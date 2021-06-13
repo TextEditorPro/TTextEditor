@@ -3,12 +3,12 @@
 The latest stable release of TTextEditor control for Delphi 10.4.2.
 Can work with older versions but not tested. Namespaces require at least version XE2.
 
-##Updates
+## Updates
 
 The repository is not actively updated in github - only when deemed necessary. 
 Development takes place elsewhere.
 
-##Features
+## Features
 
 - Arabic and Hebrew support
 - Code/text folding
@@ -40,27 +40,27 @@ Development takes place elsewhere.
 - Variable-width font support
 - Word wrap
 
-##Supports
+## Supports
 
 - AlphaSkins (native) - https://www.alphakins.com/
 - BaseNcoding - https://github.com/Xor-el/BaseNcodingPascal
 - Hunspell - http://hunspell.github.io/
 
-##Defines
+## Defines
 
 Define | Description
 ------ | -----------
 ALPHASKINS | Native AlphaSkins support
 BASENCODING | BaseNcoding support
 
-##License
+## License
 
 - MIT
 
-##Open to work
+## Open to work
 
 https://www.linkedin.com/in/lassemarkusrautiainen/
 
-##Donations
+## Donations
 
 https://www.texteditor.pro/support/donations/

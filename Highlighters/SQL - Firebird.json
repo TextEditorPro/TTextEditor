@@ -1,0 +1,571 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "select \"Hello, World!\" from RDB$DATABASE;"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "--"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "rdb$"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Attributes": {
+              "Element": "Symbol"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": ":"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "abs",
+              "accent",
+              "acos",
+              "action",
+              "active",
+              "add",
+              "admin",
+              "after",
+              "all",
+              "alter",
+              "always",
+              "and",
+              "any",
+              "as",
+              "asc",
+              "ascending",
+              "ascii_char",
+              "ascii_val",
+              "asin",
+              "at",
+              "atan",
+              "atan2",
+              "auto",
+              "autonomous",
+              "backup",
+              "before",
+              "begin",
+              "between",
+              "bigint",
+              "bin_and",
+              "bin_not",
+              "bin_or",
+              "bin_shl",
+              "bin_shr",
+              "bin_xor",
+              "bit_length",
+              "blob",
+              "block",
+              "both",
+              "break",
+              "by",
+              "caller",
+              "cascade",
+              "case",
+              "cast",
+              "ceil",
+              "ceiling",
+              "char",
+              "char_length",
+              "char_to_uuid",
+              "character",
+              "character_length",
+              "check",
+              "close",
+              "coalesce",
+              "collate",
+              "collation",
+              "column",
+              "comment",
+              "commit",
+              "committed",
+              "common",
+              "computed",
+              "conditional",
+              "connect",
+              "constraint",
+              "containing",
+              "cos",
+              "cosh",
+              "cot",
+              "create",
+              "cross",
+              "cstring",
+              "current",
+              "current_connection",
+              "current_date",
+              "current_role",
+              "current_time",
+              "current_timestamp",
+              "current_transaction",
+              "current_user",
+              "cursor",
+              "data",
+              "database",
+              "date",
+              "dateadd",
+              "datediff",
+              "day",
+              "dec",
+              "decimal",
+              "declare",
+              "decode",
+              "default",
+              "delete",
+              "deleting",
+              "desc",
+              "descending",
+              "descriptor",
+              "difference",
+              "disconnect",
+              "distinct",
+              "do",
+              "domain",
+              "double",
+              "drop",
+              "else",
+              "end",
+              "entry_point",
+              "escape",
+              "exception",
+              "execute",
+              "exists",
+              "exit",
+              "exp",
+              "external",
+              "extract",
+              "fetch",
+              "file",
+              "filter",
+              "firstname",
+              "float",
+              "floor",
+              "for",
+              "foreign",
+              "free_it",
+              "from",
+              "full",
+              "function",
+              "gdscode",
+              "gen_id",
+              "gen_uuid",
+              "generated",
+              "generator",
+              "global",
+              "grant",
+              "granted",
+              "group",
+              "hash",
+              "having",
+              "hour",
+              "if",
+              "ignore",
+              "iif",
+              "in",
+              "inactive",
+              "index",
+              "inner",
+              "input_type",
+              "insensitive",
+              "insert",
+              "inserting",
+              "int",
+              "integer",
+              "into",
+              "is",
+              "isolation",
+              "join",
+              "key",
+              "lastname",
+              "leading",
+              "leave",
+              "left",
+              "length",
+              "level",
+              "like",
+              "limbo",
+              "list",
+              "ln",
+              "lock",
+              "log",
+              "log10",
+              "long",
+              "lower",
+              "lpad",
+              "manual",
+              "mapping",
+              "matched",
+              "matching",
+              "maximum_segment",
+              "maxvalue",
+              "merge",
+              "middlename",
+              "millisecond",
+              "minute",
+              "minvalue",
+              "mod",
+              "module_name",
+              "month",
+              "names",
+              "national",
+              "natural",
+              "nchar",
+              "next",
+              "no",
+              "not",
+              "null",
+              "nullif",
+              "nulls",
+              "numeric",
+              "octet_length",
+              "of",
+              "on",
+              "only",
+              "open",
+              "option",
+              "or",
+              "order",
+              "os_name",
+              "outer",
+              "output_type",
+              "overflow",
+              "overlay",
+              "pad",
+              "page",
+              "page_size",
+              "pages",
+              "parameter",
+              "password",
+              "pi",
+              "placing",
+              "plan",
+              "position",
+              "post_event",
+              "power",
+              "precision",
+              "preserve",
+              "primary",
+              "privileges",
+              "procedure",
+              "protected",
+              "rand",
+              "rdb$db_key",
+              "read",
+              "real",
+              "record_version",
+              "recreate",
+              "recursive",
+              "references",
+              "release",
+              "replace",
+              "requests",
+              "reserv",
+              "reserving",
+              "restart",
+              "restrict",
+              "retain",
+              "returning",
+              "returning_values",
+              "returns",
+              "reverse",
+              "revoke",
+              "right",
+              "role",
+              "rollback",
+              "round",
+              "row_count",
+              "rows",
+              "rpad",
+              "savepoint",
+              "scalar_array",
+              "schema",
+              "second",
+              "segment",
+              "select",
+              "sensitive",
+              "sequence",
+              "set",
+              "shadow",
+              "shared",
+              "sign",
+              "similar",
+              "sin",
+              "singular",
+              "sinh",
+              "size",
+              "skip",
+              "smallint",
+              "snapshot",
+              "some",
+              "sort",
+              "source",
+              "space",
+              "sqlcode",
+              "sqlstate",
+              "sqrt",
+              "stability",
+              "start",
+              "starting",
+              "starts",
+              "statement",
+              "statistics",
+              "sub_type",
+              "substring",
+              "suspend",
+              "table",
+              "tan",
+              "tanh",
+              "temporary",
+              "then",
+              "time",
+              "timeout",
+              "timestamp",
+              "to",
+              "trailing",
+              "transaction",
+              "trigger",
+              "trim",
+              "trunc",
+              "two_phase",
+              "type",
+              "uncommitted",
+              "undo",
+              "union",
+              "unique",
+              "update",
+              "updating",
+              "upper",
+              "user",
+              "using",
+              "uuid_to_char",
+              "value",
+              "values",
+              "varchar",
+              "variable",
+              "varying",
+              "view",
+              "wait",
+              "week",
+              "weekday",
+              "when",
+              "where",
+              "while",
+              "with",
+              "work",
+              "write",
+              "year",
+              "yearday"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "avg",
+              "count",
+              "first",
+              "last",
+              "max",
+              "min",
+              "sum",
+              "trim"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}",
+              "|"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "--",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "BEGIN",
+            "CloseToken": "END"
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "--",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

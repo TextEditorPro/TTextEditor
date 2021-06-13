@@ -1,0 +1,493 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "#!/usr/bin/perl -w\r\n",
+      "\r\n",
+      "# Hello, World! in Perl\r\n",
+      "\r\n",
+      "use strict;\r\n",
+      "\r\n",
+      "print \"Hello, World!\\n\";"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "Character",
+            "Attributes": {
+              "Element": "Character"
+            },
+            "Delimiters": "{}",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "$",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Character",
+            "Attributes": {
+              "Element": "Character"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~@,$%?:;'\".><#'",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "%",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Character",
+            "Attributes": {
+              "Element": "Character"
+            },
+            "Delimiters": "*/=\\|&()[]{}`~!@,$%^?:;'\".><#'",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "@",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "-a",
+              "abs",
+              "accept",
+              "alarm",
+              "atan2",
+              "autoload",
+              "-b",
+              "begin",
+              "bind",
+              "binmode",
+              "bless",
+              "break",
+              "-c",
+              "caller",
+              "chdir",
+              "check",
+              "chmod",
+              "chomp",
+              "chop",
+              "chown",
+              "chr",
+              "chroot",
+              "close",
+              "closedir",
+              "connect",
+              "cos",
+              "crypt",
+              "-d",
+              "dbmclose",
+              "dbmopen",
+              "defined",
+              "delete",
+              "destroy",
+              "die",
+              "dump",
+              "-e",
+              "each",
+              "end",
+              "endgrent",
+              "endhostent",
+              "endnetent",
+              "endprotoent",
+              "endpwent",
+              "endservent",
+              "eof",
+              "eval",
+              "exec",
+              "exists",
+              "exit",
+              "-f",
+              "fcntl",
+              "fileno",
+              "flock",
+              "fork",
+              "format",
+              "formline",
+              "-g",
+              "getc",
+              "getgrent",
+              "getgrgid",
+              "getgrnam",
+              "gethostbyaddr",
+              "gethostbyname",
+              "gethostent",
+              "getlogin",
+              "getnetbyaddr",
+              "getnetbyname",
+              "getnetent",
+              "getpeername",
+              "getpgrp",
+              "getppid",
+              "getpriority",
+              "getprotobyname",
+              "getprotobynumber",
+              "getprotoent",
+              "getpwent",
+              "getpwnam",
+              "getpwuid",
+              "getservbyname",
+              "getservbyport",
+              "getservent",
+              "getsockname",
+              "getsockopt",
+              "glob",
+              "gmtime",
+              "goto",
+              "grep",
+              "hex",
+              "index",
+              "init",
+              "int",
+              "ioctl",
+              "join",
+              "-k",
+              "keys",
+              "kill",
+              "-l",
+              "last",
+              "lc",
+              "lcfirst",
+              "length",
+              "link",
+              "listen",
+              "local",
+              "localtime",
+              "log",
+              "lstat",
+              "-m",
+              "map",
+              "mkdir",
+              "msgctl",
+              "msgget",
+              "msgrcv",
+              "msgsnd",
+              "my",
+              "next",
+              "not",
+              "-o",
+              "oct",
+              "open",
+              "opendir",
+              "ord",
+              "our",
+              "-p",
+              "pack",
+              "pipe",
+              "pop",
+              "pos",
+              "print",
+              "printf",
+              "prototype",
+              "push",
+              "quotemeta",
+              "-r",
+              "rand",
+              "read",
+              "readdir",
+              "readline",
+              "readlink",
+              "readpipe",
+              "recv",
+              "redo",
+              "ref",
+              "rename",
+              "require",
+              "reset",
+              "return",
+              "reverse",
+              "rewinddir",
+              "rindex",
+              "rmdir",
+              "-s",
+              "say",
+              "scalar",
+              "seek",
+              "seekdir",
+              "select",
+              "semctl",
+              "semget",
+              "semop",
+              "send",
+              "setgrent",
+              "sethostent",
+              "setnetent",
+              "setpgrp",
+              "setpriority",
+              "setprotoent",
+              "setpwent",
+              "setservent",
+              "setsockopt",
+              "shift",
+              "shmctl",
+              "shmget",
+              "shmread",
+              "shmwrite",
+              "shutdown",
+              "sin",
+              "sleep",
+              "socket",
+              "socketpair",
+              "sort",
+              "splice",
+              "split",
+              "sprintf",
+              "sqrt",
+              "srand",
+              "stat",
+              "state",
+              "study",
+              "substr",
+              "symlink",
+              "syscall",
+              "sysopen",
+              "sysread",
+              "sysseek",
+              "system",
+              "syswrite",
+              "-t",
+              "tell",
+              "telldir",
+              "tie",
+              "tied",
+              "time",
+              "times",
+              "truncate",
+              "-u",
+              "uc",
+              "ucfirst",
+              "umask",
+              "undef",
+              "unitcheck",
+              "unlink",
+              "unpack",
+              "unshift",
+              "untie",
+              "use",
+              "utime",
+              "-w",
+              "wait",
+              "waitpid",
+              "values",
+              "wantarray",
+              "warn",
+              "vec",
+              "write",
+              "-x",
+              "-z"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "__DATA__",
+              "__END__",
+              "__FILE__",
+              "__LINE__",
+              "__PACKAGE__",
+              "and",
+              "argv",
+              "argvout",
+              "cmp",
+              "continue",
+              "CORE",
+              "do",
+              "else",
+              "elsif",
+              "eq",
+              "exp",
+              "for",
+              "foreach",
+              "ge",
+              "gt",
+              "if",
+              "le",
+              "lock",
+              "lt",
+              "m",
+              "ne",
+              "no",
+              "or",
+              "package",
+              "q",
+              "qq",
+              "qr",
+              "qw",
+              "qx",
+              "s",
+              "stderr",
+              "stdin",
+              "stdout",
+              "sub",
+              "tr",
+              "unless",
+              "until",
+              "while",
+              "xor",
+              "y"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "#",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

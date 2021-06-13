@@ -1,0 +1,335 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "#!/usr/bin/ruby -w\r\n",
+      "\r\n",
+      "# This is a single line comment.\r\n",
+      "\r\n",
+      "puts \"Hello, World!\""
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "=begin",
+              "Close": "=end"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#!"
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "__encoding__",
+              "__line__",
+              "__file__",
+              "alias",
+              "and",
+              "break",
+              "case",
+              "class",
+              "def",
+              "defined?",
+              "do",
+              "else",
+              "elseif",
+              "end",
+              "ensure",
+              "false",
+              "for",
+              "if",
+              "in",
+              "module",
+              "next",
+              "nil",
+              "not",
+              "or",
+              "redo",
+              "rescue",
+              "retry",
+              "return",
+              "self",
+              "super",
+              "then",
+              "true",
+              "undef",
+              "unless",
+              "until",
+              "when",
+              "whilte",
+              "yield"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "#",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "=BEGIN",
+            "CloseToken": "=END",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          },
+          {
+            "OpenToken": "DEF",
+            "CloseToken": "END"
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "#",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "=begin",
+        "CloseToken": "=end",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

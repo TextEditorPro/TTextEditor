@@ -1,0 +1,139 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "MIME-Version: 1.0\r\n",
+      "Content-Type: multipart/mixed; boundary=frontier\r\n",
+      "\r\n",
+      "This is a message with multiple parts in MIME format.\r\n",
+      "--frontier\r\n",
+      "Content-Type: text/plain\r\n",
+      "\r\n",
+      "This is the body of the message.\r\n",
+      "--frontier\r\n",
+      "Content-Type: application/octet-stream\r\n",
+      "Content-Transfer-Encoding: base64\r\n",
+      "\r\n",
+      "PGh0bWw+CiAgPGhlYWQ+CiAgPC9oZWFkPgogIDxib2R5PgogICAgPHA+VGhpcyBpcyB0aGUg\r\n",
+      "Ym9keSBvZiB0aGUgbWVzc2FnZS48L3A+CiAgPC9ib2R5Pgo8L2h0bWw+Cg==\r\n",
+      "--frontier--"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "--"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "=?",
+              "Close": "?="
+            }
+          },
+          {
+            "Type": "ReservedWord",
+            "Attributes": {
+              "Element": "ReservedWord"
+            },
+            "Delimiters": " :",
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "Content-"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "boundary",
+              "MIME-Version",
+              "Subject"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  }
+}

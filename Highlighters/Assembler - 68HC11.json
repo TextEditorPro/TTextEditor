@@ -1,0 +1,543 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "REGBS   EQU     $1000     ; location of on-board peripherals\r\n",
+      "PAO     EQU     0         ; port A offset from REGBS\r\n",
+      "        ldx     #REGBS    ; load X with a base address\r\n",
+      "        brset   %10000000 PAO,X DEST\r\n",
+      "                          ; goto DEST if port A bit 7 high"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "*"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": ";"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "Number",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "$"
+            }
+          },
+          {
+            "Type": "Number",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "%"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "aba",
+              "abx",
+              "aby",
+              "adca",
+              "adca_",
+              "adcb",
+              "adcb_",
+              "adctl",
+              "adda",
+              "adda_",
+              "addb",
+              "addb_",
+              "addd",
+              "addd_",
+              "adr1",
+              "adr2",
+              "adr3",
+              "adr4",
+              "anda",
+              "anda_",
+              "andb",
+              "andb_",
+              "andcc",
+              "asl",
+              "asl_",
+              "asla",
+              "aslb",
+              "asld",
+              "asr",
+              "asr_",
+              "asra",
+              "asrb",
+              "badopint",
+              "base",
+              "baud",
+              "bcc",
+              "bcc_",
+              "bclr",
+              "bclr_",
+              "bcs",
+              "bcs_",
+              "beq",
+              "beq_",
+              "bge",
+              "bge_",
+              "bgt",
+              "bgt_",
+              "bhi",
+              "bhi_",
+              "bhs",
+              "bhs_",
+              "bita",
+              "bita_",
+              "bitb",
+              "bitb_",
+              "ble",
+              "ble_",
+              "blo",
+              "blo_",
+              "bls",
+              "bls_",
+              "blt",
+              "blt_",
+              "bmi",
+              "bmi_",
+              "bne",
+              "bne_",
+              "bpl",
+              "bpl_",
+              "bprot",
+              "bra",
+              "bra_",
+              "brclr",
+              "brclr_",
+              "brn",
+              "brn_",
+              "brset_",
+              "bset",
+              "bset_",
+              "bsr",
+              "bsr_",
+              "bsz_",
+              "bvc",
+              "bvc_",
+              "bvs",
+              "bvs_",
+              "cba",
+              "cforc",
+              "clc",
+              "cli",
+              "clr",
+              "clr_",
+              "clra",
+              "clrb",
+              "clv",
+              "cmeint",
+              "cmpa",
+              "cmpa_",
+              "cmpb",
+              "cmpb_",
+              "cmpd",
+              "cmps",
+              "cmpu",
+              "cmpx",
+              "cmpy",
+              "com",
+              "com_",
+              "coma",
+              "comb",
+              "config",
+              "coprst",
+              "cpd",
+              "cpd_",
+              "cpx",
+              "cpx_",
+              "cpy",
+              "cpy_",
+              "cwai",
+              "daa",
+              "ddra",
+              "ddrb",
+              "ddrc",
+              "ddrd",
+              "ddre",
+              "dec",
+              "dec_",
+              "deca",
+              "decb",
+              "des",
+              "dex",
+              "dey",
+              "eora",
+              "eora_",
+              "eorb",
+              "eorb_",
+              "exg",
+              "fcb_",
+              "fcc_",
+              "fdb_",
+              "fdiv",
+              "hprio",
+              "idiv",
+              "inc",
+              "inc_",
+              "inca",
+              "incb",
+              "init",
+              "ins",
+              "inx",
+              "iny",
+              "irqint",
+              "jmp",
+              "jmp_",
+              "jsr",
+              "jsr_",
+              "lbcc",
+              "lbcs",
+              "lbeq",
+              "lbge",
+              "lbgt",
+              "lbhi",
+              "lbhs",
+              "lble",
+              "lblo",
+              "lbls",
+              "lblt",
+              "lbmi",
+              "lbne",
+              "lbpl",
+              "lbra",
+              "lbrn",
+              "lbsr",
+              "lbvc",
+              "lbvs",
+              "lda",
+              "ldaa",
+              "ldaa_",
+              "ldab",
+              "ldab_",
+              "ldb",
+              "ldd",
+              "ldd_",
+              "lds",
+              "lds_",
+              "ldu",
+              "ldx",
+              "ldx_",
+              "ldy",
+              "ldy_",
+              "leas",
+              "leau",
+              "leax",
+              "leay",
+              "lsl",
+              "lsl_",
+              "lsla",
+              "lslb",
+              "lsld",
+              "lsr",
+              "lsr_",
+              "lsra",
+              "lsrb",
+              "lsrd",
+              "mul",
+              "neg",
+              "neg_",
+              "nega",
+              "negb",
+              "nocopint",
+              "nop",
+              "oc1d",
+              "oc1m",
+              "option",
+              "ora",
+              "oraa",
+              "oraa_",
+              "orab",
+              "orab_",
+              "orb",
+              "orcc",
+              "pacnt",
+              "pactl",
+              "paiint",
+              "paovint",
+              "pioc",
+              "porta",
+              "portb",
+              "portc",
+              "portcl",
+              "portd",
+              "porte",
+              "pprog",
+              "psha",
+              "pshb",
+              "pshs",
+              "pshu",
+              "pshx",
+              "pshy",
+              "pula",
+              "pulb",
+              "puls",
+              "pulu",
+              "pulx",
+              "puly",
+              "resetint",
+              "resv1",
+              "resv2",
+              "resv3",
+              "resv4",
+              "rol",
+              "rol_",
+              "rola",
+              "rolb",
+              "ror",
+              "ror_",
+              "rora",
+              "rorb",
+              "rti",
+              "rtiint",
+              "rts",
+              "sba",
+              "sbca",
+              "sbca_",
+              "sbcb",
+              "sbcb_",
+              "sccr1",
+              "sccr2",
+              "scdr",
+              "sciint",
+              "scsr",
+              "sec",
+              "sei",
+              "sev",
+              "sex",
+              "spcr",
+              "spdr",
+              "spiint",
+              "spsr",
+              "sta",
+              "staa",
+              "staa_",
+              "stab",
+              "stab_",
+              "stb",
+              "std",
+              "std_",
+              "stop",
+              "sts",
+              "sts_",
+              "stu",
+              "stx",
+              "stx_",
+              "sty",
+              "sty_",
+              "suba",
+              "suba_",
+              "subb",
+              "subb_",
+              "subd",
+              "subd_",
+              "swi",
+              "swi2",
+              "swi3",
+              "swiint",
+              "sync",
+              "tab",
+              "tap",
+              "tba",
+              "tcnt",
+              "tctl1",
+              "tctl2",
+              "test",
+              "test1",
+              "tflg1",
+              "tflg2",
+              "tfr",
+              "ti4o5",
+              "tic1",
+              "tic1int",
+              "tic2",
+              "tic2int",
+              "tic3",
+              "tic3int",
+              "tmsk1",
+              "tmsk2",
+              "toc1",
+              "toc1int",
+              "toc2",
+              "toc2int",
+              "toc3",
+              "toc3int",
+              "toc4",
+              "toc4int",
+              "toc5int",
+              "toint",
+              "tpa",
+              "tst",
+              "tst_",
+              "tsta",
+              "tstb",
+              "tsx",
+              "tsy",
+              "txs",
+              "tys",
+              "wai",
+              "xgdx",
+              "xgdy",
+              "xirqint"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Directive",
+            "Words": [
+              "equ_",
+              "opt_",
+              "page",
+              "org_",
+              "rmb_",
+              "end"
+            ],
+            "Attributes": {
+              "Element": "Directive"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": ";",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "*",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

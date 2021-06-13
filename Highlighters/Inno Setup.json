@@ -1,0 +1,434 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "; This is comment\r\n",
+      "/[Setup]\r\n",
+      "AppName=My Program\r\n",
+      "\r\n",
+      "[Files]\r\n",
+      "Source: \"MYPROG.EXE\"; DestDir: \"{app}\"\r\n"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": ";"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "Character"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "[",
+              "Close": "]"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "afterinstall",
+              "append",
+              "attribs",
+              "beforeinstall",
+              "begin",
+              "break",
+              "case",
+              "check",
+              "comment",
+              "components",
+              "const",
+              "continue",
+              "copymode",
+              "define",
+              "description",
+              "destdir",
+              "destname",
+              "dim",
+              "do",
+              "downto",
+              "else",
+              "else",
+              "emit",
+              "end",
+              "endif",
+              "endsub",
+              "error",
+              "except",
+              "excludes",
+              "expr",
+              "extradiskspacerequired",
+              "file",
+              "filename",
+              "finally",
+              "flags",
+              "fontinstall",
+              "for",
+              "for",
+              "function",
+              "groupdescription",
+              "hotkey",
+              "iconfilename",
+              "iconindex",
+              "if",
+              "if",
+              "ifdef",
+              "ifexist",
+              "ifndef",
+              "ifnexist",
+              "include",
+              "infoafterfile",
+              "infobeforefile",
+              "insert",
+              "key",
+              "languages",
+              "licensefile",
+              "messagesfile",
+              "minversion",
+              "name",
+              "of",
+              "onlybelowversion",
+              "parameters",
+              "permissions",
+              "pragma",
+              "procedure",
+              "repeat",
+              "root",
+              "runonceid",
+              "section",
+              "source",
+              "statusmsg",
+              "string",
+              "sub",
+              "subkey",
+              "tasks",
+              "then",
+              "to",
+              "try",
+              "type",
+              "types",
+              "undef",
+              "until",
+              "uses",
+              "valuedata",
+              "valuename",
+              "valuetype",
+              "var",
+              "while",
+              "with",
+              "workingdir"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Directives",
+            "Words": [
+              "AllowCancelDuringInstall",
+              "AllowNetworkDrive",
+              "AllowNoIcons",
+              "AllowRootDirectory",
+              "AllowUNCPath",
+              "AlwaysCreateUninstallIcon",
+              "AlwaysRestart",
+              "AlwaysShowComponentsList",
+              "AlwaysShowDirOnReadyPage",
+              "AlwaysShowGroupOnReadyPage",
+              "AlwaysUsePersonalGroup",
+              "AppComments",
+              "AppContact",
+              "AppCopyright",
+              "AppendDefaultDirName",
+              "AppendDefaultGroupName",
+              "AppId",
+              "AppModifyPath",
+              "AppMutex",
+              "AppName",
+              "AppPublisher",
+              "AppPublisherURL",
+              "AppReadmeFile",
+              "AppSupportPhone",
+              "AppSupportURL",
+              "AppUpdatesURL",
+              "AppVerName",
+              "AppVersion",
+              "ArchitecturesAllowed",
+              "ArchitecturesInstallIn64BitMode",
+              "BackColor",
+              "BackColorDirection",
+              "BackSolid",
+              "ChangesAssociations",
+              "ChangesEnvironment",
+              "CloseApplications",
+              "CloseApplicationsFilter",
+              "Compression",
+              "CompressionThreads",
+              "CreateAppDir",
+              "CreateUninstallRegKey",
+              "DefaultDialogFontName",
+              "DefaultDirName",
+              "DefaultGroupName",
+              "DefaultUserInfoName",
+              "DefaultUserInfoOrg",
+              "DefaultUserInfoSerial",
+              "DirExistsWarning",
+              "DisableAppendDir",
+              "DisableDirPage",
+              "DisableFinishedPage",
+              "DisableProgramGroupPage",
+              "DisableReadyMemo",
+              "DisableReadyPage",
+              "DisableStartupPrompt",
+              "DisableWelcomePage",
+              "DiskClusterSize",
+              "DiskSliceSize",
+              "DiskSpanning",
+              "DontMergeDuplicateFiles",
+              "EnableDirDoesntExistWarning",
+              "Encryption",
+              "ExtraDiskSpaceRequired",
+              "FlatComponentsList",
+              "InfoAfterFile",
+              "InfoBeforeFile",
+              "InternalCompressLevel",
+              "LanguageDetectionMethod",
+              "LicenseFile",
+              "LZMAAlgorithm",
+              "LZMABlockSize",
+              "LZMADictionarySize",
+              "LZMAMatchFinder",
+              "LZMANumBlockThreads",
+              "LZMANumFastBytes",
+              "LZMAUseSeparateProcess",
+              "MergeDuplicateFiles",
+              "MessagesFile",
+              "MinVersion",
+              "OnlyBelowVersion",
+              "Output",
+              "OutputBaseFilename",
+              "OutputDir",
+              "OutputManifestFile",
+              "Password",
+              "PrivilegesRequired",
+              "ReserveBytes",
+              "RestartApplications",
+              "RestartIfNeededByRun",
+              "SetupIconFile",
+              "SetupLogging",
+              "ShowComponentSizes",
+              "ShowLanguageDialog",
+              "ShowTasksTreeLines",
+              "ShowUndisplayableLanguages",
+              "SignedUninstaller",
+              "SignedUninstallerDir",
+              "SignTool",
+              "SlicesPerDisk",
+              "SolidCompression",
+              "SourceDir",
+              "TerminalServicesAware",
+              "TimeStampRounding",
+              "TimeStampsInUTC",
+              "TouchDate",
+              "TouchTime",
+              "Uninstallable",
+              "UninstallDisplayIcon",
+              "UninstallDisplayName",
+              "UninstallDisplaySize",
+              "UninstallFilesDir",
+              "UninstallIconFile",
+              "UninstallIconName",
+              "UninstallLogMode",
+              "UninstallRestartComputer",
+              "UninstallStyle",
+              "UpdateUninstallLogAppName",
+              "UsePreviousAppDir",
+              "UsePreviousGroup",
+              "UsePreviousLanguage",
+              "UsePreviousSetupType",
+              "UsePreviousTasks",
+              "UsePreviousUserInfo",
+              "UserInfoPage",
+              "UseSetupLdr",
+              "VersionInfoCompany",
+              "VersionInfoCopyright",
+              "VersionInfoDescription",
+              "VersionInfoProductName",
+              "VersionInfoProductTextVersion",
+              "VersionInfoProductVersion",
+              "VersionInfoTextVersion",
+              "VersionInfoVersion",
+              "WindowResizable",
+              "WindowShowCaption",
+              "WindowStartMaximized",
+              "WindowVisible",
+              "WizardImageBackColor",
+              "WizardImageFile",
+              "WizardImageStretch",
+              "WizardSmallImageBackColor",
+              "WizardSmallImageFile",
+              "WizardStyle"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "MatchingPairHighlight": false
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": ";",
+            "RegionType": "SingleLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "[",
+            "CloseToken": "[",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true,
+              "CloseTokenBeginningOfLine": true,
+              "OpenIsClose": true,
+              "TokenEndIsPreviousLine": true,
+              "OpenTokenEnd": "]",
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": ";",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

@@ -1,0 +1,440 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "# Hello, World! in GDScript\r\n",
+      "\r\n",
+      "print(\"Hello, World!\")"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"\"\"",
+              "Close": "\"\"\""
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"\"\"",
+              "Close": "\"\"\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"\"\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "@\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "TokenRange": {
+              "Open": "func",
+              "Close": "("
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "("
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Name": "Keywords",
+            "Type": "ReservedWord",
+            "Words": [
+              "assert",
+              "break",
+              "breakpoint",
+              "case",
+              "class",
+              "const",
+              "continue",
+              "do",
+              "elif",
+              "else",
+              "enum",
+              "export",
+              "extends",
+              "for",
+              "func",
+              "if",
+              "INF",
+              "is",
+              "master",
+              "match",
+              "NAN",
+              "onready",
+              "pass",
+              "PI",
+              "preload",
+              "remote",
+              "return",
+              "self",
+              "setget",
+              "signal",
+              "slave",
+              "static",
+              "switch",
+              "sync",
+              "TAU",
+              "tool",
+              "var",
+              "while",
+              "yield"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Methods",
+            "Type": "Method",
+            "Words": [
+              "abs",
+              "acos",
+              "asin",
+              "assert",
+              "atan",
+              "atan2",
+              "bytes2var",
+              "cartesian2polar",
+              "ceil",
+              "char",
+              "clamp",
+              "color8",
+              "colorn",
+              "convert",
+              "cos",
+              "cosh",
+              "db2linear",
+              "decimals",
+              "dectime",
+              "deg2rad",
+              "dict2inst",
+              "ease",
+              "exp",
+              "floor",
+              "fmod",
+              "fposmod",
+              "funcref",
+              "get_stack",
+              "hash",
+              "inst2dict",
+              "instance_from_id",
+              "inverse_lerp",
+              "is_inf",
+              "is_instance_valid",
+              "is_nan",
+              "len",
+              "lerp",
+              "linear2db",
+              "load",
+              "log",
+              "max",
+              "min",
+              "nearest_po2",
+              "parse_json",
+              "polar2cartesian",
+              "pow",
+              "print",
+              "preload",
+              "printerr",
+              "printraw",
+              "prints",
+              "printt",
+              "print_debug",
+              "print_stack",
+              "push_error",
+              "push_warning",
+              "rad2deg",
+              "randf",
+              "randi",
+              "randomize",
+              "rand_range",
+              "rand_seed",
+              "range",
+              "range_lerp",
+              "round",
+              "seed",
+              "sign",
+              "sin",
+              "sinh",
+              "sqrt",
+              "stepify",
+              "str",
+              "str2var",
+              "tan",
+              "tanh",
+              "to_json",
+              "typeof",
+              "type_exists",
+              "validate_json",
+              "var2bytes",
+              "var2str",
+              "weakref",
+              "wrapf",
+              "wrapi"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}",
+              "!",
+              "$",
+              "%",
+              "^",
+              "&",
+              "|",
+              "~"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "#",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "\"\"\"",
+        "CloseToken": "\"\"\"",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

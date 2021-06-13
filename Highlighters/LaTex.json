@@ -1,0 +1,202 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "\\documentclass{article}\r\n",
+      "\\usepackage{graphicx}\r\n",
+      "\r\n",
+      "\\begin{document}\r\n",
+      "\r\n",
+      "\\title{Introduction to \\LaTeX{}}\r\n",
+      "\\author{Author's Name}\r\n",
+      "\r\n",
+      "\\maketitle\r\n",
+      "\r\n",
+      "\\begin{abstract}\r\n",
+      "The abstract text goes here.\r\n",
+      "\\end{abstract}\r\n",
+      "\r\n",
+      "\\section{Introduction}\r\n",
+      "Here is the text of your introduction.\r\n",
+      "\r\n",
+      "\\begin{equation}\r\n",
+      "    \\label{simple_equation}\r\n",
+      "    \\alpha = \\sqrt{ \\beta }\r\n",
+      "\\end{equation}\r\n",
+      "\r\n",
+      "\\subsection{Subsection Heading Here}\r\n",
+      "Write your subsection text here.\r\n",
+      "\r\n",
+      "\\begin{figure}\r\n",
+      "    \\centering\r\n",
+      "    \\includegraphics[width=3.0in]{myfigure}\r\n",
+      "    \\caption{Simulation Results}\r\n",
+      "    \\label{simulationfigure}\r\n",
+      "\\end{figure}\r\n",
+      "\r\n",
+      "\\section{Conclusion}\r\n",
+      "Write your conclusion here.\r\n",
+      "\r\n",
+      "\\end{document}"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "%"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "TokenRange": {
+              "Open": "{",
+              "Close": "}"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "Command",
+                  "Attributes": {
+                    "Element": "Method"
+                  },
+                  "Properties": {
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\"
+                  }
+                }
+              ],
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "{",
+                    "}"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "TokenRange": {
+              "Open": "[",
+              "Close": "]"
+            }
+          },
+          {
+            "Type": "Command",
+            "Attributes": {
+              "Element": "Method"
+            },
+            "Properties": {
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "\\"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Name": "Keywords",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\documentclass",
+              "\\label",
+              "\\usepackage"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "%",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

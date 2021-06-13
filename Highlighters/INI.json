@@ -1,0 +1,126 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "; Comment\r\n",
+      "[Section]\r\n",
+      "Name=Value"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "; "
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": "# "
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "ReservedWord"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": "[",
+              "Close": "]"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "="
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "Symbol",
+            "Words": [
+              "="
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "MatchingPairHighlight": false
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": ";",
+            "RegionType": "SingleLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "[",
+            "CloseToken": "[",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true,
+              "CloseTokenBeginningOfLine": true,
+              "OpenIsClose": true,
+              "ShowGuideLine": false,
+              "TokenEndIsPreviousLine": true,
+              "OpenTokenEnd": "]",
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": ";",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

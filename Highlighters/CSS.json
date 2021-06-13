@@ -1,0 +1,603 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "/* Hello, World! in CSS */\r\n",
+      "body:before {\r\n",
+      "    content: \"Hello, World!\";\r\n",
+      "}"
+    ],
+    "MainRules": {
+      "Name": "CSS",
+      "Attributes": {
+        "Element": "ReservedWord"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "TokenRange": {
+              "Open": "(",
+              "Close": ")"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                }
+              ],
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    ")"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "TokenRange": {
+              "Open": "[",
+              "Close": "]"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                }
+              ],
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "]"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "."
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": ":"
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "-"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "Method"
+            },
+            "TokenRange": {
+              "Open": "{",
+              "Close": "}"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "BlockComment",
+                  "Attributes": {
+                    "Element": "Comment"
+                  },
+                  "TokenRange": {
+                    "Open": "/*",
+                    "Close": "*/"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "TokenRange": {
+                    "Open": "(",
+                    "Close": ")"
+                  },
+                  "SubRules": {
+                    "Range": [
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "String"
+                        },
+                        "TokenRange": {
+                          "Open": "\"",
+                          "Close": "\""
+                        }
+                      },
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "String"
+                        },
+                        "TokenRange": {
+                          "Open": "'",
+                          "Close": "'"
+                        }
+                      }
+                    ],
+                    "KeyList": [
+                      {
+                        "Type": "Symbol",
+                        "Words": [
+                          ")"
+                        ],
+                        "Attributes": {
+                          "Element": "Symbol"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "TokenRange": {
+                    "Open": "[",
+                    "Close": "]"
+                  },
+                  "SubRules": {
+                    "Range": [
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "String"
+                        },
+                        "TokenRange": {
+                          "Open": "\"",
+                          "Close": "\""
+                        }
+                      },
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "String"
+                        },
+                        "TokenRange": {
+                          "Open": "'",
+                          "Close": "'"
+                        }
+                      }
+                    ],
+                    "KeyList": [
+                      {
+                        "Type": "Symbol",
+                        "Words": [
+                          "]"
+                        ],
+                        "Attributes": {
+                          "Element": "Symbol"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "Method",
+                  "Attributes": {
+                    "Element": "MethodName"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "."
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "AlternativeClose": [
+                      "}"
+                    ]
+                  },
+                  "TokenRange": {
+                    "Open": ":",
+                    "Close": ";"
+                  },
+                  "SubRules": {
+                    "Range": [
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "String"
+                        },
+                        "TokenRange": {
+                          "Open": "(",
+                          "Close": ")"
+                        },
+                        "SubRules": {
+                          "Range": [
+                            {
+                              "Type": "String",
+                              "Attributes": {
+                                "Element": "String"
+                              },
+                              "TokenRange": {
+                                "Open": "\"",
+                                "Close": "\""
+                              }
+                            },
+                            {
+                              "Type": "String",
+                              "Attributes": {
+                                "Element": "String"
+                              },
+                              "TokenRange": {
+                                "Open": "'",
+                                "Close": "'"
+                              }
+                            }
+                          ],
+                          "KeyList": [
+                            {
+                              "Type": "Symbol",
+                              "Words": [
+                                ")"
+                              ],
+                              "Attributes": {
+                                "Element": "Symbol"
+                              }
+                            }
+                          ]
+                        }
+                      },
+                      {
+                        "Type": "HexNumber",
+                        "Attributes": {
+                          "Element": "HexNumber"
+                        },
+                        "Properties": {
+                          "CloseOnTerm": true,
+                          "CloseOnEndOfLine": true
+                        },
+                        "TokenRange": {
+                          "Open": "#"
+                        }
+                      }
+                    ],
+                    "KeyList": [
+                      {
+                        "Type": "Symbol",
+                        "Words": [
+                          ":",
+                          ";",
+                          "<",
+                          ">",
+                          "=",
+                          "*",
+                          ",",
+                          "+",
+                          "(",
+                          ")",
+                          "[",
+                          "]",
+                          "{",
+                          "}"
+                        ],
+                        "Attributes": {
+                          "Element": "Symbol"
+                        }
+                      },
+                      {
+                        "Type": "Number",
+                        "Words": [
+                          "%"
+                        ],
+                        "Attributes": {
+                          "Element": "Number"
+                        }
+                      }
+                    ],
+                    "Set": [
+                      {
+                        "Type": "Number",
+                        "Symbols": "0123456789em",
+                        "Attributes": {
+                          "Element": "Number"
+                        }
+                      },
+                      {
+                        "Type": "Float",
+                        "Symbols": ".0123456789empx",
+                        "Attributes": {
+                          "Element": "Number"
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    ":",
+                    "}"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Name": "CSS Keywords",
+            "Type": "ReservedWord",
+            "Words": [
+              "/style"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "*",
+              ",",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Number",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "MultiLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "MultiLineString"
+          },
+          {
+            "OpenToken": "//",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "MultiLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "MultiLineString"
+      },
+      {
+        "OpenToken": "//",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

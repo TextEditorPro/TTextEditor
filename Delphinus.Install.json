@@ -1,0 +1,34 @@
+{
+	"search_pathes": [
+		{
+			"pathes": "Source",
+			"platforms": "Win32;Win64"
+		}
+	],
+	"browsing_pathes": [
+		{
+			"pathes": "Source",
+			"platforms": "Win32;Win64"
+		}
+	],
+	"source_folders": [
+		{
+			"folder": "Source",
+			"base": "",
+			"recursive": true,
+			"filter": "*;*.*"
+		},
+		{
+			"folder": "Packages",
+			"base": "",
+			"recursive": true,
+			"filter": "*;*.*"
+		}
+	],
+	"projects": [
+		{
+			"project": "Packages\\TextEditor.Delphi.groupproj",
+			"compiler_min": 30
+		}
+	]
+}

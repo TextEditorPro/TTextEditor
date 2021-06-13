@@ -1,0 +1,324 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "; Hello, World! in 6502 assembly\r\n",
+      "\r\n",
+      "a_cr  = $0d      ; Carriage return.\r\n",
+      "bsout = $ffd2    ; C64 KERNEL ROM, output a character to current device.\r\n",
+      "                 ; use $fded for Apple 2\r\n",
+      "  .code\r\n",
+      "\r\n",
+      "  ldx #0         ; Starting index 0 in X register.\r\n",
+      "printnext:\r\n",
+      "  lda text,x     ; Get character from string.\r\n",
+      "  beq done       ; If we read a 0 we're done.\r\n",
+      "  jsr bsout      ; Output character.\r\n",
+      "  inx            ; Increment index to next character.\r\n",
+      "  bne printnext  ; Repeat if index doesn't overflow to 0.\r\n",
+      "done:\r\n",
+      "  rts            ; Return from subroutine.\r\n",
+      "\r\n",
+      "  .rodata\r\n",
+      "\r\n",
+      "text:\r\n",
+      "  .byte  \"Hello world!\", a_cr, 0"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": ";"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": ".",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "$",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "adc",
+              "and",
+              "asl",
+              "bcc",
+              "bcs",
+              "beq",
+              "bit",
+              "bmi",
+              "bne",
+              "bpl",
+              "bvc",
+              "bvs",
+              "clc",
+              "cld",
+              "cli",
+              "clv",
+              "cmp",
+              "cpx",
+              "cpy",
+              "dec",
+              "dex",
+              "dey",
+              "eor",
+              "inc",
+              "inx",
+              "iny",
+              "jmp",
+              "jsr",
+              "lda",
+              "ldx",
+              "ldy",
+              "lsr",
+              "nop",
+              "ora",
+              "pha",
+              "php",
+              "phy",
+              "pla",
+              "plp",
+              "ply",
+              "rol",
+              "ror",
+              "rti",
+              "rts",
+              "sbc",
+              "sec",
+              "sed",
+              "sei",
+              "sta",
+              "stx",
+              "sty",
+              "tax",
+              "tay",
+              "tsx",
+              "txa",
+              "txs",
+              "tya"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Directive",
+            "Words": [
+              ".byte"
+            ],
+            "Attributes": {
+              "Element": "Directive"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "|",
+              "#"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": ";",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

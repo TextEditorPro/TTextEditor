@@ -1,0 +1,513 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "-- Hello, World! in T-SQL\r\n",
+      "SELECT \"Hello, World!\" AS Greeting"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "--"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Attributes": {
+              "Element": "Symbol"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": ":"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "add",
+              "all",
+              "alter",
+              "and",
+              "any",
+              "as",
+              "asc",
+              "authorization",
+              "backup",
+              "begin",
+              "between",
+              "bigint",
+              "binary",
+              "bit",
+              "break",
+              "browse",
+              "bulk",
+              "by",
+              "cascade",
+              "case",
+              "char",
+              "check",
+              "checkpoint",
+              "close",
+              "clustered",
+              "coalesce",
+              "collate",
+              "column",
+              "commit",
+              "compute",
+              "constraint",
+              "contains",
+              "containstable",
+              "continue",
+              "convert",
+              "create",
+              "cross",
+              "current",
+              "current_date",
+              "current_time",
+              "current_timestamp",
+              "current_user",
+              "cursor",
+              "database",
+              "date",
+              "datetime",
+              "datetime2",
+              "datetimeoffset",
+              "dbcc",
+              "deallocate",
+              "decimal",
+              "declare",
+              "default",
+              "delete",
+              "deny",
+              "desc",
+              "disk",
+              "distinct",
+              "distributed",
+              "double",
+              "drop",
+              "dump",
+              "else",
+              "end",
+              "errlvl",
+              "escape",
+              "except",
+              "exec",
+              "execute",
+              "exists",
+              "exit",
+              "external",
+              "fetch",
+              "file",
+              "fillfactor",
+              "float",
+              "for",
+              "foreign",
+              "freetext",
+              "freetexttable",
+              "from",
+              "full",
+              "function",
+              "go",
+              "goto",
+              "grant",
+              "group",
+              "having",
+              "hierarchyid",
+              "holdlock",
+              "identity",
+              "identitycol",
+              "identity_insert",
+              "if",
+              "image",
+              "in",
+              "index",
+              "inner",
+              "insert",
+              "int",
+              "intersect",
+              "into",
+              "is",
+              "join",
+              "key",
+              "kill",
+              "left",
+              "like",
+              "lineno",
+              "load",
+              "merge",
+              "money",
+              "national",
+              "nchar",
+              "nocheck",
+              "nonclustered",
+              "not",
+              "ntext",
+              "null",
+              "nullif",
+              "numeric",
+              "nvarchar",
+              "of",
+              "off",
+              "offsets",
+              "on",
+              "open",
+              "opendatasource",
+              "openquery",
+              "openrowset",
+              "openxml",
+              "option",
+              "or",
+              "order",
+              "outer",
+              "over",
+              "percent",
+              "pivot",
+              "plan",
+              "precision",
+              "primary",
+              "print",
+              "proc",
+              "procedure",
+              "public",
+              "raiserror",
+              "read",
+              "readtext",
+              "real",
+              "reconfigure",
+              "references",
+              "replication",
+              "restore",
+              "restrict",
+              "return",
+              "revert",
+              "revoke",
+              "right",
+              "rollback",
+              "rowcount",
+              "rowguidcol",
+              "rowversion",
+              "rule",
+              "save",
+              "schema",
+              "securityaudit",
+              "select",
+              "semantickeyphrasetable",
+              "semanticsimilaritydetailstable",
+              "semanticsimilaritytable",
+              "session_user",
+              "set",
+              "setuser",
+              "shutdown",
+              "smalldatetime",
+              "smallint",
+              "smallmoney",
+              "some",
+              "sql_variant",
+              "statistics",
+              "system_user",
+              "table",
+              "tablesample",
+              "text",
+              "textsize",
+              "then",
+              "time",
+              "tinyint",
+              "to",
+              "top",
+              "tran",
+              "transaction",
+              "trigger",
+              "truncate",
+              "try_convert",
+              "tsequal",
+              "union",
+              "unique",
+              "uniqueidentifier",
+              "unpivot",
+              "update",
+              "updatetext",
+              "use",
+              "user",
+              "values",
+              "varbinary",
+              "varchar",
+              "varying",
+              "view",
+              "waitfor",
+              "when",
+              "where",
+              "while",
+              "with",
+              "within",
+              "writetext",
+              "xml"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "abs",
+              "acos",
+              "ascii",
+              "asin",
+              "atan",
+              "atn2",
+              "avg",
+              "cast",
+              "ceiling",
+              "char",
+              "charindex",
+              "coalesce",
+              "concat",
+              "concat_ws",
+              "convert",
+              "cos",
+              "cot",
+              "count",
+              "current_timestamp",
+              "current_user",
+              "datalength",
+              "dateadd",
+              "datediff",
+              "datefromparts",
+              "datename",
+              "datepart",
+              "day",
+              "degrees",
+              "difference",
+              "exp",
+              "floor",
+              "format",
+              "getdate",
+              "getutcdate",
+              "iif",
+              "isdate",
+              "isnull",
+              "isnumeric",
+              "left",
+              "len",
+              "log",
+              "log10",
+              "lower",
+              "ltrim",
+              "max",
+              "min",
+              "month",
+              "nchar",
+              "nullif",
+              "patindex",
+              "pi",
+              "power",
+              "quotename",
+              "radians",
+              "rand",
+              "replace",
+              "replicate",
+              "reverse",
+              "right",
+              "round",
+              "rtrim",
+              "sessionproperty",
+              "session_user",
+              "sign",
+              "sin",
+              "soundex",
+              "space",
+              "sqrt",
+              "square",
+              "str",
+              "stuff",
+              "substring",
+              "sum",
+              "sysdatetime",
+              "system_user",
+              "tan",
+              "translate",
+              "trim",
+              "unicode",
+              "upper",
+              "user_name",
+              "year"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}",
+              "|"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "--",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "BEGIN",
+            "CloseToken": "END"
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "--",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

@@ -1,0 +1,210 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "object Form1: TForm1\r\n",
+      "  Left = 0\r\n",
+      "  Top = 0\r\n",
+      "  Caption = 'Form1'\r\n",
+      "  object Label1: TLabel\r\n",
+      "    Left = 30\r\n",
+      "    Top = 20\r\n",
+      "    Width = 55\r\n",
+      "    Height = 13\r\n",
+      "    Caption = 'Hello, World!'\r\n",
+      "  end\r\n",
+      "end"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "{",
+              "Close": "}"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "$",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Character",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#",
+              "Close": " "
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "end",
+              "inherited",
+              "inline",
+              "nil",
+              "object"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Number",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "OBJECT",
+            "CloseToken": "END",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true
+            }
+          },
+          {
+            "OpenToken": "INLINE",
+            "CloseToken": "END",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true
+            }
+          },
+          {
+            "OpenToken": "ITEM",
+            "CloseToken": "END",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true
+            }
+          },
+          {
+            "OpenToken": "INHERITED",
+            "CloseToken": "END",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "object",
+        "CloseToken": "end"
+      },
+      {
+        "OpenToken": "inline",
+        "CloseToken": "end"
+      },
+      {
+        "OpenToken": "inherited",
+        "CloseToken": "end"
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "<",
+        "CloseToken": ">"
+      }
+    ]
+  }
+}

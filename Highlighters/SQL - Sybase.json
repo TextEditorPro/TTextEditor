@@ -1,0 +1,521 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "declare @val varbinary (16)\r\n",
+      "select @val = textptr (ut) from unitable\r\n",
+      "where i = 100\r\n",
+      "writetext unitable.ut @val with log \"Hello, World!\""
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "--"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Attributes": {
+              "Element": "Symbol"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": ":"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "active",
+              "add",
+              "all",
+              "algorithm",
+              "alter",
+              "and",
+              "any",
+              "append",
+              "as",
+              "asc",
+              "auto",
+              "backup",
+              "begin",
+              "between",
+              "bigint",
+              "binary",
+              "bit",
+              "bottom",
+              "break",
+              "by",
+              "calibrate",
+              "calibration",
+              "call",
+              "cancel",
+              "capability",
+              "cascade",
+              "case",
+              "cast",
+              "certificate",
+              "char",
+              "char_convert",
+              "character",
+              "check",
+              "checkpoint",
+              "checksum",
+              "clientport",
+              "close",
+              "columns",
+              "comment",
+              "commit",
+              "committed",
+              "comparisons",
+              "computes",
+              "conflict",
+              "connect",
+              "constraint",
+              "contains",
+              "continue",
+              "convert",
+              "create",
+              "cross",
+              "cube",
+              "current",
+              "current_timestamp",
+              "current_user",
+              "cursor",
+              "date",
+              "dbspace",
+              "dbspacename",
+              "deallocate",
+              "debug",
+              "dec",
+              "decimal",
+              "declare",
+              "decoupled",
+              "decrypted",
+              "default",
+              "delay",
+              "delete",
+              "deleting",
+              "density",
+              "desc",
+              "deterministic",
+              "disable",
+              "distinct",
+              "do",
+              "double",
+              "drop",
+              "dynamic",
+              "elements",
+              "else",
+              "elseif",
+              "enable",
+              "encapsulated",
+              "encrypted",
+              "end",
+              "endif",
+              "escape",
+              "except",
+              "exception",
+              "exclude",
+              "exec",
+              "execute",
+              "existing",
+              "exists",
+              "explicit",
+              "express",
+              "externlogin",
+              "fastfirstrow",
+              "fetch",
+              "first",
+              "float",
+              "following",
+              "for",
+              "force",
+              "foreign",
+              "forward",
+              "from",
+              "full",
+              "gb",
+              "goto",
+              "grant",
+              "group",
+              "grouping",
+              "having",
+              "hidden",
+              "history",
+              "holdlock",
+              "identified",
+              "if",
+              "in",
+              "inactive",
+              "index",
+              "index_lparen",
+              "inner",
+              "inout",
+              "input",
+              "insensitive",
+              "insert",
+              "inserting",
+              "instead",
+              "int",
+              "integer",
+              "integrated",
+              "intersect",
+              "into",
+              "iq",
+              "is",
+              "isolation",
+              "jdk",
+              "join",
+              "kb",
+              "key",
+              "lateral",
+              "left",
+              "like",
+              "lock",
+              "logging",
+              "login",
+              "long",
+              "mb",
+              "match",
+              "membership",
+              "message",
+              "mode",
+              "modify",
+              "namespace",
+              "natural",
+              "new",
+              "no",
+              "noholdlock",
+              "nolock",
+              "not",
+              "notify",
+              "null",
+              "numeric",
+              "of",
+              "off",
+              "on",
+              "open",
+              "optimization",
+              "option",
+              "options",
+              "or",
+              "order",
+              "others",
+              "out",
+              "outer",
+              "over",
+              "pages",
+              "paglock",
+              "partial",
+              "partition",
+              "passthrough",
+              "password",
+              "plan",
+              "preceding",
+              "precision",
+              "prepare",
+              "primary",
+              "print",
+              "privileges",
+              "proc",
+              "procedure",
+              "proxy",
+              "publication",
+              "raiserror",
+              "range",
+              "raw",
+              "readcommitted",
+              "readonly",
+              "readpast",
+              "readtext",
+              "readuncommitted",
+              "readwrite",
+              "real",
+              "recursive",
+              "ref",
+              "reference",
+              "references",
+              "release",
+              "relocate",
+              "remote",
+              "rename",
+              "reorganize",
+              "repeatable",
+              "repeatableread",
+              "reserve",
+              "resizing",
+              "resource",
+              "restore",
+              "restrict",
+              "return",
+              "revoke",
+              "right",
+              "rollback",
+              "rollup",
+              "root",
+              "row",
+              "rowlock",
+              "rows",
+              "save",
+              "savepoint",
+              "schedule",
+              "scroll",
+              "secure",
+              "select",
+              "sensitive",
+              "serializable",
+              "service",
+              "session",
+              "set",
+              "setuser",
+              "share",
+              "smallint",
+              "soapaction",
+              "some",
+              "space",
+              "sqlcode",
+              "sqlstate",
+              "start",
+              "stop",
+              "subtrans",
+              "subtransaction",
+              "synchronize",
+              "syntax_error",
+              "table",
+              "tablock",
+              "tablockx",
+              "tb",
+              "temporary",
+              "then",
+              "ties",
+              "time",
+              "timestamp",
+              "tinyint",
+              "to",
+              "top",
+              "tran",
+              "transaction",
+              "transactional",
+              "transfer",
+              "tries",
+              "trigger",
+              "truncate",
+              "tsequal",
+              "unbounded",
+              "uncommitted",
+              "union",
+              "unique",
+              "uniqueidentifier",
+              "unknown",
+              "unsigned",
+              "update",
+              "updating",
+              "updlock",
+              "url",
+              "user",
+              "utc",
+              "using",
+              "validate",
+              "varying",
+              "virtual",
+              "view",
+              "wait",
+              "waitfor",
+              "web",
+              "when",
+              "where",
+              "while",
+              "window",
+              "with",
+              "withauto",
+              "with_cube",
+              "with_lparen",
+              "with_rollup",
+              "within",
+              "word",
+              "work",
+              "writeserver",
+              "writetext",
+              "xlock",
+              "xml"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}",
+              "|"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "--",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "BEGIN",
+            "CloseToken": "END"
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "--",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

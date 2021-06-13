@@ -1,0 +1,503 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "% Hello, World! in MATLAB\r\n",
+      "\r\n",
+      "function y = hello_world\r\n",
+      "y = 'Hello, World!'"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "%"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "abs",
+              "acos",
+              "acosh",
+              "acot",
+              "acoth",
+              "acsc",
+              "acsch",
+              "all",
+              "angle",
+              "ans",
+              "any",
+              "asec",
+              "asech",
+              "asin",
+              "asinh",
+              "atan",
+              "atanh",
+              "atan2",
+              "axes",
+              "axis",
+              "bar",
+              "break",
+              "case",
+              "cat",
+              "catch",
+              "ceil",
+              "cell",
+              "celldisp",
+              "cellplot",
+              "cd",
+              "char",
+              "classdef",
+              "clc",
+              "clear",
+              "clock",
+              "close",
+              "conj",
+              "continue",
+              "contour",
+              "conv",
+              "cos",
+              "cosh",
+              "cot",
+              "coth",
+              "csc",
+              "csch",
+              "cputime",
+              "cross",
+              "date",
+              "deal",
+              "deconv",
+              "delete",
+              "det",
+              "diary",
+              "diff",
+              "dir",
+              "disp",
+              "dot",
+              "eig",
+              "else",
+              "elseif",
+              "end",
+              "eps",
+              "erf",
+              "eval",
+              "exist",
+              "exp",
+              "eye",
+              "feval",
+              "fieldnames",
+              "figure",
+              "find",
+              "findstr",
+              "finite",
+              "fix",
+              "floor",
+              "fmin",
+              "fmins",
+              "for",
+              "format",
+              "fplot",
+              "fprintf",
+              "fscanf",
+              "fzero",
+              "gensig",
+              "getfield",
+              "global",
+              "grid",
+              "gtext",
+              "help",
+              "hist",
+              "histc",
+              "hold",
+              "i",
+              "if",
+              "imag",
+              "inf",
+              "interp1",
+              "interp2",
+              "inv",
+              "iscell",
+              "isfield",
+              "isinf",
+              "isempty",
+              "isnan",
+              "isreal",
+              "isstruct",
+              "j",
+              "legend",
+              "length",
+              "linspace",
+              "load",
+              "log",
+              "log10",
+              "loglog",
+              "logspace",
+              "lookfor",
+              "max",
+              "mean",
+              "median",
+              "mesh",
+              "meshc",
+              "meshgrid",
+              "meshz",
+              "methods",
+              "min",
+              "nan",
+              "nargin",
+              "nargout",
+              "num2cell",
+              "ode23",
+              "ode45",
+              "ode113",
+              "ode23s",
+              "ode23t",
+              "ode23b",
+              "ode15s",
+              "odeset",
+              "ones",
+              "otherwise",
+              "path",
+              "persistent",
+              "pi",
+              "pinv",
+              "plot",
+              "plot3",
+              "polar",
+              "poly",
+              "polyder",
+              "polyfit",
+              "polyval",
+              "print",
+              "prod",
+              "properties",
+              "pwd",
+              "quad",
+              "quadl",
+              "quit",
+              "rand",
+              "randn",
+              "rank",
+              "real",
+              "refresh",
+              "reshape",
+              "return",
+              "rmfield",
+              "round",
+              "roots",
+              "rref",
+              "save",
+              "sawtooth",
+              "script",
+              "sec",
+              "sech",
+              "semilogx",
+              "semilogy",
+              "set",
+              "setfield",
+              "sign",
+              "sin",
+              "sinh",
+              "size",
+              "sort",
+              "spline",
+              "square",
+              "std",
+              "stepfun",
+              "surf",
+              "surfc",
+              "stairs",
+              "stem",
+              "subplot",
+              "sqrt",
+              "strcmp",
+              "struct",
+              "sum",
+              "switch",
+              "tan",
+              "tanh",
+              "text",
+              "tic",
+              "title",
+              "toc",
+              "trapz",
+              "try",
+              "type",
+              "unmkpp",
+              "warning",
+              "waterfall",
+              "what",
+              "while",
+              "who",
+              "whos",
+              "wklread",
+              "xlabel",
+              "xor",
+              "ylabel",
+              "zeros",
+              "zlabel"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "class",
+              "collect",
+              "det",
+              "diff",
+              "digits",
+              "dirac",
+              "double",
+              "dsolve",
+              "eig",
+              "expand",
+              "ezplot",
+              "findsym",
+              "function",
+              "heaviside",
+              "ilaplace",
+              "int",
+              "inv",
+              "laplace",
+              "limit",
+              "numden",
+              "poly",
+              "poly2sum",
+              "pretty",
+              "simple",
+              "simplify",
+              "solve",
+              "subs",
+              "sym",
+              "sym2poly",
+              "syms",
+              "symsum",
+              "taylor",
+              "vpa"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "\\",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "_",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "%",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

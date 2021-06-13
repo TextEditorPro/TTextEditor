@@ -1,0 +1,438 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "-- Hello, World! in Eiffel\r\n",
+      "\r\n",
+      "class\r\n",
+      "    HELLO_WORLD\r\n",
+      "create\r\n",
+      "    make\r\n",
+      "feature\r\n",
+      "    make\r\n",
+      "        do\r\n",
+      "            print (\"Hello, World!%N\")\r\n",
+      "        end\r\n",
+      "end"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "--"
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespace": true
+            },
+            "TokenRange": {
+              "Open": ":",
+              "Close": "like"
+            },
+           "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "ReservedWord",
+                  "Words": [
+                    "like"
+                  ],
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "TokenRange": {
+              "Open": "{",
+              "Close": "}"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    ":",
+                    ";",
+                    "<",
+                    ">",
+                    "=",
+                    "/",
+                    "*",
+                    ".",
+                    ",",
+                    "-",
+                    "+",
+                    "(",
+                    ")",
+                    "[",
+                    "]",
+                    "{",
+                    "}"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "AlternativeClose": [
+                "inherit",
+                "feature"
+              ]
+            },
+            "TokenRange": {
+              "Open": "class",
+              "Close": "create"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "ReservedWord",
+                  "Words": [
+                    "class",
+                    "create",
+                    "inherit"
+                  ],
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  }
+                },
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    ":",
+                    ";",
+                    "<",
+                    ">",
+                    "=",
+                    "/",
+                    "*",
+                    ".",
+                    ",",
+                    "-",
+                    "+",
+                    "(",
+                    ")",
+                    "[",
+                    "]",
+                    "{",
+                    "}"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "AlternativeClose": [
+                "redefine",
+                "rename",
+                "create"
+              ]
+            },
+            "TokenRange": {
+              "Open": "inherit",
+              "Close": "feature"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "ReservedWord",
+                  "Words": [
+                    "redefine",
+                    "feature",
+                    "rename",
+                    "create"
+                  ],
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "across",
+              "agent",
+              "alias",
+              "all",
+              "and",
+              "as",
+              "assign",
+              "attribute",
+              "check",
+              "class",
+              "convert",
+              "create",
+              "current",
+              "debug",
+              "deferred",
+              "do",
+              "else",
+              "elseif",
+              "end",
+              "ensure",
+              "expanded",
+              "export",
+              "external",
+              "false",
+              "feature",
+              "from",
+              "frozen",
+              "if",
+              "implies",
+              "inherit",
+              "inspect",
+              "invariant",
+              "like",
+              "local",
+              "loop",
+              "not",
+              "note",
+              "obsolete",
+              "old",
+              "once",
+              "only",
+              "or",
+              "precursor",
+              "redefine",
+              "rename",
+              "require",
+              "rescue",
+              "result",
+              "retry",
+              "select",
+              "separate",
+              "then",
+              "true",
+              "tuple",
+              "undefine",
+              "until",
+              "variant",
+              "void",
+              "when",
+              "xor"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "--",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

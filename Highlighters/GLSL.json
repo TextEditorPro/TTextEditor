@@ -1,0 +1,496 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "// GLSL example\r\n",
+      "void mainImage( out vec4 fragColor, in vec2 fragCoord )\r\n",
+      "{\r\n",
+      "  vec2 uv = fragCoord.xy / iResolution.xy;\r\n",
+      "  fragColor = vec4(uv,0.5+0.5*sin(iGlobalTime),1.0);\r\n",
+      "}\r\n"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "AlternativeClose": [
+                "(",
+                "/",
+                "{",
+                ";"
+              ]
+            },
+            "TokenRange": {
+              "Open": "void",
+              "Close": ")"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "in",
+                    "out",
+                    "inout",
+                    "("
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "//"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Name": "GLSL Keywords",
+            "Type": "ReservedWord",
+            "Words": [
+              "break",
+              "case",
+              "continue",
+              "default",
+              "discard",
+              "do",
+              "else",
+              "exit",
+              "for",
+              "if",
+              "return",
+              "struct",
+              "switch",
+              "while"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "GLSL types",
+            "Type": "ReservedWord",
+            "Words": [
+              "bool",
+              "bvec2",
+              "bvec3",
+              "bvec4",
+              "float",
+              "int",
+              "ivec2",
+              "ivec3",
+              "ivec4",
+              "mat2",
+              "mat3",
+              "mat4",
+              "sampler2D",
+              "samplerCube",
+              "vec2",
+              "vec3",
+              "vec4",
+              "void",
+              "struct"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Word",
+            "Type": "ReservedWord",
+            "Words": [
+              "attribute",
+              "const",
+              "uniform",
+              "varying",
+              "highp",
+              "mediump",
+              "lowp"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "ShaderUniforms",
+            "Type": "Attribute",
+            "Words": [
+              "fragCoord",
+              "fragColor",
+              "gl_FragCoord",
+              "gl_FragColor",
+              "resolution",
+              "iResolution",
+              "iGlobalTime",
+              "globalTime",
+              "iTimeDelta",
+              "iFrame",
+              "iChannelTime",
+              "iChannelResolution",
+              "iMouse",
+              "mouse",
+              "iChannel0",
+              "iChannel1",
+              "iChannel2",
+              "iChannel3",
+              "iDate",
+              "iSampleRate",
+              "uniform",
+              "varying"
+            ],
+            "Attributes": {
+              "Element": "Attribute"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "abs",
+              "acos",
+              "acosh",
+              "asin",
+              "asinh",
+              "atan",
+              "atanh",
+              "ceil",
+              "clamp",
+              "cos",
+              "cosh",
+              "cross",
+              "degrees",
+              "determinant",
+              "dFdx",
+              "dFdxCoarse",
+              "dFdxFine",
+              "dFdy",
+              "dFdyCoarse",
+              "dFdyFine",
+              "distance",
+              "dot",
+              "equal",
+              "exp",
+              "exp2",
+              "faceforward",
+              "floor",
+              "fma",
+              "fract",
+              "frexp",
+              "fwidth",
+              "fwidthCoarse",
+              "fwidthFine",
+              "inverse",
+              "inversesqrt",
+              "isinf",
+              "isnan",
+              "ldexp",
+              "length",
+              "log",
+              "log2",
+              "max",
+              "min",
+              "mix",
+              "mod",
+              "modf",
+              "normalize",
+              "pow",
+              "radians",
+              "reflect",
+              "refract",
+              "sign",
+              "sin",
+              "sinh",
+              "smoothstep",
+              "sqrt",
+              "step",
+              "tan",
+              "tanh",
+              "texture2D",
+              "texture2DLod",
+              "texture2DProj",
+              "texture2DProjLod",
+              "transpose",
+              "trunc"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "!",
+              "?",
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "//",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "//",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

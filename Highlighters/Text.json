@@ -1,0 +1,205 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "Simple text file with Universal Resource Identifier highlighting and opener (with Ctrl key).\r\n",
+      "\r\n",
+      "https://www.texteditor.pro\r\n",
+      "www.texteditor.pro\r\n",
+      "mailto:info@texteditor.pro\r\n",
+      "news:comp.lang.pascal.borland"
+    ],
+    "Editor": {
+      "URIOpener": true,
+      "TextFolding": true
+    },
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "WebLink",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "<>\\^{|}\"",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "http://",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "WebLink",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "<>\\^{|}\"",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "https://",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "News",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "<>\\^{|}\"",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "news://",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "News",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "<>\\^{|}\"",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "news:",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Gopher",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "<>\\^{|}\"",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "gopher://",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Prospero",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "<>\\^{|}\"",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "prospero://",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Nntp",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "<>\\^{|}\"",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "nntp://",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Ftp",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "<>\\^{|}\"",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "ftp://",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Wais",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "<>\\^{|}\"",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "wais://",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Telnet",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "<>\\^{|}\"",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "telnet://",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "MailtoLink",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "<>\\",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "mailto:",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "WWW",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "<>\\^{|}\"",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "www",
+              "Close": " "
+            }
+          }
+        ]
+      }
+    }
+  }
+}

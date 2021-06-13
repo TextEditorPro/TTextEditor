@@ -1,0 +1,686 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "' Hello, World! in FreeBASIC\r\n",
+      "\r\n",
+      "Print \"Hello, World!\""
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "Rem"
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "__",
+              "Close": "__"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Name": "FreeBASIC Keywords",
+            "Type": "ReservedWord",
+            "Words": [
+              "abs",
+              "abstract",
+              "access",
+              "acos",
+              "add",
+              "alias",
+              "allocate",
+              "alpha",
+              "and",
+              "andalso",
+              "any",
+              "append",
+              "as",
+              "asc",
+              "asin",
+              "asm",
+              "assert",
+              "assertwarn",
+              "atan2",
+              "atn",
+              "base",
+              "beep",
+              "bin",
+              "binary",
+              "bit",
+              "bitreset",
+              "bitset",
+              "bload",
+              "boolean",
+              "bsave",
+              "byref",
+              "byte",
+              "byval",
+              "call",
+              "callocate",
+              "case",
+              "cast",
+              "cbool",
+              "cbyte",
+              "cdbl",
+              "cdecl",
+              "chain",
+              "chdir",
+              "chr",
+              "cint",
+              "circle",
+              "class",
+              "clear",
+              "clng",
+              "clngint",
+              "close",
+              "cls",
+              "color",
+              "com",
+              "command",
+              "common",
+              "condbroadcast",
+              "condcreate",
+              "conddestroy",
+              "condsignal",
+              "condwait",
+              "cons",
+              "const",
+              "constructor",
+              "continue",
+              "cos",
+              "cptr",
+              "cshort",
+              "csign",
+              "csng",
+              "csrlin",
+              "cubyte",
+              "cuint",
+              "culng",
+              "culngint",
+              "cunsg",
+              "curdir",
+              "cushort",
+              "custom",
+              "cvd",
+              "cvi",
+              "cvl",
+              "cvlongint",
+              "cvs",
+              "cvshort",
+              "data",
+              "date",
+              "dateadd",
+              "datediff",
+              "datepart",
+              "dateserial",
+              "datevalue",
+              "day",
+              "deallocate",
+              "declare",
+              "defbyte",
+              "defdbl",
+              "defined",
+              "defint",
+              "deflng",
+              "deflongint",
+              "defshort",
+              "defsng",
+              "defstr",
+              "defubyte",
+              "defuint",
+              "defulongint",
+              "defushort",
+              "delete",
+              "destructor",
+              "dim",
+              "dir",
+              "do",
+              "double",
+              "draw",
+              "draw string",
+              "dylibfree",
+              "dylibload",
+              "dylibsymbol",
+              "dynamic",
+              "else",
+              "elseif",
+              "encoding",
+              "end",
+              "enum",
+              "environ",
+              "eof",
+              "eqv",
+              "erase",
+              "erfn",
+              "erl",
+              "ermn",
+              "err",
+              "error",
+              "escape",
+              "event",
+              "exec",
+              "exepath",
+              "exit",
+              "exp",
+              "explicit",
+              "export",
+              "extends",
+              "extern",
+              "false",
+              "field",
+              "fileattr",
+              "filecopy",
+              "filedatetime",
+              "fileexists",
+              "filelen",
+              "fix",
+              "flip",
+              "for",
+              "format",
+              "frac",
+              "fre",
+              "freefile",
+              "function",
+              "get",
+              "getjoystick",
+              "getkey",
+              "getmouse",
+              "gosub",
+              "goto",
+              "hex",
+              "hibyte",
+              "hiword",
+              "hour",
+              "if",
+              "iif",
+              "imageconvertrow",
+              "imagecreate",
+              "imagedestroy",
+              "imageinfo",
+              "imp",
+              "implements",
+              "import",
+              "inkey",
+              "inp",
+              "input",
+              "instr",
+              "instrrev",
+              "int",
+              "integer",
+              "is",
+              "isdate",
+              "isredirected",
+              "kill",
+              "lbound",
+              "lcase",
+              "left",
+              "len",
+              "let",
+              "lib",
+              "line",
+              "lobyte",
+              "loc",
+              "local",
+              "locate",
+              "lock",
+              "lof",
+              "log",
+              "long",
+              "longint",
+              "loop",
+              "loword",
+              "lpos",
+              "lprint",
+              "lpt",
+              "lset",
+              "ltrim",
+              "mid",
+              "minute",
+              "mkd",
+              "mkdir",
+              "mki",
+              "mkl",
+              "mklongint",
+              "mks",
+              "mkshort",
+              "mod",
+              "month",
+              "monthname",
+              "multikey",
+              "mutexcreate",
+              "mutexdestroy",
+              "mutexlock",
+              "mutexunlock",
+              "naked",
+              "name",
+              "namespace",
+              "new",
+              "next",
+              "nogosub",
+              "nokeyword",
+              "not",
+              "now",
+              "object",
+              "oct",
+              "offsetof",
+              "on",
+              "on error",
+              "once",
+              "open",
+              "operator",
+              "option",
+              "or",
+              "orelse",
+              "out",
+              "output",
+              "overload",
+              "override",
+              "paint",
+              "palette",
+              "pascal",
+              "pcopy",
+              "peek",
+              "pipe",
+              "pmap",
+              "point",
+              "pointcoord",
+              "pointer",
+              "poke",
+              "pos",
+              "preserve",
+              "preset",
+              "print",
+              "private",
+              "procptr",
+              "property",
+              "protected",
+              "pset",
+              "ptr",
+              "public",
+              "put",
+              "random",
+              "randomize",
+              "read",
+              "reallocate",
+              "redim",
+              "rem",
+              "reset",
+              "restore",
+              "resume",
+              "return",
+              "rgb",
+              "rgba",
+              "right",
+              "rmdir",
+              "rnd",
+              "rset",
+              "rtrim",
+              "run",
+              "sadd",
+              "scope",
+              "screen",
+              "screen (console)",
+              "screencontrol",
+              "screencopy",
+              "screenevent",
+              "screenglproc",
+              "screeninfo",
+              "screenlist",
+              "screenlock",
+              "screenptr",
+              "screenres",
+              "screenset",
+              "screensync",
+              "screenunlock",
+              "scrn",
+              "second",
+              "seek (function)",
+              "seek (statement)",
+              "select case",
+              "setdate",
+              "setenviron",
+              "setmouse",
+              "settime",
+              "sgn",
+              "shared",
+              "shell",
+              "shl",
+              "short",
+              "shr",
+              "sin",
+              "single",
+              "sizeof",
+              "sleep",
+              "space",
+              "spc",
+              "sqr",
+              "static",
+              "stdcall",
+              "step",
+              "stick",
+              "stop",
+              "str",
+              "strig",
+              "string",
+              "strptr",
+              "sub",
+              "swap",
+              "system",
+              "tab",
+              "tan",
+              "then",
+              "this",
+              "threadcall",
+              "threadcreate",
+              "threaddetach",
+              "threadwait",
+              "time",
+              "timer",
+              "timeserial",
+              "timevalue",
+              "to",
+              "trans",
+              "trim",
+              "true",
+              "type",
+              "typeof",
+              "ubound",
+              "ubyte",
+              "ucase",
+              "uinteger",
+              "ulong",
+              "ulongint",
+              "union",
+              "unlock",
+              "unsigned",
+              "until",
+              "ushort",
+              "using",
+              "val",
+              "valint",
+              "vallng",
+              "valuint",
+              "valulng",
+              "var",
+              "varptr",
+              "va_arg",
+              "va_first",
+              "va_next",
+              "view",
+              "virtual",
+              "wait",
+              "wbin",
+              "wchr",
+              "weekday",
+              "weekdayname",
+              "wend",
+              "whex",
+              "while",
+              "width",
+              "window",
+              "windowtitle",
+              "winput",
+              "with",
+              "woct",
+              "write",
+              "wspace",
+              "wstr",
+              "wstring",
+              "xor",
+              "year",
+              "zstring"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "\\",
+              "^",
+              "&",
+              "@",
+              "!",
+              "-"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "'",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "REM",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "SUB",
+            "CloseToken": "END SUB",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true,
+              "BreakCharFollows": false
+            }
+          },
+          {
+            "OpenToken": "FUNCTION",
+            "CloseToken": "END FUNCTION",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true,
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "'",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "Rem",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

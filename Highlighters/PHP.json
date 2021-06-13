@@ -1,0 +1,488 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "<?php\r\n",
+      "  echo \"Hello, World!!\";\r\n",
+      "?>"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Name": "PHP",
+            "Type": "Tag",
+            "Attributes": {
+              "Element": "HighlightedBlock",
+              "ParentBackground": false
+            },
+            "TokenRange": {
+              "Open": "<?",
+              "Close": "?>"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "BlockComment",
+                  "Attributes": {
+                    "Element": "Comment"
+                  },
+                  "TokenRange": {
+                    "Open": "/*",
+                    "Close": "*/"
+                  }
+                },
+                {
+                  "Type": "LineComment",
+                  "Attributes": {
+                    "Element": "Comment"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "//"
+                  }
+                },
+                {
+                  "Type": "LineComment",
+                  "Attributes": {
+                    "Element": "Comment"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "#"
+                  }
+                },
+                {
+                  "Type": "Method",
+                  "Attributes": {
+                    "Element": "MethodName"
+                  },
+                  "Properties": {
+                    "AlternativeClose": [
+                      "{"
+                    ]
+                  },
+                  "TokenRange": {
+                    "Open": "function",
+                    "Close": "("
+                  },
+                  "SubRules": {
+                    "KeyList": [
+                      {
+                        "Type": "Symbol",
+                        "Words": [
+                          "{",
+                          "("
+                        ],
+                        "Attributes": {
+                          "Element": "Symbol"
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Type": "BinaryNumber",
+                  "CaseSensitive": true,
+                  "Attributes": {
+                    "Element": "Number"
+                  },
+                  "Properties": {
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "0b",
+                    "Close": " "
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  },
+                  "SubRules": {
+                    "Range": [
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "String"
+                        },
+                        "Properties": {
+                          "CloseOnEndOfLine": true,
+                          "CloseOnTerm": true
+                        },
+                        "TokenRange": {
+                          "Open": "\\\"",
+                          "Close": ""
+                        }
+                      },
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "String"
+                        },
+                        "Properties": {
+                          "CloseOnEndOfLine": true,
+                          "CloseOnTerm": true
+                        },
+                        "TokenRange": {
+                          "Open": "\\\\",
+                          "Close": ""
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  },
+                  "SubRules": {
+                    "Range": [
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "String"
+                        },
+                        "Properties": {
+                          "CloseOnEndOfLine": true,
+                          "CloseOnTerm": true
+                        },
+                        "TokenRange": {
+                          "Open": "\\'",
+                          "Close": ""
+                        }
+                      },
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "String"
+                        },
+                        "Properties": {
+                          "CloseOnEndOfLine": true,
+                          "CloseOnTerm": true
+                        },
+                        "TokenRange": {
+                          "Open": "\\\\",
+                          "Close": ""
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Type": "Character",
+                  "Attributes": {
+                    "Element": "Character"
+                  },
+                  "Properties": {
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "$",
+                    "Close": " "
+                  }
+                },
+                {
+                  "Type": "Hex",
+                  "Attributes": {
+                    "Element": "Number"
+                  },
+                  "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuvwyzåäö",
+                  "Properties": {
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "0",
+                    "OpenBreakType": "Any"
+                  }
+                }
+              ],
+              "KeyList": [
+                {
+                  "Name": "PHP",
+                  "Type": "ReservedWord",
+                  "Words": [
+                    "__halt_compiler",
+                    "abstract",
+                    "and",
+                    "array",
+                    "as",
+                    "break",
+                    "callable",
+                    "case",
+                    "catch",
+                    "class",
+                    "clone",
+                    "const",
+                    "continue",
+                    "declare",
+                    "default",
+                    "die",
+                    "do",
+                    "else",
+                    "elseif",
+                    "enddeclare",
+                    "endfor",
+                    "endforeach",
+                    "endif",
+                    "endswitch",
+                    "endwhile",
+                    "eval",
+                    "exit",
+                    "extends",
+                    "final",
+                    "for",
+                    "foreach",
+                    "global",
+                    "goto",
+                    "if",
+                    "implements",
+                    "include",
+                    "include_once",
+                    "instanceof",
+                    "insteadof",
+                    "interface",
+                    "isset",
+                    "list",
+                    "namespace",
+                    "new",
+                    "or",
+                    "php",
+                    "private",
+                    "protected",
+                    "public",
+                    "require",
+                    "require_once",
+                    "return",
+                    "static",
+                    "switch",
+                    "throw",
+                    "trait",
+                    "try",
+                    "unset",
+                    "use",
+                    "var",
+                    "while",
+                    "xor"
+                  ],
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  }
+                },
+                {
+                  "Type": "Method",
+                  "Words": [
+                    "function",
+                    "procedure"
+                  ],
+                  "Attributes": {
+                    "Element": "Method"
+                  }
+                },
+                {
+                  "Type": "Method",
+                  "Words": [
+                    "echo",
+                    "print",
+                    "empty"
+                  ],
+                  "Attributes": {
+                    "Element": "Method"
+                  }
+                },
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "&",
+                    ":",
+                    ";",
+                    "<",
+                    ">",
+                    "=",
+                    "/",
+                    "*",
+                    ".",
+                    ",",
+                    "-",
+                    "+",
+                    "(",
+                    ")",
+                    "[",
+                    "]",
+                    "{",
+                    "}",
+                    "?>"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                },
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "?>"
+                  ],
+                  "Attributes": {
+                    "Element": "HighlightedBlockSymbol",
+                    "ParentBackground": false
+                  }
+                }
+              ],
+              "Set": [
+                {
+                  "Type": "Number",
+                  "Symbols": "0123456789",
+                  "Attributes": {
+                    "Element": "Number"
+                  }
+                },
+                {
+                  "Type": "Float",
+                  "Symbols": ".0123456789",
+                  "Attributes": {
+                    "Element": "Number"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "Symbol",
+            "Words": [
+              "<?"
+            ],
+            "Attributes": {
+              "Element": "HighlightedBlockSymbol",
+              "ParentBackground": false
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "MultiLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "MultiLineString"
+          },
+          {
+            "OpenToken": "//",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "#",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "<?",
+            "CloseToken": "?>",
+            "Properties": {
+              "OpenTokenCanBeFollowedBy": "PHP"
+            }
+          },
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          },
+          {
+            "OpenToken": "IF",
+            "CloseToken": "ENDIF",
+            "Properties": {
+              "BreakIfNotFoundBeforeNextRegion": "):"
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "MultiLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "MultiLineString"
+      },
+      {
+        "OpenToken": "//",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

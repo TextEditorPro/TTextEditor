@@ -1,0 +1,694 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "SELECT \"Hello, World!\" FROM dual;"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "--"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Attributes": {
+              "Element": "Symbol"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": ":"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Name": "Oracle Reserved Words",
+            "Type": "ReservedWord",
+            "Words": [
+              "access",
+              "add",
+              "all",
+              "alter",
+              "and",
+              "any",
+              "arraylen",
+              "as",
+              "asc",
+              "audit",
+              "between",
+              "by",
+              "char",
+              "check",
+              "cluster",
+              "column",
+              "comment",
+              "compress",
+              "connect",
+              "create",
+              "current",
+              "date",
+              "decimal",
+              "default",
+              "delete",
+              "desc",
+              "distinct",
+              "drop",
+              "else",
+              "exclusive",
+              "exists",
+              "file",
+              "float",
+              "for",
+              "from",
+              "grant",
+              "group",
+              "having",
+              "identified",
+              "immediate",
+              "in",
+              "increment",
+              "index",
+              "initial",
+              "insert",
+              "integer",
+              "intersect",
+              "into",
+              "is",
+              "level",
+              "like",
+              "lock",
+              "long",
+              "maxextents",
+              "minus",
+              "mode",
+              "modify",
+              "noaudit",
+              "nocompress",
+              "not",
+              "notfound",
+              "nowait",
+              "null",
+              "number",
+              "of",
+              "offline",
+              "on",
+              "online",
+              "option",
+              "or",
+              "order",
+              "pctfree",
+              "prior",
+              "privileges",
+              "public",
+              "raw",
+              "rename",
+              "resource",
+              "revoke",
+              "row",
+              "rowid",
+              "rowlabel",
+              "rownum",
+              "rows",
+              "select",
+              "session",
+              "set",
+              "share",
+              "size",
+              "smallint",
+              "sqlbuf",
+              "start",
+              "successful",
+              "synonym",
+              "sysdate",
+              "table",
+              "then",
+              "to",
+              "trigger",
+              "uid",
+              "union",
+              "unique",
+              "update",
+              "user",
+              "validate",
+              "values",
+              "varchar",
+              "varchar2",
+              "whenever",
+              "where",
+              "view",
+              "with"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Oracle Keywords",
+            "Type": "ReservedWord",
+            "Words": [
+              "admin",
+              "after",
+              "allocate",
+              "analyze",
+              "archive",
+              "archivelog",
+              "authorization",
+              "backup",
+              "become",
+              "before",
+              "begin",
+              "block",
+              "body",
+              "cache",
+              "cancel",
+              "cascade",
+              "change",
+              "character",
+              "checkpoint",
+              "close",
+              "cobol",
+              "commit",
+              "compile",
+              "constraint",
+              "constraints",
+              "contents",
+              "continue",
+              "controlfile",
+              "cursor",
+              "cycle",
+              "database",
+              "datafile",
+              "dba",
+              "dec",
+              "declare",
+              "disable",
+              "dismount",
+              "double",
+              "dump",
+              "each",
+              "enable",
+              "end",
+              "escape",
+              "events",
+              "except",
+              "exceptions",
+              "exec",
+              "execute",
+              "explain",
+              "extent",
+              "externally",
+              "fetch",
+              "flush",
+              "force",
+              "foreign",
+              "fortran",
+              "found",
+              "freelist",
+              "freelists",
+              "function",
+              "go",
+              "goto",
+              "groups",
+              "including",
+              "indicator",
+              "initrans",
+              "instance",
+              "int",
+              "key",
+              "language",
+              "layer",
+              "link",
+              "lists",
+              "logfile",
+              "manage",
+              "manual",
+              "maxdatafiles",
+              "maxinstances",
+              "maxlogfiles",
+              "maxloghistory",
+              "maxlogmembers",
+              "maxtrans",
+              "maxvalue",
+              "minextents",
+              "minvalue",
+              "module",
+              "mount",
+              "new",
+              "next",
+              "noarchivelog",
+              "nocache",
+              "nocycle",
+              "nomaxvalue",
+              "nominvalue",
+              "none",
+              "noorder",
+              "noresetlogs",
+              "normal",
+              "nosort",
+              "numeric",
+              "off",
+              "old",
+              "only",
+              "open",
+              "optimal",
+              "own",
+              "package",
+              "parallel",
+              "pctincrease",
+              "pctused",
+              "plan",
+              "pli",
+              "precision",
+              "primary",
+              "private",
+              "procedure",
+              "profile",
+              "quota",
+              "read",
+              "real",
+              "recover",
+              "references",
+              "referencing",
+              "resetlogs",
+              "restricted",
+              "reuse",
+              "role",
+              "roles",
+              "rollback",
+              "savepoint",
+              "schema",
+              "scn",
+              "section",
+              "segment",
+              "sequence",
+              "shared",
+              "snapshot",
+              "some",
+              "sort",
+              "sql",
+              "sqlcode",
+              "sqlerror",
+              "sqlstate",
+              "statement_id",
+              "statistics",
+              "stop",
+              "storage",
+              "switch",
+              "system",
+              "tables",
+              "tablespace",
+              "temporary",
+              "thread",
+              "time",
+              "tracing",
+              "transaction",
+              "triggers",
+              "truncate",
+              "under",
+              "unlimited",
+              "until",
+              "use",
+              "using",
+              "when",
+              "work",
+              "write"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Oracle PL/SQL Reserved Words",
+            "Type": "ReservedWord",
+            "Words": [
+              "abort",
+              "accept",
+              "access",
+              "add",
+              "allby",
+              "altercase",
+              "andchar",
+              "any",
+              "array",
+              "arraylen",
+              "as",
+              "asc",
+              "assert",
+              "assign",
+              "at",
+              "authorization",
+              "avg",
+              "base_table",
+              "begin",
+              "between",
+              "binary_integer",
+              "body",
+              "boolean",
+              "char_base",
+              "check",
+              "close",
+              "cluster",
+              "clusters",
+              "colauth",
+              "columns",
+              "commit",
+              "compress",
+              "connect",
+              "constant",
+              "count",
+              "crash",
+              "create",
+              "current",
+              "currval",
+              "cursor",
+              "data_base",
+              "database",
+              "date",
+              "dba",
+              "debugoff",
+              "debugon",
+              "decimal",
+              "declare",
+              "default",
+              "definition",
+              "delay",
+              "delete",
+              "delta",
+              "desc",
+              "digits",
+              "dispose",
+              "distinct",
+              "do",
+              "drop",
+              "else",
+              "elsif",
+              "end",
+              "entry",
+              "exception",
+              "exception_init",
+              "exists",
+              "exit",
+              "false",
+              "fetch",
+              "float",
+              "for",
+              "form",
+              "from",
+              "function",
+              "generic",
+              "goto",
+              "grant",
+              "group",
+              "having",
+              "identified",
+              "if",
+              "in",
+              "index",
+              "indexes",
+              "indicator",
+              "insert",
+              "integer",
+              "intersect",
+              "into",
+              "is",
+              "level",
+              "like",
+              "limited",
+              "loop",
+              "minus",
+              "mlslabel",
+              "modrange",
+              "mode",
+              "natural",
+              "new",
+              "nextval",
+              "nocompress",
+              "not",
+              "null",
+              "number",
+              "number_base",
+              "of",
+              "on",
+              "open",
+              "option",
+              "or",
+              "order",
+              "others",
+              "out",
+              "package",
+              "partition",
+              "pctfree",
+              "positive",
+              "pragma",
+              "prior",
+              "private",
+              "procedure",
+              "public",
+              "raise",
+              "real",
+              "record",
+              "release",
+              "remr",
+              "rename",
+              "resource",
+              "return",
+              "reverse",
+              "revoke",
+              "rollback",
+              "rowid",
+              "rowlabel",
+              "rownum",
+              "rowtype",
+              "run",
+              "savepoint",
+              "schema",
+              "select",
+              "separate",
+              "set",
+              "size",
+              "smallint",
+              "space",
+              "sql",
+              "sqlcode",
+              "sqlerrm",
+              "start",
+              "statement",
+              "stddev",
+              "subtyp",
+              "tabauth",
+              "table",
+              "tables",
+              "task",
+              "terminate",
+              "then",
+              "to",
+              "true",
+              "type",
+              "union",
+              "unique",
+              "update",
+              "use",
+              "values",
+              "varchar",
+              "varchar2",
+              "variance",
+              "when",
+              "where",
+              "while",
+              "view",
+              "views",
+              "with",
+              "work",
+              "xore"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "avg",
+              "count",
+              "max",
+              "min",
+              "sum"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}",
+              "|"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "--",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "BEGIN",
+            "CloseToken": "END"
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "--",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

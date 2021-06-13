@@ -1,0 +1,112 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "--- /path/to/original timestampr\n",
+      "+++ /path/to/new timestampr\n",
+      "@@ -1,4 +1,4 @@r\n",
+      "Hellor\n",
+      "-wrldr\n",
+      "+world!"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": "---"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": "+++"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": "@@"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": "***"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "ReservedWord"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": "-"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Attribute"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": "+"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": "!"
+            }
+          }
+        ]
+      }
+    }
+  }
+}

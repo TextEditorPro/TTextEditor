@@ -1,0 +1,611 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "#!/path/to/wish\r\n",
+      "\r\n",
+      "puts \"Hello, World!\"",
+      "\r\n",
+      "set RLSerial::Open 1",
+      "\r\n",
+      "set mainframe [MainFrame $base.mainframe  -menu $descmenu -textvariable gMainState]",
+      "\r\n",
+      "yruyr:dkdk :jdd ::dfsfs sfs",
+      "\r\n"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "CaseSensitive": true,
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "Attribute",
+            "Attributes": {
+              "Element": "Attribute"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "-"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "Properties": {
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "::"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "TokenRange": {
+              "Close": "::"
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "after",
+              "append",
+              "array",
+              "auto_execok",
+              "auto_import",
+              "auto_load",
+              "auto_mkindex",
+              "auto_mkindex_old",
+              "auto_qualify",
+              "auto_reset",
+              "base",
+              "bgerror",
+              "binary",
+              "body",
+              "break",
+              "catch",
+              "cd",
+              "class",
+              "clock",
+              "close",
+              "code",
+              "concat",
+              "configbody",
+              "constructor",
+              "continue",
+              "dde",
+              "destructor",
+              "else",
+              "elseif",
+              "encoding",
+              "ensemble",
+              "eof",
+              "error",
+              "eval",
+              "exec",
+              "exit",
+              "expr",
+              "fblocked",
+              "fconfigure",
+              "fcopy",
+              "file",
+              "fileevent",
+              "filename",
+              "find",
+              "flush",
+              "for",
+              "foreach",
+              "format",
+              "gets",
+              "glob",
+              "global",
+              "history",
+              "http",
+              "if",
+              "incr",
+              "info",
+              "inherit",
+              "is",
+              "interp",
+              "join",
+              "lappend",
+              "lindex",
+              "linsert",
+              "list",
+              "llength",
+              "load",
+              "local",
+              "lrange",
+              "lreplace",
+              "lsearch",
+              "lset",
+              "lsort",
+              "memory",
+              "method",
+              "msgcat",
+              "namespace",
+              "open",
+              "package",
+              "parray",
+              "pid",
+              "pkg_mkindex",
+              "private",
+              "proc",
+              "protected",
+              "public",
+              "puts",
+              "pwd",
+              "re_syntax",
+              "read",
+              "regexp",
+              "registry",
+              "regsub",
+              "rename",
+              "resource",
+              "return",
+              "safe",
+              "safebase",
+              "scan",
+              "scope",
+              "seek",
+              "set",
+              "socket",
+              "source",
+              "split",
+              "string",
+              "subst",
+              "switch",
+              "tcl",
+              "tcl_endofword",
+              "tcl_findlibrary",
+              "tcl_startofnextword",
+              "tcl_startofpreviousword",
+              "tcl_wordbreakafter",
+              "tcl_wordbreakbefore",
+              "tcltest",
+              "tclvars",
+              "tell",
+              "then",
+              "time",
+              "trace",
+              "unknown",
+              "unset",
+              "update",
+              "uplevel",
+              "upvar",
+              "variable",
+              "vwait",
+              "while",
+              "apply",
+              "bell",
+              "bind",
+              "bindidproc",
+              "bindproc",
+              "bindtags",
+              "bitmap",
+              "button",
+              "canvas",
+              "cascad",
+              "checkbutton",
+              "clipboard",
+              "colors",
+              "combobox",
+              "command",
+              "console",
+              "cursors",
+              "debug",
+              "destroy",
+              "dict",
+              "entry",
+              "event",
+              "exp_after",
+              "exp_before",
+              "exp_continue",
+              "exp_internal",
+              "exp_send",
+              "expect",
+              "focus",
+              "font",
+              "frame",
+              "grab",
+              "grid",
+              "chan",
+              "image",
+              "interact",
+              "interpreter",
+              "keysyms",
+              "label",
+              "labelframe",
+              "lassign",
+              "listbox",
+              "loadtk",
+              "log_file",
+              "log_user",
+              "lower",
+              "lreverse",
+              "menu",
+              "menubutton",
+              "message",
+              "my",
+              "namespupd",
+              "next",
+              "option",
+              "options",
+              "pack",
+              "panedwindow",
+              "photo",
+              "place",
+              "radiobutton",
+              "raise",
+              "rgb",
+              "scale",
+              "scrollbar",
+              "selection",
+              "self",
+              "send",
+              "send_error",
+              "send_log",
+              "send_tty",
+              "send_user",
+              "sendout",
+              "sleep",
+              "spawn",
+              "spinbox",
+              "stty",
+              "superclass",
+              "text",
+              "throw",
+              "tk",
+              "tk_bisque",
+              "tk_choosecolor",
+              "tk_choosedirectory",
+              "tk_dialog",
+              "tk_focusfollowsmouse",
+              "tk_focusnext",
+              "tk_focusprev",
+              "tk_getopenfile",
+              "tk_getsavefile",
+              "tk_menusetfocus",
+              "tk_messagebox",
+              "tk_optionmenu",
+              "tk_popup",
+              "tk_setpalette",
+              "tk_textcopy",
+              "tk_textcut",
+              "tk_textpaste",
+              "tkerror",
+              "tkvars",
+              "tkwait",
+              "toplevel",
+              "try",
+              "unload",
+              "wait",
+              "winfo",
+              "wm",
+              "zlib"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "compound",
+              "pixmap",
+              "tix",
+              "tixballoon",
+              "tixbuttonbox",
+              "tixcombobox",
+              "tixcontrol",
+              "tixdestroy",
+              "tixdirlist",
+              "tixdirselectdialog",
+              "tixdirtree",
+              "tixdisplaystyle",
+              "tixexfileselectbox",
+              "tixexfileselectdialog",
+              "tixfileentry",
+              "tixfileselectbox",
+              "tixfileselectdialog",
+              "tixform",
+              "tixgetboolean",
+              "tixgetint",
+              "tixgrid",
+              "tixhlist",
+              "tixchecklist",
+              "tixinputonly",
+              "tixlabelentry",
+              "tixlabelframe",
+              "tixlistnotebook",
+              "tixmeter",
+              "tixmwm",
+              "tixnbframe",
+              "tixnotebook",
+              "tixoptionmenu",
+              "tixpanedwindow",
+              "tixpopupmenu",
+              "tixscrolledhlist",
+              "tixscrolledlistbox",
+              "tixscrolledtext",
+              "tixscrolledwindow",
+              "tixselect",
+              "tixstdbuttonbox",
+              "tixtlist",
+              "tixtree",
+              "tixutils",
+              "tixwish"
+            ],
+            "Attributes": {
+              "Element": "Attribute"
+            }
+          },
+          {
+            "Type": "ReservedWord",
+            "CaseSensitive": true,
+            "Words": [
+              "ArrowButton",
+              "Button",
+              "ButtonBox",
+              "ComboBox",
+              "Dialog",
+              "DragSite",
+              "DropSite",
+              "DynamicHelp",
+              "Entry",
+              "Label",
+              "LabelEntry",
+              "LabelFrame",
+              "ListBox",
+              "MainFrame",
+              "MessageDlg",
+              "NoteBook",
+              "PagesManager",
+              "PanedWindow",
+              "PasswdDlg",
+              "ProgressBar",
+              "ProgressDlg",
+              "ScrollableFrame",
+              "ScrollableWindow",
+              "ScrolledWindow",
+              "ScrollView",
+              "SelectColor",
+              "SelectFont",
+              "Separator",
+              "SpinBox",
+              "TitleFrame",
+              "Tree",
+              "BWidget",
+              "Widget"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "ReservedWord",
+            "CaseSensitive": true,
+            "Words": [
+              "add",
+              "addindicator",
+              "both",
+              "bottom",
+              "center",
+              "cget",
+              "config",
+              "configure",
+              "copy",
+              "create",
+              "default",
+              "deiconify",
+              "delete",
+              "disabled",
+              "focusmodel",
+              "forget",
+              "geometry",
+              "get",
+              "getframe",
+              "groove",
+              "horizontal",
+              "left",
+              "normal",
+              "passive",
+              "protocol",
+              "right",
+              "raised",
+              "release",
+              "resizable",
+              "seconds",
+              "sunken",
+              "title",
+              "tolower",
+              "toupper",
+              "vertical",
+              "withdraw"
+            ],
+            "Attributes": {
+              "Element": "Directive"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}",
+              "%"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "#",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "id": "{288B726D-55B1-4511-9823-23021D087E21}",
+  "name": "TTextEditor",
+  "picture": "Assetts\\TTextEditor_Icon.png",
+  "licenses": [
+    {
+      "type": "MIT",
+      "file": "LICENSE"
+    }
+  ],
+  "platforms": "Win32;Win64",
+  "first_version": "1.0.0",
+  "package_compiler_min": 30,
+  "compiler_min": 30
+}

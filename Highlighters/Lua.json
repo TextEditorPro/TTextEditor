@@ -1,0 +1,483 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "-- Hello, World! in Lua\r\n",
+      "\r\n",
+      "print(\"Hello, World!\")"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "--"
+            }
+          },
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "--[[",
+              "Close": "]]"
+            }
+          },
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "--[=",
+              "Close": "=]"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "TokenRange": {
+              "Open": "[[",
+              "Close": "]]"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "TokenRange": {
+              "Open": "[=",
+              "Close": "=]"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "and",
+              "break",
+              "do",
+              "else",
+              "elseif",
+              "end",
+              "false",
+              "for",
+              "function",
+              "if",
+              "in",
+              "local",
+              "nil",
+              "not",
+              "or",
+              "repeat",
+              "return",
+              "then",
+              "true",
+              "until",
+              "while"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "abs",
+              "acos",
+              "asin",
+              "assert",
+              "atan2",
+              "byte",
+              "ceil",
+              "char",
+              "clock",
+              "close",
+              "collectgarbage",
+              "concat",
+              "cosh",
+              "cpath",
+              "create",
+              "date",
+              "debug",
+              "deg",
+              "difftime",
+              "dofile",
+              "dump",
+              "error",
+              "execute",
+              "exit",
+              "exp",
+              "find",
+              "floor",
+              "flush",
+              "fmod",
+              "format",
+              "frexp",
+              "getenv",
+              "getfenv",
+              "gethook",
+              "getinfo",
+              "getlocal",
+              "getmetatable",
+              "getregistry",
+              "getupvalue",
+              "gmatch",
+              "gsub",
+              "input",
+              "insert",
+              "ipairs",
+              "ldexp",
+              "len",
+              "lines",
+              "loaded",
+              "loadfile",
+              "loadlib",
+              "loadstring",
+              "log",
+              "log10",
+              "lower",
+              "match",
+              "max",
+              "maxn",
+              "min",
+              "modf",
+              "module",
+              "next",
+              "open",
+              "output",
+              "pairs",
+              "path",
+              "pcall",
+              "popen",
+              "pow",
+              "preload",
+              "print",
+              "rad",
+              "random",
+              "randomseed",
+              "rawequal",
+              "rawget",
+              "rawset",
+              "read",
+              "remove",
+              "rename",
+              "rep",
+              "require",
+              "resume",
+              "reverse",
+              "running",
+              "seeall",
+              "select",
+              "setfenv",
+              "sethook",
+              "setlocal",
+              "setlocale",
+              "setmetatable",
+              "setupvalue",
+              "sinh",
+              "sort",
+              "sqrt",
+              "status",
+              "sub",
+              "tanh",
+              "time",
+              "tmpfile",
+              "tmpname",
+              "tonumber",
+              "tostring",
+              "traceback",
+              "type",
+              "unpack",
+              "upper",
+              "wrap",
+              "write",
+              "xpcall",
+              "yield"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "%",
+              "^",
+              "#",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "--",
+            "RegionType": "SingleLine",
+            "NextCharIsNot": "["
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          },
+          {
+            "OpenToken": "[[",
+            "CloseToken": "]]"
+          },
+          {
+            "OpenToken": "--[[",
+            "CloseToken": "]]"
+          },
+          {
+            "OpenToken": "--[=",
+            "CloseToken": "=]"
+          },
+          {
+            "OpenToken": "FUNCTION",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "WHILE",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "FOR",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "IF",
+            "CloseToken": "END"
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "--",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

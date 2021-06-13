@@ -1,0 +1,408 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "' Hello, World! in Visual Basic\r\n",
+      "\r\n",
+      "Imports System\r\n",
+      "\r\n",
+      "' This module houses the application's entry point.\r\n",
+      "Public Module modmain\r\n",
+      "    ' Main is the application's entry point.\r\n",
+      "    Sub Main()\r\n",
+      "        ' Write text to the console.\r\n",
+      "        Console.WriteLine (\"Hello, World!\")\r\n",
+      "    End Sub\r\n",
+      "End Module"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "#const",
+              "#else",
+              "#elseif",
+              "#end",
+              "#if",
+              "addhandler",
+              "addressof",
+              "alias",
+              "and",
+              "andalso",
+              "as",
+              "boolean",
+              "byref",
+              "byte",
+              "byval",
+              "call",
+              "case",
+              "catch",
+              "cbool",
+              "cbyte",
+              "cchar",
+              "cdate",
+              "cdbl",
+              "cdec",
+              "char",
+              "cint",
+              "class",
+              "clng",
+              "cobj",
+              "const",
+              "continue",
+              "csbyte",
+              "cshort",
+              "csng",
+              "cstr",
+              "ctype",
+              "cuint",
+              "culng",
+              "cushort",
+              "date",
+              "decimal",
+              "declare",
+              "default",
+              "delegate",
+              "dim",
+              "directcast",
+              "do",
+              "double",
+              "each",
+              "else",
+              "elseif",
+              "end",
+              "endif",
+              "enum",
+              "erase",
+              "error",
+              "event",
+              "exit",
+              "false",
+              "finally",
+              "for",
+              "friend",
+              "function",
+              "get",
+              "gettype",
+              "getxmlnamespace",
+              "global",
+              "gosub",
+              "goto",
+              "handles",
+              "if",
+              "implements",
+              "imports",
+              "in",
+              "inherits",
+              "integer",
+              "interface",
+              "is",
+              "isnot",
+              "let",
+              "lib",
+              "like",
+              "long",
+              "loop",
+              "me",
+              "mod",
+              "module",
+              "mustinherit",
+              "mustoverride",
+              "mybase",
+              "myclass",
+              "namespace",
+              "narrowing",
+              "newconstraint",
+              "newoperator",
+              "next",
+              "not",
+              "nothing",
+              "notinheritable",
+              "notoverridable",
+              "object",
+              "of",
+              "on",
+              "operator",
+              "option",
+              "optional",
+              "or",
+              "orelse",
+              "out",
+              "overloads",
+              "overridable",
+              "overrides",
+              "paramarray",
+              "partial",
+              "private",
+              "property",
+              "protected",
+              "public",
+              "raiseevent",
+              "readonly",
+              "redim",
+              "rem",
+              "removehandler",
+              "resume",
+              "return",
+              "sbyte",
+              "select",
+              "set",
+              "shadows",
+              "shared",
+              "short",
+              "single",
+              "static",
+              "step",
+              "stop",
+              "string",
+              "structure",
+              "sub",
+              "synclock",
+              "then",
+              "throw",
+              "to",
+              "true",
+              "try",
+              "trycast",
+              "typeof",
+              "uinteger",
+              "ulong",
+              "ushort",
+              "using",
+              "variant",
+              "wend",
+              "when",
+              "while",
+              "widening",
+              "with",
+              "withevents",
+              "writeonly",
+              "xor"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "SkipRegion": [
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "'",
+            "RegionType": "SingleLine"
+          }
+        ],
+        "FoldRegion": [
+         {
+            "OpenToken": "CLASS",
+            "CloseToken": "END CLASS",
+            "Properties": {
+              "NoDuplicateClose": true
+            }
+          },
+         {
+            "OpenToken": "PROPERTY",
+            "CloseToken": "END PROPERTY",
+            "Properties": {
+              "NoDuplicateClose": true
+            }
+          },
+         {
+            "OpenToken": "SUB",
+            "CloseToken": "END SUB",
+            "Properties": {
+              "NoDuplicateClose": true
+            }
+          },
+         {
+            "OpenToken": "FUNCTION",
+            "CloseToken": "END FUNCTION",
+            "Properties": {
+              "NoDuplicateClose": true
+            }
+          },
+         {
+            "OpenToken": "FOR",
+            "CloseToken": "NEXT",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true,
+              "NoDuplicateClose": true
+            }
+          },
+         {
+            "OpenToken": "IF",
+            "CloseToken": "END IF",
+            "Properties": {
+              "CheckIfThenOneLiner": true,
+              "NoDuplicateClose": true
+            }
+          },
+         {
+            "OpenToken": "EXIT",
+            "Properties": {
+              "OpenTokenBreaksLine": true,
+              "RemoveRange": true,
+              "NoDuplicateClose": true
+             }
+          },
+         {
+            "OpenToken": "DO",
+            "CloseToken": "LOOP",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true,
+              "NoDuplicateClose": true
+            }
+          },
+         {
+            "OpenToken": "SELECT CASE",
+            "CloseToken": "END SELECT",
+            "Properties": {
+              "NoDuplicateClose": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "'",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

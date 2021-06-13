@@ -1,0 +1,607 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "# Hello, World! in NSIS\r\n",
+      "\r\n",
+      "# set the name of the installer\r\n",
+      "Outfile \"hello world.exe\"\r\n",
+      "\r\n",
+      "# create a default section.\r\n",
+      "Section\r\n",
+      "\r\n",
+      "# create a popup box, with an OK button and the text \"Hello, World!\"\r\n",
+      "MessageBox MB_OK \"Hello, World!\"\r\n",
+      "\r\n",
+      "SectionEnd"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": ";"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": false
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": false
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": false
+            },
+            "TokenRange": {
+              "Open": "`",
+              "Close": "`"
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "!"
+            }
+          },
+          {
+            "Type": "Character",
+            "Attributes": {
+              "Element": "Character"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "$",
+							"Close": " "
+            },
+					 "SubRules": {
+              "Range": [
+                {
+                  "Type": "Character",
+                  "Attributes": {
+                    "Element": "Character"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "{",
+                    "Close": "}"
+                  }
+                }
+							]
+					  }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "::",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "addbrandingimage",
+              "addsize",
+              "allowrootdirinstall",
+              "allowskipfiles",
+              "autoclosewindow",
+              "bgfont",
+              "bggradient",
+              "brandingtext",
+              "caption",
+              "changeui",
+              "checkbitmap",
+              "completedtext",
+              "componenttext",
+              "crccheck",
+              "detailsbuttontext",
+              "dirshow",
+              "dirtext",
+              "dirvar",
+              "dirverify",
+              "filebufsize",
+              "fileerrortext",
+              "function",
+              "functionend",
+              "getinstdirerror",
+              "icon",
+              "installbuttontext",
+              "installcolors",
+              "installdir",
+              "installdirregkey",
+              "instprogressflags",
+              "insttype",
+              "langstring",
+              "langstringup",
+              "licensebkcolor",
+              "licensedata",
+              "licenseforceselection",
+              "licenselangstring",
+              "licensetext",
+              "loadlanguagefile",
+              "miscbuttontext",
+              "name",
+              "outfile",
+              "page",
+              "pagecallbacks",
+              "pageex",
+              "pageexend",
+              "requestexecutionlevel",
+              "section",
+              "sectionend",
+              "sectiongroup",
+              "sectiongroupend",
+              "sectionin",
+              "setcompress",
+              "setcompressionlevel",
+              "setcompressor",
+              "setcompressordictsize",
+              "setdatablockoptimize",
+              "setdatesave",
+              "setfont",
+              "setoverwrite",
+              "setpluginunload",
+              "showinstdetails",
+              "showuninstdetails",
+              "silentinstall",
+              "silentuninstall",
+              "spacetexts",
+              "subcaption",
+              "subsection",
+              "subsectionend",
+              "uninstallbuttontext",
+              "uninstallcaption",
+              "uninstallicon",
+              "uninstallsubcaption",
+              "uninstalltext",
+              "uninstpage",
+              "var",
+              "viaddversionkey",
+              "viproductversion",
+              "windowicon",
+              "xpstyle"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Words": [
+              "abort",
+              "call",
+              "callinstdll",
+              "clearerrors",
+              "copyfiles",
+              "createdirectory",
+              "createfont",
+              "bringtofront",
+              "createshortcut",
+              "delete",
+              "deleteinisec",
+              "deleteinistr",
+              "deleteregkey",
+              "deleteregvalue",
+              "detailprint",
+              "enablewindow",
+              "enumregkey",
+              "enumregvalue",
+              "exch",
+              "exec",
+              "execshell",
+              "execwait",
+              "expandenvstrings",
+              "file",
+              "fileclose",
+              "fileopen",
+              "fileread",
+              "filereadbyte",
+              "fileseek",
+              "filewrite",
+              "filewritebyte",
+              "findclose",
+              "findfirst",
+              "findnext",
+              "findwindow",
+              "flushini",
+              "getcurinsttype",
+              "getcurrentaddress",
+              "getdlgitem",
+              "getdllversion",
+              "getdllversionlocal",
+              "geterrorlevel",
+              "getfiletime",
+              "getfiletimelocal",
+              "getfullpathname",
+              "getfunctionaddress",
+              "getlabeladdress",
+              "gettempfilename",
+              "getwindowtext",
+              "goto",
+              "hidewindow",
+              "ifabort",
+              "iferrors",
+              "iffileexists",
+              "ifrebootflag",
+              "ifsilent",
+              "initpluginsdir",
+              "insttypegettext",
+              "insttypesettext",
+              "intcmp",
+              "intcmpu",
+              "intfmt",
+              "intop",
+              "iswindow",
+              "lockwindow",
+              "logset",
+              "logtext",
+              "messagebox",
+              "nop",
+              "pop",
+              "push",
+              "quit",
+              "readenvstr",
+              "readinistr",
+              "readregdword",
+              "readregstr",
+              "reboot",
+              "regdll",
+              "rename",
+              "reservefile",
+              "return",
+              "rmdir",
+              "searchpath",
+              "sectiongetflags",
+              "sectiongetinsttypes",
+              "sectiongetsize",
+              "sectiongettext",
+              "sectionsetflags",
+              "sectionsetinsttypes",
+              "sectionsetsize",
+              "sectionsettext",
+              "sendmessage",
+              "setautoclose",
+              "setbrandingimage",
+              "setctlcolors",
+              "setcurinsttype",
+              "setdetailsprint",
+              "setdetailsview",
+              "seterrorlevel",
+              "seterrors",
+              "setfileattributes",
+              "setoutpath",
+              "setrebootflag",
+              "setshellvarcontext",
+              "setsilent",
+              "showwindow",
+              "sleep",
+              "strcmp",
+              "strcpy",
+              "strlen",
+              "unregdll",
+              "writeinistr",
+              "writeregbin",
+              "writeregdword",
+              "writeregexpandstr",
+              "writeregstr",
+              "writeuninstaller"
+            ],
+            "Attributes": {
+              "Element": "MethodName"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "MultiLineString"
+          },
+          {
+            "OpenToken": "`",
+            "CloseToken": "`",
+            "RegionType": "MultiLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "MultiLineString"
+          },
+          {
+            "OpenToken": "#",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": ";",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "FUNCTION",
+            "CloseToken": "FUNCTIONEND"
+          },
+          {
+            "OpenToken": "PAGEEX",
+            "CloseToken": "PAGEEXEND"
+          },
+          {
+            "OpenToken": "SECTION",
+            "CloseToken": "SECTIONEND"
+          },
+          {
+            "OpenToken": "SECTIONGROUP",
+            "CloseToken": "SECTIONGROUPEND"
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "`",
+        "CloseToken": "`"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "MultiLineString"
+      },
+      {
+        "OpenToken": "`",
+        "CloseToken": "`",
+        "RegionType": "MultiLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "MultiLineString"
+      },
+      {
+        "OpenToken": "#",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": ";",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

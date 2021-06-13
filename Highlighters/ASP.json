@@ -1,0 +1,233 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "<%\r\n",
+      "response.write(\"Hello, World!\")\r\n",
+      "%>"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Name": "ASP",
+            "Type": "Tag",
+            "Attributes": {
+              "Element": "HighlightedBlock",
+              "ParentBackground": false
+            },
+            "TokenRange": {
+              "Open": "<%",
+              "Close": "%>"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "BlockComment",
+                  "Attributes": {
+                    "Element": "Comment"
+                  },
+                  "TokenRange": {
+                    "Open": "<!--",
+                    "Close": "-->"
+                  }
+                },
+                {
+                  "Type": "LineComment",
+                  "Attributes": {
+                    "Element": "Comment"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  },
+                  "SubRules": {
+                    "Range": [
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "String"
+                        },
+                        "Properties": {
+                          "CloseOnEndOfLine": true,
+                          "CloseOnTerm": true
+                        },
+                        "TokenRange": {
+                          "Open": "\\\"",
+                          "Close": ""
+                        }
+                      },
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "String"
+                        },
+                        "Properties": {
+                          "CloseOnEndOfLine": true,
+                          "CloseOnTerm": true
+                        },
+                        "TokenRange": {
+                          "Open": "\\\\",
+                          "Close": ""
+                        }
+                      }
+                    ]
+                  }
+                }
+              ],
+              "KeyList": [
+                {
+                  "Type": "ReservedWord",
+                  "Words": [
+                    "application",
+                    "call",
+                    "case",
+                    "dim",
+                    "each",
+                    "else",
+                    "end",
+                    "function",
+                    "if",
+                    "next",
+                    "request",
+                    "response",
+                    "select",
+                    "server",
+                    "session",
+                    "set",
+                    "sub",
+                    "then",
+                    "to"
+                  ],
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  }
+                },
+                {
+                  "Type": "Method",
+                  "Words": [
+                    "abandon",
+                    "contents",
+                    "cookies",
+                    "createobject",
+                    "form",
+                    "lock",
+                    "querystring",
+                    "staticobjects",
+                    "timeout",
+                    "unlock",
+                    "write"
+                  ],
+                  "Attributes": {
+                    "Element": "Method"
+                  }
+                },
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    ":",
+                    ";",
+                    "<",
+                    ">",
+                    "=",
+                    "/",
+                    "*",
+                    ".",
+                    ",",
+                    "-",
+                    "+",
+                    "(",
+                    ")",
+                    "[",
+                    "]",
+                    "{",
+                    "}"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ],
+              "Set": [
+                {
+                  "Type": "Numbers",
+                  "Symbols": "0123456789",
+                  "Attributes": {
+                    "Element": "Number"
+                  }
+                },
+                {
+                  "Type": "Float",
+                  "Symbols": ".0123456789",
+                  "Attributes": {
+                    "Element": "Number"
+                  }
+                }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  },
+  "MatchingPair": {
+    "Pairs": [
+     {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+     {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "<!--",
+        "CloseToken": "-->",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

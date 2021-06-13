@@ -1,0 +1,450 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "% Hello, World! in Erlang\r\n",
+      "\r\n",
+      "-module(hello_world).\r\n",
+      "-compile(export_all).\r\n",
+      "\r\n",
+      "hello() ->\r\n",
+      "  io:format(\"Hello, World!\n\")."
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "MethodName"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "%"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "TokenRange": {
+              "Open": "(",
+              "Close": ")"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                      "-",
+                      "=",
+                      ":",
+                      ";",
+                      "/",
+                      "*",
+                      ".",
+                      ",",
+                      "+",
+                      "#",
+                      "(",
+                      ")",
+                      "[",
+                      "]",
+                      "{",
+                      "}"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ],
+              "Set": [
+                {
+                  "Type": "Numbers",
+                  "Symbols": "0123456789",
+                  "Attributes": {
+                    "Element": "Number"
+                  }
+                },
+                {
+                  "Type": "Float",
+                  "Symbols": ".0123456789",
+                  "Attributes": {
+                    "Element": "Number"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "Method"
+            },
+            "TokenRange": {
+              "Open": "{",
+              "Close": "}"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                      "-",
+                      "=",
+                      ":",
+                      ";",
+                      "/",
+                      "*",
+                      ".",
+                      ",",
+                      "+",
+                      "#",
+                      "(",
+                      ")",
+                      "[",
+                      "]",
+                      "{",
+                      "}"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ],
+              "Set": [
+                {
+                  "Type": "Numbers",
+                  "Symbols": "0123456789",
+                  "Attributes": {
+                    "Element": "Number"
+                  }
+                },
+                {
+                  "Type": "Float",
+                  "Symbols": ".0123456789",
+                  "Attributes": {
+                    "Element": "Number"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Hex",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "->",
+              ">",
+              "<",
+              "=:=",
+              "=/=",
+              "==",
+              "=",
+              "!",
+              "after",
+              "and",
+              "andalso",
+              "band",
+              "begin",
+              "behaviour",
+              "bnot",
+              "bor",
+              "bsl",
+              "bsr",
+              "bxor",
+              "case",
+              "catch",
+              "compile",
+              "cond",
+              "define",
+              "div",
+              "else",
+              "end",
+              "endif",
+              "export",
+              "export_type",
+              "fun",
+              "if",
+              "ifdef",
+              "import",
+              "let",
+              "module",
+              "not",
+              "of",
+              "or",
+              "orelse",
+              "receive",
+              "rem",
+              "try",
+              "when",
+              "xor"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "array",
+              "base64",
+              "beam_lib",
+              "binary",
+              "calendar",
+              "dets",
+              "dict",
+              "digraph",
+              "digraph_utils",
+              "epp",
+              "erl_anno",
+              "erl_eval",
+              "erl_expand_records",
+              "erl_id_trans",
+              "erl_internal",
+              "erl_lint",
+              "erl_parse",
+              "erl_pp",
+              "erl_scan",
+              "erl_tar",
+              "error",
+              "ets",
+              "file_sorter",
+              "filelib",
+              "filename",
+              "gb_sets",
+              "gb_trees",
+              "gen_event",
+              "gen_fsm",
+              "gen_server",
+              "gen_statem",
+              "io",
+              "io_lib",
+              "lists",
+              "log_mf_h",
+              "maps",
+              "math",
+              "ms_transform",
+              "orddict",
+              "ordsets",
+              "pool",
+              "proc_lib",
+              "proplists",
+              "qlc",
+              "queue",
+              "rand",
+              "random",
+              "re",
+              "sets",
+              "shell",
+              "shell_default",
+              "slave",
+              "sofs",
+              "string",
+              "supervisor",
+              "supervisor_bridge",
+              "sys",
+              "timer",
+              "unicode",
+              "uri_string",
+              "win32reg",
+              "zip",
+              "if_else"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "-",
+              ":",
+              ";",
+              "/",
+              "*",
+              ".",
+              ",",
+              "+",
+              "#",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          },
+          {
+            "Type": "Numbers",
+            "Words": [
+              "greater",
+              "equal",
+              "export_all",
+              "less",
+              "more",
+              "true",
+              "spec",
+              "type",
+              "opaque",
+              "false",
+              "unknown"
+            ],
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "%",
+            "RegionType": "SingleLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "->",
+            "CloseToken": ".",
+            "Properties": {
+              "NoSubs": true,
+              "ShowGuideLine": false,
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "%",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

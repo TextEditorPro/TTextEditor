@@ -55,7 +55,7 @@ BASENCODING | BaseNcoding support
 
 ## License
 
-- MIT
+[MIT]("https://github.com/TextEditorPro/TTextEditor/blob/main/LICENSE")
 
 ## Open to work
 

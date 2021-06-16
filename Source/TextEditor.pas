@@ -1093,6 +1093,7 @@ type
     property Align;
     property Anchors;
     property BorderStyle;
+    property BorderWidth;
 {$IFDEF ALPHASKINS}
     property BoundLabel;
 {$ENDIF}

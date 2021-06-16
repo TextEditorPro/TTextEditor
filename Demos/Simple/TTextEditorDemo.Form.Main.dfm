@@ -110,6 +110,7 @@ object MainForm: TMainForm
     Minimap.Font.Height = -1
     Minimap.Font.Name = 'Courier New'
     Minimap.Font.Style = []
+    OnCreateHighlighterStream = EditorCreateHighlighterStream
     Ruler.Font.Charset = DEFAULT_CHARSET
     Ruler.Font.Color = 13408665
     Ruler.Font.Height = -11

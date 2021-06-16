@@ -17,6 +17,7 @@ type
     procedure FormCreate(Sender: TObject);
     procedure ListBoxThemesClick(Sender: TObject);
     procedure ListBoxHighlightersClick(Sender: TObject);
+    procedure EditorCreateHighlighterStream(const ASender: TObject; const AName: string; var AStream: TStream);
   private
     procedure SetSelectedColor;
     procedure SetSelectedHighlighter;
@@ -45,6 +46,13 @@ begin
   finally
     FindClose(LSearchRec);
   end;
+end;
+
+procedure TMainForm.EditorCreateHighlighterStream(const ASender: TObject; const AName: string; var AStream: TStream);
+begin
+  { Multi-highlighter stream loaging. For example HTML with scripts (PHP, Javascript, and CSS). }
+  if AName <> '' then
+    AStream := TFileStream.Create(HIGHLIGHTERS_PATH + AName + '.json', fmOpenRead);
 end;
 
 procedure TMainForm.FormCreate(Sender: TObject);

@@ -23,6 +23,18 @@
 			"base": "",
 			"recursive": true,
 			"filter": "*;*.*"
+		},
+		{
+			"folder": "Highlighters",
+			"base": "",
+			"recursive": true,
+			"filter": "*;*.*"
+		},
+		{
+			"folder": "Themes",
+			"base": "",
+			"recursive": true,
+			"filter": "*;*.*"
 		}
 	],
 	"projects": [

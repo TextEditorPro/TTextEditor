@@ -14010,19 +14010,17 @@ var
       LTempTextPosition: TTextEditorTextPosition;
       LSelectionBeginChar, LSelectionEndChar: Integer;
     begin
-      if FPosition.BeginSelection.Line = FPosition.EndSelection.Line then
-      begin
-        LTempTextPosition := FPosition.EndSelection;
-        LSelectionBeginChar := FPosition.BeginSelection.Char;
-        LSelectionEndChar := FPosition.EndSelection.Char;
-        if LSelectionBeginChar > LSelectionEndChar then
-          SwapInt(LSelectionBeginChar, LSelectionEndChar);
-        LTempTextPosition.Char := LSelectionEndChar - 1;
-        LSelectedText := Copy(FLines[FPosition.BeginSelection.Line], LSelectionBeginChar,
-          LSelectionEndChar - LSelectionBeginChar);
+      LTempTextPosition := FPosition.EndSelection;
+      LSelectionBeginChar := FPosition.BeginSelection.Char;
+      LSelectionEndChar := FPosition.EndSelection.Char;
+      if LSelectionBeginChar > LSelectionEndChar then
+        SwapInt(LSelectionBeginChar, LSelectionEndChar);
+      LTempTextPosition.Char := LSelectionEndChar - 1;
+      LSelectedText := Copy(FLines[FPosition.BeginSelection.Line], LSelectionBeginChar,
+        LSelectionEndChar - LSelectionBeginChar);
 
-        LWordAtSelection := WordAtTextPosition(LTempTextPosition);
-      end
+      if FPosition.BeginSelection.Line = FPosition.EndSelection.Line then
+        LWordAtSelection := WordAtTextPosition(LTempTextPosition)
       else
         LWordAtSelection := '';
     end;

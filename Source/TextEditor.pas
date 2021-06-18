@@ -14110,26 +14110,29 @@ var
         begin
           LKeyword := '';
 
-          if soTermsCaseSensitive in FSelection.Options then
+          if LSelectedText.Trim <> '' then
           begin
-            if LTokenText = LWordAtSelection then
-              LKeyword := LSelectedText;
-
-            LIsCustomBackgroundColor := (LKeyword <> '') and (LKeyword = LTokenText);
-          end
-          else
-          begin
-            LPToken := PChar(LTokenText);
-            LPWord := PChar(LSelectedText);
-            while (LPToken^ <> TEXT_EDITOR_NONE_CHAR) and (LPWord^ <> TEXT_EDITOR_NONE_CHAR) and
-              (CaseUpper(LPToken^) = CaseUpper(LPWord^)) do
+            if soTermsCaseSensitive in FSelection.Options then
             begin
-              Inc(LPToken);
-              Inc(LPWord);
+              if LTokenText = LWordAtSelection then
+                LKeyword := LSelectedText;
+
+              LIsCustomBackgroundColor := (LKeyword <> '') and (LKeyword = LTokenText);
+            end
+            else
+            begin
+              LPToken := PChar(LTokenText);
+              LPWord := PChar(LSelectedText);
+              while (LPToken^ <> TEXT_EDITOR_NONE_CHAR) and (LPWord^ <> TEXT_EDITOR_NONE_CHAR) and
+                (CaseUpper(LPToken^) = CaseUpper(LPWord^)) do
+              begin
+                Inc(LPToken);
+                Inc(LPWord);
+              end;
+              LIsCustomBackgroundColor := (LPToken^ = TEXT_EDITOR_NONE_CHAR) and (LPWord^ = TEXT_EDITOR_NONE_CHAR);
+              if LIsCustomBackgroundColor then
+                LKeyword := LSelectedText;
             end;
-            LIsCustomBackgroundColor := (LPToken^ = TEXT_EDITOR_NONE_CHAR) and (LPWord^ = TEXT_EDITOR_NONE_CHAR);
-            if LIsCustomBackgroundColor then
-              LKeyword := LSelectedText;
           end;
 
           if LIsCustomBackgroundColor then

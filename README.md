@@ -42,7 +42,7 @@ Development takes place elsewhere.
 
 ## Supports
 
-- AlphaSkins (native) - https://www.alphakins.com/
+- AlphaSkins (native) - https://www.alphaskins.com/
 - BaseNcoding - https://github.com/Xor-el/BaseNcodingPascal
 - Hunspell - http://hunspell.github.io/
 

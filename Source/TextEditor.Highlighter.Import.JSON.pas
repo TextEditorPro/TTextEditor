@@ -200,6 +200,7 @@ begin
       LEditor.LeftMargin.Colors.ActiveLineBackgroundUnfocused := StringToColorDef(LColorsObject['LeftMarginActiveLineBackgroundUnfocused'].Value, LEditor.LeftMargin.Colors.ActiveLineBackground);
       LEditor.LeftMargin.Colors.Background := StringToColorDef(LColorsObject['LeftMarginBackground'].Value, LEditor.LeftMargin.Colors.Background);
       LEditor.LeftMargin.Colors.Border := StringToColorDef(LColorsObject['LeftMarginBorder'].Value, LEditor.LeftMargin.Colors.Border);
+      LEditor.LeftMargin.Colors.ActiveLineNumber := StringToColorDef(LColorsObject['LeftMarginActiveLineNumber'].Value, LEditor.LeftMargin.Colors.ActiveLineNumber);
       LEditor.LeftMargin.Colors.LineNumberLine := StringToColorDef(LColorsObject['LeftMarginLineNumberLine'].Value, LEditor.LeftMargin.Colors.LineNumberLine);
       LEditor.LeftMargin.Font.Color := StringToColorDef(LColorsObject['LeftMarginLineNumbers'].Value, LEditor.LeftMargin.Font.Color);
       LEditor.LeftMargin.Colors.BookmarkPanelBackground := StringToColorDef(LColorsObject['LeftMarginBookmarkPanel'].Value, LEditor.LeftMargin.Colors.BookmarkPanelBackground);

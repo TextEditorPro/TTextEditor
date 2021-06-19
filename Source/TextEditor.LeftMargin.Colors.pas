@@ -10,6 +10,7 @@ type
   strict private
     FActiveLineBackground: TColor;
     FActiveLineBackgroundUnfocused: TColor;
+    FActiveLineNumber: TColor;
     FBackground: TColor;
     FBookmarkBackground: TColor;
     FBookmarkPanelBackground: TColor;
@@ -24,6 +25,7 @@ type
   published
     property ActiveLineBackground: TColor read FActiveLineBackground write FActiveLineBackground default clActiveLineBackground;
     property ActiveLineBackgroundUnfocused: TColor read FActiveLineBackgroundUnfocused write FActiveLineBackgroundUnfocused default clActiveLineBackgroundUnfocused;
+    property ActiveLineNumber: TColor read FActiveLineNumber write FActiveLineNumber default clNone;
     property Background: TColor read FBackground write FBackground default clLeftMarginBackground;
     property BookmarkBackground: TColor read FBookmarkBackground write FBookmarkBackground default clNone;
     property BookmarkPanelBackground: TColor read FBookmarkPanelBackground write FBookmarkPanelBackground default clLeftMarginBackground;
@@ -42,6 +44,7 @@ begin
 
   FActiveLineBackground := clActiveLineBackground;
   FActiveLineBackgroundUnfocused := clActiveLineBackgroundUnfocused;
+  FActiveLineNumber := clNone;
   FBackground := clLeftMarginBackground;
   FBookmarkBackground := clNone;
   FBookmarkPanelBackground := clLeftMarginBackground;

@@ -12154,11 +12154,13 @@ var
       LLeftMarginWidth := LLineRect.Left + FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
       LLongLineWidth := 0;
       LShortLineWith := 0;
+
       if lnoIntens in LeftMargin.LineNumbers.Options then
       begin
         LLongLineWidth := (FLeftMarginCharWidth - 9) div 2;
         LShortLineWith := (FLeftMarginCharWidth - 1) div 2;
       end;
+
       for LIndex := AFirstLine to LLastTextLine do
       begin
         LLine := GetViewTextLineNumber(LIndex);
@@ -12204,10 +12206,18 @@ var
         if (LLine = LCaretY) and FActiveLine.Visible and (FActiveLine.Colors.Foreground <> clNone) then
         begin
           if Focused then
-            FPaintHelper.SetForegroundColor(FActiveLine.Colors.Foreground)
+          begin
+            if FLeftMargin.Colors.ActiveLineNumber = clNone then
+              FPaintHelper.SetForegroundColor(FActiveLine.Colors.Foreground)
+            else
+              FPaintHelper.SetForegroundColor(FLeftMargin.Colors.ActiveLineNumber)
+          end
           else
             FPaintHelper.SetForegroundColor(FActiveLine.Colors.ForegroundUnfocused)
         end
+        else
+        if (LLine = LCaretY) and (FLeftMargin.Colors.ActiveLineNumber <> clNone) then
+          FPaintHelper.SetForegroundColor(FLeftMargin.Colors.ActiveLineNumber)
         else
           FPaintHelper.SetForegroundColor(FLeftMargin.Font.Color);
 
@@ -12669,6 +12679,8 @@ begin
 
       SetBkMode(Canvas.Handle, TRANSPARENT);
 
+      Pen.Color := FRuler.Colors.Lines;
+
       for LIndex := LCharsInView to FScrollHelper.PageWidth div LCharWidth + LCharsInView + 10 do
       begin
         if LIndex mod 10 = 0 then
@@ -12694,7 +12706,6 @@ begin
         Inc(LLeft, LCharWidth);
       end;
 
-      Pen.Color := FSelection.Colors.Background;
       MoveTo(LRulerCaretPosition, 0);
       LineTo(LRulerCaretPosition, LClipRect.Bottom);
     end;

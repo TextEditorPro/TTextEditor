@@ -75,7 +75,6 @@
         <DCC_F>false</DCC_F>
         <DCC_E>false</DCC_E>
         <DCC_Inlining>auto</DCC_Inlining>
-        <DCC_UnitSearchPath>$(DELPHI_ROOT)\Components\AlphaSkins;$(DELPHI_ROOT)\Components\BaseNcodingPascal\BaseNcoding\src\BaseInterfaces;$(DELPHI_ROOT)\Components\BaseNcodingPascal\BaseNcoding\src\BaseUnits;$(DELPHI_ROOT)\Components\BaseNcodingPascal\BaseNcoding\src\UtilityUnits;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
         <DCC_WIDECHAR_REDUCED>false</DCC_WIDECHAR_REDUCED>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
@@ -285,27 +284,10 @@
                     <VersionInfoKeys Name="Comments"/>
                 </VersionInfoKeys>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\acntDX10Sydney.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\acntDX10Sydney.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\AlphaDBDX10Sydney.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\AlphaDBDX10Sydney.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\DclEhLib.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\DclEhLib.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\TextEditor.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\TextEditor.Delphi.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\HexEditor.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\HexEditor.Delphi.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\MyComponents.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\MyComponents.Delphi.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\MyControls.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\MyControls.Delphi.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\dclSVGIconImageList_D10_4.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\dclSVGIconImageList_D10_4.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\Jedi.D104.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\Jedi.D104.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\DclEhLib270.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\DclEhLib270.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\AQPDesignD10_4.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\AQPDesignD10_4.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\GR32_DD104.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\GR32_DD104.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\STComponents.D104.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\STComponents.D104.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\STDualList.D104.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\STDualList.D104.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\STLisenssit.D104.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\STLisenssit.D104.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\THComponents.D104.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\THComponents.D104.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\github\DFMCheck\bin\DfmCheckD104.bpl">File C:\github\DFMCheck\bin\DfmCheckD104.bpl not found</Excluded_Packages>
+
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k270.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp270.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\QR506DesignDXE10_4.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\21.0\Bpl\QR506DesignDXE10_4.bpl not found</Excluded_Packages>
-                </Excluded_Packages>
+            </Excluded_Packages>
             </Delphi.Personality>
             <Platforms>
                 <Platform value="Win32">True</Platform>

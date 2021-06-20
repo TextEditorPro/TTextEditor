@@ -1584,6 +1584,7 @@ var
   LPLineText: PChar;
   LBeginChar: Integer;
   LLineText: string;
+  LScrollPastEndOfLine: Boolean;
 
   function GetBeginChar(const ARow: Integer): Integer;
   begin
@@ -1671,6 +1672,10 @@ begin
         if CanFocus then
           SetFocus;
 
+        LScrollPastEndOfLine := not (soPastEndOfLine in FScroll.Options);
+        if LScrollPastEndOfLine then
+          FScroll.SetOption(soPastEndOfLine, True);
+
         EnsureCursorPositionVisible;
 
         if Assigned(LSnippetItem) and LSnippetItem.Position.Active then
@@ -1691,6 +1696,9 @@ begin
           SelectionBeginPosition := TextPosition;
           SelectionEndPosition := SelectionBeginPosition;
         end;
+
+        if LScrollPastEndOfLine then
+          FScroll.SetOption(soPastEndOfLine, False);
 
         Result := True;
       finally

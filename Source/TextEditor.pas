@@ -7045,10 +7045,8 @@ end;
 procedure TCustomTextEditor.RulerChanged(ASender: TObject); //FI:O804 Method parameter is declared but never used
 begin
   if not (csLoading in ComponentState) and FFile.Loaded then
-  begin
     SizeOrFontChanged(False);
-    Invalidate;
-  end;
+  Invalidate;
 end;
 
 procedure TCustomTextEditor.ScanCodeFoldingRanges;
@@ -13526,7 +13524,8 @@ var
           Winapi.Windows.ExtTextOut(Canvas.Handle, LTextRect.Left, LTextRect.Top, ETO_OPAQUE or ETO_CLIPPED, @LTextRect,
             LPChar, LTokenLength, nil);
 
-        if not AMinimap and LTokenHelper.IsItalic and (LPChar^ <> TEXT_EDITOR_SPACE_CHAR) and (ATokenLength = Length(AToken)) then
+        if not AMinimap and LTokenHelper.IsItalic and (LPChar^ <> TEXT_EDITOR_SPACE_CHAR) and (ATokenLength <> 0) and
+          (ATokenLength = Length(AToken)) then
         begin
           LLastChar := AToken[ATokenLength];
           LAnsiChar := TEXT_EDITOR_NONE_CHAR;

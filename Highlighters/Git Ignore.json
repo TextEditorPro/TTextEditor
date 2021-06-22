@@ -1,0 +1,98 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "# Hello, World! in Git Ignore\r\n",
+      "\r\n",
+      "*.helloword"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "[",
+              "Close": "]"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "*",
+              "!",
+							"~"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "/",
+              "."
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": "0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Float",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "#",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

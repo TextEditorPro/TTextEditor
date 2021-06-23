@@ -47,7 +47,6 @@ type
     FPosition: TTextEditorCompletionProposalSnippetItemPosition;
     FSelection: TTextEditorCompletionProposalSnippetItemSelection;
     FSnippet: TStrings;
-    procedure SetKeyword(const AValue: string);
     procedure SetSnippet(const AValue: TStrings);
   protected
     function GetDisplayName: string; override;
@@ -58,7 +57,7 @@ type
   published
     property Description: string read FDescription write FDescription;
     property ExecuteWith: TTextEditorSnippetExecuteWith read FExecuteWith write FExecuteWith default seListOnly;
-    property Keyword: string read FKeyword write SetKeyword;
+    property Keyword: string read FKeyword write FKeyword;
     property Position: TTextEditorCompletionProposalSnippetItemPosition read FPosition write FPosition;
     property Selection: TTextEditorCompletionProposalSnippetItemSelection read FSelection write FSelection;
     property Snippet: TStrings read FSnippet write SetSnippet;
@@ -190,20 +189,6 @@ begin
   end
   else
     inherited Assign(ASource);
-end;
-
-procedure TTextEditorCompletionProposalSnippetItem.SetKeyword(const AValue: string);
-var
-  LValue: string;
-begin
-  LValue := System.SysUtils.Trim(AValue);
-  if LValue = '' then
-    FKeyword := ''
-  else
-  if not TTextEditorCompletionProposalSnippetItems(Collection).DoesKeywordExist(LValue) then
-    FKeyword := LValue
-  else
-    raise ETextEditorCompletionProposalSnippetException.CreateRes(@SDuplicateString);
 end;
 
 procedure TTextEditorCompletionProposalSnippetItem.SetSnippet(const AValue: TStrings);

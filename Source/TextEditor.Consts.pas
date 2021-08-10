@@ -3,7 +3,7 @@ unit TextEditor.Consts;
 interface
 
 uses
-  Vcl.Graphics;
+  System.UITypes;
 
 type
   TTextEditorCharSet = set of AnsiChar;
@@ -51,31 +51,10 @@ const
     '`', '~', '!', '@', ',', '$', '%', '^', '?', ':', ';', '''', '"', '.', '>', '<', '#'];
   TEXT_EDITOR_ABSOLUTE_DELIMITERS: TTextEditorCharSet = [TEXT_EDITOR_NONE_CHAR, TEXT_EDITOR_TAB_CHAR, TEXT_EDITOR_LINEFEED,
     TEXT_EDITOR_CARRIAGE_RETURN, TEXT_EDITOR_SPACE_CHAR, TEXT_EDITOR_SUBSTITUTE_CHAR];
-  { Encoding }
-  TEXT_EDITOR_UTF8_BOM: array [0 .. 2] of Byte = ($EF, $BB, $BF);
   { Highlighter attribute elements }
   TEXT_EDITOR_ATTRIBUTE_ELEMENT_COMMENT = 'Comment';
   // TEXT_EDITOR_ATTRIBUTE_ELEMENT_DIRECTIVE = 'Directive';
   TEXT_EDITOR_ATTRIBUTE_ELEMENT_STRING = 'String';
-  { Default colors }
-  clSelectionColor = $00A56D53;
-  clSearchHighlighter = $0078AAFF;
-  clSearchInSelectionBackground = $00FCFDCD;
-  clActiveLineBackground = $00E6FAFF;
-  clActiveLineForeground = clNone;
-  clActiveLineBackgroundUnfocused = $00E6FAFF;
-  clActiveLineForegroundUnfocused = clNone;
-  clLeftMarginBackground = $00FFFFFF;
-  clLeftMarginFontForeground = $00CC9999;
-  clSearchMapActiveLine = $00F4F4F4;
-  clIndentHighlight = $00CC9999;
-  clIndent = $00CC9999;
-  clMatchingPairUnderline = $00CC9999;
-  clMinimapVisibleLines = $00E6FAFF;
-  clMinimapBookmark = clGreen;
-  clWordWrapIndicatorArrow = clNavy;
-  clWordWrapIndicatorLines = clBlack;
-  clSyncEditBackground = $00FCFDCD;
   { Undo }
   TEXT_EDITOR_UNDO_BLOCK_NUMBER_START = 10;
   { Resource file bitmaps }
@@ -85,16 +64,6 @@ const
   TEXT_EDITOR_NULL_IMAGE = 'TEXTEDITORNULLIMAGE';
   TEXT_EDITOR_SYNCEDIT = 'TEXTEDITORSYNCEDIT';
   TEXT_EDITOR_NULL_IMAGE_WIDTH = 16;
-  { Mouse wheel scroll cursor indexes }
-  scNone = -1;
-  scNorth = 0;
-  scNorthEast = 1;
-  scEast = 2;
-  scSouthEast = 3;
-  scSouth = 4;
-  scSouthWest = 5;
-  scWest = 6;
-  scNorthWest = 7;
   { Replace }
   TEXT_EDITOR_REPLACE_RESULT_CANCEL = -9;
   { Search engine }
@@ -102,6 +71,42 @@ const
   TEXT_EDITOR_SEARCH_ENGINE_EXTENDED = 'Extended';
   TEXT_EDITOR_SEARCH_ENGINE_REGULAR_EXPRESSION = 'RegularExpression';
   TEXT_EDITOR_SEARCH_ENGINE_WILDCARD = 'Wildcard';
+
+type
+  TDefaultColors = record
+  const
+    SelectionColor = $00A56D53;
+    SearchHighlighter = $0078AAFF;
+    SearchInSelectionBackground = $00FCFDCD;
+    ActiveLineBackground = $00E6FAFF;
+    ActiveLineForeground = TColors.SysNone;
+    ActiveLineBackgroundUnfocused = $00E6FAFF;
+    ActiveLineForegroundUnfocused = TColors.SysNone;
+    LeftMarginBackground = $00FFFFFF;
+    LeftMarginFontForeground = $00CC9999;
+    SearchMapActiveLine = $00F4F4F4;
+    IndentHighlight = $00CC9999;
+    Indent = $00CC9999;
+    MatchingPairUnderline = $00CC9999;
+    MinimapVisibleLines = $00E6FAFF;
+    MinimapBookmark = TColors.Green;
+    WordWrapIndicatorArrow = TColors.Navy;
+    WordWrapIndicatorLines = TColors.Black;
+    SyncEditBackground = $00FCFDCD;
+  end;
+
+  TMouseWheelScrollCursors = record
+  const
+    None = -1;
+    North = 0;
+    NorthEast = 1;
+    East = 2;
+    SouthEast = 3;
+    South = 4;
+    SouthWest = 5;
+    West = 6;
+    NorthWest = 7;
+  end;
 
 implementation
 

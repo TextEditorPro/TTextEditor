@@ -3,7 +3,7 @@ unit TextEditor.SpecialChars.LineBreak;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Types;
+  System.Classes, System.UITypes, TextEditor.Types;
 
 type
   TTextEditorSpecialCharsLineBreak = class(TPersistent)
@@ -21,7 +21,7 @@ type
     procedure Assign(ASource: TPersistent); override;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
-    property Color: TColor read FColor write SetColor default clBlack;
+    property Color: TColor read FColor write SetColor default TColors.Black;
     property Style: TTextEditorSpecialCharsLineBreakStyle read FStyle write SetStyle default eolArrow;
     property Visible: Boolean read FVisible write SetVisible default False;
   end;
@@ -32,7 +32,7 @@ constructor TTextEditorSpecialCharsLineBreak.Create;
 begin
   inherited;
 
-  FColor := clBlack;
+  FColor := TColors.Black;
   FStyle := eolArrow;
   FVisible := False;
 end;

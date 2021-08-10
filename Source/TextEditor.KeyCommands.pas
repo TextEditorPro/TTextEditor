@@ -5,134 +5,136 @@ interface
 uses
   System.Classes, System.SysUtils, Vcl.Menus;
 
-const
-  ecNone = 0;
-  ecEditCommandFirst = 501;
-  ecEditCommandLast = 1000;
-  { Caret moving }
-  ecLeft = 1;
-  ecRight = 2;
-  ecUp = 3;
-  ecDown = 4;
-  ecWordLeft = 5;
-  ecWordRight = 6;
-  ecLineBegin = 7;
-  ecLineEnd = 8;
-  ecPageUp = 9;
-  ecPageDown = 10;
-  ecPageLeft = 11;
-  ecPageRight = 12;
-  ecPageTop = 13;
-  ecPageBottom = 14;
-  ecEditorTop = 15;
-  ecEditorBottom = 16;
-  ecGoToXY = 17;
-  { Selection }
-  ecSelection = 100;
-  ecSelectionLeft = ecLeft + ecSelection;
-  ecSelectionRight = ecRight + ecSelection;
-  ecSelectionUp = ecUp + ecSelection;
-  ecSelectionDown = ecDown + ecSelection;
-  ecSelectionWordLeft = ecWordLeft + ecSelection;
-  ecSelectionWordRight = ecWordRight + ecSelection;
-  ecSelectionLineBegin = ecLineBegin + ecSelection;
-  ecSelectionLineEnd = ecLineEnd + ecSelection;
-  ecSelectionPageUp = ecPageUp + ecSelection;
-  ecSelectionPageDown = ecPageDown + ecSelection;
-  ecSelectionPageLeft = ecPageLeft + ecSelection;
-  ecSelectionPageRight = ecPageRight + ecSelection;
-  ecSelectionPageTop = ecPageTop + ecSelection;
-  ecSelectionPageBottom = ecPageBottom + ecSelection;
-  ecSelectionEditorTop = ecEditorTop + ecSelection;
-  ecSelectionEditorBottom = ecEditorBottom + ecSelection;
-  ecSelectionGoToXY = ecGoToXY + ecSelection;
-  ecSelectionWord = ecSelection + 21;
-  ecSelectAll = ecSelection + 22;
-  { Scrolling }
-  ecScrollUp = 211;
-  ecScrollDown = 212;
-  ecScrollLeft = 213;
-  ecScrollRight = 214;
-  { Mode }
-  ecInsertMode = 221;
-  ecOverwriteMode = 222;
-  ecToggleMode = 223;
-  { Bookmark }
-  ecToggleBookmark = 300;
-  ecGoToBookmark1 = 310;
-  ecGoToBookmark2 = 311;
-  ecGoToBookmark3 = 312;
-  ecGoToBookmark4 = 313;
-  ecGoToBookmark5 = 314;
-  ecGoToBookmark6 = 315;
-  ecGoToBookmark7 = 316;
-  ecGoToBookmark8 = 317;
-  ecGoToBookmark9 = 318;
-  ecSetBookmark1 = 320;
-  ecSetBookmark2 = 321;
-  ecSetBookmark3 = 322;
-  ecSetBookmark4 = 323;
-  ecSetBookmark5 = 324;
-  ecSetBookmark6 = 325;
-  ecSetBookmark7 = 326;
-  ecSetBookmark8 = 327;
-  ecSetBookmark9 = 328;
-  ecGoToNextBookmark = 330;
-  ecGoToPreviousBookmark = 331;
-  { Deletion }
-  ecBackspace = 501;
-  ecDeleteChar = 502;
-  ecDeleteWord = 503;
-  ecDeleteWordForward = 504;
-  ecDeleteWordBackward = 505;
-  ecDeleteBeginningOfLine = 506;
-  ecDeleteEndOfLine = 507;
-  ecDeleteLine = 508;
-  ecClear = 509;
-  { Insert }
-  ecLineBreak = 510;
-  ecInsertLine = 511;
-  ecChar = 512;
-  ecString = 513;
-  ecImeStr = 550;
-  { Clipboard }
-  ecUndo = 601;
-  ecRedo = 602;
-  ecCopy = 603;
-  ecCut = 604;
-  ecPaste = 605;
-  { Indent }
-  ecBlockIndent = 610;
-  ecBlockUnindent = 611;
-  ecTab = 612;
-  ecShiftTab = 613;
-  { Case }
-  ecUpperCase = 620;
-  ecLowerCase = 621;
-  ecAlternatingCase = 622;
-  ecSentenceCase = 623;
-  ecTitleCase = 624;
-  ecUpperCaseBlock = 625;
-  ecLowerCaseBlock = 626;
-  ecAlternatingCaseBlock = 627;
-  { Move }
-  ecMoveLineUp = 701;
-  ecMoveLineDown = 702;
-  { Search }
-  ecSearchNext = 800;
-  ecSearchPrevious = 801;
-  { Comments }
-  ecLineComment = 900;
-  ecBlockComment = 901;
-  { Folding }
-  ecFoldingCollapseLine = 910;
-  ecFoldingExpandLine = 911;
-  ecFoldingGoToNext = 912;
-  ecFoldingGoToPrevious = 913;
-
-  ecUserFirst = 1001;
-
 type
+  TKeyCommands = record
+  const
+    None = 0;
+    EditCommandFirst = 501;
+    EditCommandLast = 1000;
+    { Caret moving }
+    Left = 1;
+    Right = 2;
+    Up = 3;
+    Down = 4;
+    WordLeft = 5;
+    WordRight = 6;
+    LineBegin = 7;
+    LineEnd = 8;
+    PageUp = 9;
+    PageDown = 10;
+    PageLeft = 11;
+    PageRight = 12;
+    PageTop = 13;
+    PageBottom = 14;
+    EditorTop = 15;
+    EditorBottom = 16;
+    GoToXY = 17;
+    { Selection }
+    Selection = 100;
+    SelectionLeft = Left + Selection;
+    SelectionRight = Right + Selection;
+    SelectionUp = Up + Selection;
+    SelectionDown = Down + Selection;
+    SelectionWordLeft = WordLeft + Selection;
+    SelectionWordRight = WordRight + Selection;
+    SelectionLineBegin = LineBegin + Selection;
+    SelectionLineEnd = LineEnd + Selection;
+    SelectionPageUp = PageUp + Selection;
+    SelectionPageDown = PageDown + Selection;
+    SelectionPageLeft = PageLeft + Selection;
+    SelectionPageRight = PageRight + Selection;
+    SelectionPageTop = PageTop + Selection;
+    SelectionPageBottom = PageBottom + Selection;
+    SelectionEditorTop = EditorTop + Selection;
+    SelectionEditorBottom = EditorBottom + Selection;
+    SelectionGoToXY = GoToXY + Selection;
+    SelectionWord = Selection + 21;
+    SelectAll = Selection + 22;
+    { Scrolling }
+    ScrollUp = 211;
+    ScrollDown = 212;
+    ScrollLeft = 213;
+    ScrollRight = 214;
+    { Mode }
+    InsertMode = 221;
+    OverwriteMode = 222;
+    ToggleMode = 223;
+    { Bookmark }
+    ToggleBookmark = 300;
+    GoToBookmark1 = 310;
+    GoToBookmark2 = 311;
+    GoToBookmark3 = 312;
+    GoToBookmark4 = 313;
+    GoToBookmark5 = 314;
+    GoToBookmark6 = 315;
+    GoToBookmark7 = 316;
+    GoToBookmark8 = 317;
+    GoToBookmark9 = 318;
+    SetBookmark1 = 320;
+    SetBookmark2 = 321;
+    SetBookmark3 = 322;
+    SetBookmark4 = 323;
+    SetBookmark5 = 324;
+    SetBookmark6 = 325;
+    SetBookmark7 = 326;
+    SetBookmark8 = 327;
+    SetBookmark9 = 328;
+    GoToNextBookmark = 330;
+    GoToPreviousBookmark = 331;
+    { Deletion }
+    Backspace = 501;
+    DeleteChar = 502;
+    DeleteWord = 503;
+    DeleteWordForward = 504;
+    DeleteWordBackward = 505;
+    DeleteBeginningOfLine = 506;
+    DeleteEndOfLine = 507;
+    DeleteLine = 508;
+    Clear = 509;
+    { Insert }
+    LineBreak = 510;
+    InsertLine = 511;
+    Char = 512;
+    Text = 513;
+    ImeStr = 550;
+    { Clipboard }
+    Undo = 601;
+    Redo = 602;
+    Copy = 603;
+    Cut = 604;
+    Paste = 605;
+    { Indent }
+    BlockIndent = 610;
+    BlockUnindent = 611;
+    Tab = 612;
+    ShiftTab = 613;
+    { Case }
+    UpperCase = 620;
+    LowerCase = 621;
+    AlternatingCase = 622;
+    SentenceCase = 623;
+    TitleCase = 624;
+    UpperCaseBlock = 625;
+    LowerCaseBlock = 626;
+    AlternatingCaseBlock = 627;
+    { Move }
+    MoveLineUp = 701;
+    MoveLineDown = 702;
+    { Search }
+    SearchNext = 800;
+    SearchPrevious = 801;
+    { Comments }
+    LineComment = 900;
+    BlockComment = 901;
+    { Folding }
+    FoldingCollapseLine = 910;
+    FoldingExpandLine = 911;
+    FoldingGoToNext = 912;
+    FoldingGoToPrevious = 913;
+
+    UserFirst = 1001;
+  end;
+
   TTextEditorCommand = type Word;
 
   TTextEditorHookedCommandEvent = procedure(const ASender: TObject; const AAfterProcessing: Boolean; var AHandled: Boolean;
@@ -142,8 +144,8 @@ type
 
   TTextEditorHookedCommandHandler = class(TObject)
   strict private
-    FEvent: TTextEditorHookedCommandEvent;
     FData: Pointer;
+    FEvent: TTextEditorHookedCommandEvent;
   public
     constructor Create(AEvent: TTextEditorHookedCommandEvent; AData: pointer);
     function Equals(AEvent: TTextEditorHookedCommandEvent): Boolean; reintroduce;
@@ -153,32 +155,32 @@ type
 
   TTextEditorKeyCommand = class(TCollectionItem)
   strict private
+    FCommand: TTextEditorCommand;
     FKey: Word;
     FSecondaryKey: Word;
-    FShiftState: TShiftState;
     FSecondaryShiftState: TShiftState;
-    FCommand: TTextEditorCommand;
-    function GetShortCut: TShortCut;
+    FShiftState: TShiftState;
     function GetSecondaryShortCut: TShortCut;
+    function GetShortCut: TShortCut;
     procedure SetCommand(const AValue: TTextEditorCommand);
     procedure SetKey(const AValue: Word);
     procedure SetSecondaryKey(const AValue: Word);
-    procedure SetShiftState(const AValue: TShiftState);
     procedure SetSecondaryShiftState(const AValue: TShiftState);
-    procedure SetShortCut(const AValue: TShortCut);
     procedure SetSecondaryShortCut(const AValue: TShortCut);
+    procedure SetShiftState(const AValue: TShiftState);
+    procedure SetShortCut(const AValue: TShortCut);
   protected
     function GetDisplayName: string; override;
   public
     procedure Assign(ASource: TPersistent); override;
     property Key: Word read FKey write SetKey;
     property SecondaryKey: Word read FSecondaryKey write SetSecondaryKey;
-    property ShiftState: TShiftState read FShiftState write SetShiftState;
     property SecondaryShiftState: TShiftState read FSecondaryShiftState write SetSecondaryShiftState;
+    property ShiftState: TShiftState read FShiftState write SetShiftState;
   published
     property Command: TTextEditorCommand read FCommand write SetCommand;
-    property ShortCut: TShortCut read GetShortCut write SetShortCut default 0;
     property SecondaryShortCut: TShortCut read GetSecondaryShortCut write SetSecondaryShortCut default 0;
+    property ShortCut: TShortCut read GetShortCut write SetShortCut default 0;
   end;
 
   ETextEditorKeyCommandException = class(Exception);
@@ -192,7 +194,6 @@ type
     function GetOwner: TPersistent; override;
   public
     constructor Create(AOwner: TPersistent);
-
     function FindCommand(const ACommand: TTextEditorCommand): Integer;
     function FindKeyCode(const AKeyCode: Word; const AShift: TShiftState): Integer;
     function FindKeyCodes(const AKeyCode: Word; const AShift: TShiftState; const ASecondaryKeycode: Word; const ASecondaryShift: TShiftState): Integer;
@@ -212,7 +213,7 @@ function EditorCommandToIdent(ACommand: Integer; var AIdent: string): Boolean;
 implementation
 
 uses
-  Winapi.Windows, TextEditor.Language;
+  Winapi.Windows, System.UITypes, TextEditor.Language;
 
 type
   TTextEditorCommandString = record
@@ -222,113 +223,113 @@ type
 
 const
   EditorCommandStrings: array [0 .. 106] of TTextEditorCommandString = (
-    (Value: ecNone; Name: 'ecNone'),
-    (Value: ecLeft; Name: 'ecLeft'),
-    (Value: ecRight; Name: 'ecRight'),
-    (Value: ecUp; Name: 'ecUp'),
-    (Value: ecDown; Name: 'ecDown'),
-    (Value: ecWordLeft; Name: 'ecWordLeft'),
-    (Value: ecWordRight; Name: 'ecWordRight'),
-    (Value: ecLineBegin; Name: 'ecLineBegin'),
-    (Value: ecLineEnd; Name: 'ecLineEnd'),
-    (Value: ecPageUp; Name: 'ecPageUp'),
-    (Value: ecPageDown; Name: 'ecPageDown'),
-    (Value: ecPageLeft; Name: 'ecPageLeft'),
-    (Value: ecPageRight; Name: 'ecPageRight'),
-    (Value: ecPageTop; Name: 'ecPageTop'),
-    (Value: ecPageBottom; Name: 'ecPageBottom'),
-    (Value: ecEditorTop; Name: 'ecEditorTop'),
-    (Value: ecEditorBottom; Name: 'ecEditorBottom'),
-    (Value: ecGoToXY; Name: 'ecGoToXY'),
-    (Value: ecSelectionLeft; Name: 'ecSelectionLeft'),
-    (Value: ecSelectionRight; Name: 'ecSelectionRight'),
-    (Value: ecSelectionUp; Name: 'ecSelectionUp'),
-    (Value: ecSelectionDown; Name: 'ecSelectionDown'),
-    (Value: ecSelectionWordLeft; Name: 'ecSelectionWordLeft'),
-    (Value: ecSelectionWordRight; Name: 'ecSelectionWordRight'),
-    (Value: ecSelectionLineBegin; Name: 'ecSelectionLineBegin'),
-    (Value: ecSelectionLineEnd; Name: 'ecSelectionLineEnd'),
-    (Value: ecSelectionPageUp; Name: 'ecSelectionPageUp'),
-    (Value: ecSelectionPageDown; Name: 'ecSelectionPageDown'),
-    (Value: ecSelectionPageLeft; Name: 'ecSelectionPageLeft'),
-    (Value: ecSelectionPageRight; Name: 'ecSelectionPageRight'),
-    (Value: ecSelectionPageTop; Name: 'ecSelectionPageTop'),
-    (Value: ecSelectionPageBottom; Name: 'ecSelectionPageBottom'),
-    (Value: ecSelectionEditorTop; Name: 'ecSelectionEditorTop'),
-    (Value: ecSelectionEditorBottom; Name: 'ecSelectionEditorBottom'),
-    (Value: ecSelectionGoToXY; Name: 'ecSelectionGoToXY'),
-    (Value: ecSelectionWord; Name: 'ecSelectionWord'),
-    (Value: ecSelectAll; Name: 'ecSelectAll'),
-    (Value: ecScrollUp; Name: 'ecScrollUp'),
-    (Value: ecScrollDown; Name: 'ecScrollDown'),
-    (Value: ecScrollLeft; Name: 'ecScrollLeft'),
-    (Value: ecScrollRight; Name: 'ecScrollRight'),
-    (Value: ecBackspace; Name: 'ecBackspace'),
-    (Value: ecDeleteChar; Name: 'ecDeleteChar'),
-    (Value: ecDeleteWord; Name: 'ecDeleteWord'),
-    (Value: ecDeleteWordForward; Name: 'ecDeleteWordForward'),
-    (Value: ecDeleteWordBackward; Name: 'ecDeleteWordBackward'),
-    (Value: ecDeleteBeginningOfLine; Name: 'ecDeleteBeginningOfLine'),
-    (Value: ecDeleteEndOfLine; Name: 'ecDeleteEndOfLine'),
-    (Value: ecDeleteLine; Name: 'ecDeleteLine'),
-    (Value: ecClear; Name: 'ecClear'),
-    (Value: ecLineBreak; Name: 'ecLineBreak'),
-    (Value: ecInsertLine; Name: 'ecInsertLine'),
-    (Value: ecChar; Name: 'ecChar'),
-    (Value: ecImeStr; Name: 'ecImeStr'),
-    (Value: ecUndo; Name: 'ecUndo'),
-    (Value: ecRedo; Name: 'ecRedo'),
-    (Value: ecCut; Name: 'ecCut'),
-    (Value: ecCopy; Name: 'ecCopy'),
-    (Value: ecPaste; Name: 'ecPaste'),
-    (Value: ecInsertMode; Name: 'ecInsertMode'),
-    (Value: ecOverwriteMode; Name: 'ecOverwriteMode'),
-    (Value: ecToggleMode; Name: 'ecToggleMode'),
-    (Value: ecBlockIndent; Name: 'ecBlockIndent'),
-    (Value: ecBlockUnindent; Name: 'ecBlockUnindent'),
-    (Value: ecTab; Name: 'ecTab'),
-    (Value: ecShiftTab; Name: 'ecShiftTab'),
-    (Value: ecUserFirst; Name: 'ecUserFirst'),
-    (Value: ecToggleBookmark; Name: 'ecToggleBookmark'),
-    (Value: ecGoToBookmark1; Name: 'ecGoToBookmark1'),
-    (Value: ecGoToBookmark2; Name: 'ecGoToBookmark2'),
-    (Value: ecGoToBookmark3; Name: 'ecGoToBookmark3'),
-    (Value: ecGoToBookmark4; Name: 'ecGoToBookmark4'),
-    (Value: ecGoToBookmark5; Name: 'ecGoToBookmark5'),
-    (Value: ecGoToBookmark6; Name: 'ecGoToBookmark6'),
-    (Value: ecGoToBookmark7; Name: 'ecGoToBookmark7'),
-    (Value: ecGoToBookmark8; Name: 'ecGoToBookmark8'),
-    (Value: ecGoToBookmark9; Name: 'ecGoToBookmark9'),
-    (Value: ecSetBookmark1; Name: 'ecSetBookmark1'),
-    (Value: ecSetBookmark2; Name: 'ecSetBookmark2'),
-    (Value: ecSetBookmark3; Name: 'ecSetBookmark3'),
-    (Value: ecSetBookmark4; Name: 'ecSetBookmark4'),
-    (Value: ecSetBookmark5; Name: 'ecSetBookmark5'),
-    (Value: ecSetBookmark6; Name: 'ecSetBookmark6'),
-    (Value: ecSetBookmark7; Name: 'ecSetBookmark7'),
-    (Value: ecSetBookmark8; Name: 'ecSetBookmark8'),
-    (Value: ecSetBookmark9; Name: 'ecSetBookmark9'),
-    (Value: ecGoToNextBookmark; Name: 'ecGoToNextBookmark'),
-    (Value: ecGoToPreviousBookmark; Name: 'ecGoToPreviousBookmark'),
-    (Value: ecString; Name: 'ecString'),
-    (Value: ecMoveLineUp; Name: 'ecMoveLineUp'),
-    (Value: ecMoveLineDown; Name: 'ecMoveLineDown'),
-    (Value: ecUpperCase; Name: 'ecUpperCase'),
-    (Value: ecLowerCase; Name: 'ecLowerCase'),
-    (Value: ecAlternatingCase; Name: 'ecAlternatingCase'),
-    (Value: ecSentenceCase; Name: 'ecSentenceCase'),
-    (Value: ecTitleCase; Name: 'ecTitleCase'),
-    (Value: ecUpperCaseBlock; Name: 'ecUpperCaseBlock'),
-    (Value: ecLowerCaseBlock; Name: 'ecLowerCaseBlock'),
-    (Value: ecAlternatingCaseBlock; Name: 'ecAlternatingCaseBlock'),
-    (Value: ecSearchNext; Name: 'ecSearchNext'),
-    (Value: ecSearchPrevious; Name: 'ecSearchPrevious'),
-    (Value: ecLineComment; Name: 'ecLineComment'),
-    (Value: ecBlockComment; Name: 'ecBlockComment'),
-    (Value: ecFoldingCollapseLine; Name: 'ecFoldingCollapseLine'),
-    (Value: ecFoldingExpandLine; Name: 'ecFoldingExpandLine'),
-    (Value: ecFoldingGoToNext; Name: 'ecFoldingGoToNext'),
-    (Value: ecFoldingGoToPrevious; Name: 'ecFoldingGoToPrevious')
+    (Value: TKeyCommands.None; Name: 'TKeyCommands.None'),
+    (Value: TKeyCommands.Left; Name: 'TKeyCommands.Left'),
+    (Value: TKeyCommands.Right; Name: 'TKeyCommands.Right'),
+    (Value: TKeyCommands.Up; Name: 'TKeyCommands.Up'),
+    (Value: TKeyCommands.Down; Name: 'TKeyCommands.Down'),
+    (Value: TKeyCommands.WordLeft; Name: 'TKeyCommands.WordLeft'),
+    (Value: TKeyCommands.WordRight; Name: 'TKeyCommands.WordRight'),
+    (Value: TKeyCommands.LineBegin; Name: 'TKeyCommands.LineBegin'),
+    (Value: TKeyCommands.LineEnd; Name: 'TKeyCommands.LineEnd'),
+    (Value: TKeyCommands.PageUp; Name: 'TKeyCommands.PageUp'),
+    (Value: TKeyCommands.PageDown; Name: 'TKeyCommands.PageDown'),
+    (Value: TKeyCommands.PageLeft; Name: 'TKeyCommands.PageLeft'),
+    (Value: TKeyCommands.PageRight; Name: 'TKeyCommands.PageRight'),
+    (Value: TKeyCommands.PageTop; Name: 'TKeyCommands.PageTop'),
+    (Value: TKeyCommands.PageBottom; Name: 'TKeyCommands.PageBottom'),
+    (Value: TKeyCommands.EditorTop; Name: 'TKeyCommands.EditorTop'),
+    (Value: TKeyCommands.EditorBottom; Name: 'TKeyCommands.EditorBottom'),
+    (Value: TKeyCommands.GoToXY; Name: 'TKeyCommands.GoToXY'),
+    (Value: TKeyCommands.SelectionLeft; Name: 'TKeyCommands.SelectionLeft'),
+    (Value: TKeyCommands.SelectionRight; Name: 'TKeyCommands.SelectionRight'),
+    (Value: TKeyCommands.SelectionUp; Name: 'TKeyCommands.SelectionUp'),
+    (Value: TKeyCommands.SelectionDown; Name: 'TKeyCommands.SelectionDown'),
+    (Value: TKeyCommands.SelectionWordLeft; Name: 'TKeyCommands.SelectionWordLeft'),
+    (Value: TKeyCommands.SelectionWordRight; Name: 'TKeyCommands.SelectionWordRight'),
+    (Value: TKeyCommands.SelectionLineBegin; Name: 'TKeyCommands.SelectionLineBegin'),
+    (Value: TKeyCommands.SelectionLineEnd; Name: 'TKeyCommands.SelectionLineEnd'),
+    (Value: TKeyCommands.SelectionPageUp; Name: 'TKeyCommands.SelectionPageUp'),
+    (Value: TKeyCommands.SelectionPageDown; Name: 'TKeyCommands.SelectionPageDown'),
+    (Value: TKeyCommands.SelectionPageLeft; Name: 'TKeyCommands.SelectionPageLeft'),
+    (Value: TKeyCommands.SelectionPageRight; Name: 'TKeyCommands.SelectionPageRight'),
+    (Value: TKeyCommands.SelectionPageTop; Name: 'TKeyCommands.SelectionPageTop'),
+    (Value: TKeyCommands.SelectionPageBottom; Name: 'TKeyCommands.SelectionPageBottom'),
+    (Value: TKeyCommands.SelectionEditorTop; Name: 'TKeyCommands.SelectionEditorTop'),
+    (Value: TKeyCommands.SelectionEditorBottom; Name: 'TKeyCommands.SelectionEditorBottom'),
+    (Value: TKeyCommands.SelectionGoToXY; Name: 'TKeyCommands.SelectionGoToXY'),
+    (Value: TKeyCommands.SelectionWord; Name: 'TKeyCommands.SelectionWord'),
+    (Value: TKeyCommands.SelectAll; Name: 'TKeyCommands.SelectAll'),
+    (Value: TKeyCommands.ScrollUp; Name: 'TKeyCommands.ScrollUp'),
+    (Value: TKeyCommands.ScrollDown; Name: 'TKeyCommands.ScrollDown'),
+    (Value: TKeyCommands.ScrollLeft; Name: 'TKeyCommands.ScrollLeft'),
+    (Value: TKeyCommands.ScrollRight; Name: 'TKeyCommands.ScrollRight'),
+    (Value: TKeyCommands.Backspace; Name: 'TKeyCommands.Backspace'),
+    (Value: TKeyCommands.DeleteChar; Name: 'TKeyCommands.DeleteChar'),
+    (Value: TKeyCommands.DeleteWord; Name: 'TKeyCommands.DeleteWord'),
+    (Value: TKeyCommands.DeleteWordForward; Name: 'TKeyCommands.DeleteWordForward'),
+    (Value: TKeyCommands.DeleteWordBackward; Name: 'TKeyCommands.DeleteWordBackward'),
+    (Value: TKeyCommands.DeleteBeginningOfLine; Name: 'TKeyCommands.DeleteBeginningOfLine'),
+    (Value: TKeyCommands.DeleteEndOfLine; Name: 'TKeyCommands.DeleteEndOfLine'),
+    (Value: TKeyCommands.DeleteLine; Name: 'TKeyCommands.DeleteLine'),
+    (Value: TKeyCommands.Clear; Name: 'TKeyCommands.Clear'),
+    (Value: TKeyCommands.LineBreak; Name: 'TKeyCommands.LineBreak'),
+    (Value: TKeyCommands.InsertLine; Name: 'TKeyCommands.InsertLine'),
+    (Value: TKeyCommands.Char; Name: 'TKeyCommands.Char'),
+    (Value: TKeyCommands.ImeStr; Name: 'TKeyCommands.ImeStr'),
+    (Value: TKeyCommands.Undo; Name: 'TKeyCommands.Undo'),
+    (Value: TKeyCommands.Redo; Name: 'TKeyCommands.Redo'),
+    (Value: TKeyCommands.Cut; Name: 'TKeyCommands.Cut'),
+    (Value: TKeyCommands.Copy; Name: 'TKeyCommands.Copy'),
+    (Value: TKeyCommands.Paste; Name: 'TKeyCommands.Paste'),
+    (Value: TKeyCommands.InsertMode; Name: 'TKeyCommands.InsertMode'),
+    (Value: TKeyCommands.OverwriteMode; Name: 'TKeyCommands.OverwriteMode'),
+    (Value: TKeyCommands.ToggleMode; Name: 'TKeyCommands.ToggleMode'),
+    (Value: TKeyCommands.BlockIndent; Name: 'TKeyCommands.BlockIndent'),
+    (Value: TKeyCommands.BlockUnindent; Name: 'TKeyCommands.BlockUnindent'),
+    (Value: TKeyCommands.Tab; Name: 'TKeyCommands.Tab'),
+    (Value: TKeyCommands.ShiftTab; Name: 'TKeyCommands.ShiftTab'),
+    (Value: TKeyCommands.UserFirst; Name: 'TKeyCommands.UserFirst'),
+    (Value: TKeyCommands.ToggleBookmark; Name: 'TKeyCommands.ToggleBookmark'),
+    (Value: TKeyCommands.GoToBookmark1; Name: 'TKeyCommands.GoToBookmark1'),
+    (Value: TKeyCommands.GoToBookmark2; Name: 'TKeyCommands.GoToBookmark2'),
+    (Value: TKeyCommands.GoToBookmark3; Name: 'TKeyCommands.GoToBookmark3'),
+    (Value: TKeyCommands.GoToBookmark4; Name: 'TKeyCommands.GoToBookmark4'),
+    (Value: TKeyCommands.GoToBookmark5; Name: 'TKeyCommands.GoToBookmark5'),
+    (Value: TKeyCommands.GoToBookmark6; Name: 'TKeyCommands.GoToBookmark6'),
+    (Value: TKeyCommands.GoToBookmark7; Name: 'TKeyCommands.GoToBookmark7'),
+    (Value: TKeyCommands.GoToBookmark8; Name: 'TKeyCommands.GoToBookmark8'),
+    (Value: TKeyCommands.GoToBookmark9; Name: 'TKeyCommands.GoToBookmark9'),
+    (Value: TKeyCommands.SetBookmark1; Name: 'TKeyCommands.SetBookmark1'),
+    (Value: TKeyCommands.SetBookmark2; Name: 'TKeyCommands.SetBookmark2'),
+    (Value: TKeyCommands.SetBookmark3; Name: 'TKeyCommands.SetBookmark3'),
+    (Value: TKeyCommands.SetBookmark4; Name: 'TKeyCommands.SetBookmark4'),
+    (Value: TKeyCommands.SetBookmark5; Name: 'TKeyCommands.SetBookmark5'),
+    (Value: TKeyCommands.SetBookmark6; Name: 'TKeyCommands.SetBookmark6'),
+    (Value: TKeyCommands.SetBookmark7; Name: 'TKeyCommands.SetBookmark7'),
+    (Value: TKeyCommands.SetBookmark8; Name: 'TKeyCommands.SetBookmark8'),
+    (Value: TKeyCommands.SetBookmark9; Name: 'TKeyCommands.SetBookmark9'),
+    (Value: TKeyCommands.GoToNextBookmark; Name: 'TKeyCommands.GoToNextBookmark'),
+    (Value: TKeyCommands.GoToPreviousBookmark; Name: 'TKeyCommands.GoToPreviousBookmark'),
+    (Value: TKeyCommands.Text; Name: 'TKeyCommands.Text'),
+    (Value: TKeyCommands.MoveLineUp; Name: 'TKeyCommands.MoveLineUp'),
+    (Value: TKeyCommands.MoveLineDown; Name: 'TKeyCommands.MoveLineDown'),
+    (Value: TKeyCommands.UpperCase; Name: 'TKeyCommands.UpperCase'),
+    (Value: TKeyCommands.LowerCase; Name: 'TKeyCommands.LowerCase'),
+    (Value: TKeyCommands.AlternatingCase; Name: 'TKeyCommands.AlternatingCase'),
+    (Value: TKeyCommands.SentenceCase; Name: 'TKeyCommands.SentenceCase'),
+    (Value: TKeyCommands.TitleCase; Name: 'TKeyCommands.TitleCase'),
+    (Value: TKeyCommands.UpperCaseBlock; Name: 'TKeyCommands.UpperCaseBlock'),
+    (Value: TKeyCommands.LowerCaseBlock; Name: 'TKeyCommands.LowerCaseBlock'),
+    (Value: TKeyCommands.AlternatingCaseBlock; Name: 'TKeyCommands.AlternatingCaseBlock'),
+    (Value: TKeyCommands.SearchNext; Name: 'TKeyCommands.SearchNext'),
+    (Value: TKeyCommands.SearchPrevious; Name: 'TKeyCommands.SearchPrevious'),
+    (Value: TKeyCommands.LineComment; Name: 'TKeyCommands.LineComment'),
+    (Value: TKeyCommands.BlockComment; Name: 'TKeyCommands.BlockComment'),
+    (Value: TKeyCommands.FoldingCollapseLine; Name: 'TKeyCommands.FoldingCollapseLine'),
+    (Value: TKeyCommands.FoldingExpandLine; Name: 'TKeyCommands.FoldingExpandLine'),
+    (Value: TKeyCommands.FoldingGoToNext; Name: 'TKeyCommands.FoldingGoToNext'),
+    (Value: TKeyCommands.FoldingGoToPrevious; Name: 'TKeyCommands.FoldingGoToPrevious')
   );
 
 function IdentToEditorCommand(const AIdent: string; var ACommand: Integer): Boolean;
@@ -623,102 +624,102 @@ begin
   Clear;
 
   { Scrolling, caret moving and selection }
-  Add(ecUp, [], VK_UP);
-  Add(ecSelectionUp, [ssShift], VK_UP);
-  Add(ecScrollUp, [ssCtrl], VK_UP);
-  Add(ecDown, [], VK_DOWN);
-  Add(ecSelectionDown, [ssShift], VK_DOWN);
-  Add(ecScrollDown, [ssCtrl], VK_DOWN);
-  Add(ecLeft, [], VK_LEFT);
-  Add(ecSelectionLeft, [ssShift], VK_LEFT);
-  Add(ecWordLeft, [ssCtrl], VK_LEFT);
-  Add(ecSelectionWordLeft, [ssShift, ssCtrl], VK_LEFT);
-  Add(ecRight, [], VK_RIGHT);
-  Add(ecSelectionRight, [ssShift], VK_RIGHT);
-  Add(ecWordRight, [ssCtrl], VK_RIGHT);
-  Add(ecSelectionWordRight, [ssShift, ssCtrl], VK_RIGHT);
-  Add(ecPageDown, [], VK_NEXT);
-  Add(ecSelectionPageDown, [ssShift], VK_NEXT);
-  Add(ecPageBottom, [ssCtrl], VK_NEXT);
-  Add(ecSelectionPageBottom, [ssShift, ssCtrl], VK_NEXT);
-  Add(ecPageUp, [], VK_PRIOR);
-  Add(ecSelectionPageUp, [ssShift], VK_PRIOR);
-  Add(ecPageTop, [ssCtrl], VK_PRIOR);
-  Add(ecSelectionPageTop, [ssShift, ssCtrl], VK_PRIOR);
-  Add(ecLineBegin, [], VK_HOME);
-  Add(ecSelectionLineBegin, [ssShift], VK_HOME);
-  Add(ecEditorTop, [ssCtrl], VK_HOME);
-  Add(ecSelectionEditorTop, [ssShift, ssCtrl], VK_HOME);
-  Add(ecLineEnd, [], VK_END);
-  Add(ecSelectionLineEnd, [ssShift], VK_END);
-  Add(ecEditorBottom, [ssCtrl], VK_END);
-  Add(ecSelectionEditorBottom, [ssShift, ssCtrl], VK_END);
+  Add(TKeyCommands.Up, [], vkUp);
+  Add(TKeyCommands.SelectionUp, [ssShift], vkUp);
+  Add(TKeyCommands.ScrollUp, [ssCtrl], vkUp);
+  Add(TKeyCommands.Down, [], vkDown);
+  Add(TKeyCommands.SelectionDown, [ssShift], vkDown);
+  Add(TKeyCommands.ScrollDown, [ssCtrl], vkDown);
+  Add(TKeyCommands.Left, [], vkLeft);
+  Add(TKeyCommands.SelectionLeft, [ssShift], vkLeft);
+  Add(TKeyCommands.WordLeft, [ssCtrl], vkLeft);
+  Add(TKeyCommands.SelectionWordLeft, [ssShift, ssCtrl], vkLeft);
+  Add(TKeyCommands.Right, [], vkRight);
+  Add(TKeyCommands.SelectionRight, [ssShift], vkRight);
+  Add(TKeyCommands.WordRight, [ssCtrl], vkRight);
+  Add(TKeyCommands.SelectionWordRight, [ssShift, ssCtrl], vkRight);
+  Add(TKeyCommands.PageDown, [], vkNext);
+  Add(TKeyCommands.SelectionPageDown, [ssShift], vkNext);
+  Add(TKeyCommands.PageBottom, [ssCtrl], vkNext);
+  Add(TKeyCommands.SelectionPageBottom, [ssShift, ssCtrl], vkNext);
+  Add(TKeyCommands.PageUp, [], vkPrior);
+  Add(TKeyCommands.SelectionPageUp, [ssShift], vkPrior);
+  Add(TKeyCommands.PageTop, [ssCtrl], vkPrior);
+  Add(TKeyCommands.SelectionPageTop, [ssShift, ssCtrl], vkPrior);
+  Add(TKeyCommands.LineBegin, [], vkHome);
+  Add(TKeyCommands.SelectionLineBegin, [ssShift], vkHome);
+  Add(TKeyCommands.EditorTop, [ssCtrl], vkHome);
+  Add(TKeyCommands.SelectionEditorTop, [ssShift, ssCtrl], vkHome);
+  Add(TKeyCommands.LineEnd, [], vkEnd);
+  Add(TKeyCommands.SelectionLineEnd, [ssShift], vkEnd);
+  Add(TKeyCommands.EditorBottom, [ssCtrl], vkEnd);
+  Add(TKeyCommands.SelectionEditorBottom, [ssShift, ssCtrl], vkEnd);
   { Insert key alone }
-  Add(ecToggleMode, [], VK_INSERT);
+  Add(TKeyCommands.ToggleMode, [], vkInsert);
   { Deletion }
-  Add(ecDeleteChar, [], VK_DELETE);
-  Add(ecBackspace, [], VK_BACK);
-  Add(ecBackspace, [ssShift], VK_BACK);
+  Add(TKeyCommands.DeleteChar, [], vkDelete);
+  Add(TKeyCommands.Backspace, [], vkBack);
+  Add(TKeyCommands.Backspace, [ssShift], vkBack);
   { Search }
-  Add(ecSearchNext, [], VK_F3);
-  Add(ecSearchPrevious, [ssShift], VK_F3);
+  Add(TKeyCommands.SearchNext, [], vkF3);
+  Add(TKeyCommands.SearchPrevious, [ssShift], vkF3);
   { Enter (return) & Tab }
-  Add(ecLineBreak, [], VK_RETURN);
-  Add(ecTab, [], VK_TAB);
-  Add(ecShiftTab, [ssShift], VK_TAB);
+  Add(TKeyCommands.LineBreak, [], vkReturn);
+  Add(TKeyCommands.Tab, [], vkTab);
+  Add(TKeyCommands.ShiftTab, [ssShift], vkTab);
   { Standard edit commands }
-  Add(ecUndo, [ssCtrl], Ord('Z'));
-  Add(ecRedo, [ssCtrl, ssShift], Ord('Z'));
-  Add(ecCut, [ssCtrl], Ord('X'));
-  Add(ecCut, [ssShift], VK_DELETE);
-  Add(ecCopy, [ssCtrl], Ord('C'));
-  Add(ecCopy, [ssCtrl], VK_INSERT);
-  Add(ecPaste, [ssCtrl], Ord('V'));
-  Add(ecPaste, [ssShift], VK_INSERT);
-  Add(ecSelectAll, [ssCtrl], Ord('A'));
+  Add(TKeyCommands.Undo, [ssCtrl], Ord('Z'));
+  Add(TKeyCommands.Redo, [ssCtrl, ssShift], Ord('Z'));
+  Add(TKeyCommands.Cut, [ssCtrl], Ord('X'));
+  Add(TKeyCommands.Cut, [ssShift], vkDelete);
+  Add(TKeyCommands.Copy, [ssCtrl], Ord('C'));
+  Add(TKeyCommands.Copy, [ssCtrl], vkInsert);
+  Add(TKeyCommands.Paste, [ssCtrl], Ord('V'));
+  Add(TKeyCommands.Paste, [ssShift], vkInsert);
+  Add(TKeyCommands.SelectAll, [ssCtrl], Ord('A'));
   { Block commands }
-  Add(ecBlockIndent, [ssCtrl, ssShift], Ord('I'));
-  Add(ecBlockUnindent, [ssCtrl, ssShift], Ord('U'));
+  Add(TKeyCommands.BlockIndent, [ssCtrl, ssShift], Ord('I'));
+  Add(TKeyCommands.BlockUnindent, [ssCtrl, ssShift], Ord('U'));
   { Fragment deletion }
-  Add(ecDeleteWord, [ssCtrl], Ord('W'));
-  Add(ecDeleteWordBackward, [ssCtrl], VK_BACK);
-  Add(ecDeleteWordForward, [ssCtrl], VK_DELETE);
+  Add(TKeyCommands.DeleteWord, [ssCtrl], Ord('W'));
+  Add(TKeyCommands.DeleteWordBackward, [ssCtrl], vkBack);
+  Add(TKeyCommands.DeleteWordForward, [ssCtrl], vkDelete);
   { Line operations }
-  Add(ecInsertLine, [ssCtrl], Ord('M'));
-  Add(ecMoveLineUp, [ssCtrl, ssShift], VK_UP);
-  Add(ecMoveLineDown, [ssCtrl, ssShift], VK_DOWN);
-  Add(ecDeleteLine, [ssCtrl], Ord('Y'));
-  Add(ecDeleteEndOfLine, [ssCtrl, ssShift], Ord('Y'));
+  Add(TKeyCommands.InsertLine, [ssCtrl], Ord('M'));
+  Add(TKeyCommands.MoveLineUp, [ssCtrl, ssShift], vkUp);
+  Add(TKeyCommands.MoveLineDown, [ssCtrl, ssShift], vkDown);
+  Add(TKeyCommands.DeleteLine, [ssCtrl], Ord('Y'));
+  Add(TKeyCommands.DeleteEndOfLine, [ssCtrl, ssShift], Ord('Y'));
   { Bookmarks }
-  Add(ecToggleBookmark, [ssCtrl], VK_F2);
-  Add(ecGoToBookmark1, [ssCtrl], Ord('1'));
-  Add(ecGoToBookmark2, [ssCtrl], Ord('2'));
-  Add(ecGoToBookmark3, [ssCtrl], Ord('3'));
-  Add(ecGoToBookmark4, [ssCtrl], Ord('4'));
-  Add(ecGoToBookmark5, [ssCtrl], Ord('5'));
-  Add(ecGoToBookmark6, [ssCtrl], Ord('6'));
-  Add(ecGoToBookmark7, [ssCtrl], Ord('7'));
-  Add(ecGoToBookmark8, [ssCtrl], Ord('8'));
-  Add(ecGoToBookmark9, [ssCtrl], Ord('9'));
-  Add(ecSetBookmark1, [ssCtrl, ssShift], Ord('1'));
-  Add(ecSetBookmark2, [ssCtrl, ssShift], Ord('2'));
-  Add(ecSetBookmark3, [ssCtrl, ssShift], Ord('3'));
-  Add(ecSetBookmark4, [ssCtrl, ssShift], Ord('4'));
-  Add(ecSetBookmark5, [ssCtrl, ssShift], Ord('5'));
-  Add(ecSetBookmark6, [ssCtrl, ssShift], Ord('6'));
-  Add(ecSetBookmark7, [ssCtrl, ssShift], Ord('7'));
-  Add(ecSetBookmark8, [ssCtrl, ssShift], Ord('8'));
-  Add(ecSetBookmark9, [ssCtrl, ssShift], Ord('9'));
-  Add(ecGoToNextBookmark, [], VK_F2);
-  Add(ecGoToPreviousBookmark, [ssShift], VK_F2);
+  Add(TKeyCommands.ToggleBookmark, [ssCtrl], vkF2);
+  Add(TKeyCommands.GoToBookmark1, [ssCtrl], Ord('1'));
+  Add(TKeyCommands.GoToBookmark2, [ssCtrl], Ord('2'));
+  Add(TKeyCommands.GoToBookmark3, [ssCtrl], Ord('3'));
+  Add(TKeyCommands.GoToBookmark4, [ssCtrl], Ord('4'));
+  Add(TKeyCommands.GoToBookmark5, [ssCtrl], Ord('5'));
+  Add(TKeyCommands.GoToBookmark6, [ssCtrl], Ord('6'));
+  Add(TKeyCommands.GoToBookmark7, [ssCtrl], Ord('7'));
+  Add(TKeyCommands.GoToBookmark8, [ssCtrl], Ord('8'));
+  Add(TKeyCommands.GoToBookmark9, [ssCtrl], Ord('9'));
+  Add(TKeyCommands.SetBookmark1, [ssCtrl, ssShift], Ord('1'));
+  Add(TKeyCommands.SetBookmark2, [ssCtrl, ssShift], Ord('2'));
+  Add(TKeyCommands.SetBookmark3, [ssCtrl, ssShift], Ord('3'));
+  Add(TKeyCommands.SetBookmark4, [ssCtrl, ssShift], Ord('4'));
+  Add(TKeyCommands.SetBookmark5, [ssCtrl, ssShift], Ord('5'));
+  Add(TKeyCommands.SetBookmark6, [ssCtrl, ssShift], Ord('6'));
+  Add(TKeyCommands.SetBookmark7, [ssCtrl, ssShift], Ord('7'));
+  Add(TKeyCommands.SetBookmark8, [ssCtrl, ssShift], Ord('8'));
+  Add(TKeyCommands.SetBookmark9, [ssCtrl, ssShift], Ord('9'));
+  Add(TKeyCommands.GoToNextBookmark, [], vkF2);
+  Add(TKeyCommands.GoToPreviousBookmark, [ssShift], vkF2);
   { Comments }
-  Add(ecLineComment, [ssCtrl], VK_OEM_2);
-  Add(ecBlockComment, [ssCtrl, ssShift], VK_OEM_2);
+  Add(TKeyCommands.LineComment, [ssCtrl], vkSlash);
+  Add(TKeyCommands.BlockComment, [ssCtrl, ssShift], vkSlash);
   { Folding }
-  Add(ecFoldingCollapseLine, [ssAlt], VK_LEFT);
-  Add(ecFoldingExpandLine, [ssAlt], VK_RIGHT);
-  Add(ecFoldingGoToNext, [ssAlt], VK_DOWN);
-  Add(ecFoldingGoToPrevious, [ssAlt], VK_UP);
+  Add(TKeyCommands.FoldingCollapseLine, [ssAlt], vkLeft);
+  Add(TKeyCommands.FoldingExpandLine, [ssAlt], vkRight);
+  Add(TKeyCommands.FoldingGoToNext, [ssAlt], vkDown);
+  Add(TKeyCommands.FoldingGoToPrevious, [ssAlt], vkUp);
 end;
 
 procedure TTextEditorKeyCommands.SetItem(const AIndex: Integer; AValue: TTextEditorKeyCommand);

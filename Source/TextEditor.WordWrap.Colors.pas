@@ -3,7 +3,7 @@ unit TextEditor.WordWrap.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Consts;
+  System.Classes, System.UITypes, TextEditor.Consts;
 
 type
   TTextEditorWordWrapColors = class(TPersistent)
@@ -14,8 +14,8 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Arrow: TColor read FArrow write FArrow default clWordWrapIndicatorArrow;
-    property Lines: TColor read FLines write FLines default clWordWrapIndicatorLines;
+    property Arrow: TColor read FArrow write FArrow default TDefaultColors.WordWrapIndicatorArrow;
+    property Lines: TColor read FLines write FLines default TDefaultColors.WordWrapIndicatorLines;
   end;
 
 implementation
@@ -24,8 +24,8 @@ constructor TTextEditorWordWrapColors.Create;
 begin
   inherited;
 
-  FArrow := clWordWrapIndicatorArrow;
-  FLines := clWordWrapIndicatorLines;
+  FArrow := TDefaultColors.WordWrapIndicatorArrow;
+  FLines := TDefaultColors.WordWrapIndicatorLines;
 end;
 
 procedure TTextEditorWordWrapColors.Assign(ASource: TPersistent);

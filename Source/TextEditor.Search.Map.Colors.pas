@@ -3,7 +3,7 @@ unit TextEditor.Search.Map.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Consts, TextEditor.Types;
+  System.Classes, System.UITypes, TextEditor.Consts, TextEditor.Types;
 
 type
   TTextEditorSearchMapColors = class(TPersistent)
@@ -15,9 +15,9 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property ActiveLine: TColor read FActiveLine write FActiveLine default clSearchMapActiveLine;
-    property Background: TColor read FBackground write FBackground default clLeftMarginBackground;
-    property Foreground: TColor read FForeground write FForeground default clSearchHighlighter;
+    property ActiveLine: TColor read FActiveLine write FActiveLine default TDefaultColors.SearchMapActiveLine;
+    property Background: TColor read FBackground write FBackground default TDefaultColors.LeftMarginBackground;
+    property Foreground: TColor read FForeground write FForeground default TDefaultColors.SearchHighlighter;
   end;
 
 implementation
@@ -26,9 +26,9 @@ constructor TTextEditorSearchMapColors.Create;
 begin
   inherited;
 
-  FActiveLine := clSearchMapActiveLine;
-  FBackground := clLeftMarginBackground;
-  FForeground := clSearchHighlighter;
+  FActiveLine := TDefaultColors.SearchMapActiveLine;
+  FBackground := TDefaultColors.LeftMarginBackground;
+  FForeground := TDefaultColors.SearchHighlighter;
 end;
 
 procedure TTextEditorSearchMapColors.Assign(ASource: TPersistent);

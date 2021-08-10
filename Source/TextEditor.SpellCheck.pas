@@ -11,7 +11,6 @@ type
   TTextEditorSpellCheck = class(TComponent)
   private
     FCodePage: Word;
-    FDictionaryCache: TStringList;
     FFilename: string;
     FHandle: Pointer;
     FItems: TList;
@@ -71,8 +70,6 @@ constructor TTextEditorSpellCheck.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FDictionaryCache := TStringList.Create;
-  FDictionaryCache.Sorted := True;
   FLibraryLoaded := False;
   FItems := TList.Create;
 end;
@@ -80,7 +77,6 @@ end;
 destructor TTextEditorSpellCheck.Destroy;
 begin
   Close;
-  FDictionaryCache.Free;
   ClearItems;
   FItems.Free;
 
@@ -123,7 +119,6 @@ begin
     SpellCheckUninitialize(FHandle);
     FHandle := nil;
   end;
-  FDictionaryCache.Clear;
   FLibraryLoaded := False;
 end;
 
@@ -138,9 +133,9 @@ end;
 
 function TTextEditorSpellCheck.UnicodeToDLLString(const AValue: UnicodeString; const AIncompatCharBehaviour: TIncompatCharBehaviour): AnsiString;
 const
-  Flags: array[TIncompatCharBehaviour] of DWORD = (WC_NO_BEST_FIT_CHARS, 0, WC_NO_BEST_FIT_CHARS);
+  Flags: array [TIncompatCharBehaviour] of DWORD = (WC_NO_BEST_FIT_CHARS, 0, WC_NO_BEST_FIT_CHARS);
 var
-  LAnsiBuffer: array[0..1023] of AnsiChar;
+  LAnsiBuffer: array [0..1023] of AnsiChar;
   LAnsiLen: Integer;
   LUsedDefaultChar: BOOL;
 begin

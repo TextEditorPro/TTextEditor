@@ -3,7 +3,7 @@ unit TextEditor.Caret.NonBlinking.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics;
+  System.Classes, System.UITypes;
 
 type
   TTextEditorCaretNonBlinkingColors = class(TPersistent)
@@ -14,8 +14,8 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Background: TColor read FBackground write FBackground default clBlack;
-    property Foreground: TColor read FForeground write FForeground default clWhite;
+    property Background: TColor read FBackground write FBackground default TColors.Black;
+    property Foreground: TColor read FForeground write FForeground default TColors.White;
   end;
 
 implementation
@@ -24,8 +24,8 @@ constructor TTextEditorCaretNonBlinkingColors.Create;
 begin
   inherited;
 
-  FBackground := clBlack;
-  FForeground := clWhite;
+  FBackground := TColors.Black;
+  FForeground := TColors.White;
 end;
 
 procedure TTextEditorCaretNonBlinkingColors.Assign(ASource: TPersistent);

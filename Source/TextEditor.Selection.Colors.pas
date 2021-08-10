@@ -3,7 +3,7 @@ unit TextEditor.Selection.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Consts;
+  System.Classes, System.UITypes, TextEditor.Consts;
 
 type
   TTextEditorSelectionColors = class(TPersistent)
@@ -14,8 +14,8 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Background: TColor read FBackground write FBackground default clSelectionColor;
-    property Foreground: TColor read FForeground write FForeground default clHighLightText;
+    property Background: TColor read FBackground write FBackground default TDefaultColors.SelectionColor;
+    property Foreground: TColor read FForeground write FForeground default TColors.SysHighlightText;
   end;
 
 implementation
@@ -24,8 +24,8 @@ constructor TTextEditorSelectionColors.Create;
 begin
   inherited;
 
-  FBackground := clSelectionColor;
-  FForeground := clHighLightText;
+  FBackground := TDefaultColors.SelectionColor;
+  FForeground := TColors.SysHighlightText;
 end;
 
 procedure TTextEditorSelectionColors.Assign(ASource: TPersistent);

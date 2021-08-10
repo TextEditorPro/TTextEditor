@@ -241,7 +241,7 @@ begin
       end;
     end;
   end;
-  if (fIndexOfLongestLine >= 0) and (FIndexOfLongestLine < FCount) then
+  if (FIndexOfLongestLine >= 0) and (FIndexOfLongestLine < FCount) then
     Result := FItems^[FIndexOfLongestLine].ExpandedLength
   else
     Result := 0;
@@ -1301,48 +1301,50 @@ begin
     if Assigned(LPValue) then
     begin
       LLength := Length(AValue);
-      LPLastChar := @AValue[LLength];
       if LLength > 0 then
-      while LPValue <= LPLastChar do
       begin
-        LPStartValue := LPValue;
-        while (LPValue <= LPLastChar) and
-          (LPValue^ <> TEXT_EDITOR_CARRIAGE_RETURN) and
-          (LPValue^ <> TEXT_EDITOR_LINEFEED) and
-          (LPValue^ <> TEXT_EDITOR_LINE_SEPARATOR) do
-          Inc(LPValue);
-
-        if FCount = FCapacity then
-          Grow;
-
-        with FItems^[FCount] do
+        LPLastChar := @AValue[LLength];
+        while LPValue <= LPLastChar do
         begin
-          Pointer(TextLine) := nil;
-          if LPValue = LPStartValue then
-            TextLine := ''
-          else
-            SetString(TextLine, LPStartValue, LPValue - LPStartValue);
-          Range := nil;
-          ExpandedLength := -1;
-          Flags := [sfExpandedLengthUnknown];
-          OriginalLineNumber := FCount;
+          LPStartValue := LPValue;
+          while (LPValue <= LPLastChar) and
+            (LPValue^ <> TEXT_EDITOR_CARRIAGE_RETURN) and
+            (LPValue^ <> TEXT_EDITOR_LINEFEED) and
+            (LPValue^ <> TEXT_EDITOR_LINE_SEPARATOR) do
+            Inc(LPValue);
 
-          Inc(FCount);
+          if FCount = FCapacity then
+            Grow;
 
-          if LPValue^ = TEXT_EDITOR_CARRIAGE_RETURN then
+          with FItems^[FCount] do
           begin
-            Inc(LPValue);
-            Include(Flags, sfLineBreakCR);
-          end;
+            Pointer(TextLine) := nil;
+            if LPValue = LPStartValue then
+              TextLine := ''
+            else
+              SetString(TextLine, LPStartValue, LPValue - LPStartValue);
+            Range := nil;
+            ExpandedLength := -1;
+            Flags := [sfExpandedLengthUnknown];
+            OriginalLineNumber := FCount;
 
-          if LPValue^ = TEXT_EDITOR_LINEFEED then
-          begin
-            Inc(LPValue);
-            Include(Flags, sfLineBreakLF);
-          end;
+            Inc(FCount);
 
-          if LPValue^ = TEXT_EDITOR_LINE_SEPARATOR then
-            Inc(LPValue);
+            if LPValue^ = TEXT_EDITOR_CARRIAGE_RETURN then
+            begin
+              Inc(LPValue);
+              Include(Flags, sfLineBreakCR);
+            end;
+
+            if LPValue^ = TEXT_EDITOR_LINEFEED then
+            begin
+              Inc(LPValue);
+              Include(Flags, sfLineBreakLF);
+            end;
+
+            if LPValue^ = TEXT_EDITOR_LINE_SEPARATOR then
+              Inc(LPValue);
+          end;
         end;
       end;
     end;

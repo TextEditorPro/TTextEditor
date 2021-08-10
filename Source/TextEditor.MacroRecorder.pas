@@ -48,7 +48,7 @@ type
     property Key: Char read FKey write FKey;
   end;
 
-  TTextEditorStringEvent = class(TTextEditorMacroEvent)
+  TTextEditorTextEvent = class(TTextEditorMacroEvent)
   protected
     FString: string;
     procedure InitEventParameters(const AString: string); override;
@@ -283,21 +283,21 @@ function TCustomEditorMacroRecorder.CreateMacroEvent(const ACommand: TTextEditor
 
 begin
   case ACommand of
-    ecGoToXY, ecSelectionGoToXY, ecSetBookmark1 .. ecSetBookmark9:
+    TKeyCommands.GoToXY, TKeyCommands.SelectionGoToXY, TKeyCommands.SetBookmark1 .. TKeyCommands.SetBookmark9:
       begin
         Result := TTextEditorPositionEvent.Create;
 
         TTextEditorPositionEvent(Result).Command := ACommand;
       end;
-    ecChar:
+    TKeyCommands.Char:
       Result := TTextEditorCharEvent.Create;
-    ecString:
-      Result := TTextEditorStringEvent.Create;
+    TKeyCommands.Text:
+      Result := TTextEditorTextEvent.Create;
   else
     begin
       Result := nil;
 
-      if (ACommand < ecUserFirst) or WantDefaultEvent(Result) then
+      if (ACommand < TKeyCommands.UserFirst) or WantDefaultEvent(Result) then
       begin
         Result := TTextEditorBasicEvent.Create;
         TTextEditorBasicEvent(Result).Command := ACommand;
@@ -480,7 +480,7 @@ begin
       LEvent.Initialize(ACommand, AChar, AData);
       FEvents.Add(LEvent);
 
-      if SaveMarkerPos and (ACommand >= ecSetBookmark1) and (ACommand <= ecSetBookmark9) and not Assigned(AData) then
+      if SaveMarkerPos and (ACommand >= TKeyCommands.SetBookmark1) and (ACommand <= TKeyCommands.SetBookmark9) and not Assigned(AData) then
         TTextEditorPositionEvent(LEvent).Position := TCustomTextEditor(FCurrentEditor).TextPosition;
     end;
   end
@@ -815,12 +815,12 @@ var
   LIndex: Integer;
 begin
   for LIndex := 1 to RepeatCount do //FI:W528 Variable not used in FOR-loop
-    TCustomTextEditor(AEditor).CommandProcessor(ecChar, Key, nil);
+    TCustomTextEditor(AEditor).CommandProcessor(TKeyCommands.Char, Key, nil);
 end;
 
 procedure TTextEditorCharEvent.SaveToStream(const AStream: TStream);
 const
-  CharCommand: TTextEditorCommand = ecChar;
+  CharCommand: TTextEditorCommand = TKeyCommands.Char;
 begin
   AStream.Write(CharCommand, SizeOf(TTextEditorCommand));
   AStream.Write(Key, SizeOf(Key));
@@ -889,9 +889,9 @@ begin
   AStream.Write(Position, SizeOf(Position));
 end;
 
-{ TTextEditorStringEvent }
+{ TTextEditorTextEvent }
 
-procedure TTextEditorStringEvent.InitEventParameters(const AString: string);
+procedure TTextEditorTextEvent.InitEventParameters(const AString: string);
 var
   LOpenPosition, LClosePosition: Integer;
   LValue: string;
@@ -921,12 +921,12 @@ begin
   RepeatCount := StrToIntDef(TextEditor.Utils.Trim(LString), 1);
 end;
 
-procedure TTextEditorStringEvent.Initialize(const ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer);
+procedure TTextEditorTextEvent.Initialize(const ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer);
 begin
   Value := string(AData);
 end;
 
-procedure TTextEditorStringEvent.LoadFromStream(const AStream: TStream);
+procedure TTextEditorTextEvent.LoadFromStream(const AStream: TStream);
 var
   LLength: Integer;
   LPBuffer: PChar;
@@ -943,18 +943,18 @@ begin
   AStream.Read(FRepeatCount, SizeOf(FRepeatCount));
 end;
 
-procedure TTextEditorStringEvent.Playback(const AEditor: TCustomControl);
+procedure TTextEditorTextEvent.Playback(const AEditor: TCustomControl);
 var
   LIndex, LIndex2: Integer;
 begin
   for LIndex := 1 to RepeatCount do //FI:W528 Variable not used in FOR-loop
     for LIndex2 := 1 to Length(Value) do
-      TCustomTextEditor(AEditor).CommandProcessor(ecChar, Value[LIndex2], nil);
+      TCustomTextEditor(AEditor).CommandProcessor(TKeyCommands.Char, Value[LIndex2], nil);
 end;
 
-procedure TTextEditorStringEvent.SaveToStream(const AStream: TStream);
+procedure TTextEditorTextEvent.SaveToStream(const AStream: TStream);
 const
-  Command: TTextEditorCommand = ecString;
+  Command: TTextEditorCommand = TKeyCommands.Text;
 var
   LLength: Integer;
   LPBuffer: PChar;

@@ -153,7 +153,7 @@ begin
   FLineNumbersInMargin := False;
   FPages := TList.Create;
   FTabWidth := 8;
-  FDefaultBackground := clWhite;
+  FDefaultBackground := TColors.White;
   LFont := TFont.Create;
   try
     LFont.Name := 'Courier New';
@@ -422,7 +422,7 @@ begin
   LLineNumber := (FLineNumber + FLineOffset).ToString + ': ';
   FCanvas.Brush.Color := FDefaultBackground;
   FCanvas.Font.Style := [];
-  FCanvas.Font.Color := clBlack;
+  FCanvas.Font.Color := TColors.Black;
   FCanvas.TextOut(FMargins.PixelLeft - FCanvas.TextWidth(LLineNumber), FYPos, LLineNumber);
   RestoreFont;
 end;
@@ -581,16 +581,16 @@ begin
           if FColors then
           begin
             LColor := LHighlighterAttribute.Foreground;
-            if LColor = clNone then
+            if LColor = TColors.SysNone then
               LColor := FFont.Color;
             FCanvas.Font.Color := LColor;
             LColor := LHighlighterAttribute.Background;
-            if LColor = clNone then
+            if LColor = TColors.SysNone then
               LColor := FDefaultBackground;
             FCanvas.Brush.Color := LColor;
           end
           else
-            FCanvas.Font.Color := clBlack;
+            FCanvas.Font.Color := TColors.Black;
         end;
 
         LHandled := False;

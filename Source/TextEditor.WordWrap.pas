@@ -35,13 +35,16 @@ type
 
 implementation
 
+uses
+  System.UITypes;
+
 constructor TTextEditorWordWrap.Create;
 begin
   inherited;
 
   FActive := False;
   FColors := TTextEditorWordWrapColors.Create;
-  FIndicator := TTextEditorGlyph.Create(HInstance, '', clFuchsia);
+  FIndicator := TTextEditorGlyph.Create(HInstance, '', TColors.Fuchsia);
   CreateInternalBitmap;
   FWidth := wwwPage;
 end;
@@ -81,7 +84,7 @@ begin
   FBitmap := Vcl.Graphics.TBitmap.Create;
   with FBitmap do
   begin
-    Canvas.Brush.Color := clFuchsia;
+    Canvas.Brush.Color := TColors.Fuchsia;
     Width := 15;
     Height := 14;
     Canvas.Pen.Color := FColors.Arrow;
@@ -106,7 +109,7 @@ begin
     Canvas.LineTo(7, 12);
   end;
 
-  FIndicator.MaskColor := clFuchsia;
+  FIndicator.MaskColor := TColors.Fuchsia;
   FIndicator.Bitmap.Handle := FBitmap.Handle;
 end;
 

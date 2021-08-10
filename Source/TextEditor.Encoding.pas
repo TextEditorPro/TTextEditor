@@ -3,7 +3,10 @@ unit TextEditor.Encoding;
 interface
 
 uses
-  System.NetEncoding, System.SysUtils;
+  System.SysUtils
+{$IFDEF BASENCODING}
+  , System.NetEncoding
+{$ENDIF};
 
 type
   TUTF8WithoutBOM = class(TUTF8Encoding)
@@ -23,7 +26,6 @@ type
 {$IFDEF BASENCODING}
   TASCIIDecimalEncoding = class(TNetEncoding)
   protected
-    //function DoEncode(const Input: array of Byte): TBytes; overload; override;
     function DoDecode(const AInput: string): string; overload; override;
     function DoEncode(const AInput: string): string; overload; override;
   end;
@@ -223,9 +225,9 @@ type
 implementation
 
 uses
-  Winapi.Windows, TextEditor.Consts, TextEditor.Utils
+  Winapi.Windows
 {$IFDEF BASENCODING}, BcpBase1024, BcpBase128, BcpBase256, BcpBase32, BcpBase4096, BcpBase64, BcpBase85, BcpBase91,
-  BcpIBaseInterfaces{$ENDIF};
+  BcpIBaseInterfaces, TextEditor.Consts, TextEditor.Utils{$ENDIF};
 
 { TUTF8WithoutBOM }
 

@@ -40,8 +40,8 @@ type
 implementation
 
 uses
-  System.TypInfo, Vcl.Dialogs, Vcl.Forms, Vcl.Graphics, Vcl.GraphUtil, TextEditor.Consts, TextEditor.Highlighter.Token,
-  TextEditor.Language, TextEditor.Types, TextEditor.Utils
+  System.TypInfo, System.UITypes, Vcl.Dialogs, Vcl.Forms, Vcl.Graphics, Vcl.GraphUtil, TextEditor.Consts,
+  TextEditor.Highlighter.Token, TextEditor.Language, TextEditor.Types, TextEditor.Utils
 {$IFDEF ALPHASKINS}, sCommonData{$ENDIF};
 
 function StringToColorDef(const AString: string; const DefaultColor: TColor): Integer;
@@ -327,7 +327,7 @@ begin
   if Assigned(ARangeObject) then
   begin
     LName := ARangeObject['File'].Value;
-    if FHighlighter.MultiHighlighter and (LName <> '') then
+    if (hoMultiHighlighter in FHighlighter.Options) and (LName <> '') then
     begin
       LElementPrefix := ARangeObject['ElementPrefix'].Value;
       LEditor := FHighlighter.Editor as TCustomTextEditor;
@@ -476,7 +476,7 @@ begin
   begin
     LJSONDataValue := LSkipRegionArray.Items[LIndex];
 
-    if FHighlighter.MultiHighlighter then
+    if hoMultiHighlighter in FHighlighter.Options then
     begin
       { Multi highlighter code folding skip region include }
       LName := LJSONDataValue.ObjectValue['File'].Value;
@@ -533,7 +533,7 @@ begin
       LOpenToken := LJSONDataValue.ObjectValue['OpenToken'].Value;
       LCloseToken := LJSONDataValue.ObjectValue['CloseToken'].Value;
 
-      if FHighlighter.MultiHighlighter then
+      if hoMultiHighlighter in FHighlighter.Options then
       begin
         { Multi highlighter code folding skip region include }
         LName := LJSONDataValue.ObjectValue['File'].Value;
@@ -609,7 +609,7 @@ begin
       LOpenToken := LJSONDataValue.ObjectValue['OpenToken'].Value;
       LCloseToken := LJSONDataValue.ObjectValue['CloseToken'].Value;
 
-      if FHighlighter.MultiHighlighter then
+      if hoMultiHighlighter in FHighlighter.Options then
       begin
         { Multi highlighter code folding fold region include }
         LName := LJSONDataValue.ObjectValue['File'].Value;
@@ -753,7 +753,7 @@ begin
   begin
     LJSONDataValue := LArray.Items[LIndex];
 
-    if FHighlighter.MultiHighlighter then
+    if hoMultiHighlighter in FHighlighter.Options then
     begin
       { Multi highlighter code folding fold region include }
       LName := LJSONDataValue.ObjectValue['File'].Value;
@@ -803,8 +803,8 @@ begin
   begin
     LJSONDataValue := LElementsArray.Items[LIndex];
     New(LElement);
-    LElement.Background := StringToColorDef(LJSONDataValue.ObjectValue['Background'].Value, clWindow);
-    LElement.Foreground := StringToColorDef(LJSONDataValue.ObjectValue['Foreground'].Value, clWindowText);
+    LElement.Background := StringToColorDef(LJSONDataValue.ObjectValue['Background'].Value, TColors.SysWindow);
+    LElement.Foreground := StringToColorDef(LJSONDataValue.ObjectValue['Foreground'].Value, TColors.SysWindowText);
     LElement.Name := LJSONDataValue.ObjectValue['Name'].Value;
     LElement.FontStyles := StrToFontStyle(LJSONDataValue.ObjectValue['Style'].Value);
     FHighlighter.Colors.Styles.Add(LElement);
@@ -826,9 +826,15 @@ begin
   FHighlighter.Clear;
 
   LHighlighterObject := AJSONObject['Highlighter'];
-  FHighlighter.MultiHighlighter := LHighlighterObject.ValueBoolean['MultiHighlighter'];
+
+  FHighlighter.SetOption(hoMultiHighlighter, LHighlighterObject.ValueBoolean['MultiHighlighter']);
+  FHighlighter.ExludedWordBreakCharacters := StrToSet(LHighlighterObject.ValueString['ExcludedWordBreakCharacters']);
+
   if LHighlighterObject.ValueBoolean['YAML'] then
-    FHighlighter.BeforePrepare := FHighlighter.PrepareYAMLHighlighter;
+    FHighlighter.BeforePrepare := FHighlighter.PrepareYAMLHighlighter
+  else
+    FHighlighter.BeforePrepare := nil;
+
   ImportSample(LHighlighterObject);
   ImportEditorProperties(LHighlighterObject['Editor'].ObjectValue);
   ImportRange(FHighlighter.MainRules, LHighlighterObject['MainRules'].ObjectValue);

@@ -3,7 +3,7 @@ unit TextEditor.SpecialChars;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.SpecialChars.LineBreak, TextEditor.SpecialChars.Selection, TextEditor.Types;
+  System.Classes, System.UITypes, TextEditor.SpecialChars.LineBreak, TextEditor.SpecialChars.Selection, TextEditor.Types;
 
 type
   TTextEditorSpecialChars = class(TPersistent)
@@ -30,11 +30,11 @@ type
     procedure SetOption(const AOption: TTextEditorSpecialCharsOption; const AEnabled: Boolean);
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
   published
-    property Color: TColor read FColor write SetColor default clBlack;
+    property Color: TColor read FColor write SetColor default TColors.Black;
     property LineBreak: TTextEditorSpecialCharsLineBreak read FLineBreak write SetLineBreak;
     property Options: TTextEditorSpecialCharsOptions read FOptions write SetOptions default [scoMiddleColor];
     property Selection: TTextEditorSpecialCharsSelection read FSelection write SetSelection;
-    property Style: TTextEditorSpecialCharsStyle read FStyle write SetStyle;
+    property Style: TTextEditorSpecialCharsStyle read FStyle write SetStyle default scsDot;
     property Visible: Boolean read FVisible write SetVisible default False;
   end;
 
@@ -44,11 +44,12 @@ constructor TTextEditorSpecialChars.Create;
 begin
   inherited;
 
-  FColor := clBlack;
+  FColor := TColors.Black;
   FLineBreak := TTextEditorSpecialCharsLineBreak.Create;
   FSelection := TTextEditorSpecialCharsSelection.Create;
   FVisible := False;
   FOptions := [scoMiddleColor];
+  FStyle := scsDot;
 end;
 
 destructor TTextEditorSpecialChars.Destroy;

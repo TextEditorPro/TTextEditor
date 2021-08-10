@@ -64,7 +64,7 @@ begin
   begin
     Self.FVisible := FVisible;
     Self.FPosition := FPosition;
-    Self.FColors.Assign(fColors);
+    Self.FColors.Assign(FColors);
     Self.FOptions := FOptions;
     Self.FCursor := FCursor;
     Self.DoChange;

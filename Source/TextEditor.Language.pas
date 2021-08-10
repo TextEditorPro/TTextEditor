@@ -42,12 +42,14 @@ resourcestring
   { TextEditor.PaintHelper }
   STextEditorValueMustBeSpecified = 'SetBaseFont: ''Value'' must be specified.';
 
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
   { Spell check }
   STextEditorSpellCheckEngineCantLoadLibrary = 'Can''t load spell check dynamic link library (DLL).' + sLineBreak + sLineBreak +
     'Check the DLL version - 32-bit application can''t work with 64-bit version and vice versa.';
   STextEditorSpellCheckEngineCantInitialize = 'Can''t initialize spell check engine.';
   STextEditorHunspellHandleNeeded = 'Operation requires a dictionary to be loaded first';
   STextEditorContainsInvalidChars = 'Invalid word: ''%s'' contains characters that cannot be represented in the loaded dictionary''s codepage';
+{$ENDIF}
 
   { JSON parser }
   STextEditorUnsupportedFileEncoding = 'File encoding is not supported';

@@ -3,7 +3,7 @@ unit TextEditor.InternalImage;
 interface
 
 uses
-  Vcl.Graphics;
+  System.UITypes, Vcl.Graphics;
 
 type
   TTextEditorInternalImage = class(TObject)
@@ -19,7 +19,7 @@ type
     destructor Destroy; override;
     procedure ChangeScale(const AMultiplier, ADivider: Integer); virtual;
     procedure Draw(const ACanvas: TCanvas; const ANumber: Integer; const X: Integer; const Y: Integer;
-      const ALineHeight: Integer; const ATransparentColor: TColor = clNone);
+      const ALineHeight: Integer; const ATransparentColor: TColor = TColors.SysNone);
   end;
 
 implementation
@@ -61,7 +61,7 @@ Var
 begin
   LNumerator := (AMultiplier div ADivider) * ADivider;
   FWidth := MulDiv(FWidth, LNumerator, ADivider);
-  ResizeBitmap(FImages, FWidth * FCount, MulDiv(fImages.Height, LNumerator, ADivider));
+  ResizeBitmap(FImages, FWidth * FCount, MulDiv(FImages.Height, LNumerator, ADivider));
   FHeight := FImages.Height;
 end;
 
@@ -128,7 +128,7 @@ begin
 end;
 
 procedure TTextEditorInternalImage.Draw(const ACanvas: TCanvas; const ANumber: Integer; const X: Integer; const Y: Integer;
-  const ALineHeight: Integer; const ATransparentColor: TColor = clNone);
+  const ALineHeight: Integer; const ATransparentColor: TColor = TColors.SysNone);
 var
   LSourceRect, LDestinationRect: TRect;
   LY: Integer;
@@ -150,7 +150,7 @@ begin
       LSourceRect := Rect(ANumber * FWidth, LY, (ANumber + 1) * FWidth, LY + ALineHeight);
     end;
 
-    if ATransparentColor = clNone then
+    if ATransparentColor = TColors.SysNone then
       ACanvas.CopyRect(LDestinationRect, FImages.Canvas, LSourceRect)
     else
       ACanvas.BrushCopy(LDestinationRect, FImages, LSourceRect, ATransparentColor);

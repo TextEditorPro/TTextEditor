@@ -3,7 +3,7 @@ unit TextEditor.Search.Highlighter.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Consts, TextEditor.Types;
+  System.Classes, System.UITypes, TextEditor.Consts, TextEditor.Types;
 
 type
   TTextEditorSearchColors = class(TPersistent)
@@ -15,9 +15,9 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Background: TColor read FBackground write FBackground default clSearchHighlighter;
-    property Border: TColor read FBorder write FBorder default clNone;
-    property Foreground: TColor read FForeground write FForeground default clWindowText;
+    property Background: TColor read FBackground write FBackground default TDefaultColors.SearchHighlighter;
+    property Border: TColor read FBorder write FBorder default TColors.SysNone;
+    property Foreground: TColor read FForeground write FForeground default TColors.SysWindowText;
   end;
 
 implementation
@@ -26,9 +26,9 @@ constructor TTextEditorSearchColors.Create;
 begin
   inherited;
 
-  FBackground := clSearchHighlighter;
-  FBorder := clNone;
-  FForeground := clWindowText;
+  FBackground := TDefaultColors.SearchHighlighter;
+  FBorder := TColors.SysNone;
+  FForeground := TColors.SysWindowText;
 end;
 
 procedure TTextEditorSearchColors.Assign(ASource: TPersistent);

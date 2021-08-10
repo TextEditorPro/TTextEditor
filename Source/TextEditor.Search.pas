@@ -303,10 +303,6 @@ begin
     if soWrapAround in Options then
       Exit(0)
     else
-    if (LSearchItem^.EndTextPosition.Line = ATextPosition.Line) and
-      (LSearchItem^.EndTextPosition.Char < ATextPosition.Char) then
-      Exit(LHigh)
-    else
       Exit;
 
   LLow := 1;

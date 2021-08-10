@@ -3,7 +3,7 @@ unit TextEditor.CodeFolding.Hint.Form;
 interface
 
 uses
-  Winapi.Messages, Winapi.Windows, System.Classes, System.Types, Vcl.Controls, Vcl.Forms, Vcl.Graphics;
+  Winapi.Messages, Winapi.Windows, System.Classes, System.Types, System.UITypes, Vcl.Controls, Vcl.Forms, Vcl.Graphics;
 
 type
   TTextEditorCodeFoldingHintForm = class(TCustomForm)
@@ -40,8 +40,8 @@ type
     constructor Create(AOwner: TComponent); overload; override;
     destructor Destroy; override;
     procedure Execute(const X, Y: Integer);
-    property BackgroundColor: TColor read FBackgroundColor write FBackgroundColor default clWindow;
-    property BorderColor: TColor read FBorderColor write FBorderColor default clBtnFace;
+    property BackgroundColor: TColor read FBackgroundColor write FBackgroundColor default TColors.SysWindow;
+    property BorderColor: TColor read FBorderColor write FBorderColor default TColors.SysBtnFace;
     property Font: TFont read FFont write SetFont;
     property FormWidth: Integer read FFormWidth write FFormWidth; { Don't use the width because it triggers resizing }
     property ItemHeight: Integer read FItemHeight write SetItemHeight default 0;
@@ -53,8 +53,7 @@ type
 implementation
 
 uses
-  System.SysUtils, System.UITypes, TextEditor.Consts, TextEditor, TextEditor.KeyCommands, TextEditor.PaintHelper,
-  TextEditor.Utils
+  System.SysUtils, TextEditor, TextEditor.Consts, TextEditor.KeyCommands, TextEditor.PaintHelper, TextEditor.Utils
 {$IFDEF ALPHASKINS}, sMessages, sSkinProvider{$ENDIF};
 
 constructor TTextEditorCodeFoldingHintForm.Create(AOwner: TComponent); //FI:W525 Missing INHERITED call in constructor
@@ -80,8 +79,8 @@ begin
   FFont.Name := 'Courier New';
   FFont.Size := 8;
 
-  FBackgroundColor := clWindow;
-  FBorderColor := clBtnFace;
+  FBackgroundColor := TColors.SysWindow;
+  FBorderColor := TColors.SysBtnFace;
 
   BorderStyle := bsNone;
   FormStyle := fsStayOnTop;

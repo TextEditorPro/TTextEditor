@@ -3,7 +3,7 @@ unit TextEditor.SyncEdit.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Consts;
+  System.Classes, System.UITypes, TextEditor.Consts;
 
 type
   TTextEditorSyncEditColors = class(TPersistent)
@@ -15,9 +15,9 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Background: TColor read FBackground write FBackground default clSyncEditBackground;
-    property EditBorder: TColor read FEditBorder write FEditBorder default clWindowText;
-    property WordBorder: TColor read FWordBorder write FWordBorder default clHighlight;
+    property Background: TColor read FBackground write FBackground default TDefaultColors.SyncEditBackground;
+    property EditBorder: TColor read FEditBorder write FEditBorder default TColors.SysWindowText;
+    property WordBorder: TColor read FWordBorder write FWordBorder default TColors.SysHighlight;
   end;
 
 implementation
@@ -26,9 +26,9 @@ constructor TTextEditorSyncEditColors.Create;
 begin
   inherited;
 
-  FBackground := clSyncEditBackground;
-  FEditBorder := clWindowText;
-  FWordBorder := clHighlight;
+  FBackground := TDefaultColors.SyncEditBackground;
+  FEditBorder := TColors.SysWindowText;
+  FWordBorder := TColors.SysHighlight;
 end;
 
 procedure TTextEditorSyncEditColors.Assign(ASource: TPersistent);

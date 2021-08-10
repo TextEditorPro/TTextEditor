@@ -97,8 +97,7 @@ type
 
 implementation
 
-uses
-  System.RTLConsts, TextEditor.Utils;
+
 
 { TTextEditorCompletionProposalSnippetItemPosition }
 

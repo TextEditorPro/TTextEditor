@@ -3,7 +3,7 @@ unit TextEditor.Glyph;
 interface
 
 uses
-  System.Classes, Vcl.Graphics;
+  System.Classes, System.UITypes, Vcl.Graphics;
 
 type
   TTextEditorGlyph = class(TPersistent)
@@ -22,7 +22,7 @@ type
     procedure SetMaskColor(const AValue: TColor);
     procedure SetVisible(const AValue: Boolean);
   public
-    constructor Create(const AModule: THandle = 0; const AName: string = ''; const AMaskColor: TColor = clFuchsia);
+    constructor Create(const AModule: THandle = 0; const AName: string = ''; const AMaskColor: TColor = TColors.Fuchsia);
     destructor Destroy; override;
     procedure Assign(ASource: TPersistent); override;
     procedure ChangeScale(const AMultiplier, ADivider: Integer);
@@ -33,7 +33,7 @@ type
     property Width: Integer read GetWidth;
   published
     property Left: Integer read FLeft write SetLeft default 2;
-    property MaskColor: TColor read FMaskColor write SetMaskColor default clNone;
+    property MaskColor: TColor read FMaskColor write SetMaskColor default TColors.SysNone;
     property Visible: Boolean read FVisible write SetVisible default True;
   end;
 
@@ -42,7 +42,7 @@ implementation
 uses
   Winapi.Windows, System.SysUtils, TextEditor.Utils;
 
-constructor TTextEditorGlyph.Create(const AModule: THandle = 0; const AName: string = ''; const AMaskColor: TColor = clFuchsia);
+constructor TTextEditorGlyph.Create(const AModule: THandle = 0; const AName: string = ''; const AMaskColor: TColor = TColors.Fuchsia);
 begin
   inherited Create;
 
@@ -53,11 +53,11 @@ begin
     FInternalMaskColor := AMaskColor;
   end
   else
-    FInternalMaskColor := clNone;
+    FInternalMaskColor := TColors.SysNone;
 
   FVisible := True;
   FBitmap := Vcl.Graphics.TBitmap.Create;
-  FMaskColor := clNone;
+  FMaskColor := TColors.SysNone;
   FLeft := 2;
 end;
 

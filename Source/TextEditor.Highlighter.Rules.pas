@@ -175,7 +175,7 @@ type
 implementation
 
 uses
-  System.Types, TextEditor.Utils;
+  System.Types, System.UITypes, TextEditor.Utils;
 
 { TTextEditorParser }
 
@@ -816,8 +816,8 @@ begin
 
   FKeyList := TStringList.Create;
   FKeyList.Sorted := True;
-  FAttribute.Foreground := clWindowText;
-  FAttribute.Background := clWindow;
+  FAttribute.Foreground := TColors.SysWindowText;
+  FAttribute.Background := TColors.SysWindow;
 end;
 
 destructor TTextEditorKeyList.Destroy;
@@ -833,8 +833,8 @@ begin
   inherited Create;
 
   FCharSet := ACharSet;
-  FAttribute.Foreground := clWindowText;
-  FAttribute.Background := clWindow;
+  FAttribute.Foreground := TColors.SysWindowText;
+  FAttribute.Background := TColors.SysWindow;
 end;
 
 end.

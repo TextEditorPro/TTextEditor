@@ -20,7 +20,7 @@ type
     procedure SetOption(const AOption: TTextEditorMatchingPairOption; const AEnabled: Boolean);
   published
     property Active: Boolean read FActive write FActive default True;
-    property AutoComplete: Boolean read FAutoComplete write FAutoComplete;
+    property AutoComplete: Boolean read FAutoComplete write FAutoComplete default False;
     property Colors: TTextEditorMatchingPairColors read FColors write SetColors;
     property Options: TTextEditorMatchingPairOptions read FOptions write FOptions default [mpoUseMatchedColor];
   end;
@@ -31,6 +31,7 @@ constructor TTextEditorMatchingPairs.Create;
 begin
   inherited;
 
+  FAutoComplete := False;
   FColors := TTextEditorMatchingPairColors.Create;
   FActive := True;
   FOptions := [mpoUseMatchedColor];

@@ -113,7 +113,7 @@ type
 
   { Editor options }
   TTextEditorOption = (eoAutoIndent, eoDragDropEditing, eoDropFiles, eoShowNonBreakingSpaceAsSpace,
-    eoShowNullCharacters, eoSpellCheck, eoTrimTrailingSpaces, eoTrailingLineBreak);
+    eoShowNullCharacters{$IFDEF TEXT_EDITOR_SPELL_CHECK}, eoSpellCheck{$ENDIF}, eoTrimTrailingSpaces, eoTrailingLineBreak);
   TTextEditorOptions = set of TTextEditorOption;
 
   TTextEditorOvertypeMode = (omInsert, omOverwrite);
@@ -200,6 +200,9 @@ type
     ttMailtoLink, ttMethod, ttMethodName, ttNumber, ttReservedWord, ttString, ttSymbol, ttWebLink);
 
   TTextEditorKeyCharType = (ctFoldOpen, ctFoldClose, ctSkipOpen, ctSkipClose);
+
+  TTextEditorHighlighterOption = (hoExecuteBeforePrepare, hoMultiHighlighter);
+  TTextEditorHighlighterOptions = set of TTextEditorHighlighterOption;
 
   { Special chars }
   TTextEditorSpecialCharsLineBreakStyle = (eolArrow, eolCRLF, eolEnter, eolPilcrow);

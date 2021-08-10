@@ -3,7 +3,7 @@ unit TextEditor.MatchingPair.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Consts;
+  System.Classes, System.UITypes, TextEditor.Consts;
 
 type
   TTextEditorMatchingPairColors = class(TPersistent)
@@ -15,9 +15,9 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Matched: TColor read FMatched write FMatched default clAqua;
-    property Underline: TColor read FUnderline write FUnderline default clMatchingPairUnderline;
-    property Unmatched: TColor read FUnmatched write FUnmatched default clYellow;
+    property Matched: TColor read FMatched write FMatched default TColors.Aqua;
+    property Underline: TColor read FUnderline write FUnderline default TDefaultColors.MatchingPairUnderline;
+    property Unmatched: TColor read FUnmatched write FUnmatched default TColors.Yellow;
   end;
 
 implementation
@@ -26,9 +26,9 @@ constructor TTextEditorMatchingPairColors.Create;
 begin
   inherited;
 
-  FMatched := clAqua;
-  FUnderline := clMatchingPairUnderline;
-  FUnmatched := clYellow;
+  FMatched := TColors.Aqua;
+  FUnderline := TDefaultColors.MatchingPairUnderline;
+  FUnmatched := TColors.Yellow;
 end;
 
 procedure TTextEditorMatchingPairColors.Assign(ASource: TPersistent);

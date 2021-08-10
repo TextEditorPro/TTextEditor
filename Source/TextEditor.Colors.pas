@@ -3,7 +3,7 @@ unit TextEditor.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Types;
+  System.Classes, System.UITypes, TextEditor.Types;
 
 type
   TTextEditorColors = class(TPersistent)
@@ -18,10 +18,10 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Background: TColor read FBackground write SetBackground default clWindow;
-    property Foreground: TColor read FForeground write SetForeground default clWindowText;
+    property Background: TColor read FBackground write SetBackground default TColors.SysWindow;
+    property Foreground: TColor read FForeground write SetForeground default TColors.SysWindowText;
     property OnChange: TTextEditorCodeColorEvent read FOnChange write FOnChange;
-    property ReservedWord: TColor read FReservedWord write FReservedWord default clWindowText;
+    property ReservedWord: TColor read FReservedWord write FReservedWord default TColors.SysWindowText;
   end;
 
 implementation
@@ -30,9 +30,9 @@ constructor TTextEditorColors.Create;
 begin
   inherited;
 
-  FBackground := clWindow;
-  FForeground := clWindowText;
-  FReservedWord := clWindowText;
+  FBackground := TColors.SysWindow;
+  FForeground := TColors.SysWindowText;
+  FReservedWord := TColors.SysWindowText;
 end;
 
 procedure TTextEditorColors.Assign(ASource: TPersistent);

@@ -86,7 +86,7 @@
         <GenPackage>true</GenPackage>
         <DCC_ImageBase>00400000</DCC_ImageBase>
         <DCC_WriteableConstants>true</DCC_WriteableConstants>
-        <DCC_Description>TextEditor component suite</DCC_Description>
+        <DCC_Description>TTextEditor control package - designtime</DCC_Description>
         <DCC_Namespace>System;Xml;Data;Datasnap;Web;Soap;Vcl;Winapi;$(DCC_Namespace)</DCC_Namespace>
         <DCC_N>false</DCC_N>
         <DCC_S>false</DCC_S>
@@ -145,7 +145,7 @@
         <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
-        <DCC_Define>DEBUG;$(DCC_Define)</DCC_Define>
+        <DCC_Define>DEBUG;TEXT_EDITOR_SPELL_CHECK;$(DCC_Define)</DCC_Define>
         <DCC_Optimize>false</DCC_Optimize>
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
     </PropertyGroup>

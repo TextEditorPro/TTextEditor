@@ -20,14 +20,14 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property ActiveLineBackground: TColor read FActiveLineBackground write FActiveLineBackground default clActiveLineBackground;
-    property ActiveLineBackgroundUnfocused: TColor read FActiveLineBackgroundUnfocused write FActiveLineBackgroundUnfocused default clActiveLineBackgroundUnfocused;
-    property CollapsedLine: TColor read FCollapsedLine write FCollapsedLine default clLeftMarginFontForeground;
-    property Background: TColor read FBackground write FBackground default clLeftMarginBackground;
-    property FoldingLine: TColor read FFoldingLine write FFoldingLine default clLeftMarginFontForeground;
-    property FoldingLineHighlight: TColor read FFoldingLineHighlight write FFoldingLineHighlight default clLeftMarginFontForeground;
-    property Indent: TColor read FIndent write FIndent default clIndent;
-    property IndentHighlight: TColor read FIndentHighlight write FIndentHighlight default clIndentHighlight;
+    property ActiveLineBackground: TColor read FActiveLineBackground write FActiveLineBackground default TDefaultColors.ActiveLineBackground;
+    property ActiveLineBackgroundUnfocused: TColor read FActiveLineBackgroundUnfocused write FActiveLineBackgroundUnfocused default TDefaultColors.ActiveLineBackgroundUnfocused;
+    property CollapsedLine: TColor read FCollapsedLine write FCollapsedLine default TDefaultColors.LeftMarginFontForeground;
+    property Background: TColor read FBackground write FBackground default TDefaultColors.LeftMarginBackground;
+    property FoldingLine: TColor read FFoldingLine write FFoldingLine default TDefaultColors.LeftMarginFontForeground;
+    property FoldingLineHighlight: TColor read FFoldingLineHighlight write FFoldingLineHighlight default TDefaultColors.LeftMarginFontForeground;
+    property Indent: TColor read FIndent write FIndent default TDefaultColors.Indent;
+    property IndentHighlight: TColor read FIndentHighlight write FIndentHighlight default TDefaultColors.IndentHighlight;
   end;
 
 implementation
@@ -36,14 +36,14 @@ constructor TTextEditorCodeFoldingColors.Create;
 begin
   inherited;
 
-  FActiveLineBackground := clActiveLineBackground;
-  FActiveLineBackgroundUnfocused := clActiveLineBackgroundUnfocused;
-  FCollapsedLine := clLeftMarginFontForeground;
-  FBackground := clLeftMarginBackground;
-  FFoldingLine := clLeftMarginFontForeground;
-  FFoldingLineHighlight := clLeftMarginFontForeground;
-  FIndent := clIndent;
-  FIndentHighlight := clIndentHighlight;
+  FActiveLineBackground := TDefaultColors.ActiveLineBackground;
+  FActiveLineBackgroundUnfocused := TDefaultColors.ActiveLineBackgroundUnfocused;
+  FCollapsedLine := TDefaultColors.LeftMarginFontForeground;
+  FBackground := TDefaultColors.LeftMarginBackground;
+  FFoldingLine := TDefaultColors.LeftMarginFontForeground;
+  FFoldingLineHighlight := TDefaultColors.LeftMarginFontForeground;
+  FIndent := TDefaultColors.Indent;
+  FIndentHighlight := TDefaultColors.IndentHighlight;
 end;
 
 procedure TTextEditorCodeFoldingColors.Assign(ASource: TPersistent);

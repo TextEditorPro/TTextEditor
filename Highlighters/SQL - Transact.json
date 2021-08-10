@@ -176,6 +176,7 @@
               "inner",
               "insert",
               "int",
+              "integer",
               "intersect",
               "into",
               "is",
@@ -231,6 +232,7 @@
               "restore",
               "restrict",
               "return",
+              "returns",
               "revert",
               "revoke",
               "right",
@@ -291,6 +293,7 @@
               "while",
               "with",
               "within",
+              "within_group",
               "writetext",
               "xml"
             ],

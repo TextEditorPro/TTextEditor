@@ -3,7 +3,7 @@ unit TextEditor.Highlighter.Attributes;
 interface
 
 uses
-  Winapi.Windows, System.Classes, Vcl.Graphics, TextEditor.Consts;
+  Winapi.Windows, System.Classes, System.UITypes, TextEditor.Consts;
 
 type
   TTextEditorHighlighterAttribute = class(TPersistent)
@@ -21,11 +21,11 @@ type
     procedure Assign(ASource: TPersistent); override;
   public
     property Name: string read FName write FName;
-    property Background: TColor read FBackground write FBackground default clNone;
+    property Background: TColor read FBackground write FBackground default TColors.SysNone;
     property Element: string read FElement write FElement;
     property EscapeChar: Char read FEscapeChar write FEscapeChar default TEXT_EDITOR_NONE_CHAR;
     property FontStyles: TFontStyles read FFontStyles write FFontStyles;
-    property Foreground: TColor read FForeground write FForeground default clNone;
+    property Foreground: TColor read FForeground write FForeground default TColors.SysNone;
     property ParentBackground: Boolean read FParentBackground write FParentBackground;
     property ParentForeground: Boolean read FParentForeground write FParentForeground;
   end;
@@ -39,8 +39,8 @@ constructor TTextEditorHighlighterAttribute.Create(const AttributeName: string);
 begin
   inherited Create;
 
-  FBackground := clNone;
-  FForeground := clNone;
+  FBackground := TColors.SysNone;
+  FForeground := TColors.SysNone;
   FName := AttributeName;
   FEscapeChar := TEXT_EDITOR_NONE_CHAR;
 end;

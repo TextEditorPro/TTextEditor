@@ -3,6 +3,7 @@
     "Sample": [
       "MsgBox(64, \"Tutorial\", \"Hello, World!\")"
     ],
+    "ExcludedWordBreakCharacters": "$@",
     "MainRules": {
       "Attributes": {
         "Element": "Editor"
@@ -163,6 +164,7 @@
               "acos",
               "adlibregister",
               "adlibunregister",
+              "and",
               "asc",
               "ascw",
               "asin",
@@ -402,6 +404,7 @@
               "mouseup",
               "mousewheel",
               "msgbox",
+              "not",
               "number",
               "objcreate",
               "objcreateinterface",
@@ -410,6 +413,7 @@
               "objname",
               "onautoitexitregister",
               "onautoitexitunregister",
+              "or",
               "ping",
               "pixelchecksum",
               "pixelgetcolor",

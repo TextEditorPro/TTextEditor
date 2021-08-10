@@ -66,7 +66,8 @@ implementation
 
 uses
   Winapi.Windows, System.Generics.Defaults, System.Math, System.SysUtils, System.UITypes, Vcl.Dialogs, TextEditor,
-  TextEditor.CompletionProposal.Snippets, TextEditor.Consts, TextEditor.KeyCommands, TextEditor.PaintHelper
+  TextEditor.CompletionProposal.Snippets, TextEditor.Consts, TextEditor.Highlighter, TextEditor.KeyCommands,
+  TextEditor.PaintHelper
 {$IFDEF ALPHASKINS}, sCommonData{$ENDIF};
 
 constructor TTextEditorCompletionProposalPopupWindow.Create(AOwner: TComponent);
@@ -165,25 +166,25 @@ begin
   if Assigned(Owner) then
     LEditor := Owner as TCustomTextEditor;
   case AKey of
-    VK_RETURN, VK_TAB:
+    vkReturn, vkTab:
       if Assigned(FOnValidate) then
         FOnValidate(Self, TEXT_EDITOR_NONE_CHAR);
-    VK_ESCAPE:
+    vkEscape:
       Hide;
-    VK_LEFT:
+    vkLeft:
       if Length(FCurrentString) > 0 then
       begin
         CurrentString := Copy(FCurrentString, 1, Length(FCurrentString) - 1);
         if Assigned(LEditor) then
-          LEditor.CommandProcessor(ecLeft, TEXT_EDITOR_NONE_CHAR, nil);
+          LEditor.CommandProcessor(TKeyCommands.Left, TEXT_EDITOR_NONE_CHAR, nil);
       end
       else
       begin
         if Assigned(LEditor) then
-          LEditor.CommandProcessor(ecLeft, TEXT_EDITOR_NONE_CHAR, nil);
+          LEditor.CommandProcessor(TKeyCommands.Left, TEXT_EDITOR_NONE_CHAR, nil);
         Hide;
       end;
-    VK_RIGHT:
+    vkRight:
       if Assigned(LEditor) then
       with LEditor do
       begin
@@ -198,27 +199,27 @@ begin
         else
           CurrentString := FCurrentString + LChar;
 
-        CommandProcessor(ecRight, TEXT_EDITOR_NONE_CHAR, nil);
+        CommandProcessor(TKeyCommands.Right, TEXT_EDITOR_NONE_CHAR, nil);
       end;
-    VK_PRIOR:
+    vkPrior:
       MoveSelectedLine(-FCompletionProposal.VisibleLines);
-    VK_NEXT:
+    vkNext:
       MoveSelectedLine(FCompletionProposal.VisibleLines);
-    VK_END:
+    vkEnd:
       TopLine := Length(FItemIndexArray) - 1;
-    VK_HOME:
+    vkHome:
       TopLine := 0;
-    VK_UP:
+    vkUp:
       if ssCtrl in AShift then
         FSelectedLine := 0
       else
         MoveSelectedLine(-1);
-    VK_DOWN:
+    vkDown:
       if ssCtrl in AShift then
         FSelectedLine := Length(FItemIndexArray) - 1
       else
         MoveSelectedLine(1);
-    VK_BACK:
+    vkBack:
       if AShift = [] then
       begin
         if Length(FCurrentString) > 0 then
@@ -226,12 +227,12 @@ begin
           CurrentString := Copy(FCurrentString, 1, Length(FCurrentString) - 1);
 
           if Assigned(LEditor) then
-            LEditor.CommandProcessor(ecBackspace, TEXT_EDITOR_NONE_CHAR, nil);
+            LEditor.CommandProcessor(TKeyCommands.Backspace, TEXT_EDITOR_NONE_CHAR, nil);
         end
         else
         begin
           if Assigned(LEditor) then
-            LEditor.CommandProcessor(ecBackspace, TEXT_EDITOR_NONE_CHAR, nil);
+            LEditor.CommandProcessor(TKeyCommands.Backspace, TEXT_EDITOR_NONE_CHAR, nil);
 
           Hide;
         end;
@@ -266,7 +267,7 @@ begin
     TEXT_EDITOR_BACKSPACE_CHAR:
       if not CodeInsight then
       with Owner as TCustomTextEditor do
-        CommandProcessor(ecChar, AKey, nil);
+        CommandProcessor(TKeyCommands.Char, AKey, nil);
   end;
   Invalidate;
 end;

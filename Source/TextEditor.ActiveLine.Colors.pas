@@ -3,7 +3,7 @@ unit TextEditor.ActiveLine.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Consts;
+  System.Classes, System.UITypes, TextEditor.Consts;
 
 type
   TTextEditorActiveLineColors = class(TPersistent)
@@ -16,10 +16,10 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Background: TColor read FBackground write FBackground default clActiveLineBackground;
-    property BackgroundUnfocused: TColor read FBackgroundUnfocused write FBackgroundUnfocused default clActiveLineBackgroundUnfocused;
-    property Foreground: TColor read FForeground write FForeground default clActiveLineForeground;
-    property ForegroundUnfocused: TColor read FForegroundUnfocused write FForegroundUnfocused default clActiveLineForegroundUnfocused;
+    property Background: TColor read FBackground write FBackground default TDefaultColors.ActiveLineBackground;
+    property BackgroundUnfocused: TColor read FBackgroundUnfocused write FBackgroundUnfocused default TDefaultColors.ActiveLineBackgroundUnfocused;
+    property Foreground: TColor read FForeground write FForeground default TDefaultColors.ActiveLineForeground;
+    property ForegroundUnfocused: TColor read FForegroundUnfocused write FForegroundUnfocused default TDefaultColors.ActiveLineForegroundUnfocused;
   end;
 
 implementation
@@ -28,10 +28,10 @@ constructor TTextEditorActiveLineColors.Create;
 begin
   inherited;
 
-  FBackground := clActiveLineBackground;
-  FBackgroundUnfocused := clActiveLineBackgroundUnfocused;
-  FForeground := clActiveLineForeground;
-  FForegroundUnfocused := clActiveLineForegroundUnfocused;
+  FBackground := TDefaultColors.ActiveLineBackground;
+  FBackgroundUnfocused := TDefaultColors.ActiveLineBackgroundUnfocused;
+  FForeground := TDefaultColors.ActiveLineForeground;
+  FForegroundUnfocused := TDefaultColors.ActiveLineForegroundUnfocused;
 end;
 
 procedure TTextEditorActiveLineColors.Assign(ASource: TPersistent);

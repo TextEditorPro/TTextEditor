@@ -3,7 +3,7 @@ unit TextEditor.CompletionProposal.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics;
+  System.Classes, System.UITypes;
 
 type
   TTextEditorCompletionProposalColors = class(TPersistent)
@@ -16,10 +16,10 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Background: TColor read FBackground write FBackground default clWindow;
-    property Foreground: TColor read FForeground write FForeground default clWindowText;
-    property SelectedBackground: TColor read FSelectedBackground write FSelectedBackground default clHighlight;
-    property SelectedText: TColor read FSelectedText write FSelectedText default clHighlightText;
+    property Background: TColor read FBackground write FBackground default TColors.SysWindow;
+    property Foreground: TColor read FForeground write FForeground default TColors.SysWindowText;
+    property SelectedBackground: TColor read FSelectedBackground write FSelectedBackground default TColors.SysHighlight;
+    property SelectedText: TColor read FSelectedText write FSelectedText default TColors.SysHighlightText;
   end;
 
 implementation
@@ -28,10 +28,10 @@ constructor TTextEditorCompletionProposalColors.Create;
 begin
   inherited;
 
-  FBackground := clWindow;
-  FForeground := clWindowText;
-  FSelectedBackground := clHighlight;
-  FSelectedText := clHighlightText;
+  FBackground := TColors.SysWindow;
+  FForeground := TColors.SysWindowText;
+  FSelectedBackground := TColors.SysHighlight;
+  FSelectedText := TColors.SysHighlightText;
 end;
 
 procedure TTextEditorCompletionProposalColors.Assign(ASource: TPersistent);

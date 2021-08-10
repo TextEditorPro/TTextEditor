@@ -395,6 +395,7 @@
               "binary_integer",
               "body",
               "boolean",
+              "case",
               "char_base",
               "check",
               "close",
@@ -468,6 +469,7 @@
               "loop",
               "minus",
               "mlslabel",
+              "mod",
               "modrange",
               "mode",
               "natural",
@@ -496,6 +498,7 @@
               "procedure",
               "public",
               "raise",
+              "range",
               "real",
               "record",
               "release",
@@ -519,6 +522,7 @@
               "size",
               "smallint",
               "space",
+              "subtype",
               "sql",
               "sqlcode",
               "sqlerrm",
@@ -550,7 +554,7 @@
               "views",
               "with",
               "work",
-              "xore"
+              "xor"
             ],
             "Attributes": {
               "Element": "ReservedWord"

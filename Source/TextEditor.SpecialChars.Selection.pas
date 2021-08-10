@@ -3,7 +3,7 @@ unit TextEditor.SpecialChars.Selection;
 interface
 
 uses
-  System.Classes, Vcl.Graphics;
+  System.Classes, System.UITypes;
 
 type
   TTextEditorSpecialCharsSelection = class(TPersistent)
@@ -19,7 +19,7 @@ type
     procedure Assign(ASource: TPersistent); override;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
-    property Color: TColor read FColor write SetColor default clBlack;
+    property Color: TColor read FColor write SetColor default TColors.Black;
     property Visible: Boolean read FVisible write SetVisible default False;
   end;
 
@@ -29,7 +29,7 @@ constructor TTextEditorSpecialCharsSelection.Create;
 begin
   inherited;
 
-  FColor := clBlack;
+  FColor := TColors.Black;
   FVisible := False;
 end;
 

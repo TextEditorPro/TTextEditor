@@ -3,7 +3,7 @@ unit TextEditor.CodeFolding.Hint.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics;
+  System.Classes, System.UITypes;
 
 type
   TTextEditorCodeFoldingHintColors = class(TPersistent)
@@ -14,8 +14,8 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Background: TColor read FBackground write FBackground default clWindow;
-    property Border: TColor read FBorder write FBorder default clBtnFace;
+    property Background: TColor read FBackground write FBackground default TColors.SysWindow;
+    property Border: TColor read FBorder write FBorder default TColors.SysBtnFace;
   end;
 
 implementation
@@ -24,8 +24,8 @@ constructor TTextEditorCodeFoldingHintColors.Create;
 begin
   inherited;
 
-  FBackground := clWindow;
-  FBorder := clBtnFace;
+  FBackground := TColors.SysWindow;
+  FBorder := TColors.SysBtnFace;
 end;
 
 procedure TTextEditorCodeFoldingHintColors.Assign(ASource: TPersistent);

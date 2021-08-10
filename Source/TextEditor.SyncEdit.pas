@@ -58,7 +58,7 @@ type
 implementation
 
 uses
-  Vcl.Graphics, Vcl.Menus, TextEditor.Consts;
+  System.UITypes, Vcl.Graphics, Vcl.Menus, TextEditor.Consts;
 
 constructor TTextEditorSyncEdit.Create;
 begin
@@ -72,7 +72,7 @@ begin
   FOptions := [seCaseSensitive];
   FSyncItems := TList.Create;
   FColors := TTextEditorSyncEditColors.Create;
-  FActivator := TTextEditorGlyph.Create(HInstance, TEXT_EDITOR_SYNCEDIT, clFuchsia);
+  FActivator := TTextEditorGlyph.Create(HInstance, TEXT_EDITOR_SYNCEDIT, TColors.Fuchsia);
 end;
 
 destructor TTextEditorSyncEdit.Destroy;

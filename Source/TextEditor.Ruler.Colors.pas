@@ -3,7 +3,7 @@ unit TextEditor.Ruler.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Consts;
+  System.Classes, System.UITypes, TextEditor.Consts;
 
 type
   TTextEditorRulerColors = class(TPersistent)
@@ -17,11 +17,11 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Background: TColor read FBackground write FBackground default clLeftMarginBackground;
-    property Border: TColor read FBorder write FBorder default clLeftMarginFontForeground;
-    property Lines: TColor read FLines write FLines default clLeftMarginFontForeground;
-    property MovingEdge: TColor read FMovingEdge write FMovingEdge default clSilver;
-    property Selection: TColor read FSelection write FSelection default clBtnFace;
+    property Background: TColor read FBackground write FBackground default TDefaultColors.LeftMarginBackground;
+    property Border: TColor read FBorder write FBorder default TDefaultColors.LeftMarginFontForeground;
+    property Lines: TColor read FLines write FLines default TDefaultColors.LeftMarginFontForeground;
+    property MovingEdge: TColor read FMovingEdge write FMovingEdge default TColors.Silver;
+    property Selection: TColor read FSelection write FSelection default TColors.SysBtnFace;
   end;
 
 implementation
@@ -30,11 +30,11 @@ constructor TTextEditorRulerColors.Create;
 begin
   inherited;
 
-  FBackground := clLeftMarginBackground;
-  FBorder := clLeftMarginFontForeground;
-  FLines := clLeftMarginFontForeground;
-  FMovingEdge := clSilver;
-  FSelection := clBtnFace;
+  FBackground := TDefaultColors.LeftMarginBackground;
+  FBorder := TDefaultColors.LeftMarginFontForeground;
+  FLines := TDefaultColors.LeftMarginFontForeground;
+  FMovingEdge := TColors.Silver;
+  FSelection := TColors.SysBtnFace;
 end;
 
 procedure TTextEditorRulerColors.Assign(ASource: TPersistent);

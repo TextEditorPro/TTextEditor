@@ -25,8 +25,9 @@ package TextEditor.Delphi.Designtime;
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
 {$DEFINE DEBUG}
+{$DEFINE TEXT_EDITOR_SPELL_CHECK}
 {$ENDIF IMPLICITBUILDING}
-{$DESCRIPTION 'TextEditor component suite'}
+{$DESCRIPTION 'TTextEditor control package - designtime'}
 {$DESIGNONLY}
 {$IMPLICITBUILD ON}
 

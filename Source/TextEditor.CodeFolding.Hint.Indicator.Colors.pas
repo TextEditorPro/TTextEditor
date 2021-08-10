@@ -15,9 +15,9 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Background: TColor read FBackground write FBackground default clLeftMarginBackground;
-    property Border: TColor read FBorder write FBorder default clLeftMarginFontForeground;
-    property Mark: TColor read FMark write FMark default clLeftMarginFontForeground;
+    property Background: TColor read FBackground write FBackground default TDefaultColors.LeftMarginBackground;
+    property Border: TColor read FBorder write FBorder default TDefaultColors.LeftMarginFontForeground;
+    property Mark: TColor read FMark write FMark default TDefaultColors.LeftMarginFontForeground;
   end;
 
 implementation
@@ -26,9 +26,9 @@ constructor TTextEditorCodeFoldingHintIndicatorColors.Create;
 begin
   inherited;
 
-  FBackground := clLeftMarginBackground;
-  FBorder := clLeftMarginFontForeground;
-  FMark := clLeftMarginFontForeground;
+  FBackground := TDefaultColors.LeftMarginBackground;
+  FBorder := TDefaultColors.LeftMarginFontForeground;
+  FMark := TDefaultColors.LeftMarginFontForeground;
 end;
 
 procedure TTextEditorCodeFoldingHintIndicatorColors.Assign(ASource: TPersistent);

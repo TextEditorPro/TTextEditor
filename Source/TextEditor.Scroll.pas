@@ -52,7 +52,7 @@ begin
   FMaxWidth := 1024;
   FBars := System.UITypes.TScrollStyle.ssBoth;
   FHint := TTextEditorScrollHint.Create;
-  FIndicator := TTextEditorGlyph.Create(HInstance, TEXT_EDITOR_MOUSE_MOVE_SCROLL, clFuchsia);
+  FIndicator := TTextEditorGlyph.Create(HInstance, TEXT_EDITOR_MOUSE_MOVE_SCROLL, TColors.Fuchsia);
   FShadow := TTextEditorScrollShadow.Create;
 end;
 

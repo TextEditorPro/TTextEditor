@@ -23,6 +23,7 @@ package TextEditor.Delphi.Runtime;
 {$WRITEABLECONST ON}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
+{$DEFINE TEXT_EDITOR_SPELL_CHECK}
 {$DEFINE DEBUG}
 {$ENDIF IMPLICITBUILDING}
 {$DESCRIPTION 'TTextEditor control package - runtime'}
@@ -129,7 +130,9 @@ contains
   TextEditor.SpecialChars in '..\Source\TextEditor.SpecialChars.pas',
   TextEditor.SpecialChars.LineBreak in '..\Source\TextEditor.SpecialChars.LineBreak.pas',
   TextEditor.SpecialChars.Selection in '..\Source\TextEditor.SpecialChars.Selection.pas',
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
   TextEditor.SpellCheck in '..\Source\TextEditor.SpellCheck.pas',
+{$ENDIF}
   TextEditor.SyncEdit in '..\Source\TextEditor.SyncEdit.pas',
   TextEditor.SyncEdit.Colors in '..\Source\TextEditor.SyncEdit.Colors.pas',
   TextEditor.Tabs in '..\Source\TextEditor.Tabs.pas',
@@ -144,5 +147,4 @@ contains
   TextEditor.WordWrap.Colors in '..\Source\TextEditor.WordWrap.Colors.pas';
 
 end.
-
 

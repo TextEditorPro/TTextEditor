@@ -3,7 +3,7 @@ unit TextEditor.RightMargin.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics;
+  System.Classes, System.UITypes;
 
 type
   TTextEditorRightMarginColors = class(TPersistent)
@@ -14,8 +14,8 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Margin: TColor read FMargin write FMargin default clSilver;
-    property MovingEdge: TColor read FMovingEdge write FMovingEdge default clSilver;
+    property Margin: TColor read FMargin write FMargin default TColors.Silver;
+    property MovingEdge: TColor read FMovingEdge write FMovingEdge default TColors.Silver;
   end;
 
 implementation
@@ -24,8 +24,8 @@ constructor TTextEditorRightMarginColors.Create;
 begin
   inherited;
 
-  FMargin := clSilver;
-  FMovingEdge := clSilver;
+  FMargin := TColors.Silver;
+  FMovingEdge := TColors.Silver;
 end;
 
 procedure TTextEditorRightMarginColors.Assign(ASource: TPersistent);

@@ -79,7 +79,7 @@ begin
   FFont.Name := 'Courier New';
   FFont.Size := 8;
   FFont.Style := [];
-  FFont.Color := clLeftMarginFontForeground;
+  FFont.Color := TDefaultColors.LeftMarginFontForeground;
   FWidth := 57;
   FVisible := True;
 

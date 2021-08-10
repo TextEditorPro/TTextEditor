@@ -3,7 +3,7 @@ unit TextEditor.ActiveLine;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.ActiveLine.Colors, TextEditor.Consts, TextEditor.Glyph;
+  System.Classes, System.UITypes, TextEditor.ActiveLine.Colors, TextEditor.Consts, TextEditor.Glyph;
 
 type
   TTextEditorActiveLine = class(TPersistent)
@@ -35,7 +35,7 @@ begin
   inherited;
 
   FColors := TTextEditorActiveLineColors.Create;
-  FIndicator := TTextEditorGlyph.Create(HInstance, TEXT_EDITOR_ACTIVE_LINE, clFuchsia);
+  FIndicator := TTextEditorGlyph.Create(HInstance, TEXT_EDITOR_ACTIVE_LINE, TColors.Fuchsia);
   FIndicator.Visible := False;
   FVisible := True;
 end;

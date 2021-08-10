@@ -3,7 +3,7 @@ unit TextEditor.Minimap.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Consts;
+  System.Classes, System.UITypes, TextEditor.Consts;
 
 type
   TTextEditorMinimapColors = class(TPersistent)
@@ -15,9 +15,9 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property Background: TColor read FBackground write FBackground default clNone;
-    property Bookmark: TColor read FBookmark write FBookmark default clMinimapBookmark;
-    property VisibleLines: TColor read FVisibleLines write FVisibleLines default clMinimapVisibleLines;
+    property Background: TColor read FBackground write FBackground default TColors.SysNone;
+    property Bookmark: TColor read FBookmark write FBookmark default TDefaultColors.MinimapBookmark;
+    property VisibleLines: TColor read FVisibleLines write FVisibleLines default TDefaultColors.MinimapVisibleLines;
   end;
 
 implementation
@@ -26,9 +26,9 @@ constructor TTextEditorMinimapColors.Create;
 begin
   inherited;
 
-  FBackground := clNone;
-  FBookmark := clMinimapBookmark;
-  FVisibleLines := clMinimapVisibleLines;
+  FBackground := TColors.SysNone;
+  FBookmark := TDefaultColors.MinimapBookmark;
+  FVisibleLines := TDefaultColors.MinimapVisibleLines;
 end;
 
 procedure TTextEditorMinimapColors.Assign(ASource: TPersistent);

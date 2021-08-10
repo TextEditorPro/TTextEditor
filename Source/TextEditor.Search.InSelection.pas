@@ -3,7 +3,7 @@ unit TextEditor.Search.InSelection;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Consts, TextEditor.Types;
+  System.Classes, System.UITypes, TextEditor.Consts, TextEditor.Types;
 
 type
   TTextEditorSearchInSelection = class(TPersistent)
@@ -22,7 +22,7 @@ type
     property SelectionEndPosition: TTextEditorTextPosition read FSelectionEndPosition write FSelectionEndPosition;
   published
     property Active: Boolean read FActive write SetActive default False;
-    property Background: TColor read FBackground write FBackground default clSearchInSelectionBackground;
+    property Background: TColor read FBackground write FBackground default TDefaultColors.SearchInSelectionBackground;
     property OnChange: TTextEditorSearchChangeEvent read FOnChange write FOnChange;
   end;
 
@@ -33,7 +33,7 @@ begin
   inherited;
 
   FActive := False;
-  FBackground := clSearchInSelectionBackground;
+  FBackground := TDefaultColors.SearchInSelectionBackground;
 end;
 
 procedure TTextEditorSearchInSelection.DoChange;

@@ -55,7 +55,7 @@ begin
   FFont.Name := 'Courier New';
   FFont.Size := 8;
   FFont.Style := [];
-  FFont.Color := clLeftMarginFontForeground;
+  FFont.Color := TDefaultColors.LeftMarginFontForeground;
   FHeight := 18;
   FMoving := False;
   FVisible := False;

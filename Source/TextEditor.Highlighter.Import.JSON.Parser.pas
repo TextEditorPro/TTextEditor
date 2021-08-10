@@ -390,7 +390,7 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.AnsiStrings, System.RTLConsts, System.SysConst, System.Variants, TextEditor.Language;
+  Winapi.Windows, System.AnsiStrings, System.RTLConsts, System.Variants, TextEditor.Language;
 
 type
   TJSONTokenKind = (jtkEof, jtkInvalidSymbol, jtkLBrace, jtkRBrace, jtkLBracket, jtkRBracket, jtkComma, jtkColon,
@@ -1167,29 +1167,29 @@ end;
 
 class function TJSONBaseObject.ParseFromStream(const Stream: TStream): TJSONBaseObject;
 var
-  LStreamInfo: TStreamInfo;
+  StreamInfo: TStreamInfo;
   LEncoding: TEncoding;
 begin
   LEncoding := nil;
-  GetStreamBytes(Stream, LEncoding, True, LStreamInfo);
+  GetStreamBytes(Stream, LEncoding, True, StreamInfo);
   try
-    Result := ParseUtf8Bytes(LStreamInfo.Buffer, LStreamInfo.Size)
+    Result := ParseUtf8Bytes(StreamInfo.Buffer, StreamInfo.Size)
   finally
-    FreeMem(LStreamInfo.AllocationBase);
+    FreeMem(StreamInfo.AllocationBase);
   end;
 end;
 
 procedure TJSONBaseObject.FromUtf8JSON(const S: PByte; Len: Integer);
 var
-  LReader: TJSONReader;
+  Reader: TJSONReader;
 begin
   if Len < 0 then
     Len := System.AnsiStrings.StrLen(PAnsiChar(S));
-  LReader := TJSONReader.Create(S, Len);
+  Reader := TJSONReader.Create(S, Len);
   try
-    LReader.Parse(Self);
+    Reader.Parse(Self);
   finally
-    LReader.Free;
+    Reader.Free;
   end;
 end;
 

@@ -3,7 +3,7 @@ unit TextEditor.Minimap.Shadow;
 interface
 
 uses
-  System.Classes, Vcl.Graphics;
+  System.Classes, System.UITypes;
 
 type
   TTextEditorMinimapShadow = class(TPersistent)
@@ -24,7 +24,7 @@ type
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
     property AlphaBlending: Byte read FAlphaBlending write SetAlphaBlending default 96;
-    property Color: TColor read FColor write SetColor default clBlack;
+    property Color: TColor read FColor write SetColor default TColors.Black;
     property Visible: Boolean read FVisible write SetVisible default False;
     property Width: Integer read FWidth write SetWidth default 8;
   end;
@@ -36,7 +36,7 @@ begin
   inherited;
 
   FAlphaBlending := 96;
-  FColor := clBlack;
+  FColor := TColors.Black;
   FVisible := False;
   FWidth := 8;
 end;

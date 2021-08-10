@@ -484,10 +484,10 @@ begin
 
   FFontStock := TTextEditorFontStock.Create(ABaseFont);
   FStockBitmap := Vcl.Graphics.TBitmap.Create;
-  FStockBitmap.Canvas.Brush.Color := clWhite;
+  FStockBitmap.Canvas.Brush.Color := TColors.White;
   FCalcExtentBaseStyle := ACalcExtentBaseStyle;
   SetBaseFont(ABaseFont);
-  FColor := clWindowText;
+  FColor := TColors.SysWindowText;
   FBackgroundColor := clWindow;
 end;
 

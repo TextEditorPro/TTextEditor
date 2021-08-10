@@ -3,8 +3,8 @@ unit TextEditor.Print.HeaderFooter;
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.SysUtils, Vcl.Graphics, TextEditor.Print.Margins, TextEditor.Types,
-  TextEditor.Utils;
+  Winapi.Windows, System.Classes, System.SysUtils, System.UITypes, Vcl.Graphics, TextEditor.Print.Margins,
+  TextEditor.Types, TextEditor.Utils;
 
 type
   TTextEditorSectionItem = class
@@ -83,10 +83,10 @@ type
   published
     property DefaultFont: TFont read FDefaultFont write SetDefaultFont;
     property FrameTypes: TTextEditorFrameTypes read FFrameTypes write FFrameTypes default [ftLine];
-    property LineColor: TColor read FLineColor write FLineColor default clBlack;
+    property LineColor: TColor read FLineColor write FLineColor default TColors.Black;
     property MirrorPosition: Boolean read FMirrorPosition write FMirrorPosition default False;
     property RomanNumbers: Boolean read FRomanNumbers write FRomanNumbers default False;
-    property ShadedColor: TColor read FShadedColor write FShadedColor default clSilver;
+    property ShadedColor: TColor read FShadedColor write FShadedColor default TColors.Silver;
   end;
 
   TTextEditorPrintHeader = class(TTextEditorSection)
@@ -102,7 +102,7 @@ type
 implementation
 
 uses
-  System.Math, System.UITypes, TextEditor.Consts;
+  System.Math, TextEditor.Consts;
 
 { TTextEditorSectionItem }
 
@@ -329,8 +329,8 @@ constructor TTextEditorSection.Create;
 begin
   inherited;
   FFrameTypes := [ftLine];
-  FShadedColor := clSilver;
-  FLineColor := clBlack;
+  FShadedColor := TColors.Silver;
+  FLineColor := TColors.Black;
   FItems := TList.Create;
   FDefaultFont := TFont.Create;
   FOldPen := TPen.Create;
@@ -343,7 +343,7 @@ begin
   begin
     Name := 'Courier New';
     Size := 9;
-    Color := clBlack;
+    Color := TColors.Black;
   end;
 end;
 
@@ -578,7 +578,7 @@ begin
   begin
     LSectionItem := TTextEditorSectionItem(FItems[LIndex]);
     ACanvas.Font := LSectionItem.Font;
-    ACanvas.Font.Color := clBlack;
+    ACanvas.Font.Color := TColors.Black;
     if LSectionItem.LineNumber <> LCurrentLine then
     begin
       LY := LY + TTextEditorLineInfo(FLineInfo[LCurrentLine - 1]).LineHeight;

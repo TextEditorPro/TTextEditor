@@ -63,9 +63,9 @@ type
 implementation
 
 uses
-  Winapi.CommCtrl, Winapi.Windows, System.Math, System.SysUtils, Vcl.Forms, Vcl.Graphics, TextEditor.Consts,
+  Winapi.Windows, System.Math, System.SysUtils, System.UITypes, Vcl.Forms, Vcl.Graphics, TextEditor.Consts,
   TextEditor.Types
-{$IFDEF ALPHASKINS}, sConst, sMessages, sStyleSimply, sVCLUtils{$ENDIF};
+{$IFDEF ALPHASKINS}, Winapi.CommCtrl, sConst, sMessages, sStyleSimply, sVCLUtils{$ENDIF};
 
 constructor TTextEditorCompareScrollBar.Create(AOwner: TComponent);
 begin
@@ -77,7 +77,7 @@ begin
   inherited Create(AOwner);
 
   FScrollBarVisible := False;
-  Color := clWindow;
+  Color := TColors.SysWindow;
   DoubleBuffered := False;
   ControlStyle := ControlStyle + [csOpaque, csSetCaption, csNeedsBorderPaint];
   FSystemMetricsCYDRAG := GetSystemMetrics(SM_CYDRAG);
@@ -201,13 +201,13 @@ begin
 
   Canvas.Pen.Width := 1;
   Canvas.Pen.Style := psSolid;
-  Canvas.Pen.Color := clRed;
+  Canvas.Pen.Color := TColors.Red;
   LLine := 1;
   LHalfWidth := ClientWidth div 2;
   for LIndex := FScrollBarTopLine to Min(FScrollBarTopLine + ClientHeight, FEditorLeft.Lines.Count - 1) do
   begin
     if (LLine >= FTopLine - FScrollBarTopLine) and (LLine < FTopLine - FScrollBarTopLine + FVisibleLines) then
-      Canvas.Pen.Color := clRed
+      Canvas.Pen.Color := TColors.Red
     else
       Canvas.Pen.Color := CPaleRed;
 
@@ -241,7 +241,7 @@ begin
 {$IFDEF ALPHASKINS}
   Canvas.Pen.Color := SkinData.SkinManager.GetHighlightColor;
 {$ELSE}
-  Canvas.Pen.Color := clHighlight;
+  Canvas.Pen.Color := TColors.SysHighlight;
 {$ENDIF}
   Canvas.Brush.Style := bsClear;
   Canvas.Rectangle(LClipRect);

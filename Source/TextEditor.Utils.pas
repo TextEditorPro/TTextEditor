@@ -42,8 +42,11 @@ procedure SetClipboardText(const AText: string);
 implementation
 
 uses
-  System.Character, Vcl.Controls, Vcl.Forms, TextEditor.Consts, Vcl.ClipBrd
+  System.Character, Vcl.ClipBrd, Vcl.Controls, Vcl.Forms, TextEditor.Consts
 {$IFDEF ALPHASKINS}, sDialogs{$ELSE}, Vcl.Dialogs{$ENDIF};
+
+const
+  TEXT_EDITOR_UTF8_BOM: array [0 .. 2] of Byte = ($EF, $BB, $BF);
 
 function ToggleCase(const AValue: string): string;
 var
@@ -90,7 +93,7 @@ begin
   LLength := AText.Length - 1;
   LIndex := 0;
 
-  if (LLength = -1) or (AText[LIndex] > ' ') and (AText[LLength] > ' ') then
+  if (LLength = -1) or (AText.Chars[LIndex] > ' ') and (AText.Chars[LLength] > ' ') then
     Exit(AText);
 
   while (LIndex <= LLength) and (AText.Chars[LIndex] <= ' ') do
@@ -271,11 +274,11 @@ function HexToColor(const AColor: string): TColor;
 var
   LColor: string;
 begin
-  Result := clNone;
+  Result := TColors.SysNone;
   if AColor.Length = 7 then
   begin
     LColor := '$00' + Copy(AColor, 6, 2) + Copy(AColor, 4, 2) + Copy(AColor, 2, 2);
-    Result := StrToIntDef(LColor, clNone);
+    Result := StrToIntDef(LColor, TColors.SysNone);
   end;
 end;
 
@@ -326,10 +329,10 @@ var
 begin
   LRed1 := GetRValue(AColor1);
   LRed2 := GetRValue(AColor2);
-  LGreen1 := GetRValue(AColor1);
-  LGreen2 := GetRValue(AColor2);
-  LBlue1 := GetRValue(AColor1);
-  LBlue2 := GetRValue(AColor2);
+  LGreen1 := GetGValue(AColor1);
+  LGreen2 := GetGValue(AColor2);
+  LBlue1 := GetBValue(AColor1);
+  LBlue2 := GetBValue(AColor2);
 
   LRed := (LRed1 + LRed2) div 2;
   LGreen := (LGreen1 + LGreen2) div 2;
@@ -747,7 +750,6 @@ begin
   while LPosition <= Length(ALine) do
   begin
     LFound := (LPosition - LPreviousPosition > AMaxColumn) and (LWrapPosition.Index <> 0);
-
     if not LFound and (ALine[LPosition] <= High(Char)) and (Char(ALine[LPosition]) in ABreakChars) then
       LWrapPosition.Index := LPosition;
 

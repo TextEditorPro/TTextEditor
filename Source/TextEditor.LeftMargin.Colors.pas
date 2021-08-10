@@ -3,7 +3,7 @@ unit TextEditor.LeftMargin.Colors;
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Consts;
+  System.Classes, System.UITypes, TextEditor.Consts;
 
 type
   TTextEditorLeftMarginColors = class(TPersistent)
@@ -23,17 +23,17 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
-    property ActiveLineBackground: TColor read FActiveLineBackground write FActiveLineBackground default clActiveLineBackground;
-    property ActiveLineBackgroundUnfocused: TColor read FActiveLineBackgroundUnfocused write FActiveLineBackgroundUnfocused default clActiveLineBackgroundUnfocused;
-    property ActiveLineNumber: TColor read FActiveLineNumber write FActiveLineNumber default clNone;
-    property Background: TColor read FBackground write FBackground default clLeftMarginBackground;
-    property BookmarkBackground: TColor read FBookmarkBackground write FBookmarkBackground default clNone;
-    property BookmarkPanelBackground: TColor read FBookmarkPanelBackground write FBookmarkPanelBackground default clLeftMarginBackground;
-    property Border: TColor read FBorder write FBorder default clLeftMarginBackground;
-    property LineNumberLine: TColor read FLineNumberLine write FLineNumberLine default clLeftMarginFontForeground;
-    property LineStateModified: TColor read FLineStateModified write FLineStateModified default clYellow;
-    property LineStateNormal: TColor read FLineStateNormal write FLineStateNormal default clLime;
-    property MarkDefaultBackground: TColor read FMarkDefaultBackground write FMarkDefaultBackground default clNone;
+    property ActiveLineBackground: TColor read FActiveLineBackground write FActiveLineBackground default TDefaultColors.ActiveLineBackground;
+    property ActiveLineBackgroundUnfocused: TColor read FActiveLineBackgroundUnfocused write FActiveLineBackgroundUnfocused default TDefaultColors.ActiveLineBackgroundUnfocused;
+    property ActiveLineNumber: TColor read FActiveLineNumber write FActiveLineNumber default TColors.SysNone;
+    property Background: TColor read FBackground write FBackground default TDefaultColors.LeftMarginBackground;
+    property BookmarkBackground: TColor read FBookmarkBackground write FBookmarkBackground default TColors.SysNone;
+    property BookmarkPanelBackground: TColor read FBookmarkPanelBackground write FBookmarkPanelBackground default TDefaultColors.LeftMarginBackground;
+    property Border: TColor read FBorder write FBorder default TDefaultColors.LeftMarginBackground;
+    property LineNumberLine: TColor read FLineNumberLine write FLineNumberLine default TDefaultColors.LeftMarginFontForeground;
+    property LineStateModified: TColor read FLineStateModified write FLineStateModified default TColors.Yellow;
+    property LineStateNormal: TColor read FLineStateNormal write FLineStateNormal default TColors.Lime;
+    property MarkDefaultBackground: TColor read FMarkDefaultBackground write FMarkDefaultBackground default TColors.SysNone;
   end;
 
 implementation
@@ -42,17 +42,17 @@ constructor TTextEditorLeftMarginColors.Create;
 begin
   inherited;
 
-  FActiveLineBackground := clActiveLineBackground;
-  FActiveLineBackgroundUnfocused := clActiveLineBackgroundUnfocused;
-  FActiveLineNumber := clNone;
-  FBackground := clLeftMarginBackground;
-  FBookmarkBackground := clNone;
-  FBookmarkPanelBackground := clLeftMarginBackground;
-  FBorder := clLeftMarginBackground;
-  FLineNumberLine := clLeftMarginFontForeground;
-  FLineStateModified := clYellow;
-  FLineStateNormal := clLime;
-  FMarkDefaultBackground := clNone;
+  FActiveLineBackground := TDefaultColors.ActiveLineBackground;
+  FActiveLineBackgroundUnfocused := TDefaultColors.ActiveLineBackgroundUnfocused;
+  FActiveLineNumber := TColors.SysNone;
+  FBackground := TDefaultColors.LeftMarginBackground;
+  FBookmarkBackground := TColors.SysNone;
+  FBookmarkPanelBackground := TDefaultColors.LeftMarginBackground;
+  FBorder := TDefaultColors.LeftMarginBackground;
+  FLineNumberLine := TDefaultColors.LeftMarginFontForeground;
+  FLineStateModified := TColors.Yellow;
+  FLineStateNormal := TColors.Lime;
+  FMarkDefaultBackground := TColors.SysNone;
 end;
 
 procedure TTextEditorLeftMarginColors.Assign(ASource: TPersistent);

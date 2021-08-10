@@ -5,8 +5,8 @@ unit TextEditor.Print.Preview;
 interface
 
 uses
-  Winapi.Messages, Winapi.Windows, System.Classes, System.SysUtils, Vcl.Controls, Vcl.Forms, Vcl.Graphics,
-  TextEditor.Print
+  Winapi.Messages, Winapi.Windows, System.Classes, System.SysUtils, System.UITypes, Vcl.Controls, Vcl.Forms,
+  Vcl.Graphics, TextEditor.Print
 {$IFDEF ALPHASKINS}, acSBUtils, sCommonData{$ENDIF};
 
 type
@@ -88,7 +88,7 @@ type
   published
     property Align default alClient;
     property BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default bsSingle;
-    property Color default clAppWorkspace;
+    property Color default TColors.SysAppWorkspace;
     property Cursor;
     property EditorPrint: TTextEditorPrint read GetEditorPrint write SetEditorPrint;
     property OnClick;
@@ -96,7 +96,7 @@ type
     property OnMouseUp;
     property OnPreviewPage: TTextEditorPreviewPageEvent read FOnPreviewPage write FOnPreviewPage;
     property OnScaleChange: TNotifyEvent read FOnScaleChange write FOnScaleChange;
-    property PageBackgroundColor: TColor read FPageBackgroundColor write SetPageBackgroundColor default clWhite;
+    property PageBackgroundColor: TColor read FPageBackgroundColor write SetPageBackgroundColor default TColors.White;
     property PopupMenu;
     property ScaleMode: TTextEditorPreviewScale read FScaleMode write SetScaleMode default pscUserScaled;
     property ScalePercent: Integer read FScalePercent write SetScalePercent default 100;
@@ -110,8 +110,8 @@ type
 implementation
 
 uses
-  Winapi.CommCtrl, System.Types
-{$IFDEF ALPHASKINS}, sConst, sMessages, sStyleSimply, sVCLUtils{$ENDIF};
+  System.Types
+{$IFDEF ALPHASKINS}, Winapi.CommCtrl, sConst, sMessages, sStyleSimply, sVCLUtils{$ENDIF};
 
 const
   MARGIN_WIDTH_LEFT_AND_RIGHT = 12;
@@ -133,11 +133,11 @@ begin
   FBorderStyle := bsSingle;
   FScaleMode := pscUserScaled;
   FScalePercent := 100;
-  FPageBackgroundColor := clWhite;
+  FPageBackgroundColor := TColors.White;
   Width := 200;
   Height := 120;
   ParentColor := False;
-  Color := clAppWorkspace;
+  Color := TColors.SysAppWorkspace;
   FPageNumber := 1;
   FShowScrollHint := True;
   FWheelAccumulator := 0;
@@ -266,7 +266,7 @@ begin
       Exit;
     Brush.Color := Self.Color;
     Brush.Style := bsSolid;
-    Pen.Color := clBlack;
+    Pen.Color := TColors.Black;
     Pen.Width := 1;
     Pen.Style := psSolid;
     if (csDesigning in ComponentState) or not Assigned(FEditorPrint) then
@@ -339,23 +339,18 @@ var
 begin
   LWidth := ClientWidth;
   LPosition := LWidth - FVirtualSize.X;
+
   if AValue < LPosition then
     AValue := LPosition;
+
   if AValue > 0 then
     AValue := 0;
+
   if FScrollPosition.X <> AValue then
   begin
-//    LPosition := AValue - FScrollPosition.X;
     FScrollPosition.X := AValue;
     UpdateScrollbars;
     Invalidate;
-    //if Abs(LPosition) > LWidth div 2 then
-    //  Invalidate
-    //else
-    //begin
-    //  ScrollWindow(Handle, LPosition, 0, nil, nil);
-    //  Update;
-    //end;
   end;
 end;
 
@@ -646,25 +641,25 @@ end;
 procedure TTextEditorPrintPreview.KeyDown(var Key: Word; Shift: TShiftState);
 begin
   case Key of
-    VK_NEXT:
+    vkNext:
       begin
         FPageNumber := FPageNumber + 1;
         if FPageNumber > FEditorPrint.PageCount then
           FPageNumber := FEditorPrint.PageCount;
       end;
-    VK_PRIOR:
+    vkPrior:
       begin
         FPageNumber := FPageNumber - 1;
         if FPageNumber < 1 then
           FPageNumber := 1;
       end;
-    VK_DOWN:
+    vkDown:
       ScrollVerticallyFor(-(ClientHeight div 10));
-    VK_UP:
+    vkUp:
       ScrollVerticallyFor(ClientHeight div 10);
-    VK_RIGHT:
+    vkRight:
       ScrollHorizontallyFor(-(ClientWidth div 10));
-    VK_LEFT:
+    vkLeft:
       ScrollHorizontallyFor(ClientWidth div 10);
   end;
   Invalidate;
@@ -693,7 +688,7 @@ var
 var
   IsNegative: Boolean;
 begin
-  LCtrlPressed := GetKeyState(VK_CONTROL) < 0;
+  LCtrlPressed := GetKeyState(vkControl) < 0;
 
   Inc(FWheelAccumulator, message.WheelDelta);
 
@@ -791,7 +786,7 @@ const
   ALT_KEY_DOWN = $20000000;
 begin
   { Prevent Alt-Backspace from beeping }
-  if (AMessage.Msg = WM_SYSCHAR) and (AMessage.wParam = VK_BACK) and (AMessage.LParam and ALT_KEY_DOWN <> 0) then
+  if (AMessage.Msg = WM_SYSCHAR) and (AMessage.wParam = vkBack) and (AMessage.LParam and ALT_KEY_DOWN <> 0) then
     AMessage.Msg := 0;
 
   if AMessage.Msg = SM_ALPHACMD then

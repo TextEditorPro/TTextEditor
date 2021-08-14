@@ -57,7 +57,6 @@ resourcestring
   STextEditorUnexpectedToken = 'Expected %s but found %s';
   STextEditorInvalidStringCharacter = 'Invalid character in string';
   STextEditorStringNotClosed = 'String not closed';
-  STextEditorInvalidHexNumber = 'Invalid hex number "%s"';
   STextEditorTypeCastError = 'Cannot cast %s into %s';
   STextEditorInvalidJSONPath = 'Invalid JSON path "%s"';
   STextEditorJSONPathContainsNullValue = 'JSON path contains null value ("%s")';

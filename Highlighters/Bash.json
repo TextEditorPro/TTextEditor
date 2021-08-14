@@ -309,7 +309,7 @@
           }
         ],
         "FoldRegion": [
-           {
+          {
             "OpenToken": "{",
             "CloseToken": "}",
             "Properties": {
@@ -330,11 +330,11 @@
   },
   "MatchingPair": {
     "Pairs": [
-     {
+      {
         "OpenToken": "'",
         "CloseToken": "'"
       },
-     {
+      {
         "OpenToken": "\"",
         "CloseToken": "\""
       },

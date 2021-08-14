@@ -2290,17 +2290,17 @@
             "OpenToken": "&&",
             "RegionType": "SingleLine"
           },
-					{
+          {
             "OpenToken": "NOTE",
             "RegionType": "SingleLine"
           },
-					{
+          {
             "OpenToken": "*",
             "RegionType": "SingleLine"
           }
         ],
         "FoldRegion": [
-           {
+          {
             "OpenToken": "IF",
             "CloseToken": "ENDIF"
           }

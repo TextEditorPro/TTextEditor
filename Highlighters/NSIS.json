@@ -180,9 +180,9 @@
             },
             "TokenRange": {
               "Open": "$",
-							"Close": " "
+              "Close": " "
             },
-					 "SubRules": {
+            "SubRules": {
               "Range": [
                 {
                   "Type": "Character",
@@ -198,8 +198,8 @@
                     "Close": "}"
                   }
                 }
-							]
-					  }
+              ]
+            }
           },
           {
             "Type": "MethodName",

@@ -24,7 +24,7 @@
               "Open": "#"
             }
           },
-         {
+          {
             "Type": "String",
             "Attributes": {
               "Element": "String"
@@ -114,7 +114,6 @@
               ]
             }
           },
-
           {
             "Type": "Number",
             "Attributes": {
@@ -128,7 +127,7 @@
               "Open": "*"
             }
           },
-           {
+          {
             "Type": "Number",
             "Attributes": {
               "Element": "Number"

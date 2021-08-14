@@ -46,7 +46,7 @@
               "Open": ":",
               "Close": "like"
             },
-           "SubRules": {
+            "SubRules": {
               "KeyList": [
                 {
                   "Type": "ReservedWord",
@@ -395,11 +395,11 @@
   },
   "MatchingPair": {
     "Pairs": [
-     {
+      {
         "OpenToken": "'",
         "CloseToken": "'"
       },
-     {
+      {
         "OpenToken": "\"",
         "CloseToken": "\""
       },

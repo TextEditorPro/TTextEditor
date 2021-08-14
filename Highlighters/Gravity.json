@@ -125,7 +125,7 @@
               ]
             }
           },
-					{
+          {
             "Type": "Method",
             "Attributes": {
               "Element": "MethodName"
@@ -224,86 +224,86 @@
               "Element": "ReservedWord"
             }
           },
-					{
+          {
             "Type": "Method",
             "Words": [
-							"acos",
-							"asin",
-							"atan",
-							"atan2",
-							"bind",
-							"call",
-							"cbrt",
-							"ceil",
-							"cos",
-							"count",
-							"create",
-							"disassemble",
-							"exp",
-							"floor",
-							"gcf",
-							"get",
-							"isdone",
-							"keys",
-							"length",
-							"lcm",
-							"log",
-							"log10",
-							"logx",
-							"loop",
-							"max",
-							"min",
-							"pow",
-							"put",
-							"random",
-							"round",
-							"set",
-							"sin",
-							"sqrt",
-							"tan",
-							"unbind",
-							"xrt",
-						  "abs",
-						  "exit",
-						  "foo",
-						  "nanotime",
+              "acos",
+              "asin",
+              "atan",
+              "atan2",
+              "bind",
+              "call",
+              "cbrt",
+              "ceil",
+              "cos",
+              "count",
+              "create",
+              "disassemble",
+              "exp",
+              "floor",
+              "gcf",
+              "get",
+              "isdone",
+              "keys",
+              "length",
+              "lcm",
+              "log",
+              "log10",
+              "logx",
+              "loop",
+              "max",
+              "min",
+              "pow",
+              "put",
+              "random",
+              "round",
+              "set",
+              "sin",
+              "sqrt",
+              "tan",
+              "unbind",
+              "xrt",
+              "abs",
+              "exit",
+              "foo",
+              "nanotime",
               "print",
-							"write",
-							"yield",
-							"yieldWaitTime"
+              "write",
+              "yield",
+              "yieldWaitTime"
             ],
             "Attributes": {
               "Element": "Method"
             }
           },
-				  {
+          {
             "Type": "String",
             "Words": [
-							"bool",
-							"console",
-							"env",
-							"fiber",
-							"float",
-							"int",
-							"math",
-							"string",
-							"system"
+              "bool",
+              "console",
+              "env",
+              "fiber",
+              "float",
+              "int",
+              "math",
+              "string",
+              "system"
             ],
             "Attributes": {
               "Element": "String"
             }
           },
-				  {
+          {
             "Type": "Symbol",
             "Words": [
-							"e",
-							"ln10",
-							"ln2",
-							"log10e",
-							"log2e",
-							"pi",
-							"sqrt1_2",
-							"sqrt2"
+              "e",
+              "ln10",
+              "ln2",
+              "log10e",
+              "log2e",
+              "pi",
+              "sqrt1_2",
+              "sqrt2"
             ],
             "Attributes": {
               "Element": "Symbol"
@@ -329,12 +329,12 @@
               "]",
               "{",
               "}",
-							"~",
-							"^",
-							"%",
-							"!",
-							"&",
-							"|"
+              "~",
+              "^",
+              "%",
+              "!",
+              "&",
+              "|"
             ],
             "Attributes": {
               "Element": "Symbol"

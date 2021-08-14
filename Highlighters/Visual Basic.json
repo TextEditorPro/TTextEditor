@@ -301,35 +301,35 @@
           }
         ],
         "FoldRegion": [
-         {
+          {
             "OpenToken": "CLASS",
             "CloseToken": "END CLASS",
             "Properties": {
               "NoDuplicateClose": true
             }
           },
-         {
+          {
             "OpenToken": "PROPERTY",
             "CloseToken": "END PROPERTY",
             "Properties": {
               "NoDuplicateClose": true
             }
           },
-         {
+          {
             "OpenToken": "SUB",
             "CloseToken": "END SUB",
             "Properties": {
               "NoDuplicateClose": true
             }
           },
-         {
+          {
             "OpenToken": "FUNCTION",
             "CloseToken": "END FUNCTION",
             "Properties": {
               "NoDuplicateClose": true
             }
           },
-         {
+          {
             "OpenToken": "FOR",
             "CloseToken": "NEXT",
             "Properties": {
@@ -337,7 +337,7 @@
               "NoDuplicateClose": true
             }
           },
-         {
+          {
             "OpenToken": "IF",
             "CloseToken": "END IF",
             "Properties": {
@@ -345,15 +345,15 @@
               "NoDuplicateClose": true
             }
           },
-         {
+          {
             "OpenToken": "EXIT",
             "Properties": {
               "OpenTokenBreaksLine": true,
               "RemoveRange": true,
               "NoDuplicateClose": true
-             }
+            }
           },
-         {
+          {
             "OpenToken": "DO",
             "CloseToken": "LOOP",
             "Properties": {
@@ -361,7 +361,7 @@
               "NoDuplicateClose": true
             }
           },
-         {
+          {
             "OpenToken": "SELECT CASE",
             "CloseToken": "END SELECT",
             "Properties": {
@@ -374,7 +374,7 @@
   },
   "MatchingPair": {
     "Pairs": [
-     {
+      {
         "OpenToken": "\"",
         "CloseToken": "\""
       },

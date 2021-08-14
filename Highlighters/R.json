@@ -171,7 +171,7 @@
               "Element": "ReservedWord"
             }
           },
-         {
+          {
             "Name": "Methods",
             "Type": "Method",
             "Words": [
@@ -199,7 +199,7 @@
               "log",
               "log10",
               "mad",
-              "matrix", 
+              "matrix",
               "max",
               "mean",
               "median",
@@ -222,7 +222,7 @@
               "quantile",
               "qunif",
               "range",
-              "rbind",  
+              "rbind",
               "rbinom",
               "rename",
               "rep",
@@ -338,11 +338,11 @@
   },
   "MatchingPair": {
     "Pairs": [
-     {
+      {
         "OpenToken": "'",
         "CloseToken": "'"
       },
-     {
+      {
         "OpenToken": "\"",
         "CloseToken": "\""
       },

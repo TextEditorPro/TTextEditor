@@ -527,11 +527,11 @@
   },
   "MatchingPair": {
     "Pairs": [
-     {
+      {
         "OpenToken": "'",
         "CloseToken": "'"
       },
-     {
+      {
         "OpenToken": "\"",
         "CloseToken": "\""
       },

@@ -647,7 +647,7 @@
   },
   "MatchingPair": {
     "Pairs": [
-     {
+      {
         "OpenToken": "\"",
         "CloseToken": "\""
       },

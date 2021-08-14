@@ -179,10 +179,10 @@
               "Element": "ReservedWord"
             }
           },
-					{
+          {
             "Type": "Method",
             "Words": [
-							"main",
+              "main",
               "init",
               "subscriptions",
               "update",
@@ -239,11 +239,11 @@
   },
   "MatchingPair": {
     "Pairs": [
-     {
+      {
         "OpenToken": "'",
         "CloseToken": "'"
       },
-     {
+      {
         "OpenToken": "\"",
         "CloseToken": "\""
       },

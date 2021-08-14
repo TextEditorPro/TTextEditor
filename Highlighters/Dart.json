@@ -13,7 +13,7 @@
       },
       "SubRules": {
         "Range": [
-				  {
+          {
             "Type": "BlockComment",
             "Attributes": {
               "Element": "Comment"
@@ -325,7 +325,6 @@
               "BreakCharFollows": false
             }
           }
-
         ]
       }
     ]
@@ -370,7 +369,7 @@
         "OpenToken": "//",
         "RegionType": "SingleLine"
       },
-     {
+      {
         "OpenToken": "/*",
         "CloseToken": "*/",
         "RegionType": "MultiLine"

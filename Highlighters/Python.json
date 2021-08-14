@@ -46,7 +46,7 @@
               "Close": "'"
             }
           },
-         {
+          {
             "Type": "Method",
             "Attributes": {
               "Element": "MethodName"
@@ -331,11 +331,11 @@
   },
   "MatchingPair": {
     "Pairs": [
-     {
+      {
         "OpenToken": "'",
         "CloseToken": "'"
       },
-     {
+      {
         "OpenToken": "\"",
         "CloseToken": "\""
       },

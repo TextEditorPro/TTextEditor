@@ -2159,7 +2159,7 @@ begin
     if LPositionY = 0 then
       FHighlighter.ResetRange
     else
-      FHighlighter.SetRange(FLines.Items^[LPositionY - 1].Range);
+      FHighlighter.SetRange(FLines.Ranges[LPositionY - 1]);
     FHighlighter.SetLine(LLine);
     LPositionX := ATextPosition.Char;
     if (LPositionX > 0) and (LPositionX <= Length(LLine)) then
@@ -2417,7 +2417,7 @@ var
     if LTextPosition.Line = 0 then
       FHighlighter.ResetRange
     else
-      FHighlighter.SetRange(FLines.Items^[LTextPosition.Line - 1].Range);
+      FHighlighter.SetRange(FLines.Ranges[LTextPosition.Line - 1]);
 
     LCurrentLineText := FLines[LTextPosition.Line];
     FHighlighter.SetLine(LCurrentLineText);
@@ -3098,7 +3098,7 @@ var
     if LCurrentLine = 1 then
       FHighlighter.ResetRange
     else
-      FHighlighter.SetRange(FLines.Items^[LCurrentLine - 2].Range);
+      FHighlighter.SetRange(FLines.Ranges[LCurrentLine - 2]);
     LLine := FLines.Items^[LCurrentLine - 1].TextLine;
     FHighlighter.SetLine(LLine);
     LWidth := 0;
@@ -3886,7 +3886,7 @@ begin
   if LRow = 1 then
     FHighlighter.ResetRange
   else
-    FHighlighter.SetRange(FLines.Items^[LRow - 2].Range);
+    FHighlighter.SetRange(FLines.Ranges[LRow - 2]);
   FHighlighter.SetLine(LLineText);
 
   LCurrentRow := ARow;
@@ -4066,7 +4066,7 @@ begin
   if Result = 0 then
     FHighlighter.ResetRange
   else
-    FHighlighter.SetRange(FLines.Items^[Result - 1].Range);
+    FHighlighter.SetRange(FLines.Ranges[Result - 1]);
 
   LProgress := 0;
   LProgressInc := 0;
@@ -5016,7 +5016,7 @@ var
     if LTextPosition.Line = 0 then
       FHighlighter.ResetRange
     else
-      FHighlighter.SetRange(FLines.Items^[LTextPosition.Line - 1].Range);
+      FHighlighter.SetRange(FLines.Ranges[LTextPosition.Line - 1]);
     FHighlighter.SetLine(FLines[LTextPosition.Line]);
   end;
 
@@ -10622,7 +10622,7 @@ begin
     if LLine = 0 then
       FHighlighter.ResetRange
     else
-      FHighlighter.SetRange(FLines.Items^[LLine - 1].Range);
+      FHighlighter.SetRange(FLines.Ranges[LLine - 1]);
     FHighlighter.SetLine(FLines.Items^[LLine].TextLine);
     while not FHighlighter.EndOfLine do
     begin
@@ -14402,7 +14402,7 @@ var
               if LCurrentLine = 0 then
                 FHighlighter.ResetRange
               else
-                FHighlighter.SetRange(FLines.Items^[LCurrentLine - 1].Range);
+                FHighlighter.SetRange(FLines.Ranges[LCurrentLine - 1]);
               FHighlighter.SetLine(LFromLineText);
 
               repeat
@@ -14455,7 +14455,7 @@ var
       if LCurrentLine = 0 then
         FHighlighter.ResetRange
       else
-        FHighlighter.SetRange(FLines.Items^[LCurrentLine - 1].Range);
+        FHighlighter.SetRange(FLines.Ranges[LCurrentLine - 1]);
 
       FHighlighter.SetLine(LCurrentLineText);
       LWordWrapTokenPosition := 0;
@@ -18474,7 +18474,7 @@ begin
     if LLine = 0 then
       FHighlighter.ResetRange
     else
-      FHighlighter.SetRange(FLines.Items^[LLine - 1].Range);
+      FHighlighter.SetRange(FLines.Ranges[LLine - 1]);
 
     FHighlighter.SetLine(FLines.Items^[LLine].TextLine);
     LPreviousTokenType := ttUnspecified;

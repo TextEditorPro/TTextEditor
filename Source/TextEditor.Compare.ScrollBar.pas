@@ -331,16 +331,10 @@ begin
         (FTopLine / Max(FEditorLeft.LineNumbersCount - FVisibleLines, 1)))), 1);
 
     if Assigned(FEditorLeft) then
-    begin
       FEditorLeft.TopLine := FTopLine;
-      FEditorLeft.Repaint;
-    end;
 
     if Assigned(FEditorRight) then
-    begin
       FEditorRight.TopLine := FTopLine;
-      FEditorRight.Repaint;
-    end;
 
     UpdateScrollBars;
     Invalidate;

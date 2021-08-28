@@ -26,6 +26,7 @@ type
 
     function GetElement(const Name: string): PTextEditorHighlighterElement;
     procedure Clear;
+    procedure LoadFromFile(const AFilename: string);
     procedure LoadFromStream(AStream: TStream; const AScaleFontHeight: Boolean = False);
     property Filename: string read FFilename write FFilename;
     property Name: string read FName write FName;
@@ -76,6 +77,18 @@ begin
   end;
 end;
 
+procedure TTextEditorHighlighterColors.LoadFromFile(const AFilename: string);
+var
+  LFileStream: TFileStream;
+begin
+  LFileStream := TFileStream.Create(AFilename, fmOpenRead or fmShareDenyNone);
+  try
+    LoadFromStream(LFileStream);
+  finally
+    LFileStream.Free;
+  end;
+end;
+
 procedure TTextEditorHighlighterColors.LoadFromStream(AStream: TStream; const AScaleFontHeight: Boolean = False);
 var
   LHighlighter: TTextEditorHighlighter;
@@ -94,3 +107,4 @@ begin
 end;
 
 end.
+

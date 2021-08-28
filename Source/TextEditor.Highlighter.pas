@@ -67,6 +67,7 @@ type
     procedure Clear;
     procedure GetKeywords(var AStringList: TStringList);
     procedure GetToken(var AResult: string);
+    procedure LoadFromFile(const AFilename: string);
     procedure LoadFromStream(const AStream: TStream);
     procedure Next;
     procedure NextToEndOfLine;
@@ -620,6 +621,18 @@ begin
 
       SetOption(hoExecuteBeforePrepare, False);
     end;
+  end;
+end;
+
+procedure TTextEditorHighlighter.LoadFromFile(const AFilename: string);
+var
+  LFileStream: TFileStream;
+begin
+  LFileStream := TFileStream.Create(AFilename, fmOpenRead or fmShareDenyNone);
+  try
+    LoadFromStream(LFileStream);
+  finally
+    LFileStream.Free;
   end;
 end;
 

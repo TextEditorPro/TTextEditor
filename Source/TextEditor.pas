@@ -11260,8 +11260,10 @@ begin
             LLine := LFoldRange.ToLine - LFoldRange.FromLine - 1;
             if LLine > FCodeFolding.Hint.RowCount then
               LLine := FCodeFolding.Hint.RowCount;
+
             for LIndex := LFoldRange.FromLine - 1 to LFoldRange.FromLine + LLine do
               FCodeFoldings.HintForm.ItemList.Add(FLines.ExpandedStrings[LIndex]);
+
             if LLine = FCodeFolding.Hint.RowCount then
               FCodeFoldings.HintForm.ItemList.Add(TEXT_EDITOR_THREE_DOTS);
 

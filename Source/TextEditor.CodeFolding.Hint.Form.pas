@@ -54,13 +54,9 @@ implementation
 
 uses
   System.SysUtils, TextEditor, TextEditor.Consts, TextEditor.KeyCommands, TextEditor.PaintHelper, TextEditor.Utils
-{$IFDEF ALPHASKINS}, sMessages, sSkinProvider{$ENDIF};
+{$IFDEF ALPHASKINS}, sSkinProvider{$ENDIF};
 
 constructor TTextEditorCodeFoldingHintForm.Create(AOwner: TComponent); //FI:W525 Missing INHERITED call in constructor
-{$IFDEF ALPHASKINS}
-var
-  LSkinProvider: TsSkinProvider;
-{$ENDIF}
 begin
   CreateNew(AOwner);
 
@@ -93,12 +89,11 @@ begin
   FHeightBuffer := 0;
   FFont.OnChange := FontChange;
 {$IFDEF ALPHASKINS}
-  LSkinProvider := TsSkinProvider(SendMessage(Handle, SM_ALPHACMD, MakeWParam(0, AC_GETPROVIDER), 0));
-  if Assigned(LSkinProvider) then
+  with TsSkinProvider.Create(Self) do
+  if SkinData.Skinned then
   begin
-    LSkinProvider.AllowExtBorders := False;
-    LSkinProvider.DrawNonClientArea := False;
-    LSkinProvider.DrawClientArea := False;
+    DrawNonClientArea := False;
+    DrawClientArea := False;
   end;
 {$ENDIF}
 end;
@@ -117,8 +112,8 @@ begin
   inherited CreateParams(AParams);
 
   with AParams do
-    if ((Win32Platform and VER_PLATFORM_WIN32_NT) <> 0) and (Win32MajorVersion > 4) and (Win32MinorVersion > 0) then
-      WindowClass.Style := WindowClass.Style or CS_DROPSHADOW;
+  if ((Win32Platform and VER_PLATFORM_WIN32_NT) <> 0) and (Win32MajorVersion > 4) and (Win32MinorVersion > 0) then
+    WindowClass.Style := WindowClass.Style or CS_DROPSHADOW;
 end;
 
 procedure TTextEditorCodeFoldingHintForm.Activate;
@@ -144,6 +139,7 @@ begin
     LEditorCommand := TranslateKeyCode(AKey, AShift);
     CommandProcessor(LEditorCommand, LChar, LData);
   end;
+
   Invalidate;
 end;
 
@@ -198,6 +194,7 @@ begin
   if FItemHeight <> AValue then
   begin
     FItemHeight := AValue;
+
     RecalculateItemHeight;
   end;
 end;
@@ -206,6 +203,7 @@ procedure TTextEditorCodeFoldingHintForm.RecalculateItemHeight;
 begin
   Canvas.Font.Assign(FFont);
   FFontHeight := TextHeight(Canvas, 'X');
+
   if FItemHeight > 0 then
     FEffectiveItemHeight := FItemHeight
   else
@@ -220,12 +218,14 @@ end;
 procedure TTextEditorCodeFoldingHintForm.WMGetDlgCode(var AMessage: TWMGetDlgCode);
 begin
   inherited;
+
   AMessage.Result := AMessage.Result or DLGC_WANTTAB;
 end;
 
 procedure TTextEditorCodeFoldingHintForm.SetFont(const AValue: TFont);
 begin
   FFont.Assign(AValue);
+
   RecalculateItemHeight;
   AdjustMetrics;
 end;
@@ -288,10 +288,10 @@ procedure TTextEditorCodeFoldingHintForm.Execute(const X, Y: Integer);
         LY := 0;
     end;
 
-    SetWindowPos(Handle, HWND_TOP, LX, LY, 0, 0, SWP_NOACTIVATE or SWP_SHOWWINDOW or SWP_NOSIZE);
-
     Width := LWidth;
     Height := LHeight;
+
+    SetWindowPos(Handle, HWND_TOP, LX, LY, 0, 0, SWP_NOACTIVATE or SWP_SHOWWINDOW or SWP_NOSIZE);
   end;
 
 begin

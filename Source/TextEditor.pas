@@ -1232,6 +1232,7 @@ uses
   TextEditor.Language, TextEditor.LeftMargin.Border, TextEditor.LeftMargin.LineNumbers, TextEditor.Scroll.Hint,
   TextEditor.Search.Map, TextEditor.Search.Normal, TextEditor.Search.RegularExpressions, TextEditor.Search.WildCard,
   TextEditor.Undo.Item
+{$IFDEF VCL_STYLES}, TextEditor.StyleHooks{$ENDIF}
 {$IFDEF ALPHASKINS}, acGlow, sConst, sMessages, sSkinManager, sStyleSimply, sVCLUtils{$ENDIF};
 
 type

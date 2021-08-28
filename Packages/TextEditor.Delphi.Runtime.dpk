@@ -133,6 +133,7 @@ contains
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
   TextEditor.SpellCheck in '..\Source\TextEditor.SpellCheck.pas',
 {$ENDIF}
+  TextEditor.StyleHooks in '..\Source\TextEditor.StyleHooks.pas',
   TextEditor.SyncEdit in '..\Source\TextEditor.SyncEdit.pas',
   TextEditor.SyncEdit.Colors in '..\Source\TextEditor.SyncEdit.Colors.pas',
   TextEditor.Tabs in '..\Source\TextEditor.Tabs.pas',
@@ -147,4 +148,3 @@ contains
   TextEditor.WordWrap.Colors in '..\Source\TextEditor.WordWrap.Colors.pas';
 
 end.
-

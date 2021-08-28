@@ -52,6 +52,7 @@ Define | Description
 ------ | -----------
 ALPHASKINS | Native AlphaSkins support
 BASENCODING | BaseNcoding support
+VCL_STYLES | VCL Styles support
 
 ## License
 

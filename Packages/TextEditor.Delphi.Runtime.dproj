@@ -224,6 +224,7 @@
         <DCCReference Include="..\Source\TextEditor.SpecialChars.LineBreak.pas"/>
         <DCCReference Include="..\Source\TextEditor.SpecialChars.Selection.pas"/>
         <DCCReference Include="..\Source\TextEditor.SpellCheck.pas"/>
+        <DCCReference Include="..\Source\TextEditor.StyleHooks.pas"/>
         <DCCReference Include="..\Source\TextEditor.SyncEdit.pas"/>
         <DCCReference Include="..\Source\TextEditor.SyncEdit.Colors.pas"/>
         <DCCReference Include="..\Source\TextEditor.Tabs.pas"/>

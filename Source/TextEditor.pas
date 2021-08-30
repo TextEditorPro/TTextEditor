@@ -4682,7 +4682,7 @@ begin
         Exit;
       FSyncEdit.MoveEndPositionChar(-1);
     end;
-    LLineText := FLines.Items^[LTextPosition.Line].TextLine;
+    LLineText := FLines[LTextPosition.Line];
     LLength := Length(LLineText);
     if LTextPosition.Char > LLength + 1 then
     begin

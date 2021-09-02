@@ -180,10 +180,10 @@ type
     end;
 
     TTextEditorMultiCaret = record
-       Carets: TList;
-       Draw: Boolean;
-       Position: TTextEditorViewPosition;
-       Timer: TTextEditorTimer;
+      Carets: TList;
+      Draw: Boolean;
+      Position: TTextEditorViewPosition;
+      Timer: TTextEditorTimer;
     end;
 
     TTextEditorOriginal = record
@@ -5626,14 +5626,14 @@ begin
     LLineText := FLines[LTextPosition.Line];
     LLength := Length(LLineText);
 
-    with FLines.Items^[LTextPosition.Line] do
-    begin
-      Exclude(Flags, sfLineBreakCR);
-      Exclude(Flags, sfLineBreakLF);
-    end;
-
     if LLength > 0 then
     begin
+      with FLines.Items^[LTextPosition.Line] do
+      begin
+        Exclude(Flags, sfLineBreakCR);
+        Exclude(Flags, sfLineBreakLF);
+      end;
+
       if LLength >= LTextPosition.Char then
       begin
         if LTextPosition.Char > 1 then
@@ -6141,7 +6141,7 @@ begin
       LTextPosition := FPosition.BeginSelection;
     end;
 
-    LTextLine := FLines.Items^[LTextPosition.Line].TextLine;
+    LTextLine := FLines[LTextPosition.Line];
 
     LViewPosition := ViewPosition;
     LLengthAfterLine := Max(LViewPosition.Column - FLines.ExpandedStringLengths[LTextPosition.Line], 1);
@@ -8938,6 +8938,7 @@ end;
 procedure TCustomTextEditor.WMCaptureChanged(var AMessage: TMessage);
 begin
   FScrollHelper.Timer.Enabled := False;
+
   inherited;
 end;
 
@@ -8955,6 +8956,7 @@ end;
 procedure TCustomTextEditor.WMCopy(var AMessage: TMessage);
 begin
   CopyToClipboard;
+
   AMessage.Result := Ord(True);
 end;
 
@@ -8962,6 +8964,7 @@ procedure TCustomTextEditor.WMCut(var AMessage: TMessage);
 begin
   if not ReadOnly then
     CutToClipboard;
+
   AMessage.Result := Ord(True);
 end;
 
@@ -9227,6 +9230,7 @@ end;
 procedure TCustomTextEditor.WMSize(var AMessage: TWMSize);
 begin
   inherited;
+
   SizeOrFontChanged(False);
 end;
 
@@ -9440,6 +9444,7 @@ begin
     else
       Result := TKeyCommands.None;
   end;
+
   if (Result = TKeyCommands.None) and (ACode >= vkAccept) and (ACode <= vkScroll) then
   begin
     FLast.Key := ACode;

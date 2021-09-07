@@ -71,13 +71,13 @@ type
     function GetCapacity: Integer; override;
     function GetCount: Integer; override;
     function GetTextStr: string; override;
+    procedure InsertItem(const AIndex: Integer; const AValue: string);
     procedure Put(AIndex: Integer; const AValue: string); override;
     procedure SetCapacity(AValue: Integer); override;
     procedure SetEncoding(const AValue: System.SysUtils.TEncoding); override;
     procedure SetTabWidth(const AValue: Integer);
     procedure SetTextStr(const AValue: string); override;
     procedure SetUpdateState(AUpdating: Boolean); override;
-    procedure InsertItem(const AIndex: Integer; const AValue: string);
   public
     constructor Create(AOwner: TObject);
     destructor Destroy; override;
@@ -225,6 +225,7 @@ begin
   if FIndexOfLongestLine < 0 then
   begin
     LMaxLength := 0;
+
     if FCount > 0 then
     begin
       LPStringRecord := @FItems^[0];
@@ -232,15 +233,18 @@ begin
       begin
         if sfExpandedLengthUnknown in LPStringRecord^.Flags then
           ExpandString(LIndex);
+
         if LPStringRecord^.ExpandedLength > LMaxLength then
         begin
           LMaxLength := LPStringRecord^.ExpandedLength;
           FIndexOfLongestLine := LIndex;
         end;
+
         Inc(LPStringRecord);
       end;
     end;
   end;
+
   if (FIndexOfLongestLine >= 0) and (FIndexOfLongestLine < FCount) then
     Result := FItems^[FIndexOfLongestLine].ExpandedLength
   else
@@ -250,8 +254,14 @@ end;
 function TTextEditorLines.GetLineBreak(const AIndex: Integer): string;
 var
   LFlags: TTextEditorStringFlags;
+  LPStringRecord: PTextEditorStringRecord;
 begin
-  LFlags := FItems^[AIndex].Flags;
+  LFlags := [];
+
+  LPStringRecord := @FItems^[AIndex];
+  if Assigned(LPStringRecord) then
+    LFlags := LPStringRecord^.Flags;
+
   if (sfLineBreakCR in LFlags) and (sfLineBreakLF in LFlags) then
     Result := TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED
   else

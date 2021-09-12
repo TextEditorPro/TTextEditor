@@ -1,4 +1,4 @@
-unit TextEditor.CompletionProposal.PopupWindow;
+﻿unit TextEditor.CompletionProposal.PopupWindow;
 
 interface
 

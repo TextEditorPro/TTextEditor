@@ -1,4 +1,4 @@
-unit TextEditor.Highlighter.Import.JSON;
+﻿unit TextEditor.Highlighter.Import.JSON;
 
 interface
 

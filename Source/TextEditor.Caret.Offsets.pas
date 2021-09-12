@@ -1,4 +1,4 @@
-unit TextEditor.Caret.Offsets;
+﻿unit TextEditor.Caret.Offsets;
 
 interface
 

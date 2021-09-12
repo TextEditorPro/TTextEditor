@@ -3,7 +3,7 @@
     "Sample": [
       "# Filename: Hello.ps1\r\n",
       "Write-Host\r\n",
-      "Write-Host 'Hello, World!!'\r\n",
+      "Write-Host 'Hello, World!'\r\n",
       "# end of script"
     ],
     "MainRules": {

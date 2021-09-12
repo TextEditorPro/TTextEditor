@@ -1,4 +1,4 @@
-package TextEditor.Delphi.Designtime;
+﻿package TextEditor.Delphi.Alexandria.Designtime;
 
 {$R *.res}
 {$R *.dres}
@@ -35,7 +35,7 @@ requires
   designide,
   dbrtl,
   vcldb,
-  TextEditor.Delphi.Runtime;
+  TextEditor.Delphi.Alexandria.Runtime;
 
 contains
   TextEditor.Register in '..\Source\TextEditor.Register.pas',

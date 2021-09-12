@@ -1,4 +1,4 @@
-{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
+﻿{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
 unit TextEditor.Highlighter.Rules;
 
 interface

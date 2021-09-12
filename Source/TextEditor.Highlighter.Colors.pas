@@ -1,4 +1,4 @@
-unit TextEditor.Highlighter.Colors;
+﻿unit TextEditor.Highlighter.Colors;
 
 interface
 
@@ -23,7 +23,6 @@ type
   public
     constructor Create(AOwner: TObject);
     destructor Destroy; override;
-
     function GetElement(const Name: string): PTextEditorHighlighterElement;
     procedure Clear;
     procedure LoadFromFile(const AFilename: string);
@@ -107,4 +106,3 @@ begin
 end;
 
 end.
-

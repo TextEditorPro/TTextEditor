@@ -1,4 +1,4 @@
-unit TextEditor.Print.Preview;
+﻿unit TextEditor.Print.Preview;
 
 {$M+}
 

@@ -1,4 +1,4 @@
-unit TextEditor.Types;
+﻿unit TextEditor.Types;
 
 interface
 

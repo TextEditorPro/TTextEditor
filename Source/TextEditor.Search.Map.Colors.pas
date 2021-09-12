@@ -1,4 +1,4 @@
-unit TextEditor.Search.Map.Colors;
+﻿unit TextEditor.Search.Map.Colors;
 
 interface
 

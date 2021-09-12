@@ -1,4 +1,4 @@
-unit TextEditor.Minimap;
+﻿unit TextEditor.Minimap;
 
 interface
 

@@ -1,4 +1,4 @@
-unit TextEditor.WordWrap;
+﻿unit TextEditor.WordWrap;
 
 interface
 

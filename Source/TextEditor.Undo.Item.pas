@@ -1,4 +1,4 @@
-unit TextEditor.Undo.Item;
+﻿unit TextEditor.Undo.Item;
 
 interface
 

@@ -1,4 +1,4 @@
-unit TextEditor.Scroll.Shadow;
+﻿unit TextEditor.Scroll.Shadow;
 
 interface
 

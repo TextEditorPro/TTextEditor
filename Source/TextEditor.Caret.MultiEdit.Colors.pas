@@ -1,4 +1,4 @@
-unit TextEditor.Caret.MultiEdit.Colors;
+﻿unit TextEditor.Caret.MultiEdit.Colors;
 
 interface
 

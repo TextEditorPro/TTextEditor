@@ -1,4 +1,4 @@
-unit TextEditor.Consts;
+ï»¿unit TextEditor.Consts;
 
 interface
 
@@ -46,7 +46,7 @@ const
   TEXT_EDITOR_LINE_SEPARATOR = Char($2028);
   TEXT_EDITOR_WORD_BREAK_CHARACTERS = ['.', ',', ';', ':', '"', '''', '!', '?', '[', ']', '(', ')', '{', '}', '^',
     '=', '+', '-', '*', '/', '\', '|', ' '];
-  TEXT_EDITOR_EXTRA_WORD_BREAK_CHARACTERS = ['´', '`', '°', '&', '$', '@', '§', '%', '#', '~', '<', '>'];
+  TEXT_EDITOR_EXTRA_WORD_BREAK_CHARACTERS = ['Â´', '`', 'Â°', '&', '$', '@', 'Â§', '%', '#', '~', '<', '>'];
   TEXT_EDITOR_DEFAULT_DELIMITERS: TTextEditorCharSet = ['*', '/', '+', '-', '=', '\', '|', '&', '(', ')', '[', ']', '{', '}',
     '`', '~', '!', '@', ',', '$', '%', '^', '?', ':', ';', '''', '"', '.', '>', '<', '#'];
   TEXT_EDITOR_ABSOLUTE_DELIMITERS: TTextEditorCharSet = [TEXT_EDITOR_NONE_CHAR, TEXT_EDITOR_TAB_CHAR, TEXT_EDITOR_LINEFEED,

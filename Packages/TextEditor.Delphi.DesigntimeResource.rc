@@ -1,7 +1,0 @@
-TTextEditor BITMAP "Images\\TTextEditor.bmp"
-TDBTextEditor BITMAP "Images\\TDBTextEditor.bmp"
-TTextEditorPrint BITMAP "Images\\TTextEditorPrint.bmp"
-TTextEditorPrintPreview BITMAP "Images\\TTextEditorPrintPreview.bmp"
-TTextEditorMacroRecorder BITMAP "Images\\TTextEditorMacroRecorder.bmp"
-TTextEditorSpellCheck BITMAP "Images\\TTextEditorSpellCheck.bmp"
-TTextEditorCompareScrollBar BITMAP "Images\\TTextEditorCompareScrollBar.bmp"

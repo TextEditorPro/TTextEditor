@@ -1,4 +1,4 @@
-unit TextEditor.CodeFolding.Regions;
+﻿unit TextEditor.CodeFolding.Regions;
 
 interface
 

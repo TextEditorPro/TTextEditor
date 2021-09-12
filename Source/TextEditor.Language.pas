@@ -1,4 +1,4 @@
-unit TextEditor.Language;
+﻿unit TextEditor.Language;
 
 interface
 

@@ -1,4 +1,4 @@
-unit TextEditor.CompletionProposal.Trigger;
+﻿unit TextEditor.CompletionProposal.Trigger;
 
 interface
 

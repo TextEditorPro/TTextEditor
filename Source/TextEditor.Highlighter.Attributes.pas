@@ -1,4 +1,4 @@
-unit TextEditor.Highlighter.Attributes;
+﻿unit TextEditor.Highlighter.Attributes;
 
 interface
 

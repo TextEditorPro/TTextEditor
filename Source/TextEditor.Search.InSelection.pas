@@ -1,4 +1,4 @@
-unit TextEditor.Search.InSelection;
+﻿unit TextEditor.Search.InSelection;
 
 interface
 

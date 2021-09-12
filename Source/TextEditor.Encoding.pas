@@ -1,4 +1,4 @@
-unit TextEditor.Encoding;
+﻿unit TextEditor.Encoding;
 
 interface
 

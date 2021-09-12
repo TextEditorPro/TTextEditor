@@ -1,4 +1,4 @@
-unit TextEditor.Print.Margins;
+﻿unit TextEditor.Print.Margins;
 
 interface
 

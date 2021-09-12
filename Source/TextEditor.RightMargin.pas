@@ -1,4 +1,4 @@
-unit TextEditor.RightMargin;
+﻿unit TextEditor.RightMargin;
 
 interface
 

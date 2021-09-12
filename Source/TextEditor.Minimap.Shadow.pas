@@ -1,4 +1,4 @@
-unit TextEditor.Minimap.Shadow;
+﻿unit TextEditor.Minimap.Shadow;
 
 interface
 

@@ -1,4 +1,4 @@
-unit TextEditor.MatchingPair.Colors;
+﻿unit TextEditor.MatchingPair.Colors;
 
 interface
 

@@ -1,4 +1,4 @@
-unit TextEditor.Marks;
+﻿unit TextEditor.Marks;
 
 interface
 

@@ -1,4 +1,4 @@
-unit TextEditor.SpellCheck;
+﻿unit TextEditor.SpellCheck;
 
 interface
 

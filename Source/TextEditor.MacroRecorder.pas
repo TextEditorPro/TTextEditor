@@ -1,4 +1,4 @@
-unit TextEditor.MacroRecorder;
+﻿unit TextEditor.MacroRecorder;
 
 interface
 

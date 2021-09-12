@@ -1,4 +1,4 @@
-unit TextEditor.Search.RegularExpressions;
+﻿unit TextEditor.Search.RegularExpressions;
 
 interface
 

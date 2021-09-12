@@ -1,4 +1,4 @@
-unit TextEditor.ActiveLine;
+﻿unit TextEditor.ActiveLine;
 
 interface
 

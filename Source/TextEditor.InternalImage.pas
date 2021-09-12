@@ -1,4 +1,4 @@
-unit TextEditor.InternalImage;
+﻿unit TextEditor.InternalImage;
 
 interface
 

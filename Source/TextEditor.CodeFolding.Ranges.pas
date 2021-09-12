@@ -1,4 +1,4 @@
-unit TextEditor.CodeFolding.Ranges;
+﻿unit TextEditor.CodeFolding.Ranges;
 
 interface
 

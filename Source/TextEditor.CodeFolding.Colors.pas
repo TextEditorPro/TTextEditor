@@ -1,4 +1,4 @@
-unit TextEditor.CodeFolding.Colors;
+﻿unit TextEditor.CodeFolding.Colors;
 
 interface
 

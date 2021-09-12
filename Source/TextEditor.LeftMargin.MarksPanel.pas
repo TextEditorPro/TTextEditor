@@ -1,4 +1,4 @@
-unit TextEditor.LeftMargin.MarksPanel;
+﻿unit TextEditor.LeftMargin.MarksPanel;
 
 interface
 

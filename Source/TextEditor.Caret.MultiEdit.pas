@@ -1,4 +1,4 @@
-unit TextEditor.Caret.MultiEdit;
+﻿unit TextEditor.Caret.MultiEdit;
 
 interface
 

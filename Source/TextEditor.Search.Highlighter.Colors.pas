@@ -1,4 +1,4 @@
-unit TextEditor.Search.Highlighter.Colors;
+﻿unit TextEditor.Search.Highlighter.Colors;
 
 interface
 

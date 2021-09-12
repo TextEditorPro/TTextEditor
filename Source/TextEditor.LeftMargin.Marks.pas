@@ -1,4 +1,4 @@
-unit TextEditor.LeftMargin.Marks;
+﻿unit TextEditor.LeftMargin.Marks;
 
 interface
 

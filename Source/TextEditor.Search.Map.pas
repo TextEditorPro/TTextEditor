@@ -1,4 +1,4 @@
-unit TextEditor.Search.Map;
+﻿unit TextEditor.Search.Map;
 
 interface
 

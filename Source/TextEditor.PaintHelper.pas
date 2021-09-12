@@ -1,4 +1,4 @@
-unit TextEditor.PaintHelper;
+﻿unit TextEditor.PaintHelper;
 
 interface
 

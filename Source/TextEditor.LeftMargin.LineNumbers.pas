@@ -1,4 +1,4 @@
-unit TextEditor.LeftMargin.LineNumbers;
+﻿unit TextEditor.LeftMargin.LineNumbers;
 
 interface
 

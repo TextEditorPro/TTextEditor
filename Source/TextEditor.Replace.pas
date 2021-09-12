@@ -1,4 +1,4 @@
-unit TextEditor.Replace;
+﻿unit TextEditor.Replace;
 
 interface
 

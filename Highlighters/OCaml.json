@@ -3,7 +3,7 @@
     "Sample": [
       "(* Hello, World! in OCaml *)\r\n",
       "\r\n",
-      "print_string \"Hello, World!\";;"
+      "print_string \"Hello, World!\";"
     ],
     "MainRules": {
       "Attributes": {

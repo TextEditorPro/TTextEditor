@@ -1,4 +1,4 @@
-unit TextEditor.KeyCommands;
+﻿unit TextEditor.KeyCommands;
 
 interface
 

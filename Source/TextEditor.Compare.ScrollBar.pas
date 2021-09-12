@@ -1,4 +1,4 @@
-unit TextEditor.Compare.ScrollBar;
+﻿unit TextEditor.Compare.ScrollBar;
 
 interface
 
@@ -346,9 +346,19 @@ begin
   if FScrollBarClicked then
   begin
     if FScrollBarDragging then
+    begin
       DragMinimap(Y);
+
+      if Assigned(FEditorLeft) then
+        FEditorLeft.Invalidate;
+
+      if Assigned(FEditorRight) then
+        FEditorRight.Invalidate;
+    end;
+
     if not FScrollBarDragging and (ssLeft in AShift) and MouseCapture and (Abs(FMouseDownY - Y) >= FSystemMetricsCYDRAG) then
       FScrollBarDragging := True;
+
     Exit;
   end;
 
@@ -369,14 +379,12 @@ begin
     FMouseDownY := Y;
 
   if not FScrollBarDragging then
-  begin
     if InRange(X, ClientRect.Left, ClientRect.Right) then
     begin
       DoOnScrollBarClick(Y);
       Invalidate;
       Exit;
     end;
-  end;
 
   inherited MouseDown(AButton, AShift, X, Y);
 end;

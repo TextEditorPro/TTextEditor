@@ -1,4 +1,4 @@
-unit TextEditor.LeftMargin.Bookmarks;
+﻿unit TextEditor.LeftMargin.Bookmarks;
 
 interface
 

@@ -1,4 +1,4 @@
-unit TextEditor.UnknownChars;
+﻿unit TextEditor.UnknownChars;
 
 interface
 

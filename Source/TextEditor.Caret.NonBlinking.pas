@@ -1,4 +1,4 @@
-unit TextEditor.Caret.NonBlinking;
+﻿unit TextEditor.Caret.NonBlinking;
 
 interface
 

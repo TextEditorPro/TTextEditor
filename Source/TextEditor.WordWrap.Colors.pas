@@ -1,4 +1,4 @@
-unit TextEditor.WordWrap.Colors;
+﻿unit TextEditor.WordWrap.Colors;
 
 interface
 

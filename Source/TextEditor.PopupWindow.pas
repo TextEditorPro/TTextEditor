@@ -1,4 +1,4 @@
-unit TextEditor.PopupWindow;
+﻿unit TextEditor.PopupWindow;
 
 interface
 

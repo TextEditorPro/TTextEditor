@@ -1,4 +1,4 @@
-unit TextEditor.Glyph;
+﻿unit TextEditor.Glyph;
 
 interface
 

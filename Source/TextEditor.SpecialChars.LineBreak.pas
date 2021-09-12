@@ -1,4 +1,4 @@
-unit TextEditor.SpecialChars.LineBreak;
+﻿unit TextEditor.SpecialChars.LineBreak;
 
 interface
 

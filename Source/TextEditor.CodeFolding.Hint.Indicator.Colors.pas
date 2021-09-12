@@ -1,4 +1,4 @@
-unit TextEditor.CodeFolding.Hint.Indicator.Colors;
+﻿unit TextEditor.CodeFolding.Hint.Indicator.Colors;
 
 interface
 

@@ -1,4 +1,4 @@
-unit TextEditor.SyncEdit.Colors;
+﻿unit TextEditor.SyncEdit.Colors;
 
 interface
 

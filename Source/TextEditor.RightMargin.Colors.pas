@@ -1,4 +1,4 @@
-unit TextEditor.RightMargin.Colors;
+﻿unit TextEditor.RightMargin.Colors;
 
 interface
 

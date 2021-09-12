@@ -1,4 +1,4 @@
-unit TextEditor.Minimap.Colors;
+﻿unit TextEditor.Minimap.Colors;
 
 interface
 

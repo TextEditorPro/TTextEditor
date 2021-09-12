@@ -1,4 +1,4 @@
-unit TextEditor.Search.Normal;
+﻿unit TextEditor.Search.Normal;
 
 interface
 

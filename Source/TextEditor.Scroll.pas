@@ -1,4 +1,4 @@
-unit TextEditor.Scroll;
+﻿unit TextEditor.Scroll;
 
 interface
 

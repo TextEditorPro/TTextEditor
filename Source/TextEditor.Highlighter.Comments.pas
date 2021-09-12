@@ -1,4 +1,4 @@
-unit TextEditor.Highlighter.Comments;
+﻿unit TextEditor.Highlighter.Comments;
 
 interface
 

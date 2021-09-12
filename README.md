@@ -1,12 +1,13 @@
 # TTextEditor
 
-The latest stable release of TTextEditor control for Delphi 10.4.2.
-Can work with older versions but not tested. Namespaces require at least version XE2.
+The latest stable release of TTextEditor control for Delphi. 
+The development environment is Delphi 11.0 Alexandria but can work with older versions as well (not tested). 
+The use of namespaces requires at least Delphi XE2.
 
 ## Updates
 
 The repository is not actively updated in github - only when deemed necessary. 
-Development takes place elsewhere.
+Development takes place elsewhere. 
 
 ## Features
 
@@ -27,7 +28,7 @@ Development takes place elsewhere.
 - Macro recorder
 - Matching pairs
 - Minimap
-- Multi-caret
+- Multi edit
 - Non-blinking caret
 - Printing
 - Replace

@@ -1,4 +1,4 @@
-{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
+Ôªø{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
 unit TextEditor;
 
 interface
@@ -13917,8 +13917,8 @@ var
     function IsAnsiUnicodeChar(const AChar: Char): Boolean;
     begin
       case AChar of
-        'ô', 'Ä', 'É', 'Ñ', 'Ü', 'á', 'à', 'â', 'ä', 'ã', 'å', 'é', 'ë', 'í', 'ì', 'î', 'ï', 'ñ', 'ó', 'ò', 'ö', 'õ',
-        'ú', 'û', 'ü':
+        '‚Ñ¢', '‚Ç¨', '∆í', '‚Äû', '‚Ä†', '‚Ä°', 'ÀÜ', '‚Ä∞', '≈†', '‚Äπ', '≈í', '≈Ω', '‚Äò', '‚Äô', '‚Äú', '‚Äù', '‚Ä¢', '‚Äì', '‚Äî', 'Àú', '≈°', '‚Ä∫',
+        '≈ì', '≈æ', '≈∏':
           Result := True
       else
         Result := False;

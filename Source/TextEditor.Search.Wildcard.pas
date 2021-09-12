@@ -1,4 +1,4 @@
-unit TextEditor.Search.Wildcard;
+﻿unit TextEditor.Search.Wildcard;
 
 interface
 

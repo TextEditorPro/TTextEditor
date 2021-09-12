@@ -1,4 +1,4 @@
-unit TextEditor.Print.PrinterInfo;
+﻿unit TextEditor.Print.PrinterInfo;
 
 interface
 

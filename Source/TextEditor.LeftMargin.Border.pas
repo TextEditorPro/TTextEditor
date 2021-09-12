@@ -1,4 +1,4 @@
-unit TextEditor.LeftMargin.Border;
+﻿unit TextEditor.LeftMargin.Border;
 
 interface
 

@@ -1,4 +1,4 @@
-unit TextEditor.CompletionProposal;
+﻿unit TextEditor.CompletionProposal;
 
 interface
 

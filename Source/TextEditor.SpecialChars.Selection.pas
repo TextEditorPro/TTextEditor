@@ -1,4 +1,4 @@
-unit TextEditor.SpecialChars.Selection;
+﻿unit TextEditor.SpecialChars.Selection;
 
 interface
 

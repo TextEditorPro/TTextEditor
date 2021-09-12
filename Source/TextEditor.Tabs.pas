@@ -1,4 +1,4 @@
-unit TextEditor.Tabs;
+﻿unit TextEditor.Tabs;
 
 interface
 

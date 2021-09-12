@@ -1,4 +1,4 @@
-unit TextEditor.Export.HTML;
+﻿unit TextEditor.Export.HTML;
 
 interface
 

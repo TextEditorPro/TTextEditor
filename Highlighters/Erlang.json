@@ -7,7 +7,7 @@
       "-compile(export_all).\r\n",
       "\r\n",
       "hello() ->\r\n",
-      "  io:format(\"Hello, World!\n\")."
+      "  io:format(\"Hello, World!\")."
     ],
     "MainRules": {
       "Attributes": {

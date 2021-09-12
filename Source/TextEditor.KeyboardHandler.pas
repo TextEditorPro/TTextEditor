@@ -1,4 +1,4 @@
-unit TextEditor.KeyboardHandler;
+﻿unit TextEditor.KeyboardHandler;
 
 interface
 

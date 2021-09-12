@@ -1,4 +1,4 @@
-unit TextEditor.SkipRegions;
+﻿unit TextEditor.SkipRegions;
 
 interface
 

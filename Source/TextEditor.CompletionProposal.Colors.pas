@@ -1,4 +1,4 @@
-unit TextEditor.CompletionProposal.Colors;
+﻿unit TextEditor.CompletionProposal.Colors;
 
 interface
 

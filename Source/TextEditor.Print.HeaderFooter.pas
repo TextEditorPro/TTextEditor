@@ -1,4 +1,4 @@
-unit TextEditor.Print.HeaderFooter;
+﻿unit TextEditor.Print.HeaderFooter;
 
 interface
 

@@ -1,4 +1,4 @@
-unit TextEditor.SpecialChars;
+﻿unit TextEditor.SpecialChars;
 
 interface
 

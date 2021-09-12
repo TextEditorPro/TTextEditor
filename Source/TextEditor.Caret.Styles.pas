@@ -1,4 +1,4 @@
-unit TextEditor.Caret.Styles;
+﻿unit TextEditor.Caret.Styles;
 
 interface
 

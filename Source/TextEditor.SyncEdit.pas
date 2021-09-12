@@ -1,4 +1,4 @@
-unit TextEditor.SyncEdit;
+﻿unit TextEditor.SyncEdit;
 
 interface
 

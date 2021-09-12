@@ -1,4 +1,4 @@
-unit TextEditor.MatchingPairs;
+﻿unit TextEditor.MatchingPairs;
 
 interface
 

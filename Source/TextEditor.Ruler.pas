@@ -1,4 +1,4 @@
-unit TextEditor.Ruler;
+﻿unit TextEditor.Ruler;
 
 interface
 

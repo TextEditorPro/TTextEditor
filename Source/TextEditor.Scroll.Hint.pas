@@ -1,4 +1,4 @@
-unit TextEditor.Scroll.Hint;
+﻿unit TextEditor.Scroll.Hint;
 
 interface
 

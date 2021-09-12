@@ -1,4 +1,4 @@
-{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
+﻿{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
 unit TextEditor.Highlighter.Import.JSON.Parser;
 
 { Copyright (c) 2015 Andreas Hausladen

@@ -1,4 +1,4 @@
-unit TextEditor.LeftMargin.LineState;
+﻿unit TextEditor.LeftMargin.LineState;
 
 interface
 

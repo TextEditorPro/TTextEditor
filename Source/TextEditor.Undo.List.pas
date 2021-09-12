@@ -1,4 +1,4 @@
-unit TextEditor.Undo.List;
+﻿unit TextEditor.Undo.List;
 
 interface
 

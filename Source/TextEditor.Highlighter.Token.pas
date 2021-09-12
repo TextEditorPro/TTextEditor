@@ -1,4 +1,4 @@
-unit TextEditor.Highlighter.Token;
+﻿unit TextEditor.Highlighter.Token;
 
 interface
 

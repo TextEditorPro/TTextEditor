@@ -10,7 +10,6 @@ object MainForm: TMainForm
   Font.Height = -11
   Font.Name = 'Tahoma'
   Font.Style = []
-  OldCreateOrder = False
   Position = poScreenCenter
   OnCreate = FormCreate
   PixelsPerInch = 96
@@ -63,7 +62,7 @@ object MainForm: TMainForm
       OnClick = ListBoxHighlightersClick
     end
   end
-  object Editor: TTextEditor
+  object TextEditor: TTextEditor
     AlignWithMargins = True
     Left = 210
     Top = 3
@@ -90,7 +89,9 @@ object MainForm: TMainForm
     CompletionProposal.MinHeight = 0
     CompletionProposal.MinWidth = 0
     CompletionProposal.ShortCut = 16416
-    CompletionProposal.Snippets.Items = <>
+    CompletionProposal.Snippets.Items = <
+      item
+      end>
     CompletionProposal.Trigger.Chars = '.'
     Font.Charset = DEFAULT_CHARSET
     Font.Color = clWindowText
@@ -104,19 +105,17 @@ object MainForm: TMainForm
     LeftMargin.Font.Style = []
     LeftMargin.Width = 55
     LineSpacing = 0
-    MatchingPairs.AutoComplete = False
     Minimap.Font.Charset = DEFAULT_CHARSET
     Minimap.Font.Color = clWindowText
     Minimap.Font.Height = -1
     Minimap.Font.Name = 'Courier New'
     Minimap.Font.Style = []
-    OnCreateHighlighterStream = EditorCreateHighlighterStream
+    OnCreateHighlighterStream = TextEditorCreateHighlighterStream
     Ruler.Font.Charset = DEFAULT_CHARSET
     Ruler.Font.Color = 13408665
     Ruler.Font.Height = -11
     Ruler.Font.Name = 'Courier New'
     Ruler.Font.Style = []
-    SpecialChars.Style = scsDot
     SyncEdit.ShortCut = 24650
     TabOrder = 1
     WordWrap.Indicator.MaskColor = clFuchsia

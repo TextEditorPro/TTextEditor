@@ -8,16 +8,16 @@ uses
 
 type
   TMainForm = class(TForm)
-    Editor: TTextEditor;
     ListBoxHighlighters: TListBox;
     ListBoxThemes: TListBox;
     PanelLeft: TPanel;
     SplitterHorizontal: TSplitter;
     SplitterVertical: TSplitter;
+    TextEditor: TTextEditor;
     procedure FormCreate(Sender: TObject);
     procedure ListBoxThemesClick(Sender: TObject);
     procedure ListBoxHighlightersClick(Sender: TObject);
-    procedure EditorCreateHighlighterStream(const ASender: TObject; const AName: string; var AStream: TStream);
+    procedure TextEditorCreateHighlighterStream(const ASender: TObject; const AName: string; var AStream: TStream);
   private
     procedure SetSelectedColor;
     procedure SetSelectedHighlighter;
@@ -29,6 +29,9 @@ var
 implementation
 
 {$R *.dfm}
+
+uses
+  TextEditor.CompletionProposal.Snippets, TextEditor.Types;
 
 const
   HIGHLIGHTERS_PATH = '..\..\Highlighters\';
@@ -48,7 +51,7 @@ begin
   end;
 end;
 
-procedure TMainForm.EditorCreateHighlighterStream(const ASender: TObject; const AName: string; var AStream: TStream);
+procedure TMainForm.TextEditorCreateHighlighterStream(const ASender: TObject; const AName: string; var AStream: TStream);
 begin
   { Multi-highlighter stream loaging. For example HTML with scripts (PHP, Javascript, and CSS). }
   if AName <> '' then
@@ -73,15 +76,61 @@ end;
 procedure TMainForm.SetSelectedColor;
 begin
   with ListBoxThemes do
-  Editor.Highlighter.Colors.LoadFromFile(THEMES_PATH + Items[ItemIndex]);
+  TextEditor.Highlighter.Colors.LoadFromFile(THEMES_PATH + Items[ItemIndex]);
 end;
 
 procedure TMainForm.SetSelectedHighlighter;
+var
+  LItem: TTextEditorCompletionProposalSnippetItem;
 begin
   with ListBoxHighlighters do
-  Editor.Highlighter.LoadFromFile(HIGHLIGHTERS_PATH + Items[ItemIndex]);
+  TextEditor.Highlighter.LoadFromFile(HIGHLIGHTERS_PATH + Items[ItemIndex]);
 
-  Editor.Lines.Text := Editor.Highlighter.Sample;
+  TextEditor.Lines.Text := TextEditor.Highlighter.Sample;
+
+  { Snippet examples }
+  if ListBoxHighlighters.Selected[ListBoxHighlighters.Items.IndexOf('Object Pascal.json')] then
+  begin
+    { Add begin..end with enter }
+    LItem := TextEditor.CompletionProposal.Snippets.Items.Add;
+    with LItem do
+    begin
+      Description := 'begin..end';
+      Keyword := 'begin';
+      ExecuteWith := seEnter;
+    end;
+    with LItem.Position do
+    begin
+      Active := True;
+      Column := 2;
+      Row := 2;
+    end;
+    with LItem.Snippet do
+    begin
+      Add('begin');
+      Add('');
+      Add('end');
+    end;
+    { Add if True then with space }
+    LItem := TextEditor.CompletionProposal.Snippets.Items.Add;
+    with LItem do
+    begin
+      Description := 'if True then';
+      Keyword := 'if';
+      ExecuteWith := seSpace;
+    end;
+    with LItem.Selection do
+    begin
+      Active := True;
+      FromColumn := 4;
+      ToColumn := 8;
+      FromRow := 1;
+      ToRow := 1;
+    end;
+    LItem.Snippet.Add('if True then');
+  end
+  else
+    TextEditor.CompletionProposal.Snippets.Items.Clear;
 end;
 
 procedure TMainForm.ListBoxThemesClick(Sender: TObject);

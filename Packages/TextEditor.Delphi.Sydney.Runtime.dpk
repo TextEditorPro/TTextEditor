@@ -36,7 +36,8 @@ requires
   dbrtl,
   vcldb,
   vclx,
-  vclimg;
+  vclimg
+{$IFDEF ALPHASKINS}, acntDX10Sydney_R{$ENDIF};
 
 contains
   TextEditor in '..\Source\TextEditor.pas',

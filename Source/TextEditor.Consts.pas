@@ -51,26 +51,10 @@ const
     '`', '~', '!', '@', ',', '$', '%', '^', '?', ':', ';', '''', '"', '.', '>', '<', '#'];
   TEXT_EDITOR_ABSOLUTE_DELIMITERS: TTextEditorCharSet = [TEXT_EDITOR_NONE_CHAR, TEXT_EDITOR_TAB_CHAR, TEXT_EDITOR_LINEFEED,
     TEXT_EDITOR_CARRIAGE_RETURN, TEXT_EDITOR_SPACE_CHAR, TEXT_EDITOR_SUBSTITUTE_CHAR];
-  { Highlighter attribute elements }
-  TEXT_EDITOR_ATTRIBUTE_ELEMENT_COMMENT = 'Comment';
-  // TEXT_EDITOR_ATTRIBUTE_ELEMENT_DIRECTIVE = 'Directive';
-  TEXT_EDITOR_ATTRIBUTE_ELEMENT_STRING = 'String';
   { Undo }
   TEXT_EDITOR_UNDO_BLOCK_NUMBER_START = 10;
-  { Resource file bitmaps }
-  TEXT_EDITOR_ACTIVE_LINE = 'TEXTEDITORACTIVELINE';
-  TEXT_EDITOR_BOOKMARK_IMAGES = 'TEXTEDITORBOOKMARKIMAGES';
-  TEXT_EDITOR_MOUSE_MOVE_SCROLL = 'TEXTEDITORMOUSEMOVESCROLL';
-  TEXT_EDITOR_NULL_IMAGE = 'TEXTEDITORNULLIMAGE';
-  TEXT_EDITOR_SYNCEDIT = 'TEXTEDITORSYNCEDIT';
-  TEXT_EDITOR_NULL_IMAGE_WIDTH = 16;
   { Replace }
   TEXT_EDITOR_REPLACE_RESULT_CANCEL = -9;
-  { Search engine }
-  TEXT_EDITOR_SEARCH_ENGINE_NORMAL = 'Normal';
-  TEXT_EDITOR_SEARCH_ENGINE_EXTENDED = 'Extended';
-  TEXT_EDITOR_SEARCH_ENGINE_REGULAR_EXPRESSION = 'RegularExpression';
-  TEXT_EDITOR_SEARCH_ENGINE_WILDCARD = 'Wildcard';
 
 type
   TDefaultColors = record
@@ -95,6 +79,12 @@ type
     SyncEditBackground = $00FCFDCD;
   end;
 
+  THighlighterAttribute = record
+  const
+    ElementComment = 'Comment';
+    ElementString = 'String';
+  end;
+
   TMouseWheelScrollCursors = record
   const
     None = -1;
@@ -106,6 +96,24 @@ type
     SouthWest = 5;
     West = 6;
     NorthWest = 7;
+  end;
+
+  TResourceBitmap = record
+  const
+    ActiveLine = 'TEXTEDITORACTIVELINE';
+    BookmarkImages = 'TEXTEDITORBOOKMARKIMAGES';
+    MouseMoveScroll = 'TEXTEDITORMOUSEMOVESCROLL';
+    NullImage = 'TEXTEDITORNULLIMAGE';
+    NullImageWidth = 16;
+    SyncEdit = 'TEXTEDITORSYNCEDIT';
+  end;
+
+  TSearchEngine = record
+  const
+    Normal = 'Normal';
+    Extended = 'Extended';
+    RegularExpression = 'RegularExpression';
+    Wildcard = 'Wildcard';
   end;
 
 implementation

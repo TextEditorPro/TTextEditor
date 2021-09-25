@@ -72,7 +72,7 @@ begin
   FOptions := [seCaseSensitive];
   FSyncItems := TList.Create;
   FColors := TTextEditorSyncEditColors.Create;
-  FActivator := TTextEditorGlyph.Create(HInstance, TEXT_EDITOR_SYNCEDIT, TColors.Fuchsia);
+  FActivator := TTextEditorGlyph.Create(HInstance, TResourceBitmap.SyncEdit, TColors.Fuchsia);
 end;
 
 destructor TTextEditorSyncEdit.Destroy;

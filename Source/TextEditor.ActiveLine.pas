@@ -35,7 +35,7 @@ begin
   inherited;
 
   FColors := TTextEditorActiveLineColors.Create;
-  FIndicator := TTextEditorGlyph.Create(HInstance, TEXT_EDITOR_ACTIVE_LINE, TColors.Fuchsia);
+  FIndicator := TTextEditorGlyph.Create(HInstance, TResourceBitmap.ActiveLine, TColors.Fuchsia);
   FIndicator.Visible := False;
   FVisible := True;
 end;

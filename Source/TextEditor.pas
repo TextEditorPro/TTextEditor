@@ -365,16 +365,13 @@ type
     function GetCanPaste: Boolean;
     function GetCanRedo: Boolean;
     function GetCanUndo: Boolean;
+    function GetCaretIndex: Integer;
     function GetCharAtCursor: Char;
     function GetCharAtTextPosition(const ATextPosition: TTextEditorTextPosition): Char;
-    function GetPreviousCharAtCursor: Char;
     function GetCharWidth: Integer; inline;
-    function GetViewLineNumber(const AViewLineNumber: Integer): Integer;
-    function GetViewTextLineNumber(const AViewLineNumber: Integer): Integer;
     function GetEndOfLine(const ALine: PChar): PChar;
     function GetFoldingOnCurrentLine: Boolean;
-    function GetHighlighterAttributeAtRowColumn(const ATextPosition: TTextEditorTextPosition; var AToken: string;
-      var ATokenType: TTextEditorRangeType; var AStart: Integer; var AHighlighterAttribute: TTextEditorHighlighterAttribute): Boolean;
+    function GetHighlighterAttributeAtRowColumn(const ATextPosition: TTextEditorTextPosition; var AToken: string; var ATokenType: TTextEditorRangeType; var AStart: Integer; var AHighlighterAttribute: TTextEditorHighlighterAttribute): Boolean;
     function GetHookedCommandHandlersCount: Integer;
     function GetHorizontalScrollMax: Integer;
     function GetLeadingExpandedLength(const AText: string; const ABorder: Integer = 0): Integer;
@@ -385,6 +382,7 @@ type
     function GetMatchingToken(const AViewPosition: TTextEditorViewPosition; var AMatch: TTextEditorMatchingPairMatch): TTextEditorMatchingTokenResult;
     function GetMouseScrollCursorIndex: Integer;
     function GetMouseScrollCursors(const AIndex: Integer): HCursor;
+    function GetPreviousCharAtCursor: Char;
     function GetRowCountFromPixel(const AY: Integer): Integer;
     function GetScrollPageWidth: Integer;
     function GetSearchResultCount: Integer;
@@ -401,6 +399,8 @@ type
     function GetTextPosition: TTextEditorTextPosition;
     function GetTokenCharCount(const AToken: string; const ACharsBefore: Integer): Integer; inline;
     function GetTokenWidth(const AToken: string; const ALength: Integer; const ACharsBefore: Integer; const AMinimap: Boolean = False; const ARTLReading: Boolean = False): Integer; inline;
+    function GetViewLineNumber(const AViewLineNumber: Integer): Integer;
+    function GetViewTextLineNumber(const AViewLineNumber: Integer): Integer;
     function GetVisibleChars(const ARow: Integer; const ALineText: string = ''): Integer;
     function IsCommentAtCaretPosition: Boolean;
     function IsKeywordAtCaretPosition(const APOpenKeyWord: PBoolean = nil): Boolean;
@@ -474,7 +474,7 @@ type
     procedure DoToggleBookmark;
     procedure DoToggleMark;
     procedure DoToggleSelectedCase(const ACommand: TTextEditorCommand);
-    procedure DoTrimTrailingSpaces(const ATextLine: Integer);
+    procedure DoTrimTrailingSpaces(const ATextLine: Integer; const AForceTrim: Boolean = False);
     procedure DoWordLeft(const ACommand: TTextEditorCommand);
     procedure DoWordRight(const ACommand: TTextEditorCommand);
     procedure DragMinimap(const AY: Integer);
@@ -515,6 +515,7 @@ type
     procedure SelectionChanged(ASender: TObject);
     procedure SetActiveLine(const AValue: TTextEditorActiveLine);
     procedure SetBorderStyle(const AValue: TBorderStyle);
+    procedure SetCaretIndex(const AValue: Integer);
     procedure SetCodeFolding(const AValue: TTextEditorCodeFolding);
     procedure SetCompletionProposalPopupWindowLocation;
     procedure SetDefaultKeyCommands;
@@ -527,6 +528,7 @@ type
     procedure SetModified(const AValue: Boolean);
     procedure SetMouseScrollCursors(const AIndex: Integer; const AValue: HCursor);
     procedure SetOptions(const AValue: TTextEditorOptions);
+    procedure SetOvertypeMode(const AValue: TTextEditorOvertypeMode);
     procedure SetRightMargin(const AValue: TTextEditorRightMargin);
     procedure SetScroll(const AValue: TTextEditorScroll);
     procedure SetSearch(const AValue: TTextEditorSearch);
@@ -542,10 +544,9 @@ type
     procedure SetTabs(const AValue: TTextEditorTabs);
     procedure SetText(const AValue: string);
     procedure SetTextBetween(const ATextBeginPosition: TTextEditorTextPosition; const ATextEndPosition: TTextEditorTextPosition; const AValue: string);
-    procedure SetTextPosition(const AValue: TTextEditorTextPosition);
     procedure SetTextCaretX(const AValue: Integer);
     procedure SetTextCaretY(const AValue: Integer);
-    procedure SetOvertypeMode(const AValue: TTextEditorOvertypeMode);
+    procedure SetTextPosition(const AValue: TTextEditorTextPosition);
     procedure SetTopLine(const AValue: Integer);
     procedure SetUndo(const AValue: TTextEditorUndo);
     procedure SetUnknownChars(const AValue: TTextEditorUnknownChars);
@@ -843,6 +844,7 @@ type
     property CanUndo: Boolean read GetCanUndo;
     property Canvas;
     property Caret: TTextEditorCaret read FCaret write FCaret;
+    property CaretIndex: Integer read GetCaretIndex write SetCaretIndex;
     property CharAtCursor: Char read GetCharAtCursor;
     property CharWidth: Integer read GetCharWidth;
     property CodeFolding: TTextEditorCodeFolding read FCodeFolding write SetCodeFolding;
@@ -1452,7 +1454,7 @@ begin
   FHighlighter.Lines := FLines;
   { Mouse wheel scroll cursors }
   for LIndex := 0 to 7 do
-    FMouse.ScrollCursors[LIndex] := LoadCursor(HInstance, PChar(TEXT_EDITOR_MOUSE_MOVE_SCROLL + IntToStr(LIndex)));
+    FMouse.ScrollCursors[LIndex] := LoadCursor(HInstance, PChar(TResourceBitmap.MouseMoveScroll + IntToStr(LIndex)));
 {$IFDEF ALPHASKINS}
   FBoundLabel := TsBoundLabel.Create(Self, FSkinData);
 {$ENDIF}
@@ -1896,9 +1898,9 @@ begin
   end;
 end;
 
-procedure TCustomTextEditor.DoTrimTrailingSpaces(const ATextLine: Integer);
+procedure TCustomTextEditor.DoTrimTrailingSpaces(const ATextLine: Integer; const AForceTrim: Boolean = False);
 begin
-  if eoTrimTrailingSpaces in FOptions then
+  if (eoTrimTrailingSpaces in FOptions) or AForceTrim then
     FLines.DoTrimTrailingSpaces(ATextLine);
 end;
 
@@ -1907,7 +1909,7 @@ var
   LLine: Integer;
 begin
   for LLine := 0 to FLines.Count - 1 do
-    DoTrimTrailingSpaces(LLine);
+    DoTrimTrailingSpaces(LLine, True);
   Invalidate;
 end;
 
@@ -2006,6 +2008,50 @@ begin
   Result := not ReadOnly and FUndoList.CanUndo;
 end;
 
+function TCustomTextEditor.GetCaretIndex: Integer;
+var
+  LPText: PChar;
+  LTextPosition: TTextEditorTextPosition;
+  LLine: Integer;
+  LLineFeed: Boolean;
+begin
+  Result := 0;
+
+  LPText := PChar(Text);
+  LTextPosition := TextPosition;
+  LLine := 0;
+  while LPText^ <> TEXT_EDITOR_NONE_CHAR do
+  begin
+    if LLine = LTextPosition.Line then
+    begin
+      Inc(Result, LTextPosition.Char);
+      Exit;
+    end;
+
+    LLineFeed := LPText^ in [TEXT_EDITOR_CARRIAGE_RETURN, TEXT_EDITOR_LINEFEED];
+
+    if LPText^ = TEXT_EDITOR_CARRIAGE_RETURN then
+    begin
+      Inc(Result);
+      Inc(LPText);
+    end;
+
+    if LPText^ = TEXT_EDITOR_LINEFEED then
+    begin
+      Inc(Result);
+      Inc(LPText);
+    end;
+
+    if LLineFeed then
+      Inc(LLine)
+    else
+    begin
+      Inc(Result);
+      Inc(LPText);
+    end;
+  end;
+end;
+
 function TCustomTextEditor.GetCharAtCursor: Char;
 begin
   Result := GetCharAtTextPosition(TextPosition);
@@ -2023,6 +2069,7 @@ begin
     LLength := Length(LTextLine);
     if LLength = 0 then
       Exit;
+
     if ATextPosition.Char <= LLength then
       Result := LTextLine[ATextPosition.Char];
   end;
@@ -3011,7 +3058,7 @@ begin
   if LChar = TEXT_EDITOR_SUBSTITUTE_CHAR then
   begin
     if eoShowNullCharacters in Options then
-      Result := TEXT_EDITOR_NULL_IMAGE_WIDTH * ALength
+      Result := TResourceBitmap.NullImageWidth * ALength
     else
       Result := 0
   end
@@ -4255,6 +4302,7 @@ begin
   SetLength(FCodeFoldings.RangeFromLine, LLength);
   SetLength(FCodeFoldings.RangeToLine, 0);
   SetLength(FCodeFoldings.RangeToLine, LLength);
+
   for LIndex := FCodeFoldings.AllRanges.AllCount - 1 downto 0 do
   begin
     LCodeFoldingRange := FCodeFoldings.AllRanges[LIndex];
@@ -4281,10 +4329,10 @@ procedure TCustomTextEditor.CodeFoldingOnChange(const AEvent: TTextEditorCodeFol
 begin
   if AEvent = fcVisible then
   begin
-    if not FCodeFolding.Visible then
-      ExpandAll
+    if FCodeFolding.Visible then
+      InitCodeFolding
     else
-      InitCodeFolding;
+      ExpandAll;
   end;
 
   FLeftMarginWidth := GetLeftMarginWidth;
@@ -8184,6 +8232,49 @@ begin
     FBorderStyle := AValue;
     RecreateWnd;
   end;
+end;
+
+procedure TCustomTextEditor.SetCaretIndex(const AValue: Integer);
+var
+  LPText: PChar;
+  LIndex: Integer;
+  LLineFeed: Boolean;
+  LTextPosition: TTextEditorTextPosition;
+begin
+  LPText := PChar(Text);
+  LIndex := 0;
+  LTextPosition.Char := 1;
+  LTextPosition.Line := 0;
+  while (LPText^ <> TEXT_EDITOR_NONE_CHAR) and (LIndex < AValue) do
+  begin
+    LLineFeed := LPText^ in [TEXT_EDITOR_CARRIAGE_RETURN, TEXT_EDITOR_LINEFEED];
+
+    if LPText^ = TEXT_EDITOR_CARRIAGE_RETURN then
+    begin
+      Inc(LIndex);
+      Inc(LPText);
+    end;
+
+    if LPText^ = TEXT_EDITOR_LINEFEED then
+    begin
+      Inc(LIndex);
+      Inc(LPText);
+    end;
+
+    if LLineFeed then
+    begin
+      LTextPosition.Char := 1;
+      LTextPosition.Line := LTextPosition.Line + 1;
+    end
+    else
+    begin
+      LTextPosition.Char := LTextPosition.Char + 1;
+      Inc(LIndex);
+      Inc(LPText);
+    end;
+  end;
+
+  TextPosition := LTextPosition;
 end;
 
 procedure TCustomTextEditor.SetCodeFolding(const AValue: TTextEditorCodeFolding);
@@ -12136,7 +12227,7 @@ var
   begin
     if not Assigned(FImages.Bookmark) then
     begin
-      FImages.Bookmark := TTextEditorInternalImage.Create(HInstance, TEXT_EDITOR_BOOKMARK_IMAGES, TEXT_EDITOR_BOOKMARK_IMAGE_COUNT);
+      FImages.Bookmark := TTextEditorInternalImage.Create(HInstance, TResourceBitmap.BookmarkImages, TEXT_EDITOR_BOOKMARK_IMAGE_COUNT);
 {$IFDEF ALPHASKINS}
       FImages.Bookmark.ChangeScale(SkinData.CommonSkinData.PPI, 96);
 {$ENDIF}
@@ -13377,7 +13468,7 @@ var
 
       if not Assigned(FImages.Null) then
       begin
-        FImages.Null := TTextEditorInternalImage.Create(HInstance, TEXT_EDITOR_NULL_IMAGE);
+        FImages.Null := TTextEditorInternalImage.Create(HInstance, TResourceBitmap.NullImage);
 {$IFDEF ALPHASKINS}
         FImages.Null.ChangeScale(SkinData.CommonSkinData.PPI, 96);
 {$ENDIF}
@@ -14418,7 +14509,7 @@ var
                   (LOpenTokenEndPos > FHighlighter.TokenPosition + FHighlighter.TokenLength) do
                   FHighlighter.Next;
                 LElement := FHighlighter.RangeAttribute.Element;
-                if (LElement <> TEXT_EDITOR_ATTRIBUTE_ELEMENT_COMMENT) and (LElement <> TEXT_EDITOR_ATTRIBUTE_ELEMENT_STRING) then
+                if (LElement <> THighlighterAttribute.ElementComment) and (LElement <> THighlighterAttribute.ElementString) then
                   Break;
                 LOpenTokenEndPos := 0;
                 if Assigned(LFoldRange.RegionItem) then
@@ -18911,6 +19002,7 @@ begin
     LPText := PChar(SelectedText)
   else
     LPText := PChar(Text);
+
   while LPText^ <> TEXT_EDITOR_NONE_CHAR do
   begin
     while ((LPText^ < TEXT_EDITOR_EXCLAMATION_MARK) or IsWordBreakChar(LPText^)) and (LPText^ <> TEXT_EDITOR_NONE_CHAR) do

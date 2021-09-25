@@ -335,25 +335,25 @@ function SearchEngineAsText(const ASearchEngine: TTextEditorSearchEngine): strin
 begin
   case ASearchEngine of
     seNormal:
-      Result := TEXT_EDITOR_SEARCH_ENGINE_NORMAL;
+      Result := TSearchEngine.Normal;
     seExtended:
-      Result := TEXT_EDITOR_SEARCH_ENGINE_EXTENDED;
+      Result := TSearchEngine.Extended;
     seRegularExpression:
-      Result := TEXT_EDITOR_SEARCH_ENGINE_REGULAR_EXPRESSION;
+      Result := TSearchEngine.RegularExpression;
     seWildcard:
-      Result := TEXT_EDITOR_SEARCH_ENGINE_WILDCARD;
+      Result := TSearchEngine.Wildcard;
   end;
 end;
 
 function TextAsSearchEngine(const ASearchEngineName: string): TTextEditorSearchEngine;
 begin
-  if ASearchEngineName = TEXT_EDITOR_SEARCH_ENGINE_EXTENDED then
+  if ASearchEngineName = TSearchEngine.Extended then
     Result := seExtended
   else
-  if ASearchEngineName = TEXT_EDITOR_SEARCH_ENGINE_REGULAR_EXPRESSION then
+  if ASearchEngineName = TSearchEngine.RegularExpression then
     Result := seRegularExpression
   else
-  if ASearchEngineName = TEXT_EDITOR_SEARCH_ENGINE_WILDCARD then
+  if ASearchEngineName = TSearchEngine.Wildcard then
     Result := seWildcard
   else
     Result := seNormal

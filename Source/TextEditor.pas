@@ -6893,7 +6893,7 @@ begin
 
   LDestinationPosition := LTextPosition;
 
-  LCurrentLineLength := Length(FLines.Items^[LTextPosition.Line].TextLine);
+  LCurrentLineLength := Length(FLines[LTextPosition.Line]);
   LChangeY := not (soPastEndOfLine in FScroll.Options) or FWordWrap.Active;
 
   if LChangeY and (X = -1) and (LTextPosition.Char = 1) and (LTextPosition.Line >= 1) then

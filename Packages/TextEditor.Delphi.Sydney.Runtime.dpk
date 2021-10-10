@@ -130,7 +130,9 @@ contains
   TextEditor.SpecialChars in '..\Source\TextEditor.SpecialChars.pas',
   TextEditor.SpecialChars.LineBreak in '..\Source\TextEditor.SpecialChars.LineBreak.pas',
   TextEditor.SpecialChars.Selection in '..\Source\TextEditor.SpecialChars.Selection.pas',
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
   TextEditor.SpellCheck in '..\Source\TextEditor.SpellCheck.pas',
+{$ENDIF}
   TextEditor.StyleHooks in '..\Source\TextEditor.StyleHooks.pas',
   TextEditor.SyncEdit in '..\Source\TextEditor.SyncEdit.pas',
   TextEditor.SyncEdit.Colors in '..\Source\TextEditor.SyncEdit.Colors.pas',

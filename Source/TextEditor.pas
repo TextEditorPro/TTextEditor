@@ -8939,7 +8939,7 @@ begin
         LScrollInfo.nPos := MulDiv(TEXT_EDITOR_MAX_SCROLL_RANGE, FScrollHelper.HorizontalPosition, LHorizontalScrollMax);
       end;
 
-      LShowScrollBar := (LHorizontalScrollMax > FScrollHelper.PageWidth) and (soShowHorizontalScrollBar in FScroll.Options);
+      LShowScrollBar := LHorizontalScrollMax > FScrollHelper.PageWidth;
       if not LShowScrollBar then
         FScrollHelper.HorizontalPosition := 0;
 
@@ -8978,7 +8978,7 @@ begin
         LScrollInfo.nPos := MulDiv(TEXT_EDITOR_MAX_SCROLL_RANGE, TopLine, LVerticalMaxScroll);
       end;
 
-      LShowScrollBar := (LScrollInfo.nMax > VisibleLineCount) and (soShowVerticalScrollBar in FScroll.Options);
+      LShowScrollBar := LScrollInfo.nMax > VisibleLineCount;
       if not LShowScrollBar then
         TopLine := 1;
 

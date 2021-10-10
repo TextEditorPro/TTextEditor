@@ -123,7 +123,7 @@ type
 
   { Scroll }
   TTextEditorScrollOption = (soHalfPage, soHintFollows, soPastEndOfFileMarker, soPastEndOfLine, soShowVerticalScrollHint,
-    soWheelClickMove, soShowHorizontalScrollBar, soShowVerticalScrollBar);
+    soWheelClickMove);
   TTextEditorScrollOptions = set of TTextEditorScrollOption;
 
   TTextEditorScrollHintFormat = (shfTopLineOnly, shfTopToBottom);

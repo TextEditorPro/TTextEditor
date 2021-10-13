@@ -1043,65 +1043,68 @@ begin
 
         LPValue := PChar(LString);
         LLength := Length(LString);
-        LPLastChar := @LString[LLength];
 
         if LLength > 0 then
-        while LPValue <= LPLastChar do
         begin
-          LPStartValue := LPValue;
-          { Delphi strings end with none char (#0). That's why those characters are changed to substitute characters. }
-          while (LPValue <= LPLastChar) and
-            (LPValue^ <> TEXT_EDITOR_CARRIAGE_RETURN) and (LPValue^ <> TEXT_EDITOR_LINEFEED) and
-            (LPValue^ <> TEXT_EDITOR_LINE_SEPARATOR) do
+          LPLastChar := @LString[LLength];
+
+          while LPValue <= LPLastChar do
           begin
-            if LPValue^ = TEXT_EDITOR_NONE_CHAR then
-              LPValue^ := TEXT_EDITOR_SUBSTITUTE_CHAR;
-            Inc(LPValue);
-          end;
-
-          if FCount = FCapacity then
-            Grow;
-
-          with FItems^[FCount] do
-          begin
-            Pointer(TextLine) := nil;
-            if LPValue = LPStartValue then
-              TextLine := ''
-            else
-              SetString(TextLine, LPStartValue, LPValue - LPStartValue);
-            Range := nil;
-            ExpandedLength := -1;
-            Flags := [sfExpandedLengthUnknown];
-            OriginalLineNumber := FCount;
-
-            { Line break can be CR+LF (Windows), LF (Unix), and CR (Mac). }
-            if LPValue^ = TEXT_EDITOR_CARRIAGE_RETURN then
+            LPStartValue := LPValue;
+            { Delphi strings end with none char (#0). That's why those characters are changed to substitute characters. }
+            while (LPValue <= LPLastChar) and
+              (LPValue^ <> TEXT_EDITOR_CARRIAGE_RETURN) and (LPValue^ <> TEXT_EDITOR_LINEFEED) and
+              (LPValue^ <> TEXT_EDITOR_LINE_SEPARATOR) do
             begin
+              if LPValue^ = TEXT_EDITOR_NONE_CHAR then
+                LPValue^ := TEXT_EDITOR_SUBSTITUTE_CHAR;
               Inc(LPValue);
-              Include(Flags, sfLineBreakCR);
             end;
 
-            if LPValue^ = TEXT_EDITOR_LINEFEED then
+            if FCount = FCapacity then
+              Grow;
+
+            with FItems^[FCount] do
             begin
-              Inc(LPValue);
-              Include(Flags, sfLineBreakLF);
+              Pointer(TextLine) := nil;
+              if LPValue = LPStartValue then
+                TextLine := ''
+              else
+                SetString(TextLine, LPStartValue, LPValue - LPStartValue);
+              Range := nil;
+              ExpandedLength := -1;
+              Flags := [sfExpandedLengthUnknown];
+              OriginalLineNumber := FCount;
+
+              { Line break can be CR+LF (Windows), LF (Unix), and CR (Mac). }
+              if LPValue^ = TEXT_EDITOR_CARRIAGE_RETURN then
+              begin
+                Inc(LPValue);
+                Include(Flags, sfLineBreakCR);
+              end;
+
+              if LPValue^ = TEXT_EDITOR_LINEFEED then
+              begin
+                Inc(LPValue);
+                Include(Flags, sfLineBreakLF);
+              end;
+
+              if LPValue^ = TEXT_EDITOR_LINE_SEPARATOR then
+                Inc(LPValue);
             end;
 
-            if LPValue^ = TEXT_EDITOR_LINE_SEPARATOR then
-              Inc(LPValue);
-          end;
+            Inc(FCount);
 
-          Inc(FCount);
-
-          if FShowProgress then
-          begin
-            Inc(LProgressPosition, LPValue - LPStartValue);
-            if LProgressPosition > LProgress then
+            if FShowProgress then
             begin
-              Inc(FProgressPosition);
-              if Assigned(FPaintProgress) then
-                FPaintProgress(nil);
-              Inc(LProgress, LProgressInc);
+              Inc(LProgressPosition, LPValue - LPStartValue);
+              if LProgressPosition > LProgress then
+              begin
+                Inc(FProgressPosition);
+                if Assigned(FPaintProgress) then
+                  FPaintProgress(nil);
+                Inc(LProgress, LProgressInc);
+              end;
             end;
           end;
         end;

@@ -1041,11 +1041,11 @@ begin
           LRead := True;
         end;
 
-        LPValue := PChar(LString);
         LLength := Length(LString);
 
         if LLength > 0 then
         begin
+          LPValue := PChar(LString);
           LPLastChar := @LString[LLength];
 
           while LPValue <= LPLastChar do

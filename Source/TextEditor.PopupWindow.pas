@@ -50,6 +50,7 @@ begin
 
   ControlStyle := ControlStyle + [csNoDesignVisible, csReplicatable];
 
+  DoubleBuffered := True;
   Ctl3D := False;
   ParentCtl3D := False;
   Parent := AOwner as TWinControl;

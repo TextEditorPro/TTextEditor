@@ -792,7 +792,7 @@ begin
     while (LIndex > 0) and (LLineText[LIndex] > TEXT_EDITOR_SPACE_CHAR) and not LEditor.IsWordBreakChar(LLineText[LIndex]) do
       Dec(LIndex);
 
-    Result := Copy(LLineText, LIndex + 1, LTextPosition.Char - LIndex + 1);
+    Result := Copy(LLineText, LIndex + 1, LTextPosition.Char - LIndex - 1);
   end;
 end;
 
@@ -808,11 +808,11 @@ begin
     SendMessage(Handle, WM_SETREDRAW, 0, 0);
 
   LScrollInfo.nMin := 0;
-  LScrollInfo.nMax := Max(0, Length(FItemIndexArray) - 1); // FItems.Count - 2);
+  LScrollInfo.nMax := Max(0, Length(FItemIndexArray) - 1);
   LScrollInfo.nPage := FCompletionProposal.VisibleLines;
   LScrollInfo.nPos := TopLine;
 
-  ShowScrollBar(Handle, SB_VERT, {FItems.Count} Length(FItemIndexArray) > FCompletionProposal.VisibleLines);
+  ShowScrollBar(Handle, SB_VERT, Length(FItemIndexArray) > FCompletionProposal.VisibleLines);
   SetScrollInfo(Handle, SB_VERT, LScrollInfo, True);
 
   if FItems.Count <= FCompletionProposal.VisibleLines then
@@ -823,7 +823,7 @@ begin
     if TopLine <= 0 then
       EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_UP)
     else
-    if TopLine + FCompletionProposal.VisibleLines >= {FItems.Count} Length(FItemIndexArray) then
+    if TopLine + FCompletionProposal.VisibleLines >= Length(FItemIndexArray) then
       EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_DOWN);
   end;
 

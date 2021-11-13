@@ -7374,11 +7374,14 @@ var
 
     if LOpenTokenSkipFoldRangeList.Count <> 0 then
       Exit;
+
     if CaseUpper(LPText^) in FHighlighter.FoldOpenKeyChars then
     begin
       LCodeFoldingRange := nil;
+
       if LOpenTokenFoldRangeList.Count > 0 then
         LCodeFoldingRange := LOpenTokenFoldRangeList.Last;
+
       if Assigned(LCodeFoldingRange) and LCodeFoldingRange.RegionItem.NoSubs then
         Exit;
 
@@ -7407,6 +7410,7 @@ var
                     Inc(LPKeyWord);
                   Inc(LPText);
                 end;
+
                 if LPKeyWord^ = TEXT_EDITOR_NONE_CHAR then
                 begin
                   LCodeFoldingRange.IsExtraTokenFound := True;
@@ -7440,6 +7444,7 @@ var
                   Inc(LPTempText);
                   Inc(LPTempKeyWord);
                 end;
+
                 if LPTempKeyWord^ = TEXT_EDITOR_NONE_CHAR then
                   LPText := LPTempText;
               end;
@@ -7451,6 +7456,7 @@ var
               begin
                 { Check if special rule found }
                 LSkipIfFoundAfterOpenToken := False;
+
                 if LRegionItem.SkipIfFoundAfterOpenTokenArrayCount > 0 then
                 begin
                   while LPText^ <> TEXT_EDITOR_NONE_CHAR do
@@ -7467,6 +7473,7 @@ var
                           Inc(LPText);
                           Inc(LPKeyWord);
                         end;
+
                         if LPKeyWord^ = TEXT_EDITOR_NONE_CHAR then
                         begin
                           LSkipIfFoundAfterOpenToken := True;
@@ -7476,8 +7483,10 @@ var
                           LPText := LPBookmarkText2; { Region not found, return pointer back }
                       end;
                     end;
+
                     if LSkipIfFoundAfterOpenToken then
                       Break; { while }
+
                     Inc(LPText);
                   end;
                 end;
@@ -7556,8 +7565,10 @@ var
     LChar: Char;
   begin
     Result := False;
+
     if LOpenTokenSkipFoldRangeList.Count <> 0 then
       Exit;
+
     LChar := CaseUpper(LPText^);
     LPBookmarkText := LPText;
     for LIndex := 1 to Highlighter.CodeFoldingRangeCount - 1 do { First (0) is the default range }
@@ -7574,12 +7585,15 @@ var
           Inc(LPText);
           Inc(LPKeyWord);
         end;
+
         LPText := LPBookmarkText; { Return pointer always back }
+
         if LPKeyWord^ = TEXT_EDITOR_NONE_CHAR then
         begin
           LCodeFoldingRangeIndexList.Add(Pointer(LIndex));
           LCurrentCodeFoldingRegion := Highlighter.CodeFoldingRegions[LIndex];
-          Exit(True)
+
+          Exit(True);
         end
       end;
     end;
@@ -7624,20 +7638,6 @@ var
     end;
   end;
 
-  function TagFolds: Boolean;
-  var
-    LIndex: Integer;
-    LCodeFoldingRegion: TTextEditorCodeFoldingRegion;
-  begin
-    Result := False;
-    for LIndex := 0 to Highlighter.CodeFoldingRangeCount - 1 do
-    begin
-      LCodeFoldingRegion := Highlighter.CodeFoldingRegions[LIndex];
-      if LCodeFoldingRegion.FoldTags then
-        Exit(True);
-    end;
-  end;
-
   procedure AddTagFolds;
   var
     LPText: PChar;
@@ -7645,7 +7645,11 @@ var
     LAdded: Boolean;
     LOpenToken, LCloseToken: string;
     LRegionItem: TTextEditorCodeFoldingRegionItem;
+    LDefaultRegion: TTextEditorCodeFoldingRegion;
+    LMultilineTag: Boolean;
   begin
+    LDefaultRegion := FHighlighter.CodeFoldingRegions[0];
+
     LPText := PChar(FLines.Text);
     LAdded := False;
     while LPText^ <> TEXT_EDITOR_NONE_CHAR do
@@ -7656,15 +7660,28 @@ var
         if not (LPText^ in ['?', '!', '/']) then
         begin
           LTokenName := '';
+          LMultilineTag := False;
           while (LPText^ <> TEXT_EDITOR_NONE_CHAR) and not (LPText^ in [' ', '>']) do
           begin
+            if LPText^ in [TEXT_EDITOR_CARRIAGE_RETURN, TEXT_EDITOR_LINEFEED] then
+            begin
+              LMultilineTag := True;
+              Break;
+            end;
+
             LTokenName := LTokenName + CaseUpper(LPText^);
             Inc(LPText);
           end;
+
           LTokenAttributes := '';
           if LPText^ = ' ' then
           while (LPText^ <> TEXT_EDITOR_NONE_CHAR) and not (LPText^ in ['/', '>']) do
           begin
+            if LPText^ in [TEXT_EDITOR_CARRIAGE_RETURN, TEXT_EDITOR_LINEFEED] then
+            begin
+              LMultilineTag := True;
+              Break;
+            end;
             LTokenAttributes := LTokenAttributes + CaseUpper(LPText^);
             Inc(LPText);
             if (LPText^ in ['"', '''']) then
@@ -7680,12 +7697,13 @@ var
           end;
 
           LOpenToken := '<' + LTokenName + LTokenAttributes + LPText^;
+          LOpenToken := LOpenToken.Trim;
           LCloseToken := '</' + LTokenName + '>';
 
-          if (LPText^ = '>') and ((LPText - 1)^ <> '/') then
-            if not FHighlighter.CodeFoldingRegions[0].Contains(LOpenToken, LCloseToken) then { First (0) is the default range }
+          if LMultilineTag or (LPText^ = '>') and ((LPText - 1)^ <> '/') then
+            if not LDefaultRegion.Contains(LOpenToken, LCloseToken) then
             begin
-              LRegionItem := FHighlighter.CodeFoldingRegions[0].Add(LOpenToken, LCloseToken);
+              LRegionItem := LDefaultRegion.Add(LOpenToken, LCloseToken);
               LRegionItem.BreakCharFollows := False;
               LAdded := True;
             end;
@@ -7711,7 +7729,7 @@ var
     LOpenTokenFoldRangeList := TList.Create;
     LCodeFoldingRangeIndexList := TList.Create;
     try
-      if TagFolds then
+      if FHighlighter.FoldTags then
         AddTagFolds;
 
       { Go through the text line by line, character by character }
@@ -10148,8 +10166,9 @@ begin
   if FCodeFolding.Visible then
   begin
     LTextPosition := FPosition.Text;
-    if FCodeFoldings.Rescan or ((ACommand = TKeyCommands.Char) or (ACommand = TKeyCommands.Backspace) or (ACommand = TKeyCommands.DeleteChar) or
-      (ACommand = TKeyCommands.LineBreak)) and IsKeywordAtCaretPositionOrAfter(TextPosition) then
+    if ((ACommand = TKeyCommands.Char) or (ACommand = TKeyCommands.Backspace) or (ACommand = TKeyCommands.DeleteChar) or
+      (ACommand = TKeyCommands.LineBreak)) and IsKeywordAtCaretPositionOrAfter(TextPosition) or
+      FHighlighter.FoldTags and (ACommand = TKeyCommands.Char) and (AChar = '>') then
       FCodeFoldings.Rescan := True;
   end;
 

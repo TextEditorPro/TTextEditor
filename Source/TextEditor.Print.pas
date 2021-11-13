@@ -135,7 +135,6 @@ var
 begin
   inherited;
 
-  FCopies := 1;
   FFooter := TTextEditorPrintFooter.Create;
   FHeader := TTextEditorPrintHeader.Create;
   FLines := TStringList.Create;
@@ -143,7 +142,9 @@ begin
   FPrinterInfo := TTextEditorPrinterInfo.Create;
   FFont := TFont.Create;
   FOldFont := TFont.Create;
-  MaxLeftChar := 1024;
+
+  FCopies := 1;
+  FMaxLeftChar := 1024;
   FWrap := True;
   FHighlight := True;
   FColors := False;
@@ -154,6 +155,7 @@ begin
   FPages := TList.Create;
   FTabWidth := 8;
   FDefaultBackground := TColors.White;
+
   LFont := TFont.Create;
   try
     LFont.Name := 'Courier New';
@@ -210,6 +212,7 @@ begin
       EndUpdate;
     end;
   end;
+
   FHighlighterRangesSet := False;
   FPagesCounted := False;
 end;

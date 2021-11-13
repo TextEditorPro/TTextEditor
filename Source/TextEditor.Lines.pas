@@ -278,10 +278,8 @@ function TTextEditorLines.LineBreakLength(const AIndex: Integer): Integer;
 var
   LLineBreak: string;
 begin
-  Result := 0;
-
   if (AIndex < 0) or (AIndex > FCount - 1) then
-    Exit;
+    Exit(0);
 
   if (AIndex = FCount - 1) and not TrailingLineBreak then
     Result := 0
@@ -294,12 +292,10 @@ end;
 
 function TTextEditorLines.StringLength(const AIndex: Integer): Integer;
 begin
-  Result := 0;
-
   if (AIndex < 0) or (AIndex > FCount - 1) then
-    Exit;
-
-  Result := Length(FItems^[AIndex].TextLine);
+    Result := 0
+  else
+    Result := Length(FItems^[AIndex].TextLine);
 end;
 
 procedure TTextEditorLines.Clear;
@@ -897,11 +893,14 @@ begin
   LLeft := ALeft;
   LRight := ARight;
   LMiddle := (ALeft + ARight) shr 1;
+
   repeat
     while ACompare(Self, LLeft, LMiddle) < 0 do
       Inc(LLeft);
+
     while ACompare(Self, LRight, LMiddle) > 0 do
       Dec(LRight);
+
     if LLeft <= LRight then
     begin
       if LLeft <> LRight then
@@ -915,8 +914,10 @@ begin
       Dec(LRight);
     end;
   until LLeft > LRight;
+
   if LRight > ALeft then
     QuickSort(ALeft, LRight, ACompare);
+
   if LLeft < ARight then
     QuickSort(LLeft, ARight, ACompare);
 end;
@@ -1228,6 +1229,7 @@ begin
 {$ENDIF}
     if Assigned(OnBeforePutted) then
       OnBeforePutted(Self, AIndex, 1);
+
     with FItems^[AIndex] do
     begin
       Include(Flags, sfExpandedLengthUnknown);
@@ -1236,6 +1238,7 @@ begin
       TextLine := AValue;
       Include(Flags, sfLineStateModified);
     end;
+
     if FIndexOfLongestLine <> -1 then
       if FItems^[FIndexOfLongestLine].ExpandedLength < Length(ConvertTabs(AValue, FTabWidth, LHasTabs, FColumns)) then
         FIndexOfLongestLine := AIndex;

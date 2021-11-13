@@ -45,8 +45,9 @@ begin
   FActive := False;
   FColors := TTextEditorWordWrapColors.Create;
   FIndicator := TTextEditorGlyph.Create(HInstance, '', TColors.Fuchsia);
-  CreateInternalBitmap;
   FWidth := wwwPage;
+
+  CreateInternalBitmap;
 end;
 
 destructor TTextEditorWordWrap.Destroy;

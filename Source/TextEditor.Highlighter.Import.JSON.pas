@@ -60,13 +60,14 @@ var
   LIndex: Integer;
 begin
   Result := [];
+
   for LIndex := 1 to Length(AString) do
     Result := Result + [AString[LIndex]];
 end;
 
 function StrToStrDef(const AString: string; const AStringDef: string): string;
 begin
-  if System.SysUtils.Trim(AString) = '' then
+  if AString.Trim.Isempty then
     Result := AStringDef
   else
     Result := AString
@@ -75,22 +76,23 @@ end;
 function StrToFontStyle(const AString: string): TFontStyles;
 begin
   Result := [];
-  if FastPos('Bold', AString) > 0 then
+
+  if FastPos(TFontStyleNames.Bold, AString) > 0 then
     Include(Result, fsBold);
-  if FastPos('Italic', AString) > 0 then
+  if FastPos(TFontStyleNames.Italic, AString) > 0 then
     Include(Result, fsItalic);
-  if FastPos('Underline', AString) > 0 then
+  if FastPos(TFontStyleNames.Underline, AString) > 0 then
     Include(Result, fsUnderline);
-  if FastPos('StrikeOut', AString) > 0 then
+  if FastPos(TFontStyleNames.StrikeOut, AString) > 0 then
     Include(Result, fsStrikeOut);
 end;
 
 function StrToBreakType(const AString: string): TTextEditorBreakType;
 begin
-  if AString = 'Any' then
+  if AString = TBreakType.Any then
     Result := btAny
   else
-  if (AString = 'Term') or (AString = '') then
+  if (AString = TBreakType.Term) or AString.IsEmpty then
     Result := btTerm
   else
     Result := btUnspecified;
@@ -98,13 +100,13 @@ end;
 
 function StrToRegionType(const AString: string): TTextEditorSkipRegionItemType;
 begin
-  if AString = 'SingleLine' then
+  if AString = TRegionType.SingleLine then
     Result := ritSingleLineComment
   else
-  if AString = 'MultiLine' then
+  if AString = TRegionType.MultiLine then
     Result := ritMultiLineComment
   else
-  if AString = 'SingleLineString' then
+  if AString = TRegionType.SingleLineString then
     Result := ritSingleLineString
   else
     Result := ritMultiLineString
@@ -155,8 +157,11 @@ begin
   begin
     LEditor := FHighlighter.Editor as TCustomTextEditor;
     LEditor.URIOpener := StrToBoolDef(AEditorObject['URIOpener'].Value, False);
-    LEditor.CodeFolding.Outlining := StrToBoolDef(AEditorObject['Outlining'].Value, False);
-    LEditor.CodeFolding.TextFolding.Active := LEditor.CodeFolding.Outlining or StrToBoolDef(AEditorObject['TextFolding'].Value, False);
+    with LEditor.CodeFolding do
+    begin
+      Outlining := StrToBoolDef(AEditorObject['Outlining'].Value, False);
+      TextFolding.Active := LEditor.CodeFolding.Outlining or StrToBoolDef(AEditorObject['TextFolding'].Value, False);
+    end;
   end;
 end;
 
@@ -172,97 +177,174 @@ begin
     if Assigned(LColorsObject) then
     begin
       LEditor.Colors.Background := StringToColorDef(LColorsObject['Background'].Value, LEditor.Colors.Background);
-      LEditor.ActiveLine.Colors.Background := StringToColorDef(LColorsObject['ActiveLineBackground'].Value, LEditor.ActiveLine.Colors.Background);
-      LEditor.ActiveLine.Colors.BackgroundUnfocused := StringToColorDef(LColorsObject['ActiveLineBackgroundUnfocused'].Value, LEditor.ActiveLine.Colors.Background);
-      LEditor.ActiveLine.Colors.Foreground := StringToColorDef(LColorsObject['ActiveLineForeground'].Value, LEditor.ActiveLine.Colors.Foreground);
-      LEditor.ActiveLine.Colors.ForegroundUnfocused := StringToColorDef(LColorsObject['ActiveLineForegroundUnfocused'].Value, LEditor.ActiveLine.Colors.Foreground);
-      LEditor.Caret.MultiEdit.Colors.Background :=  StringToColorDef(LColorsObject['MultiEditBackground'].Value, LEditor.Caret.MultiEdit.Colors.Background);
-      LEditor.Caret.MultiEdit.Colors.Foreground :=  StringToColorDef(LColorsObject['MultiEditForeground'].Value, LEditor.Caret.MultiEdit.Colors.Foreground);
-      LEditor.CodeFolding.Colors.ActiveLineBackground := StringToColorDef(LColorsObject['CodeFoldingActiveLineBackground'].Value, LEditor.CodeFolding.Colors.ActiveLineBackground);
-      LEditor.CodeFolding.Colors.ActiveLineBackgroundUnfocused := StringToColorDef(LColorsObject['CodeFoldingActiveLineBackgroundUnfocused'].Value, LEditor.CodeFolding.Colors.ActiveLineBackground);
-      LEditor.CodeFolding.Colors.Background := StringToColorDef(LColorsObject['CodeFoldingBackground'].Value, LEditor.CodeFolding.Colors.Background);
-      LEditor.CodeFolding.Colors.CollapsedLine := StringToColorDef(LColorsObject['CodeFoldingCollapsedLine'].Value, LEditor.CodeFolding.Colors.CollapsedLine);
-      LEditor.CodeFolding.Colors.FoldingLine := StringToColorDef(LColorsObject['CodeFoldingFoldingLine'].Value, LEditor.CodeFolding.Colors.FoldingLine);
-      LEditor.CodeFolding.Colors.FoldingLineHighlight := StringToColorDef(LColorsObject['CodeFoldingFoldingLineHighlight'].Value, LEditor.CodeFolding.Colors.FoldingLineHighlight);
-      LEditor.CodeFolding.Colors.Indent := StringToColorDef(LColorsObject['CodeFoldingIndent'].Value, LEditor.CodeFolding.Colors.Indent);
-      LEditor.CodeFolding.Colors.IndentHighlight := StringToColorDef(LColorsObject['CodeFoldingIndentHighlight'].Value, LEditor.CodeFolding.Colors.IndentHighlight);
-      LEditor.CodeFolding.Hint.Colors.Background := StringToColorDef(LColorsObject['CodeFoldingHintBackground'].Value, LEditor.CodeFolding.Hint.Colors.Background);
-      LEditor.CodeFolding.Hint.Colors.Border := StringToColorDef(LColorsObject['CodeFoldingHintBorder'].Value, LEditor.CodeFolding.Hint.Colors.Border);
-      LEditor.CodeFolding.Hint.Font.Color := StringToColorDef(LColorsObject['CodeFoldingHintText'].Value, LEditor.CodeFolding.Hint.Font.Color);
-      LEditor.CodeFolding.Hint.Indicator.Colors.Background := StringToColorDef(LColorsObject['CodeFoldingHintIndicatorBackground'].Value, LEditor.CodeFolding.Hint.Indicator.Colors.Background);
-      LEditor.CodeFolding.Hint.Indicator.Colors.Border := StringToColorDef(LColorsObject['CodeFoldingHintIndicatorBorder'].Value, LEditor.CodeFolding.Hint.Indicator.Colors.Border);
-      LEditor.CodeFolding.Hint.Indicator.Colors.Mark := StringToColorDef(LColorsObject['CodeFoldingHintIndicatorMark'].Value, LEditor.CodeFolding.Hint.Indicator.Colors.Mark);
-      LEditor.CompletionProposal.Colors.Background := StringToColorDef(LColorsObject['CompletionProposalBackground'].Value, LEditor.CompletionProposal.Colors.Background);
-      LEditor.CompletionProposal.Colors.Foreground := StringToColorDef(LColorsObject['CompletionProposalForeground'].Value, LEditor.CompletionProposal.Colors.Foreground);
-      LEditor.CompletionProposal.Colors.SelectedBackground := StringToColorDef(LColorsObject['CompletionProposalSelectedBackground'].Value, LEditor.CompletionProposal.Colors.SelectedBackground);
-      LEditor.CompletionProposal.Colors.SelectedText := StringToColorDef(LColorsObject['CompletionProposalSelectedText'].Value, LEditor.CompletionProposal.Colors.SelectedText);
-      LEditor.LeftMargin.Colors.ActiveLineBackground := StringToColorDef(LColorsObject['LeftMarginActiveLineBackground'].Value, LEditor.LeftMargin.Colors.ActiveLineBackground);
-      LEditor.LeftMargin.Colors.ActiveLineBackgroundUnfocused := StringToColorDef(LColorsObject['LeftMarginActiveLineBackgroundUnfocused'].Value, LEditor.LeftMargin.Colors.ActiveLineBackground);
-      LEditor.LeftMargin.Colors.Background := StringToColorDef(LColorsObject['LeftMarginBackground'].Value, LEditor.LeftMargin.Colors.Background);
-      LEditor.LeftMargin.Colors.Border := StringToColorDef(LColorsObject['LeftMarginBorder'].Value, LEditor.LeftMargin.Colors.Border);
-      LEditor.LeftMargin.Colors.ActiveLineNumber := StringToColorDef(LColorsObject['LeftMarginActiveLineNumber'].Value, LEditor.LeftMargin.Colors.ActiveLineNumber);
-      LEditor.LeftMargin.Colors.LineNumberLine := StringToColorDef(LColorsObject['LeftMarginLineNumberLine'].Value, LEditor.LeftMargin.Colors.LineNumberLine);
+
+      with LEditor.ActiveLine.Colors do
+      begin
+        Background := StringToColorDef(LColorsObject['ActiveLineBackground'].Value, Background);
+        BackgroundUnfocused := StringToColorDef(LColorsObject['ActiveLineBackgroundUnfocused'].Value, Background);
+        Foreground := StringToColorDef(LColorsObject['ActiveLineForeground'].Value, Foreground);
+        ForegroundUnfocused := StringToColorDef(LColorsObject['ActiveLineForegroundUnfocused'].Value, Foreground);
+      end;
+
+      with LEditor.Caret.MultiEdit.Colors do
+      begin
+        Background :=  StringToColorDef(LColorsObject['MultiEditBackground'].Value, Background);
+        Foreground :=  StringToColorDef(LColorsObject['MultiEditForeground'].Value, Foreground);
+      end;
+
+      with LEditor.CodeFolding.Colors do
+      begin
+        ActiveLineBackground := StringToColorDef(LColorsObject['CodeFoldingActiveLineBackground'].Value, ActiveLineBackground);
+        ActiveLineBackgroundUnfocused := StringToColorDef(LColorsObject['CodeFoldingActiveLineBackgroundUnfocused'].Value, ActiveLineBackground);
+        Background := StringToColorDef(LColorsObject['CodeFoldingBackground'].Value, Background);
+        CollapsedLine := StringToColorDef(LColorsObject['CodeFoldingCollapsedLine'].Value, CollapsedLine);
+        FoldingLine := StringToColorDef(LColorsObject['CodeFoldingFoldingLine'].Value, FoldingLine);
+        FoldingLineHighlight := StringToColorDef(LColorsObject['CodeFoldingFoldingLineHighlight'].Value, FoldingLineHighlight);
+        Indent := StringToColorDef(LColorsObject['CodeFoldingIndent'].Value, Indent);
+        IndentHighlight := StringToColorDef(LColorsObject['CodeFoldingIndentHighlight'].Value, IndentHighlight);
+      end;
+
+      with LEditor.CodeFolding.Hint.Colors do
+      begin
+        Background := StringToColorDef(LColorsObject['CodeFoldingHintBackground'].Value, Background);
+        Border := StringToColorDef(LColorsObject['CodeFoldingHintBorder'].Value, Border);
+      end;
+
+      with LEditor.CodeFolding.Hint.Font do
+        Color := StringToColorDef(LColorsObject['CodeFoldingHintText'].Value, Color);
+
+      with LEditor.CodeFolding.Hint.Indicator.Colors do
+      begin
+        Background := StringToColorDef(LColorsObject['CodeFoldingHintIndicatorBackground'].Value, Background);
+        Border := StringToColorDef(LColorsObject['CodeFoldingHintIndicatorBorder'].Value, Border);
+        Mark := StringToColorDef(LColorsObject['CodeFoldingHintIndicatorMark'].Value, Mark);
+      end;
+
+      with LEditor.CompletionProposal.Colors do
+      begin
+        Background := StringToColorDef(LColorsObject['CompletionProposalBackground'].Value, Background);
+        Foreground := StringToColorDef(LColorsObject['CompletionProposalForeground'].Value, Foreground);
+        SelectedBackground := StringToColorDef(LColorsObject['CompletionProposalSelectedBackground'].Value, SelectedBackground);
+        SelectedText := StringToColorDef(LColorsObject['CompletionProposalSelectedText'].Value, SelectedText);
+      end;
+
+      with LEditor.LeftMargin.Colors do
+      begin
+        ActiveLineBackground := StringToColorDef(LColorsObject['LeftMarginActiveLineBackground'].Value, ActiveLineBackground);
+        ActiveLineBackgroundUnfocused := StringToColorDef(LColorsObject['LeftMarginActiveLineBackgroundUnfocused'].Value, ActiveLineBackground);
+        Background := StringToColorDef(LColorsObject['LeftMarginBackground'].Value, Background);
+        Border := StringToColorDef(LColorsObject['LeftMarginBorder'].Value, Border);
+        ActiveLineNumber := StringToColorDef(LColorsObject['LeftMarginActiveLineNumber'].Value, ActiveLineNumber);
+        LineNumberLine := StringToColorDef(LColorsObject['LeftMarginLineNumberLine'].Value, LineNumberLine);
+        BookmarkPanelBackground := StringToColorDef(LColorsObject['LeftMarginBookmarkPanel'].Value, BookmarkPanelBackground);
+        LineStateModified := StringToColorDef(LColorsObject['LeftMarginLineStateModified'].Value, LineStateModified);
+        LineStateNormal := StringToColorDef(LColorsObject['LeftMarginLineStateNormal'].Value, LineStateNormal);
+      end;
+
       LEditor.LeftMargin.Font.Color := StringToColorDef(LColorsObject['LeftMarginLineNumbers'].Value, LEditor.LeftMargin.Font.Color);
-      LEditor.LeftMargin.Colors.BookmarkPanelBackground := StringToColorDef(LColorsObject['LeftMarginBookmarkPanel'].Value, LEditor.LeftMargin.Colors.BookmarkPanelBackground);
-      LEditor.LeftMargin.Colors.LineStateModified := StringToColorDef(LColorsObject['LeftMarginLineStateModified'].Value, LEditor.LeftMargin.Colors.LineStateModified);
-      LEditor.LeftMargin.Colors.LineStateNormal := StringToColorDef(LColorsObject['LeftMarginLineStateNormal'].Value, LEditor.LeftMargin.Colors.LineStateNormal);
-      LEditor.Minimap.Colors.Background := StringToColorDef(LColorsObject['MinimapBackground'].Value, LEditor.Minimap.Colors.Background);
-      LEditor.Minimap.Colors.Bookmark := StringToColorDef(LColorsObject['MinimapBookmark'].Value, LEditor.Minimap.Colors.Bookmark);
-      LEditor.Minimap.Colors.VisibleLines := StringToColorDef(LColorsObject['MinimapVisibleLines'].Value, LEditor.Minimap.Colors.VisibleLines);
-      LEditor.MatchingPairs.Colors.Matched := StringToColorDef(LColorsObject['MatchingPairMatched'].Value, LEditor.MatchingPairs.Colors.Matched);
-      LEditor.MatchingPairs.Colors.Underline := StringToColorDef(LColorsObject['MatchingPairUnderline'].Value, LEditor.MatchingPairs.Colors.Underline);
-      LEditor.MatchingPairs.Colors.Unmatched := StringToColorDef(LColorsObject['MatchingPairUnmatched'].Value, LEditor.MatchingPairs.Colors.Unmatched);
-      LEditor.RightMargin.Colors.Margin := StringToColorDef(LColorsObject['RightMargin'].Value, LEditor.RightMargin.Colors.Margin);
-      LEditor.RightMargin.Colors.MovingEdge := StringToColorDef(LColorsObject['RightMovingEdge'].Value, LEditor.RightMargin.Colors.MovingEdge);
-      LEditor.Ruler.Colors.Background := StringToColorDef(LColorsObject['RulerBackground'].Value, LEditor.Ruler.Colors.Background);
-      LEditor.Ruler.Colors.Border := StringToColorDef(LColorsObject['RulerBorder'].Value, LEditor.Ruler.Colors.Border);
-      LEditor.Ruler.Colors.Lines := StringToColorDef(LColorsObject['RulerLines'].Value, LEditor.Ruler.Colors.Lines);
-      LEditor.Ruler.Colors.MovingEdge := StringToColorDef(LColorsObject['RulerMovingEdge'].Value, LEditor.Ruler.Colors.MovingEdge);
-      LEditor.Ruler.Colors.Selection := StringToColorDef(LColorsObject['RulerSelection'].Value, LEditor.Ruler.Colors.Selection);
-      LEditor.Ruler.Font.Color := StringToColorDef(LColorsObject['RulerNumbers'].Value, LEditor.Ruler.Font.Color);
-      LEditor.Search.Highlighter.Colors.Background := StringToColorDef(LColorsObject['SearchHighlighterBackground'].Value, LEditor.Search.Highlighter.Colors.Background);
-      LEditor.Search.Highlighter.Colors.Border := StringToColorDef(LColorsObject['SearchHighlighterBorder'].Value, LEditor.Search.Highlighter.Colors.Border);
-      LEditor.Search.Highlighter.Colors.Foreground := StringToColorDef(LColorsObject['SearchHighlighterForeground'].Value, LEditor.Search.Highlighter.Colors.Foreground);
-      LEditor.Search.InSelection.Background := StringToColorDef(LColorsObject['SearchInSelectionBackground'].Value, LEditor.Search.InSelection.Background);
-      LEditor.Search.Map.Colors.ActiveLine := StringToColorDef(LColorsObject['SearchMapActiveLine'].Value, LEditor.Search.Map.Colors.ActiveLine);
-      LEditor.Search.Map.Colors.Background := StringToColorDef(LColorsObject['SearchMapBackground'].Value, LEditor.Search.Map.Colors.Background);
-      LEditor.Search.Map.Colors.Foreground := StringToColorDef(LColorsObject['SearchMapForeground'].Value, LEditor.Search.Map.Colors.Foreground);
-      LEditor.Selection.Colors.Background := StringToColorDef(LColorsObject['SelectionBackground'].Value, LEditor.Selection.Colors.Background);
-      LEditor.Selection.Colors.Foreground := StringToColorDef(LColorsObject['SelectionForeground'].Value, LEditor.Selection.Colors.Foreground);
-      LEditor.SyncEdit.Colors.Background := StringToColorDef(LColorsObject['SyncEditBackground'].Value, LEditor.SyncEdit.Colors.Background);
-      LEditor.SyncEdit.Colors.EditBorder := StringToColorDef(LColorsObject['SyncEditEditBorder'].Value, LEditor.SyncEdit.Colors.EditBorder);
-      LEditor.SyncEdit.Colors.WordBorder := StringToColorDef(LColorsObject['SyncEditWordBorder'].Value, LEditor.SyncEdit.Colors.WordBorder);
-      LEditor.WordWrap.Colors.Arrow := StringToColorDef(LColorsObject['WordWrapIndicatorArrow'].Value, LEditor.WordWrap.Colors.Arrow);
-      LEditor.WordWrap.Colors.Lines := StringToColorDef(LColorsObject['WordWrapIndicatorLines'].Value, LEditor.WordWrap.Colors.Lines);
+
+      with LEditor.Minimap.Colors do
+      begin
+        Background := StringToColorDef(LColorsObject['MinimapBackground'].Value, Background);
+        Bookmark := StringToColorDef(LColorsObject['MinimapBookmark'].Value, Bookmark);
+        VisibleLines := StringToColorDef(LColorsObject['MinimapVisibleLines'].Value, VisibleLines);
+      end;
+
+      with LEditor.MatchingPairs.Colors do
+      begin
+        Matched := StringToColorDef(LColorsObject['MatchingPairMatched'].Value, Matched);
+        Underline := StringToColorDef(LColorsObject['MatchingPairUnderline'].Value, Underline);
+        Unmatched := StringToColorDef(LColorsObject['MatchingPairUnmatched'].Value, Unmatched);
+      end;
+
+      with LEditor.RightMargin.Colors do
+      begin
+        Margin := StringToColorDef(LColorsObject['RightMargin'].Value, Margin);
+        MovingEdge := StringToColorDef(LColorsObject['RightMovingEdge'].Value, MovingEdge);
+      end;
+
+      with LEditor.Ruler.Colors do
+      begin
+        Background := StringToColorDef(LColorsObject['RulerBackground'].Value, Background);
+        Border := StringToColorDef(LColorsObject['RulerBorder'].Value, Border);
+        Lines := StringToColorDef(LColorsObject['RulerLines'].Value, Lines);
+        MovingEdge := StringToColorDef(LColorsObject['RulerMovingEdge'].Value, MovingEdge);
+        Selection := StringToColorDef(LColorsObject['RulerSelection'].Value, Selection);
+      end;
+
+      with LEditor.Ruler.Font do
+        Color := StringToColorDef(LColorsObject['RulerNumbers'].Value, Color);
+
+      with LEditor.Search.Highlighter.Colors do
+      begin
+        Background := StringToColorDef(LColorsObject['SearchHighlighterBackground'].Value, Background);
+        Border := StringToColorDef(LColorsObject['SearchHighlighterBorder'].Value, Border);
+        Foreground := StringToColorDef(LColorsObject['SearchHighlighterForeground'].Value, Foreground);
+      end;
+
+      with LEditor.Search.InSelection do
+        Background := StringToColorDef(LColorsObject['SearchInSelectionBackground'].Value, Background);
+
+      with LEditor.Search.Map.Colors do
+      begin
+        ActiveLine := StringToColorDef(LColorsObject['SearchMapActiveLine'].Value, ActiveLine);
+        Background := StringToColorDef(LColorsObject['SearchMapBackground'].Value, Background);
+        Foreground := StringToColorDef(LColorsObject['SearchMapForeground'].Value, Foreground);
+      end;
+
+      with LEditor.Selection.Colors do
+      begin
+        Background := StringToColorDef(LColorsObject['SelectionBackground'].Value, Background);
+        Foreground := StringToColorDef(LColorsObject['SelectionForeground'].Value, Foreground);
+      end;
+
+      with LEditor.SyncEdit.Colors do
+      begin
+        Background := StringToColorDef(LColorsObject['SyncEditBackground'].Value, Background);
+        EditBorder := StringToColorDef(LColorsObject['SyncEditEditBorder'].Value, EditBorder);
+        WordBorder := StringToColorDef(LColorsObject['SyncEditWordBorder'].Value, WordBorder);
+      end;
+
+      with LEditor.WordWrap.Colors do
+      begin
+        Arrow := StringToColorDef(LColorsObject['WordWrapIndicatorArrow'].Value, Arrow);
+        Lines := StringToColorDef(LColorsObject['WordWrapIndicatorLines'].Value, Lines);
+      end;
+
       LEditor.WordWrap.CreateInternalBitmap;
     end;
+
     LFontsObject := AEditorObject['Fonts'].ObjectValue;
     if Assigned(LFontsObject) then
+    with LEditor do
     begin
-      LEditor.LeftMargin.Font.Name := StrToStrDef(LFontsObject['LineNumbers'].Value, LEditor.LeftMargin.Font.Name);
-      LEditor.Font.Name := StrToStrDef(LFontsObject['Text'].Value, LEditor.Font.Name);
-      LEditor.Minimap.Font.Name := StrToStrDef(LFontsObject['Minimap'].Value, LEditor.Minimap.Font.Name);
-      LEditor.CodeFolding.Hint.Font.Name := StrToStrDef(LFontsObject['CodeFoldingHint'].Value, LEditor.CodeFolding.Hint.Font.Name);
-      LEditor.CompletionProposal.Font.Name := StrToStrDef(LFontsObject['CompletionProposal'].Value, LEditor.CompletionProposal.Font.Name);
+      LeftMargin.Font.Name := StrToStrDef(LFontsObject['LineNumbers'].Value, LeftMargin.Font.Name);
+      Font.Name := StrToStrDef(LFontsObject['Text'].Value, Font.Name);
+      Minimap.Font.Name := StrToStrDef(LFontsObject['Minimap'].Value, Minimap.Font.Name);
+      CodeFolding.Hint.Font.Name := StrToStrDef(LFontsObject['CodeFoldingHint'].Value, CodeFolding.Hint.Font.Name);
+      CompletionProposal.Font.Name := StrToStrDef(LFontsObject['CompletionProposal'].Value, CompletionProposal.Font.Name);
     end;
+
     LFontSizesObject := AEditorObject['FontSizes'].ObjectValue;
     if Assigned(LFontSizesObject) then
+    with LEditor do
     begin
-      LEditor.LeftMargin.Font.Size := StrToIntDef(LFontSizesObject['LineNumbers'].Value, LEditor.LeftMargin.Font.Size);
-      LEditor.Minimap.Font.Size := StrToIntDef(LFontSizesObject['Minimap'].Value, LEditor.Minimap.Font.Size);
-      LEditor.CodeFolding.Hint.Font.Size := StrToIntDef(LFontSizesObject['CodeFoldingHint'].Value, LEditor.CodeFolding.Hint.Font.Size);
-      LEditor.CompletionProposal.Font.Size := StrToIntDef(LFontSizesObject['CompletionProposal'].Value, LEditor.CompletionProposal.Font.Size);
-      LEditor.Font.Size := StrToIntDef(LFontSizesObject['Text'].Value, LEditor.Font.Size);
-      LEditor.OriginalFontSize := LEditor.Font.Size;
-      LEditor.OriginalLeftMarginFontSize := LEditor.LeftMargin.Font.Size;
+      LeftMargin.Font.Size := StrToIntDef(LFontSizesObject['LineNumbers'].Value, LeftMargin.Font.Size);
+      Minimap.Font.Size := StrToIntDef(LFontSizesObject['Minimap'].Value, Minimap.Font.Size);
+      CodeFolding.Hint.Font.Size := StrToIntDef(LFontSizesObject['CodeFoldingHint'].Value, CodeFolding.Hint.Font.Size);
+      CompletionProposal.Font.Size := StrToIntDef(LFontSizesObject['CompletionProposal'].Value, CompletionProposal.Font.Size);
+      Font.Size := StrToIntDef(LFontSizesObject['Text'].Value, Font.Size);
+      OriginalFontSize := Font.Size;
+      OriginalLeftMarginFontSize := LeftMargin.Font.Size;
 {$IFDEF ALPHASKINS}
       if AScaleFontHeight then
+      with LEditor do
       begin
-        LEditor.LeftMargin.Font.Height := ScaleInt(LEditor.LeftMargin.Font.Height);
-        LEditor.Minimap.Font.Height := ScaleInt(LEditor.LeftMargin.Font.Height);
-        LEditor.CodeFolding.Hint.Font.Height := ScaleInt(LEditor.LeftMargin.Font.Height);
-        LEditor.CompletionProposal.Font.Height := ScaleInt(LEditor.LeftMargin.Font.Height);
-        LEditor.Font.Height := ScaleInt(LEditor.Font.Height);
+        LeftMargin.Font.Height := ScaleInt(LeftMargin.Font.Height);
+        Minimap.Font.Height := ScaleInt(LeftMargin.Font.Height);
+        CodeFolding.Hint.Font.Height := ScaleInt(LeftMargin.Font.Height);
+        CompletionProposal.Font.Height := ScaleInt(LeftMargin.Font.Height);
+        Font.Height := ScaleInt(Font.Height);
       end;
 {$ENDIF}
     end;
@@ -273,12 +355,13 @@ procedure TTextEditorHighlighterImportJSON.ImportAttributes(const AHighlighterAt
   const AAttributesObject: TJSONObject; const AElementPrefix: string);
 begin
   if Assigned(AAttributesObject) then
+  with AHighlighterAttribute do
   begin
-    AHighlighterAttribute.Element := AElementPrefix + AAttributesObject['Element'].Value;
-    AHighlighterAttribute.ParentForeground := StrToBoolDef(AAttributesObject['ParentForeground'].Value, False);
-    AHighlighterAttribute.ParentBackground := StrToBoolDef(AAttributesObject['ParentBackground'].Value, True);
+    Element := AElementPrefix + AAttributesObject['Element'].Value;
+    ParentForeground := StrToBoolDef(AAttributesObject['ParentForeground'].Value, False);
+    ParentBackground := StrToBoolDef(AAttributesObject['ParentBackground'].Value, True);
     if AAttributesObject.Contains('EscapeChar') then
-      AHighlighterAttribute.EscapeChar := AAttributesObject['EscapeChar'].Value[1];
+      EscapeChar := AAttributesObject['EscapeChar'].Value[1];
   end;
 end;
 
@@ -383,12 +466,15 @@ begin
         LPropertiesObject := ARangeObject['Properties'].ObjectValue;
         if Assigned(LPropertiesObject) then
         begin
-          ARange.CloseOnEndOfLine := LPropertiesObject.ValueBoolean['CloseOnEndOfLine'];
-          ARange.CloseOnTerm := LPropertiesObject.ValueBoolean['CloseOnTerm'];
-          ARange.SkipWhitespace := LPropertiesObject.ValueBoolean['SkipWhitespace'];
-          ARange.CloseParent := LPropertiesObject.ValueBoolean['CloseParent'];
-          ARange.UseDelimitersForText := LPropertiesObject.ValueBoolean['UseDelimitersForText'];
-          ARange.HereDocument := LPropertiesObject.ValueBoolean['HereDocument'];
+          with ARange do
+          begin
+            CloseOnEndOfLine := LPropertiesObject.ValueBoolean['CloseOnEndOfLine'];
+            CloseOnTerm := LPropertiesObject.ValueBoolean['CloseOnTerm'];
+            SkipWhitespace := LPropertiesObject.ValueBoolean['SkipWhitespace'];
+            CloseParent := LPropertiesObject.ValueBoolean['CloseParent'];
+            UseDelimitersForText := LPropertiesObject.ValueBoolean['UseDelimitersForText'];
+            HereDocument := LPropertiesObject.ValueBoolean['HereDocument'];
+          end;
 
           LArrayValue := LPropertiesObject['AlternativeClose'].ArrayValue;
           if LArrayValue.Count > 0 then
@@ -400,10 +486,13 @@ begin
           ARange.OpenBeginningOfLine := LPropertiesObject.ValueBoolean['OpenBeginningOfLine'];
         end;
 
-        ARange.OpenToken.Clear;
-        ARange.OpenToken.BreakType := btUnspecified;
-        ARange.CloseToken.Clear;
-        ARange.CloseToken.BreakType := btUnspecified;
+        with ARange do
+        begin
+          OpenToken.Clear;
+          OpenToken.BreakType := btUnspecified;
+          CloseToken.Clear;
+          CloseToken.BreakType := btUnspecified;
+        end;
 
         LTokenRangeObject := ARangeObject['TokenRange'].ObjectValue;
         if Assigned(LTokenRangeObject) then
@@ -571,13 +660,19 @@ begin
       else
       begin
         LSkipRegionItem := ACodeFoldingRegion.SkipRegions.Add(LOpenToken, LCloseToken);
-        LSkipRegionItem.RegionType := LSkipRegionType;
-        LSkipRegionItem.SkipEmptyChars := LJSONDataValue.ObjectValue.ValueBoolean['SkipEmptyChars'];
-        LSkipRegionItem.SkipIfNextCharIsNot := TEXT_EDITOR_NONE_CHAR;
-        if LJSONDataValue.ObjectValue.Contains('NextCharIsNot') then
-          LSkipRegionItem.SkipIfNextCharIsNot := LJSONDataValue.ObjectValue['NextCharIsNot'].Value[1];
+
+        with LSkipRegionItem do
+        begin
+          RegionType := LSkipRegionType;
+          SkipEmptyChars := LJSONDataValue.ObjectValue.ValueBoolean['SkipEmptyChars'];
+          SkipIfNextCharIsNot := TEXT_EDITOR_NONE_CHAR;
+          if LJSONDataValue.ObjectValue.Contains('NextCharIsNot') then
+            SkipIfNextCharIsNot := LJSONDataValue.ObjectValue['NextCharIsNot'].Value[1];
+        end;
+
         if LOpenToken <> '' then
           FHighlighter.AddKeyChar(ctSkipOpen, LOpenToken[1]);
+
         if LCloseToken <> '' then
           FHighlighter.AddKeyChar(ctSkipClose, LCloseToken[1]);
       end;
@@ -639,39 +734,43 @@ begin
 
       LMemberObject := LJSONDataValue.ObjectValue['Properties'].ObjectValue;
       if Assigned(LMemberObject) then
+      with LRegionItem do
       begin
         { Options }
-        LRegionItem.OpenTokenBeginningOfLine := LMemberObject.ValueBoolean['OpenTokenBeginningOfLine'];
-        LRegionItem.CloseTokenBeginningOfLine := LMemberObject.ValueBoolean['CloseTokenBeginningOfLine'];
-        LRegionItem.SharedClose := LMemberObject.ValueBoolean['SharedClose'];
-        LRegionItem.OpenIsClose := LMemberObject.ValueBoolean['OpenIsClose'];
-        LRegionItem.OpenTokenCanBeFollowedBy := LMemberObject['OpenTokenCanBeFollowedBy'].Value;
-        LRegionItem.TokenEndIsPreviousLine := LMemberObject.ValueBoolean['TokenEndIsPreviousLine'];
-        LRegionItem.NoDuplicateClose := LMemberObject.ValueBoolean['NoDuplicateClose'];
-        LRegionItem.NoSubs := LMemberObject.ValueBoolean['NoSubs'];
-        LRegionItem.BeginWithBreakChar := LMemberObject.ValueBoolean['BeginWithBreakChar'];
+        OpenTokenBeginningOfLine := LMemberObject.ValueBoolean['OpenTokenBeginningOfLine'];
+        CloseTokenBeginningOfLine := LMemberObject.ValueBoolean['CloseTokenBeginningOfLine'];
+        SharedClose := LMemberObject.ValueBoolean['SharedClose'];
+        OpenIsClose := LMemberObject.ValueBoolean['OpenIsClose'];
+        OpenTokenCanBeFollowedBy := LMemberObject['OpenTokenCanBeFollowedBy'].Value;
+        TokenEndIsPreviousLine := LMemberObject.ValueBoolean['TokenEndIsPreviousLine'];
+        NoDuplicateClose := LMemberObject.ValueBoolean['NoDuplicateClose'];
+        NoSubs := LMemberObject.ValueBoolean['NoSubs'];
+        BeginWithBreakChar := LMemberObject.ValueBoolean['BeginWithBreakChar'];
 
         LSkipIfFoundAfterOpenTokenArray := LMemberObject['SkipIfFoundAfterOpenToken'].ArrayValue;
         if LSkipIfFoundAfterOpenTokenArray.Count > 0 then
         begin
-          LRegionItem.SkipIfFoundAfterOpenTokenArrayCount := LSkipIfFoundAfterOpenTokenArray.Count;
-          for LIndex2 := 0 to LRegionItem.SkipIfFoundAfterOpenTokenArrayCount - 1 do
-            LRegionItem.SkipIfFoundAfterOpenTokenArray[LIndex2] := LSkipIfFoundAfterOpenTokenArray.Items[LIndex2].Value;
+          SkipIfFoundAfterOpenTokenArrayCount := LSkipIfFoundAfterOpenTokenArray.Count;
+          for LIndex2 := 0 to SkipIfFoundAfterOpenTokenArrayCount - 1 do
+            SkipIfFoundAfterOpenTokenArray[LIndex2] := LSkipIfFoundAfterOpenTokenArray.Items[LIndex2].Value;
         end;
 
         if LMemberObject.Contains('BreakCharFollows') then
-          LRegionItem.BreakCharFollows := LMemberObject.ValueBoolean['BreakCharFollows'];
-        LRegionItem.BreakIfNotFoundBeforeNextRegion := LMemberObject['BreakIfNotFoundBeforeNextRegion'].Value;
-        LRegionItem.OpenTokenEnd := LMemberObject['OpenTokenEnd'].Value;
-        LRegionItem.ShowGuideLine := StrToBoolDef(LMemberObject['ShowGuideLine'].Value, True);
-        LRegionItem.OpenTokenBreaksLine := LMemberObject.ValueBoolean['OpenTokenBreaksLine'];
-        LRegionItem.RemoveRange := LMemberObject.ValueBoolean['RemoveRange'];
-        LRegionItem.CheckIfThenOneLiner := LMemberObject.ValueBoolean['CheckIfThenOneLiner'];
+          BreakCharFollows := LMemberObject.ValueBoolean['BreakCharFollows'];
+        BreakIfNotFoundBeforeNextRegion := LMemberObject['BreakIfNotFoundBeforeNextRegion'].Value;
+        OpenTokenEnd := LMemberObject['OpenTokenEnd'].Value;
+        ShowGuideLine := StrToBoolDef(LMemberObject['ShowGuideLine'].Value, True);
+        OpenTokenBreaksLine := LMemberObject.ValueBoolean['OpenTokenBreaksLine'];
+        RemoveRange := LMemberObject.ValueBoolean['RemoveRange'];
+        CheckIfThenOneLiner := LMemberObject.ValueBoolean['CheckIfThenOneLiner'];
       end;
+
       if LOpenToken <> '' then
         FHighlighter.AddKeyChar(ctFoldOpen, LOpenToken[1]);
+
       if LRegionItem.BreakIfNotFoundBeforeNextRegion <> '' then
         FHighlighter.AddKeyChar(ctFoldOpen, LRegionItem.BreakIfNotFoundBeforeNextRegion[1]);
+
       if LCloseToken <> '' then
         FHighlighter.AddKeyChar(ctFoldClose, LCloseToken[1]);
     end;
@@ -683,29 +782,30 @@ procedure TTextEditorHighlighterImportJSON.ImportCodeFoldingOptions(const ACodeF
 var
   LCodeFoldingObject: TJSONObject;
 begin
-  FHighlighter.MatchingPairHighlight := True;
-
   if ACodeFoldingObject.Contains('Options') then
   begin
     LCodeFoldingObject := ACodeFoldingObject['Options'].ObjectValue;
 
-    if LCodeFoldingObject.Contains('OpenToken') then
-      ACodeFoldingRegion.OpenToken := LCodeFoldingObject['OpenToken'].Value;
+    with ACodeFoldingRegion do
+    begin
+      if LCodeFoldingObject.Contains('OpenToken') then
+        OpenToken := LCodeFoldingObject['OpenToken'].Value;
 
-    if LCodeFoldingObject.Contains('CloseToken') then
-      ACodeFoldingRegion.CloseToken := LCodeFoldingObject['CloseToken'].Value;
+      if LCodeFoldingObject.Contains('CloseToken') then
+        CloseToken := LCodeFoldingObject['CloseToken'].Value;
 
-    if LCodeFoldingObject.Contains('EscapeChar') then
-      ACodeFoldingRegion.EscapeChar := LCodeFoldingObject['EscapeChar'].Value[1];
+      if LCodeFoldingObject.Contains('EscapeChar') then
+        EscapeChar := LCodeFoldingObject['EscapeChar'].Value[1];
 
-    if LCodeFoldingObject.Contains('FoldTags') then
-      ACodeFoldingRegion.FoldTags := LCodeFoldingObject.ValueBoolean['FoldTags'];
+      if LCodeFoldingObject.Contains('StringEscapeChar') then
+        StringEscapeChar := LCodeFoldingObject['StringEscapeChar'].Value[1];
+    end;
 
-    if LCodeFoldingObject.Contains('StringEscapeChar') then
-      ACodeFoldingRegion.StringEscapeChar := LCodeFoldingObject['StringEscapeChar'].Value[1];
+    if LCodeFoldingObject.Contains('FoldTags') and LCodeFoldingObject.ValueBoolean['FoldTags'] then
+      FHighlighter.FoldTags := True;
 
-    if LCodeFoldingObject.Contains('MatchingPairHighlight') then
-      FHighlighter.MatchingPairHighlight := LCodeFoldingObject.ValueBoolean['MatchingPairHighlight'];
+    if LCodeFoldingObject.Contains('MatchingPairHighlight') and not LCodeFoldingObject.ValueBoolean['MatchingPairHighlight'] then
+      FHighlighter.MatchingPairHighlight := False;
   end;
 end;
 
@@ -717,11 +817,13 @@ var
 begin
   if not Assigned(ACodeFoldingObject) then
     Exit;
+
   LArray := ACodeFoldingObject['Ranges'].ArrayValue;
   LCount := LArray.Count;
   if LCount > 0 then
   begin
     FHighlighter.CodeFoldingRangeCount := LCount;
+
     for LIndex := 0 to LCount - 1 do
     begin
       FHighlighter.CodeFoldingRegions[LIndex] := TTextEditorCodeFoldingRegion.Create(TTextEditorCodeFoldingRegionItem);

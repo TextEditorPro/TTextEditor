@@ -24,7 +24,6 @@ type
     constructor Create(const AChar: Char; const AToken: TTextEditorToken; const ABreakType: TTextEditorBreakType); reintroduce; overload; virtual;
     constructor Create(const ASet: TTextEditorSet); reintroduce; overload; virtual;
     destructor Destroy; override;
-
     function GetToken(const ACurrentRange: TTextEditorRange; const APLine: PChar; var ARun: Integer; var AToken: TTextEditorToken): Boolean; override;
     procedure AddSet(const ASet: TTextEditorSet);
     procedure AddTokenNode(const AString: string; AToken: TTextEditorToken; ABreakType: TTextEditorBreakType);
@@ -131,7 +130,6 @@ type
   public
     constructor Create(const AOpenToken: string = ''; const ACloseToken: string = ''); virtual;
     destructor Destroy; override;
-
     function FindToken(const AString: string): TTextEditorToken;
     procedure AddKeyList(const ANewKeyList: TTextEditorKeyList);
     procedure AddRange(const ANewRange: TTextEditorRange);

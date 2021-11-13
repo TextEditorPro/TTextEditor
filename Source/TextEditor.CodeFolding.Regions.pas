@@ -67,7 +67,6 @@ type
   strict private
     FCloseToken: string;
     FEscapeChar: Char;
-    FFoldTags: Boolean;
     FOpenToken: string;
     FSkipRegions: TTextEditorSkipRegions;
     FStringEscapeChar: Char;
@@ -79,7 +78,6 @@ type
     property CloseToken: string read FCloseToken write FCloseToken;
     function Contains(const AOpenToken: string; const ACloseToken: string): Boolean;
     property EscapeChar: Char read FEscapeChar write FEscapeChar default TEXT_EDITOR_NONE_CHAR;
-    property FoldTags: Boolean read FFoldTags write FFoldTags default False;
     property Items[AIndex: Integer]: TTextEditorCodeFoldingRegionItem read GetItem; default;
     property OpenToken: string read FOpenToken write FOpenToken;
     property SkipRegions: TTextEditorSkipRegions read FSkipRegions;
@@ -137,7 +135,6 @@ begin
   FSkipRegions := TTextEditorSkipRegions.Create(TTextEditorSkipRegionItem);
   FEscapeChar := TEXT_EDITOR_NONE_CHAR;
   FStringEscapeChar := TEXT_EDITOR_NONE_CHAR;
-  FFoldTags := False;
 end;
 
 destructor TTextEditorCodeFoldingRegion.Destroy;

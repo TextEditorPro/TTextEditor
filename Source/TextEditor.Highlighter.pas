@@ -28,6 +28,7 @@ type
     FFoldCloseKeyChars: TTextEditorCharSet;
     FFoldKeyChars: TTextEditorCharSet;
     FFoldOpenKeyChars: TTextEditorCharSet;
+    FFoldTags: Boolean;
     FLine: PChar;
     FLines: TTextEditorLines;
     FLoaded: Boolean;
@@ -92,6 +93,7 @@ type
     property FoldCloseKeyChars: TTextEditorCharSet read FFoldCloseKeyChars write FFoldCloseKeyChars;
     property FoldKeyChars: TTextEditorCharSet read FFoldKeyChars write FFoldKeyChars;
     property FoldOpenKeyChars: TTextEditorCharSet read FFoldOpenKeyChars write FFoldOpenKeyChars;
+    property FoldTags: Boolean read FFoldTags write FFoldTags default False;
     property Lines: TTextEditorLines read FLines write FLines;
     property Loaded: Boolean read FLoaded write FLoaded;
     property Loading: Boolean read FLoading write FLoading;
@@ -159,7 +161,6 @@ begin
 
   FColors := TTextEditorHighlighterColors.Create(Self);
   FMatchingPairs := TList.Create;
-  FMatchingPairHighlight := True;
 
   FTemporaryTokens := TList.Create;
 
@@ -463,6 +464,8 @@ procedure TTextEditorHighlighter.Clear;
 var
   LIndex: Integer;
 begin
+  FFoldTags := False;
+  FMatchingPairHighlight := True;
   FFoldKeyChars := [#0];
   FFoldOpenKeyChars := [];
   FFoldCloseKeyChars := [];

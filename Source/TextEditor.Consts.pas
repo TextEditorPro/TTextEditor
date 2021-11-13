@@ -116,6 +116,27 @@ type
     Wildcard = 'Wildcard';
   end;
 
+  TFontStyleNames = record
+  const
+    Bold = 'Bold';
+    Italic = 'Italic';
+    Underline = 'Underline';
+    StrikeOut = 'StrikeOut';
+  end;
+
+  TBreakType = record
+  const
+    Any = 'Any';
+    Term = 'Term';
+  end;
+
+  TRegionType = record
+  const
+    SingleLine = 'SingleLine';
+    MultiLine = 'MultiLine';
+    SingleLineString = 'SingleLineString';
+  end;
+
 implementation
 
 end.

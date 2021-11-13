@@ -47,7 +47,7 @@ type
     function GetFontsInfo(const ABaseFont: TFont): PTextEditorSharedFontsInfo;
     procedure LockFontsInfo(const ASharedFontsInfo: PTextEditorSharedFontsInfo);
     procedure ReleaseFontsInfo(const ASharedFontsInfo: PTextEditorSharedFontsInfo);
-    procedure UnLockFontsInfo(const ASharedFontsInfo: PTextEditorSharedFontsInfo);
+    procedure UnlockFontsInfo(const ASharedFontsInfo: PTextEditorSharedFontsInfo);
   end;
 
   TTextEditorFontStock = class(TObject)
@@ -163,12 +163,12 @@ begin
   end;
 end;
 
-procedure TTextEditorFontsInfoManager.UnLockFontsInfo(const ASharedFontsInfo: PTextEditorSharedFontsInfo);
+procedure TTextEditorFontsInfoManager.UnlockFontsInfo(const ASharedFontsInfo: PTextEditorSharedFontsInfo);
 begin
   with ASharedFontsInfo^ do
   begin
     Dec(LockCount);
-    if 0 = LockCount then
+    if LockCount = 0 then
       DestroyFontHandles(ASharedFontsInfo);
   end;
 end;
@@ -217,6 +217,7 @@ begin
     if CompareMem(@(Result^.BaseLogFont), @ALogFont, SizeOf(TLogFont)) then
       Exit;
   end;
+
   Result := nil;
 end;
 
@@ -380,7 +381,7 @@ begin
   if FUsingFontHandles then
   with GFontsInfoManager do
   begin
-    UnLockFontsInfo(FSharedFontsInfo);
+    UnlockFontsInfo(FSharedFontsInfo);
     FUsingFontHandles := False;
   end;
 end;
@@ -392,7 +393,7 @@ begin
   begin
     if FUsingFontHandles then
     begin
-      UnLockFontsInfo(FSharedFontsInfo);
+      UnlockFontsInfo(FSharedFontsInfo);
       FUsingFontHandles := False;
     end;
     ReleaseFontsInfo(FSharedFontsInfo);
@@ -512,6 +513,7 @@ begin
     Winapi.Windows.SetTextColor(AHandle, ColorToRGB(FColor));
     Winapi.Windows.SetBkColor(AHandle, ColorToRGB(FBackgroundColor));
   end;
+
   Inc(FDrawingCount);
 end;
 

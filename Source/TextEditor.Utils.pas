@@ -54,6 +54,7 @@ var
   LValue: string;
 begin
   Result := UpperCase(AValue);
+
   LValue := LowerCase(AValue);
   for LIndex := 1 to Length(AValue) do
   if Result[LIndex] = AValue[LIndex] then
@@ -66,6 +67,7 @@ var
   LChar: string;
 begin
   Result := '';
+
   LIndex := 1;
   LLength := Length(AValue);
   SetLength(Result, LLength);
@@ -169,13 +171,15 @@ begin
 {$IFDEF CPU32BITS}
   Result := System.Pos(ASubStr, AStr, AOffset);
 {$ELSE}
-  if AOffset - 1 + Length(ASubStr) > Length(AStr) then
-    Exit(0);
   Result := 0;
+
+  if AOffset - 1 + Length(ASubStr) > Length(AStr) then
+    Exit;
+
   LPStr := PChar(AStr) + AOffset - 1;
   LPEnd := LPStr + Length(AStr) - Length(ASubStr) + 1;
   case Length(ASubStr) of
-    0: Exit(0);
+    0: Exit;
     1:
       begin
         LSubStrTip := PUInt16(ASubStr)^;
@@ -184,7 +188,6 @@ begin
           Exit(LPStr - PChar(AStr) + 1)
         else
           Inc(LPStr);
-        Exit(0);
       end;
     2:
       begin
@@ -194,7 +197,6 @@ begin
           Exit(LPStr - PChar(AStr) + 1)
         else
           Inc(LPStr);
-        Exit(0);
       end;
     else
       begin
@@ -203,8 +205,7 @@ begin
         LLengthSubStr := Length(ASubStr) - LCmpMemOffset;
         LSubStrTip := PUInt32(ASubStr)^;
         while LPStr < LPEnd do
-        if (PUInt32(LPStr)^ = LSubStrTip) and
-          CompareMem(LPStr + LCmpMemOffset, LPSubStr, LLengthSubStr * SizeOf(Char)) then
+        if (PUInt32(LPStr)^ = LSubStrTip) and CompareMem(LPStr + LCmpMemOffset, LPSubStr, LLengthSubStr * SizeOf(Char)) then
           Exit(LPStr - PChar(AStr) + 1)
         else
           Inc(LPStr);
@@ -258,7 +259,7 @@ begin
   case AChar of
     'a'..'z':
       Result := Char(Word(AChar) and $FFDF);
-  { Turkish special characters }
+    { Turkish special characters }
     'ç', 'Ç':
       Result := 'C';
     'ı', 'İ':
@@ -460,7 +461,7 @@ begin
   Result := (APosition1.Line = APosition2.Line) and (APosition1.Char = APosition2.Char);
 end;
 
-// checks for a BOM in UTF-8 format or searches the Buffer for typical UTF-8 octet sequences
+{ checks for a BOM in UTF-8 format or searches the Buffer for typical UTF-8 octet sequences }
 function IsUTF8Buffer(const ABuffer: TBytes; out AWithBOM: Boolean): Boolean;
 const
   MinimumCountOfUTF8Strings = 1;
@@ -626,6 +627,7 @@ var
 
 begin
   Result := '';
+
   if OpenClipboard then
   try
     if Clipboard.HasFormat(CF_UNICODETEXT) then
@@ -669,7 +671,7 @@ var
   LPGlobalLock: PByte;
   LLength: Integer;
 begin
-  if AText = '' then
+  if AText.IsEmpty then
     Exit;
 
   LLength := Length(AText);
@@ -776,6 +778,7 @@ var
   LValue: Integer;
 begin
   Result := '';
+
   LValue := AValue;
   while LValue >= 1000 do
   begin

@@ -368,7 +368,7 @@ type
     function GetCaretIndex: Integer;
     function GetCharAtCursor: Char;
     function GetCharAtTextPosition(const ATextPosition: TTextEditorTextPosition): Char;
-    function GetCharWidth: Integer; inline;
+    function GetCharWidth: Integer;
     function GetEndOfLine(const ALine: PChar): PChar;
     function GetFoldingOnCurrentLine: Boolean;
     function GetHighlighterAttributeAtRowColumn(const ATextPosition: TTextEditorTextPosition; var AToken: string; var ATokenType: TTextEditorRangeType; var AStart: Integer; var AHighlighterAttribute: TTextEditorHighlighterAttribute): Boolean;
@@ -11627,14 +11627,17 @@ begin
       if FSyncEdit.Active and FSyncEdit.Visible then
         PaintSyncItems;
 
-      if FCaret.NonBlinking.Active or Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) and FMultiCaret.Draw then
-        PaintCaret;
+      if FCaret.Visible then
+      begin
+        if FCaret.NonBlinking.Active or Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) and FMultiCaret.Draw then
+          PaintCaret;
 
-      if Dragging then
-        PaintCaretBlock(FViewPosition);
+        if Dragging then
+          PaintCaretBlock(FViewPosition);
 
-      if not Assigned(FCompletionProposalPopupWindow) and FCaret.MultiEdit.Active and (FMultiCaret.Position.Row <> -1) then
-        PaintCaretBlock(FMultiCaret.Position);
+        if not Assigned(FCompletionProposalPopupWindow) and FCaret.MultiEdit.Active and (FMultiCaret.Position.Row <> -1) then
+          PaintCaretBlock(FMultiCaret.Position);
+      end;
 
       if FRightMargin.Moving then
         PaintRightMarginMove;

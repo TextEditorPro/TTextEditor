@@ -15391,7 +15391,7 @@ var
             LTempString := FLines[LCurrentLine];
             LLength := Length(LTempString);
 
-            if (LLength < LInsertPosition) and (LPText - LPStart > 0) then
+            if (LLength > 0) and (LLength < LInsertPosition) and (LPText - LPStart > 0) then
               LTempString := LTempString + StringOfChar(TEXT_EDITOR_SPACE_CHAR, LInsertPosition - LLength - 1) + LStr
             else
               Insert(LStr, LTempString, LInsertPosition);

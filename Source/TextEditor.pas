@@ -11329,7 +11329,7 @@ begin
   begin
     LTextPosition := PixelsToTextPosition(X, Y);
 
-    FRulerMovePosition := FLeftMarginWidth + (LTextPosition.Char - 1) * CharWidth - FScrollHelper.HorizontalPosition;
+    FRulerMovePosition := FLeftMarginWidth + (LTextPosition.Char - 1) * FPaintHelper.CharWidth - FScrollHelper.HorizontalPosition;
 
     LHintWindow := GetHintWindow;
     LPositionText := Format(STextEditorRightMarginPosition, [LTextPosition.Char - 1]);
@@ -12794,7 +12794,7 @@ begin
   LClipRect := ClientRect;
   LClipRect.Bottom := FRuler.Height - 1;
 
-  LCharWidth := CharWidth;
+  LCharWidth := FPaintHelper.CharWidth;
 
   LOldColor := Canvas.Brush.Color;
   LOldPenColor := Canvas.Pen.Color;
@@ -12849,7 +12849,7 @@ begin
 
           LNumbers := IntToStr(LIndex);
           LRect.Left := LLeft;
-          LRect.Right := LLeft + Length(LNumbers) * CharWidth;
+          LRect.Right := LLeft + Length(LNumbers) * FPaintHelper.CharWidth;
           LWidth := LRect.Width div 2;
           Dec(LRect.Left, LWidth);
           Dec(LRect.Right, LWidth);
@@ -17827,7 +17827,10 @@ procedure TCustomTextEditor.FoldingCollapseLine;
 var
   LFoldRange: TTextEditorCodeFoldingRange;
 begin
-  if FCodeFolding.Visible and (FLines.Count > 0) then
+  if not FCodeFolding.Visible then
+    Exit;
+
+  if FLines.Count > 0 then
   begin
     LFoldRange := CodeFoldingCollapsableFoldRangeForLine(TextPosition.Line + 1);
 
@@ -17835,6 +17838,7 @@ begin
     begin
       if not LFoldRange.Collapsed then
         CodeFoldingCollapse(LFoldRange);
+
       Invalidate;
     end;
   end;
@@ -17844,7 +17848,10 @@ procedure TCustomTextEditor.FoldingExpandLine;
 var
   LFoldRange: TTextEditorCodeFoldingRange;
 begin
-  if FCodeFolding.Visible and (FLines.Count > 0) then
+  if not FCodeFolding.Visible then
+    Exit;
+
+  if FLines.Count > 0 then
   begin
     LFoldRange := CodeFoldingCollapsableFoldRangeForLine(TextPosition.Line + 1);
 
@@ -17852,6 +17859,7 @@ begin
     begin
       if LFoldRange.Collapsed then
         CodeFoldingExpand(LFoldRange);
+
       Invalidate;
     end;
   end;
@@ -17861,9 +17869,13 @@ procedure TCustomTextEditor.FoldingGoToNext;
 var
   LTextPosition: TTextEditorTextPosition;
 begin
+  if not FCodeFolding.Visible then
+    Exit;
+
   LTextPosition := TextPosition;
   LTextPosition.Line := LTextPosition.Line + 1;
-  while (LTextPosition.Line < FLines.Count) and not Assigned(FCodeFoldings.RangeFromLine[LTextPosition.Line + 1]) do
+  while (LTextPosition.Line < FLines.Count) and Assigned(FCodeFoldings.RangeFromLine) and
+    not Assigned(FCodeFoldings.RangeFromLine[LTextPosition.Line + 1]) do
     LTextPosition.Line := LTextPosition.Line + 1;
   TextPosition := LTextPosition;
 
@@ -17874,9 +17886,13 @@ procedure TCustomTextEditor.FoldingGoToPrevious;
 var
   LTextPosition: TTextEditorTextPosition;
 begin
+  if not FCodeFolding.Visible then
+    Exit;
+
   LTextPosition := TextPosition;
   LTextPosition.Line := LTextPosition.Line - 1;
-  while (LTextPosition.Line < FLines.Count) and not Assigned(FCodeFoldings.RangeFromLine[LTextPosition.Line + 1]) do
+  while (LTextPosition.Line < FLines.Count) and Assigned(FCodeFoldings.RangeFromLine) and
+    not Assigned(FCodeFoldings.RangeFromLine[LTextPosition.Line + 1]) do
     LTextPosition.Line := LTextPosition.Line - 1;
   TextPosition := LTextPosition;
 

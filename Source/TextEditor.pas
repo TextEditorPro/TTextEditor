@@ -10499,7 +10499,7 @@ begin
       SelectionBeginPosition := TextPosition;
     end
     else
-    if not (ssAlt in AShift) and FState.AltDown then
+    if not (ssAlt in AShift) and not (ssCtrl in AShift) and FState.AltDown then
     begin
       FSelection.Mode := FSaveSelectionMode;
       FScroll.SetOption(soPastEndOfLine, FSaveScrollOption);

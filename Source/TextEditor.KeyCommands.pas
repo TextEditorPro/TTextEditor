@@ -624,36 +624,40 @@ begin
   Clear;
 
   { Scrolling, caret moving and selection }
-  Add(TKeyCommands.Up, [], vkUp);
-  Add(TKeyCommands.SelectionUp, [ssShift], vkUp);
-  Add(TKeyCommands.ScrollUp, [ssCtrl], vkUp);
   Add(TKeyCommands.Down, [], vkDown);
-  Add(TKeyCommands.SelectionDown, [ssShift], vkDown);
-  Add(TKeyCommands.ScrollDown, [ssCtrl], vkDown);
-  Add(TKeyCommands.Left, [], vkLeft);
-  Add(TKeyCommands.SelectionLeft, [ssShift], vkLeft);
-  Add(TKeyCommands.WordLeft, [ssCtrl], vkLeft);
-  Add(TKeyCommands.SelectionWordLeft, [ssShift, ssCtrl], vkLeft);
-  Add(TKeyCommands.Right, [], vkRight);
-  Add(TKeyCommands.SelectionRight, [ssShift], vkRight);
-  Add(TKeyCommands.WordRight, [ssCtrl], vkRight);
-  Add(TKeyCommands.SelectionWordRight, [ssShift, ssCtrl], vkRight);
-  Add(TKeyCommands.PageDown, [], vkNext);
-  Add(TKeyCommands.SelectionPageDown, [ssShift], vkNext);
-  Add(TKeyCommands.PageBottom, [ssCtrl], vkNext);
-  Add(TKeyCommands.SelectionPageBottom, [ssShift, ssCtrl], vkNext);
-  Add(TKeyCommands.PageUp, [], vkPrior);
-  Add(TKeyCommands.SelectionPageUp, [ssShift], vkPrior);
-  Add(TKeyCommands.PageTop, [ssCtrl], vkPrior);
-  Add(TKeyCommands.SelectionPageTop, [ssShift, ssCtrl], vkPrior);
-  Add(TKeyCommands.LineBegin, [], vkHome);
-  Add(TKeyCommands.SelectionLineBegin, [ssShift], vkHome);
-  Add(TKeyCommands.EditorTop, [ssCtrl], vkHome);
-  Add(TKeyCommands.SelectionEditorTop, [ssShift, ssCtrl], vkHome);
-  Add(TKeyCommands.LineEnd, [], vkEnd);
-  Add(TKeyCommands.SelectionLineEnd, [ssShift], vkEnd);
   Add(TKeyCommands.EditorBottom, [ssCtrl], vkEnd);
+  Add(TKeyCommands.EditorTop, [ssCtrl], vkHome);
+  Add(TKeyCommands.Left, [], vkLeft);
+  Add(TKeyCommands.LineBegin, [], vkHome);
+  Add(TKeyCommands.LineEnd, [], vkEnd);
+  Add(TKeyCommands.PageBottom, [ssCtrl], vkNext);
+  Add(TKeyCommands.PageDown, [], vkNext);
+  Add(TKeyCommands.PageTop, [ssCtrl], vkPrior);
+  Add(TKeyCommands.PageUp, [], vkPrior);
+  Add(TKeyCommands.Right, [], vkRight);
+  Add(TKeyCommands.ScrollDown, [ssCtrl], vkDown);
+  Add(TKeyCommands.ScrollUp, [ssCtrl], vkUp);
+  Add(TKeyCommands.SelectionDown, [ssAlt], vkDown);
+  Add(TKeyCommands.SelectionDown, [ssShift], vkDown);
   Add(TKeyCommands.SelectionEditorBottom, [ssShift, ssCtrl], vkEnd);
+  Add(TKeyCommands.SelectionEditorTop, [ssShift, ssCtrl], vkHome);
+  Add(TKeyCommands.SelectionLeft, [ssAlt], vkLeft);
+  Add(TKeyCommands.SelectionLeft, [ssShift], vkLeft);
+  Add(TKeyCommands.SelectionLineBegin, [ssShift], vkHome);
+  Add(TKeyCommands.SelectionLineEnd, [ssShift], vkEnd);
+  Add(TKeyCommands.SelectionPageBottom, [ssShift, ssCtrl], vkNext);
+  Add(TKeyCommands.SelectionPageDown, [ssShift], vkNext);
+  Add(TKeyCommands.SelectionPageTop, [ssShift, ssCtrl], vkPrior);
+  Add(TKeyCommands.SelectionPageUp, [ssShift], vkPrior);
+  Add(TKeyCommands.SelectionRight, [ssAlt], vkRight);
+  Add(TKeyCommands.SelectionRight, [ssShift], vkRight);
+  Add(TKeyCommands.SelectionUp, [ssAlt], vkUp);
+  Add(TKeyCommands.SelectionUp, [ssShift], vkUp);
+  Add(TKeyCommands.SelectionWordLeft, [ssShift, ssCtrl], vkLeft);
+  Add(TKeyCommands.SelectionWordRight, [ssShift, ssCtrl], vkRight);
+  Add(TKeyCommands.Up, [], vkUp);
+  Add(TKeyCommands.WordLeft, [ssCtrl], vkLeft);
+  Add(TKeyCommands.WordRight, [ssCtrl], vkRight);
   { Insert key alone }
   Add(TKeyCommands.ToggleMode, [], vkInsert);
   { Deletion }
@@ -716,10 +720,10 @@ begin
   Add(TKeyCommands.LineComment, [ssCtrl], vkSlash);
   Add(TKeyCommands.BlockComment, [ssCtrl, ssShift], vkSlash);
   { Folding }
-  Add(TKeyCommands.FoldingCollapseLine, [ssAlt], vkLeft);
-  Add(TKeyCommands.FoldingExpandLine, [ssAlt], vkRight);
-  Add(TKeyCommands.FoldingGoToNext, [ssAlt], vkDown);
-  Add(TKeyCommands.FoldingGoToPrevious, [ssAlt], vkUp);
+  Add(TKeyCommands.FoldingCollapseLine, [ssCtrl, ssAlt], vkLeft);
+  Add(TKeyCommands.FoldingExpandLine, [ssCtrl, ssAlt], vkRight);
+  Add(TKeyCommands.FoldingGoToNext, [ssCtrl, ssAlt], vkDown);
+  Add(TKeyCommands.FoldingGoToPrevious, [ssCtrl, ssAlt], vkUp);
 end;
 
 procedure TTextEditorKeyCommands.SetItem(const AIndex: Integer; AValue: TTextEditorKeyCommand);

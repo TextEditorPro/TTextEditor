@@ -322,6 +322,7 @@ type
     FRightMarginMovePosition: Integer;
     FRuler: TTextEditorRuler;
     FRulerMovePosition: Integer;
+    FSaveScrollOption: Boolean;
     FSaveSelectionMode: TTextEditorSelectionMode;
     FScroll: TTextEditorScroll;
     FScrollHelper: TTextEditorScrollHelper;
@@ -10486,6 +10487,26 @@ var
 begin
   inherited;
 
+  if soALTSetsColumnMode in FSelection.Options then
+  begin
+    if (ssAlt in AShift) and not FState.AltDown then
+    begin
+      FSaveSelectionMode := FSelection.Mode;
+      FSaveScrollOption := soPastEndOfLine in FScroll.Options;
+      FScroll.SetOption(soPastEndOfLine, True);
+      FSelection.Mode := smColumn;
+      FState.AltDown := True;
+      SelectionBeginPosition := TextPosition;
+    end
+    else
+    if not (ssAlt in AShift) and FState.AltDown then
+    begin
+      FSelection.Mode := FSaveSelectionMode;
+      FScroll.SetOption(soPastEndOfLine, FSaveScrollOption);
+      FState.AltDown := False;
+    end;
+  end;
+
   if AKey = 0 then
   begin
     Include(FState.Flags, sfIgnoreNextChar);
@@ -11149,20 +11170,13 @@ begin
           else
           begin
             if soALTSetsColumnMode in FSelection.Options then
-            begin
-              if (ssAlt in AShift) and not FState.AltDown then
-              begin
-                FSaveSelectionMode := FSelection.Mode;
-                FSelection.Mode := smColumn;
-                FState.AltDown := True;
-              end
-              else
               if not (ssAlt in AShift) and FState.AltDown then
               begin
                 FSelection.Mode := FSaveSelectionMode;
+                FScroll.SetOption(soPastEndOfLine, FSaveScrollOption);
                 FState.AltDown := False;
               end;
-            end;
+
             SelectionBeginPosition := TextPosition;
           end;
         end;

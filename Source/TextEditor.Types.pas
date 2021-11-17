@@ -133,7 +133,7 @@ type
   TTextEditorTabOptions = set of TTextEditorTabOption;
 
   { Selection }
-  TTextEditorSelectionOption = (soALTSetsColumnMode, soExpandRealNumbers, soHighlightSimilarTerms,
+  TTextEditorSelectionOption = (soALTSetsColumnMode, soExpandPrefix, soExpandRealNumbers, soHighlightSimilarTerms,
     soTermsCaseSensitive, soToEndOfLine, soTripleClickRowSelect, soAutoCopyToClipboard);
   TTextEditorSelectionOptions = set of TTextEditorSelectionOption;
 

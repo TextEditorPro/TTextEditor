@@ -10,6 +10,7 @@ function ActivateDropShadow(const AHandle: THandle): Boolean;
 function CaseNone(const AChar: Char): Char;
 function CaseStringNone(const AString: string): string;
 function CaseUpper(const AChar: Char): Char;
+function CharInString(const AChar: Char; const AString: string): Boolean; inline;
 function ColorToHex(const AColor: TColor): string;
 function ConvertTabs(const ALine: string; ATabWidth: Integer; var AHasTabs: Boolean; const AColumns: Boolean): string;
 function DeleteWhitespace(const AValue: string): string;
@@ -269,6 +270,22 @@ begin
     'ğ', 'Ğ':
       Result := 'G';
   end;
+end;
+
+function CharInString(const AChar: Char; const AString: string): Boolean; inline;
+var
+  LIndex: Integer;
+  LLength: Integer;
+begin
+  Result := False;
+
+  LLength := AString.Length;
+  if LLength = 0 then
+    Exit;
+
+  for LIndex := 1 to LLength do
+  if AChar = AString[LIndex] then
+    Exit(True);
 end;
 
 function HexToColor(const AColor: string): TColor;

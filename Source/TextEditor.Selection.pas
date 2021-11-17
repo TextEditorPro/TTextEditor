@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Selection.Colors, TextEditor.Types;
+  System.Classes, Vcl.Graphics, TextEditor.Consts, TextEditor.Selection.Colors, TextEditor.Types;
 
 type
   TTextEditorSelection = class(TPersistent)
@@ -13,6 +13,7 @@ type
     FMode: TTextEditorSelectionMode;
     FOnChange: TNotifyEvent;
     FOptions: TTextEditorSelectionOptions;
+    FPrefixCharacters: string;
     FVisible: Boolean;
     procedure DoChange;
     procedure SetActiveMode(const AValue: TTextEditorSelectionMode);
@@ -31,6 +32,7 @@ type
     property Colors: TTextEditorSelectionColors read FColors write SetColors;
     property Mode: TTextEditorSelectionMode read FMode write SetMode default smNormal;
     property Options: TTextEditorSelectionOptions read FOptions write SetOptions default [soHighlightSimilarTerms, soTermsCaseSensitive];
+    property PrefixCharacters: string read FPrefixCharacters write FPrefixCharacters;
     property Visible: Boolean read FVisible write SetVisible default True;
   end;
 
@@ -44,6 +46,7 @@ begin
   FActiveMode := smNormal;
   FMode := smNormal;
   FOptions := [soHighlightSimilarTerms, soTermsCaseSensitive];
+  FPrefixCharacters := TEXT_EDITOR_DEFAULT_SELECTION_PREFIX_CHARACTERS;
   FVisible := True;
 end;
 

@@ -3504,6 +3504,10 @@ begin
       while (LTextPosition.Char > 0) and (LTextLine[LTextPosition.Char - 1] in TEXT_EDITOR_REAL_NUMBER_CHARS) do
         Dec(LTextPosition.Char);
 
+      if soExpandPrefix in FSelection.Options then
+      while (LTextPosition.Char > 0) and CharInString(LTextLine[LTextPosition.Char - 1], FSelection.PrefixCharacters) do
+        Dec(LTextPosition.Char);
+
       if LChar > LTextPosition.Char then
         Result := Copy(LTextLine, LTextPosition.Char, LChar - LTextPosition.Char);
 
@@ -8672,6 +8676,14 @@ var
           Inc(LIndex);
         LBlockEndPosition.Char := LIndex;
       end;
+
+    if soExpandPrefix in FSelection.Options then
+    begin
+      LIndex := LBlockBeginPosition.Char - 1;
+      while (LIndex > 0) and CharInString(LTempString[LIndex], FSelection.PrefixCharacters) do
+        Dec(LIndex);
+      LBlockBeginPosition.Char := LIndex + 1;
+    end;
   end;
 
 begin

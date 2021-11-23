@@ -46,6 +46,7 @@ type
     FKeyword: string;
     FPosition: TTextEditorCompletionProposalSnippetItemPosition;
     FSelection: TTextEditorCompletionProposalSnippetItemSelection;
+    FShortCut: TShortCut;
     FSnippet: TStrings;
     procedure SetSnippet(const AValue: TStrings);
   protected
@@ -60,6 +61,7 @@ type
     property Keyword: string read FKeyword write FKeyword;
     property Position: TTextEditorCompletionProposalSnippetItemPosition read FPosition write FPosition;
     property Selection: TTextEditorCompletionProposalSnippetItemSelection read FSelection write FSelection;
+    property ShortCut: TShortCut read FShortCut write FShortCut default scNone;
     property Snippet: TStrings read FSnippet write SetSnippet;
   end;
 
@@ -96,8 +98,6 @@ type
   ETextEditorCompletionProposalSnippetException = class(Exception);
 
 implementation
-
-
 
 { TTextEditorCompletionProposalSnippetItemPosition }
 
@@ -162,6 +162,7 @@ begin
   FSnippet.TrailingLineBreak := False;
   FPosition := TTextEditorCompletionProposalSnippetItemPosition.Create;
   FSelection := TTextEditorCompletionProposalSnippetItemSelection.Create;
+  FShortCut := scNone;
 end;
 
 destructor TTextEditorCompletionProposalSnippetItem.Destroy;
@@ -184,6 +185,7 @@ begin
     Self.FKeyword := FKeyword;
     Self.FPosition.Assign(FPosition);
     Self.FSelection.Assign(FSelection);
+    Self.FShortCut := FShortCut;
     Self.FSnippet.Assign(FSnippet);
   end
   else

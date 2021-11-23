@@ -8,14 +8,16 @@ uses
   Vcl.Controls, Vcl.DBCtrls, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Forms, Vcl.Graphics, Vcl.StdCtrls, Data.DB,
   TextEditor.ActiveLine, TextEditor.Caret, TextEditor.CodeFolding, TextEditor.CodeFolding.Hint.Form,
   TextEditor.CodeFolding.Ranges, TextEditor.CodeFolding.Regions, TextEditor.Colors, TextEditor.CompletionProposal,
-  TextEditor.CompletionProposal.PopupWindow, TextEditor.Consts, TextEditor.Glyph, TextEditor.Highlighter,
-  TextEditor.Highlighter.Attributes, TextEditor.InternalImage, TextEditor.KeyboardHandler, TextEditor.KeyCommands,
-  TextEditor.LeftMargin, TextEditor.Lines, TextEditor.MacroRecorder, TextEditor.Marks, TextEditor.MatchingPairs,
-  TextEditor.Minimap, TextEditor.PaintHelper, TextEditor.Replace, TextEditor.RightMargin, TextEditor.Ruler,
-  TextEditor.Scroll, TextEditor.Search, TextEditor.Search.Base, TextEditor.Selection, TextEditor.SkipRegions,
-  TextEditor.SpecialChars, TextEditor.SyncEdit, TextEditor.Tabs, TextEditor.Types, TextEditor.Undo,
-  TextEditor.Undo.List, TextEditor.UnknownChars, TextEditor.Utils, TextEditor.WordWrap
-{$IFDEF ALPHASKINS}, acSBUtils, sCommonData{$ENDIF}{$IFDEF TEXT_EDITOR_SPELL_CHECK}, TextEditor.SpellCheck{$ENDIF};
+  TextEditor.CompletionProposal.PopupWindow, TextEditor.CompletionProposal.Snippets, TextEditor.Consts,
+  TextEditor.Glyph, TextEditor.Highlighter, TextEditor.Highlighter.Attributes, TextEditor.InternalImage,
+  TextEditor.KeyboardHandler, TextEditor.KeyCommands, TextEditor.LeftMargin, TextEditor.Lines,
+  TextEditor.MacroRecorder, TextEditor.Marks, TextEditor.MatchingPairs, TextEditor.Minimap, TextEditor.PaintHelper,
+  TextEditor.Replace, TextEditor.RightMargin, TextEditor.Ruler, TextEditor.Scroll, TextEditor.Search,
+  TextEditor.Search.Base, TextEditor.Selection, TextEditor.SkipRegions, TextEditor.SpecialChars, TextEditor.SyncEdit,
+  TextEditor.Tabs, TextEditor.Types, TextEditor.Undo, TextEditor.Undo.List, TextEditor.UnknownChars, TextEditor.Utils,
+  TextEditor.WordWrap
+{$IFDEF ALPHASKINS}, acSBUtils, sCommonData{$ENDIF}
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}, TextEditor.SpellCheck{$ENDIF};
 
 const
   TEXTEDITOR_DEFAULT_OPTIONS = [eoAutoIndent, eoDragDropEditing, eoShowNullCharacters];
@@ -488,6 +490,7 @@ type
     procedure InitCodeFolding;
     procedure InitializeScrollShadow;
     procedure InsertLine; overload;
+    procedure InsertSnippet(const AItem: TTextEditorCompletionProposalSnippetItem; const ATextPosition: TTextEditorTextPosition);
     procedure LinesChanging(ASender: TObject);
     procedure MinimapChanged(ASender: TObject);
     procedure MouseScrollTimerHandler(ASender: TObject);
@@ -1231,10 +1234,9 @@ implementation
 
 uses
   Winapi.Imm, Winapi.ShellAPI, System.Character, System.RegularExpressions, System.StrUtils, System.Types, Vcl.Menus,
-  TextEditor.CompletionProposal.Snippets, TextEditor.Encoding, TextEditor.Export.HTML, TextEditor.Highlighter.Rules,
-  TextEditor.Language, TextEditor.LeftMargin.Border, TextEditor.LeftMargin.LineNumbers, TextEditor.Scroll.Hint,
-  TextEditor.Search.Map, TextEditor.Search.Normal, TextEditor.Search.RegularExpressions, TextEditor.Search.WildCard,
-  TextEditor.Undo.Item
+  TextEditor.Encoding, TextEditor.Export.HTML, TextEditor.Highlighter.Rules, TextEditor.Language,
+  TextEditor.LeftMargin.Border, TextEditor.LeftMargin.LineNumbers, TextEditor.Scroll.Hint, TextEditor.Search.Map,
+  TextEditor.Search.Normal, TextEditor.Search.RegularExpressions, TextEditor.Search.WildCard, TextEditor.Undo.Item
 {$IFDEF VCL_STYLES}, TextEditor.StyleHooks{$ENDIF}
 {$IFDEF ALPHASKINS}, acGlow, sConst, sMessages, sSkinManager, sStyleSimply, sVCLUtils{$ENDIF};
 
@@ -1597,27 +1599,10 @@ end;
 
 function TCustomTextEditor.AddSnippet(const AExecuteWith: TTextEditorSnippetExecuteWith; const ATextPosition: TTextEditorTextPosition): Boolean;
 var
-  LIndex, LIndex2: Integer;
+  LIndex: Integer;
   LTextPosition: TTextEditorTextPosition;
   LKeyword: string;
   LSnippetItem: TTextEditorCompletionProposalSnippetItem;
-  LStringList: TStringList;
-  LSnippetPosition, LSnippetSelectionBeginPosition, LSnippetSelectionEndPosition: TTextEditorTextPosition;
-  LCharCount: Integer;
-  LSpaces: string;
-  LPLineText: PChar;
-  LBeginChar: Integer;
-  LLineText: string;
-  LScrollPastEndOfLine: Boolean;
-
-  function GetBeginChar(const ARow: Integer): Integer;
-  begin
-    if ARow = 1 then
-      Result := SelectionBeginPosition.Char
-    else
-      Result := LCharCount + 1;
-  end;
-
 begin
   Result := False;
 
@@ -1636,100 +1621,123 @@ begin
     LSnippetItem := FCompletionProposal.Snippets.Item[LIndex];
     if (LSnippetItem.ExecuteWith = AExecuteWith) and (LSnippetItem.Keyword.Trim = LKeyword) then
     begin
-      BeginUpdate;
-      BeginUndoBlock;
-      try
-        WordAtTextPosition(LTextPosition, True);
-
-        LStringList := TStringList.Create;
-        LStringList.TrailingLineBreak := False;
-        try
-          LStringList.Text := LSnippetItem.Snippet.Text;
-          LLineText := FLines[LTextPosition.Line];
-          LCharCount := 0;
-          LPLineText := PChar(LLineText);
-          for LIndex2 := 0 to SelectionBeginPosition.Char - 1 do
-          begin
-            if LPLineText^ = TEXT_EDITOR_TAB_CHAR then
-              Inc(LCharCount, Tabs.Width)
-            else
-              Inc(LCharCount);
-
-            if LPLineText^ <> TEXT_EDITOR_NONE_CHAR then
-              Inc(LPLineText);
-          end;
-          Dec(LCharCount);
-
-          if toTabsToSpaces in Tabs.Options then
-            LSpaces := StringOfChar(TEXT_EDITOR_SPACE_CHAR, LCharCount)
-          else
-          begin
-            LSpaces := StringOfChar(TEXT_EDITOR_TAB_CHAR, LCharCount div Tabs.Width);
-            LSpaces := LSpaces + StringOfChar(TEXT_EDITOR_SPACE_CHAR, LCharCount mod Tabs.Width);
-          end;
-
-          for LIndex2 := 1 to LStringList.Count - 1 do
-            LStringList[LIndex2] := LSpaces + LStringList[LIndex2];
-
-          if LSnippetItem.Position.Active then
-          begin
-            LBeginChar := GetBeginChar(LSnippetItem.Position.Row);
-            LSnippetPosition := GetPosition(LBeginChar + LSnippetItem.Position.Column - 1,
-              SelectionBeginPosition.Line + LSnippetItem.Position.Row - 1);
-          end;
-
-          if LSnippetItem.Selection.Active then
-          begin
-            LBeginChar := GetBeginChar(LSnippetItem.Selection.FromRow);
-            LSnippetSelectionBeginPosition := GetPosition(LBeginChar + LSnippetItem.Selection.FromColumn - 1,
-              SelectionBeginPosition.Line + LSnippetItem.Selection.FromRow - 1);
-            LBeginChar := GetBeginChar(LSnippetItem.Selection.ToRow);
-            LSnippetSelectionEndPosition := GetPosition(LBeginChar + LSnippetItem.Selection.ToColumn - 1,
-              SelectionBeginPosition.Line + LSnippetItem.Selection.ToRow - 1);
-          end;
-
-          SelectedText := LStringList.Text
-        finally
-          LStringList.Free;
-        end;
-
-        if CanFocus then
-          SetFocus;
-
-        LScrollPastEndOfLine := not (soPastEndOfLine in FScroll.Options);
-        if LScrollPastEndOfLine then
-          FScroll.SetOption(soPastEndOfLine, True);
-
-        EnsureCursorPositionVisible;
-
-        if Assigned(LSnippetItem) and LSnippetItem.Position.Active then
-          TextPosition := LSnippetPosition
-        else
-        if Assigned(LSnippetItem) and LSnippetItem.Selection.Active then
-          TextPosition := LSnippetSelectionEndPosition
-        else
-          TextPosition := SelectionEndPosition;
-
-        if Assigned(LSnippetItem) and LSnippetItem.Selection.Active then
-        begin
-          SelectionBeginPosition := LSnippetSelectionBeginPosition;
-          SelectionEndPosition := LSnippetSelectionEndPosition;
-        end
-        else
-        begin
-          SelectionBeginPosition := TextPosition;
-          SelectionEndPosition := SelectionBeginPosition;
-        end;
-
-        if LScrollPastEndOfLine then
-          FScroll.SetOption(soPastEndOfLine, False);
-
-        Result := True;
-      finally
-        EndUndoBlock;
-        EndUpdate;
-      end;
+      InsertSnippet(LSnippetItem, LTextPosition);
+      Result := True;
     end;
+  end;
+end;
+
+procedure TCustomTextEditor.InsertSnippet(const AItem: TTextEditorCompletionProposalSnippetItem; const ATextPosition: TTextEditorTextPosition);
+var
+  LIndex: Integer;
+  LStringList: TStringList;
+  LSnippetPosition, LSnippetSelectionBeginPosition, LSnippetSelectionEndPosition: TTextEditorTextPosition;
+  LCharCount: Integer;
+  LSpaces: string;
+  LPLineText: PChar;
+  LBeginChar: Integer;
+  LLineText: string;
+  LScrollPastEndOfLine: Boolean;
+
+  function GetBeginChar(const ARow: Integer): Integer;
+  begin
+    if ARow = 1 then
+      Result := SelectionBeginPosition.Char
+    else
+      Result := LCharCount + 1;
+  end;
+
+begin
+  BeginUpdate;
+  BeginUndoBlock;
+  try
+    WordAtTextPosition(ATextPosition, True);
+
+    LStringList := TStringList.Create;
+    LStringList.TrailingLineBreak := False;
+    try
+      LStringList.Text := AItem.Snippet.Text;
+      LLineText := FLines[ATextPosition.Line];
+      LCharCount := 0;
+      LPLineText := PChar(LLineText);
+      for LIndex := 0 to SelectionBeginPosition.Char - 1 do
+      begin
+        if LPLineText^ = TEXT_EDITOR_TAB_CHAR then
+          Inc(LCharCount, Tabs.Width)
+        else
+          Inc(LCharCount);
+
+        if LPLineText^ <> TEXT_EDITOR_NONE_CHAR then
+          Inc(LPLineText);
+      end;
+      Dec(LCharCount);
+
+      if toTabsToSpaces in Tabs.Options then
+        LSpaces := StringOfChar(TEXT_EDITOR_SPACE_CHAR, LCharCount)
+      else
+      begin
+        LSpaces := StringOfChar(TEXT_EDITOR_TAB_CHAR, LCharCount div Tabs.Width);
+        LSpaces := LSpaces + StringOfChar(TEXT_EDITOR_SPACE_CHAR, LCharCount mod Tabs.Width);
+      end;
+
+      for LIndex := 1 to LStringList.Count - 1 do
+        LStringList[LIndex] := LSpaces + LStringList[LIndex];
+
+      if AItem.Position.Active then
+      begin
+        LBeginChar := GetBeginChar(AItem.Position.Row);
+        LSnippetPosition := GetPosition(LBeginChar + AItem.Position.Column - 1,
+          SelectionBeginPosition.Line + AItem.Position.Row - 1);
+      end;
+
+      if AItem.Selection.Active then
+      begin
+        LBeginChar := GetBeginChar(AItem.Selection.FromRow);
+        LSnippetSelectionBeginPosition := GetPosition(LBeginChar + AItem.Selection.FromColumn - 1,
+          SelectionBeginPosition.Line + AItem.Selection.FromRow - 1);
+        LBeginChar := GetBeginChar(AItem.Selection.ToRow);
+        LSnippetSelectionEndPosition := GetPosition(LBeginChar + AItem.Selection.ToColumn - 1,
+          SelectionBeginPosition.Line + AItem.Selection.ToRow - 1);
+      end;
+
+      SelectedText := LStringList.Text
+    finally
+      LStringList.Free;
+    end;
+
+    if CanFocus then
+      SetFocus;
+
+    LScrollPastEndOfLine := not (soPastEndOfLine in FScroll.Options);
+    if LScrollPastEndOfLine then
+      FScroll.SetOption(soPastEndOfLine, True);
+
+    EnsureCursorPositionVisible;
+
+    if AItem.Position.Active then
+      TextPosition := LSnippetPosition
+    else
+    if AItem.Selection.Active then
+      TextPosition := LSnippetSelectionEndPosition
+    else
+      TextPosition := SelectionEndPosition;
+
+    if AItem.Selection.Active then
+    begin
+      SelectionBeginPosition := LSnippetSelectionBeginPosition;
+      SelectionEndPosition := LSnippetSelectionEndPosition;
+    end
+    else
+    begin
+      SelectionBeginPosition := TextPosition;
+      SelectionEndPosition := SelectionBeginPosition;
+    end;
+
+    if LScrollPastEndOfLine then
+      FScroll.SetOption(soPastEndOfLine, False);
+  finally
+    EndUndoBlock;
+    EndUpdate;
   end;
 end;
 
@@ -10496,6 +10504,25 @@ var
     end;
   end;
 
+  function ExecuteCompletionProposalSnippet: Boolean;
+  var
+    LIndex: Integer;
+    LSnippetItem: TTextEditorCompletionProposalSnippetItem;
+  begin
+    Result := False;
+
+    for LIndex := 0 to FCompletionProposal.Snippets.Items.Count - 1 do
+    begin
+      LSnippetItem := FCompletionProposal.Snippets.Item[LIndex];
+      if LSnippetItem.ShortCut <> scNone then
+      begin
+        ShortCutToKey(LSnippetItem.ShortCut, LShortCutKey, LShortCutShift);
+        if (AShift = LShortCutShift) and (AKey = LShortCutKey) then
+          InsertSnippet(LSnippetItem, TextPosition);
+      end;
+    end;
+  end;
+
 begin
   inherited;
 
@@ -10602,7 +10629,11 @@ begin
   if not ReadOnly and FCompletionProposal.Active and not Assigned(FCompletionProposalPopupWindow) then
   begin
     ShortCutToKey(FCompletionProposal.ShortCut, LShortCutKey, LShortCutShift);
+
     if ExecuteCompletionProposal then
+      Exit;
+
+    if ExecuteCompletionProposalSnippet then
       Exit;
   end;
 

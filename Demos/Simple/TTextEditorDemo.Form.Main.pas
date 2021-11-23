@@ -31,7 +31,7 @@ implementation
 {$R *.dfm}
 
 uses
-  TextEditor.CompletionProposal.Snippets, TextEditor.Types;
+  Vcl.Menus, TextEditor.CompletionProposal.Snippets, TextEditor.Types;
 
 const
   HIGHLIGHTERS_PATH = '..\..\Highlighters\';
@@ -89,9 +89,11 @@ begin
   TextEditor.Lines.Text := TextEditor.Highlighter.Sample;
 
   { Snippet examples }
+  TextEditor.CompletionProposal.Snippets.Items.Clear;
+
   if ListBoxHighlighters.Selected[ListBoxHighlighters.Items.IndexOf('Object Pascal.json')] then
   begin
-    { Add begin..end with enter }
+    { "begin..end" with enter }
     LItem := TextEditor.CompletionProposal.Snippets.Items.Add;
     with LItem do
     begin
@@ -111,7 +113,7 @@ begin
       Add('');
       Add('end');
     end;
-    { Add if True then with space }
+    { "if True then" with space }
     LItem := TextEditor.CompletionProposal.Snippets.Items.Add;
     with LItem do
     begin
@@ -130,7 +132,23 @@ begin
     LItem.Snippet.Add('if True then');
   end
   else
-    TextEditor.CompletionProposal.Snippets.Items.Clear;
+  if ListBoxHighlighters.Selected[ListBoxHighlighters.Items.IndexOf('HTML with Scripts.json')] then
+  begin
+    { "<br />" with shortcut shift + enter }
+    LItem := TextEditor.CompletionProposal.Snippets.Items.Add;
+    with LItem do
+    begin
+      Description := '<br />';
+      ShortCut := TextToShortCut('Shift+Enter');
+    end;
+    with LItem.Position do
+    begin
+      Active := True;
+      Column := 7;
+      Row := 1;
+    end;
+    LItem.Snippet.Add('<br />');
+  end
 end;
 
 procedure TMainForm.ListBoxThemesClick(Sender: TObject);

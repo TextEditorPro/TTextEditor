@@ -116,6 +116,7 @@ object MainForm: TMainForm
     Ruler.Font.Height = -11
     Ruler.Font.Name = 'Courier New'
     Ruler.Font.Style = []
+    Selection.PrefixCharacters = '$%:@'
     SyncEdit.ShortCut = 24650
     TabOrder = 1
     WordWrap.Indicator.MaskColor = clFuchsia

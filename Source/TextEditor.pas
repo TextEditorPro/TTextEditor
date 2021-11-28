@@ -13311,13 +13311,11 @@ var
     if AMinimap and (moShowBookmarks in FMinimap.Options) and LBookmarkOnCurrentLine then
       Result := FMinimap.Colors.Bookmark
     else
-    if LIsCurrentLine and FActiveLine.Visible and (FActiveLine.Colors.Background <> TColors.SysNone) then
-    begin
-      if Focused then
-        Result := FActiveLine.Colors.Background
-      else
-        Result := FActiveLine.Colors.BackgroundUnfocused
-    end
+    if LIsCurrentLine and FActiveLine.Visible and Focused and (FActiveLine.Colors.Background <> TColors.SysNone) then
+      Result := FActiveLine.Colors.Background
+    else
+    if LIsCurrentLine and FActiveLine.Visible and not Focused and (FActiveLine.Colors.BackgroundUnfocused <> TColors.SysNone) then
+      Result := FActiveLine.Colors.BackgroundUnfocused
     else
     if LMarkColor <> TColors.SysNone then
       Result := LMarkColor

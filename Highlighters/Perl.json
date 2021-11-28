@@ -38,6 +38,38 @@
             "TokenRange": {
               "Open": "'",
               "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
             }
           },
           {
@@ -51,6 +83,38 @@
             "TokenRange": {
               "Open": "\"",
               "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
             }
           },
           {

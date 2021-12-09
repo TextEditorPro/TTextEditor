@@ -33,6 +33,20 @@
               "Element": "String"
             },
             "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "\\'",
+              "Close": ""
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
               "CloseOnEndOfLine": true
             },
             "TokenRange": {
@@ -486,7 +500,8 @@
               "[",
               "]",
               "{",
-              "}"
+              "}",
+              "~"
             ],
             "Attributes": {
               "Element": "Symbol"

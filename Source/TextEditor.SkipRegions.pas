@@ -20,7 +20,7 @@ type
     property CloseToken: string read FCloseToken write FCloseToken;
     property RegionType: TTextEditorSkipRegionItemType read FRegionType write FRegionType;
     property SkipEmptyChars: Boolean read FSkipEmptyChars write FSkipEmptyChars;
-    property SkipIfNextCharIsNot: Char read FSkipIfNextCharIsNot write FSkipIfNextCharIsNot default TEXT_EDITOR_NONE_CHAR;
+    property SkipIfNextCharIsNot: Char read FSkipIfNextCharIsNot write FSkipIfNextCharIsNot default TControlCharacters.Null;
   end;
 
   TTextEditorSkipRegions = class(TCollection)

@@ -3,7 +3,7 @@
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.SysUtils, System.Types, TextEditor.Types;
+  Winapi.Windows, System.Classes, System.SysUtils, System.Types, System.UITypes, TextEditor.Types;
 
 type
   TIncompatCharBehaviour = (icUseDefault, icBestFit, icError);
@@ -15,6 +15,8 @@ type
     FHandle: Pointer;
     FItems: TList;
     FLibraryLoaded: Boolean;
+    FUnderLine: TTextEditorUnderline;
+    FUnderlineColor: TColor;
     function DLLToUnicodeString(const AValue: PAnsiChar): UnicodeString;
     function UnicodeToDLLString(const AValue: string; const AIncompatCharBehaviour: TIncompatCharBehaviour): AnsiString;
     procedure LoadSpellCheckLibrary;
@@ -32,6 +34,8 @@ type
     property Items: TList read FItems write FItems;
   published
     property Filename: string read FFilename write SetFilename;
+    property Underline: TTextEditorUnderline read FUnderLine write FUnderLine default ulWaveLine;
+    property UnderlineColor: TColor read FUnderlineColor write FUnderlineColor default TColors.Red;
   end;
 
   ETextEditorSpellCheckException = class(Exception);
@@ -71,6 +75,8 @@ begin
   inherited Create(AOwner);
 
   FLibraryLoaded := False;
+  FUnderLine := ulWaveLine;
+  FUnderlineColor := TColors.Red;
   FItems := TList.Create;
 end;
 

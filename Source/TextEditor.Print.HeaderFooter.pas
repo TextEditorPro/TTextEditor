@@ -244,12 +244,12 @@ var
 begin
   with AStream do
   begin
-    Read(LLength, sizeof(LLength));
-    BufferSize := LLength * sizeof(Char);
-    GetMem(LBuffer, BufferSize + sizeof(Char));
+    Read(LLength, SizeOf(LLength));
+    BufferSize := LLength * SizeOf(Char);
+    GetMem(LBuffer, BufferSize + SizeOf(Char));
     try
       Read(LBuffer^, BufferSize);
-      PChar(LBuffer)[BufferSize div sizeof(Char)] := TEXT_EDITOR_NONE_CHAR;
+      PChar(LBuffer)[BufferSize div SizeOf(Char)] := TControlCharacters.Null;
       FText := PChar(LBuffer);
     finally
       FreeMem(LBuffer);
@@ -262,7 +262,7 @@ begin
     GetMem(LBuffer, BufferSize + 1);
     try
       Read(LBuffer^, BufferSize);
-      PAnsiChar(LBuffer)[BufferSize div SizeOf(AnsiChar)] := TEXT_EDITOR_NONE_CHAR;
+      PAnsiChar(LBuffer)[BufferSize div SizeOf(AnsiChar)] := TControlCharacters.Null;
       LName := string(PAnsiChar(LBuffer));
     finally
       FreeMem(LBuffer);
@@ -676,7 +676,7 @@ begin
     GetMem(LBuffer, LBufferSize + 1);
     try
       Read(LBuffer^, LBufferSize);
-      LBuffer[LBufferSize] := TEXT_EDITOR_NONE_CHAR;
+      LBuffer[LBufferSize] := TControlCharacters.Null;
       LName := string(LBuffer);
     finally
       FreeMem(LBuffer);

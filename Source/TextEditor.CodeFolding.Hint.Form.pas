@@ -135,7 +135,7 @@ begin
   with Owner as TCustomTextEditor do
   begin
     LData := nil;
-    LChar := TEXT_EDITOR_NONE_CHAR;
+    LChar := TControlCharacters.Null;
     LEditorCommand := TranslateKeyCode(AKey, AShift);
     CommandProcessor(LEditorCommand, LChar, LData);
   end;
@@ -145,7 +145,7 @@ end;
 
 procedure TTextEditorCodeFoldingHintForm.DoKeyPressW(AKey: Char);
 begin
-  if AKey <> TEXT_EDITOR_NONE_CHAR then
+  if AKey <> TControlCharacters.Null then
     KeyPressW(AKey);
 end;
 

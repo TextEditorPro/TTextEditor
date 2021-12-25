@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, TextEditor.Consts, TextEditor.Types, TextEditor.Undo.Item;
+  System.Classes, TextEditor.Types, TextEditor.Undo.Item;
 
 type
   TTextEditorUndoList = class(TPersistent)
@@ -68,7 +68,7 @@ begin
   FInsideUndoBlock := False;
   FInsideUndoBlockCount := 0;
   FChangeCount := 0;
-  FBlockNumber := TEXT_EDITOR_UNDO_BLOCK_NUMBER_START;
+  FBlockNumber := 10;
 end;
 
 destructor TTextEditorUndoList.Destroy;

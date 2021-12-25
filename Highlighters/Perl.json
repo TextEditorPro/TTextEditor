@@ -136,7 +136,7 @@
             "Attributes": {
               "Element": "Character"
             },
-            "Delimiters": "{}",
+            "Delimiters": "*/=\\|&()[]{}`~!@,$%^?:;'\".><#'",
             "Properties": {
               "CloseOnTerm": true,
               "CloseOnEndOfLine": true
@@ -501,6 +501,7 @@
               "]",
               "{",
               "}",
+              "&",
               "~"
             ],
             "Attributes": {

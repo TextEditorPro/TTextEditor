@@ -183,7 +183,7 @@ uses
 procedure TTextEditorDataEvent.Initialize(const ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer);
 begin
   FCommand := ACommand;
-  Assert(AChar = TEXT_EDITOR_NONE_CHAR);
+  Assert(AChar = TControlCharacters.Null);
   FData := AData;
 end;
 
@@ -194,7 +194,7 @@ end;
 
 procedure TTextEditorDataEvent.Playback(const AEditor: TCustomControl);
 begin
-  TCustomTextEditor(AEditor).CommandProcessor(Command, TEXT_EDITOR_NONE_CHAR, FData);
+  TCustomTextEditor(AEditor).CommandProcessor(Command, TControlCharacters.Null, FData);
 end;
 
 procedure TTextEditorDataEvent.SaveToStream(const AStream: TStream);
@@ -460,7 +460,7 @@ begin
   begin
     ASource.Read(LCommand, SizeOf(TTextEditorCommand));
     LEvent := CreateMacroEvent(LCommand);
-    LEvent.Initialize(LCommand, TEXT_EDITOR_NONE_CHAR, nil);
+    LEvent.Initialize(LCommand, TControlCharacters.Null, nil);
     LEvent.LoadFromStream(ASource);
     FEvents.Add(LEvent);
     Inc(LIndex);
@@ -774,7 +774,7 @@ var
   LIndex: Integer;
 begin
   for LIndex := 1 to RepeatCount do //FI:W528 Variable not used in FOR-loop
-    TCustomTextEditor(AEditor).CommandProcessor(Command, TEXT_EDITOR_NONE_CHAR, nil);
+    TCustomTextEditor(AEditor).CommandProcessor(Command, TControlCharacters.Null, nil);
 end;
 
 procedure TTextEditorBasicEvent.SaveToStream(const AStream: TStream);
@@ -877,9 +877,9 @@ end;
 procedure TTextEditorPositionEvent.Playback(const AEditor: TCustomControl);
 begin
   if (Position.Char <> 0) or (Position.Line <> 0) then
-    TCustomTextEditor(AEditor).CommandProcessor(Command, TEXT_EDITOR_NONE_CHAR, @Position)
+    TCustomTextEditor(AEditor).CommandProcessor(Command, TControlCharacters.Null, @Position)
   else
-    TCustomTextEditor(AEditor).CommandProcessor(Command, TEXT_EDITOR_NONE_CHAR, nil);
+    TCustomTextEditor(AEditor).CommandProcessor(Command, TControlCharacters.Null, nil);
 end;
 
 procedure TTextEditorPositionEvent.SaveToStream(const AStream: TStream);
@@ -905,7 +905,7 @@ var
     P := PChar(Delimiters);
     while Result > 0 do
     begin
-      if (S[Result] <> TEXT_EDITOR_NONE_CHAR) and Assigned(WStrScan(P, S[Result])) then
+      if (S[Result] <> TControlCharacters.Null) and Assigned(WStrScan(P, S[Result])) then
         Exit;
       Dec(Result);
     end;

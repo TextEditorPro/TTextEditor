@@ -77,11 +77,11 @@ type
     function Add(const AOpenToken: string; const ACloseToken: string): TTextEditorCodeFoldingRegionItem;
     property CloseToken: string read FCloseToken write FCloseToken;
     function Contains(const AOpenToken: string; const ACloseToken: string): Boolean;
-    property EscapeChar: Char read FEscapeChar write FEscapeChar default TEXT_EDITOR_NONE_CHAR;
+    property EscapeChar: Char read FEscapeChar write FEscapeChar default TControlCharacters.Null;
     property Items[AIndex: Integer]: TTextEditorCodeFoldingRegionItem read GetItem; default;
     property OpenToken: string read FOpenToken write FOpenToken;
     property SkipRegions: TTextEditorSkipRegions read FSkipRegions;
-    property StringEscapeChar: Char read FStringEscapeChar write FStringEscapeChar default TEXT_EDITOR_NONE_CHAR;
+    property StringEscapeChar: Char read FStringEscapeChar write FStringEscapeChar default TControlCharacters.Null;
   end;
 
   TTextEditorCodeFoldingRegions = array of TTextEditorCodeFoldingRegion;
@@ -133,8 +133,8 @@ begin
   inherited Create(AItemClass);
 
   FSkipRegions := TTextEditorSkipRegions.Create(TTextEditorSkipRegionItem);
-  FEscapeChar := TEXT_EDITOR_NONE_CHAR;
-  FStringEscapeChar := TEXT_EDITOR_NONE_CHAR;
+  FEscapeChar := TControlCharacters.Null;
+  FStringEscapeChar := TControlCharacters.Null;
 end;
 
 destructor TTextEditorCodeFoldingRegion.Destroy;

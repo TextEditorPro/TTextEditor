@@ -23,7 +23,7 @@ type
     property Name: string read FName write FName;
     property Background: TColor read FBackground write FBackground default TColors.SysNone;
     property Element: string read FElement write FElement;
-    property EscapeChar: Char read FEscapeChar write FEscapeChar default TEXT_EDITOR_NONE_CHAR;
+    property EscapeChar: Char read FEscapeChar write FEscapeChar default TControlCharacters.Null;
     property FontStyles: TFontStyles read FFontStyles write FFontStyles;
     property Foreground: TColor read FForeground write FForeground default TColors.SysNone;
     property ParentBackground: Boolean read FParentBackground write FParentBackground;
@@ -42,7 +42,7 @@ begin
   FBackground := TColors.SysNone;
   FForeground := TColors.SysNone;
   FName := AttributeName;
-  FEscapeChar := TEXT_EDITOR_NONE_CHAR;
+  FEscapeChar := TControlCharacters.Null;
 end;
 
 procedure TTextEditorHighlighterAttribute.Assign(ASource: TPersistent);

@@ -141,7 +141,7 @@ begin
     begin
       LHighlighterAttribute := FHighlighter.TokenAttribute;
       FHighlighter.GetToken(LToken);
-      if LToken = TEXT_EDITOR_SPACE_CHAR then
+      if LToken = TCharacters.Space then
         LTextLine := LTextLine + '&nbsp;'
       else
       if LToken = '&' then

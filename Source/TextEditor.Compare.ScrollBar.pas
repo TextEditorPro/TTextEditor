@@ -288,7 +288,7 @@ begin
 
     LScrollInfo.nMin := 1;
     LScrollInfo.nTrackPos := 0;
-    if LVerticalMaxScroll <= TEXT_EDITOR_MAX_SCROLL_RANGE then
+    if LVerticalMaxScroll <= TMaxValues.ScrollRange then
     begin
       LScrollInfo.nMax := Max(1, LVerticalMaxScroll);
       LScrollInfo.nPage := FVisibleLines;
@@ -296,9 +296,9 @@ begin
     end
     else
     begin
-      LScrollInfo.nMax := TEXT_EDITOR_MAX_SCROLL_RANGE;
-      LScrollInfo.nPage := MulDiv(TEXT_EDITOR_MAX_SCROLL_RANGE, FVisibleLines, LVerticalMaxScroll);
-      LScrollInfo.nPos := MulDiv(TEXT_EDITOR_MAX_SCROLL_RANGE, TopLine, LVerticalMaxScroll);
+      LScrollInfo.nMax := TMaxValues.ScrollRange;
+      LScrollInfo.nPage := MulDiv(TMaxValues.ScrollRange, FVisibleLines, LVerticalMaxScroll);
+      LScrollInfo.nPos := MulDiv(TMaxValues.ScrollRange, TopLine, LVerticalMaxScroll);
     end;
 
     if Assigned(FEditorLeft) and (FEditorLeft.LineNumbersCount <= FVisibleLines) then
@@ -474,8 +474,8 @@ begin
     SB_THUMBPOSITION, SB_THUMBTRACK:
       begin
         LLineNumbersCount := Max(FEditorLeft.LineNumbersCount, FEditorRight.LineNumbersCount);
-        if LLineNumbersCount > TEXT_EDITOR_MAX_SCROLL_RANGE then
-          TopLine := MulDiv(FVisibleLines + LLineNumbersCount - 1, AMessage.Pos, TEXT_EDITOR_MAX_SCROLL_RANGE)
+        if LLineNumbersCount > TMaxValues.ScrollRange then
+          TopLine := MulDiv(FVisibleLines + LLineNumbersCount - 1, AMessage.Pos, TMaxValues.ScrollRange)
         else
           TopLine := AMessage.Pos;
       end;

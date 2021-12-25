@@ -100,7 +100,7 @@ begin
     Exit(AText);
 
   while (LIndex <= LLength) and (AText.Chars[LIndex] <= ' ') do
-  if AText.Chars[LIndex] = TEXT_EDITOR_SUBSTITUTE_CHAR then
+  if AText.Chars[LIndex] = TControlCharacters.Substitute then
     Break
   else
     Inc(LIndex);
@@ -109,7 +109,7 @@ begin
     Exit('');
 
   while AText.Chars[LLength] <= ' ' do
-  if AText.Chars[LIndex] = TEXT_EDITOR_SUBSTITUTE_CHAR then
+  if AText.Chars[LIndex] = TControlCharacters.Substitute then
     Break
   else
     Dec(LLength);
@@ -125,7 +125,7 @@ begin
   LIndex := 0;
 
   while (LIndex <= LLength) and (AText.Chars[LIndex] <= ' ') do
-  if AText.Chars[LIndex] = TEXT_EDITOR_SUBSTITUTE_CHAR then
+  if AText.Chars[LIndex] = TControlCharacters.Substitute then
     Break
   else
     Inc(LIndex);
@@ -147,7 +147,7 @@ begin
   else
   begin
     while (LIndex >= 0) and (AText.Chars[LIndex] <= ' ') do
-    if AText.Chars[LIndex] = TEXT_EDITOR_SUBSTITUTE_CHAR then
+    if AText.Chars[LIndex] = TControlCharacters.Substitute then
       Break
     else
       Dec(LIndex);
@@ -315,20 +315,20 @@ begin
   LPosition := 1;
   while True do
   begin
-    LPosition := FastPos(TEXT_EDITOR_TAB_CHAR, Result, LPosition);
+    LPosition := FastPos(TControlCharacters.Tab, Result, LPosition);
     if LPosition = 0 then
       Break;
 
     AHasTabs := True;
 
-    Delete(Result, LPosition, Length(TEXT_EDITOR_TAB_CHAR));
+    Delete(Result, LPosition, Length(TControlCharacters.Tab));
 
     if AColumns then
       LCount := ATabWidth - (LPosition - ATabWidth - 1) mod ATabWidth
     else
       LCount := ATabWidth;
 
-    Insert(StringOfChar(TEXT_EDITOR_SPACE_CHAR, LCount), Result, LPosition);
+    Insert(StringOfChar(TCharacters.Space, LCount), Result, LPosition);
     Inc(LPosition, LCount);
   end;
 end;
@@ -423,9 +423,9 @@ begin
 
   ACharsBefore := 0;
   if Assigned(ALine) then
-  while ALine^ <> TEXT_EDITOR_NONE_CHAR do
+  while ALine^ <> TControlCharacters.Null do
   begin
-    if ALine^ = TEXT_EDITOR_TAB_CHAR then
+    if ALine^ = TControlCharacters.Tab then
       Exit(True);
     Inc(ACharsBefore);
     Inc(ALine);
@@ -600,20 +600,20 @@ var
   LRetryCount: Integer;
   LDelayStepMs: Integer;
 begin
-  LDelayStepMs := TEXT_EDITOR_CLIPBOARD_DELAY_STEP_MS;
+  LDelayStepMs := TClipboardDefaults.DelayStepMs;
   Result := False;
-  for LRetryCount := 1 to TEXT_EDITOR_CLIPBOARD_MAX_RETRIES do
+  for LRetryCount := 1 to TClipboardDefaults.MaxRetries do
   try
     Clipboard.Open;
     Exit(True);
   except
     on Exception do
-    if LRetryCount = TEXT_EDITOR_CLIPBOARD_MAX_RETRIES then
+    if LRetryCount = TClipboardDefaults.MaxRetries then
       raise
     else
     begin
       Sleep(LDelayStepMs);
-      Inc(LDelayStepMs, TEXT_EDITOR_CLIPBOARD_DELAY_STEP_MS);
+      Inc(LDelayStepMs, TClipboardDefaults.DelayStepMs);
     end;
   end;
 end;

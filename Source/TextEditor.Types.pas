@@ -56,9 +56,9 @@ type
     Row: Integer;
   end;
 
-  TTextEditorEmptySpace = (esNone, esSpace, esSubstitute, esTab);
+  TTextEditorEmptySpace = (esNone, esControlCharacter, esSpace, esNull, esTab, esZeroWidthSpace);
 
-  TTextEditorTokenAddon = (taNone, taDoubleUnderline, taUnderline, taWaveLine);
+  TTextEditorUnderline = (ulNone, ulDoubleUnderline, ulUnderline, ulWaveLine, ulWavyZigzag);
 
   TTextEditorMoveDirection = (mdUp, mdDown, mdLeft, mdRight);
   TTextEditorProgressType = (ptNone, ptProcessing, ptLoading);
@@ -112,8 +112,9 @@ type
   TTextEditorCompletionProposalItems = TList<TTextEditorCompletionProposalItem>;
 
   { Editor options }
-  TTextEditorOption = (eoAutoIndent, eoDragDropEditing, eoDropFiles, eoShowNonBreakingSpaceAsSpace,
-    eoShowNullCharacters{$IFDEF TEXT_EDITOR_SPELL_CHECK}, eoSpellCheck{$ENDIF}, eoTrimTrailingSpaces, eoTrailingLineBreak);
+  TTextEditorOption = (eoAutoIndent, eoDragDropEditing, eoDropFiles, eoShowControlCharacters, eoShowNonBreakingSpaceAsSpace,
+    eoShowNullCharacters{$IFDEF TEXT_EDITOR_SPELL_CHECK}, eoSpellCheck{$ENDIF}, eoShowZeroWidthSpace, eoTrimTrailingSpaces,
+    eoTrailingLineBreak);
   TTextEditorOptions = set of TTextEditorOption;
 
   TTextEditorOvertypeMode = (omInsert, omOverwrite);
@@ -299,7 +300,7 @@ type
     var AForeground: TColor; var ABackground: TColor) of object;
   TTextEditorCustomTokenAttributeEvent = procedure(const ASender: TObject; const AText: string; const ALine: Integer;
     const AChar: Integer; var AForegroundColor: TColor; var ABackgroundColor: TColor; var AStyles: TFontStyles;
-    var ATokenAddon: TTextEditorTokenAddon; var ATokenAddonColor: TColor) of object;
+    var AUnderline: TTextEditorUnderline; var AUnderlineColor: TColor) of object;
   TTextEditorDropFilesEvent = procedure(const ASender: TObject; const APos: TPoint; const AFiles: TStrings) of object;
   TTextEditorHighlighterPrepare = procedure of object;
   TTextEditorKeyPressWEvent = procedure(const ASender: TObject; var AKey: Char) of object;

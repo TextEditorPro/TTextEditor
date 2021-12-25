@@ -164,7 +164,7 @@ begin
 
   FTemporaryTokens := TList.Create;
 
-  FAllDelimiters := TEXT_EDITOR_DEFAULT_DELIMITERS + TEXT_EDITOR_ABSOLUTE_DELIMITERS;
+  FAllDelimiters := TCharacterSets.DefaultDelimiters + TCharacterSets.AbsoluteDelimiters;
 
   FLoading := False;
   FLoaded := False;
@@ -259,8 +259,9 @@ begin
   begin
     while Assigned(FRange) and (FRange.CloseOnEndOfLine or FRange.CloseOnTerm) do
       FRange := FRange.Parent;
-     
+
     FEndOfLine := True;
+
     Exit;
   end;
 
@@ -270,15 +271,16 @@ begin
     LKeyword := PChar(FRange.AlternativeCloseArray[LIndex]);
     LPosition := FRunPosition;
 
-    while (FLine[LPosition] <> TEXT_EDITOR_NONE_CHAR) and (FLine[LPosition] = LKeyword^) do
+    while (FLine[LPosition] <> TControlCharacters.Null) and (FLine[LPosition] = LKeyword^) do
     begin
       Inc(LKeyword);
       Inc(LPosition);
     end;
 
-    if LKeyword^ = TEXT_EDITOR_NONE_CHAR then
+    if LKeyword^ = TControlCharacters.Null then
     begin
       FRange := FRange.Parent;
+
       Break;
     end;
   end;
@@ -289,7 +291,7 @@ begin
   begin
     LCloseParent := FRange.CloseParent;
     if FRange.CloseOnTerm and (FLine[FRunPosition] in FRange.Delimiters) and
-      not (FRange.SkipWhitespace and (FLine[FRunPosition] in TEXT_EDITOR_ABSOLUTE_DELIMITERS)) then
+      not (FRange.SkipWhitespace and (FLine[FRunPosition] in TCharacterSets.AbsoluteDelimiters)) then
     begin
       FRange := FRange.Parent;
       if Assigned(FRange) then
@@ -297,7 +299,7 @@ begin
           FRange := FRange.Parent;
     end;
 
-    if Ord(FLine[FRunPosition]) < TEXT_EDITOR_ANSI_CHAR_COUNT then
+    if Ord(FLine[FRunPosition]) < TCharacters.AnsiCharCount then
       LParser := FRange.SymbolList[AnsiChar(FRange.CaseFunct(FLine[FRunPosition]))]
     else
     case FLine[FRunPosition] of
@@ -324,11 +326,9 @@ begin
       FToken := FRange.DefaultToken;
 
       if FRange.UseDelimitersForText then
-        LDelimiters := FRange.Delimiters
+        LDelimiters := FRange.Delimiters + [TControlCharacters.Null]
       else
         LDelimiters := FAllDelimiters;
-
-      LDelimiters := LDelimiters + [TEXT_EDITOR_NONE_CHAR];
 
       if IsRightToLeftCharacter(FLine[FRunPosition], False) then
       begin
@@ -337,7 +337,7 @@ begin
         while IsRightToLeftCharacter(FLine[FRunPosition]) do
           Inc(FRunPosition);
 
-        while (FRunPosition > 1) and (FLine[FRunPosition - 1] in [TEXT_EDITOR_TAB_CHAR, TEXT_EDITOR_SPACE_CHAR]) do
+        while (FRunPosition > 1) and (FLine[FRunPosition - 1] in [TControlCharacters.Tab, TCharacters.Space]) do
           Dec(FRunPosition);
       end
       else
@@ -364,10 +364,10 @@ begin
       FTemporaryTokens.Add(FToken);
   end;
 
-  if FBeginningOfLine and (FRunPosition >= 1) and not (FLine[FRunPosition - 1] in TEXT_EDITOR_ABSOLUTE_DELIMITERS) then
+  if FBeginningOfLine and (FRunPosition >= 1) and not (FLine[FRunPosition - 1] in TCharacterSets.AbsoluteDelimiters) then
     FBeginningOfLine := False;
 
-  if FLine[FRunPosition] = TEXT_EDITOR_NONE_CHAR then
+  if FLine[FRunPosition] = TControlCharacters.Null then
     FPreviousEndOfLine := True;
 end;
 
@@ -443,12 +443,14 @@ var
   LRangeKeyList: TTextEditorKeyList;
 begin
   LTokenType := FRange.TokenType;
+
   if LTokenType <> ttUnspecified then
     Result := LTokenType
   else
   { keyword token type }
   begin
     GetToken(LToken);
+
     for LIndex := 0 to FRange.KeyListCount - 1 do
     begin
       LRangeKeyList := FRange.KeyList[LIndex];
@@ -456,6 +458,7 @@ begin
       if LRangeKeyList.KeyList.IndexOf(LToken) <> -1 then
         Exit(LRangeKeyList.TokenType);
     end;
+
     Result := ttUnspecified
   end;
 end;
@@ -596,13 +599,13 @@ begin
               Dec(LPText);
               { Space or tab characters }
               LKeyWord := ':';
-              while (LPText >= LPStart) and (LPText^ in [TEXT_EDITOR_SPACE_CHAR, TEXT_EDITOR_TAB_CHAR]) do
+              while (LPText >= LPStart) and (LPText^ in [TCharacters.Space, TControlCharacters.Tab]) do
               begin
                 LKeyWord := LPText^ + LKeyWord;
                 Dec(LPText);
               end;
               { Keyword }
-              while (LPText >= LPStart) and not (LPText^ in [TEXT_EDITOR_SPACE_CHAR, TEXT_EDITOR_TAB_CHAR, '{', '(']) do
+              while (LPText >= LPStart) and not (LPText^ in [TCharacters.Space, TControlCharacters.Tab, '{', '(']) do
               begin
                 LKeyWord := LPText^ + LKeyWord;
                 Dec(LPText);

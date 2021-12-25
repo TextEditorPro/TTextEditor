@@ -234,7 +234,7 @@ begin
     for LIndex := Count - 1 downto 0 do
     begin
       TTextEditorKeyPressWEvent(Items[LIndex])(ASender, Key);
-      if Key = TEXT_EDITOR_NONE_CHAR then
+      if Key = TControlCharacters.Null then
       begin
         FInKeyPress := False;
         Exit;

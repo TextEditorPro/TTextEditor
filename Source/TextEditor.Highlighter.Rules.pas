@@ -26,7 +26,7 @@ type
     destructor Destroy; override;
     function GetToken(const ACurrentRange: TTextEditorRange; const APLine: PChar; var ARun: Integer; var AToken: TTextEditorToken): Boolean; override;
     procedure AddSet(const ASet: TTextEditorSet);
-    procedure AddTokenNode(const AString: string; AToken: TTextEditorToken; ABreakType: TTextEditorBreakType);
+    procedure AddTokenNode(const AString: string; const AToken: TTextEditorToken; const ABreakType: TTextEditorBreakType);
     property HeadNode: TTextEditorTokenNode read FHeadNode;
     property Sets: TList read FSets;
   end;
@@ -200,13 +200,16 @@ begin
     FHeadNode.Free;
     FHeadNode := nil;
   end;
+
   FSets.Clear;
   FSets.Free;
   FSets := nil;
+
   inherited;
 end;
 
-procedure TTextEditorParser.AddTokenNode(const AString: string; AToken: TTextEditorToken; ABreakType: TTextEditorBreakType);
+procedure TTextEditorParser.AddTokenNode(const AString: string; const AToken: TTextEditorToken;
+  const ABreakType: TTextEditorBreakType);
 var
   LIndex: Integer;
   LLength: Integer;
@@ -266,7 +269,7 @@ begin
       else
         LFindTokenNode := nil;
       LPreviousPosition := ARun;
-      while (LCurrentTokenNode.NextNodes.Count > 0) and (APLine[ARun] <> TEXT_EDITOR_NONE_CHAR) do
+      while (LCurrentTokenNode.NextNodes.Count > 0) and (APLine[ARun] <> TControlCharacters.Null) do
       begin
         Inc(ARun);
         LCurrentTokenNode := LCurrentTokenNode.NextNodes.FindNode(ACurrentRange.CaseFunct(APLine[ARun]));
@@ -293,11 +296,11 @@ begin
       ARun := LPreviousPosition;
 
       if not Assigned(LFindTokenNode) or not Assigned(LFindTokenNode.Token) or
-        ((LFindTokenNode.Token.Attribute.EscapeChar <> TEXT_EDITOR_NONE_CHAR) and
+        ((LFindTokenNode.Token.Attribute.EscapeChar <> TControlCharacters.Null) and
         (LStartPosition > 0) and (APLine[LStartPosition - 1] = LFindTokenNode.Token.Attribute.EscapeChar)) then
         Continue;
 
-      if APLine[ARun] <> TEXT_EDITOR_NONE_CHAR then
+      if APLine[ARun] <> TControlCharacters.Null then
         Inc(ARun);
 
       if (LFindTokenNode.BreakType = btAny) or (APLine[ARun] in ACurrentRange.Delimiters) then
@@ -319,7 +322,7 @@ begin
     repeat
       Inc(ARun);
       LChar := APLine[ARun];
-    until not (LChar in LSet.CharSet) or (LChar = TEXT_EDITOR_NONE_CHAR);
+    until not (LChar in LSet.CharSet) or (LChar = TControlCharacters.Null);
 
     if LChar in LAllowedDelimiters then
     begin
@@ -369,7 +372,7 @@ end;
 
 function TDelimitersParser.GetToken(const ACurrentRange: TTextEditorRange; const APLine: PChar; var ARun: Integer; var AToken: TTextEditorToken): Boolean;
 begin
-  if APLine[ARun] <> TEXT_EDITOR_NONE_CHAR then
+  if APLine[ARun] <> TControlCharacters.Null then
     Inc(ARun);
   AToken := Self.Token;
   Result := True;
@@ -411,7 +414,7 @@ begin
   FSets := TList.Create;
   FTokens := TList.Create;
 
-  FDelimiters := TEXT_EDITOR_DEFAULT_DELIMITERS;
+  FDelimiters := TCharacterSets.DefaultDelimiters;
 end;
 
 destructor TTextEditorRange.Destroy;
@@ -635,7 +638,7 @@ begin
   FDefaultTermSymbol := TDelimitersParser.Create(TTextEditorToken.Create(Attribute));
   FDefaultSymbols := TTextEditorDefaultParser.Create(TTextEditorToken.Create(Attribute));
 
-  FDelimiters := FDelimiters + TEXT_EDITOR_ABSOLUTE_DELIMITERS;
+  FDelimiters := FDelimiters + TCharacterSets.AbsoluteDelimiters;
 
   if Assigned(FRanges) then
   for LIndex := 0 to FRanges.Count - 1 do
@@ -687,7 +690,7 @@ begin
       LBreakType := btTerm;
 
     LChar := CaseFunct(LFirstChar);
-    if Ord(LChar) < TEXT_EDITOR_ANSI_CHAR_COUNT then
+    if Ord(LChar) < TCharacters.AnsiCharCount then
     begin
       LAnsiChar := AnsiChar(LChar);
       if not Assigned(SymbolList[LAnsiChar]) then
@@ -697,10 +700,12 @@ begin
         else
           FSymbolList[LAnsiChar] := TTextEditorParser.Create(LFirstChar, FDefaultToken, LBreakType);
       end;
+
       if LSymbol[LLength] in FDelimiters then
         LBreakType := btAny;
+
       if LLength <> 1 then
-        TTextEditorParser(SymbolList[LAnsiChar]).AddTokenNode(StringCaseFunct(Copy(LSymbol, 2, LLength - 1)), LTempToken,
+        TTextEditorParser(SymbolList[LAnsiChar]).AddTokenNode(StringCaseFunct(Copy(LSymbol, 2)), LTempToken,
           LBreakType);
     end;
   end;

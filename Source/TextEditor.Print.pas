@@ -200,11 +200,11 @@ begin
       for LIndex := 0 to AValue.Count - 1 do
       begin
         LLine := ConvertTabs(AValue[LIndex], FTabWidth, LHasTabs, FColumns);
-        LPosition := FastPos(TEXT_EDITOR_TAB_CHAR, LLine);
+        LPosition := FastPos(TControlCharacters.Tab, LLine);
         while LPosition > 0 do
         begin
           LLine[LPosition] := ' ';
-          LPosition := FastPos(TEXT_EDITOR_TAB_CHAR, LLine);
+          LPosition := FastPos(TControlCharacters.Tab, LLine);
         end;
         Add(LLine);
       end;
@@ -391,7 +391,7 @@ begin
       begin
         LList := TList.Create;
         try
-          if WrapTextEx(LText, [' ', '-', TEXT_EDITOR_TAB_CHAR, ','], FMaxColumn, LList) then
+          if WrapTextEx(LText, [' ', '-', TControlCharacters.Tab, ','], FMaxColumn, LList) then
             CountWrapped
           else
           if WrapTextEx(LText, [';', ')', '.'], FMaxColumn, LList) then
@@ -461,7 +461,7 @@ var
 begin
   LList := TList.Create;
   try
-    if WrapTextEx(AText, [' ', '-', TEXT_EDITOR_TAB_CHAR, ','], FMaxColumn, LList) then
+    if WrapTextEx(AText, [' ', '-', TControlCharacters.Tab, ','], FMaxColumn, LList) then
       TextOut(AText, LList)
     else
     if WrapTextEx(AText, [';', ')', '.'], FMaxColumn, LList) then
@@ -844,7 +844,7 @@ begin
     GetMem(LBuffer, LBufferSize + SizeOf(Char));
     try
       Read(LBuffer^, LBufferSize);
-      LBuffer[LBufferSize div SizeOf(Char)] := TEXT_EDITOR_NONE_CHAR;
+      LBuffer[LBufferSize div SizeOf(Char)] := TControlCharacters.Null;
       FTitle := LBuffer;
     finally
       FreeMem(LBuffer);
@@ -855,7 +855,7 @@ begin
     GetMem(LBuffer, LBufferSize + SizeOf(Char));
     try
       Read(LBuffer^, LBufferSize);
-      LBuffer[LBufferSize div SizeOf(Char)] := TEXT_EDITOR_NONE_CHAR;
+      LBuffer[LBufferSize div SizeOf(Char)] := TControlCharacters.Null;
       FDocumentTitle := LBuffer;
     finally
       FreeMem(LBuffer);

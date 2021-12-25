@@ -46,7 +46,7 @@ begin
   FActiveMode := smNormal;
   FMode := smNormal;
   FOptions := [soHighlightSimilarTerms, soTermsCaseSensitive];
-  FPrefixCharacters := TEXT_EDITOR_DEFAULT_SELECTION_PREFIX_CHARACTERS;
+  FPrefixCharacters := TCharacterSets.DefaultSelectionPrefix;
   FVisible := True;
 end;
 

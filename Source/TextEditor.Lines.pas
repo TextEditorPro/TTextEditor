@@ -263,13 +263,13 @@ begin
     LFlags := LPStringRecord^.Flags;
 
   if (sfLineBreakCR in LFlags) and (sfLineBreakLF in LFlags) then
-    Result := TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED
+    Result := TControlCharacters.CarriageReturnLineFeed
   else
   if sfLineBreakLF in LFlags then
-    Result := TEXT_EDITOR_LINEFEED
+    Result := TControlCharacters.Linefeed
   else
   if sfLineBreakCR in LFlags then
-    Result := TEXT_EDITOR_CARRIAGE_RETURN
+    Result := TControlCharacters.CarriageReturn
   else
     Result := DefaultLineBreak;
 end;
@@ -556,12 +556,12 @@ end;
 function TTextEditorLines.DefaultLineBreak: string;
 begin
   if FLineBreak = lbCRLF then
-    Result := TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED
+    Result := TControlCharacters.CarriageReturnLinefeed
   else
   if FLineBreak = lbLF then
-    Result := TEXT_EDITOR_LINEFEED
+    Result := TControlCharacters.Linefeed
   else
-    Result := TEXT_EDITOR_CARRIAGE_RETURN;
+    Result := TControlCharacters.CarriageReturn;
 end;
 
 function TTextEditorLines.GetPartialTextStr(const AStart, AEnd: Integer): string;
@@ -589,13 +589,13 @@ begin
         Continue;
 
     if (sfLineBreakCR in LStringRecord.Flags) and (sfLineBreakLF in LStringRecord.Flags) then
-      LLineBreak := TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED
+      LLineBreak := TControlCharacters.CarriageReturnLinefeed
     else
     if sfLineBreakLF in LStringRecord.Flags then
-      LLineBreak := TEXT_EDITOR_LINEFEED
+      LLineBreak := TControlCharacters.Linefeed
     else
     if sfLineBreakCR in LStringRecord.Flags then
-      LLineBreak := TEXT_EDITOR_CARRIAGE_RETURN
+      LLineBreak := TControlCharacters.CarriageReturn
     else
       LLineBreak := DefaultLineBreak;
     LLineBreakLength := Length(LLineBreak);
@@ -606,8 +606,8 @@ begin
       System.Move(Pointer(LStringRecord.TextLine)^, LPValue^, LLength * SizeOf(Char));
       for LIndex2 := 0 to LLength - 1 do //FI:W528 Variable not used in FOR-loop
       begin
-        if LPValue^ = TEXT_EDITOR_SUBSTITUTE_CHAR then
-          LPValue^ := TEXT_EDITOR_NONE_CHAR;
+        if LPValue^ = TControlCharacters.Substitute then
+          LPValue^ := TControlCharacters.Null;
         Inc(LPValue);
       end;
     end;
@@ -645,13 +645,13 @@ begin
         Continue;
 
     if (sfLineBreakCR in LStringRecord.Flags) and (sfLineBreakLF in LStringRecord.Flags) then
-      LLineBreak := TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED
+      LLineBreak := TControlCharacters.CarriageReturnLinefeed
     else
     if sfLineBreakLF in LStringRecord.Flags then
-      LLineBreak := TEXT_EDITOR_LINEFEED
+      LLineBreak := TControlCharacters.Linefeed
     else
     if sfLineBreakCR in LStringRecord.Flags then
-      LLineBreak := TEXT_EDITOR_CARRIAGE_RETURN
+      LLineBreak := TControlCharacters.CarriageReturn
     else
       LLineBreak := DefaultLineBreak;
     LLineBreakLength := Length(LLineBreak);
@@ -662,8 +662,8 @@ begin
       System.Move(Pointer(LStringRecord.TextLine)^, LPValue^, LLength * SizeOf(Char));
       for LIndex2 := 0 to LLength - 1 do //FI:W528 Variable not used in FOR-loop
       begin
-        if LPValue^ = TEXT_EDITOR_SUBSTITUTE_CHAR then
-          LPValue^ := TEXT_EDITOR_NONE_CHAR;
+        if LPValue^ = TControlCharacters.Substitute then
+          LPValue^ := TControlCharacters.Null;
         Inc(LPValue);
       end;
     end;
@@ -1020,17 +1020,17 @@ begin
       { Large files can cause easily integer overflow without limiting the buffer size. }
       while not LRead do
       begin
-        if LBufferLength > TEXT_EDITOR_MAX_BUFFER_SIZE then
+        if LBufferLength > TMaxValues.BufferSize then
         begin
-          LLength := TEXT_EDITOR_MAX_BUFFER_SIZE - LPreambleLength;
+          LLength := TMaxValues.BufferSize - LPreambleLength;
           { Find the previous line end }
           while (LLength > 0) and
-            (LBuffer[LPosition + LLength] <> TEXT_EDITOR_LINEFEED_KEY) and
-            (LBuffer[LPosition + LLength] <> TEXT_EDITOR_CARRIAGE_RETURN_KEY) do
+            (LBuffer[LPosition + LLength] <> TControlCharacters.Keys.Linefeed) and
+            (LBuffer[LPosition + LLength] <> TControlCharacters.Keys.CarriageReturn) do
             Dec(LLength);
           { Include line breaks }
-          while (LBuffer[LPosition + LLength] = TEXT_EDITOR_LINEFEED_KEY) or
-            (LBuffer[LPosition + LLength] = TEXT_EDITOR_CARRIAGE_RETURN_KEY) do
+          while (LBuffer[LPosition + LLength] = TControlCharacters.Keys.Linefeed) or
+            (LBuffer[LPosition + LLength] = TControlCharacters.Keys.CarriageReturn) do
             Inc(LLength);
           LString := Encoding.GetString(LBuffer, LPosition, LLength);
           Dec(LBufferLength, LLength);
@@ -1054,11 +1054,11 @@ begin
             LPStartValue := LPValue;
             { Delphi strings end with none char (#0). That's why those characters are changed to substitute characters. }
             while (LPValue <= LPLastChar) and
-              (LPValue^ <> TEXT_EDITOR_CARRIAGE_RETURN) and (LPValue^ <> TEXT_EDITOR_LINEFEED) and
-              (LPValue^ <> TEXT_EDITOR_LINE_SEPARATOR) do
+              (LPValue^ <> TControlCharacters.CarriageReturn) and (LPValue^ <> TControlCharacters.Linefeed) and
+              (LPValue^ <> TCharacters.LineSeparator) do
             begin
-              if LPValue^ = TEXT_EDITOR_NONE_CHAR then
-                LPValue^ := TEXT_EDITOR_SUBSTITUTE_CHAR;
+              if LPValue^ = TControlCharacters.Null then
+                LPValue^ := TControlCharacters.Substitute;
               Inc(LPValue);
             end;
 
@@ -1078,19 +1078,19 @@ begin
               OriginalLineNumber := FCount;
 
               { Line break can be CR+LF (Windows), LF (Unix), and CR (Mac). }
-              if LPValue^ = TEXT_EDITOR_CARRIAGE_RETURN then
+              if LPValue^ = TControlCharacters.CarriageReturn then
               begin
                 Inc(LPValue);
                 Include(Flags, sfLineBreakCR);
               end;
 
-              if LPValue^ = TEXT_EDITOR_LINEFEED then
+              if LPValue^ = TControlCharacters.Linefeed then
               begin
                 Inc(LPValue);
                 Include(Flags, sfLineBreakLF);
               end;
 
-              if LPValue^ = TEXT_EDITOR_LINE_SEPARATOR then
+              if LPValue^ = TCharacters.LineSeparator then
                 Inc(LPValue);
             end;
 
@@ -1158,21 +1158,19 @@ var
   LText: string;
 begin
   if Assigned(AEncoding) then
-    Encoding := AEncoding
-  else
-    AEncoding := FEncoding;
+    Encoding := AEncoding;
 
   WriteBOM := FEncoding <> TEncoding.UTF8WithoutBOM;
 
   FStreaming := True;
   FSavingToStream := True;
   try
-    LPreamble := AEncoding.GetPreamble;
+    LPreamble := FEncoding.GetPreamble;
     if Length(LPreamble) > 0 then
       AStream.WriteBuffer(LPreamble[0], Length(LPreamble));
 
     FTextLength := GetTextLength;
-    if FTextLength >= TEXT_EDITOR_MAX_TEXT_LENGTH then
+    if FTextLength >= TMaxValues.TextLength then
     begin
       LPreviousStart := 0;
       LEnd := 0;
@@ -1183,7 +1181,7 @@ begin
         LEnd := Min(LEnd + LLineInc, FCount);
 
         FTextLength := GetPartialTextLength(LStart, LEnd);
-        if FTextLength >= TEXT_EDITOR_MAX_TEXT_LENGTH then
+        if FTextLength >= TMaxValues.TextLength then
         begin
           LEnd := LPreviousStart;
           LLineInc := LLineInc div 2;
@@ -1193,16 +1191,17 @@ begin
           LPreviousStart := LStart;
 
           LText := GetPartialTextStr(LStart, LEnd);
-          LBuffer := AEncoding.GetBytes(LText);
+          LBuffer := FEncoding.GetBytes(LText);
           SetLength(LText, 0);
           AStream.WriteBuffer(LBuffer[0], Length(LBuffer));
         end;
       end
     end
     else
+    if FTextLength > 0 then
     begin
       LText := GetTextStr;
-      LBuffer := AEncoding.GetBytes(LText);
+      LBuffer := FEncoding.GetBytes(LText);
       SetLength(LText, 0);
       AStream.WriteBuffer(LBuffer[0], Length(LBuffer));
     end;
@@ -1270,6 +1269,7 @@ procedure TTextEditorLines.SetCapacity(AValue: Integer);
 begin
   if AValue < Count then
     EListError.Create(STextEditorInvalidCapacity);
+
   if AValue <> FCapacity then
   begin
     ReallocMem(FItems, AValue * TEXT_EDITOR_STRING_RECORD_SIZE);
@@ -1280,6 +1280,7 @@ end;
 procedure TTextEditorLines.SetEncoding(const AValue: System.SysUtils.TEncoding);
 begin
   FEncoding := AValue;
+
   SetUnknownCharHigh;
 end;
 
@@ -1291,6 +1292,7 @@ begin
   begin
     FTabWidth := AValue;
     FIndexOfLongestLine := -1;
+
     for LIndex := 0 to FCount - 1 do
     with FItems^[LIndex] do
     begin
@@ -1324,9 +1326,9 @@ begin
         begin
           LPStartValue := LPValue;
           while (LPValue <= LPLastChar) and
-            (LPValue^ <> TEXT_EDITOR_CARRIAGE_RETURN) and
-            (LPValue^ <> TEXT_EDITOR_LINEFEED) and
-            (LPValue^ <> TEXT_EDITOR_LINE_SEPARATOR) do
+            (LPValue^ <> TControlCharacters.CarriageReturn) and
+            (LPValue^ <> TControlCharacters.Linefeed) and
+            (LPValue^ <> TCharacters.LineSeparator) do
             Inc(LPValue);
 
           if FCount = FCapacity then
@@ -1346,19 +1348,19 @@ begin
 
             Inc(FCount);
 
-            if LPValue^ = TEXT_EDITOR_CARRIAGE_RETURN then
+            if LPValue^ = TControlCharacters.CarriageReturn then
             begin
               Inc(LPValue);
               Include(Flags, sfLineBreakCR);
             end;
 
-            if LPValue^ = TEXT_EDITOR_LINEFEED then
+            if LPValue^ = TControlCharacters.Linefeed then
             begin
               Inc(LPValue);
               Include(Flags, sfLineBreakLF);
             end;
 
-            if LPValue^ = TEXT_EDITOR_LINE_SEPARATOR then
+            if LPValue^ = TCharacters.LineSeparator then
               Inc(LPValue);
           end;
         end;

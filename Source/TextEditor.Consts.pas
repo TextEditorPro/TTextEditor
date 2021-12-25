@@ -8,56 +8,126 @@ uses
 type
   TTextEditorCharSet = set of AnsiChar;
 
-const
-  TEXT_EDITOR_BOOKMARK_IMAGE_COUNT = 10;
-  TEXT_EDITOR_CLIPBOARD_MAX_RETRIES = 5;
-  TEXT_EDITOR_CLIPBOARD_DELAY_STEP_MS = 200;
-  TEXT_EDITOR_WHEEL_DIVISOR = 120;
-  TEXT_EDITOR_TOKEN_MAX_LENGTH = 128;
-  TEXT_EDITOR_ANSI_CHAR_COUNT = 256;
-  TEXT_EDITOR_MAX_SCROLL_RANGE = High(Smallint);
-  TEXT_EDITOR_MAX_BUFFER_SIZE = 10485760; // = 1024 * 1024 * 10;
-  TEXT_EDITOR_MAX_TEXT_LENGTH = (MaxInt div SizeOf(WideChar)) div 4;
-  { Characters }
-  TEXT_EDITOR_UNDERSCORE = '_';
-  TEXT_EDITOR_SLASH = '/';
-  TEXT_EDITOR_THREE_DOTS = '...';
-  TEXT_EDITOR_CODE_FOLDING_VALID_CHARACTERS = ['\', '@', '_'];
-  TEXT_EDITOR_REAL_NUMBER_CHARS = ['0'..'9', 'e', 'E', '.'];
-  TEXT_EDITOR_NONE_CHAR = #0;
-  TEXT_EDITOR_BACKSPACE_CHAR = #8;
-  TEXT_EDITOR_TAB_CHAR = #9;
-  TEXT_EDITOR_LINEFEED = #10;
-  TEXT_EDITOR_LINEFEED_KEY = 10;
-  TEXT_EDITOR_CARRIAGE_RETURN = #13;
-  TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED = #13#10;
-  TEXT_EDITOR_CARRIAGE_RETURN_KEY = 13;
-  TEXT_EDITOR_SUBSTITUTE_CHAR = #26;
-  TEXT_EDITOR_ESCAPE = #27;
-  TEXT_EDITOR_ESCAPE_KEY = 27;
-  TEXT_EDITOR_SPACE_CHAR = #32;
-  TEXT_EDITOR_EXCLAMATION_MARK = #33;
-  TEXT_EDITOR_LOW_LINE = #95;
-  TEXT_EDITOR_CTRL_BACKSPACE = #127;
-  TEXT_EDITOR_NON_BREAKING_SPACE_CHAR = #160;
-  TEXT_EDITOR_PILCROW_CHAR = Char($00B6);
-  TEXT_EDITOR_PILCROW_CR = 'CR';
-  TEXT_EDITOR_PILCROW_LF = 'LF';
-  TEXT_EDITOR_LINE_SEPARATOR = Char($2028);
-  TEXT_EDITOR_WORD_BREAK_CHARACTERS = ['.', ',', ';', ':', '"', '''', '!', '?', '[', ']', '(', ')', '{', '}', '^',
-    '=', '+', '-', '*', '/', '\', '|', ' '];
-  TEXT_EDITOR_EXTRA_WORD_BREAK_CHARACTERS = ['´', '`', '°', '&', '$', '@', '§', '%', '#', '~', '<', '>'];
-  TEXT_EDITOR_DEFAULT_DELIMITERS: TTextEditorCharSet = ['*', '/', '+', '-', '=', '\', '|', '&', '(', ')', '[', ']', '{', '}',
-    '`', '~', '!', '@', ',', '$', '%', '^', '?', ':', ';', '''', '"', '.', '>', '<', '#'];
-  TEXT_EDITOR_ABSOLUTE_DELIMITERS: TTextEditorCharSet = [TEXT_EDITOR_NONE_CHAR, TEXT_EDITOR_TAB_CHAR, TEXT_EDITOR_LINEFEED,
-    TEXT_EDITOR_CARRIAGE_RETURN, TEXT_EDITOR_SPACE_CHAR, TEXT_EDITOR_SUBSTITUTE_CHAR];
-  TEXT_EDITOR_DEFAULT_SELECTION_PREFIX_CHARACTERS = '$%:@';
-  { Undo }
-  TEXT_EDITOR_UNDO_BLOCK_NUMBER_START = 10;
-  { Replace }
-  TEXT_EDITOR_REPLACE_RESULT_CANCEL = -9;
+  TCharacterSets = record
+  const
+    AbsoluteDelimiters: TTextEditorCharSet = [#0, #9, #10, #13, #32, #26];
+    LowerCharacters = ['a'..'z'];
+    UpperCharacters = ['A'..'Z'];
+    Characters = LowerCharacters + UpperCharacters;
+    DefaultDelimiters = ['!', '"', '#', '$', '%', '&', '''', '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=',
+      '>', '?', '@', '[', '\', ']', '^', '`', '{', '|', '}', '~'];
+    DefaultSelectionPrefix = '$%:@';
+    Numbers = ['0'..'9'];
+    RealNumbers = Numbers + ['e', 'E', '.'];
+    ValidFoldingWord = Numbers + Characters + ['\', '@', '_'];
+    ValidKeyword = UpperCharacters + Numbers;
+    WordBreak = DefaultDelimiters + [' ', '§', '°', '´'];
+    CharactersAndNumbers = Characters + Numbers;
+  end;
 
-type
+  TCharacters = record
+  const
+    AnsiCharCount = 256;
+    CtrlBackspace = #127;
+    ExclamationMark = #33;
+    LineSeparator = Char($2028);
+    LowLine = #95;
+    NonBreakingSpace = #160;
+    Pilcrow = Char($00B6);
+    Slash = '/';
+    Space = #32;
+    ThreeDots = '...';
+    Underscore = '_';
+    ZeroWidthSpace = Char($200B);
+  end;
+
+  TClipboardDefaults = record
+  const
+    DelayStepMs = 200;
+    MaxRetries = 5;
+  end;
+
+  TControlCharacterKeys = record
+  const
+    CarriageReturn = 13;
+    Escape = 27;
+    Linefeed = 10;
+  end;
+
+  TControlCharacterNames = record
+  const
+    Acknowledge = 'ACK';
+    Bell = 'BEL';
+    Cancel = 'CAN';
+    CarriageReturn = 'CR';
+    DataLinkEscape = 'DLE';
+    DeviceControl1 = 'DC1';
+    DeviceControl2 = 'DC2';
+    DeviceControl3 = 'DC3';
+    DeviceControl4 = 'DC4';
+    EndOfMedium = 'EM';
+    EndOfText = 'ETX';
+    EndOfTransmission = 'EOT';
+    EndOfTransmissionBlock = 'ETB';
+    Enquiry = 'ENQ';
+    Escape = 'ESC';
+    FileSeparator = 'FS';
+    FormFeed = 'FF';
+    GroupSeparator = 'GS';
+    LineFeed = 'LF';
+    NegativeAcknowledge = 'NAK';
+    Null = 'NUL';
+    RecordSeparator = 'RS';
+    ShiftIn = 'SI';
+    ShiftOut = 'SO';
+    StartOfHeading = 'SOH';
+    StartOfText = 'STX';
+    SynchronousIdle = 'SYN';
+    UnitSeparator = 'US';
+    VerticalTab = 'VT';
+    ZeroWidthSpace = 'ZWSP';
+  end;
+
+  TControlCharacters = record
+  const
+    Acknowledge = #6;
+    Backspace = #8;
+    Bell = #7;
+    Cancel = #24;
+    CarriageReturn = #13;
+    CarriageReturnLineFeed = #13#10;
+    DataLinkEscape = #16;
+    DeviceControl1 = #17;
+    DeviceControl2 = #18;
+    DeviceControl3 = #19;
+    DeviceControl4 = #20;
+    EndOfMedium = #25;
+    EndOfText = #3;
+    EndOfTransmission = #4;
+    EndOfTransmissionBlock = #23;
+    Enquiry = #5;
+    Escape = #27;
+    FileSeparator = #28;
+    FormFeed = #12;
+    GroupSeparator = #29;
+    Linefeed = #10;
+    NegativeAcknowledge = #21;
+    Null = #0;
+    RecordSeparator = #30;
+    ShiftIn = #15;
+    ShiftOut = #14;
+    StartOfHeading = #1;
+    StartOfText = #2;
+    Substitute = #26; { Used to substitute null characters - null character terminates strings in Delphi. }
+    SynchronousIdle = #22;
+    Tab = #9;
+    UnitSeparator = #31;
+    VerticalTab = #11;
+    Names: TControlCharacterNames = ();
+    Keys: TControlCharacterKeys = ();
+    AsSet = [#1..#31] - [CarriageReturn, Linefeed, Null, Substitute, Tab];
+  end;
+
   TDefaultColors = record
   const
     SelectionColor = $00A56D53;
@@ -86,6 +156,14 @@ type
     ElementString = 'String';
   end;
 
+  TMaxValues = record
+  const
+    TokenLength = 128;
+    ScrollRange = High(Smallint);
+    BufferSize = 10485760; // = 1024 * 1024 * 10;
+    TextLength = (MaxInt div SizeOf(WideChar)) div 4;
+  end;
+
   TMouseWheelScrollCursors = record
   const
     None = -1;
@@ -99,13 +177,18 @@ type
     NorthWest = 7;
   end;
 
+  TMouseWheel = record
+  const
+    Divisor = 120;
+    ScrollCursor: TMouseWheelScrollCursors = ();
+  end;
+
   TResourceBitmap = record
   const
     ActiveLine = 'TEXTEDITORACTIVELINE';
     BookmarkImages = 'TEXTEDITORBOOKMARKIMAGES';
+    BookmarkImageCount = 10;
     MouseMoveScroll = 'TEXTEDITORMOUSEMOVESCROLL';
-    NullImage = 'TEXTEDITORNULLIMAGE';
-    NullImageWidth = 16;
     SyncEdit = 'TEXTEDITORSYNCEDIT';
   end;
 
@@ -138,6 +221,76 @@ type
     SingleLineString = 'SingleLineString';
   end;
 
+function ControlCharacterToName(const AChar: Char): string;
+
 implementation
+
+function ControlCharacterToName(const AChar: Char): string;
+begin
+  case AChar of
+    TControlCharacters.Acknowledge:
+      Result := TControlCharacterNames.Acknowledge;
+    TControlCharacters.Bell:
+      Result := TControlCharacterNames.Bell;
+    TControlCharacters.Cancel:
+      Result := TControlCharacterNames.Cancel;
+    TControlCharacters.CarriageReturn:
+      Result := TControlCharacterNames.CarriageReturn;
+    TControlCharacters.DataLinkEscape:
+      Result := TControlCharacterNames.DataLinkEscape;
+    TControlCharacters.DeviceControl1:
+      Result := TControlCharacterNames.DeviceControl1;
+    TControlCharacters.DeviceControl2:
+      Result := TControlCharacterNames.DeviceControl2;
+    TControlCharacters.DeviceControl3:
+      Result := TControlCharacterNames.DeviceControl3;
+    TControlCharacters.DeviceControl4:
+      Result := TControlCharacterNames.DeviceControl4;
+    TControlCharacters.EndOfMedium:
+      Result := TControlCharacterNames.EndOfMedium;
+    TControlCharacters.EndOfText:
+      Result := TControlCharacterNames.EndOfText;
+    TControlCharacters.EndOfTransmission:
+      Result := TControlCharacterNames.EndOfTransmission;
+    TControlCharacters.EndOfTransmissionBlock:
+      Result := TControlCharacterNames.EndOfTransmissionBlock;
+    TControlCharacters.Enquiry:
+      Result := TControlCharacterNames.Enquiry;
+    TControlCharacters.Escape:
+      Result := TControlCharacterNames.Escape;
+    TControlCharacters.FileSeparator:
+      Result := TControlCharacterNames.FileSeparator;
+    TControlCharacters.FormFeed:
+      Result := TControlCharacterNames.FormFeed;
+    TControlCharacters.GroupSeparator:
+      Result := TControlCharacterNames.GroupSeparator;
+    TControlCharacters.LineFeed:
+      Result := TControlCharacterNames.LineFeed;
+    TControlCharacters.NegativeAcknowledge:
+      Result := TControlCharacterNames.NegativeAcknowledge;
+    TControlCharacters.Substitute:
+      Result := TControlCharacterNames.Null;
+    TControlCharacters.RecordSeparator:
+      Result := TControlCharacterNames.RecordSeparator;
+    TControlCharacters.ShiftIn:
+      Result := TControlCharacterNames.ShiftIn;
+    TControlCharacters.ShiftOut:
+      Result := TControlCharacterNames.ShiftOut;
+    TControlCharacters.StartOfHeading:
+      Result := TControlCharacterNames.StartOfHeading;
+    TControlCharacters.StartOfText:
+      Result := TControlCharacterNames.StartOfText;
+    TControlCharacters.SynchronousIdle:
+      Result := TControlCharacterNames.SynchronousIdle;
+    TControlCharacters.UnitSeparator:
+      Result := TControlCharacterNames.UnitSeparator;
+    TControlCharacters.VerticalTab:
+      Result := TControlCharacterNames.VerticalTab;
+    TCharacters.ZeroWidthSpace:
+      Result := TControlCharacterNames.ZeroWidthSpace;
+  else
+    Result := '';
+  end;
+end;
 
 end.

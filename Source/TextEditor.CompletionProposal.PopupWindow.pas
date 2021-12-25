@@ -67,8 +67,7 @@ implementation
 uses
   Winapi.Windows, System.Generics.Defaults, System.Math, System.SysUtils, System.UITypes, Vcl.Dialogs, TextEditor,
   TextEditor.CompletionProposal.Snippets, TextEditor.Consts, TextEditor.Highlighter, TextEditor.KeyCommands,
-  TextEditor.PaintHelper
-{$IFDEF ALPHASKINS}, sCommonData{$ENDIF};
+  TextEditor.PaintHelper;
 
 constructor TTextEditorCompletionProposalPopupWindow.Create(AOwner: TComponent);
 begin
@@ -168,7 +167,7 @@ begin
   case AKey of
     vkReturn, vkTab:
       if Assigned(FOnValidate) then
-        FOnValidate(Self, TEXT_EDITOR_NONE_CHAR);
+        FOnValidate(Self, TControlCharacters.Null);
     vkEscape:
       Hide;
     vkLeft:
@@ -176,12 +175,12 @@ begin
       begin
         CurrentString := Copy(FCurrentString, 1, Length(FCurrentString) - 1);
         if Assigned(LEditor) then
-          LEditor.CommandProcessor(TKeyCommands.Left, TEXT_EDITOR_NONE_CHAR, nil);
+          LEditor.CommandProcessor(TKeyCommands.Left, TControlCharacters.Null, nil);
       end
       else
       begin
         if Assigned(LEditor) then
-          LEditor.CommandProcessor(TKeyCommands.Left, TEXT_EDITOR_NONE_CHAR, nil);
+          LEditor.CommandProcessor(TKeyCommands.Left, TControlCharacters.Null, nil);
         Hide;
       end;
     vkRight:
@@ -192,14 +191,14 @@ begin
         if LTextPosition.Char <= Length(FLines[LTextPosition.Line]) then
           LChar := FLines[LTextPosition.Line][LTextPosition.Char]
         else
-          LChar := TEXT_EDITOR_SPACE_CHAR;
+          LChar := TCharacters.Space;
 
         if IsWordBreakChar(LChar) then
           Self.Hide
         else
           CurrentString := FCurrentString + LChar;
 
-        CommandProcessor(TKeyCommands.Right, TEXT_EDITOR_NONE_CHAR, nil);
+        CommandProcessor(TKeyCommands.Right, TControlCharacters.Null, nil);
       end;
     vkPrior:
       MoveSelectedLine(-FCompletionProposal.VisibleLines);
@@ -227,12 +226,12 @@ begin
           CurrentString := Copy(FCurrentString, 1, Length(FCurrentString) - 1);
 
           if Assigned(LEditor) then
-            LEditor.CommandProcessor(TKeyCommands.Backspace, TEXT_EDITOR_NONE_CHAR, nil);
+            LEditor.CommandProcessor(TKeyCommands.Backspace, TControlCharacters.Null, nil);
         end
         else
         begin
           if Assigned(LEditor) then
-            LEditor.CommandProcessor(TKeyCommands.Backspace, TEXT_EDITOR_NONE_CHAR, nil);
+            LEditor.CommandProcessor(TKeyCommands.Backspace, TControlCharacters.Null, nil);
 
           Hide;
         end;
@@ -245,16 +244,16 @@ end;
 procedure TTextEditorCompletionProposalPopupWindow.EditorKeyPress(const ASender: TObject; var AKey: Char); //FI:O804 Method parameter is declared but never used
 begin
   case AKey of
-    TEXT_EDITOR_CARRIAGE_RETURN, TEXT_EDITOR_TAB_CHAR:
+    TControlCharacters.CarriageReturn, TControlCharacters.Tab:
       Hide;
-    TEXT_EDITOR_SPACE_CHAR .. High(Char):
+    TCharacters.Space .. High(Char):
       begin
         if not CodeInsight then
         begin
           if not (cpoAutoInvoke in FCompletionProposal.Options) then
             if (Owner as TCustomTextEditor).IsWordBreakChar(AKey) and Assigned(FOnValidate) then
-              if AKey = TEXT_EDITOR_SPACE_CHAR then
-                FOnValidate(Self, TEXT_EDITOR_NONE_CHAR);
+              if AKey = TCharacters.Space then
+                FOnValidate(Self, TControlCharacters.Null);
           CurrentString := FCurrentString + AKey;
         end;
         if (cpoAutoInvoke in FCompletionProposal.Options) and (Length(FItemIndexArray) = 0) or
@@ -264,7 +263,7 @@ begin
         if Assigned(OnKeyPress) and not CodeInsight then
           OnKeyPress(Self, AKey);
       end;
-    TEXT_EDITOR_BACKSPACE_CHAR:
+    TControlCharacters.Backspace:
       if not CodeInsight then
       with Owner as TCustomTextEditor do
         CommandProcessor(TKeyCommands.Char, AKey, nil);
@@ -635,11 +634,11 @@ begin
       begin
         LIndex := LTextPosition.Char - 1;
         if LIndex <= Length(LLineText) then
-        while (LIndex > 0) and (LLineText[LIndex] > TEXT_EDITOR_SPACE_CHAR) and not LEditor.IsWordBreakChar(LLineText[LIndex]) do
+        while (LIndex > 0) and (LLineText[LIndex] > TCharacters.Space) and not LEditor.IsWordBreakChar(LLineText[LIndex]) do
           Dec(LIndex);
 
         SelectionBeginPosition := GetPosition(LIndex + 1, LTextPosition.Line);
-        if AEndToken = TEXT_EDITOR_NONE_CHAR then
+        if AEndToken = TControlCharacters.Null then
         begin
           LLine := Lines[LTextPosition.Line];
           if (Length(LLine) >= LTextPosition.Char) and IsWordBreakChar(LLine[LTextPosition.Char]) then
@@ -675,22 +674,22 @@ begin
             LPLineText := PChar(LLineText);
             for LIndex := 0 to SelectionBeginPosition.Char - 1 do
             begin
-              if LPLineText^ = TEXT_EDITOR_TAB_CHAR then
+              if LPLineText^ = TControlCharacters.Tab then
                 Inc(LCharCount, Tabs.Width)
               else
                 Inc(LCharCount);
 
-              if LPLineText^ <> TEXT_EDITOR_NONE_CHAR then
+              if LPLineText^ <> TControlCharacters.Null then
                 Inc(LPLineText);
             end;
             Dec(LCharCount);
 
             if toTabsToSpaces in Tabs.Options then
-              LSpaces := StringOfChar(TEXT_EDITOR_SPACE_CHAR, LCharCount)
+              LSpaces := StringOfChar(TCharacters.Space, LCharCount)
             else
             begin
-              LSpaces := StringOfChar(TEXT_EDITOR_TAB_CHAR, LCharCount div Tabs.Width);
-              LSpaces := LSpaces + StringOfChar(TEXT_EDITOR_SPACE_CHAR, LCharCount mod Tabs.Width);
+              LSpaces := StringOfChar(TControlCharacters.Tab, LCharCount div Tabs.Width);
+              LSpaces := LSpaces + StringOfChar(TCharacters.Space, LCharCount mod Tabs.Width);
             end;
 
             for LIndex := 1 to LStringList.Count - 1 do
@@ -767,7 +766,7 @@ end;
 procedure TTextEditorCompletionProposalPopupWindow.HandleDblClick(ASender: TObject); //FI:O804 Method parameter is declared but never used
 begin
   if Assigned(FOnValidate) then
-    FOnValidate(Self, TEXT_EDITOR_NONE_CHAR);
+    FOnValidate(Self, TControlCharacters.Null);
 
   Hide;
 end;
@@ -789,7 +788,7 @@ begin
   LIndex := LTextPosition.Char - 1;
   if LIndex <= Length(LLineText) then
   begin
-    while (LIndex > 0) and (LLineText[LIndex] > TEXT_EDITOR_SPACE_CHAR) and not LEditor.IsWordBreakChar(LLineText[LIndex]) do
+    while (LIndex > 0) and (LLineText[LIndex] > TCharacters.Space) and not LEditor.IsWordBreakChar(LLineText[LIndex]) do
       Dec(LIndex);
 
     Result := Copy(LLineText, LIndex + 1, LTextPosition.Char - LIndex - 1);

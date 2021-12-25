@@ -271,8 +271,8 @@ var
 
 begin
   Result := '';
-  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED, ' ', [rfReplaceAll]));
-  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TEXT_EDITOR_LINEFEED, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
   for LIndex := 1 to Length(LInput) do
   begin
     if LInput[LIndex] = ' ' then
@@ -307,8 +307,8 @@ var
   LByte, LByteIndex: Byte;
 begin
   Result := '';
-  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED, ' ', [rfReplaceAll]));
-  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TEXT_EDITOR_LINEFEED, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
   LInput := StringReplace(LInput, ' ', '', [rfReplaceAll]);
   LByte := 0;
   LByteIndex := 0;
@@ -366,8 +366,8 @@ var
 
 begin
   Result := '';
-  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED, ' ', [rfReplaceAll]));
-  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TEXT_EDITOR_LINEFEED, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
   for LIndex := 1 to Length(LInput) do
   begin
     if LInput[LIndex] = ' ' then
@@ -411,8 +411,8 @@ var
 
 begin
   Result := '';
-  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED, ' ', [rfReplaceAll]));
-  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TEXT_EDITOR_LINEFEED, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
   for LIndex := 1 to Length(LInput) do
   begin
     if LInput[LIndex] = ' ' then
@@ -462,8 +462,8 @@ var
 
 begin
   Result := '';
-  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED, ' ', [rfReplaceAll]));
-  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TEXT_EDITOR_LINEFEED, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
   for LIndex := 1 to Length(LInput) do
   begin
     if LInput[LIndex] = ' ' then
@@ -499,8 +499,8 @@ var
   LValue: string;
 begin
   Result := '';
-  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED, ' ', [rfReplaceAll]));
-  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TEXT_EDITOR_LINEFEED, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
   LIndex := 1;
   while LIndex < Length(LInput) do
   begin
@@ -530,8 +530,8 @@ var
   LValue: string;
 begin
   Result := '';
-  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED, ' ', [rfReplaceAll]));
-  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TEXT_EDITOR_LINEFEED, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
   LIndex := 1;
   while LIndex < Length(LInput) do
   begin
@@ -560,8 +560,8 @@ var
   LValue: string;
 begin
   Result := '';
-  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED, ' ', [rfReplaceAll]));
-  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TEXT_EDITOR_LINEFEED, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
   LIndex := 1;
   while LIndex < Length(LInput) do
   begin
@@ -631,8 +631,8 @@ var
 
 begin
   Result := '';
-  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TEXT_EDITOR_CARRIAGE_RETURN_LINEFEED, ' ', [rfReplaceAll]));
-  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TEXT_EDITOR_LINEFEED, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
+  LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
   for LIndex := 1 to Length(LInput) do
   begin
     if LInput[LIndex] = ' ' then
@@ -668,37 +668,37 @@ function RotateBy(const AValue: String; const ARotate: Integer): string;
     LRotate := 0;
     case ARotate of
       5:
-        if AChr in ['0'..'9'] then
+        if AChr in TCharacterSets.Numbers then
         begin
           LStart := 48; // '0'
           LRotate := 5;
         end;
       13:
-        if AChr in ['A'..'Z'] then
+        if AChr in TCharacterSets.UpperCharacters then
         begin
           LStart := 65; // 'A'
           LRotate := 13;
         end
         else
-        if AChr in ['a'..'z'] then
+        if AChr in TCharacterSets.LowerCharacters then
         begin
           LStart := 97; // 'a'
           LRotate := 13;
         end;
       18:
-        if AChr in ['0'..'9'] then
+        if AChr in TCharacterSets.Numbers then
         begin
           LStart := 48; // '0'
           LRotate := 5;
         end
         else
-        if AChr in ['A'..'Z'] then
+        if AChr in TCharacterSets.UpperCharacters then
         begin
           LStart := 65; // 'A'
           LRotate := 13;
         end
         else
-        if AChr in ['a'..'z'] then
+        if AChr in TCharacterSets.LowerCharacters then
         begin
           LStart := 97; // 'a'
           LRotate := 13;

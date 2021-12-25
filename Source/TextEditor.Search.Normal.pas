@@ -83,12 +83,12 @@ function TTextEditorNormalSearch.TestWholeWord: Boolean;
 var
   LPTest: PChar;
 
-  function IsWordBreakChar(AChar: Char): Boolean;
+  function IsWordBreakChar(const AChar: Char): Boolean;
   begin
-    if (AChar < TEXT_EDITOR_EXCLAMATION_MARK) or AChar.IsWhiteSpace then
+    if (AChar < TCharacters.ExclamationMark) or AChar.IsWhiteSpace then
       Result := True
     else
-    if AChar = TEXT_EDITOR_LOW_LINE then
+    if AChar = TCharacters.LowLine then
       Result := False
     else
       Result := not AChar.IsLetterOrDigit;
@@ -146,8 +146,8 @@ begin
   if FExtended then
   begin
     LValue := StringReplace(LValue, '\n', FLineBreak, [rfReplaceAll]);
-    LValue := StringReplace(LValue, '\t', TEXT_EDITOR_TAB_CHAR, [rfReplaceAll]);
-    LValue := StringReplace(LValue, '\0', TEXT_EDITOR_SUBSTITUTE_CHAR, [rfReplaceAll]);
+    LValue := StringReplace(LValue, '\t', TControlCharacters.Tab, [rfReplaceAll]);
+    LValue := StringReplace(LValue, '\0', TControlCharacters.Substitute, [rfReplaceAll]);
   end;
 
   if FPattern <> LValue then

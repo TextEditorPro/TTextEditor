@@ -665,7 +665,7 @@ begin
         begin
           RegionType := LSkipRegionType;
           SkipEmptyChars := LJSONDataValue.ObjectValue.ValueBoolean['SkipEmptyChars'];
-          SkipIfNextCharIsNot := TEXT_EDITOR_NONE_CHAR;
+          SkipIfNextCharIsNot := TControlCharacters.Null;
           if LJSONDataValue.ObjectValue.Contains('NextCharIsNot') then
             SkipIfNextCharIsNot := LJSONDataValue.ObjectValue['NextCharIsNot'].Value[1];
         end;

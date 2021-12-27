@@ -3177,7 +3177,7 @@ begin
   else
   if LChar = TCharacters.ZeroWidthSpace then
   begin
-    if eoShowZeroWidthSpace in Options then
+    if eoShowZeroWidthSpaces in Options then
       Result := GetControlCharacterWidth
     else
       Result := 0
@@ -7165,7 +7165,7 @@ begin
         (IsCombiningCharacter(LPLine) or
          not (eoShowNullCharacters in Options) and (LPLine^ = TControlCharacters.Substitute) or
          not (eoShowControlCharacters in Options) and (LPLine^ < TCharacters.Space) and (LPLine^ in TControlCharacters.AsSet) or
-         not (eoShowZeroWidthSpace in Options) and (LPLine^ = TCharacters.ZeroWidthSpace)) do
+         not (eoShowZeroWidthSpaces in Options) and (LPLine^ = TCharacters.ZeroWidthSpace)) do
       if X > 0 then
       begin
         Inc(LPLine);

@@ -113,7 +113,7 @@ type
 
   { Editor options }
   TTextEditorOption = (eoAutoIndent, eoDragDropEditing, eoDropFiles, eoShowControlCharacters, eoShowNonBreakingSpaceAsSpace,
-    eoShowNullCharacters{$IFDEF TEXT_EDITOR_SPELL_CHECK}, eoSpellCheck{$ENDIF}, eoShowZeroWidthSpace, eoTrimTrailingSpaces,
+    eoShowNullCharacters{$IFDEF TEXT_EDITOR_SPELL_CHECK}, eoSpellCheck{$ENDIF}, eoShowZeroWidthSpaces, eoTrimTrailingSpaces,
     eoTrailingLineBreak);
   TTextEditorOptions = set of TTextEditorOption;
 

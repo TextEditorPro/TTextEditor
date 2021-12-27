@@ -3,8 +3,9 @@ unit TTextEditorDemo.Form.Main;
 interface
 
 uses
-  Winapi.Messages, Winapi.Windows, System.Classes, System.ImageList, System.SysUtils, System.Variants, Vcl.Controls,
-  Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Forms, Vcl.Graphics, Vcl.ImgList, Vcl.StdCtrls, TextEditor;
+  Winapi.Messages, Winapi.Windows, System.Classes, System.Generics.Collections, System.ImageList, System.SysUtils,
+  System.Variants, Vcl.Controls, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Forms, Vcl.Graphics, Vcl.ImgList, Vcl.StdCtrls,
+  TextEditor, TextEditor.Types;
 
 type
   TMainForm = class(TForm)
@@ -17,6 +18,8 @@ type
     procedure FormCreate(Sender: TObject);
     procedure ListBoxThemesClick(Sender: TObject);
     procedure ListBoxHighlightersClick(Sender: TObject);
+    procedure TextEditorCompletionProposalExecute(const ASender: TObject;
+      const AItems: TList<TextEditor.Types.TTextEditorCompletionProposalItem>; var AOptions: TCompletionProposalOptions);
     procedure TextEditorCreateHighlighterStream(const ASender: TObject; const AName: string; var AStream: TStream);
   private
     procedure SetSelectedColor;
@@ -31,7 +34,7 @@ implementation
 {$R *.dfm}
 
 uses
-  Vcl.Menus, TextEditor.CompletionProposal.Snippets, TextEditor.Types;
+  Vcl.Menus, TextEditor.CompletionProposal.Snippets;
 
 const
   HIGHLIGHTERS_PATH = '..\..\Highlighters\';
@@ -48,6 +51,23 @@ begin
     until FindNext(LSearchRec) <> 0;
   finally
     FindClose(LSearchRec);
+  end;
+end;
+
+procedure TMainForm.TextEditorCompletionProposalExecute(const ASender: TObject;
+  const AItems: TList<TextEditor.Types.TTextEditorCompletionProposalItem>; var AOptions: TCompletionProposalOptions);
+var
+  LIndex: Integer;
+  LItem: TTextEditorCompletionProposalItem;
+begin
+  { Custom keyword example }
+  if ListBoxHighlighters.Selected[ListBoxHighlighters.Items.IndexOf('Object Pascal.json')] then
+  for LIndex := 5 downto 1 do
+  begin
+    LItem.Keyword := 'Custom keyword ' + LIndex.ToString;
+    LItem.Description := 'Example ' + LIndex.ToString;
+    LItem.SnippetIndex := -1;
+    AItems.Insert(0, LItem);
   end;
 end;
 

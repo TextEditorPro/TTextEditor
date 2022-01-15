@@ -10778,7 +10778,6 @@ begin
   inherited;
 
   if soALTSetsColumnMode in FSelection.Options then
-  begin
     if (ssAlt in AShift) and not FState.AltDown then
     begin
       FSaveSelectionMode := FSelection.Mode;
@@ -10787,15 +10786,7 @@ begin
       FSelection.Mode := smColumn;
       FState.AltDown := True;
       SelectionBeginPosition := TextPosition;
-    end
-    else
-    if not (ssAlt in AShift) and not (ssCtrl in AShift) and FState.AltDown then
-    begin
-      FSelection.Mode := FSaveSelectionMode;
-      FScroll.SetOption(soPastEndOfLine, FSaveScrollOption);
-      FState.AltDown := False;
     end;
-  end;
 
   if AKey = 0 then
   begin
@@ -10874,6 +10865,14 @@ begin
     if Assigned(LData) then
       FreeMem(LData);
   end;
+
+  if soALTSetsColumnMode in FSelection.Options then
+    if not (ssAlt in AShift) and not (ssCtrl in AShift) and FState.AltDown then
+    begin
+      FSelection.Mode := FSaveSelectionMode;
+      FScroll.SetOption(soPastEndOfLine, FSaveScrollOption);
+      FState.AltDown := False;
+    end;
 
   if Assigned(FCompletionProposalPopupWindow) and not FCompletionProposalPopupWindow.Visible then
     FreeCompletionProposalPopupWindow;

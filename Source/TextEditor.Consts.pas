@@ -221,6 +221,13 @@ type
     SingleLineString = 'SingleLineString';
   end;
 
+  TSnippetReplaceTags = record
+  const
+    CurrentWord = '{CurrentWord}';
+    SelectedText = '{SelectedText}';
+    Text = '{Text}';
+  end;
+
 function ControlCharacterToName(const AChar: Char): string;
 
 implementation

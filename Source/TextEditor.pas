@@ -1625,6 +1625,7 @@ procedure TCustomTextEditor.InsertSnippet(const AItem: TTextEditorCompletionProp
 var
   LIndex: Integer;
   LStringList: TStringList;
+  LText: string;
   LSnippetPosition, LSnippetSelectionBeginPosition, LSnippetSelectionEndPosition: TTextEditorTextPosition;
   LCharCount: Integer;
   LSpaces: string;
@@ -1650,7 +1651,13 @@ begin
     LStringList := TStringList.Create;
     LStringList.TrailingLineBreak := False;
     try
-      LStringList.Text := AItem.Snippet.Text;
+      LText := AItem.Snippet.Text;
+      LText := StringReplace(LText, TSnippetReplaceTags.CurrentWord, WordAtCursor, [rfReplaceAll]);
+      LText := StringReplace(LText, TSnippetReplaceTags.SelectedText, SelectedText, [rfReplaceAll]);
+      LText := StringReplace(LText, TSnippetReplaceTags.Text, Text, [rfReplaceAll]);
+
+      LStringList.Text := LText;
+
       LLineText := FLines[ATextPosition.Line];
       LCharCount := 0;
       LPLineText := PChar(LLineText);

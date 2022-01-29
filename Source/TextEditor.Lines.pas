@@ -1132,6 +1132,15 @@ begin
 
           Inc(FCount);
         end;
+        { Set default line break }
+        if (sfLineBreakCR in LFlags) and (sfLineBreakLF in LFlags) then
+          LineBreak := lbCRLF
+        else
+        if (sfLineBreakCR in LFlags) then
+          LineBreak := lbCR
+        else
+        if (sfLineBreakLF in LFlags) then
+          LineBreak := lbLF;
       end;
     except
       on E: Exception do

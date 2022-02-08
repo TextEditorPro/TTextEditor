@@ -51,7 +51,7 @@ type
     destructor Destroy; override;
     function GetCurrentInput: string;
     procedure Assign(ASource: TPersistent); override;
-    procedure Execute(const ACurrentString: string; const APoint: TPoint; const ASortByDescription: Boolean);
+    procedure Execute(const ACurrentString: string; const APoint: TPoint; const AOptions: TCompletionProposalOptions);
     procedure MouseWheel(AShift: TShiftState; AWheelDelta: Integer);
     property CodeInsight: Boolean read FCodeInsight write FCodeInsight;
     property CurrentString: string read FCurrentString write SetCurrentString;
@@ -464,7 +464,7 @@ begin
 end;
 
 procedure TTextEditorCompletionProposalPopupWindow.Execute(const ACurrentString: string; const APoint: TPoint;
-  const ASortByDescription: Boolean);
+  const AOptions: TCompletionProposalOptions);
 var
   LPoint: TPoint;
 
@@ -555,7 +555,7 @@ var
 var
   LIndex, LCount: Integer;
 begin
-  if ASortByDescription then
+  if AOptions.SortByDescription then
     FItems.Sort(TComparer<TTextEditorCompletionProposalItem>.Construct(
       function(const ALeft, ARight: TTextEditorCompletionProposalItem): Integer
       begin
@@ -564,6 +564,7 @@ begin
           Result := CompareStr(ALeft.Keyword, ARight.Keyword);
       end))
   else
+  if AOptions.SortByKeyword then
     FItems.Sort(TComparer<TTextEditorCompletionProposalItem>.Construct(
       function(const ALeft, ARight: TTextEditorCompletionProposalItem): Integer
       begin

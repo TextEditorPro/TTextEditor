@@ -42,8 +42,8 @@ type
     end;
 
     TTextEditorEvents = record
-      OnAfterBookmarkPlaced: TNotifyEvent;
-      OnAfterDeleteBookmark: TNotifyEvent;
+      OnAfterBookmarkPlaced: TTextEditorBookmarkPlacedEvent;
+      OnAfterDeleteBookmark: TTextEditorBookmarkDeletedEvent;
       OnAfterDeleteMark: TNotifyEvent;
       OnAfterLinePaint: TTextEditorLinePaintEvent;
       OnAfterMarkPanelPaint: TTextEditorMarkPanelPaintEvent;
@@ -311,7 +311,6 @@ type
     FOriginal: TTextEditorOriginal;
     FPaintHelper: TTextEditorPaintHelper;
     FPaintLock: Integer;
-    FPixelsPerInch: Integer;
     FPosition: TTextEditorPosition;
     FRedoList: TTextEditorUndoList;
     FReplace: TTextEditorReplace;
@@ -874,8 +873,8 @@ type
     property Minimap: TTextEditorMinimap read FMinimap write FMinimap;
     property Modified: Boolean read FState.Modified write SetModified;
     property MouseScrollCursors[const AIndex: Integer]: HCursor read GetMouseScrollCursors write SetMouseScrollCursors;
-    property OnAfterBookmarkPlaced: TNotifyEvent read FEvents.OnAfterBookmarkPlaced write FEvents.OnAfterBookmarkPlaced;
-    property OnAfterDeleteBookmark: TNotifyEvent read FEvents.OnAfterDeleteBookmark write FEvents.OnAfterDeleteBookmark;
+    property OnAfterBookmarkPlaced: TTextEditorBookmarkPlacedEvent read FEvents.OnAfterBookmarkPlaced write FEvents.OnAfterBookmarkPlaced;
+    property OnAfterDeleteBookmark: TTextEditorBookmarkDeletedEvent read FEvents.OnAfterDeleteBookmark write FEvents.OnAfterDeleteBookmark;
     property OnAfterDeleteMark: TNotifyEvent read FEvents.OnAfterDeleteMark write FEvents.OnAfterDeleteMark;
     property OnAfterLinePaint: TTextEditorLinePaintEvent read FEvents.OnAfterLinePaint write FEvents.OnAfterLinePaint;
     property OnAfterMarkPanelPaint: TTextEditorMarkPanelPaintEvent read FEvents.OnAfterMarkPanelPaint write FEvents.OnAfterMarkPanelPaint;
@@ -916,7 +915,6 @@ type
     property PaintLock: Integer read FPaintLock write FPaintLock;
     property ParentColor default False;
     property ParentFont default False;
-    property PixelsPerInch: Integer read FPixelsPerInch write FPixelsPerInch;
     property PreviousCharAtCursor: Char read GetPreviousCharAtCursor;
     property ReadOnly: Boolean read GetReadOnly write SetReadOnly default False;
     property RedoList: TTextEditorUndoList read FRedoList;
@@ -1267,7 +1265,6 @@ begin
 
   inherited Create(AOwner);
 
-  FPixelsPerInch := 96;
   Height := 150;
   Width := 200;
   Cursor := crIBeam;
@@ -9946,8 +9943,6 @@ begin
   if csDesigning in ComponentState then
     Exit;
 
-  FPixelsPerInch := AMultiplier;
-
 {$IF DEFINED(ALPHASKINS)}
   if SkinData.SkinManager.Options.ScaleMode = smCustomPPI then
   begin
@@ -10287,6 +10282,7 @@ begin
     else
       LOptions.ShowDescription := False;
 
+    LOptions.SortByKeyword := True;
     LOptions.SortByDescription := False;
     LOptions.CodeInsight := False;
 
@@ -10310,7 +10306,7 @@ begin
     FPosition.CompletionProposal := ViewPosition;
 
     if Items.Count > 0 then
-      Execute(GetCurrentInput, LPoint, LOptions.SortByDescription)
+      Execute(GetCurrentInput, LPoint, LOptions)
     else
       FreeCompletionProposalPopupWindow;
   end;
@@ -17261,7 +17257,7 @@ begin
   begin
     FBookmarkList.Remove(ABookmark);
     if Assigned(FEvents.OnAfterDeleteBookmark) then
-      FEvents.OnAfterDeleteBookmark(Self);
+      FEvents.OnAfterDeleteBookmark(Self, ABookmark);
   end;
 end;
 
@@ -18838,7 +18834,7 @@ begin
     FBookmarkList.Sort(CompareBookmarkLines);
 
     if Assigned(FEvents.OnAfterBookmarkPlaced) then
-      FEvents.OnAfterBookmarkPlaced(Self);
+      FEvents.OnAfterBookmarkPlaced(Self, AIndex, ATextPosition);
   end;
 end;
 

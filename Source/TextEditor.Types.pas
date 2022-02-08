@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, System.Classes, System.Generics.Collections, System.SysUtils, Vcl.Controls, Vcl.ExtCtrls, Vcl.Forms,
-  Vcl.Graphics, TextEditor.Consts;
+  Vcl.Graphics, TextEditor.Consts, TextEditor.Marks;
 
 type
   { Lines }
@@ -95,6 +95,7 @@ type
     ParseItemsFromText: Boolean;
     ShowDescription: Boolean;
     SortByDescription: Boolean;
+    SortByKeyword: Boolean;
     Triggered: Boolean;
   end;
 
@@ -290,6 +291,9 @@ type
   { Events }
   TOnCompletionProposalExecute = procedure(const ASender: TObject; const AItems: TTextEditorCompletionProposalItems;
     var AOptions: TCompletionProposalOptions) of object;
+
+  TTextEditorBookmarkDeletedEvent = procedure(const ASender: TObject; const ABookmark: TTextEditorMark) of object;
+  TTextEditorBookmarkPlacedEvent = procedure(const ASender: TObject; const AIndex: Integer; const ATextPosition: TTextEditorTextPosition) of object;
   TTextEditorCaretChangedEvent = procedure(const ASender: TObject; const X, Y: Integer; const AOffset: Integer) of object;
   TTextEditorCodeColorEvent = procedure(const AEvent: TTextEditorColorChanges) of object;
   TTextEditorCodeFoldingChangeEvent = procedure(const AEvent: TTextEditorCodeFoldingChanges) of object;

@@ -17,8 +17,8 @@ type
     procedure ImportCodeFoldingFoldRegion(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
     procedure ImportCodeFoldingOptions(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
     procedure ImportCodeFoldingSkipRegion(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
-    procedure ImportColors(const AJSONObject: TJSONObject; const AScaleFontHeight: Boolean = False);
-    procedure ImportColorsEditorProperties(const AEditorObject: TJSONObject; const AScaleFontHeight: Boolean = False);
+    procedure ImportColors(const AJSONObject: TJSONObject);
+    procedure ImportColorsEditorProperties(const AEditorObject: TJSONObject);
     procedure ImportCompletionProposal(const ACompletionProposalObject: TJSONObject);
     procedure ImportEditorProperties(const AEditorObject: TJSONObject);
     procedure ImportElements(const AColorsObject: TJSONObject);
@@ -32,7 +32,7 @@ type
   public
     constructor Create(const AHighlighter: TTextEditorHighlighter); overload;
     procedure ImportFromStream(const AStream: TStream);
-    procedure ImportColorsFromStream(const AStream: TStream; const AScaleFontHeight: Boolean = False);
+    procedure ImportColorsFromStream(const AStream: TStream);
   end;
 
   EJSONImportException = class(Exception);
@@ -42,7 +42,7 @@ implementation
 uses
   System.TypInfo, System.UITypes, Vcl.Dialogs, Vcl.Forms, Vcl.Graphics, Vcl.GraphUtil, TextEditor.Consts,
   TextEditor.Highlighter.Token, TextEditor.Language, TextEditor.Types, TextEditor.Utils
-{$IFDEF ALPHASKINS}, sCommonData{$ENDIF};
+{$IFDEF ALPHASKINS}, sCommonData, sConst{$ENDIF};
 
 function StringToColorDef(const AString: string; const DefaultColor: TColor): Integer;
 begin
@@ -165,7 +165,7 @@ begin
   end;
 end;
 
-procedure TTextEditorHighlighterImportJSON.ImportColorsEditorProperties(const AEditorObject: TJSONObject; const AScaleFontHeight: Boolean = False);
+procedure TTextEditorHighlighterImportJSON.ImportColorsEditorProperties(const AEditorObject: TJSONObject);
 var
   LColorsObject, LFontsObject, LFontSizesObject: TJSONObject;
   LEditor: TCustomTextEditor;
@@ -337,15 +337,8 @@ begin
       OriginalFontSize := Font.Size;
       OriginalLeftMarginFontSize := LeftMargin.Font.Size;
 {$IFDEF ALPHASKINS}
-      if AScaleFontHeight then
-      with LEditor do
-      begin
-        LeftMargin.Font.Height := ScaleInt(LeftMargin.Font.Height);
-        Minimap.Font.Height := ScaleInt(LeftMargin.Font.Height);
-        CodeFolding.Hint.Font.Height := ScaleInt(LeftMargin.Font.Height);
-        CompletionProposal.Font.Height := ScaleInt(LeftMargin.Font.Height);
-        Font.Height := ScaleInt(Font.Height);
-      end;
+      if SkinData.SkinManager.Options.ScaleMode <> smVCL then
+        LEditor.ChangeScale(PixelsPerInch, 96, True);
 {$ENDIF}
     end;
   end;
@@ -945,14 +938,14 @@ begin
   ImportCompletionProposal(AJSONObject['CompletionProposal'].ObjectValue);
 end;
 
-procedure TTextEditorHighlighterImportJSON.ImportColors(const AJSONObject: TJSONObject; const AScaleFontHeight: Boolean = False);
+procedure TTextEditorHighlighterImportJSON.ImportColors(const AJSONObject: TJSONObject);
 var
   LColorsObject: TJSONObject;
 begin
   FHighlighter.Colors.Clear;
 
   LColorsObject := AJSONObject['Colors'];
-  ImportColorsEditorProperties(LColorsObject['Editor'].ObjectValue, AScaleFontHeight);
+  ImportColorsEditorProperties(LColorsObject['Editor'].ObjectValue);
   ImportElements(AJSONObject['Colors'].ObjectValue);
 end;
 
@@ -976,7 +969,7 @@ begin
   end;
 end;
 
-procedure TTextEditorHighlighterImportJSON.ImportColorsFromStream(const AStream: TStream; const AScaleFontHeight: Boolean = False);
+procedure TTextEditorHighlighterImportJSON.ImportColorsFromStream(const AStream: TStream);
 var
   LJSONObject: TJSONObject;
 begin
@@ -984,7 +977,7 @@ begin
     LJSONObject := TJSONObject.ParseFromStream(AStream) as TJSONObject;
     if Assigned(LJSONObject) then
     try
-      ImportColors(LJSONObject, AScaleFontHeight);
+      ImportColors(LJSONObject);
     finally
       LJSONObject.Free;
     end;

@@ -119,6 +119,7 @@ begin
   FWidth := MulDiv(FWidth, AMultiplier, ADivider);
   FPadding := MulDiv(FPadding, AMultiplier, ADivider);
   FHint.Indicator.Glyph.ChangeScale(AMultiplier, ADivider);
+  FHint.Font.Height := MulDiv(FHint.Font.Height, AMultiplier, ADivider);
   DoChange;
 end;
 

@@ -603,7 +603,6 @@ type
     procedure ChainLinesInserted(ASender: TObject; const AIndex: Integer; const ACount: Integer);
     procedure ChainLinesPutted(ASender: TObject; const AIndex: Integer; const ACount: Integer);
     procedure ChainUndoRedoAdded(ASender: TObject);
-    procedure ChangeScale(AMultiplier, ADivider: Integer; AIsDpiChange: Boolean); override;
     procedure CodeFoldingExpand(const AFoldRange: TTextEditorCodeFoldingRange);
     procedure CreateParams(var AParams: TCreateParams); override;
     procedure CreateWnd; override;
@@ -806,6 +805,7 @@ type
     procedure SaveToFile(const AFilename: string; const AEncoding: System.SysUtils.TEncoding = nil);
     procedure SaveToStream(const AStream: TStream; const AEncoding: System.SysUtils.TEncoding = nil);
     procedure SelectAll;
+    procedure ChangeScale(AMultiplier, ADivider: Integer; AIsDpiChange: Boolean); override;
     procedure SetBookmark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition);
     procedure SetCaretAndSelection(const ATextPosition, ABlockBeginPosition, ABlockEndPosition: TTextEditorTextPosition);
     procedure SetFocus; override;
@@ -11689,7 +11689,7 @@ begin
             begin
               BackgroundColor := FCodeFolding.Hint.Colors.Background;
               BorderColor := FCodeFolding.Hint.Colors.Border;
-              Font := FCodeFolding.Hint.Font;
+              Font.Assign(FCodeFolding.Hint.Font);
             end;
 
             LLine := LFoldRange.ToLine - LFoldRange.FromLine - 1;

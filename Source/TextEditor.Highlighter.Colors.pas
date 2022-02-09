@@ -26,7 +26,7 @@ type
     function GetElement(const Name: string): PTextEditorHighlighterElement;
     procedure Clear;
     procedure LoadFromFile(const AFilename: string);
-    procedure LoadFromStream(AStream: TStream; const AScaleFontHeight: Boolean = False);
+    procedure LoadFromStream(AStream: TStream);
     property Filename: string read FFilename write FFilename;
     property Name: string read FName write FName;
     property Styles: TList read FElements write FElements;
@@ -88,7 +88,7 @@ begin
   end;
 end;
 
-procedure TTextEditorHighlighterColors.LoadFromStream(AStream: TStream; const AScaleFontHeight: Boolean = False);
+procedure TTextEditorHighlighterColors.LoadFromStream(AStream: TStream);
 var
   LHighlighter: TTextEditorHighlighter;
 begin
@@ -97,7 +97,7 @@ begin
   LHighlighter.Loading := True;
   with TTextEditorHighlighterImportJSON.Create(LHighlighter) do
   try
-    ImportColorsFromStream(AStream, AScaleFontHeight);
+    ImportColorsFromStream(AStream);
   finally
     Free;
   end;

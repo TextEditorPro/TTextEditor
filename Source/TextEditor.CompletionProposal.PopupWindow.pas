@@ -118,6 +118,7 @@ begin
       Self.FCaseSensitive := cpoCaseSensitive in Options;
       Self.FFiltered := cpoFiltered in Options;
       Self.FFormWidth := Width;
+      Self.Font.Assign(Font);
       Self.Constraints.Assign(Constraints);
     end
   end

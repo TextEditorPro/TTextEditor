@@ -680,8 +680,10 @@ begin
       LTempLines.Free;
     end;
     UpdateColors;
+
     if Assigned(FBeforePrepare) then
       SetOption(hoExecuteBeforePrepare, True);
+
     FLoading := False;
     FLoaded := True;
   end;

@@ -4480,7 +4480,7 @@ var
   LIndex, LIndexRange, LLength: Integer;
   LCodeFoldingRange: TTextEditorCodeFoldingRange;
 begin
-  if not Assigned(Parent) or not FCodeFolding.Visible then
+  if not FCodeFolding.Visible then
     Exit;
 
   FCodeFoldings.Exists := False;
@@ -10424,17 +10424,26 @@ var
   function IsPreviousFoldTokenEndPreviousLine(const ALine: Integer): Boolean;
   var
     LIndex: Integer;
+    LFoldingRange: TTextEditorCodeFoldingRange;
+    LRegionItem: TTextEditorCodeFoldingRegionItem;
   begin
     LIndex := ALine;
+
     while (LIndex > 0) and not Assigned(FCodeFoldings.RangeToLine[LIndex]) do
     begin
       if Assigned(FCodeFoldings.RangeFromLine[LIndex]) then
         Exit(False);
+
       Dec(LIndex);
     end;
 
-    Result := Assigned(FCodeFoldings.RangeToLine[LIndex]) and Assigned(FCodeFoldings.RangeToLine[LIndex].RegionItem) and
-      FCodeFoldings.RangeToLine[LIndex].RegionItem.TokenEndIsPreviousLine
+    LFoldingRange := FCodeFoldings.RangeToLine[LIndex];
+    if Assigned(LFoldingRange) and Assigned(LFoldingRange.RegionItem) then
+      LRegionItem := LFoldingRange.RegionItem
+    else
+      LRegionItem := nil;
+
+    Result := Assigned(LRegionItem) and LRegionItem.TokenEndIsPreviousLine;
   end;
 
 begin

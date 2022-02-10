@@ -5801,7 +5801,7 @@ begin
   end
   else
   begin
-    LLineText := FLines.Items^[LTextPosition.Line].TextLine;
+    LLineText := FLines[LTextPosition.Line];
     LLength := Length(LLineText);
     if LLength < LTextPosition.Char then
       LLineText := LLineText + StringOfChar(TCharacters.Space, LTextPosition.Char - LLength - 1);

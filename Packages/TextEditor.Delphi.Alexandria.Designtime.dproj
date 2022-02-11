@@ -80,7 +80,7 @@
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
         <DCC_DebugInformation>0</DCC_DebugInformation>
         <DCC_SymbolReferenceInfo>0</DCC_SymbolReferenceInfo>
-        <DCC_Define>RELEASE;$(DCC_Define)</DCC_Define>
+        <DCC_Define>RELEASE;TEXT_EDITOR_SPELL_CHECK;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>

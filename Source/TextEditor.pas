@@ -10514,7 +10514,8 @@ begin
     SelectionEndPosition := FPosition.BeginSelection;
   end;
 
-  if (X < LeftMargin.MarksPanel.Width) and (GetRowCountFromPixel(Y) <= FViewPosition.Row - TopLine) then
+  if (AButton = mbLeft) and (X < LeftMargin.MarksPanel.Width) and
+    (GetRowCountFromPixel(Y) <= FViewPosition.Row - TopLine) then
   begin
     if LeftMargin.Bookmarks.Visible and (bpoToggleBookmarkByClick in LeftMargin.MarksPanel.Options) then
       DoToggleBookmark

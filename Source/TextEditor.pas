@@ -434,6 +434,7 @@ type
     procedure ColorsOnChange(const AEvent: TTextEditorColorChanges);
     procedure CompletionProposalTimerHandler(ASender: TObject);
     procedure ComputeScroll(const APoint: TPoint);
+    procedure CreateBookmarkImages;
     procedure CreateLineNumbersCache(const AReset: Boolean = False);
     procedure CreateShadowBitmap(const AClipRect: TRect; const ABitmap: Vcl.Graphics.TBitmap; const AShadowAlphaArray: TTextEditorArrayOfSingle; const AShadowAlphaByteArray: PByteArray);
     procedure DeflateMinimapAndSearchMapRect(var ARect: TRect);
@@ -457,6 +458,7 @@ type
     procedure DoLeftMarginAutoSize;
     procedure DoLineBreak(const AAddSpaceBuffer: Boolean = True);
     procedure DoLineComment;
+    procedure DoOnBookmarkPopup(Sender: TObject);
     procedure DoPageLeftOrRight(const ACommand: TTextEditorCommand);
     procedure DoPageTopOrBottom(const ACommand: TTextEditorCommand);
     procedure DoPageUpOrDown(const ACommand: TTextEditorCommand);
@@ -468,7 +470,7 @@ type
     procedure DoShiftTabKey;
     procedure DoSyncEdit;
     procedure DoTabKey;
-    procedure DoToggleBookmark;
+    procedure DoToggleBookmark(const AImageIndex: Integer = -1);
     procedure DoToggleMark;
     procedure DoToggleSelectedCase(const ACommand: TTextEditorCommand);
     procedure DoTrimTrailingSpaces(const ATextLine: Integer; const AForceTrim: Boolean = False);
@@ -806,7 +808,7 @@ type
     procedure SaveToStream(const AStream: TStream; const AEncoding: System.SysUtils.TEncoding = nil);
     procedure SelectAll;
     procedure ChangeScale(AMultiplier, ADivider: Integer; AIsDpiChange: Boolean); override;
-    procedure SetBookmark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition);
+    procedure SetBookmark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition; const AImageIndex: Integer = -1);
     procedure SetCaretAndSelection(const ATextPosition, ABlockBeginPosition, ABlockEndPosition: TTextEditorTextPosition);
     procedure SetFocus; override;
     procedure SetMark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition; const AImageIndex: Integer; const AColor: TColor = TColors.SysNone);
@@ -1227,8 +1229,8 @@ implementation
 {$R TextEditor.res}
 
 uses
-  Winapi.Imm, Winapi.ShellAPI, System.Character, System.RegularExpressions, System.StrUtils, System.Types, Vcl.Menus,
-  TextEditor.Encoding, TextEditor.Export.HTML, TextEditor.Highlighter.Rules, TextEditor.Language,
+  Winapi.Imm, Winapi.ShellAPI, System.Character, System.RegularExpressions, System.StrUtils, System.Types, Vcl.ImgList,
+  Vcl.Menus, TextEditor.Encoding, TextEditor.Export.HTML, TextEditor.Highlighter.Rules, TextEditor.Language,
   TextEditor.LeftMargin.Border, TextEditor.LeftMargin.LineNumbers, TextEditor.Scroll.Hint, TextEditor.Search.Map,
   TextEditor.Search.Normal, TextEditor.Search.RegularExpressions, TextEditor.Search.WildCard, TextEditor.Undo.Item
 {$IFDEF VCL_STYLES}, TextEditor.StyleHooks{$ENDIF}
@@ -6506,7 +6508,7 @@ begin
   end;
 end;
 
-procedure TCustomTextEditor.DoToggleBookmark;
+procedure TCustomTextEditor.DoToggleBookmark(const AImageIndex: Integer = -1);
 var
   LIndex, LMarkIndex: Integer;
   LMark: TTextEditorMark;
@@ -6517,16 +6519,19 @@ begin
   for LIndex := 0 to FBookmarkList.Count - 1 do
   begin
     LMark := FBookmarkList.Items[LIndex];
+
     if LMark.Line = LTextPosition.Line then
     begin
       DeleteBookmark(LMark);
       Exit;
     end;
+
     if LMark.Index > LMarkIndex then
       LMarkIndex := LMark.Index;
   end;
-  LMarkIndex := Max(TResourceBitmap.BookmarkImageCount, LMarkIndex + 1);
-  SetBookmark(LMarkIndex, LTextPosition);
+
+  LMarkIndex := Max(10, LMarkIndex + 1);
+  SetBookmark(LMarkIndex, LTextPosition, AImageIndex);
 end;
 
 procedure TCustomTextEditor.DoToggleMark;
@@ -10491,6 +10496,12 @@ begin
   end;
 end;
 
+procedure TCustomTextEditor.DoOnBookmarkPopup(Sender: TObject);
+begin
+  if Sender is TMenuItem then
+    DoToggleBookmark(TMenuItem(Sender).Tag);
+end;
+
 procedure TCustomTextEditor.DoOnLeftMarginClick(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer);
 var
   LIndex: Integer;
@@ -10500,6 +10511,57 @@ var
   LCodeFoldingRegion: Boolean;
   LTextPosition: TTextEditorTextPosition;
   LSelectedRow: Integer;
+
+  procedure ShowBookmarkColorsPopup;
+  var
+    LIndex: Integer;
+    LPopupMenu: TPopupMenu;
+    LBookmarkColors: TTextEditorArrayOfString;
+    LMenuItem: TMenuItem;
+    LPoint: TPoint;
+    LBitmap: Vcl.Graphics.TBitmap;
+  begin
+    CreateBookmarkImages;
+
+    LPopupMenu := TPopupMenu.Create(Self);
+    LPopupMenu.Images := TImageList.Create(LPopupMenu);
+    with LPopupMenu.Images do
+    begin
+      ColorDepth := cd8Bit;
+      Height := FImagesBookmark.Height;
+      Width := FImagesBookmark.Width;
+    end;
+
+    for LIndex := 9 to 13 do
+    begin
+      LBitmap := FImagesBookmark.GetBitmap(LIndex, LeftMargin.Colors.Background);
+      try
+        LPopupMenu.Images.Add(LBitmap, nil);
+      finally
+        FreeAndNil(LBitmap);
+      end;
+    end;
+
+    LBookmarkColors := [STextEditorBookmarkYellow, STextEditorBookmarkRed, STextEditorBookmarkGreen,
+      STextEditorBookmarkBlue, STextEditorBookmarkPurple];
+
+    for LIndex := 0 to Length(LBookmarkColors) - 1 do
+    begin
+      LMenuItem := TMenuItem.Create(LPopupMenu);
+      LMenuItem.Caption := LBookmarkColors[LIndex];
+      LMenuItem.ImageIndex := LIndex;
+      LMenuItem.Tag := 9 + LIndex;
+      LMenuItem.OnClick := DoOnBookmarkPopup;
+      LPopupMenu.Items.Add(LMenuItem);
+    end;
+{$IFDEF ALPHASKINS}
+    if Assigned(SkinData.SkinManager) then
+      SkinData.SkinManager.SkinableMenus.HookPopupMenu(LPopupMenu, SkinData.SkinManager.IsActive);
+{$ENDIF}
+    LPoint := ClientToScreen(Point(X, Y));
+    LPopupMenu.Popup(LPoint.X, LPoint.Y);
+  end;
+
 begin
   LSelectedRow := GetSelectedRow(Y);
   LLine := GetViewTextLineNumber(LSelectedRow);
@@ -10514,14 +10576,17 @@ begin
     SelectionEndPosition := FPosition.BeginSelection;
   end;
 
-  if (AButton = mbLeft) and (X < LeftMargin.MarksPanel.Width) and
-    (GetRowCountFromPixel(Y) <= FViewPosition.Row - TopLine) then
-  begin
-    if LeftMargin.Bookmarks.Visible and (bpoToggleBookmarkByClick in LeftMargin.MarksPanel.Options) then
-      DoToggleBookmark
-    else
-    if LeftMargin.Marks.Visible and (bpoToggleMarkByClick in LeftMargin.MarksPanel.Options) then
-      DoToggleMark
+  if LeftMargin.Bookmarks.Visible and (X < LeftMargin.MarksPanel.Width) and (GetRowCountFromPixel(Y) <= FViewPosition.Row - TopLine) then
+  case AButton of
+    mbLeft:
+      if bpoToggleBookmarkByClick in LeftMargin.MarksPanel.Options then
+        DoToggleBookmark
+      else
+      if bpoToggleMarkByClick in LeftMargin.MarksPanel.Options then
+        DoToggleMark;
+    mbRight:
+      if bpoShowBookmarkColorsPopup in LeftMargin.MarksPanel.Options then
+        ShowBookmarkColorsPopup;
   end;
 
   LCodeFoldingRegion := (X >= FLeftMarginWidth - FCodeFolding.GetWidth) and (X <= FLeftMarginWidth);
@@ -10556,14 +10621,19 @@ begin
   end;
 
   if Assigned(FEvents.OnLeftMarginClick) and (LLine - 1 < FLines.Count) then
-  for LIndex := 0 to FMarkList.Count - 1 do
   begin
-    LMark := FMarkList.Items[LIndex];
-    if LMark.Line = LLine - 1 then
+    LMark := nil;
+
+    for LIndex := 0 to FMarkList.Count - 1 do
     begin
-      FEvents.OnLeftMarginClick(Self, AButton, X, Y, LLine - 1, LMark);
-      Break;
+      LMark := FMarkList.Items[LIndex];
+      if LMark.Line = LLine - 1 then
+        Break
+      else
+        LMark := nil;
     end;
+
+    FEvents.OnLeftMarginClick(Self, AButton, X, Y, LLine - 1, LMark);
   end;
 end;
 
@@ -12595,6 +12665,17 @@ begin
   Canvas.Pen.Color := LOldColor;
 end;
 
+procedure TCustomTextEditor.CreateBookmarkImages;
+begin
+  if not Assigned(FImagesBookmark) then
+  begin
+    FImagesBookmark := TTextEditorInternalImage.Create(HInstance, TResourceBitmap.BookmarkImages, TResourceBitmap.BookmarkImageCount);
+{$IFDEF ALPHASKINS}
+    FImagesBookmark.ChangeScale(SkinData.CommonSkinData.PPI, 96);
+{$ENDIF}
+  end;
+end;
+
 procedure TCustomTextEditor.PaintLeftMargin(const AClipRect: TRect; const AFirstLine, ALastTextLine, ALastLine: Integer);
 var
   LLine, LPreviousLine: Integer;
@@ -12605,13 +12686,7 @@ var
   var
     LY: Integer;
   begin
-    if not Assigned(FImagesBookmark) then
-    begin
-      FImagesBookmark := TTextEditorInternalImage.Create(HInstance, TResourceBitmap.BookmarkImages, TResourceBitmap.BookmarkImageCount);
-{$IFDEF ALPHASKINS}
-      FImagesBookmark.ChangeScale(SkinData.CommonSkinData.PPI, 96);
-{$ENDIF}
-    end;
+    CreateBookmarkImages;
 
     LY := (AMarkRow - TopLine) * LLineHeight;
     if FRuler.Visible then
@@ -18820,7 +18895,7 @@ begin
   Result := TTextEditorMark(AItem1).Line - TTextEditorMark(AItem2).Line;
 end;
 
-procedure TCustomTextEditor.SetBookmark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition);
+procedure TCustomTextEditor.SetBookmark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition; const AImageIndex: Integer = -1);
 var
   LBookmark: TTextEditorMark;
 begin
@@ -18835,7 +18910,10 @@ begin
     begin
       Line := ATextPosition.Line;
       Char := ATextPosition.Char;
-      ImageIndex := Min(AIndex, 9);
+      if AImageIndex = -1 then
+        ImageIndex := Min(AIndex, 9)
+      else
+        ImageIndex := AImageIndex;
       Index := AIndex;
       Visible := True;
     end;

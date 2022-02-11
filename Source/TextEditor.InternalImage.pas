@@ -17,9 +17,12 @@ type
   public
     constructor Create(const AModule: THandle; const AName: string; const ACount: Integer = 1);
     destructor Destroy; override;
+    function GetBitmap(const AImageIndex: Integer; const ABackgroundColor: TColor): Vcl.Graphics.TBitmap;
     procedure ChangeScale(const AMultiplier, ADivider: Integer); virtual;
     procedure Draw(const ACanvas: TCanvas; const ANumber: Integer; const X: Integer; const Y: Integer;
       const ALineHeight: Integer; const ATransparentColor: TColor = TColors.SysNone);
+    property Height: Integer read FHeight write FHeight;
+    property Width: Integer read FWidth write FWidth;
   end;
 
 implementation
@@ -53,6 +56,16 @@ begin
   FreeBitmapFromInternalList;
 
   inherited Destroy;
+end;
+
+function TTextEditorInternalImage.GetBitmap(const AImageIndex: Integer; const ABackgroundColor: TColor): Vcl.Graphics.TBitmap;
+begin
+  Result := Vcl.Graphics.TBitmap.Create;
+  Result.TransparentColor := clFuchsia;
+  Result.Canvas.Brush.Color := ABackgroundColor;
+  Result.Width := FWidth;
+  Result.Height := FHeight;
+  Draw(Result.Canvas, AImageIndex, 0, 0, FHeight, clFuchsia);
 end;
 
 procedure TTextEditorInternalImage.ChangeScale(const AMultiplier, ADivider: Integer);

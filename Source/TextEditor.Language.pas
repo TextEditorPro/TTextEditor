@@ -62,6 +62,13 @@ resourcestring
   STextEditorJSONPathContainsNullValue = 'JSON path contains null value ("%s")';
   STextEditorJSONPathIndexError = 'JSON path index out of bounds (%d) "%s"';
 
+  { Bookmark colors }
+  STextEditorBookmarkYellow = 'Yellow';
+  STextEditorBookmarkRed = 'Red';
+  STextEditorBookmarkGreen = 'Green';
+  STextEditorBookmarkBlue = 'Blue';
+  STextEditorBookmarkPurple = 'Purple';
+
 implementation
 
 end.

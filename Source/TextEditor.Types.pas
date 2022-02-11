@@ -169,7 +169,7 @@ type
   TTextEditorSearchMapOptions = set of TTextEditorSearchMapOption;
 
   { Left margin }
-  TTextEditorLeftMarginBookmarkPanelOption = (bpoToggleBookmarkByClick, bpoToggleMarkByClick);
+  TTextEditorLeftMarginBookmarkPanelOption = (bpoToggleBookmarkByClick, bpoToggleMarkByClick, bpoShowBookmarkColorsPopup);
   TTextEditorLeftMarginBookmarkPanelOptions = set of TTextEditorLeftMarginBookmarkPanelOption;
 
   TTextEditorLeftMarginLineNumberOption = (lnoIntens, lnoLeadingZeros, lnoAfterLastLine, lnoCompareMode);

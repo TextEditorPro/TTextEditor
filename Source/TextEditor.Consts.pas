@@ -187,7 +187,7 @@ type
   const
     ActiveLine = 'TEXTEDITORACTIVELINE';
     BookmarkImages = 'TEXTEDITORBOOKMARKIMAGES';
-    BookmarkImageCount = 10;
+    BookmarkImageCount = 14;
     MouseMoveScroll = 'TEXTEDITORMOUSEMOVESCROLL';
     SyncEdit = 'TEXTEDITORSYNCEDIT';
   end;

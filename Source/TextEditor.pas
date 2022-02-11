@@ -6523,6 +6523,8 @@ begin
     if LMark.Line = LTextPosition.Line then
     begin
       DeleteBookmark(LMark);
+      if AImageIndex <> -1 then
+        Break;
       Exit;
     end;
 

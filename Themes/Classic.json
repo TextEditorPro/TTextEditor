@@ -53,7 +53,7 @@
         "SearchMapActiveLine": "$00F0F0F0",
         "SearchMapBackground": "$00660000",
         "SearchMapForeground": "clYellow",
-        "SelectionBackground": "clSilver",
+        "SelectionBackground": "clNone",
         "SelectionForeground": "clNavy",
         "SyncEditBackground": "$009999CC",
         "SyncEditEditBorder": "clYellow",

@@ -51,7 +51,7 @@
         "SearchHighlighterForeground": "clNone",
         "SearchInSelectionBackground": "$00808080",
         "SearchMapActiveLine": "$00F0F0F0",
-        "SearchMapBackground": "$00F4F4F4",
+        "SearchMapBackground": "clNone",
         "SearchMapForeground": "$0078AAFF",
         "SelectionBackground": "$00EEEEEE",
         "SelectionForeground": "$00000000",

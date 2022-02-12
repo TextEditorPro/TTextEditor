@@ -290,7 +290,7 @@ type
 
   { Events }
   TOnCompletionProposalExecute = procedure(const ASender: TObject; const AItems: TTextEditorCompletionProposalItems;
-    var AOptions: TCompletionProposalOptions) of object;
+    const ACurrentInput: string; var AOptions: TCompletionProposalOptions) of object;
 
   TTextEditorBookmarkDeletedEvent = procedure(const ASender: TObject; const ABookmark: TTextEditorMark) of object;
   TTextEditorBookmarkPlacedEvent = procedure(const ASender: TObject; const AIndex: Integer; const ATextPosition: TTextEditorTextPosition) of object;

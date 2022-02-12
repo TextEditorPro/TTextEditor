@@ -10268,6 +10268,7 @@ procedure TCustomTextEditor.DoExecuteCompletionProposal(const ATriggered: Boolea
 var
   LPoint: TPoint;
   LOptions: TCompletionProposalOptions;
+  LCurrentInput: string;
 begin
   LPoint := ClientToScreen(ViewPositionToPixels(ViewPosition));
   Inc(LPoint.Y, GetLineHeight);
@@ -10295,8 +10296,10 @@ begin
 
     Items.Clear;
 
+    LCurrentInput := GetCurrentInput;
+
     if Assigned(FEvents.OnCompletionProposalExecute) then
-      FEvents.OnCompletionProposalExecute(Self, Items, LOptions);
+      FEvents.OnCompletionProposalExecute(Self, Items, LCurrentInput, LOptions);
 
     ShowDescription := LOptions.ShowDescription;
     CodeInsight := LOptions.CodeInsight;
@@ -10313,7 +10316,7 @@ begin
     FPosition.CompletionProposal := ViewPosition;
 
     if Items.Count > 0 then
-      Execute(GetCurrentInput, LPoint, LOptions)
+      Execute(LCurrentInput, LPoint, LOptions)
     else
       FreeCompletionProposalPopupWindow;
   end;

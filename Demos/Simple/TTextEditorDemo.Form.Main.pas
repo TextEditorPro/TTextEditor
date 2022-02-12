@@ -19,7 +19,8 @@ type
     procedure ListBoxThemesClick(Sender: TObject);
     procedure ListBoxHighlightersClick(Sender: TObject);
     procedure TextEditorCompletionProposalExecute(const ASender: TObject;
-      const AItems: TList<TextEditor.Types.TTextEditorCompletionProposalItem>; var AOptions: TCompletionProposalOptions);
+      const AItems: TList<TextEditor.Types.TTextEditorCompletionProposalItem>; const ACurrentInput: string;
+      var AOptions: TCompletionProposalOptions);
     procedure TextEditorCreateHighlighterStream(const ASender: TObject; const AName: string; var AStream: TStream);
   private
     procedure SetSelectedColor;
@@ -55,7 +56,8 @@ begin
 end;
 
 procedure TMainForm.TextEditorCompletionProposalExecute(const ASender: TObject;
-  const AItems: TList<TextEditor.Types.TTextEditorCompletionProposalItem>; var AOptions: TCompletionProposalOptions);
+  const AItems: TList<TextEditor.Types.TTextEditorCompletionProposalItem>; const ACurrentInput: string;
+  var AOptions: TCompletionProposalOptions);
 var
   LIndex: Integer;
   LItem: TTextEditorCompletionProposalItem;

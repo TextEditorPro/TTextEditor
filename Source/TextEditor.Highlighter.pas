@@ -660,12 +660,13 @@ begin
     try
       if LEditor.Visible then
         LTextPosition := LEditor.TextPosition;
+
       LTopLine := LEditor.TopLine;
       for LIndex := 0 to FLines.Count - 1 do
       if not (sfEmptyLine in FLines.Items^[LIndex].Flags) then
         LTempLines.Add(FLines.Items^[LIndex].TextLine);
+
       FLines.Clear;
-      LEditor.PixelsPerInch := 96;
       with TTextEditorHighlighterImportJSON.Create(Self) do
       try
         ImportFromStream(AStream);
@@ -673,6 +674,7 @@ begin
         Free;
       end;
       FLines.LoadFromStrings(LTempLines);
+
       LEditor.TopLine := LTopLine;
       if LEditor.Visible then
         LEditor.TextPosition := LTextPosition;

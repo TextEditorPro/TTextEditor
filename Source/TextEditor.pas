@@ -15867,6 +15867,7 @@ var
             else
               Insert(LStr, LTempString, LInsertPosition);
           end;
+
           FLines[LCurrentLine] := LTempString;
 
           if AAddToUndoList then
@@ -15875,7 +15876,7 @@ var
               AChangeBlockNumber);
         end;
 
-        if LPText^ = TControlCharacters.CarriageReturn then
+        if (LPText^ = TControlCharacters.CarriageReturn) or (LPText^ = TControlCharacters.Linefeed) then
         begin
           Inc(LPText);
 

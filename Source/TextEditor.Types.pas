@@ -271,6 +271,14 @@ type
     property Bottom default 1;
   end;
 
+  { Completion proposal }
+  TCompletionProposalParams = record
+    Items: TTextEditorCompletionProposalItems;
+    LastWord: string;
+    Options: TCompletionProposalOptions;
+    PreviousCharAtCursor: string;
+  end;
+
   { Snippets }
   TTextEditorSnippetExecuteWith = (seListOnly = -1, seEnter = 0, seSpace = 1);
 
@@ -289,8 +297,7 @@ type
   end;
 
   { Events }
-  TOnCompletionProposalExecute = procedure(const ASender: TObject; const AItems: TTextEditorCompletionProposalItems;
-    const ACurrentInput: string; var AOptions: TCompletionProposalOptions) of object;
+  TOnCompletionProposalExecute = procedure(const ASender: TObject; var AParams: TCompletionProposalParams) of object;
 
   TTextEditorBookmarkDeletedEvent = procedure(const ASender: TObject; const ABookmark: TTextEditorMark) of object;
   TTextEditorBookmarkPlacedEvent = procedure(const ASender: TObject; const AIndex: Integer; const ATextPosition: TTextEditorTextPosition) of object;

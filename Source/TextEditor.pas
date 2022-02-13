@@ -371,6 +371,7 @@ type
     function GetHighlighterAttributeAtRowColumn(const ATextPosition: TTextEditorTextPosition; var AToken: string; var ATokenType: TTextEditorRangeType; var AStart: Integer; var AHighlighterAttribute: TTextEditorHighlighterAttribute): Boolean;
     function GetHookedCommandHandlersCount: Integer;
     function GetHorizontalScrollMax: Integer;
+    function GetLastWordFromCursor: string;
     function GetLeadingExpandedLength(const AText: string; const ABorder: Integer = 0): Integer;
     function GetLeftMarginWidth: Integer;
     function GetLineHeight: Integer; inline;
@@ -10264,11 +10265,29 @@ begin
   end;
 end;
 
+function TCustomTextEditor.GetLastWordFromCursor: string;
+var
+  LTextPosition: TTextEditorTextPosition;
+  LLineText: string;
+begin
+  Result := '';
+
+  LTextPosition := TextPosition;
+  LLineText := FLines[LTextPosition.Line];
+  Dec(LTextPosition.Char);
+  if LTextPosition.Char <= Length(LLineText) then
+  begin
+    while (LTextPosition.Char > 0) and IsWordBreakChar(LLineText[LTextPosition.Char]) do
+      Dec(LTextPosition.Char);
+
+    Result := WordAtTextPosition(LTextPosition);
+  end;
+end;
+
 procedure TCustomTextEditor.DoExecuteCompletionProposal(const ATriggered: Boolean = False);
 var
   LPoint: TPoint;
-  LOptions: TCompletionProposalOptions;
-  LCurrentInput: string;
+  LParams: TCompletionProposalParams;
 begin
   LPoint := ClientToScreen(ViewPositionToPixels(ViewPosition));
   Inc(LPoint.Y, GetLineHeight);
@@ -10280,43 +10299,41 @@ begin
   begin
     Assign(FCompletionProposal);
     Lines := FLines;
-    LOptions.Triggered := ATriggered;
-    LOptions.ParseItemsFromText := True;
-    LOptions.AddHighlighterKeywords := True;
-    LOptions.AddSnippets := FCompletionProposal.Snippets.Active;
 
-    if LOptions.AddSnippets then
-      LOptions.ShowDescription := FCompletionProposal.Snippets.Items.Count > 0
-    else
-      LOptions.ShowDescription := False;
-
-    LOptions.SortByKeyword := True;
-    LOptions.SortByDescription := False;
-    LOptions.CodeInsight := False;
+    LParams.Options.Triggered := ATriggered;
+    LParams.Options.ParseItemsFromText := True;
+    LParams.Options.AddHighlighterKeywords := True;
+    LParams.Options.AddSnippets := FCompletionProposal.Snippets.Active;
+    LParams.Options.ShowDescription := LParams.Options.AddSnippets and (FCompletionProposal.Snippets.Items.Count > 0);
+    LParams.Options.SortByKeyword := True;
+    LParams.Options.SortByDescription := False;
+    LParams.Options.CodeInsight := False;
 
     Items.Clear;
 
-    LCurrentInput := GetCurrentInput;
+    LParams.Items := Items;
+    LParams.LastWord := GetLastWordFromCursor;
+    LParams.PreviousCharAtCursor := PreviousCharAtCursor;
 
     if Assigned(FEvents.OnCompletionProposalExecute) then
-      FEvents.OnCompletionProposalExecute(Self, Items, LCurrentInput, LOptions);
+      FEvents.OnCompletionProposalExecute(Self, LParams);
 
-    ShowDescription := LOptions.ShowDescription;
-    CodeInsight := LOptions.CodeInsight;
+    ShowDescription := LParams.Options.ShowDescription;
+    CodeInsight := LParams.Options.CodeInsight;
 
-    if LOptions.ParseItemsFromText and (cpoParseItemsFromText in FCompletionProposal.Options) then
+    if LParams.Options.ParseItemsFromText and (cpoParseItemsFromText in FCompletionProposal.Options) then
       SplitTextIntoWords(Items, ShowDescription);
 
-    if LOptions.AddHighlighterKeywords and (cpoAddHighlighterKeywords in FCompletionProposal.Options) then
+    if LParams.Options.AddHighlighterKeywords and (cpoAddHighlighterKeywords in FCompletionProposal.Options) then
       AddHighlighterKeywords(Items, ShowDescription);
 
-    if LOptions.AddSnippets then
+    if LParams.Options.AddSnippets then
       AddSnippets(Items, ShowDescription);
 
     FPosition.CompletionProposal := ViewPosition;
 
     if Items.Count > 0 then
-      Execute(LCurrentInput, LPoint, LOptions)
+      Execute(GetCurrentInput, LPoint, LParams.Options)
     else
       FreeCompletionProposalPopupWindow;
   end;

@@ -588,6 +588,7 @@ begin
     begin
       if cpoShowShadow in FCompletionProposal.Options then
         ActivateDropShadow(Handle);
+
       UpdateScrollBar;
       Show(LPoint);
     end;

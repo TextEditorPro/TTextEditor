@@ -315,9 +315,9 @@ begin
       LDescription := LItem.Description;
 
       if FCaseSensitive then
-        LPosition := FastPos(AnsiUpperCase(FCurrentString), AnsiUpperCase(LText))
+        LPosition := FastPos(FCurrentString, LText)
       else
-        LPosition := FastPos(FCurrentString, LText);
+        LPosition := FastPos(AnsiUpperCase(FCurrentString), AnsiUpperCase(LText));
 
       if LPosition > 0 then
       begin
@@ -367,9 +367,9 @@ procedure TTextEditorCompletionProposalPopupWindow.SetCurrentString(const AValue
     LCompareString := FItems[AIndex].Keyword;
 
     if FCaseSensitive then
-      Result := FastPos(AnsiUpperCase(AValue), AnsiUpperCase(LCompareString)) = 1
+      Result := FastPos(AValue, LCompareString) = 1
     else
-      Result := FastPos(AValue, LCompareString) = 1;
+      Result := FastPos(AnsiUpperCase(AValue), AnsiUpperCase(LCompareString)) = 1;
   end;
 
   function MatchItem2(const AIndex: Integer): Boolean;
@@ -379,9 +379,9 @@ procedure TTextEditorCompletionProposalPopupWindow.SetCurrentString(const AValue
     LCompareString := FItems[AIndex].Keyword;
 
     if FCaseSensitive then
-      Result := FastPos(AnsiUpperCase(AValue), AnsiUpperCase(LCompareString)) > 1
+      Result := FastPos(AValue, LCompareString) > 1
     else
-      Result := FastPos(AValue, LCompareString) > 1;
+      Result := FastPos(AnsiUpperCase(AValue), AnsiUpperCase(LCompareString)) > 1
   end;
 
   procedure RecalcList(const AShowAllItems: Boolean);

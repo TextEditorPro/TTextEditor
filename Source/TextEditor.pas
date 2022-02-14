@@ -6165,7 +6165,6 @@ begin
     DoInsertText(GetClipboardText);
     RescanCodeFoldingRanges;
     EnsureCursorPositionVisible;
-    UpdateScrollBars;
   finally
     Screen.Cursor := crDefault;
   end;
@@ -9208,17 +9207,13 @@ var
   LHorizontalScrollMax: Integer;
   LShowScrollBar: Boolean;
 begin
-  if FLines.Streaming or FHighlighter.Loading then
-    Exit;
-
-  if not HandleAllocated or (PaintLock <> 0) then
+  if not HandleAllocated or (FPaintLock <> 0) or FLines.Streaming or FHighlighter.Loading then
     Exit;
 
   if (FScroll.Bars <> ssNone) and (FLines.Count > 0) then
   begin
     LScrollInfo.cbSize := SizeOf(ScrollInfo);
-    LScrollInfo.fMask := SIF_ALL;
-    LScrollInfo.fMask := LScrollInfo.fMask or SIF_DISABLENOSCROLL;
+    LScrollInfo.fMask := SIF_DISABLENOSCROLL;
 
     if (FScroll.Bars in [ssBoth, ssHorizontal]) and not FWordWrap.Active then
     begin
@@ -9239,8 +9234,14 @@ begin
       end;
 
       LShowScrollBar := LHorizontalScrollMax > FScrollHelper.PageWidth;
-      if not LShowScrollBar then
+
+      if LShowScrollBar then
+        LScrollInfo.fMask := SIF_ALL
+      else
+      begin
         FScrollHelper.HorizontalPosition := 0;
+        LScrollInfo.fMask := SIF_DISABLENOSCROLL;
+      end;
 
       if not FMinimap.Dragging then
         ShowScrollBar(Handle, SB_HORZ, LShowScrollBar);
@@ -9278,8 +9279,13 @@ begin
       end;
 
       LShowScrollBar := LScrollInfo.nMax > VisibleLineCount;
-      if not LShowScrollBar then
+      if LShowScrollBar then
+        LScrollInfo.fMask := SIF_ALL
+      else
+      begin
         TopLine := 1;
+        LScrollInfo.fMask := SIF_DISABLENOSCROLL;
+      end;
 
       if not FMinimap.Dragging then
         ShowScrollBar(Handle, SB_VERT, LShowScrollBar);
@@ -10036,7 +10042,6 @@ begin
   if FPaintLock = 0 then
   begin
     UpdateScrollBars;
-
     Invalidate;
   end;
 end;
@@ -19470,9 +19475,6 @@ begin
         RefreshEditScrolls(SkinData, FScrollHelper.Wnd);
       CM_VISIBLECHANGED, CM_ENABLEDCHANGED, WM_SETFONT:
         FSkinData.Invalidate;
-      CM_TEXTCHANGED, CM_CHANGED:
-        if Assigned(FScrollHelper.Wnd) then
-          UpdateScrolls(FScrollHelper.Wnd, True);
     end;
   end;
 

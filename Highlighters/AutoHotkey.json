@@ -39,7 +39,7 @@
               "Element": "String"
             },
             "Properties": {
-              "CloseOnEndOfLine": false
+              "CloseOnEndOfLine": true
             },
             "TokenRange": {
               "Open": "\"",

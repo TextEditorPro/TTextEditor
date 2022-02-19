@@ -19,6 +19,7 @@ type
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
     procedure ChangeScale(const AMultiplier, ADivider: Integer);
+    procedure SetOption(const AOption: TTextEditorLeftMarginBookmarkPanelOption; const AEnabled: Boolean);
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
     property Options: TTextEditorLeftMarginBookmarkPanelOptions read FOptions write FOptions default [bpoToggleBookmarkByClick];
@@ -87,6 +88,14 @@ begin
     FVisible := AValue;
     DoChange
   end;
+end;
+
+procedure TTextEditorLeftMarginMarksPanel.SetOption(const AOption: TTextEditorLeftMarginBookmarkPanelOption; const AEnabled: Boolean);
+begin
+  if AEnabled then
+    Include(FOptions, AOption)
+  else
+    Exclude(FOptions, AOption);
 end;
 
 end.

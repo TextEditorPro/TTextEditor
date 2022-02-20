@@ -13470,8 +13470,8 @@ end;
 
 procedure TCustomTextEditor.SetOppositeColors;
 begin
-  FPaintHelper.SetBackgroundColor(Canvas.Pen.Color);
-  FPaintHelper.SetForegroundColor(Canvas.Brush.Color);
+  FPaintHelper.SetBackgroundColor(Colors.Foreground);
+  FPaintHelper.SetForegroundColor(Colors.Background);
   FPaintHelper.SetStyle([]);
 end;
 

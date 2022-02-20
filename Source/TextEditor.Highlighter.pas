@@ -610,6 +610,7 @@ begin
                 LKeyWord := LPText^ + LKeyWord;
                 Dec(LPText);
               end;
+
               if TextEditor.Utils.Trim(LKeyWord) <> ':' then
                 LKeyList.KeyList.Add(LKeyWord);
             end;
@@ -662,6 +663,7 @@ begin
         LTextPosition := LEditor.TextPosition;
 
       LTopLine := LEditor.TopLine;
+
       for LIndex := 0 to FLines.Count - 1 do
       if not (sfEmptyLine in FLines.Items^[LIndex].Flags) then
         LTempLines.Add(FLines.Items^[LIndex].TextLine);
@@ -681,6 +683,7 @@ begin
     finally
       LTempLines.Free;
     end;
+
     UpdateColors;
 
     if Assigned(FBeforePrepare) then

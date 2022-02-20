@@ -19473,6 +19473,8 @@ begin
     case AMessage.Msg of
       CM_SHOWINGCHANGED:
         RefreshEditScrolls(SkinData, FScrollHelper.Wnd);
+      WM_SIZE:
+        Invalidate;
       CM_VISIBLECHANGED, CM_ENABLEDCHANGED, WM_SETFONT:
         FSkinData.Invalidate;
     end;

@@ -130,24 +130,26 @@ type
 
   TDefaultColors = record
   const
-    SelectionColor = $00A56D53;
-    SearchHighlighter = $0078AAFF;
-    SearchInSelectionBackground = $00FCFDCD;
     ActiveLineBackground = $00E6FAFF;
-    ActiveLineForeground = TColors.SysNone;
     ActiveLineBackgroundUnfocused = $00E6FAFF;
+    ActiveLineForeground = TColors.SysNone;
     ActiveLineForegroundUnfocused = TColors.SysNone;
+    Indent = $00CC9999;
+    IndentHighlight = $00CC9999;
     LeftMarginBackground = $00FFFFFF;
     LeftMarginFontForeground = $00CC9999;
-    SearchMapActiveLine = $00F4F4F4;
-    IndentHighlight = $00CC9999;
-    Indent = $00CC9999;
     MatchingPairUnderline = $00CC9999;
-    MinimapVisibleLines = $00E6FAFF;
     MinimapBookmark = TColors.Green;
+    MinimapVisibleLines = $00E6FAFF;
+    PaleRed = $00E6E6FC;
+    Red = $006B6BFF;
+    SearchHighlighter = $0078AAFF;
+    SearchInSelectionBackground = $00FCFDCD;
+    SearchMapActiveLine = $00F4F4F4;
+    SelectionColor = $00A56D53;
+    SyncEditBackground = $00FCFDCD;
     WordWrapIndicatorArrow = TColors.Navy;
     WordWrapIndicatorLines = TColors.Black;
-    SyncEditBackground = $00FCFDCD;
   end;
 
   THighlighterAttribute = record

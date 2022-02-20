@@ -179,8 +179,6 @@ begin
 end;
 
 procedure TTextEditorCompareScrollBar.Paint;
-const
-  CPaleRed: TColor = $E6E6FC;
 var
   LClipRect: TRect;
   LIndex, LLine, LHalfWidth: Integer;
@@ -201,38 +199,46 @@ begin
 
   Canvas.Pen.Width := 1;
   Canvas.Pen.Style := psSolid;
-  Canvas.Pen.Color := TColors.Red;
+  Canvas.Pen.Color := TDefaultColors.Red;
+
   LLine := 1;
   LHalfWidth := ClientWidth div 2;
+
   for LIndex := FScrollBarTopLine to Min(FScrollBarTopLine + ClientHeight, FEditorLeft.Lines.Count - 1) do
   begin
     if (LLine >= FTopLine - FScrollBarTopLine) and (LLine < FTopLine - FScrollBarTopLine + FVisibleLines) then
-      Canvas.Pen.Color := TColors.Red
+      Canvas.Pen.Color := TDefaultColors.Red
     else
-      Canvas.Pen.Color := CPaleRed;
+      Canvas.Pen.Color := TDefaultColors.PaleRed;
 
     LStringRecord := FEditorLeft.Lines.Items^[LIndex];
+
     if sfModify in LStringRecord.Flags then
     begin
       Canvas.MoveTo(0, LLine);
       Canvas.LineTo(LHalfWidth, LLine);
     end;
+
     if sfEmptyLine in LStringRecord.Flags then
     begin
       Canvas.MoveTo(LHalfWidth, LLine);
       Canvas.LineTo(Width, LLine);
     end;
+
     LStringRecord := FEditorRight.Lines.Items^[LIndex];
+
     if sfModify in LStringRecord.Flags then
     begin
       Canvas.MoveTo(LHalfWidth, LLine);
       Canvas.LineTo(Width, LLine);
     end;
+
     if sfEmptyLine in LStringRecord.Flags then
     begin
       Canvas.MoveTo(0, LLine);
       Canvas.LineTo(LHalfWidth, LLine);
     end;
+
     Inc(LLine);
   end;
 

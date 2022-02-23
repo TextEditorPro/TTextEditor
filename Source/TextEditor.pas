@@ -19200,7 +19200,9 @@ begin
     Exit;
 
   LOldWrap := FWordWrap.Active;
-  UpdateWordWrap(False);
+
+  if not (csDestroying in ComponentState) then
+    UpdateWordWrap(False);
 
   FLines.OnCleared := FEvents.OnChainLinesCleared;
   FLines.OnDeleted := FEvents.OnChainLinesDeleted;

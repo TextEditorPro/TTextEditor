@@ -14,7 +14,6 @@ function CharInString(const AChar: Char; const AString: string): Boolean; inline
 function ColorToHex(const AColor: TColor): string;
 function ConvertTabs(const ALine: string; ATabWidth: Integer; var AHasTabs: Boolean; const AColumns: Boolean): string;
 function DeleteWhitespace(const AValue: string): string;
-function FastPos(const ASubStr, AStr: string; AOffset: Integer = 1): Integer;
 function GetClipboardText: string;
 function GetPosition(const AChar, ALine: Integer): TTextEditorTextPosition; inline;
 function GetViewPosition(const AColumn: Integer; const ARow: Integer): TTextEditorViewPosition; inline;
@@ -156,65 +155,6 @@ begin
   end;
 end;
 
-function FastPos(const ASubStr, AStr: string; AOffset: Integer = 1): Integer;
-{$IFNDEF CPU32BITS}
-type
-  PUInt32 = ^UInt32;
-  PUInt16 = ^UInt16;
-var
-  LSubStrTip: UInt32;
-  LPSubStr: PChar;
-  LPStr, LPEnd: PChar;
-  LLengthSubStr: Integer;
-  LCmpMemOffset: Integer;
-{$ENDIF}
-begin
-{$IFDEF CPU32BITS}
-  Result := System.Pos(ASubStr, AStr, AOffset);
-{$ELSE}
-  Result := 0;
-
-  if AOffset - 1 + Length(ASubStr) > Length(AStr) then
-    Exit;
-
-  LPStr := PChar(AStr) + AOffset - 1;
-  LPEnd := LPStr + Length(AStr) - Length(ASubStr) + 1;
-  case Length(ASubStr) of
-    0: Exit;
-    1:
-      begin
-        LSubStrTip := PUInt16(ASubStr)^;
-        while LPStr < LPEnd do
-        if PUInt16(LPStr)^ = LSubStrTip then
-          Exit(LPStr - PChar(AStr) + 1)
-        else
-          Inc(LPStr);
-      end;
-    2:
-      begin
-        LSubStrTip := PUInt32(ASubStr)^;
-        while LPStr < LPEnd do
-        if PUInt32(AStr)^ = LSubStrTip then
-          Exit(LPStr - PChar(AStr) + 1)
-        else
-          Inc(LPStr);
-      end;
-    else
-      begin
-        LCmpMemOffset := SizeOf(UInt32) div SizeOf(Char);
-        LPSubStr := PChar(ASubStr) + LCmpMemOffset;
-        LLengthSubStr := Length(ASubStr) - LCmpMemOffset;
-        LSubStrTip := PUInt32(ASubStr)^;
-        while LPStr < LPEnd do
-        if (PUInt32(LPStr)^ = LSubStrTip) and CompareMem(LPStr + LCmpMemOffset, LPSubStr, LLengthSubStr * SizeOf(Char)) then
-          Exit(LPStr - PChar(AStr) + 1)
-        else
-          Inc(LPStr);
-      end;
-  end;
-{$ENDIF}
-end;
-
 function ActivateDropShadow(const AHandle: THandle): Boolean;
 
   function IsXP: Boolean;
@@ -315,7 +255,7 @@ begin
   LPosition := 1;
   while True do
   begin
-    LPosition := FastPos(TControlCharacters.Tab, Result, LPosition);
+    LPosition := Pos(TControlCharacters.Tab, Result, LPosition);
     if LPosition = 0 then
       Break;
 

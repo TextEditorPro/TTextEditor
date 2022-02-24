@@ -839,9 +839,9 @@ begin
   inherited;
 
   LString := TextEditor.Utils.Trim(AString);
-  LDotPosition := FastPos(',', LString);
-  LOpenPosition := FastPos('(', LString);
-  LClosePosition := FastPos(')', LString);
+  LDotPosition := Pos(',', LString);
+  LOpenPosition := Pos('(', LString);
+  LClosePosition := Pos(')', LString);
   if (not((LDotPosition = 0) or (LOpenPosition = 0) or (LClosePosition = 0))) and ((LDotPosition > LOpenPosition) and
     (LDotPosition < LClosePosition)) then
   begin
@@ -849,7 +849,7 @@ begin
     X := StrToIntDef(LValue, 1);
     Delete(LString, 1, LDotPosition);
     LString := TextEditor.Utils.Trim(LString);
-    LClosePosition := FastPos(')', LString);
+    LClosePosition := Pos(')', LString);
     LValue := Copy(LString, 1, LClosePosition - 1);
     Y := StrToIntDef(LValue, 1);
     Position := GetPosition(X, Y);
@@ -913,7 +913,7 @@ var
 
 begin
   LString := AString;
-  LOpenPosition := FastPos('''', LString);
+  LOpenPosition := Pos('''', LString);
   LClosePosition := WideLastDelimiter('''', LString);
   LValue := Copy(LString, LOpenPosition + 1, LClosePosition - LOpenPosition - 1);
   Value := StringReplace(LValue, '''''', '''', [rfReplaceAll]);

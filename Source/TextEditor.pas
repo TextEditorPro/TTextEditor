@@ -44,7 +44,10 @@ type
     TTextEditorEvents = record
       OnAfterBookmarkPlaced: TTextEditorBookmarkPlacedEvent;
       OnAfterDeleteBookmark: TTextEditorBookmarkDeletedEvent;
+      OnAfterDeleteLine: TNotifyEvent;
       OnAfterDeleteMark: TNotifyEvent;
+      OnAfterDeleteSelection: TNotifyEvent;
+      OnAfterLineBreak: TNotifyEvent;
       OnAfterLinePaint: TTextEditorLinePaintEvent;
       OnAfterMarkPanelPaint: TTextEditorMarkPanelPaintEvent;
       OnAfterMarkPlaced: TNotifyEvent;
@@ -878,7 +881,10 @@ type
     property MouseScrollCursors[const AIndex: Integer]: HCursor read GetMouseScrollCursors write SetMouseScrollCursors;
     property OnAfterBookmarkPlaced: TTextEditorBookmarkPlacedEvent read FEvents.OnAfterBookmarkPlaced write FEvents.OnAfterBookmarkPlaced;
     property OnAfterDeleteBookmark: TTextEditorBookmarkDeletedEvent read FEvents.OnAfterDeleteBookmark write FEvents.OnAfterDeleteBookmark;
+    property OnAfterDeleteLine: TNotifyEvent read FEvents.OnAfterDeleteLine write FEvents.OnAfterDeleteLine;
     property OnAfterDeleteMark: TNotifyEvent read FEvents.OnAfterDeleteMark write FEvents.OnAfterDeleteMark;
+    property OnAfterDeleteSelection: TNotifyEvent read FEvents.OnAfterDeleteSelection write FEvents.OnAfterDeleteSelection;
+    property OnAfterLineBreak: TNotifyEvent read FEvents.OnAfterLineBreak write FEvents.OnAfterLineBreak;
     property OnAfterLinePaint: TTextEditorLinePaintEvent read FEvents.OnAfterLinePaint write FEvents.OnAfterLinePaint;
     property OnAfterMarkPanelPaint: TTextEditorMarkPanelPaintEvent read FEvents.OnAfterMarkPanelPaint write FEvents.OnAfterMarkPanelPaint;
     property OnAfterMarkPlaced: TNotifyEvent read FEvents.OnAfterMarkPlaced write FEvents.OnAfterMarkPlaced;
@@ -4766,6 +4772,9 @@ begin
   finally
     FUndoList.EndBlock;
   end;
+
+  if Assigned(FEvents.OnAfterDeleteLine) then
+    FEvents.OnAfterDeleteLine(Self);
 end;
 
 procedure TCustomTextEditor.DeleteText(const ACommand: TTextEditorCommand);
@@ -5184,7 +5193,7 @@ begin
     if LLineText <> '' then
     while LIndex < LLength - 1 do
     begin
-      if FastPos(FHighlighter.Comments.BlockComments[LIndex], LLineText) = 1 then
+      if Pos(FHighlighter.Comments.BlockComments[LIndex], LLineText) = 1 then
       begin
         LCommentIndex := LIndex;
         Break;
@@ -6022,6 +6031,9 @@ begin
     TextPosition := LTextPosition;
 
     EnsureCursorPositionVisible;
+
+  if Assigned(FEvents.OnAfterLineBreak) then
+    FEvents.OnAfterLineBreak(Self);
   finally
     UndoList.EndBlock;
   end;
@@ -6076,7 +6088,7 @@ begin
       if LLineText <> '' then
       while LIndex < LLength do
       begin
-        if FastPos(FHighlighter.Comments.LineComments[LIndex], LLineText) = 1 then
+        if Pos(FHighlighter.Comments.LineComments[LIndex], LLineText) = 1 then
         begin
           LCommentIndex := LIndex;
           Break;
@@ -8168,7 +8180,7 @@ var
           begin
             if LInsideBlockComment then
             begin
-              LInsideBlockComment := FastPos(FHighlighter.Comments.BlockComments[LBlockCommentIndex], LTextLine) = 0;
+              LInsideBlockComment := Pos(FHighlighter.Comments.BlockComments[LBlockCommentIndex], LTextLine) = 0;
               if LInsideBlockComment then
                 Continue;
             end
@@ -8179,7 +8191,7 @@ var
               LLength := Length(FHighlighter.Comments.LineComments);
               while LCommentIndex < LLength do
               begin
-                if FastPos(FHighlighter.Comments.LineComments[LCommentIndex], LTextLine) = 1 then
+                if Pos(FHighlighter.Comments.LineComments[LCommentIndex], LTextLine) = 1 then
                 begin
                   LCommentFound := True;
                   Break;
@@ -8196,8 +8208,8 @@ var
                 LLength := Length(FHighlighter.Comments.BlockComments);
                 while LCommentIndex < LLength do
                 begin
-                  if (FastPos(FHighlighter.Comments.BlockComments[LCommentIndex], LTextLine) <> 0) and
-                    (FastPos(FHighlighter.Comments.BlockComments[LCommentIndex + 1], LTextLine) = 0)then
+                  if (Pos(FHighlighter.Comments.BlockComments[LCommentIndex], LTextLine) <> 0) and
+                    (Pos(FHighlighter.Comments.BlockComments[LCommentIndex + 1], LTextLine) = 0)then
                   begin
                     LInsideBlockComment := True;
                     LBlockCommentIndex := LCommentIndex + 1;
@@ -10425,7 +10437,7 @@ begin
 
   if FCompletionProposal.Active and FCompletionProposal.Trigger.Active then
   begin
-    if FastPos(LKey, FCompletionProposal.Trigger.Chars) > 0 then
+    if Pos(LKey, FCompletionProposal.Trigger.Chars) > 0 then
     begin
       FCompletionProposalTimer.Interval := FCompletionProposal.Trigger.Interval;
       FCompletionProposalTimer.Enabled := True;
@@ -10955,7 +10967,7 @@ begin
         TKeyCommands.SelectionLeft, TKeyCommands.Right, TKeyCommands.SelectionRight:
         ;
       TKeyCommands.Paste:
-        if FastPos(TControlCharacters.CarriageReturn, GetClipboardText) <> 0 then
+        if Pos(TControlCharacters.CarriageReturn, GetClipboardText) <> 0 then
           LEditorCommand := TKeyCommands.None;
       TKeyCommands.LineBreak:
         FSyncEdit.Visible := False;
@@ -11045,6 +11057,7 @@ begin
     if FLeftMargin.LineNumbers.Visible and FLeftMargin.Autosize then
       FLeftMargin.AutosizeDigitCount(FLines.Count);
     UpdateScrollBars;
+    Invalidate;
   end;
 end;
 
@@ -11240,11 +11253,14 @@ var
     for LMarkIndex := 0 to AMarkList.Count - 1 do
     begin
       LMark := AMarkList[LMarkIndex];
+
       if InRange(LMark.Line, LIndex, LIndex + ACount) then
         LMark.Line := LIndex
       else
       if LMark.Line > LIndex then
-        LMark.Line := LMark.Line - ACount
+        LMark.Line := LMark.Line - ACount;
+
+      LMark.Line := Min(LMark.Line, FLines.Count - 1);
     end;
   end;
 
@@ -15023,7 +15039,7 @@ var
             LToLineText := FLines.Items^[LFoldRange.ToLine - 1].TextLine;
             LOpenTokenEndPos := 0;
             if Assigned(LFoldRange.RegionItem) then
-              LOpenTokenEndPos := FastPos(LFoldRange.RegionItem.OpenTokenEnd, AnsiUpperCase(LFromLineText));
+              LOpenTokenEndPos := Pos(LFoldRange.RegionItem.OpenTokenEnd, AnsiUpperCase(LFromLineText));
 
             if LOpenTokenEndPos > 0 then
             begin
@@ -15042,7 +15058,7 @@ var
                   Break;
                 LOpenTokenEndPos := 0;
                 if Assigned(LFoldRange.RegionItem) then
-                  LOpenTokenEndPos := FastPos(LFoldRange.RegionItem.OpenTokenEnd, AnsiUpperCase(LFromLineText),
+                  LOpenTokenEndPos := Pos(LFoldRange.RegionItem.OpenTokenEnd, AnsiUpperCase(LFromLineText),
                     LOpenTokenEndPos + 1);
               until LOpenTokenEndPos = 0;
             end;
@@ -15056,10 +15072,10 @@ var
               end
               else
                 LCurrentLineText := Copy(LFromLineText, 1, Length(LFoldRange.RegionItem.OpenToken) +
-                  FastPos(LFoldRange.RegionItem.OpenToken, AnsiUpperCase(LFromLineText)) - 1);
+                  Pos(LFoldRange.RegionItem.OpenToken, AnsiUpperCase(LFromLineText)) - 1);
 
               if LFoldRange.RegionItem.CloseToken <> '' then
-                if FastPos(LFoldRange.RegionItem.CloseToken, AnsiUpperCase(LToLineText)) <> 0 then
+                if Pos(LFoldRange.RegionItem.CloseToken, AnsiUpperCase(LToLineText)) <> 0 then
                 begin
                   LCurrentLineText := LCurrentLineText + '..' + TextEditor.Utils.TrimLeft(LToLineText);
                   if LIsSelectionInsideLine then
@@ -15503,7 +15519,7 @@ begin
         LLineText := FLines.ExpandedStrings[LFoldRange.FromLine - 1];
 
         LOpenLineText := AnsiUpperCase(LLineText);
-        LTempPosition := FastPos(LFoldRange.RegionItem.OpenToken, LOpenLineText);
+        LTempPosition := Pos(LFoldRange.RegionItem.OpenToken, LOpenLineText);
 
         FMatchingPair.CurrentMatch.OpenToken := System.Copy(LLineText, LTempPosition,
           Length(LFoldRange.RegionItem.OpenToken + LFoldRange.RegionItem.OpenTokenCanBeFollowedBy));
@@ -15511,7 +15527,7 @@ begin
 
         LLine := LFoldRange.ToLine;
         LLineText := FLines.ExpandedStrings[LLine - 1];
-        LTempPosition := FastPos(LFoldRange.RegionItem.CloseToken, AnsiUpperCase(LLineText));
+        LTempPosition := Pos(LFoldRange.RegionItem.CloseToken, AnsiUpperCase(LLineText));
         FMatchingPair.CurrentMatch.CloseToken := System.Copy(LLineText, LTempPosition,
           Length(LFoldRange.RegionItem.CloseToken));
 
@@ -15658,15 +15674,16 @@ var
     FLines.BeginUpdate;
     case FSelection.ActiveMode of
       smNormal:
+        if FLines.Count > 0 then
         begin
-          if FLines.Count > 0 then
-          begin
-            LTempString := Copy(FLines[LBeginTextPosition.Line], 1, LBeginTextPosition.Char - 1) +
-              Copy(FLines[LEndTextPosition.Line], LEndTextPosition.Char, MaxInt);
-            FLines.DeleteLines(LBeginTextPosition.Line, Min(LEndTextPosition.Line - LBeginTextPosition.Line,
-              FLines.Count - LBeginTextPosition.Line));
-            FLines[LBeginTextPosition.Line]  := LTempString;
-          end;
+          LTempString := Copy(FLines[LBeginTextPosition.Line], 1, LBeginTextPosition.Char - 1) +
+            Copy(FLines[LEndTextPosition.Line], LEndTextPosition.Char, MaxInt);
+          FLines.DeleteLines(LBeginTextPosition.Line, Min(LEndTextPosition.Line - LBeginTextPosition.Line,
+            FLines.Count - LBeginTextPosition.Line));
+          FLines[LBeginTextPosition.Line]  := LTempString;
+
+          if Assigned(FEvents.OnAfterDeleteSelection) then
+            FEvents.OnAfterDeleteSelection(Self);
         end;
       smColumn:
         begin
@@ -18950,7 +18967,7 @@ begin
     FBookmarkList.Sort(CompareBookmarkLines);
 
     if Assigned(FEvents.OnAfterBookmarkPlaced) then
-      FEvents.OnAfterBookmarkPlaced(Self, AIndex, ATextPosition);
+      FEvents.OnAfterBookmarkPlaced(Self, AIndex, AImageIndex, ATextPosition);
   end;
 end;
 

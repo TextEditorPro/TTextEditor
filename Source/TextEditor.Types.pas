@@ -300,7 +300,7 @@ type
   TOnCompletionProposalExecute = procedure(const ASender: TObject; var AParams: TCompletionProposalParams) of object;
 
   TTextEditorBookmarkDeletedEvent = procedure(const ASender: TObject; const ABookmark: TTextEditorMark) of object;
-  TTextEditorBookmarkPlacedEvent = procedure(const ASender: TObject; const AIndex: Integer; const ATextPosition: TTextEditorTextPosition) of object;
+  TTextEditorBookmarkPlacedEvent = procedure(const ASender: TObject; const AIndex: Integer; const AImageIndex: Integer; const ATextPosition: TTextEditorTextPosition) of object;
   TTextEditorCaretChangedEvent = procedure(const ASender: TObject; const X, Y: Integer; const AOffset: Integer) of object;
   TTextEditorCodeColorEvent = procedure(const AEvent: TTextEditorColorChanges) of object;
   TTextEditorCodeFoldingChangeEvent = procedure(const AEvent: TTextEditorCodeFoldingChanges) of object;

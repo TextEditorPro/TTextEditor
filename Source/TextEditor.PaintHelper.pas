@@ -341,15 +341,16 @@ end;
 
 function TTextEditorFontStock.InternalCreateFont(const AStyle: TFontStyles): HFont;
 const
-  CBolds: array [Boolean] of Integer = (400, 700);
+  FontWeights: array [Boolean] of Integer = (FW_NORMAL, FW_BOLD);
 begin
   with FBaseLogFont do
   begin
-    lfWeight := CBolds[fsBold in AStyle];
+    lfWeight := FontWeights[fsBold in AStyle];
     lfItalic := Ord(BOOL(fsItalic in AStyle));
     lfUnderline := Ord(BOOL(fsUnderline in AStyle));
     lfStrikeOut := Ord(BOOL(fsStrikeOut in AStyle));
   end;
+
   Result := CreateFontIndirect(FBaseLogFont);
 end;
 

@@ -200,11 +200,11 @@ begin
       for LIndex := 0 to AValue.Count - 1 do
       begin
         LLine := ConvertTabs(AValue[LIndex], FTabWidth, LHasTabs, FColumns);
-        LPosition := FastPos(TControlCharacters.Tab, LLine);
+        LPosition := Pos(TControlCharacters.Tab, LLine);
         while LPosition > 0 do
         begin
           LLine[LPosition] := ' ';
-          LPosition := FastPos(TControlCharacters.Tab, LLine);
+          LPosition := Pos(TControlCharacters.Tab, LLine);
         end;
         Add(LLine);
       end;

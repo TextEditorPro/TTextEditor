@@ -49,7 +49,7 @@ begin
   if System.SysUtils.Trim(AString) = '' then
     Result := DefaultColor
   else
-  if FastPos('clWeb', AString) = 1 then
+  if Pos('clWeb', AString) = 1 then
     Result := WebColorNameToColor(AString)
   else
     Result := StringToColor(AString);
@@ -77,13 +77,13 @@ function StrToFontStyle(const AString: string): TFontStyles;
 begin
   Result := [];
 
-  if FastPos(TFontStyleNames.Bold, AString) > 0 then
+  if Pos(TFontStyleNames.Bold, AString) > 0 then
     Include(Result, fsBold);
-  if FastPos(TFontStyleNames.Italic, AString) > 0 then
+  if Pos(TFontStyleNames.Italic, AString) > 0 then
     Include(Result, fsItalic);
-  if FastPos(TFontStyleNames.Underline, AString) > 0 then
+  if Pos(TFontStyleNames.Underline, AString) > 0 then
     Include(Result, fsUnderline);
-  if FastPos(TFontStyleNames.StrikeOut, AString) > 0 then
+  if Pos(TFontStyleNames.StrikeOut, AString) > 0 then
     Include(Result, fsStrikeOut);
 end;
 

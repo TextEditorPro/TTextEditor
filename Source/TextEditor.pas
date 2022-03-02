@@ -19483,17 +19483,21 @@ begin
     if CommonWndProc(AMessage, FSkinData) then
       Exit;
 {$ENDIF}
+
     inherited;
 
-    if (AMessage.Msg = WM_IME_NOTIFY) and Assigned(FCompletionProposalPopupWindow) then
-      SetCompletionProposalPopupWindowLocation;
+    case AMessage.Msg of
+      WM_IME_NOTIFY:
+        if Assigned(FCompletionProposalPopupWindow) then
+          SetCompletionProposalPopupWindowLocation;
+      WM_SIZE:
+        Invalidate;
+    end;
 
 {$IFDEF ALPHASKINS}
     case AMessage.Msg of
       CM_SHOWINGCHANGED:
         RefreshEditScrolls(SkinData, FScrollHelper.Wnd);
-      WM_SIZE:
-        Invalidate;
       CM_VISIBLECHANGED, CM_ENABLEDCHANGED, WM_SETFONT:
         FSkinData.Invalidate;
     end;

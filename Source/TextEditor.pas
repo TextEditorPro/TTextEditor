@@ -9279,7 +9279,7 @@ begin
       LScrollInfo.nMin := 0;
       if LVerticalMaxScroll <= TMaxValues.ScrollRange then
       begin
-        LScrollInfo.nMax := Max(0, LVerticalMaxScroll) - 1;
+        LScrollInfo.nMax := Max(0, LVerticalMaxScroll);
         LScrollInfo.nPage := VisibleLineCount;
         LScrollInfo.nPos := TopLine - 1;
       end

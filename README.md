@@ -18,7 +18,7 @@ Development takes place elsewhere.
   - Snippets
 - Data-aware
 - Highlighters (JSON file/stream)
-- HTML export
+- HTML export (clipboard support)
 - Large file support
 - Left margin
 	- Bookmarks

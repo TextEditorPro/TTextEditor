@@ -708,6 +708,7 @@ type
     function ReplaceSelectedText(const AReplaceText: string; const ASearchText: string; const ADeleteLine: Boolean): Boolean;
     function ReplaceText(const ASearchText: string; const AReplaceText: string; const APageIndex: Integer = -1): Integer;
     function SearchStatus: string;
+    function TextToHTML(const AClipboardFormat: Boolean = False): string;
     function TextToViewPosition(const ATextPosition: TTextEditorTextPosition): TTextEditorViewPosition;
     function TranslateKeyCode(const ACode: Word; const AShift: TShiftState): TTextEditorCommand;
     function ViewPositionToPixels(const AViewPosition: TTextEditorViewPosition; const ALineText: string = ''): TPoint;
@@ -10270,13 +10271,20 @@ begin
 end;
 
 procedure TCustomTextEditor.DoCopyToClipboard(const AText: string);
+var
+  LHTML: string;
 begin
   if AText = '' then
     Exit;
 
+  if eoAddHTMLCodeToClipboard in FOptions then
+    LHTML := TextToHTML(True)
+  else
+    LHTML := '';
+
   Screen.Cursor := crHourGlass;
   try
-    SetClipboardText(AText);
+    SetClipboardText(AText, LHTML);
   finally
     Screen.Cursor := crDefault;
   end;
@@ -18448,9 +18456,19 @@ end;
 
 procedure TCustomTextEditor.ExportToHTML(const AStream: TStream; const ACharSet: string = ''; const AEncoding: System.SysUtils.TEncoding = nil);
 begin
-  with TTextEditorExportHTML.Create(FLines, FHighlighter, Font, ACharSet) do
+  with TTextEditorExportHTML.Create(Self, Font, ACharSet) do
   try
     SaveToStream(AStream, AEncoding);
+  finally
+    Free;
+  end;
+end;
+
+function TCustomTextEditor.TextToHTML(const AClipboardFormat: Boolean = False): string;
+begin
+  with TTextEditorExportHTML.Create(Self, Font, '') do
+  try
+    Result := AsText(AClipboardFormat);
   finally
     Free;
   end;

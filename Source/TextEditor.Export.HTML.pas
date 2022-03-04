@@ -3,48 +3,45 @@
 interface
 
 uses
-  System.Classes, System.SysUtils, Vcl.Graphics, TextEditor.Highlighter, TextEditor.Lines;
+  System.Classes, System.SysUtils, Vcl.Controls, Vcl.Graphics, TextEditor.Highlighter.Attributes;
 
 type
   TTextEditorExportHTML = class(TObject)
   private
     FCharSet: string;
     FFont: TFont;
-    FHighlighter: TTextEditorHighlighter;
-    FLines: TTextEditorLines;
     FStringList: TStrings;
-    procedure CreateHTMLDocument;
-    procedure CreateHeader;
-    procedure CreateInternalCSS;
-    procedure CreateLines;
+    FTextEditor: TCustomControl;
+    function GetStyle(const AHighlighterAttribute: TTextEditorHighlighterAttribute): string;
     procedure CreateFooter;
+    procedure CreateHeader;
+    procedure CreateHTMLDocument;
+    procedure CreateLines;
   public
-    constructor Create(const ALines: TTextEditorLines; const AHighlighter: TTextEditorHighlighter; const AFont: TFont;
-      const ACharSet: string); overload;
+    constructor Create(const ATextEditor: TCustomControl; const AFont: TFont; const ACharSet: string); overload;
     destructor Destroy; override;
-
+    function AsText(const AClipboardFormat: Boolean = False): string;
     procedure SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding);
   end;
 
 implementation
 
 uses
-  Winapi.Windows, System.UITypes, TextEditor.Consts, TextEditor.Highlighter.Attributes, TextEditor.Highlighter.Colors,
-  TextEditor.Utils;
+  Winapi.Windows, System.NetEncoding, System.UITypes, TextEditor, TextEditor.Consts, TextEditor.Utils;
 
-constructor TTextEditorExportHTML.Create(const ALines: TTextEditorLines; const AHighlighter: TTextEditorHighlighter;
-  const AFont: TFont; const ACharSet: string);
+constructor TTextEditorExportHTML.Create(const ATextEditor: TCustomControl; const AFont: TFont; const ACharSet: string);
 begin
   inherited Create;
 
-  FStringList := TStringList.Create;
+  FTextEditor := ATextEditor;
 
   FCharSet := ACharSet;
   if FCharSet = '' then
     FCharSet := 'utf-8';
-  FLines := ALines;
-  FHighlighter := AHighlighter;
+
   FFont := AFont;
+
+  FStringList := TStringList.Create;
 end;
 
 destructor TTextEditorExportHTML.Destroy;
@@ -56,11 +53,6 @@ end;
 
 procedure TTextEditorExportHTML.CreateHTMLDocument;
 begin
-  if not Assigned(FHighlighter) then
-    Exit;
-  if FLines.Count = 0 then
-    Exit;
-
   CreateHeader;
   CreateLines;
   CreateFooter;
@@ -73,106 +65,107 @@ begin
   FStringList.Add('<html>');
   FStringList.Add('<head>');
 	FStringList.Add('  <meta charset="' + FCharSet + '">');
-
-  CreateInternalCSS;
-
   FStringList.Add('</head>');
   FStringList.Add('');
-  FStringList.Add('<body class="Editor">');
+  FStringList.Add('<body>');
 end;
 
-procedure TTextEditorExportHTML.CreateInternalCSS;
-var
-  LIndex: Integer;
-  LStyles: TList;
-  LElement: PTextEditorHighlighterElement;
+function TTextEditorExportHTML.GetStyle(const AHighlighterAttribute: TTextEditorHighlighterAttribute): string;
 begin
-  FStringList.Add('  <style>');
+  Result := 'box-sizing:border-box;font-family:' + FFont.Name +
+    ';font-size:' + IntToStr(FFont.Size) + 'pt' +
+    ';color:' + ColorToHex(AHighlighterAttribute.Foreground).ToLower +
+    ';background-color:' + ColorToHex(AHighlighterAttribute.Background).ToLower;
 
-  FStringList.Add('    body {');
-  FStringList.Add('      font-family: ' + FFont.Name + ';');
-  FStringList.Add('      font-size: ' + IntToStr(FFont.Size) + 'px;');
-  FStringList.Add('    }');
+  if TFontStyle.fsBold in AHighlighterAttribute.FontStyles then
+    Result := Result + ';font-weight:700'
+  else
+    Result := Result + ';font-weight:400';
 
-  LStyles := FHighlighter.Colors.Styles;
-  for LIndex := 0 to LStyles.Count - 1 do
-  begin
-    LElement := LStyles.Items[LIndex];
+  if TFontStyle.fsItalic in AHighlighterAttribute.FontStyles then
+    Result := Result + ';font-style:italic';
 
-    FStringList.Add('    .' + LElement^.Name + ' { ');
-    FStringList.Add('      color: ' + ColorToHex(LElement^.Foreground) + ';');
-    FStringList.Add('      background-color: ' + ColorToHex(LElement^.Background) + ';');
+  if TFontStyle.fsUnderline in AHighlighterAttribute.FontStyles then
+    Result := Result + ';text-decoration:underline';
 
-    if TFontStyle.fsBold in LElement^.FontStyles then
-      FStringList.Add('      font-weight: bold;');
-
-    if TFontStyle.fsItalic in LElement^.FontStyles then
-      FStringList.Add('      font-style: italic;');
-
-    if TFontStyle.fsUnderline in LElement^.FontStyles then
-      FStringList.Add('      text-decoration: underline;');
-
-    if TFontStyle.fsStrikeOut in LElement^.FontStyles then
-      FStringList.Add('      text-decoration: line-through;');
-
-    FStringList.Add('    }');
-    FStringList.Add('');
-  end;
-  FStringList.Add('  </style>');
+  if TFontStyle.fsStrikeOut in AHighlighterAttribute.FontStyles then
+    Result := Result + ';text-decoration:line-through';
 end;
 
 procedure TTextEditorExportHTML.CreateLines;
 var
-  LIndex: Integer;
-  LTextLine, LToken: string;
+  LIndex, LStartLine, LEndLine: Integer;
+  LTextLine, LSpaces, LToken: string;
   LHighlighterAttribute: TTextEditorHighlighterAttribute;
   LPreviousElement: string;
+  LTextEditor: TTextEditor;
 begin
+  LTextEditor := FTextEditor as TTextEditor;
+
   LPreviousElement := '';
-  for LIndex := 0 to FLines.Count - 1 do
+
+  if LTextEditor.SelectionAvailable then
   begin
-    if LIndex = 0 then
-      FHighlighter.ResetRange
-    else
-      FHighlighter.SetRange(FLines.Items^[LIndex - 1].Range);
-    FHighlighter.SetLine(FLines.ExpandedStrings[LIndex]);
+    LStartLine := LTextEditor.SelectionBeginPosition.Line;
+    LEndLine := LTextEditor.SelectionEndPosition.Line;
+  end
+  else
+  begin
+    LStartLine := 0;
+    LEndLine := LTextEditor.Lines.Count - 1;
+  end;
+
+  LTextEditor.Highlighter.ResetRange;
+
+  for LIndex := LStartLine to LEndLine do
+  begin
+    if LIndex > 0 then
+      LTextEditor.Highlighter.SetRange(LTextEditor.Lines.Ranges[LIndex - 1]);
+
+    LTextEditor.Highlighter.SetLine(LTextEditor.Lines.ExpandedStrings[LIndex]);
+
+    LPreviousElement := '';
     LTextLine := '';
-    while not FHighlighter.EndOfLine do
+    LSpaces := '';
+    while not LTextEditor.Highlighter.EndOfLine do
     begin
-      LHighlighterAttribute := FHighlighter.TokenAttribute;
-      FHighlighter.GetToken(LToken);
+      LHighlighterAttribute := LTextEditor.Highlighter.TokenAttribute;
+      LTextEditor.Highlighter.GetToken(LToken);
+
+      LToken := TNetEncoding.HTML.Encode(LToken);
+
       if LToken = TCharacters.Space then
-        LTextLine := LTextLine + '&nbsp;'
-      else
-      if LToken = '&' then
-        LTextLine := LTextLine + '&amp;'
-      else
-      if LToken = '<' then
-        LTextLine := LTextLine + '&lt;'
-      else
-      if LToken = '>' then
-        LTextLine := LTextLine + '&gt;'
-      else
-      if LToken = '"' then
-        LTextLine := LTextLine + '&quot;'
+        LSpaces := LSpaces + '&nbsp;'
       else
       if Assigned(LHighlighterAttribute) then
       begin
         if (LPreviousElement <> '') and (LPreviousElement <> LHighlighterAttribute.Element) then
           LTextLine := LTextLine + '</span>';
+
         if LPreviousElement <> LHighlighterAttribute.Element then
-          LTextLine := LTextLine + '<span class="' + LHighlighterAttribute.Element + '">';
+          LTextLine := LTextLine + '<span style="' + GetStyle(LHighlighterAttribute) + '">';
+
+        if LSpaces <> '' then
+        begin
+          LTextLine := LTextLine + LSpaces;
+          LSpaces := '';
+        end;
+
         LTextLine := LTextLine + LToken;
         LPreviousElement := LHighlighterAttribute.Element;
       end
       else
         LTextLine := LTextLine + LToken;
-      FHighlighter.Next;
+
+      LTextEditor.Highlighter.Next;
     end;
-    FStringList.Add(LTextLine + '<br>');
+
+    FStringList.Add('<p style="box-sizing:border-box;margin:0px;' +
+      'line-height:' + IntToStr(LTextEditor.Font.Size + 1) + 'pt;' +
+      'color:' + ColorToHex(LTextEditor.Colors.Foreground).ToLower + ';' +
+      'background-color:' + ColorToHex(LTextEditor.Colors.Background).ToLower + '">' +
+      LTextLine + '<br style="box-sizing:border-box"></p>');
   end;
-  if LPreviousElement <> '' then
-    FStringList.Add('</span>');
 end;
 
 procedure TTextEditorExportHTML.CreateFooter;
@@ -184,9 +177,23 @@ end;
 procedure TTextEditorExportHTML.SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding);
 begin
   CreateHTMLDocument;
+
   if not Assigned(AEncoding) then
     AEncoding := TEncoding.UTF8;
+
   FStringList.SaveToStream(AStream, AEncoding);
+end;
+
+function TTextEditorExportHTML.AsText(const AClipboardFormat: Boolean = False): string;
+begin
+  FStringList.Clear;
+
+  if AClipboardFormat then
+    CreateLines
+  else
+    CreateHTMLDocument;
+
+  Result := FStringList.Text;
 end;
 
 end.

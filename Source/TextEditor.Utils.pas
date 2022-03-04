@@ -1,4 +1,5 @@
 ﻿{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
+{$WARN IMPLICIT_STRING_CAST OFF}
 unit TextEditor.Utils;
 
 interface
@@ -36,17 +37,20 @@ function WrapTextEx(const ALine: string; const ABreakChars: TSysCharSet; const A
 procedure ClearList(var AList: TList);
 procedure FreeList(var AList: TList);
 procedure ResizeBitmap(const ABitmap: TBitmap; const ANewWidth, ANewHeight: Integer);
-procedure SetClipboardText(const AText: string);
+procedure SetClipboardText(const AText: string; const AHTML: string);
 
 
 implementation
 
 uses
-  System.Character, Vcl.ClipBrd, Vcl.Controls, Vcl.Forms, TextEditor.Consts
+  Winapi.ActiveX, System.Character, Vcl.ClipBrd, Vcl.Controls, Vcl.Forms, TextEditor.Consts
 {$IFDEF ALPHASKINS}, sDialogs{$ELSE}, Vcl.Dialogs{$ENDIF};
 
 const
   TEXT_EDITOR_UTF8_BOM: array [0 .. 2] of Byte = ($EF, $BB, $BF);
+
+var
+  CF_HTML: TClipFormat = 0;
 
 function ToggleCase(const AValue: string): string;
 var
@@ -622,10 +626,53 @@ begin
   end;
 end;
 
-procedure SetClipboardText(const AText: string);
+function GetHTMLClipboardFormat: TClipFormat;
+begin
+  if CF_HTML = 0 then
+    CF_HTML := RegisterClipboardFormat('HTML Format');
+  Result := CF_HTML;
+end;
+
+{ https://docs.microsoft.com/en-us/troubleshoot/developer/visualstudio/cpp/general/add-html-code-clipboard }
+function FormatForClipboard(const AText: string): UTF8String;
+const
+  Version = 'Version:1.0';
+  StartHTML = 'StartHTML:';
+  EndHTML = 'EndHTML:';
+  StartFragment = 'StartFragment:';
+  EndFragment = 'EndFragment:';
+  DocType = '<!DOCTYPE>';
+  HTMLBegin = '<html><body><!--StartFragment-->';
+  HTMLEnd = '<!--EndFragment--></body></html>';
+  DescriptionLength = Length(Version) + Length(StartHTML) + Length(EndHTML) + Length(StartFragment) +
+    Length(EndFragment) + 40;
+var
+  LStartHTML: Integer;
+  LEndHTML: Integer;
+  LStartFragment: Integer;
+  LEndFragment: Integer;
+begin
+  Result := AText;
+
+  LStartHTML := DescriptionLength;
+  LStartFragment := LStartHTML + Length(DocType) + Length(HTMLBegin);
+  LEndFragment := LStartFragment + Length(Result);
+  LEndHTML := LEndFragment + Length(HTMLEnd);
+
+  Result := Version + sLineBreak +
+    Format('%s%.8d', [StartHTML, LStartHTML]) + sLineBreak +
+    Format('%s%.8d', [EndHTML, LEndHTML]) + sLineBreak +
+    Format('%s%.8d', [StartFragment, LStartFragment]) + sLineBreak +
+    Format('%s%.8d', [EndFragment, LEndFragment]) + sLineBreak +
+    DocType + HTMLBegin + Result + HTMLEnd;
+end;
+
+{ TODO: Refactor }
+procedure SetClipboardText(const AText: string; const AHTML: string);
 var
   LGlobalMem: HGlobal;
   LPGlobalLock: PByte;
+  LHTML: UTF8String;
   LLength: Integer;
 begin
   if AText.IsEmpty then
@@ -668,6 +715,27 @@ begin
         end;
       finally
         GlobalUnlock(LGlobalMem);
+      end;
+    end;
+
+    if AHTML <> '' then
+    begin
+      LHTML := FormatForClipboard(AHTML) + #0;
+      LLength := Length(LHTML);
+
+      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, (LLength + 1) * SizeOf(Char));
+      if LGlobalMem <> 0 then
+      begin
+        LPGlobalLock := GlobalLock(LGlobalMem);
+        try
+          if Assigned(LPGlobalLock) then
+          begin
+            Move(PAnsiChar(LHTML)^, LPGlobalLock^, (LLength + 1) * SizeOf(Char));
+            Clipboard.SetAsHandle(GetHTMLClipboardFormat, LGlobalMem);
+          end;
+        finally
+          GlobalUnlock(LGlobalMem);
+        end;
       end;
     end;
   finally

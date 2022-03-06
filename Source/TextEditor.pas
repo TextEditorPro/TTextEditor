@@ -17978,13 +17978,14 @@ begin
       case LCommand of
         TKeyCommands.Char, TKeyCommands.Backspace, TKeyCommands.Tab, TKeyCommands.LineBegin, TKeyCommands.LineEnd,
         TKeyCommands.Cut, TKeyCommands.Paste, TKeyCommands.Left, TKeyCommands.SelectionLeft, TKeyCommands.Right,
-        TKeyCommands.SelectionRight:
+        TKeyCommands.SelectionRight, TKeyCommands.SelectionLineBegin, TKeyCommands.SelectionLineEnd:
           begin
             LLength := 1;
             if (LCommand = TKeyCommands.Paste) and CanPaste then
               LLength := GetClipboardText.Length;
 
-            if (LCommand in [TKeyCommands.SelectionLeft, TKeyCommands.SelectionRight]) and
+            if (LCommand in [TKeyCommands.SelectionLeft, TKeyCommands.SelectionRight, TKeyCommands.SelectionLineBegin,
+              TKeyCommands.SelectionLineEnd]) and
               not FMultiEdit.SelectionAvailable then
             begin
               FMultiEdit.SelectionAvailable := True;
@@ -18057,7 +18058,7 @@ begin
 
               case LCommand of
                 TKeyCommands.Char, TKeyCommands.Paste, TKeyCommands.Backspace, TKeyCommands.Tab, TKeyCommands.LineBegin,
-                TKeyCommands.LineEnd:
+                TKeyCommands.LineEnd, TKeyCommands.SelectionLineBegin, TKeyCommands.SelectionLineEnd:
                   for LIndex2 := 0 to FMultiEdit.Carets.Count - 1 do
                   begin
                     LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex2]);
@@ -18072,9 +18073,9 @@ begin
                             if LPMultiCaretRecord^.ViewPosition.Column > 1 then
                               Dec(LPMultiCaretRecord^.ViewPosition.Column);
                         end;
-                      TKeyCommands.LineBegin:
+                      TKeyCommands.LineBegin, TKeyCommands.SelectionLineBegin:
                         LPMultiCaretRecord^.ViewPosition.Column := 1;
-                      TKeyCommands.LineEnd:
+                      TKeyCommands.LineEnd, TKeyCommands.SelectionLineEnd:
                         LPMultiCaretRecord^.ViewPosition.Column := FLines.ExpandedStringLengths[LPMultiCaretRecord^.ViewPosition.Row - 1] + 1;
                     end;
                   end;

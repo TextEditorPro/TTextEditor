@@ -12781,10 +12781,15 @@ var
   procedure DrawBookmark(const ABookmark: TTextEditorMark; var AOverlappingOffset: Integer; const AMarkRow: Integer);
   var
     LY: Integer;
+    LRow: Integer;
   begin
     CreateBookmarkImages;
 
-    LY := (AMarkRow - TopLine) * LLineHeight;
+    LRow := AMarkRow;
+    if FWordWrap.Active then
+      LRow := GetViewLineNumber(LRow);
+
+    LY := (LRow - TopLine) * LLineHeight;
     if FRuler.Visible then
       Inc(LY, FRuler.Height);
 
@@ -12797,6 +12802,7 @@ var
   procedure DrawMark(const AMark: TTextEditorMark; const AOverlappingOffset: Integer; const AMarkRow: Integer);
   var
     LY: Integer;
+    LRow: Integer;
   begin
     if Assigned(FLeftMargin.Marks.Images) then
       if AMark.ImageIndex <= FLeftMargin.Marks.Images.Count then
@@ -12809,8 +12815,12 @@ var
         if FRuler.Visible then
           Inc(LY, FRuler.Height);
 
+        LRow := AMarkRow;
+        if FWordWrap.Active then
+          LRow := GetViewLineNumber(LRow);
+
         FLeftMargin.Marks.Images.Draw(Canvas, AClipRect.Left + FLeftMargin.Marks.LeftMargin + AOverlappingOffset,
-          (AMarkRow - TopLine) * LLineHeight + LY, AMark.ImageIndex);
+          (LRow - TopLine) * LLineHeight + LY, AMark.ImageIndex);
       end;
   end;
 

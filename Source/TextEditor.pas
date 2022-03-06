@@ -179,7 +179,7 @@ type
       WheelAccumulator: Integer;
     end;
 
-    TTextEditorMultiCaret = record
+    TTextEditorMultiEdit = record
       Carets: TList;
       Draw: Boolean;
       Position: TTextEditorViewPosition;
@@ -310,7 +310,7 @@ type
     FMinimap: TTextEditorMinimap;
     FMinimapHelper: TTextEditorMinimapHelper;
     FMouse: TTextEditorMouse;
-    FMultiCaret: TTextEditorMultiCaret;
+    FMultiEdit: TTextEditorMultiEdit;
     FOptions: TTextEditorOptions;
     FOriginal: TTextEditorOriginal;
     FPaintHelper: TTextEditorPaintHelper;
@@ -1301,7 +1301,7 @@ begin
   FToggleCase.Text := '';
   FState.URIOpener := False;
   FState.ReplaceLock := False;
-  FMultiCaret.Position.Row := -1;
+  FMultiEdit.Position.Row := -1;
 
   { Code folding }
   FCodeFoldings.AllRanges := TTextEditorAllCodeFoldingRanges.Create;
@@ -2010,10 +2010,10 @@ begin
   if GetSelectionAvailable then
     Exit;
 
-  if Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) then
-  for LIndex := 0 to FMultiCaret.Carets.Count - 1 do
+  if Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) then
+  for LIndex := 0 to FMultiEdit.Carets.Count - 1 do
   begin
-    LMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex])^;
+    LMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex])^;
     if (LMultiCaretRecord.ViewPosition.Row >= FLineNumbers.TopLine) and
       (LMultiCaretRecord.ViewPosition.Row <= FLineNumbers.TopLine + VisibleLineCount) then
       PaintCaretBlock(LMultiCaretRecord.ViewPosition);
@@ -3976,9 +3976,9 @@ var
   LIndex: Integer;
 begin
   Result := False;
-  if (meoShowActiveLine in FCaret.MultiEdit.Options) and Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) then
-  for LIndex := 0 to FMultiCaret.Carets.Count - 1 do
-  if PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex])^.ViewPosition.Row = ALine then
+  if (meoShowActiveLine in FCaret.MultiEdit.Options) and Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) then
+  for LIndex := 0 to FMultiEdit.Carets.Count - 1 do
+  if PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex])^.ViewPosition.Row = ALine then
     Exit(True);
 end;
 
@@ -4927,7 +4927,7 @@ begin
   FUndoList.BeginBlock;
   FUndoList.AddChange(crCaret, LTextPosition, SelectionBeginPosition, SelectionEndPosition, '', smNormal);
 
-  if GetSelectionAvailable or FMultiCaret.SelectionAvailable then
+  if GetSelectionAvailable or FMultiEdit.SelectionAvailable then
   begin
     if FSyncEdit.Visible then
     begin
@@ -5325,7 +5325,7 @@ begin
     Inc(LTextPosition.Line);
   end;
 
-  if GetSelectionAvailable or FMultiCaret.SelectionAvailable then
+  if GetSelectionAvailable or FMultiEdit.SelectionAvailable then
   begin
     if FSyncEdit.Visible then
       FSyncEdit.MoveEndPositionChar(-FPosition.SelectionEnd.Char + FPosition.SelectionBegin.Char + 1);
@@ -5491,13 +5491,13 @@ procedure TCustomTextEditor.DoCutToClipboard;
 var
   LText: string;
 begin
-  if not ReadOnly and (GetSelectionAvailable or FMultiCaret.SelectionAvailable) then
+  if not ReadOnly and (GetSelectionAvailable or FMultiEdit.SelectionAvailable) then
   begin
     AutoCursor;
 
     FUndoList.BeginBlock;
 
-    if FMultiCaret.SelectionAvailable then
+    if FMultiEdit.SelectionAvailable then
       LText := GetMultiCaretSelectedText
     else
       LText := SelectedText;
@@ -6206,7 +6206,7 @@ var
   LLength, LCharCount: Integer;
   LSpaces: string;
 begin
-  if FMultiCaret.SelectionAvailable then
+  if FMultiEdit.SelectionAvailable then
   begin
     SetSelectedTextEmpty(AText);
     Exit;
@@ -6614,7 +6614,7 @@ begin
   LCaretHeight := 1;
   LCaretWidth := FPaintHelper.CharWidth;
 
-  if Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) or (FMultiCaret.Position.Row <> -1) then
+  if Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) or (FMultiEdit.Position.Row <> -1) then
   begin
     LBackgroundColor := FCaret.MultiEdit.Colors.Background;
     LForegroundColor := FCaret.MultiEdit.Colors.Foreground;
@@ -6931,17 +6931,17 @@ procedure TCustomTextEditor.FreeMultiCarets;
 var
   LIndex: Integer;
 begin
-  FMultiCaret.SelectionAvailable := False;
+  FMultiEdit.SelectionAvailable := False;
 
-  if Assigned(FMultiCaret.Carets) then
+  if Assigned(FMultiEdit.Carets) then
   begin
-    FMultiCaret.Timer.Enabled := False;
-    FreeAndNil(FMultiCaret.Timer);
+    FMultiEdit.Timer.Enabled := False;
+    FreeAndNil(FMultiEdit.Timer);
 
-    for LIndex := FMultiCaret.Carets.Count - 1 downto 0 do
-      Dispose(PTextEditorMultiCaretRecord(FMultiCaret.Carets.Items[LIndex]));
-    FMultiCaret.Carets.Clear;
-    FreeAndNil(FMultiCaret.Carets);
+    for LIndex := FMultiEdit.Carets.Count - 1 downto 0 do
+      Dispose(PTextEditorMultiCaretRecord(FMultiEdit.Carets.Items[LIndex]));
+    FMultiEdit.Carets.Clear;
+    FreeAndNil(FMultiEdit.Carets);
   end;
 
   if not (csDestroying in ComponentState) then
@@ -7352,7 +7352,7 @@ end;
 
 procedure TCustomTextEditor.MultiCaretTimerHandler(ASender: TObject); //FI:O804 Method parameter is declared but never used
 begin
-  FMultiCaret.Draw := not FMultiCaret.Draw;
+  FMultiEdit.Draw := not FMultiEdit.Draw;
 
   Invalidate;
 end;
@@ -7374,33 +7374,33 @@ var
   LIndex1, LIndex2: Integer;
   LPMultiCaretRecord1, LPMultiCaretRecord2: PTextEditorMultiCaretRecord;
 begin
-  if Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) then
+  if Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) then
   begin
     { Remove duplicate multi carets }
-    for LIndex1 := 0 to FMultiCaret.Carets.Count - 1 do
-      for LIndex2 := FMultiCaret.Carets.Count - 1 downto LIndex1 + 1 do
+    for LIndex1 := 0 to FMultiEdit.Carets.Count - 1 do
+      for LIndex2 := FMultiEdit.Carets.Count - 1 downto LIndex1 + 1 do
       begin
-        LPMultiCaretRecord1 := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex1]);
-        LPMultiCaretRecord2 := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex2]);
+        LPMultiCaretRecord1 := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex1]);
+        LPMultiCaretRecord2 := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex2]);
         if (LPMultiCaretRecord1^.ViewPosition.Row = LPMultiCaretRecord2^.ViewPosition.Row) and
           (LPMultiCaretRecord1^.ViewPosition.Column = LPMultiCaretRecord2^.ViewPosition.Column) then
         begin
           Dispose(LPMultiCaretRecord2);
-          FMultiCaret.Carets.Delete(LIndex2);
+          FMultiEdit.Carets.Delete(LIndex2);
         end;
       end;
     { Remove carets after line count }
-    for LIndex1 := FMultiCaret.Carets.Count - 1 downto 0 do
+    for LIndex1 := FMultiEdit.Carets.Count - 1 downto 0 do
     begin
-      LPMultiCaretRecord1 := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex1]);
+      LPMultiCaretRecord1 := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex1]);
       if LPMultiCaretRecord1^.ViewPosition.Row > FLineNumbers.Count then
       begin
         Dispose(LPMultiCaretRecord1);
-        FMultiCaret.Carets.Delete(LIndex1);
+        FMultiEdit.Carets.Delete(LIndex1);
       end;
     end;
 
-    if FMultiCaret.Carets.Count <= 1 then
+    if FMultiEdit.Carets.Count <= 1 then
       FreeMultiCarets;
   end;
 end;
@@ -9591,9 +9591,9 @@ begin
 
   FreeCompletionProposalPopupWindow;
 
-  if FMultiCaret.Position.Row <> -1 then
+  if FMultiEdit.Position.Row <> -1 then
   begin
-    FMultiCaret.Position.Row := -1;
+    FMultiEdit.Position.Row := -1;
 
     Invalidate;
   end;
@@ -10325,7 +10325,7 @@ begin
   AutoCursor;
 
   LHTML := '';
-  if not FMultiCaret.SelectionAvailable and (eoAddHTMLCodeToClipboard in FOptions) then
+  if not FMultiEdit.SelectionAvailable and (eoAddHTMLCodeToClipboard in FOptions) then
     LHTML := TextToHTML(True);
 
   SetClipboardText(AText, LHTML);
@@ -10964,7 +10964,7 @@ begin
     Exit;
   end;
 
-  if FCaret.MultiEdit.Active and Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) then
+  if FCaret.MultiEdit.Active and Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) then
     if AKey in [TControlCharacters.Keys.CarriageReturn, TControlCharacters.Keys.Escape] then
     begin
       FreeMultiCarets;
@@ -11085,9 +11085,9 @@ begin
 
   FKeyboardHandler.ExecuteKeyUp(Self, AKey, AShift);
 
-  if FMultiCaret.Position.Row <> -1 then
+  if FMultiEdit.Position.Row <> -1 then
   begin
-    FMultiCaret.Position.Row := -1;
+    FMultiEdit.Position.Row := -1;
 
     Invalidate;
   end;
@@ -11488,7 +11488,7 @@ begin
           AddMultipleCarets(LViewPosition)
         else
         begin
-          if not Assigned(FMultiCaret.Carets) then
+          if not Assigned(FMultiEdit.Carets) then
             AddCaret(TextToViewPosition(TextPosition));
           AddCaret(LViewPosition);
         end;
@@ -11748,16 +11748,16 @@ begin
         LMultiCaretPosition := PixelsToViewPosition(X, Y);
 
         if not FMouse.OverURI and (meoShowGhost in FCaret.MultiEdit.Options) and (LMultiCaretPosition.Row <= FLines.Count) then
-          if (FMultiCaret.Position.Row <> LMultiCaretPosition.Row) or
-            (FMultiCaret.Position.Row = LMultiCaretPosition.Row) and (FMultiCaret.Position.Column <> LMultiCaretPosition.Column) then
+          if (FMultiEdit.Position.Row <> LMultiCaretPosition.Row) or
+            (FMultiEdit.Position.Row = LMultiCaretPosition.Row) and (FMultiEdit.Position.Column <> LMultiCaretPosition.Column) then
           begin
-            FMultiCaret.Position := LMultiCaretPosition;
+            FMultiEdit.Position := LMultiCaretPosition;
 
             Invalidate;
           end;
       end;
 
-    if Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) then
+    if Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) then
       Exit;
   end;
 
@@ -12126,14 +12126,14 @@ begin
 
       if FCaret.Visible then
       begin
-        if FCaret.NonBlinking.Active or Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) and FMultiCaret.Draw then
+        if FCaret.NonBlinking.Active or Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) and FMultiEdit.Draw then
           PaintCaret;
 
         if Dragging then
           PaintCaretBlock(FViewPosition);
 
-        if not Assigned(FCompletionProposalPopupWindow) and FCaret.MultiEdit.Active and (FMultiCaret.Position.Row <> -1) then
-          PaintCaretBlock(FMultiCaret.Position);
+        if not Assigned(FCompletionProposalPopupWindow) and FCaret.MultiEdit.Active and (FMultiEdit.Position.Row <> -1) then
+          PaintCaretBlock(FMultiEdit.Position);
       end;
 
       if FRightMargin.Moving then
@@ -12281,7 +12281,7 @@ begin
     FLast.TopLine := FLineNumbers.TopLine;
     FLast.LineNumberCount := FLineNumbers.Count;
 
-    if not FCaret.NonBlinking.Active and not Assigned(FMultiCaret.Carets) then
+    if not FCaret.NonBlinking.Active and not Assigned(FMultiEdit.Carets) then
       UpdateCaret;
 
     FPaintHelper.EndDrawing;
@@ -12317,8 +12317,8 @@ begin
     if FRuler.Visible then
       Inc(LRect.Top, FRuler.Height);
     LRect.Bottom := LRect.Top + LLineHeight;
-    if FActiveLine.Visible and (not Assigned(FMultiCaret.Carets) and (FPosition.Text.Line + 1 = LLine) or
-      Assigned(FMultiCaret.CArets) and
+    if FActiveLine.Visible and (not Assigned(FMultiEdit.Carets) and (FPosition.Text.Line + 1 = LLine) or
+      Assigned(FMultiEdit.CArets) and
       IsMultiEditCaretFound(LLine)) and (FCodeFolding.Colors.ActiveLineBackground <> TColors.SysNone) then
     begin
       if Focused then
@@ -12865,8 +12865,8 @@ var
 
         FPaintHelper.SetBackgroundColor(FLeftMargin.Colors.Background);
 
-        if FActiveLine.Visible and (not Assigned(FMultiCaret.Carets) and (LLine = LCaretY) or
-          Assigned(FMultiCaret.Carets) and IsMultiEditCaretFound(LLine)) and (FLeftMargin.Colors.ActiveLineBackground <> TColors.SysNone) then
+        if FActiveLine.Visible and (not Assigned(FMultiEdit.Carets) and (LLine = LCaretY) or
+          Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine)) and (FLeftMargin.Colors.ActiveLineBackground <> TColors.SysNone) then
         begin
           if Focused then
           begin
@@ -12879,7 +12879,7 @@ var
             Canvas.Brush.Color := FLeftMargin.Colors.ActiveLineBackgroundUnfocused;
           end;
 
-          if Assigned(FMultiCaret.Carets) then
+          if Assigned(FMultiEdit.Carets) then
             FillRect(LLineRect);
         end
         else
@@ -13006,8 +13006,8 @@ var
         LLine := GetViewTextLineNumber(LIndex);
 
         if FActiveLine.Visible and (FLeftMargin.Colors.ActiveLineBackground <> TColors.SysNone) and
-          not Assigned(FMultiCaret.Carets) and (LLine = FPosition.Text.Line + 1) or
-          Assigned(FMultiCaret.Carets) and IsMultiEditCaretFound(LLine) then
+          not Assigned(FMultiEdit.Carets) and (LLine = FPosition.Text.Line + 1) or
+          Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine) then
         begin
           SetPanelActiveLineRect;
 
@@ -14369,14 +14369,14 @@ var
     LSecondUnselectedPartOfToken := False;
     LIsPartOfTokenSelected := False;
 
-    if FMultiCaret.SelectionAvailable then
+    if FMultiEdit.SelectionAvailable then
     begin
       LSelected := False;
 
-      if Assigned(FMultiCaret.Carets) then
-      for LIndex := 0 to FMultiCaret.Carets.Count - 1 do
+      if Assigned(FMultiEdit.Carets) then
+      for LIndex := 0 to FMultiEdit.Carets.Count - 1 do
       begin
-        LMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex])^;
+        LMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex])^;
         if LMultiCaretRecord.SelectionBegin.Line = LCurrentLine then
         begin
           LLineSelectionStart := LMultiCaretRecord.SelectionBegin.Char;
@@ -14572,7 +14572,7 @@ var
       if FSelection.Mode = smNormal then
       begin
         SetDrawingColors(not (soToEndOfLine in FSelection.Options) and
-          not FMultiCaret.SelectionAvailable and
+          not FMultiEdit.SelectionAvailable and
           (LIsLineSelected or LSelected and (LLineSelectionEnd > LLastColumn)));
         LTokenRect.Right := LLineRect.Right;
         FillRect(LTokenRect);
@@ -14972,7 +14972,7 @@ var
       if not AMinimap or AMinimap and (moShowSelection in FMinimap.Options) then
       begin
         LWordAtSelection := '';
-        LAnySelection := GetSelectionAvailable or FMultiCaret.SelectionAvailable;
+        LAnySelection := GetSelectionAvailable or FMultiEdit.SelectionAvailable;
 
         if LAnySelection then
         begin
@@ -15193,7 +15193,7 @@ var
         LPaintedWidth := 0;
         FItalic.Offset := 0;
 
-        if Assigned(FMultiCaret.Carets) then
+        if Assigned(FMultiEdit.Carets) then
           LIsCurrentLine := IsMultiEditCaretFound(LCurrentLine + 1)
         else
           LIsCurrentLine := LTextCaretY = LCurrentLine;
@@ -15524,7 +15524,7 @@ var
   LCaretStyle: TTextEditorCaretStyle;
   LWidth, LHeight: Integer;
 begin
-  if Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) then
+  if Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) then
     Exit;
 
   if FOvertypeMode = omInsert then
@@ -15745,10 +15745,10 @@ var
     LMultiCaretRecord: TTextEditorMultiCaretRecord;
     LLineSelectionStart, LLineSelectionEnd: Integer;
   begin
-    if Assigned(FMultiCaret.Carets) then
-    for LIndex := FMultiCaret.Carets.Count - 1 downto 0 do
+    if Assigned(FMultiEdit.Carets) then
+    for LIndex := FMultiEdit.Carets.Count - 1 downto 0 do
     begin
-      LMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex])^;
+      LMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex])^;
       LLineSelectionStart := LMultiCaretRecord.SelectionBegin.Char;
       LLineSelectionEnd := LMultiCaretRecord.ViewPosition.Column;
       if LLineSelectionStart > LLineSelectionEnd then
@@ -15762,7 +15762,7 @@ var
   end;
 
 begin
-  if FMultiCaret.SelectionAvailable then
+  if FMultiEdit.SelectionAvailable then
     SetMultiSelectedText
   else
     SetSelectedText;
@@ -17248,20 +17248,20 @@ begin
   if AViewPosition.Row > FLineNumbers.Count then
     Exit;
 
-  if not Assigned(FMultiCaret.Carets) then
+  if not Assigned(FMultiEdit.Carets) then
   begin
-    FMultiCaret.Draw := True;
-    FMultiCaret.Carets := TList.Create;
-    FMultiCaret.SelectionAvailable := False;
-    FMultiCaret.Timer := TTextEditorTimer.Create(Self);
-    FMultiCaret.Timer.Interval := GetCaretBlinkTime;
-    FMultiCaret.Timer.OnTimer := MultiCaretTimerHandler;
-    FMultiCaret.Timer.Enabled := True;
+    FMultiEdit.Draw := True;
+    FMultiEdit.Carets := TList.Create;
+    FMultiEdit.SelectionAvailable := False;
+    FMultiEdit.Timer := TTextEditorTimer.Create(Self);
+    FMultiEdit.Timer.Interval := GetCaretBlinkTime;
+    FMultiEdit.Timer.OnTimer := MultiCaretTimerHandler;
+    FMultiEdit.Timer.Enabled := True;
   end;
 
-  for LIndex := 0 to FMultiCaret.Carets.Count - 1 do
+  for LIndex := 0 to FMultiEdit.Carets.Count - 1 do
   begin
-    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex]);
+    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex]);
     if (LPMultiCaretRecord^.ViewPosition.Row = AViewPosition.Row) and
       (LPMultiCaretRecord^.ViewPosition.Column = AViewPosition.Column) then
       Exit;
@@ -17270,8 +17270,8 @@ begin
   New(LPMultiCaretRecord);
   LPMultiCaretRecord^.ViewPosition.Column := AViewPosition.Column;
   LPMultiCaretRecord^.ViewPosition.Row := AViewPosition.Row;
-  FMultiCaret.Carets.Add(LPMultiCaretRecord);
-  FMultiCaret.Carets.Sort(CompareCaretRecords);
+  FMultiEdit.Carets.Add(LPMultiCaretRecord);
+  FMultiEdit.Carets.Sort(CompareCaretRecords);
 
   HideCaret;
 end;
@@ -17333,9 +17333,9 @@ begin
   if LViewPosition.Row > FLineNumbers.Count then
     Exit;
 
-  if Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) then
+  if Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) then
   begin
-    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiCaret.Carets.Last);
+    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets.Last);
     LBeginRow := LPMultiCaretRecord^.ViewPosition.Row;
     LViewPosition.Column := LPMultiCaretRecord^.ViewPosition.Column;
   end
@@ -17962,9 +17962,9 @@ begin
       end;
     end;
 
-    if Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) then
+    if Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) then
     begin
-      if FMultiCaret.SelectionAvailable then
+      if FMultiEdit.SelectionAvailable then
       case LCommand of
         TKeyCommands.Tab:
           Exit;
@@ -17985,13 +17985,13 @@ begin
               LLength := GetClipboardText.Length;
 
             if (LCommand in [TKeyCommands.SelectionLeft, TKeyCommands.SelectionRight]) and
-              not FMultiCaret.SelectionAvailable then
+              not FMultiEdit.SelectionAvailable then
             begin
-              FMultiCaret.SelectionAvailable := True;
+              FMultiEdit.SelectionAvailable := True;
 
-              for LIndex1 := 0 to FMultiCaret.Carets.Count - 1 do
+              for LIndex1 := 0 to FMultiEdit.Carets.Count - 1 do
               begin
-                LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex1]);
+                LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex1]);
                 LTextPosition := ViewToTextPosition(LPMultiCaretRecord^.ViewPosition);
                 LPMultiCaretRecord^.SelectionBegin.Char := LTextPosition.Char;
                 LPMultiCaretRecord^.SelectionBegin.Line := LTextPosition.Line;
@@ -17999,14 +17999,14 @@ begin
             end
             else
             if LCommand in [TKeyCommands.Left, TKeyCommands.Right] then
-              FMultiCaret.SelectionAvailable := False;
+              FMultiEdit.SelectionAvailable := False;
 
-            for LIndex1 := 0 to FMultiCaret.Carets.Count - 1 do
+            for LIndex1 := 0 to FMultiEdit.Carets.Count - 1 do
             begin
               case LCommand of
                 TKeyCommands.Char, TKeyCommands.Cut, TKeyCommands.Tab, TKeyCommands.Backspace, TKeyCommands.Paste:
                   begin
-                    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex1]);
+                    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex1]);
                     LViewPosition := LPMultiCaretRecord^.ViewPosition;
                     ViewPosition := LViewPosition;
 
@@ -18018,11 +18018,11 @@ begin
 
                     ExecuteCommand(LCommand, LChar, AData);
 
-                    if FMultiCaret.SelectionAvailable then
+                    if FMultiEdit.SelectionAvailable then
                     begin
-                      for LIndex2 := 0 to FMultiCaret.Carets.Count - 1 do
+                      for LIndex2 := 0 to FMultiEdit.Carets.Count - 1 do
                       begin
-                        LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex2]);
+                        LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex2]);
 
                         LLineSelectionStart := LPMultiCaretRecord^.SelectionBegin.Char;
                         LLineSelectionEnd := LPMultiCaretRecord^.ViewPosition.Column;
@@ -18038,18 +18038,18 @@ begin
                         end;
                       end;
 
-                      FMultiCaret.SelectionAvailable := False;
+                      FMultiEdit.SelectionAvailable := False;
                       Break;
                     end;
                   end;
                 TKeyCommands.Right, TKeyCommands.SelectionRight:
                   begin
-                    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex1]);
+                    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex1]);
                     Inc(LPMultiCaretRecord^.ViewPosition.Column);
                   end;
                 TKeyCommands.Left, TKeyCommands.SelectionLeft:
                   begin
-                    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex1]);
+                    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex1]);
                     if LPMultiCaretRecord^.ViewPosition.Column > 1 then
                       Dec(LPMultiCaretRecord^.ViewPosition.Column);
                   end;
@@ -18058,9 +18058,9 @@ begin
               case LCommand of
                 TKeyCommands.Char, TKeyCommands.Paste, TKeyCommands.Backspace, TKeyCommands.Tab, TKeyCommands.LineBegin,
                 TKeyCommands.LineEnd:
-                  for LIndex2 := 0 to FMultiCaret.Carets.Count - 1 do
+                  for LIndex2 := 0 to FMultiEdit.Carets.Count - 1 do
                   begin
-                    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex2]);
+                    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex2]);
                     case LCommand of
                       TKeyCommands.Char, TKeyCommands.Tab, TKeyCommands.Paste, TKeyCommands.Backspace:
                         if (LPMultiCaretRecord^.ViewPosition.Row = LViewPosition.Row) and
@@ -18122,13 +18122,13 @@ var
 begin
   Result := '';
 
-  if Assigned(FMultiCaret.Carets) and FMultiCaret.SelectionAvailable and (FMultiCaret.Carets.Count > 0) then
+  if Assigned(FMultiEdit.Carets) and FMultiEdit.SelectionAvailable and (FMultiEdit.Carets.Count > 0) then
   begin
     LLastLine := -1;
 
-    for LIndex := 0 to FMultiCaret.Carets.Count - 1 do
+    for LIndex := 0 to FMultiEdit.Carets.Count - 1 do
     begin
-      LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiCaret.Carets[LIndex]);
+      LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex]);
       LLine := LPMultiCaretRecord^.SelectionBegin.Line;
       LChar := LPMultiCaretRecord^.SelectionBegin.Char;
 
@@ -18164,7 +18164,7 @@ var
   end;
 
 begin
-  if FMultiCaret.SelectionAvailable then
+  if FMultiEdit.SelectionAvailable then
   begin
     LText := GetMultiCaretSelectedText;
     DoCopyToClipboard(LText);
@@ -19583,7 +19583,7 @@ var
   LVisibleChars: Integer;
   LLine, LOffset: Integer;
 begin
-  if Assigned(FMultiCaret.Carets) and (FMultiCaret.Carets.Count > 0) then
+  if Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) then
     HideCaret
   else
   if (PaintLock <> 0) or not (Focused or FCaretHelper.ShowAlways) then

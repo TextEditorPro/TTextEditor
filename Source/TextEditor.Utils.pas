@@ -8,6 +8,7 @@ uses
   Winapi.Windows, System.Classes, System.SysUtils, System.UITypes, Vcl.Graphics, TextEditor.Types;
 
 function ActivateDropShadow(const AHandle: THandle): Boolean;
+function AutoCursor(const ACursor: TCursor = crHourGlass): IAutoCursor;
 function CaseNone(const AChar: Char): Char;
 function CaseStringNone(const AString: string): string;
 function CaseUpper(const AChar: Char): Char;
@@ -43,14 +44,38 @@ procedure SetClipboardText(const AText: string; const AHTML: string);
 implementation
 
 uses
-  Winapi.ActiveX, System.Character, Vcl.ClipBrd, Vcl.Controls, Vcl.Forms, TextEditor.Consts
+  Winapi.ActiveX, System.Character, System.Generics.Collections, Vcl.ClipBrd, Vcl.Controls, Vcl.Forms, TextEditor.Consts
 {$IFDEF ALPHASKINS}, sDialogs{$ELSE}, Vcl.Dialogs{$ENDIF};
 
 const
   TEXT_EDITOR_UTF8_BOM: array [0 .. 2] of Byte = ($EF, $BB, $BF);
 
+type
+  TCursorPair = record
+    OriginalCursor: TCursor;
+    NewCursor : TCursor;
+    procedure Initalize(const AOriginalCursor, ANewCursor: TCursor);
+  end;
+
+  TAutoCursor = class(TInterfacedObject, IAutoCursor)
+  private
+    FCursorStack: TList<TCursorPair>;
+    function AddCursorToStack(const ACursor: TCursor): Integer;
+    procedure EndCursor(const AResetToFirst: Boolean); overload;
+  public
+    procedure BeginCursor(const ACursor: TCursor);
+    procedure EndCursor; overload;
+    constructor Create(const ACursor: TCursor);
+    destructor Destroy; override;
+  end;
+
 var
   CF_HTML: TClipFormat = 0;
+
+function AutoCursor(const ACursor: TCursor = crHourGlass): IAutoCursor;
+begin
+  Result := TAutoCursor.Create(aCursor);
+end;
 
 function ToggleCase(const AValue: string): string;
 var
@@ -882,6 +907,75 @@ begin
     Result := Result + 'I';
     Dec(LValue);
   end;
+end;
+
+{ TAutoCursor }
+
+function TAutoCursor.AddCursorToStack(const ACursor: TCursor): Integer;
+var
+  LCursorPair: TCursorPair;
+begin
+  LCursorPair.Initalize(Screen.Cursor, ACursor);
+  Result := FCursorStack.Add(LCursorPair);
+end;
+
+procedure TAutoCursor.BeginCursor(const ACursor: TCursor);
+var
+  LIndex: Integer;
+begin
+  LIndex := AddCursorToStack(ACursor);
+  Screen.Cursor := FCursorStack[LIndex].NewCursor;
+end;
+
+constructor TAutoCursor.Create(const ACursor: TCursor);
+begin
+  inherited Create;
+
+  FCursorStack := TList<TCursorPair>.Create;
+
+  BeginCursor(ACursor);
+end;
+
+destructor TAutoCursor.Destroy;
+begin
+  EndCursor(True);
+
+  FCursorStack.Free;
+
+  inherited;
+end;
+
+procedure TAutoCursor.EndCursor;
+begin
+  EndCursor(False);
+end;
+
+procedure TAutoCursor.EndCursor(const AResetToFirst: Boolean);
+var
+  LLastIndex: Integer;
+begin
+  if FCursorStack.Count >= 1 then
+  begin
+    if AResetToFirst then
+    begin
+      Screen.Cursor := FCursorStack[0].OriginalCursor;
+      FCursorStack.Clear;
+    end
+    else
+    begin
+      LLastIndex := FCursorStack.Count - 1;
+      Screen.Cursor := FCursorStack[LLastIndex].OriginalCursor;
+      FCursorStack.Delete(LLastIndex);
+    end;
+  end;
+end;
+
+{ TCursorPair }
+
+procedure TCursorPair.Initalize(const AOriginalCursor, ANewCursor: TCursor);
+begin
+  OriginalCursor := AOriginalCursor;
+  NewCursor := ANewCursor;
 end;
 
 end.

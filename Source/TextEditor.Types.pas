@@ -7,6 +7,12 @@ uses
   Vcl.Graphics, TextEditor.Consts, TextEditor.Marks;
 
 type
+  IAutoCursor = interface(IInterface)
+    ['{B291F81E-29FB-453E-B3AF-51D4EC1352CF}']
+    procedure BeginCursor(const ACursor: TCursor);
+    procedure EndCursor;
+  end;
+
   { Lines }
   TTextEditorLinesRange = Pointer;
 
@@ -54,6 +60,12 @@ type
   TTextEditorViewPosition = record
     Column: Integer;
     Row: Integer;
+  end;
+
+  PTextEditorMultiCaretRecord = ^TTextEditorMultiCaretRecord;
+  TTextEditorMultiCaretRecord = record
+    ViewPosition: TTextEditorViewPosition;
+    SelectionBegin: TTextEditorTextPosition;
   end;
 
   TTextEditorEmptySpace = (esNone, esControlCharacter, esSpace, esNull, esTab, esZeroWidthSpace);

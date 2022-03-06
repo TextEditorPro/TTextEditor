@@ -15767,6 +15767,9 @@ begin
   else
     SetSelectedText;
 
+  if Assigned(FEvents.OnAfterDeleteSelection) then
+    FEvents.OnAfterDeleteSelection(Self);
+
   EnsureCursorPositionVisible;
 end;
 

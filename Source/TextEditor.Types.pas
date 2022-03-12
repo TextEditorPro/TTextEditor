@@ -155,7 +155,8 @@ type
   TTextEditorSearchChanges = (scRefresh, scSearch, scEngineUpdate, scInSelectionActive, scVisible);
 
   TTextEditorSearchOption = (soBeepIfStringNotFound, soCaseSensitive, soEntireScope, soHighlightResults,
-    soSearchOnTyping, soShowSearchStringNotFound, soShowSearchMatchNotFound, soWholeWordsOnly, soWrapAround);
+    soSearchOnTyping, soShowSearchStringNotFound, soShowSearchMatchNotFound, soUseNearOperator, soWholeWordsOnly,
+    soWrapAround);
   TTextEditorSearchOptions = set of TTextEditorSearchOption;
 
   TTextEditorSearchEngine = (seNormal, seExtended, seRegularExpression, seWildcard);

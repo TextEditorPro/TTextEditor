@@ -4388,6 +4388,9 @@ end;
 
 procedure TCustomTextEditor.AssignSearchEngine(const AEngine: TTextEditorSearchEngine);
 begin
+  if Assigned(FSearchEngine) and (FSearchEngine.Engine = AEngine) then
+    Exit;
+
   if Assigned(FSearchEngine) then
   begin
     FSearchEngine.Free;
@@ -4402,6 +4405,8 @@ begin
     seWildCard:
       FSearchEngine := TTextEditorWildCardSearch.Create;
   end;
+
+  FSearchEngine.Engine := AEngine;
 end;
 
 procedure TCustomTextEditor.AfterSetText(ASender: TObject); //FI:O804 Method parameter is declared but never used
@@ -6714,7 +6719,7 @@ end;
 procedure TCustomTextEditor.SearchAll(const ASearchText: string = '');
 var
   LLine, LResultIndex, LSearchAllCount, LTextPosition, LSearchLength, LCurrentLineLength: Integer;
-  LSearchText: string;
+  LSearchText, LSearchTextUpper: string;
   LPSearchItem: PTextEditorSearchItem;
   LBeginTextPosition, LEndTextPosition: TTextEditorTextPosition;
   LSelectionBeginPosition, LSelectionEndPosition:  TTextEditorTextPosition;
@@ -6742,6 +6747,10 @@ var
       IsTextPositionInSearchBlock(LBeginTextPosition) and IsTextPositionInSearchBlock(LEndTextPosition));
   end;
 
+var
+  LWords: TArray<string>;
+  LPosition: Integer;
+  LMaxDistance: Integer;
 begin
   FSearch.ClearItems;
 
@@ -6756,8 +6765,37 @@ begin
   if LSearchText = '' then
     Exit;
 
+  if soUseNearOperator in FSearch.Options then
+  begin
+    LSearchTextUpper := LSearchText.ToUpper;
+    if (Pos(' NEAR ', LSearchTextUpper) > 0) or (Pos(' NEAR:', LSearchTextUpper) > 0) then
+    begin
+      LWords := LSearchText.Split([' '], TStringSplitOptions.ExcludeEmpty);
+
+      if Length(LWords) = 3 then
+      begin
+        LPosition := Pos(':', LWords[1]);
+        if LPosition > 0 then
+          LMaxDistance := StrToIntDef(Copy(LWords[1], LPosition + 1), FSearch.MaxDistanceOfNear)
+        else
+          LMaxDistance := FSearch.MaxDistanceOfNear;
+
+        LSearchText := Format('\b(?:%s(?:\W+\w+){1,%d}?\W+%s|%s(?:\W+\w+){1,%d}?\W+%s)\b', [LWords[0], LMaxDistance,
+          LWords[2], LWords[2], LMaxDistance, LWords[0]]);
+
+        AssignSearchEngine(seRegularExpression);
+      end
+      else
+        AssignSearchEngine(FSearch.Engine);
+    end
+    else
+      AssignSearchEngine(FSearch.Engine);
+  end;
+
   LSelectedOnly := False;
+
   FSearchEngine.Pattern := LSearchText;
+
   if ASearchText = '' then
   begin
     FSearchEngine.CaseSensitive := soCaseSensitive in FSearch.Options;

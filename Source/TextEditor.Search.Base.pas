@@ -3,12 +3,13 @@
 interface
 
 uses
-  System.Classes, TextEditor.Lines;
+  System.Classes, TextEditor.Lines, TextEditor.Types;
 
 type
   TTextEditorSearchBase = class
   strict private
     FCaseSensitive: Boolean;
+    FEngine: TTextEditorSearchEngine;
     FStatus: string;
     FWholeWordsOnly: Boolean;
     procedure SetCaseSensitive(const AValue: Boolean);
@@ -26,6 +27,7 @@ type
     function SearchAll(const ALines: TTextEditorLines): Integer; virtual; abstract;
     procedure Clear; virtual;
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive default False;
+    property Engine: TTextEditorSearchEngine read FEngine write FEngine;
     property Lengths[const AIndex: Integer]: Integer read GetLength;
     property Pattern: string read FPattern write SetPattern;
     property ResultCount: Integer read GetResultCount;

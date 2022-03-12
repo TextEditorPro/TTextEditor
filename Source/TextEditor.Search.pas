@@ -18,6 +18,7 @@ type
     FInSelection: TTextEditorSearchInSelection;
     FItems: TList;
     FMap: TTextEditorSearchMap;
+    FMaxDistanceOfNear: Integer;
     FOnChange: TTextEditorSearchChangeEvent;
     FOptions: TTextEditorSearchOptions;
     FSearchText: string;
@@ -48,6 +49,7 @@ type
     property Highlighter: TTextEditorSearchHighlighter read FHighlighter write SetHighlighter;
     property InSelection: TTextEditorSearchInSelection read FInSelection write SetInSelection;
     property Map: TTextEditorSearchMap read FMap write SetMap;
+    property MaxDistanceOfNear: Integer read FMaxDistanceOfNear write FMaxDistanceOfNear default 3;
     property OnChange: TTextEditorSearchChangeEvent read FOnChange write SetOnChange;
     property Options: TTextEditorSearchOptions read FOptions write FOptions default TEXTEDITOR_SEARCH_OPTIONS;
     property SearchText: string read FSearchText write SetSearchText;
@@ -60,6 +62,7 @@ begin
   inherited;
 
   FSearchText := '';
+  FMaxDistanceOfNear := 3;
   FEngine := seNormal;
   FMap := TTextEditorSearchMap.Create;
   FItems := TList.Create;

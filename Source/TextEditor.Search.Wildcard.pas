@@ -31,6 +31,10 @@ begin
       Result := Result + '.*';
     '?':
       Result := Result + '.?';
+    '|':
+      Result := Result + '\|';
+    '#':
+      Result := Result + '[0-9]';
   else
     Result := Result + AWildCard[LIndex];
   end;

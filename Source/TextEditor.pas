@@ -6718,7 +6718,7 @@ end;
 
 procedure TCustomTextEditor.SearchAll(const ASearchText: string = '');
 var
-  LLine, LResultIndex, LSearchAllCount, LTextPosition, LSearchLength, LCurrentLineLength: Integer;
+  LLine, LResultIndex, LSearchAllCount, LTextPosition, LSearchLength, LLineLength, LCurrentLineLength: Integer;
   LSearchText, LSearchTextUpper: string;
   LPSearchItem: PTextEditorSearchItem;
   LBeginTextPosition, LEndTextPosition: TTextEditorTextPosition;
@@ -6826,14 +6826,31 @@ begin
         while (LLine < FLines.Count) and (LResultIndex < LSearchAllCount) and
           (FSearchEngine.Results[LResultIndex] <= LTextPosition + LCurrentLineLength) do
         begin
-          if FLines.Items^[LLine].TextLine = '' then
+          if FLines[LLine] = '' then
             Inc(LLine);
 
           LSearchLength := FSearchEngine.Lengths[LResultIndex];
 
           LBeginTextPosition.Char := FSearchEngine.Results[LResultIndex] - LTextPosition;
           LBeginTextPosition.Line := LLine;
-          LEndTextPosition.Char := LBeginTextPosition.Char + LSearchLength;
+
+          LLineLength := Length(FLines[LLine]);
+          if LSearchLength > LLineLength - LBeginTextPosition.Char then
+          begin
+            Dec(LLineLength, LBeginTextPosition.Char);
+            while LSearchLength > LLineLength do
+            begin
+              Dec(LSearchLength, LLineLength);
+              Dec(LSearchLength, FLines.LineBreakLength(LLine));
+              Inc(LLine);
+              LLineLength := Length(FLines[LLine]);
+            end;
+
+            LEndTextPosition.Char := LSearchLength;
+          end
+          else
+            LEndTextPosition.Char := LBeginTextPosition.Char + LSearchLength;
+
           LEndTextPosition.Line := LLine;
 
           if CanAddResult then

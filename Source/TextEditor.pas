@@ -6835,10 +6835,10 @@ begin
           LBeginTextPosition.Line := LLine;
 
           LLineLength := Length(FLines[LLine]);
-          if LSearchLength > LLineLength - LBeginTextPosition.Char then
+          if LSearchLength > LLineLength - (LBeginTextPosition.Char - 1) then
           begin
             Dec(LLineLength, LBeginTextPosition.Char);
-            while LSearchLength > LLineLength do
+            while (LLineLength > 0) and (LSearchLength > LLineLength) do
             begin
               Dec(LSearchLength, LLineLength);
               Dec(LSearchLength, FLines.LineBreakLength(LLine));

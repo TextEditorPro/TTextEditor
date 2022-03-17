@@ -6765,7 +6765,7 @@ begin
   if LSearchText = '' then
     Exit;
 
-  if soUseNearOperator in FSearch.Options then
+  if FSearch.NearOperator.Enabled then
   begin
     LSearchTextUpper := LSearchText.ToUpper;
     if (Pos(' NEAR ', LSearchTextUpper) > 0) or (Pos(' NEAR:', LSearchTextUpper) > 0) then

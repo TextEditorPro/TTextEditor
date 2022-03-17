@@ -6718,7 +6718,7 @@ end;
 
 procedure TCustomTextEditor.SearchAll(const ASearchText: string = '');
 var
-  LLine, LResultIndex, LSearchAllCount, LTextPosition, LSearchLength, LLineLength, LCurrentLineLength: Integer;
+  LLine, LResultIndex, LSearchAllCount, LTextPosition, LSearchLength, LCurrentLineLength: Integer;
   LSearchText, LSearchTextUpper: string;
   LPSearchItem: PTextEditorSearchItem;
   LBeginTextPosition, LEndTextPosition: TTextEditorTextPosition;
@@ -6776,12 +6776,13 @@ begin
       begin
         LPosition := Pos(':', LWords[1]);
         if LPosition > 0 then
-          LMaxDistance := StrToIntDef(Copy(LWords[1], LPosition + 1), FSearch.MaxDistanceOfNear)
+          LMaxDistance := StrToIntDef(Copy(LWords[1], LPosition + 1), FSearch.NearOperator.MaxDistance)
         else
-          LMaxDistance := FSearch.MaxDistanceOfNear;
+          LMaxDistance := FSearch.NearOperator.MaxDistance;
 
-        LSearchText := Format('\b(?:%s(?:\W+\w+){1,%d}?\W+%s|%s(?:\W+\w+){1,%d}?\W+%s)\b', [LWords[0], LMaxDistance,
-          LWords[2], LWords[2], LMaxDistance, LWords[0]]);
+        LSearchText := Format('\b(?:%s(?:\W+\w+){%d,%d}?\W+%s|%s(?:\W+\w+){%d,%d}?\W+%s)\b', [LWords[0],
+          FSearch.NearOperator.MinDistance, LMaxDistance, LWords[2], LWords[2], FSearch.NearOperator.MinDistance,
+          LMaxDistance, LWords[0]]);
 
         AssignSearchEngine(seRegularExpression);
       end
@@ -6826,31 +6827,20 @@ begin
         while (LLine < FLines.Count) and (LResultIndex < LSearchAllCount) and
           (FSearchEngine.Results[LResultIndex] <= LTextPosition + LCurrentLineLength) do
         begin
-          if FLines[LLine] = '' then
-            Inc(LLine);
-
-          LSearchLength := FSearchEngine.Lengths[LResultIndex];
-
           LBeginTextPosition.Char := FSearchEngine.Results[LResultIndex] - LTextPosition;
           LBeginTextPosition.Line := LLine;
 
-          LLineLength := Length(FLines[LLine]);
-          if LSearchLength > LLineLength - (LBeginTextPosition.Char - 1) then
+          LSearchLength := FSearchEngine.Lengths[LResultIndex] + LBeginTextPosition.Char;
+
+          while LSearchLength > LCurrentLineLength do
           begin
-            Dec(LLineLength, LBeginTextPosition.Char);
-            while (LLineLength > 0) and (LSearchLength > LLineLength) do
-            begin
-              Dec(LSearchLength, LLineLength);
-              Dec(LSearchLength, FLines.LineBreakLength(LLine));
-              Inc(LLine);
-              LLineLength := Length(FLines[LLine]);
-            end;
+            Dec(LSearchLength, LCurrentLineLength);
+            Inc(LLine);
+            Inc(LTextPosition, LCurrentLineLength);
+            LCurrentLineLength := FLines.StringLength(LLine) + FLines.LineBreakLength(LLine);
+          end;
 
-            LEndTextPosition.Char := LSearchLength;
-          end
-          else
-            LEndTextPosition.Char := LBeginTextPosition.Char + LSearchLength;
-
+          LEndTextPosition.Char := LSearchLength;
           LEndTextPosition.Line := LLine;
 
           if CanAddResult then

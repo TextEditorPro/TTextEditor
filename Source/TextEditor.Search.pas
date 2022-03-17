@@ -4,7 +4,7 @@ interface
 
 uses
   System.Classes, Vcl.Controls, TextEditor.Search.Highlighter, TextEditor.Search.InSelection, TextEditor.Search.Map,
-  TextEditor.Types;
+  TextEditor.Search.NearOperator, TextEditor.Types;
 
 const
   TEXTEDITOR_SEARCH_OPTIONS = [soHighlightResults, soSearchOnTyping, soBeepIfStringNotFound, soShowSearchMatchNotFound];
@@ -18,7 +18,7 @@ type
     FInSelection: TTextEditorSearchInSelection;
     FItems: TList;
     FMap: TTextEditorSearchMap;
-    FMaxDistanceOfNear: Integer;
+    FNearOperator: TTextEditorSearchNearOperator;
     FOnChange: TTextEditorSearchChangeEvent;
     FOptions: TTextEditorSearchOptions;
     FSearchText: string;
@@ -29,6 +29,7 @@ type
     procedure SetHighlighter(const AValue: TTextEditorSearchHighlighter);
     procedure SetInSelection(const AValue: TTextEditorSearchInSelection);
     procedure SetMap(const AValue: TTextEditorSearchMap);
+    procedure SetNearOperator(const AValue: TTextEditorSearchNearOperator);
     procedure SetOnChange(const AValue: TTextEditorSearchChangeEvent);
     procedure SetSearchText(const AValue: string);
     procedure SetVisible(const AValue: Boolean);
@@ -49,7 +50,7 @@ type
     property Highlighter: TTextEditorSearchHighlighter read FHighlighter write SetHighlighter;
     property InSelection: TTextEditorSearchInSelection read FInSelection write SetInSelection;
     property Map: TTextEditorSearchMap read FMap write SetMap;
-    property MaxDistanceOfNear: Integer read FMaxDistanceOfNear write FMaxDistanceOfNear default 3;
+    property NearOperator: TTextEditorSearchNearOperator read FNearOperator write SetNearOperator;
     property OnChange: TTextEditorSearchChangeEvent read FOnChange write SetOnChange;
     property Options: TTextEditorSearchOptions read FOptions write FOptions default TEXTEDITOR_SEARCH_OPTIONS;
     property SearchText: string read FSearchText write SetSearchText;
@@ -62,12 +63,13 @@ begin
   inherited;
 
   FSearchText := '';
-  FMaxDistanceOfNear := 3;
+
   FEngine := seNormal;
   FMap := TTextEditorSearchMap.Create;
   FItems := TList.Create;
   FHighlighter := TTextEditorSearchHighlighter.Create;
   FInSelection := TTextEditorSearchInSelection.Create;
+  FNearOperator := TTextEditorSearchNearOperator.Create;
   FOptions := TEXTEDITOR_SEARCH_OPTIONS;
   FEnabled := True;
 end;
@@ -77,6 +79,7 @@ begin
   FMap.Free;
   FHighlighter.Free;
   FInSelection.Free;
+  FNearOperator.Free;
   ClearItems;
   FItems.Free;
 
@@ -95,6 +98,7 @@ begin
     Self.FMap.Assign(FMap);
     Self.FHighlighter.Assign(FHighlighter);
     Self.FInSelection.Assign(FInSelection);
+    Self.FNearOperator.Assign(FNearOperator);
     Self.DoChange;
   end
   else
@@ -177,6 +181,11 @@ end;
 procedure TTextEditorSearch.SetMap(const AValue: TTextEditorSearchMap);
 begin
   FMap.Assign(AValue);
+end;
+
+procedure TTextEditorSearch.SetNearOperator(const AValue: TTextEditorSearchNearOperator);
+begin
+  FNearOperator.Assign(AValue);
 end;
 
 procedure TTextEditorSearch.ClearItems;

@@ -219,7 +219,7 @@ type
   TTextEditorHighlighterOption = (hoExecuteBeforePrepare, hoMultiHighlighter);
   TTextEditorHighlighterOptions = set of TTextEditorHighlighterOption;
 
-  TTextEditorHighlighterColorOption = (hcoUseColorThemeFontNames, hcoUseColorThemeFontSizes);
+  TTextEditorHighlighterColorOption = (hcoUseColorThemeFontNames, hcoUseColorThemeFontSizes, hcoUseDefaultColors);
   TTextEditorHighlighterColorOptions = set of TTextEditorHighlighterColorOption;
 
   { Special chars }

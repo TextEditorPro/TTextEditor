@@ -173,6 +173,10 @@ begin
   if Assigned(AEditorObject) and Assigned(FHighlighter.Editor) then
   begin
     LEditor := FHighlighter.Editor as TCustomTextEditor;
+
+    if hcoUseDefaultColors in LEditor.Highlighter.Colors.Options then
+      Exit;
+
     LColorsObject := AEditorObject['Colors'].ObjectValue;
     if Assigned(LColorsObject) then
     begin

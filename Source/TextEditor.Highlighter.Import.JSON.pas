@@ -314,32 +314,38 @@ begin
       LEditor.WordWrap.CreateInternalBitmap;
     end;
 
-    LFontsObject := AEditorObject['Fonts'].ObjectValue;
-    if Assigned(LFontsObject) then
-    with LEditor do
+    if hcoUseColorThemeFontNames in LEditor.Highlighter.Colors.Options then
     begin
-      LeftMargin.Font.Name := StrToStrDef(LFontsObject['LineNumbers'].Value, LeftMargin.Font.Name);
-      Font.Name := StrToStrDef(LFontsObject['Text'].Value, Font.Name);
-      Minimap.Font.Name := StrToStrDef(LFontsObject['Minimap'].Value, Minimap.Font.Name);
-      CodeFolding.Hint.Font.Name := StrToStrDef(LFontsObject['CodeFoldingHint'].Value, CodeFolding.Hint.Font.Name);
-      CompletionProposal.Font.Name := StrToStrDef(LFontsObject['CompletionProposal'].Value, CompletionProposal.Font.Name);
+      LFontsObject := AEditorObject['Fonts'].ObjectValue;
+      if Assigned(LFontsObject) then
+      with LEditor do
+      begin
+        LeftMargin.Font.Name := StrToStrDef(LFontsObject['LineNumbers'].Value, LeftMargin.Font.Name);
+        Font.Name := StrToStrDef(LFontsObject['Text'].Value, Font.Name);
+        Minimap.Font.Name := StrToStrDef(LFontsObject['Minimap'].Value, Minimap.Font.Name);
+        CodeFolding.Hint.Font.Name := StrToStrDef(LFontsObject['CodeFoldingHint'].Value, CodeFolding.Hint.Font.Name);
+        CompletionProposal.Font.Name := StrToStrDef(LFontsObject['CompletionProposal'].Value, CompletionProposal.Font.Name);
+      end;
     end;
 
-    LFontSizesObject := AEditorObject['FontSizes'].ObjectValue;
-    if Assigned(LFontSizesObject) then
-    with LEditor do
+    if hcoUseColorThemeFontSizes in LEditor.Highlighter.Colors.Options then
     begin
-      LeftMargin.Font.Size := StrToIntDef(LFontSizesObject['LineNumbers'].Value, LeftMargin.Font.Size);
-      Minimap.Font.Size := StrToIntDef(LFontSizesObject['Minimap'].Value, Minimap.Font.Size);
-      CodeFolding.Hint.Font.Size := StrToIntDef(LFontSizesObject['CodeFoldingHint'].Value, CodeFolding.Hint.Font.Size);
-      CompletionProposal.Font.Size := StrToIntDef(LFontSizesObject['CompletionProposal'].Value, CompletionProposal.Font.Size);
-      Font.Size := StrToIntDef(LFontSizesObject['Text'].Value, Font.Size);
-      OriginalFontSize := Font.Size;
-      OriginalLeftMarginFontSize := LeftMargin.Font.Size;
+      LFontSizesObject := AEditorObject['FontSizes'].ObjectValue;
+      if Assigned(LFontSizesObject) then
+      with LEditor do
+      begin
+        LeftMargin.Font.Size := StrToIntDef(LFontSizesObject['LineNumbers'].Value, LeftMargin.Font.Size);
+        Minimap.Font.Size := StrToIntDef(LFontSizesObject['Minimap'].Value, Minimap.Font.Size);
+        CodeFolding.Hint.Font.Size := StrToIntDef(LFontSizesObject['CodeFoldingHint'].Value, CodeFolding.Hint.Font.Size);
+        CompletionProposal.Font.Size := StrToIntDef(LFontSizesObject['CompletionProposal'].Value, CompletionProposal.Font.Size);
+        Font.Size := StrToIntDef(LFontSizesObject['Text'].Value, Font.Size);
+        OriginalFontSize := Font.Size;
+        OriginalLeftMarginFontSize := LeftMargin.Font.Size;
 {$IFDEF ALPHASKINS}
-      if SkinData.SkinManager.Options.ScaleMode <> smVCL then
-        LEditor.ChangeScale(PixelsPerInch, 96, True);
+        if SkinData.SkinManager.Options.ScaleMode <> smVCL then
+          LEditor.ChangeScale(PixelsPerInch, 96, True);
 {$ENDIF}
+      end;
     end;
   end;
 end;

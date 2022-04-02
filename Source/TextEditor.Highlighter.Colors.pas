@@ -3,7 +3,10 @@
 interface
 
 uses
-  System.Classes, Vcl.Graphics;
+  System.Classes, Vcl.Graphics, TextEditor.Types;
+
+const
+  DEFAULT_OPTIONS = [hcoUseColorThemeFontNames, hcoUseColorThemeFontSizes];
 
 type
   PTextEditorHighlighterElement = ^TTextEditorHighlighterElement;
@@ -16,9 +19,10 @@ type
 
   TTextEditorHighlighterColors = class(TObject)
   strict private
-    FFilename: string;
     FElements: TList;
+    FFilename: string;
     FName: string;
+    FOptions: TTextEditorHighlighterColorOptions;
     FOwner: TObject;
   public
     constructor Create(AOwner: TObject);
@@ -29,6 +33,7 @@ type
     procedure LoadFromStream(AStream: TStream);
     property Filename: string read FFilename write FFilename;
     property Name: string read FName write FName;
+    property Options: TTextEditorHighlighterColorOptions read FOptions write FOptions default DEFAULT_OPTIONS;
     property Styles: TList read FElements write FElements;
   end;
 
@@ -41,6 +46,7 @@ constructor TTextEditorHighlighterColors.Create(AOwner: TObject);
 begin
   inherited Create;
 
+  FOptions := DEFAULT_OPTIONS;
   FOwner := AOwner;
   FElements := TList.Create;
 end;

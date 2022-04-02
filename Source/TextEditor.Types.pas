@@ -219,6 +219,9 @@ type
   TTextEditorHighlighterOption = (hoExecuteBeforePrepare, hoMultiHighlighter);
   TTextEditorHighlighterOptions = set of TTextEditorHighlighterOption;
 
+  TTextEditorHighlighterColorOption = (hcoUseColorThemeFontNames, hcoUseColorThemeFontSizes);
+  TTextEditorHighlighterColorOptions = set of TTextEditorHighlighterColorOption;
+
   { Special chars }
   TTextEditorSpecialCharsLineBreakStyle = (eolArrow, eolCRLF, eolEnter, eolPilcrow);
 

@@ -421,7 +421,6 @@ type
     function ShortCutPressed: Boolean;
     function StringWordEnd(const ALine: string; var AStart: Integer): Integer;
     function StringWordStart(const ALine: string; var AStart: Integer): Integer;
-    function TextPositionToCharIndex(const ATextPosition: TTextEditorTextPosition): Integer;
     function WordWrapWidth: Integer;
     procedure ActiveLineChanged(ASender: TObject);
     procedure AddHighlighterKeywords(const AItems: TTextEditorCompletionProposalItems; const AAddDescription: Boolean = False);
@@ -605,6 +604,7 @@ type
     function GetReadOnly: Boolean; virtual;
     function PixelAndRowToViewPosition(const X, ARow: Integer; const ALineText: string = ''): TTextEditorViewPosition;
     function PixelsToViewPosition(const X, Y: Integer): TTextEditorViewPosition;
+    function TextPositionToCharIndex(const ATextPosition: TTextEditorTextPosition): Integer;
     procedure ChainLinesChanged(ASender: TObject);
     procedure ChainLinesChanging(ASender: TObject);
     procedure ChainLinesCleared(ASender: TObject);
@@ -830,9 +830,9 @@ type
 {$ENDIF}
     procedure ToggleBookmark(const AIndex: Integer = -1);
     procedure ToggleSelectedCase(const ACase: TTextEditorCase = cNone);
-    procedure Trim(const ATrimStyle: TTextEditorTrimStyle);
     procedure TrimBeginning;
     procedure TrimEnd;
+    procedure TrimText(const ATrimStyle: TTextEditorTrimStyle);
     procedure TrimTrailingSpaces;
     procedure UnhookEditorLines;
     procedure UnlockUndo;
@@ -1783,7 +1783,7 @@ end;
 
 function TCustomTextEditor.CharIndexToTextPosition(const ACharIndex: Integer): TTextEditorTextPosition;
 begin
-  Result := CharIndexToTextPosition(ACharIndex, GetPosition(0, 0));
+  Result := CharIndexToTextPosition(ACharIndex, GetBOFPosition);
 end;
 
 function TCustomTextEditor.CharIndexToTextPosition(const ACharIndex: Integer;
@@ -8567,7 +8567,7 @@ begin
           TextPosition := FSearch.InSelection.SelectionBeginPosition
         else
         if soEntireScope in FSearch.Options then
-          TextPosition := GetPosition(1, 0);
+          TextPosition := GetBOFPosition;
 
         if SelectionAvailable then
           TextPosition := SelectionBeginPosition;
@@ -11994,7 +11994,7 @@ begin
             if Assigned(FLines.Items) then
               LTextPosition := GetPosition(Length(FLines.Items^[LTextPosition.Line].TextLine) + 1, LTextPosition.Line)
             else
-              LTextPosition := GetPosition(1, 0);
+              LTextPosition := GetBOFPosition;
 
             if not IsSamePosition(FPosition.Text, LTextPosition) then
               TextPosition := LTextPosition;
@@ -17426,7 +17426,7 @@ procedure TCustomTextEditor.MoveCaretToBeginning;
 var
   LTextPosition: TTextEditorTextPosition;
 begin
-  LTextPosition := GetPosition(1, 0);
+  LTextPosition := GetBOFPosition;
   TextPosition := LTextPosition;
   SelectionBeginPosition := LTextPosition;
   SelectionEndPosition := LTextPosition;
@@ -17771,7 +17771,7 @@ begin
   TextPosition := LTextPosition;
 end;
 
-procedure TCustomTextEditor.Trim(const ATrimStyle: TTextEditorTrimStyle);
+procedure TCustomTextEditor.TrimText(const ATrimStyle: TTextEditorTrimStyle);
 var
   LBeginPosition, LEndPosition: TTextEditorTextPosition;
   LText: string;
@@ -19241,7 +19241,7 @@ begin
     else
       Inc(LLastTextPosition.Char, FLines.GetLengthOfLongestLine);
   end;
-  SetCaretAndSelection(LOldCaretPosition, GetPosition(1, 0), LLastTextPosition);
+  SetCaretAndSelection(LOldCaretPosition, GetBOFPosition, LLastTextPosition);
   FLast.SortOrder := soDesc;
   FreeMultiCarets;
   TextPosition := LLastTextPosition;

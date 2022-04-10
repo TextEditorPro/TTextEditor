@@ -866,7 +866,7 @@ begin
   if Assigned(AData) then
     Position := TTextEditorTextPosition(AData^)
   else
-    Position := GetPosition(0, 0);
+    Position := GetBOFPosition;
 end;
 
 procedure TTextEditorPositionEvent.LoadFromStream(const AStream: TStream);

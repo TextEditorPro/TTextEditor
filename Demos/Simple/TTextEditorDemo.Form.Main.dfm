@@ -12,7 +12,6 @@ object MainForm: TMainForm
   Font.Style = []
   Position = poScreenCenter
   OnCreate = FormCreate
-  PixelsPerInch = 96
   TextHeight = 13
   object SplitterVertical: TSplitter
     Left = 207

@@ -17,6 +17,7 @@ function ColorToHex(const AColor: TColor): string;
 function ConvertTabs(const ALine: string; ATabWidth: Integer; var AHasTabs: Boolean; const AColumns: Boolean): string;
 function DeleteWhitespace(const AValue: string): string;
 function GetClipboardText: string;
+function GetBOFPosition: TTextEditorTextPosition; inline;
 function GetPosition(const AChar, ALine: Integer): TTextEditorTextPosition; inline;
 function GetViewPosition(const AColumn: Integer; const ARow: Integer): TTextEditorViewPosition; inline;
 function HexToColor(const AColor: string): TColor;
@@ -415,6 +416,12 @@ var
 begin
   GetTextExtentPoint32(ACanvas.Handle, PChar(AText), Length(AText), LSize);
   Result := LSize.cy;
+end;
+
+function GetBOFPosition: TTextEditorTextPosition; inline;
+begin
+  Result.Char := 1;
+  Result.Line := 0;
 end;
 
 function GetPosition(const AChar, ALine: Integer): TTextEditorTextPosition;

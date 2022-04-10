@@ -51,7 +51,6 @@ type
     FTrimTrailingSpaces: Boolean;
     FUnknownCharHigh: Byte;
     FUnknownCharsVisible: Boolean;
-    FUpdateCount: Integer;
     function ExpandString(const AIndex: Integer): string;
     function GetExpandedString(const AIndex: Integer): string;
     function GetExpandedStringLength(const AIndex: Integer): Integer;
@@ -164,7 +163,6 @@ begin
   FCaseSensitive := False;
   FCount := 0;
   FOwner := AOwner;
-  FUpdateCount := 0;
   FIndexOfLongestLine := -1;
   FLengthOfLongestLine := 0;
   FLongestLineNeedsUpdate := False;
@@ -199,7 +197,7 @@ function TTextEditorLines.Add(const AValue: string): Integer;
 begin
   Result := FCount;
   InsertItem(Result, AValue);
-  if Assigned(OnInserted) and (FUpdateCount = 0) then
+  if Assigned(OnInserted) then
     OnInserted(Self, Result, 1);
 end;
 
@@ -318,15 +316,10 @@ begin
   if (AIndex < 0) or (AIndex > FCount) then
     ListIndexOutOfBounds(AIndex);
 {$ENDIF}
-  BeginUpdate;
-  try
-    Finalize(FItems^[AIndex]);
-    Dec(FCount);
-    if AIndex < FCount then
-      System.Move(FItems[AIndex + 1], FItems[AIndex], (FCount - AIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
-  finally
-    EndUpdate;
-  end;
+  Finalize(FItems^[AIndex]);
+  Dec(FCount);
+  if AIndex < FCount then
+    System.Move(FItems[AIndex + 1], FItems[AIndex], (FCount - AIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
   FIndexOfLongestLine := -1;
   if Assigned(FOnDeleted) then
     FOnDeleted(Self, AIndex, 1);
@@ -349,14 +342,7 @@ begin
       LCount := FCount - AIndex - 1;
     Finalize(FItems^[AIndex], LCount);
     if LLinesAfter > 0 then
-    begin
-      BeginUpdate;
-      try
-        System.Move(FItems[AIndex + LCount], FItems[AIndex], LLinesAfter * TEXT_EDITOR_STRING_RECORD_SIZE);
-      finally
-        EndUpdate;
-      end;
-    end;
+      System.Move(FItems[AIndex + LCount], FItems[AIndex], LLinesAfter * TEXT_EDITOR_STRING_RECORD_SIZE);
     Dec(FCount, LCount);
 
     FIndexOfLongestLine := -1;
@@ -538,18 +524,13 @@ begin
   for LIndex := 0 to FCount - 1 do
     Exclude(FItems^[LIndex].Flags, sfModify);
 
-  BeginUpdate;
-  try
-    for LIndex := Count - 1 downto 0 do
-    if sfEmptyLine in FItems^[LIndex].Flags then
-    begin
-      Finalize(FItems^[LIndex]);
-      Dec(FCount);
-      if LIndex < FCount then
-        System.Move(FItems[LIndex + 1], FItems[LIndex], (FCount - LIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
-    end;
-  finally
-    EndUpdate;
+  for LIndex := Count - 1 downto 0 do
+  if sfEmptyLine in FItems^[LIndex].Flags then
+  begin
+    Finalize(FItems^[LIndex]);
+    Dec(FCount);
+    if LIndex < FCount then
+      System.Move(FItems[LIndex + 1], FItems[LIndex], (FCount - LIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
   end;
 end;
 
@@ -730,26 +711,21 @@ begin
   if (AIndex < 0) or (AIndex > FCount) then
     ListIndexOutOfBounds(AIndex);
 {$ENDIF}
-  BeginUpdate;
-  try
-    SetCapacity(FCount + 1);
-    if AIndex < FCount then
-      System.Move(FItems^[AIndex], FItems^[AIndex + 1], (FCount - AIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
-    FIndexOfLongestLine := -1;
-    with FItems^[AIndex] do
-    begin
-      Pointer(TextLine) := nil;
-      TextLine := '';
-      Range := nil;
-      ExpandedLength := -1;
-      Flags := [AFlag];
-    end;
-    Inc(FCount);
-  finally
-    EndUpdate;
+  SetCapacity(FCount + 1);
+  if AIndex < FCount then
+    System.Move(FItems^[AIndex], FItems^[AIndex + 1], (FCount - AIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
+  FIndexOfLongestLine := -1;
+  with FItems^[AIndex] do
+  begin
+    Pointer(TextLine) := nil;
+    TextLine := '';
+    Range := nil;
+    ExpandedLength := -1;
+    Flags := [AFlag];
   end;
+  Inc(FCount);
 
-  if (UpdateCount = 0) and Assigned(OnInserted) and (AFlag <> sfEmptyLine) then
+  if Assigned(OnInserted) and (AFlag <> sfEmptyLine) then
     OnInserted(Self, AIndex, 1);
 end;
 
@@ -764,32 +740,27 @@ begin
 {$ENDIF}
   if ACount > 0 then
   begin
-    BeginUpdate;
-    try
-      SetCapacity(FCount + ACount);
-      if AIndex < FCount then
-        System.Move(FItems^[AIndex], FItems^[AIndex + ACount], (FCount - AIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
+    SetCapacity(FCount + ACount);
+    if AIndex < FCount then
+      System.Move(FItems^[AIndex], FItems^[AIndex + ACount], (FCount - AIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
 
-      FIndexOfLongestLine := -1;
-      LIndex := 0;
-      for LLine := AIndex to AIndex + ACount - 1 do
-      with FItems^[LLine] do
-      begin
-        Pointer(TextLine) := nil;
-        if Assigned(AStrings) then
-          TextLine := AStrings[LIndex];
-        Inc(LIndex);
-        Range := nil;
-        ExpandedLength := -1;
-        if AModified then
-          Flags := [sfExpandedLengthUnknown, sfLineStateModified]
-        else
-          Flags := [sfExpandedLengthUnknown];
-      end;
-      Inc(FCount, ACount);
-    finally
-      EndUpdate;
+    FIndexOfLongestLine := -1;
+    LIndex := 0;
+    for LLine := AIndex to AIndex + ACount - 1 do
+    with FItems^[LLine] do
+    begin
+      Pointer(TextLine) := nil;
+      if Assigned(AStrings) then
+        TextLine := AStrings[LIndex];
+      Inc(LIndex);
+      Range := nil;
+      ExpandedLength := -1;
+      if AModified then
+        Flags := [sfExpandedLengthUnknown, sfLineStateModified]
+      else
+        Flags := [sfExpandedLengthUnknown];
     end;
+    Inc(FCount, ACount);
 
     if Assigned(OnInserted) then
       OnInserted(Self, AIndex, ACount);
@@ -951,7 +922,7 @@ begin
     end;
     AStrings.Clear;
 
-    if (FUpdateCount = 0) and Assigned(FOnInserted) then
+    if Assigned(FOnInserted) then
       FOnInserted(Self, 0, FCount);
     if Assigned(FOnChange) then
       FOnChange(Self);
@@ -1379,7 +1350,7 @@ begin
     EndUpdate;
   end;
 
-  if (FUpdateCount = 0) and Assigned(FOnInserted) then
+  if Assigned(FOnInserted) then
     FOnInserted(Self, 0, FCount);
 
   if Assigned(FOnChange) then

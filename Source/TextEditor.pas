@@ -6832,7 +6832,7 @@ begin
 
           LSearchLength := FSearchEngine.Lengths[LResultIndex] + LBeginTextPosition.Char;
 
-          while LSearchLength > LCurrentLineLength do
+          while (LLine < FLines.Count) and (LSearchLength > LCurrentLineLength) do
           begin
             Dec(LSearchLength, LCurrentLineLength);
             Inc(LLine);

@@ -181,18 +181,17 @@
             }
           },
           {
-            "Type": "Hex",
+            "Type": "HexNumber",
             "Attributes": {
-              "Element": "Number"
+              "Element": "HexNumber"
             },
-            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuwvyzåäö",
+            "AllowedCharacters": "0123456789abcdeABCDE",
             "Properties": {
               "CloseOnTerm": true,
               "CloseOnEndOfLine": true
             },
             "TokenRange": {
-              "Open": "0",
-              "OpenBreakType": "Any"
+              "Open": "0x"
             }
           }
         ],

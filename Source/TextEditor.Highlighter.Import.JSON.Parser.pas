@@ -2554,7 +2554,8 @@ begin
       FStream.Write(FStringBuffer.Data[0], FStringBuffer.DataLength);
       FStringBuffer.FDataLength := 0;
     end
-    else if FStream is TMemoryStream then
+    else
+    if FStream is TMemoryStream then
       FStringBuffer.FlushToMemoryStream(TMemoryStream(FStream), FEncoding)
     else
     begin
@@ -3305,8 +3306,8 @@ begin
   end
   else
 {$ENDIF ~CPUX64}
-    if C < MinLen then
-      C := MinLen;
+  if C < MinLen then
+    C := MinLen;
   FCapacity := C;
   if Assigned(FData) then
   begin

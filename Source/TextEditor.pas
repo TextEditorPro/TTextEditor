@@ -9880,7 +9880,7 @@ begin
   if Result then
     Exit;
 
-  if ssCtrl in aShift then
+  if (ssCtrl in AShift) and not (ssAlt in AShift)  then
     LLinesToScroll := VisibleLineCount shr Ord(soHalfPage in FScroll.Options)
   else
     LLinesToScroll := 3;
@@ -10993,7 +10993,7 @@ begin
   inherited;
 
   if soALTSetsColumnMode in FSelection.Options then
-    if (ssAlt in AShift) and not FState.AltDown then
+    if (ssAlt in AShift) and not (ssCtrl in AShift) and not FState.AltDown then
     begin
       FSaveSelectionMode := FSelection.Mode;
       FSaveScrollOption := soPastEndOfLine in FScroll.Options;
@@ -11040,7 +11040,7 @@ begin
   FKeyboardHandler.ExecuteKeyDown(Self, AKey, AShift);
 
   { URI mouse over }
-  if (ssCtrl in AShift) and URIOpener then
+  if (ssCtrl in AShift) and not (ssAlt in AShift) and URIOpener then
   begin
     Winapi.Windows.GetCursorPos(LCursorPoint);
     LCursorPoint := ScreenToClient(LCursorPoint);
@@ -11526,7 +11526,7 @@ begin
 
     if not ReadOnly and FCaret.MultiEdit.Active and not FMouse.OverURI then
     begin
-      if ssCtrl in AShift then
+      if (ssCtrl in AShift) and not (ssAlt in AShift) then
       begin
         LViewPosition := PixelsToViewPosition(X, Y);
         if ssShift in AShift then
@@ -11694,7 +11694,7 @@ begin
           else
           begin
             if soALTSetsColumnMode in FSelection.Options then
-              if not (ssAlt in AShift) and FState.AltDown then
+              if not (ssAlt in AShift) and not (ssCtrl in AShift) and FState.AltDown then
               begin
                 FSelection.Mode := FSaveSelectionMode;
                 FScroll.SetOption(soPastEndOfLine, FSaveScrollOption);
@@ -15566,6 +15566,9 @@ begin
           end;
       end;
     finally
+      if Assigned(FEvents.OnChange) then
+        FEvents.OnChange(Self);
+
       FUndoList.InsideRedo := False;
       if LChangeScrollPastEndOfLine then
         FScroll.SetOption(soPastEndOfLine, False);
@@ -16287,6 +16290,9 @@ begin
         end;
     end;
   finally
+    if Assigned(FEvents.OnChange) then
+      FEvents.OnChange(Self);
+
     if LChangeScrollPastEndOfLine then
       FScroll.SetOption(soPastEndOfLine, False);
     LUndoItem.Free;

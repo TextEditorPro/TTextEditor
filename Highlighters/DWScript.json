@@ -363,13 +363,13 @@
             "Attributes": {
               "Element": "HexNumber"
             },
+            "AllowedCharacters": "0123456789abcdeABCDE",
             "Properties": {
               "CloseOnTerm": true,
               "CloseOnEndOfLine": true
             },
             "TokenRange": {
-              "Open": "$",
-              "Close": " "
+              "Open": "$"
             }
           },
           {

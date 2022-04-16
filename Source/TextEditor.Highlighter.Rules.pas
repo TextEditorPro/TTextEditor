@@ -93,6 +93,7 @@ type
 
   TTextEditorRange = class(TTextEditorRule)
   strict private
+    FAllowedCharacters: TTextEditorCharSet;
     FAlternativeCloseArray: TTextEditorArrayOfString;
     FAlternativeCloseArrayCount: Integer;
     FCaseFunct: TTextEditorCaseFunction;
@@ -142,6 +143,7 @@ type
     procedure Prepare;
     procedure Reset;
     procedure SetDelimiters(const ADelimiters: TTextEditorCharSet);
+    property AllowedCharacters: TTextEditorCharSet read FAllowedCharacters write FAllowedCharacters;
     property AlternativeCloseArray: TTextEditorArrayOfString read FAlternativeCloseArray write FAlternativeCloseArray;
     property AlternativeCloseArrayCount: Integer read FAlternativeCloseArrayCount write SetAlternativeCloseArrayCount;
     property OpenBeginningOfLine: Boolean read FOpenBeginningOfLine write FOpenBeginningOfLine;
@@ -415,6 +417,7 @@ begin
   FTokens := TList.Create;
 
   FDelimiters := TCharacterSets.DefaultDelimiters;
+  FAllowedCharacters := [];
 end;
 
 destructor TTextEditorRange.Destroy;

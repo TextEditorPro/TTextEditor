@@ -325,24 +325,37 @@ begin
     begin
       FToken := FRange.DefaultToken;
 
-      if FRange.UseDelimitersForText then
-        LDelimiters := FRange.Delimiters + [TControlCharacters.Null]
-      else
-        LDelimiters := FAllDelimiters;
-
-      if IsRightToLeftCharacter(FLine[FRunPosition], False) then
+      if FRange.AllowedCharacters <> [] then
       begin
-        FRightToLeftToken := True;
-
-        while IsRightToLeftCharacter(FLine[FRunPosition]) do
+        Dec(FRunPosition);
+        while FLine[FRunPosition] in FRange.AllowedCharacters do
           Inc(FRunPosition);
 
-        while (FRunPosition > 1) and (FLine[FRunPosition - 1] in [TControlCharacters.Tab, TCharacters.Space]) do
-          Dec(FRunPosition);
+        FRange := FRange.Parent;
       end
       else
-      while not (FLine[FRunPosition] in LDelimiters) do
-        Inc(FRunPosition);
+      begin
+        if IsRightToLeftCharacter(FLine[FRunPosition], False) then
+        begin
+          FRightToLeftToken := True;
+
+          while IsRightToLeftCharacter(FLine[FRunPosition]) do
+            Inc(FRunPosition);
+
+          while (FRunPosition > 1) and (FLine[FRunPosition - 1] in [TControlCharacters.Tab, TCharacters.Space]) do
+            Dec(FRunPosition);
+        end
+        else
+        begin
+          if FRange.UseDelimitersForText then
+            LDelimiters := FRange.Delimiters + [TControlCharacters.Null]
+          else
+            LDelimiters := FAllDelimiters;
+
+          while not (FLine[FRunPosition] in LDelimiters) do
+            Inc(FRunPosition);
+        end;
+      end;
     end
     else
     if FRange.ClosingToken = FToken then

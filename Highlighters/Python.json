@@ -83,10 +83,11 @@
             }
           },
           {
-            "Type": "Hex",
+            "Type": "HexNumber",
             "Attributes": {
-              "Element": "Number"
+              "Element": "HexNumber"
             },
+            "AllowedCharacters": "0123456789abcdeABCDE",
             "Properties": {
               "CloseOnTerm": true,
               "CloseOnEndOfLine": true

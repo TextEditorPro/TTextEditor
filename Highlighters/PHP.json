@@ -93,13 +93,13 @@
                   "Attributes": {
                     "Element": "Number"
                   },
+                  "AllowedCharacters": "01",
                   "Properties": {
                     "CloseOnTerm": true,
                     "CloseOnEndOfLine": true
                   },
                   "TokenRange": {
-                    "Open": "0b",
-                    "Close": " "
+                    "Open": "0b"
                   }
                 },
                 {
@@ -201,18 +201,17 @@
                   }
                 },
                 {
-                  "Type": "Hex",
+                  "Type": "HexNumber",
                   "Attributes": {
-                    "Element": "Number"
+                    "Element": "HexNumber"
                   },
-                  "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'ghijklmnopqrstuvwyzåäö",
+                  "AllowedCharacters": "0123456789abcdeABCDE",
                   "Properties": {
                     "CloseOnTerm": true,
                     "CloseOnEndOfLine": true
                   },
                   "TokenRange": {
-                    "Open": "0",
-                    "OpenBreakType": "Any"
+                    "Open": "0x"
                   }
                 }
               ],

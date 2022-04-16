@@ -462,8 +462,13 @@ begin
         ARange.Clear;
         ARange.CaseSensitive := ARangeObject.ValueBoolean['CaseSensitive'];
         ImportAttributes(ARange.Attribute, ARangeObject['Attributes'].ObjectValue, AElementPrefix);
+
+        if ARangeObject['AllowedCharacters'].Value <> '' then
+          ARange.AllowedCharacters := StrToSet(ARangeObject['AllowedCharacters'].Value);
+
         if ARangeObject['Delimiters'].Value <> '' then
           ARange.Delimiters := StrToSet(ARangeObject['Delimiters'].Value);
+
         ARange.TokenType := StrToRangeType(ARangeObject['Type'].Value);
 
         LPropertiesObject := ARangeObject['Properties'].ObjectValue;

@@ -125,9 +125,9 @@ type
   TTextEditorCompletionProposalItems = TList<TTextEditorCompletionProposalItem>;
 
   { Editor options }
-  TTextEditorOption = (eoAddHTMLCodeToClipboard, eoAutoIndent, eoDragDropEditing, eoDropFiles, eoShowControlCharacters,
-    eoShowNonBreakingSpaceAsSpace, eoShowNullCharacters{$IFDEF TEXT_EDITOR_SPELL_CHECK}, eoSpellCheck{$ENDIF},
-    eoShowZeroWidthSpaces, eoTrimTrailingSpaces, eoTrailingLineBreak);
+  TTextEditorOption = (eoAddHTMLCodeToClipboard, eoAutoIndent, eoDragDropEditing, eoDropFiles,
+    eoShowControlCharacters, eoShowLineNumbersInHTMLExport, eoShowNonBreakingSpaceAsSpace, eoShowNullCharacters
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}, eoSpellCheck{$ENDIF}, eoShowZeroWidthSpaces, eoTrimTrailingSpaces, eoTrailingLineBreak);
   TTextEditorOptions = set of TTextEditorOption;
 
   TTextEditorOvertypeMode = (omInsert, omOverwrite);

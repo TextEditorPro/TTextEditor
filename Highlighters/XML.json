@@ -29,6 +29,11 @@
             "Attributes": {
               "Element": "Editor"
             },
+            "Properties": {
+              "AlternativeClose": [
+                "<"
+              ]
+            },
             "TokenRange": {
               "Open": "{",
               "Close": "}"

@@ -4826,7 +4826,7 @@ var
 
     if (Result.Char >= 1) and (Result.Line < FLines.Count) then
     begin
-      LLine := FLines.Items^[Result.Line].TextLine;
+      LLine := FLines[Result.Line];
 
       LPChar := PChar(@LLine[Result.Char]);
 

@@ -767,6 +767,7 @@ type
 {$IFDEF BASENCODING}
     procedure Encode(const ACoding: TTextEditorCoding);
 {$ENDIF}
+    procedure ChangeScale(AMultiplier, ADivider: Integer; AIsDpiChange: Boolean); override;
     procedure EndUndoBlock;
     procedure EndUpdate;
     procedure EnsureCursorPositionVisible(const AForceToMiddle: Boolean = False; const AEvenIfVisible: Boolean = False);
@@ -814,7 +815,6 @@ type
     procedure SaveToFile(const AFilename: string; const AEncoding: System.SysUtils.TEncoding = nil);
     procedure SaveToStream(const AStream: TStream; const AEncoding: System.SysUtils.TEncoding = nil);
     procedure SelectAll;
-    procedure ChangeScale(AMultiplier, ADivider: Integer; AIsDpiChange: Boolean); override;
     procedure SetBookmark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition; const AImageIndex: Integer = -1);
     procedure SetCaretAndSelection(const ATextPosition, ABlockBeginPosition, ABlockEndPosition: TTextEditorTextPosition);
     procedure SetFocus; override;

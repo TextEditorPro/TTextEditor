@@ -266,10 +266,12 @@ begin
         ARun := LNextPosition;
         LStartTokenNode := nil;
       end;
+
       if Assigned(LCurrentTokenNode.Token) then
         LFindTokenNode := LCurrentTokenNode
       else
         LFindTokenNode := nil;
+
       LPreviousPosition := ARun;
       while (LCurrentTokenNode.NextNodes.Count > 0) and (APLine[ARun] <> TControlCharacters.Null) do
       begin

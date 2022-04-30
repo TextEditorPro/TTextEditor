@@ -252,6 +252,7 @@ var
   LKeyword: PChar;
   LCloseParent: Boolean;
   LDelimiters: TTextEditorCharSet;
+  LStartPosition: Integer;
 begin
   FreeTemporaryTokens;
 
@@ -352,7 +353,8 @@ begin
           else
             LDelimiters := FAllDelimiters;
 
-          while not (FLine[FRunPosition] in LDelimiters) do
+          LStartPosition := FRunPosition;
+          while not (FLine[FRunPosition] in LDelimiters) and (FRunPosition - LStartPosition < 100) do
             Inc(FRunPosition);
         end;
       end;

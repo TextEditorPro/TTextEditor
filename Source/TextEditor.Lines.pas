@@ -19,7 +19,6 @@ type
   TTextEditorLines = class(TStrings)
   strict private
     FCapacity: Integer;
-    FCaseSensitive: Boolean;
     FColumns: Boolean;
     FCount: Integer;
     FEncoding: System.SysUtils.TEncoding;
@@ -44,7 +43,7 @@ type
     FProgressType: TTextEditorProgressType;
     FSavingToStream: Boolean;
     FShowProgress: Boolean;
-    FSortOrder: TTextEditorSortOrder;
+    FSortOptions: TTextEditorSortOptions;
     FStreaming: Boolean;
     FTabWidth: Integer;
     FTextLength: Integer;
@@ -105,7 +104,6 @@ type
     procedure SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil); override;
     procedure Sort(const ABeginLine: Integer; const AEndLine: Integer); virtual;
     procedure Trim(const ATrimStyle: TTextEditorTrimStyle; const ABeginLine: Integer; const AEndLine: Integer);
-    property CaseSensitive: Boolean read FCaseSensitive write FCaseSensitive default False;
     property Columns: Boolean read FColumns write FColumns;
     property Count: Integer read FCount;
     property Encoding: TEncoding read FEncoding write SetEncoding;
@@ -130,7 +128,7 @@ type
     property ProgressType: TTextEditorProgressType read FProgressType write FProgressType;
     property Ranges[const AIndex: Integer]: TTextEditorLinesRange read GetRanges write SetRanges;
     property ShowProgress: Boolean read FShowProgress write FShowProgress;
-    property SortOrder: TTextEditorSortOrder read FSortOrder write FSortOrder;
+    property SortOptions: TTextEditorSortOptions read FSortOptions write FSortOptions;
     property Streaming: Boolean read FStreaming write FStreaming;
     property Strings[AIndex: Integer]: string read Get write Put; default; //FI:C110 Getter or setter name is different from property declaration
     property TabWidth: Integer read FTabWidth write SetTabWidth;
@@ -160,7 +158,6 @@ constructor TTextEditorLines.Create;
 begin
   inherited Create;
 
-  FCaseSensitive := False;
   FCount := 0;
   FOwner := AOwner;
   FIndexOfLongestLine := -1;
@@ -196,22 +193,36 @@ end;
 function TTextEditorLines.Add(const AValue: string): Integer;
 begin
   Result := FCount;
+
   InsertItem(Result, AValue);
+
   if Assigned(OnInserted) then
     OnInserted(Self, Result, 1);
 end;
 
 function TTextEditorLines.CompareStrings(const S1, S2: string): Integer;
 begin
-  if SortOrder = soRandom then
+  if soRandom in FSortOptions then
     Exit(Random(2) - 1);
 
-  if CaseSensitive then
-    Result := CompareStr(S1, S2)
-  else
-    Result := CompareText(S1, S2);
+{$IF CompilerVersion >= 34.0}
+  var LOptions: TCompareOptions := [];
 
-  if SortOrder = soDesc then
+  if soNatural in FSortOptions then
+    Include(LOptions, coDigitAsNumbers);
+
+  if soIgnoreCase in FSortOptions then
+    Include(LOptions, coIgnoreCase);
+
+  Result := String.Compare(S1, S2, LOptions);
+{$ELSE}
+  if soIgnoreCase in FSortOptions then
+    Result := CompareText(S1, S2)
+  else
+    Result := CompareStr(S1, S2);
+{$ENDIF}
+
+  if soDesc in FSortOptions then
     Result := -1 * Result;
 end;
 
@@ -798,7 +809,7 @@ end;
 
 function StringListCompareStrings(const AList: TTextEditorLines; const ALeft, ARight: Integer): Integer;
 begin
-  Result := AList.CompareStrings(AList.Items[ALeft].TextLine, AList.Items[ARight].TextLine);
+  Result := AList.CompareStrings(AList[ALeft], AList[ARight]);
 end;
 
 procedure TTextEditorLines.Sort(const ABeginLine: Integer; const AEndLine: Integer);

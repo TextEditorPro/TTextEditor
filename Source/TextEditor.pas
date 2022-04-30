@@ -114,7 +114,6 @@ type
       MouseMovePoint: TPoint;
       Row: Integer;
       ShiftState: TShiftState;
-      SortOrder: TTextEditorSortOrder;
       TopLine: Integer;
     end;
 
@@ -823,7 +822,7 @@ type
     procedure SetOption(const AOption: TTextEditorOption; const AEnabled: Boolean);
     procedure SetSelectedTextEmpty(const AChangeString: string = '');
     procedure SizeOrFontChanged(const AFontChanged: Boolean = True);
-    procedure Sort(const ASortOrder: TTextEditorSortOrder = soAsc; const ACaseSensitive: Boolean = False);
+    procedure Sort(const AOptions: TTextEditorSortOptions);
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
     procedure SpellCheckFindNextError;
     procedure SpellCheckFindPreviousError;
@@ -1296,7 +1295,6 @@ begin
 
   FBorderStyle := bsSingle;
   FDoubleClickTime := GetDoubleClickTime;
-  FLast.SortOrder := soDesc;
   FLineNumbers.ResetCache := True;
   FToggleCase.Text := '';
   FState.URIOpener := False;
@@ -12006,7 +12004,6 @@ begin
 
         ComputeScroll(FLast.MouseMovePoint);
 
-        FLast.SortOrder := soDesc;
         Include(FState.Flags, sfInSelection);
         Exclude(FState.Flags, sfCodeFoldingCollapseMarkClicked);
 
@@ -19248,7 +19245,6 @@ begin
       Inc(LLastTextPosition.Char, FLines.GetLengthOfLongestLine);
   end;
   SetCaretAndSelection(LOldCaretPosition, GetBOFPosition, LLastTextPosition);
-  FLast.SortOrder := soDesc;
   FreeMultiCarets;
   TextPosition := LLastTextPosition;
 
@@ -19361,7 +19357,7 @@ begin
     Exclude(FOptions, AOption);
 end;
 
-procedure TCustomTextEditor.Sort(const ASortOrder: TTextEditorSortOrder = soAsc; const ACaseSensitive: Boolean = False);
+procedure TCustomTextEditor.Sort(const AOptions: TTextEditorSortOptions);
 var
   LBeginPosition, LEndPosition: TTextEditorTextPosition;
   LText: string;
@@ -19371,10 +19367,9 @@ var
   LIndex: Integer;
 begin
   LTextPosition := TextPosition;
-  FLines.CaseSensitive := ACaseSensitive;
-  FLines.SortOrder := ASortOrder;
+  FLines.SortOptions := AOptions;
 
-  if ASortOrder = soRandom then
+  if soRandom in AOptions then
     Randomize;
 
   LBeginPosition.Line := 0;
@@ -19411,8 +19406,7 @@ begin
 
     LLines := TTextEditorLines.Create(nil);
     try
-      LLines.CaseSensitive := ACaseSensitive;
-      LLines.SortOrder := ASortOrder;
+      LLines.SortOptions := AOptions;
       LLines.Text := SelectedText;
       LLines.Sort(0, LLines.Count - 1);
       SelectedText := LLines.Text;

@@ -20,6 +20,9 @@ type
     sfLineBreakCR, sfLineBreakLF, sfLineStateNormal, sfLineStateModified);
   TTextEditorStringFlags = set of TTextEditorStringFlag;
 
+  TTextEditorSortOption = (soAsc, soDesc, soIgnoreCase, {$IF CompilerVersion >= 34.0}soNatural,{$ENDIF} soRandom);
+  TTextEditorSortOptions = set of TTextEditorSortOption;
+
   TTextEditorLineState = (lsNone, lsNormal, lsModified);
   TTextEditorLineBreak = (lbCRLF, lbLF, lbCR);
 
@@ -249,9 +252,6 @@ type
 
   { Case }
   TTextEditorCase = (cNone=-1, cUpper=0, cLower=1, cAlternating=2, cSentence=3, cTitle=4, cOriginal=5);
-
-  { Sort }
-  TTextEditorSortOrder = (soAsc, soDesc, soRandom);
 
   { Trim }
   TTextEditorTrimStyle = (tsBoth, tsLeft, tsRight);

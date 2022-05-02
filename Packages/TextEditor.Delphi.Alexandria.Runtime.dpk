@@ -121,6 +121,7 @@ contains
   TextEditor.Search.InSelection in '..\Source\TextEditor.Search.InSelection.pas',
   TextEditor.Search.Map in '..\Source\TextEditor.Search.Map.pas',
   TextEditor.Search.Map.Colors in '..\Source\TextEditor.Search.Map.Colors.pas',
+  TextEditor.Search.NearOperator in '..\Source\TextEditor.Search.NearOperator.pas',
   TextEditor.Search.Normal in '..\Source\TextEditor.Search.Normal.pas',
   TextEditor.Search.RegularExpressions in '..\Source\TextEditor.Search.RegularExpressions.pas',
   TextEditor.Search.Wildcard in '..\Source\TextEditor.Search.Wildcard.pas',

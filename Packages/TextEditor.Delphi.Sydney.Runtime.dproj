@@ -214,6 +214,7 @@
         <DCCReference Include="..\Source\TextEditor.Search.InSelection.pas"/>
         <DCCReference Include="..\Source\TextEditor.Search.Map.pas"/>
         <DCCReference Include="..\Source\TextEditor.Search.Map.Colors.pas"/>
+        <DCCReference Include="..\Source\TextEditor.Search.NearOperator.pas"/>
         <DCCReference Include="..\Source\TextEditor.Search.Normal.pas"/>
         <DCCReference Include="..\Source\TextEditor.Search.RegularExpressions.pas"/>
         <DCCReference Include="..\Source\TextEditor.Search.Wildcard.pas"/>

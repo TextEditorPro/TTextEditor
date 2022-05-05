@@ -162,6 +162,7 @@ type
     property Editor: TCustomControl read GetEditor write SetEditor;
   end;
 
+  [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
   TTextEditorMacroRecorder = class(TCustomEditorMacroRecorder)
   published
     property OnStateChange;

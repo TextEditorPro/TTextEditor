@@ -8,6 +8,7 @@ uses
 type
   TIncompatCharBehaviour = (icUseDefault, icBestFit, icError);
 
+  [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
   TTextEditorSpellCheck = class(TComponent)
   private
     FCodePage: Word;

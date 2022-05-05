@@ -13,6 +13,7 @@ type
   TTextEditorPreviewPageEvent = procedure(ASender: TObject; APageNumber: Integer) of object;
   TTextEditorPreviewScale = (pscWholePage, pscPageWidth, pscUserScaled);
 
+  [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
   TTextEditorPrintPreview = class(TCustomControl)
   strict private
     FBorderStyle: TBorderStyle;

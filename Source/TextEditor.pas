@@ -250,6 +250,7 @@ type
       Background: TColor;
       Border: TColor;
       CharsBefore: Integer;
+      CustomBackgroundColor: Boolean;
       EmptySpace: TTextEditorEmptySpace;
       ExpandedCharsBefore: Integer;
       FontStyle: TFontStyles;
@@ -970,6 +971,7 @@ type
     property WordWrap: TTextEditorWordWrap read FWordWrap write SetWordWrap;
   end;
 
+  [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
   TTextEditor = class(TCustomTextEditor)
   published
     property ActiveLine;
@@ -1117,6 +1119,7 @@ type
     procedure Notification(AComponent: TComponent; AOperation: TOperation); override;
   end;
 
+  [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
   TDBTextEditor = class(TCustomDBTextEditor)
   published
     property ActiveLine;
@@ -14479,7 +14482,7 @@ var
 
     if LCustomLineColors and (LCustomForegroundColor <> TColors.SysNone) then
       LForegroundColor := LCustomForegroundColor;
-    if LCustomLineColors and (LCustomBackgroundColor <> TColors.SysNone) then
+    if LCustomLineColors and (LCustomBackgroundColor <> TColors.SysNone) and not LTokenHelper.CustomBackgroundColor then
       LBackgroundColor := LCustomBackgroundColor;
 
     LText := LTokenHelper.Text;
@@ -14797,6 +14800,7 @@ var
       LTokenHelper.Length := LTokenLength;
       LTokenHelper.Text := LToken;
       LTokenHelper.CharsBefore := ACharsBefore;
+      LTokenHelper.CustomBackgroundColor := ACustomBackgroundColor;
       LTokenHelper.ExpandedCharsBefore := LExpandedCharsBefore;
       LTokenHelper.Foreground := LForeground;
       LTokenHelper.Background := LBackground;

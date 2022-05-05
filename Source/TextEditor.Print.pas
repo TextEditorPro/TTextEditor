@@ -15,6 +15,7 @@ type
     property FirstLine: Integer read FFirstLine write FFirstLine;
   end;
 
+  [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
   TTextEditorPrint = class(TComponent)
   strict private
     FAbort: Boolean;

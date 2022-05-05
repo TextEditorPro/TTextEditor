@@ -7,6 +7,7 @@ uses
 {$IFDEF ALPHASKINS}, acSBUtils, sCommonData{$ENDIF};
 
 type
+  [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
   TTextEditorCompareScrollBar = class(TCustomControl)
   strict private
 {$IFDEF ALPHASKINS}

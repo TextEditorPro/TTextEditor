@@ -35,7 +35,7 @@ implementation
 
 uses
   Winapi.Windows, System.SysUtils
-{$IFDEF ALPHASKINS}, sConst, sMessages, sSkinProps, sVCLUtils{$ENDIF};
+{$IFDEF ALPHASKINS}, sConst, sMessages, sSkinProps{$ENDIF};
 
 constructor TTextEditorPopupWindow.Create(AOwner: TComponent);
 begin

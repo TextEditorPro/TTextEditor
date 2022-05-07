@@ -35,22 +35,24 @@ implementation
 
 uses
   Winapi.Windows, System.SysUtils
-{$IFDEF ALPHASKINS}, sConst, sMessages, sSkinProps{$ENDIF};
+{$IFDEF ALPHASKINS}, sConst, sMessages, sSkinProps, sVCLUtils{$ENDIF};
 
 constructor TTextEditorPopupWindow.Create(AOwner: TComponent);
 begin
 {$IFDEF ALPHASKINS}
   FSkinData := TsScrollWndData.Create(Self, True);
   FSkinData.COC := COC_TsListBox;
-  if FSkinData.SkinSection = '' then
-    FSkinData.SkinSection := s_Edit;
 {$ENDIF}
 
   inherited Create(AOwner);
 
   ControlStyle := ControlStyle + [csNoDesignVisible, csReplicatable];
 
+{$IFDEF ALPHASKINS}
+  DoubleBuffered := False;
+{$ELSE}
   DoubleBuffered := True;
+{$ENDIF}
   Ctl3D := False;
   ParentCtl3D := False;
   Parent := AOwner as TWinControl;

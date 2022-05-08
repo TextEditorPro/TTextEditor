@@ -192,6 +192,7 @@ type
   TTextEditorLeftMarginLineNumberOptions = set of TTextEditorLeftMarginLineNumberOption;
 
   TTextEditorLeftMarginBorderStyle = (mbsNone, mbsMiddle, mbsRight);
+  TTextEditorLeftMarginLineStateAlign = (lsLeft, lsRight);
 
   { Right margin }
   TTextEditorRightMarginOption = (rmoAutoLinebreak, rmoMouseMove, rmoShowMovingHint);

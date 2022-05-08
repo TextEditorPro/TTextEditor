@@ -5993,8 +5993,7 @@ begin
           FLines.Insert(LTextPosition.Line, '');
           FUndoList.AddChange(crLineBreak, LTextPosition, LTextPosition, LTextPosition, '', smNormal);
           Inc(LTextPosition.Line);
-          with FLines do
-            LineState[LTextPosition.Line] := lsModified;
+          FLines.LineState[LTextPosition.Line] := lsModified;
         end;
       end
       else
@@ -10371,7 +10370,8 @@ begin
   AutoCursor;
 
   LHTML := '';
-  if not FMultiEdit.SelectionAvailable and (eoAddHTMLCodeToClipboard in FOptions) then
+  if (eoAddHTMLCodeToClipboard in FOptions) and not FMultiEdit.SelectionAvailable and
+    (SelectionBeginPosition.Line <> SelectionEndPosition.Line) then
     LHTML := TextToHTML(True);
 
   SetClipboardText(AText, LHTML);
@@ -13208,13 +13208,23 @@ var
     begin
       LOldColor := Canvas.Brush.Color;
 
-      LLineStateRect.Left := AClipRect.Right - FLeftMargin.LineState.Width - 1;
-      LLineStateRect.Right := AClipRect.Right - 1;
+      if FLeftMargin.LineState.Align = lsLeft then
+      begin
+        LLineStateRect.Left := 0;
+        LLineStateRect.Right := FLeftMargin.LineState.Width;
+      end
+      else
+      begin
+        LLineStateRect.Left := AClipRect.Right - FLeftMargin.LineState.Width - 1;
+        LLineStateRect.Right := AClipRect.Right - 1;
+      end;
+
       for LLine := AFirstLine to ALastTextLine do
       begin
         LTextLine := GetViewTextLineNumber(LLine);
         LLineState := FLines.LineState[LTextLine - 1];
-        if LLineState <> lsNone then
+        if FLeftMargin.LineState.ShowOnlyModified and (LLineState = lsModified) or
+          not FLeftMargin.LineState.ShowOnlyModified and (LLineState <> lsNone) then
         begin
           LLineStateRect.Top := (LLine - TopLine) * LLineHeight;
           if FRuler.Visible then
@@ -16296,6 +16306,10 @@ begin
 
     if LChangeScrollPastEndOfLine then
       FScroll.SetOption(soPastEndOfLine, False);
+
+    if FUndoList.ChangeCount = 0 then
+      SetModified(False);
+
     LUndoItem.Free;
     DecPaintLock;
   end;

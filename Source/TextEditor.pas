@@ -3137,21 +3137,33 @@ var
       (FLines.Encoding = System.SysUtils.TEncoding.ASCII));
   end;
 
-  function GetTokenWidth(const AToken: string): Integer;
+  function GetTokenWidth(const AToken: string; const ATokenLength: Integer = -1): Integer;
+  var
+    LLength: Integer;
   begin
-    DrawText(FPaintHelper.StockBitmap.Canvas.Handle, AToken, ALength, LRect, LFlags);
+    if ATokenLength = -1 then
+      LLength := ALength
+    else
+      LLength := ATokenLength;
+
+    DrawText(FPaintHelper.StockBitmap.Canvas.Handle, AToken, LLength, LRect, LFlags);
 
     Result := LRect.Width;
   end;
 
   function GetControlCharacterWidth: Integer;
+  var
+    LLength: Integer;
   begin
     LToken := ControlCharacterToName(LChar);
+    LLength := Length(LToken);
 
     if FixedSizeFont then
-      Result := (FPaintHelper.FontStock.CharWidth * Length(LToken) + 3) * ALength
+      Result := FPaintHelper.FontStock.CharWidth * LLength
     else
-      Result := GetTokenWidth(LToken);
+      Result := GetTokenWidth(LToken, LLength);
+
+    Result := (Result + 3) * ALength;
   end;
 
 begin
@@ -4155,32 +4167,32 @@ begin
       LToken := LNextTokenText;
 
     LNextTokenText := '';
-
     LTokenLength := Length(LToken);
+
     LHighlighterAttribute := FHighlighter.TokenAttribute;
     if Assigned(LHighlighterAttribute) then
       LFontStyles := LHighlighterAttribute.FontStyles;
+
     if LFontStyles <> LPreviousFontStyles then
     begin
       FPaintHelper.SetStyle(LFontStyles);
       LPreviousFontStyles := LFontStyles;
     end;
 
-    if FWordWrap.Active then
-      if LCurrentRow < ARow then
-        if LLength + LTokenLength > FWordWrapLine.Length[LCurrentRow] then
-        begin
-          LNextTokenText := Copy(LToken, FWordWrapLine.Length[LCurrentRow] - LLength + 1, LTokenLength);
-          LTokenLength := FWordWrapLine.Length[LCurrentRow] - LLength;
-          LToken := Copy(LToken, 1, LTokenLength);
+    if FWordWrap.Active and (LCurrentRow < ARow) then
+      if LLength + LTokenLength > FWordWrapLine.Length[LCurrentRow] then
+      begin
+        LNextTokenText := Copy(LToken, FWordWrapLine.Length[LCurrentRow] - LLength + 1, LTokenLength);
+        LTokenLength := FWordWrapLine.Length[LCurrentRow] - LLength;
+        LToken := Copy(LToken, 1, LTokenLength);
 
-          Inc(LCurrentRow);
-          LLength := 0;
-          LTextWidth := 0;
-          Inc(LCharsBefore, GetTokenCharCount(LToken, LCharsBefore));
+        Inc(LCurrentRow);
+        LLength := 0;
+        LTextWidth := 0;
+        Inc(LCharsBefore, GetTokenCharCount(LToken, LCharsBefore));
 
-          Continue;
-        end;
+        Continue;
+      end;
 
     if LCurrentRow = ARow then
     begin
@@ -13958,105 +13970,104 @@ var
     end;
 
   begin
-    if soHighlightResults in FSearch.Options then
-      if LCurrentSearchIndex <> -1 then
+    if (soHighlightResults in FSearch.Options) and (LCurrentSearchIndex <> -1) then
+    begin
+      LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LCurrentSearchIndex])^;
+
+      while (LCurrentSearchIndex < FSearch.Items.Count) and (LSearchItem.EndTextPosition.Line < LCurrentLine) do
       begin
-        LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LCurrentSearchIndex])^;
-
-        while (LCurrentSearchIndex < FSearch.Items.Count) and (LSearchItem.EndTextPosition.Line < LCurrentLine) do
-        begin
-          Inc(LCurrentSearchIndex);
-          if LCurrentSearchIndex < FSearch.Items.Count then
-            LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LCurrentSearchIndex])^;
-        end;
-
-        if LCurrentSearchIndex = FSearch.Items.Count then
-        begin
-          LCurrentSearchIndex := -1;
-          Exit;
-        end;
-
-        if LCurrentLine < LSearchItem.BeginTextPosition.Line then
-          Exit;
-
-        LOldColor := FPaintHelper.Color;
-        LOldBackgroundColor := FPaintHelper.BackgroundColor;
-
-        if FSearch.Highlighter.Colors.Foreground <> TColors.SysNone then
-          FPaintHelper.SetForegroundColor(FSearch.Highlighter.Colors.Foreground);
-        FPaintHelper.SetBackgroundColor(FSearch.Highlighter.Colors.Background);
-
-        while True do
-        begin
-          LSearchTextLength := GetSearchTextLength;
-          if LSearchTextLength = 0 then
-            Break;
-
-          if FSearch.InSelection.Active then
-          begin
-            LIsTextPositionInSelection := IsTextPositionInSearchBlock(LSearchItem.BeginTextPosition);
-            if LIsTextPositionInSelection then
-              LIsTextPositionInSelection := not IsTextPositionInSelection(LSearchItem.BeginTextPosition);
-          end
-          else
-            LIsTextPositionInSelection := IsTextPositionInSelection(LSearchItem.BeginTextPosition) and
-              IsTextPositionInSelection(LSearchItem.EndTextPosition);
-
-          if not FSearch.InSelection.Active and LIsTextPositionInSelection or
-            FSearch.InSelection.Active and not LIsTextPositionInSelection then
-          begin
-            if not NextItem then
-              Break;
-            Continue;
-          end;
-
-          LToken := AText;
-          LSearchRect := ATextRect;
-
-          if LSearchItem.BeginTextPosition.Line < LCurrentLine then
-            LBeginTextPositionChar := 1
-          else
-            LBeginTextPositionChar := LSearchItem.BeginTextPosition.Char;
-
-          LCharCount := LBeginTextPositionChar - LTokenHelper.CharsBefore - 1;
-
-          if LCharCount > 0 then
-          begin
-            LToken := Copy(AText, 1, LCharCount);
-            Inc(LSearchRect.Left, GetTokenWidth(LToken, LCharCount, LPaintedColumn, AMinimap));
-            LToken := Copy(AText, LCharCount + 1, Length(AText));
-          end
-          else
-            LCharCount := LTokenHelper.Length - Length(AText);
-
-          LToken := Copy(LToken, 1, Min(LSearchTextLength, LBeginTextPositionChar + LSearchTextLength -
-            LTokenHelper.CharsBefore - LCharCount - 1));
-          LSearchRect.Right := LSearchRect.Left + GetTokenWidth(LToken, Length(LToken), LPaintedColumn, AMinimap);
-          if SameText(AText, LToken) then
-            Inc(LSearchRect.Right, FItalic.Offset);
-
-          if LToken <> '' then
-            Winapi.Windows.ExtTextOut(Canvas.Handle, LSearchRect.Left, LSearchRect.Top, ETO_OPAQUE or ETO_CLIPPED,
-              @LSearchRect, PChar(LToken), Length(LToken), nil);
-
-          if LBeginTextPositionChar + LSearchTextLength > LCurrentLineLength then
-            Break
-          else
-          if LBeginTextPositionChar + LSearchTextLength > LTokenHelper.CharsBefore + Length(LToken) + LCharCount + 1 then
-            Break
-          else
-          if LBeginTextPositionChar + LSearchTextLength - 1 <= LCurrentLineLength then
-          begin
-            if not NextItem then
-              Break;
-          end
-          else
-            Break;
-        end;
-
-        FPaintHelper.SetForegroundColor(LOldColor);
-        FPaintHelper.SetBackgroundColor(LOldBackgroundColor);
+        Inc(LCurrentSearchIndex);
+        if LCurrentSearchIndex < FSearch.Items.Count then
+          LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LCurrentSearchIndex])^;
       end;
+
+      if LCurrentSearchIndex = FSearch.Items.Count then
+      begin
+        LCurrentSearchIndex := -1;
+        Exit;
+      end;
+
+      if LCurrentLine < LSearchItem.BeginTextPosition.Line then
+        Exit;
+
+      LOldColor := FPaintHelper.Color;
+      LOldBackgroundColor := FPaintHelper.BackgroundColor;
+
+      if FSearch.Highlighter.Colors.Foreground <> TColors.SysNone then
+        FPaintHelper.SetForegroundColor(FSearch.Highlighter.Colors.Foreground);
+      FPaintHelper.SetBackgroundColor(FSearch.Highlighter.Colors.Background);
+
+      while True do
+      begin
+        LSearchTextLength := GetSearchTextLength;
+        if LSearchTextLength = 0 then
+          Break;
+
+        if FSearch.InSelection.Active then
+        begin
+          LIsTextPositionInSelection := IsTextPositionInSearchBlock(LSearchItem.BeginTextPosition);
+          if LIsTextPositionInSelection then
+            LIsTextPositionInSelection := not IsTextPositionInSelection(LSearchItem.BeginTextPosition);
+        end
+        else
+          LIsTextPositionInSelection := IsTextPositionInSelection(LSearchItem.BeginTextPosition) and
+            IsTextPositionInSelection(LSearchItem.EndTextPosition);
+
+        if not FSearch.InSelection.Active and LIsTextPositionInSelection or
+          FSearch.InSelection.Active and not LIsTextPositionInSelection then
+        begin
+          if not NextItem then
+            Break;
+          Continue;
+        end;
+
+        LToken := AText;
+        LSearchRect := ATextRect;
+
+        if LSearchItem.BeginTextPosition.Line < LCurrentLine then
+          LBeginTextPositionChar := 1
+        else
+          LBeginTextPositionChar := LSearchItem.BeginTextPosition.Char;
+
+        LCharCount := LBeginTextPositionChar - LTokenHelper.CharsBefore - 1;
+
+        if LCharCount > 0 then
+        begin
+          LToken := Copy(AText, 1, LCharCount);
+          Inc(LSearchRect.Left, GetTokenWidth(LToken, LCharCount, LPaintedColumn, AMinimap));
+          LToken := Copy(AText, LCharCount + 1, Length(AText));
+        end
+        else
+          LCharCount := LTokenHelper.Length - Length(AText);
+
+        LToken := Copy(LToken, 1, Min(LSearchTextLength, LBeginTextPositionChar + LSearchTextLength -
+          LTokenHelper.CharsBefore - LCharCount - 1));
+        LSearchRect.Right := LSearchRect.Left + GetTokenWidth(LToken, Length(LToken), LPaintedColumn, AMinimap);
+        if SameText(AText, LToken) then
+          Inc(LSearchRect.Right, FItalic.Offset);
+
+        if LToken <> '' then
+          Winapi.Windows.ExtTextOut(Canvas.Handle, LSearchRect.Left, LSearchRect.Top, ETO_OPAQUE or ETO_CLIPPED,
+            @LSearchRect, PChar(LToken), Length(LToken), nil);
+
+        if LBeginTextPositionChar + LSearchTextLength > LCurrentLineLength then
+          Break
+        else
+        if LBeginTextPositionChar + LSearchTextLength > LTokenHelper.CharsBefore + Length(LToken) + LCharCount + 1 then
+          Break
+        else
+        if LBeginTextPositionChar + LSearchTextLength - 1 <= LCurrentLineLength then
+        begin
+          if not NextItem then
+            Break;
+        end
+        else
+          Break;
+      end;
+
+      FPaintHelper.SetForegroundColor(LOldColor);
+      FPaintHelper.SetBackgroundColor(LOldBackgroundColor);
+    end;
   end;
 
   procedure PaintToken(const AToken: string; const ATokenLength: Integer; const ASelectedRectPaint: Boolean = False);

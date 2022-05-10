@@ -12137,6 +12137,7 @@ begin
     if Assigned(FEvents.OnLoadingProgress) then
       FEvents.OnLoadingProgress(Self)
     else
+    if Assigned(Parent) then
       PaintProgressBar;
 
     Exit;
@@ -18288,6 +18289,8 @@ begin
       else
         LText := SelectedText;
 
+      LText := StringReplace(LText, TControlCharacters.Substitute, TControlCharacters.Null, [rfReplaceAll]);
+
       if AWithLineNumbers then
       begin
         LStringList := TStringList.Create;
@@ -19266,6 +19269,7 @@ var
 begin
   LOldCaretPosition := TextPosition;
   LLastTextPosition := GetPosition(1, Max(FLines.Count - 1, 0));
+
   if LLastTextPosition.Line >= 0 then
   begin
     if FSelection.Mode = smNormal then
@@ -19273,6 +19277,7 @@ begin
     else
       Inc(LLastTextPosition.Char, FLines.GetLengthOfLongestLine);
   end;
+
   SetCaretAndSelection(LOldCaretPosition, GetBOFPosition, LLastTextPosition);
   FreeMultiCarets;
   TextPosition := LLastTextPosition;

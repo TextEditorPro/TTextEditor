@@ -9,13 +9,13 @@ uses
   TextEditor.ActiveLine, TextEditor.Caret, TextEditor.CodeFolding, TextEditor.CodeFolding.Hint.Form,
   TextEditor.CodeFolding.Ranges, TextEditor.CodeFolding.Regions, TextEditor.Colors, TextEditor.CompletionProposal,
   TextEditor.CompletionProposal.PopupWindow, TextEditor.CompletionProposal.Snippets, TextEditor.Consts,
-  TextEditor.Glyph, TextEditor.Highlighter, TextEditor.Highlighter.Attributes, TextEditor.InternalImage,
-  TextEditor.KeyboardHandler, TextEditor.KeyCommands, TextEditor.LeftMargin, TextEditor.Lines,
-  TextEditor.MacroRecorder, TextEditor.Marks, TextEditor.MatchingPairs, TextEditor.Minimap, TextEditor.PaintHelper,
-  TextEditor.Replace, TextEditor.RightMargin, TextEditor.Ruler, TextEditor.Scroll, TextEditor.Search,
-  TextEditor.Search.Base, TextEditor.Selection, TextEditor.SkipRegions, TextEditor.SpecialChars, TextEditor.SyncEdit,
-  TextEditor.Tabs, TextEditor.Types, TextEditor.Undo, TextEditor.Undo.List, TextEditor.UnknownChars, TextEditor.Utils,
-  TextEditor.WordWrap
+  TextEditor.Glyph, TextEditor.Highlighter, TextEditor.Highlighter.Attributes, TextEditor.HighlightLine,
+  TextEditor.InternalImage, TextEditor.KeyboardHandler, TextEditor.KeyCommands, TextEditor.LeftMargin,
+  TextEditor.Lines, TextEditor.MacroRecorder, TextEditor.Marks, TextEditor.MatchingPairs, TextEditor.Minimap,
+  TextEditor.PaintHelper, TextEditor.Replace, TextEditor.RightMargin, TextEditor.Ruler, TextEditor.Scroll,
+  TextEditor.Search, TextEditor.Search.Base, TextEditor.Selection, TextEditor.SkipRegions, TextEditor.SpecialChars,
+  TextEditor.SyncEdit, TextEditor.Tabs, TextEditor.Types, TextEditor.Undo, TextEditor.Undo.List,
+  TextEditor.UnknownChars, TextEditor.Utils, TextEditor.WordWrap
 {$IFDEF ALPHASKINS}, acSBUtils, sCommonData{$ENDIF}
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}, TextEditor.SpellCheck{$ENDIF};
 
@@ -291,6 +291,7 @@ type
     FFile: TTextEditorFile;
     FHighlightedFoldRange: TTextEditorCodeFoldingRange;
     FHighlighter: TTextEditorHighlighter;
+    FHighlightLine: TTextEditorHighlightLine;
     FHookedCommandHandlers: TObjectList;
     FImagesBookmark: TTextEditorInternalImage;
     FItalic: TTextEditorItalic;
@@ -313,6 +314,7 @@ type
     FMultiEdit: TTextEditorMultiEdit;
     FOptions: TTextEditorOptions;
     FOriginal: TTextEditorOriginal;
+    FOvertypeMode: TTextEditorOvertypeMode;
     FPaintHelper: TTextEditorPaintHelper;
     FPaintLock: Integer;
     FPosition: TTextEditorPosition;
@@ -333,7 +335,6 @@ type
 {$IFDEF ALPHASKINS}
     FSkinData: TsScrollWndData;
 {$ENDIF}
-    FOvertypeMode: TTextEditorOvertypeMode;
     FSpecialChars: TTextEditorSpecialChars;
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
     FSpellCheck: TTextEditorSpellCheck;
@@ -525,6 +526,7 @@ type
     procedure SetCompletionProposalPopupWindowLocation;
     procedure SetDefaultKeyCommands;
     procedure SetFullFilename(const AName: string);
+    procedure SetHighlightLine(const AValue: TTextEditorHighlightLine);
     procedure SetHorizontalScrollPosition(const AValue: Integer);
     procedure SetKeyCommands(const AValue: TTextEditorKeyCommands);
     procedure SetLeftMargin(const AValue: TTextEditorLeftMargin);
@@ -740,6 +742,7 @@ type
     procedure ChangeObjectScale(const AMultiplier, ADivider: Integer);
     procedure Clear;
     procedure ClearBookmarks;
+    procedure ClearHighlightLine;
     procedure ClearMarks;
     procedure ClearMatchingPair;
     procedure ClearSelection;
@@ -839,6 +842,7 @@ type
     procedure UnregisterCommandHandler(AHookedCommandEvent: TTextEditorHookedCommandEvent);
     procedure UpdateCaret;
     procedure WndProc(var AMessage: TMessage); override;
+        property Action;
     property ActiveLine: TTextEditorActiveLine read FActiveLine write SetActiveLine;
     property AllCodeFoldingRanges: TTextEditorAllCodeFoldingRanges read FCodeFoldings.AllRanges;
     property AlwaysShowCaret: Boolean read FCaretHelper.ShowAlways write SetAlwaysShowCaret;
@@ -868,6 +872,7 @@ type
     property Font;
     property FullFilename: string read FFile.FullName write SetFullFilename;
     property Highlighter: TTextEditorHighlighter read FHighlighter;
+    property HighlightLine: TTextEditorHighlightLine read FHighlightLine write SetHighlightLine;
     property HorizontalScrollPosition: Integer read FScrollHelper.HorizontalPosition write SetHorizontalScrollPosition;
     property HotFilename: string read FFile.HotName write FFile.HotName;
     property IsScrolling: Boolean read FScrollHelper.IsScrolling;
@@ -990,6 +995,7 @@ type
     property Enabled;
     property Font;
     property Height;
+    property HighlightLine;
     property ImeMode;
     property ImeName;
     property KeyCommands;
@@ -1141,6 +1147,7 @@ type
     property Field;
     property Font;
     property Height;
+    property HighlightLine;
     property ImeMode;
     property ImeName;
     property KeyCommands;
@@ -1246,6 +1253,7 @@ uses
   Vcl.Menus, TextEditor.Encoding, TextEditor.Export.HTML, TextEditor.Highlighter.Rules, TextEditor.Language,
   TextEditor.LeftMargin.Border, TextEditor.LeftMargin.LineNumbers, TextEditor.Scroll.Hint, TextEditor.Search.Map,
   TextEditor.Search.Normal, TextEditor.Search.RegularExpressions, TextEditor.Search.WildCard, TextEditor.Undo.Item
+
 {$IFDEF VCL_STYLES}, TextEditor.StyleHooks{$ENDIF}
 {$IFDEF ALPHASKINS}, acGlow, sConst, sMessages, sSkinManager, sStyleSimply, sVCLUtils{$ENDIF};
 
@@ -1462,6 +1470,8 @@ begin
   { Update character constraints }
   FontChanged(nil);
   TabsChanged(nil);
+  { Highlight line }
+  FHighlightLine := TTextEditorHighlightLine.Create(Self);
   { Highlighter }
   FHighlighter := TTextEditorHighlighter.Create(Self);
   FHighlighter.Lines := FLines;
@@ -1499,6 +1509,8 @@ begin
   FColors := nil;
   FCodeFoldings.AllRanges.Free;
   FCodeFoldings.AllRanges := nil;
+  FHighlightLine.Free;
+  FHighlightLine := nil;
   FHighlighter.Free;
   FHighlighter := nil;
   FreeCompletionProposalPopupWindow;
@@ -1565,6 +1577,7 @@ begin
   FSyncEdit := nil;
   FItalic.Bitmap.Free;
   FItalic.Bitmap := nil;
+
   if Assigned(FMinimapHelper.Shadow.AlphaByteArray) then
   begin
     FreeMem(FMinimapHelper.Shadow.AlphaByteArray);
@@ -14848,23 +14861,27 @@ var
 
   procedure PaintLines;
   var
-    LLine, LFirstColumn, LLastColumn: Integer;
-    LFromLineText, LToLineText: string;
     LCurrentRow: Integer;
+    LElement: string;
     LFoldRange: TTextEditorCodeFoldingRange;
-    LHighlighterAttribute: TTextEditorHighlighterAttribute;
-    LTokenText, LNextTokenText: string;
-    LTokenPosition, LWordWrapTokenPosition, LTokenLength: Integer;
     LFontStyles: TFontStyles;
+    LFromLineText, LToLineText: string;
+    LHighlighterAttribute: TTextEditorHighlighterAttribute;
+    LIndex: Integer;
+    LIsCustomBackgroundColor: Boolean;
+    LItem: TTextEditorHighlightLineItem;
     LKeyword, LWordAtSelection, LSelectedText: string;
+    LLine, LFirstColumn, LLastColumn: Integer;
+    LLinePosition: Integer;
+    LOpenTokenEndPos, LOpenTokenEndLen: Integer;
+    LRegEx: TRegEx;
+    LRegExOptions: TRegExOptions;
+    LTextCaretY: Integer;
+    LTextPosition: TTextEditorTextPosition;
+    LTokenPosition, LWordWrapTokenPosition, LTokenLength: Integer;
+    LTokenText, LNextTokenText: string;
     LUnderline: TTextEditorUnderline;
     LUnderlineColor: TColor;
-    LOpenTokenEndPos, LOpenTokenEndLen: Integer;
-    LElement: string;
-    LIsCustomBackgroundColor: Boolean;
-    LTextPosition: TTextEditorTextPosition;
-    LTextCaretY: Integer;
-    LLinePosition: Integer;
 
     procedure GetWordAtSelection;
     var
@@ -15280,6 +15297,27 @@ var
         LBackgroundColor := GetBackgroundColor;
 
         LCustomLineColors := False;
+
+        if FHighlightLine.Active and not LCurrentLineText.IsEmpty then
+        for LIndex := 0 to FHighlightLine.Items.Count - 1 do
+        begin
+          LItem := FHighlightLine.Item[LIndex];
+
+          LRegExOptions := [];
+          if LItem.IgnoreCase then
+            LRegExOptions := [roIgnoreCase];
+
+          LRegEx := TRegex.Create(LItem.Pattern, LRegExOptions);
+          if LRegEx.Match(LCurrentLineText).Success then
+          begin
+            LCustomForegroundColor := LItem.Foreground;
+            LCustomBackgroundColor := LItem.Background;
+            LCustomLineColors := True;
+
+            Break;
+          end;
+        end;
+
         if Assigned(FEvents.OnCustomLineColors) then
           FEvents.OnCustomLineColors(Self, LCurrentLine, LCustomLineColors, LCustomForegroundColor, LCustomBackgroundColor);
 
@@ -16741,7 +16779,7 @@ begin
   end
   else
   case FReplace.Engine of
-    seNormal:
+    seNormal, seWildcard:
       SelectedText := LReplaceText;
     seExtended:
       begin
@@ -17670,6 +17708,12 @@ begin
   SetLength(FCodeFoldings.TreeLine, 0);
   SetLength(FCodeFoldings.RangeFromLine, 0);
   SetLength(FCodeFoldings.RangeToLine, 0);
+end;
+
+procedure TCustomTextEditor.ClearHighlightLine;
+begin
+  if Assigned(FHighlightLine) then
+    FHighlightLine.Items.Clear;
 end;
 
 procedure TCustomTextEditor.ClearMatchingPair;
@@ -18988,6 +19032,7 @@ begin
 
     if Assigned(Parent) then
     begin
+      ClearHighlightLine;
       ClearMatchingPair;
       ClearCodeFolding;
       ClearBookmarks;
@@ -19864,6 +19909,11 @@ begin
   FFile.FullName := AName;
   FFile.Path := ExtractFilePath(AName);
   FFile.Name := ExtractFilename(AName);
+end;
+
+procedure TCustomTextEditor.SetHighlightLine(const AValue: TTextEditorHighlightLine);
+begin
+  FHighlightLine.Assign(AValue);
 end;
 
 procedure TCustomTextEditor.GoToOriginalLineAndCenter(const ALine: Integer; const AChar: Integer; const AText: string = '');

@@ -70,6 +70,7 @@ contains
   TextEditor.Encoding in '..\Source\TextEditor.Encoding.pas',
   TextEditor.Export.HTML in '..\Source\TextEditor.Export.HTML.pas',
   TextEditor.Glyph in '..\Source\TextEditor.Glyph.pas',
+  TextEditor.HighlightLine in '..\Source\TextEditor.HighlightLine.pas',
   TextEditor.Highlighter in '..\Source\TextEditor.Highlighter.pas',
   TextEditor.Highlighter.Attributes in '..\Source\TextEditor.Highlighter.Attributes.pas',
   TextEditor.Highlighter.Colors in '..\Source\TextEditor.Highlighter.Colors.pas',

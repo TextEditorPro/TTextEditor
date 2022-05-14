@@ -23,6 +23,7 @@ type
     procedure ImportEditorProperties(const AEditorObject: TJSONObject);
     procedure ImportElements(const AColorsObject: TJSONObject);
     procedure ImportHighlighter(const AJSONObject: TJSONObject);
+    procedure ImportHighlightLine(const AHighlightLineObject: TJSONObject);
     procedure ImportKeyList(const AKeyList: TTextEditorKeyList; const AKeyListObject: TJSONObject; const AElementPrefix: string);
     procedure ImportMatchingPair(const AMatchingPairObject: TJSONObject);
     procedure ImportRange(const ARange: TTextEditorRange; const ARangeObject: TJSONObject; const AParentRange: TTextEditorRange = nil;
@@ -41,7 +42,7 @@ implementation
 
 uses
   System.TypInfo, System.UITypes, Vcl.Dialogs, Vcl.Forms, Vcl.Graphics, Vcl.GraphUtil, TextEditor.Consts,
-  TextEditor.Highlighter.Token, TextEditor.Language, TextEditor.Types, TextEditor.Utils
+  TextEditor.Highlighter.Token, TextEditor.HighlightLine, TextEditor.Language, TextEditor.Types, TextEditor.Utils
 {$IFDEF ALPHASKINS}, sCommonData, sConst{$ENDIF};
 
 function StringToColorDef(const AString: string; const DefaultColor: TColor): Integer;
@@ -951,6 +952,59 @@ begin
   ImportCodeFolding(AJSONObject['CodeFolding'].ObjectValue);
   ImportMatchingPair(AJSONObject['MatchingPair'].ObjectValue);
   ImportCompletionProposal(AJSONObject['CompletionProposal'].ObjectValue);
+  ImportHighlightLine(AJSONObject['HighlightLine'].ObjectValue);
+end;
+
+procedure TTextEditorHighlighterImportJSON.ImportHighlightLine(const AHighlightLineObject: TJSONObject);
+var
+  LArray: TJSONArray;
+  LEditor: TCustomTextEditor;
+  LFileStream: TStream;
+  LIndex: Integer;
+  LItem: TTextEditorHighlightLineItem;
+  LJSONDataValue: PJSONDataValue;
+  LJSONObject: TJSONObject;
+  LName: string;
+begin
+  if not Assigned(AHighlightLineObject) then
+    Exit;
+  { Matching token pairs }
+  LArray := AHighlightLineObject['Items'].ArrayValue;
+  for LIndex := 0 to LArray.Count - 1 do
+  begin
+    LJSONDataValue := LArray.Items[LIndex];
+
+    if hoMultiHighlighter in FHighlighter.Options then
+    begin
+      { Multi highlighter code folding fold region include }
+      LName := LJSONDataValue.ObjectValue['File'].Value;
+      if LName <> '' then
+      begin
+        LEditor := FHighlighter.Editor as TCustomTextEditor;
+        LFileStream := LEditor.CreateHighlighterStream(LName);
+        if Assigned(LFileStream) then
+        begin
+          LJSONObject := TJSONObject.ParseFromStream(LFileStream) as TJSONObject;
+          if Assigned(LJSONObject) then
+          try
+            if LJSONObject.Contains('HighlightLine') then
+              ImportMatchingPair(LJSONObject['HighlightLine'].ObjectValue);
+          finally
+            LJSONObject.Free;
+            LFileStream.Free;
+          end;
+        end;
+      end;
+    end;
+
+    LEditor := FHighlighter.Editor as TCustomTextEditor;
+    LEditor.HighlightLine.Active := True;
+    LItem := LEditor.HighlightLine.Items.Add;
+    LItem.Background := StringToColorDef(LJSONDataValue.ObjectValue['BackgroundColor'].Value, LItem.Background);
+    LItem.Foreground := StringToColorDef(LJSONDataValue.ObjectValue['ForegroundColor'].Value, LItem.Foreground);
+    LItem.IgnoreCase := LJSONDataValue.ObjectValue.ValueBoolean['IgnoreCase'];
+    LItem.Pattern := LJSONDataValue.ObjectValue['Pattern'].Value;
+  end;
 end;
 
 procedure TTextEditorHighlighterImportJSON.ImportColors(const AJSONObject: TJSONObject);

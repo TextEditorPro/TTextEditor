@@ -481,6 +481,7 @@ end;
 procedure TTextEditorHighlighter.Clear;
 var
   LIndex: Integer;
+  LEditor: TCustomTextEditor;
 begin
   FFoldTags := False;
   FMatchingPairHighlight := True;
@@ -508,7 +509,11 @@ begin
   CodeFoldingRangeCount := 0;
 
   if Assigned(Editor) then
-    TCustomTextEditor(Editor).ClearMatchingPair;
+  begin
+    LEditor := Editor as TCustomTextEditor;
+    LEditor.ClearMatchingPair;
+    LEditor.ClearHighlightLine;
+  end;
 end;
 
 procedure TTextEditorHighlighter.Prepare;

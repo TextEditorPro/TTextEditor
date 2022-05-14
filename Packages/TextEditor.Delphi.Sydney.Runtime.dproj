@@ -163,6 +163,7 @@
         <DCCReference Include="..\Source\TextEditor.Encoding.pas"/>
         <DCCReference Include="..\Source\TextEditor.Export.HTML.pas"/>
         <DCCReference Include="..\Source\TextEditor.Glyph.pas"/>
+        <DCCReference Include="..\Source\TextEditor.HighlightLine.pas"/>
         <DCCReference Include="..\Source\TextEditor.Highlighter.pas"/>
         <DCCReference Include="..\Source\TextEditor.Highlighter.Attributes.pas"/>
         <DCCReference Include="..\Source\TextEditor.Highlighter.Colors.pas"/>

@@ -15,6 +15,38 @@
       "SubRules": {
         "Range": [
           {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "{",
+              "Close": "}"
+            }
+          },
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "(*",
+              "Close": "*)"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "//"
+            }
+          },
+          {
             "Type": "LineComment",
             "Attributes": {
               "Element": "Comment"
@@ -85,6 +117,7 @@
             "Type": "ReservedWord",
             "Words": [
               "afterinstall",
+              "and",
               "append",
               "attribs",
               "beforeinstall",
@@ -145,6 +178,7 @@
               "name",
               "of",
               "onlybelowversion",
+              "or",
               "parameters",
               "permissions",
               "pragma",
@@ -391,11 +425,11 @@
   },
   "MatchingPair": {
     "Pairs": [
-      {
+     {
         "OpenToken": "'",
         "CloseToken": "'"
       },
-      {
+     {
         "OpenToken": "\"",
         "CloseToken": "\""
       },
@@ -428,7 +462,22 @@
       {
         "OpenToken": ";",
         "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "//",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "(*",
+        "CloseToken": "*)",
+        "RegionType": "MultiLine"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}",
+        "RegionType": "MultiLine"
       }
+
     ]
   }
 }

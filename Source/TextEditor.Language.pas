@@ -16,6 +16,12 @@ resourcestring
   STextEditorKeyword = 'Keyword';
   STextEditorText = 'Text';
 
+  { TextEditor.CompletionProposal.Snippet }
+  STextEditorCompletionProposalSnippetItemUnnamed = '(unnamed)';
+
+  { TextEditor.HighlightLine }
+  STextEditorHighlightLineItemUnnamed = '(unnamed)';
+
   { TextEditor.KeyCommands }
   STextEditorDuplicateShortcut = 'Shortcut already exists';
 
@@ -25,6 +31,7 @@ resourcestring
   STextEditorCannotPause = 'Can only pause when recording';
   STextEditorCannotResume = 'Can only resume when paused';
   STextEditorShortcutAlreadyExists = 'Shortcut already exists';
+  STextEditorMacroNameUnnamed = 'unnamed';
 
   { TextEditor.Lines }
 {$IFDEF TEXTEDITOR_RANGE_CHECKS}

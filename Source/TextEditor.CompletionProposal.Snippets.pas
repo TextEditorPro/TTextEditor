@@ -99,6 +99,9 @@ type
 
 implementation
 
+uses
+  System.StrUtils, TextEditor.Language;
+
 { TTextEditorCompletionProposalSnippetItemPosition }
 
 constructor TTextEditorCompletionProposalSnippetItemPosition.Create;
@@ -200,10 +203,7 @@ end;
 
 function TTextEditorCompletionProposalSnippetItem.GetDisplayName: string;
 begin
-  if FKeyword <> '' then
-    Result := FKeyword
-  else
-    Result := '(unnamed)';
+  Result := IfThen(FKeyword = '', STextEditorCompletionProposalSnippetItemUnnamed, FKeyword);
 end;
 
 { TTextEditorCompletionProposalSnippetItems }

@@ -17,10 +17,11 @@
               "Element": "Comment"
             },
             "Properties": {
-              "CloseOnEndOfLine": true
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
             },
             "TokenRange": {
-              "Open": "; "
+              "Open": ";"
             }
           },
           {
@@ -33,7 +34,7 @@
               "OpenBeginningOfLine": true
             },
             "TokenRange": {
-              "Open": "# "
+              "Open": "#"
             }
           },
           {

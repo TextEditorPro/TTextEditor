@@ -265,7 +265,7 @@ constructor TCustomEditorMacroRecorder.Create(AOwner: TComponent);
 begin
   inherited;
 
-  FMacroName := 'unnamed';
+  FMacroName := STextEditorMacroNameUnnamed;
   FRecordCommandID := NewPluginCommand;
   FPlaybackCommandID := NewPluginCommand;
   FRecordShortCut := Vcl.Menus.ShortCut(Ord('R'), [ssCtrl, ssShift]);

@@ -19032,7 +19032,6 @@ begin
 
     if Assigned(Parent) then
     begin
-      ClearHighlightLine;
       ClearMatchingPair;
       ClearCodeFolding;
       ClearBookmarks;

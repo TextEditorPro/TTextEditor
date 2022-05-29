@@ -27,13 +27,14 @@
         "CompletionProposalSelectedText": "$00FFFFFF",
         "LeftMarginActiveLineBackground": "$004C2E10",
         "LeftMarginActiveLineBackgroundUnfocused": "$00463930",
+        "LeftMarginActiveLineNumber": "$00CEBAB1",
         "LeftMarginBackground": "$00201915",
+        "LeftMarginBookmarkPanel": "$00201915",
         "LeftMarginBorder": "$00201915",
         "LeftMarginLineNumberLine": "$008F8079",
         "LeftMarginLineNumbers": "$008F8079",
         "LeftMarginLineStateModified": "$0000CDCB",
         "LeftMarginLineStateNormal": "$00069E46",
-        "LeftMarginBookmarkPanel": "$00201915",
         "MatchingPairMatched": "$004A4232",
         "MatchingPairUnderline": "$008F8079",
         "MatchingPairUnmatched": "$006BCBFF",
@@ -95,7 +96,7 @@
       },
       {
         "Name": "String",
-        "Foreground": "$001744E8",
+        "Foreground": "$008DE8C3",
         "Background": "$00201915"
       },
       {
@@ -119,13 +120,18 @@
         "Background": "$00201915"
       },
       {
+        "Name": "LogicalOperator",
+        "Foreground": "$006C8CF7",
+        "Background": "$00201915"
+      },
+      {
         "Name": "Number",
-        "Foreground": "$0000CDCB",
+        "Foreground": "$006BCBFF",
         "Background": "$00201915"
       },
       {
         "Name": "HexNumber",
-        "Foreground": "$0000CDCB",
+        "Foreground": "$006BCBFF",
         "Background": "$00201915"
       },
       {
@@ -159,8 +165,19 @@
         "Background": "$00201915"
       },
       {
+        "Name": "MethodItalic",
+        "Foreground": "$00FFAA82",
+        "Background": "$00201915",
+        "Style": "Italic"
+      },
+      {
         "Name": "MethodName",
         "Foreground": "$00C5BEB0",
+        "Background": "$00201915"
+      },
+      {
+        "Name": "Value",
+        "Foreground": "$007871F0",
         "Background": "$00201915"
       }
     ]

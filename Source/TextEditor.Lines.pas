@@ -596,11 +596,13 @@ begin
     if LLength <> 0 then
     begin
       System.Move(Pointer(LStringRecord.TextLine)^, LPValue^, LLength * SizeOf(Char));
-      for LIndex2 := 0 to LLength - 1 do //FI:W528 Variable not used in FOR-loop
+      LIndex2 := 0;
+      while LIndex2 < LLength do
       begin
         if LPValue^ = TControlCharacters.Substitute then
           LPValue^ := TControlCharacters.Null;
         Inc(LPValue);
+        Inc(LIndex2);
       end;
     end;
 
@@ -652,11 +654,13 @@ begin
     if LLength <> 0 then
     begin
       System.Move(Pointer(LStringRecord.TextLine)^, LPValue^, LLength * SizeOf(Char));
-      for LIndex2 := 0 to LLength - 1 do //FI:W528 Variable not used in FOR-loop
+      LIndex2 := 0;
+      while LIndex2 < LLength do
       begin
         if LPValue^ = TControlCharacters.Substitute then
           LPValue^ := TControlCharacters.Null;
         Inc(LPValue);
+        Inc(LIndex2);
       end;
     end;
 

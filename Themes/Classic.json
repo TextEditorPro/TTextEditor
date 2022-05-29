@@ -116,6 +116,11 @@
         "Background": "clNavy"
       },
       {
+        "Name": "LogicalOperator",
+        "Foreground": "clLime",
+        "Background": "clNavy"
+      },
+      {
         "Name": "Number",
         "Foreground": "clFuchsia",
         "Background": "clNavy"
@@ -157,8 +162,19 @@
         "Background": "clNavy"
       },
       {
+        "Name": "Method",
+        "Foreground": "clWhite",
+        "Background": "clNavy",
+        "Style": "Italic"
+      },
+      {
         "Name": "MethodName",
         "Foreground": "clYellow",
+        "Background": "clNavy"
+      },
+      {
+        "Name": "Value",
+        "Foreground": "clWhite",
         "Background": "clNavy"
       }
     ]

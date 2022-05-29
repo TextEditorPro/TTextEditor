@@ -91,7 +91,7 @@
       },
       {
         "Name": "String",
-        "Foreground": "$008DE8C3",
+        "Foreground": "$0094C799",
         "Background": "$002D2D2D"
       },
       {
@@ -115,13 +115,18 @@
         "Background": "$002D2D2D"
       },
       {
+        "Name": "LogicalOperator",
+        "Foreground": "$00577BF9",
+        "Background": "$002D2D2D"
+      },
+      {
         "Name": "Number",
-        "Foreground": "$006C8CF7",
+        "Foreground": "$0057AEF9",
         "Background": "$002D2D2D"
       },
       {
         "Name": "HexNumber",
-        "Foreground": "$006C8CF7",
+        "Foreground": "$0057AEF9",
         "Background": "$002D2D2D"
       },
       {
@@ -155,9 +160,20 @@
         "Background": "$002D2D2D"
       },
       {
+        "Name": "MethodItalic",
+        "Foreground": "$0099B45E",
+        "Background": "$002D2D2D",
+        "Style": "Italic"
+      },
+      {
         "Name": "MethodName",
         "Foreground": "$00EA92C7",
         "Background": "$002D2D2D"
+      },
+      {
+        "Name": "Value",
+        "Foreground": "$00665EEC",
+        "Background": "$00232928"
       }
     ]
   }

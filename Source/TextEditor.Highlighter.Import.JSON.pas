@@ -480,6 +480,7 @@ begin
             CloseOnEndOfLine := LPropertiesObject.ValueBoolean['CloseOnEndOfLine'];
             CloseOnTerm := LPropertiesObject.ValueBoolean['CloseOnTerm'];
             SkipWhitespace := LPropertiesObject.ValueBoolean['SkipWhitespace'];
+            SkipWhitespaceOnce := LPropertiesObject.ValueBoolean['SkipWhitespaceOnce'];
             CloseParent := LPropertiesObject.ValueBoolean['CloseParent'];
             UseDelimitersForText := LPropertiesObject.ValueBoolean['UseDelimitersForText'];
             HereDocument := LPropertiesObject.ValueBoolean['HereDocument'];

@@ -117,6 +117,11 @@
         "Background": "clBlack"
       },
       {
+        "Name": "LogicalOperator",
+        "Foreground": "clSilver",
+        "Background": "clBlack"
+      },
+      {
         "Name": "Number",
         "Foreground": "clFuchsia",
         "Background": "clBlack"
@@ -158,8 +163,19 @@
         "Background": "clBlack"
       },
       {
+        "Name": "MethodItalic",
+        "Foreground": "clAqua",
+        "Background": "clBlack",
+        "Style": "Italic"
+      },
+      {
         "Name": "MethodName",
         "Foreground": "clWhite",
+        "Background": "clBlack"
+      },
+      {
+        "Name": "Value",
+        "Foreground": "clAqua",
         "Background": "clBlack"
       }
     ]

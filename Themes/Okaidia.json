@@ -117,6 +117,11 @@
         "Background": "$00222827"
       },
       {
+        "Name": "LogicalOperator",
+        "Foreground": "$00f2f8f8",
+        "Background": "$00222827"
+      },
+      {
         "Name": "Number",
         "Foreground": "$00FF81AE",
         "Background": "$00222827"
@@ -160,9 +165,21 @@
         "Style": "Bold"
       },
       {
+        "Name": "MethodItalic",
+        "Foreground": "$00efd966",
+        "Background": "$00222827",
+        "Style": "Italic"
+      },
+      {
         "Name": "MethodName",
         "Foreground": "$002ee2a6",
         "Background": "$00222827"
+      },
+      {
+        "Name": "Value",
+        "Foreground": "$00efd966",
+        "Background": "$00222827",
+        "Style": "Bold"
       }
     ]
   }

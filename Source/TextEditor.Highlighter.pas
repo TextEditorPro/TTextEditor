@@ -45,6 +45,7 @@ type
     FSample: string;
     FSkipCloseKeyChars: TTextEditorCharSet;
     FSkipOpenKeyChars: TTextEditorCharSet;
+    FSkipWhitespace: Boolean;
     FTemporaryTokens: TList;
     FToken: TTextEditorToken;
     FTokenPosition: Integer;
@@ -200,10 +201,13 @@ var
   LIndex: Integer;
 begin
   AddAttribute(ARange.Attribute);
+
   for LIndex := 0 to ARange.KeyListCount - 1 do
     AddAttribute(ARange.KeyList[LIndex].Attribute);
+
   for LIndex := 0 to ARange.SetCount - 1 do
     AddAttribute(ARange.Sets[LIndex].Attribute);
+
   for LIndex := 0 to ARange.RangeCount - 1 do
     AddAllAttributes(ARange.Ranges[LIndex]);
 end;
@@ -214,12 +218,12 @@ begin
   begin
     if Assigned(FBeforePrepare) then
       FBeforePrepare;
+
     Prepare;
   end
   else
-  if Assigned(FRange) then
-    if not FRange.Prepared then
-      Prepare;
+  if Assigned(FRange) and not FRange.Prepared then
+    Prepare;
 
   FLine := PChar(AValue);
   FRunPosition := 0;
@@ -240,7 +244,7 @@ begin
   for LIndex := FTemporaryTokens.Count - 1 downto 0 do
   begin
     LToken := TTextEditorToken(FTemporaryTokens[LIndex]);
-    LToken.Free;
+    FreeAndNil(LToken);
     FTemporaryTokens.Delete(LIndex);
   end;
 end;
@@ -281,7 +285,6 @@ begin
     if LKeyword^ = TControlCharacters.Null then
     begin
       FRange := FRange.Parent;
-
       Break;
     end;
   end;
@@ -291,13 +294,14 @@ begin
   if Assigned(FRange) then
   begin
     LCloseParent := FRange.CloseParent;
-    if FRange.CloseOnTerm and (FLine[FRunPosition] in FRange.Delimiters) and
+
+    if not FSkipWhitespace and FRange.CloseOnTerm and (FLine[FRunPosition] in FRange.Delimiters) and
       not (FRange.SkipWhitespace and (FLine[FRunPosition] in TCharacterSets.AbsoluteDelimiters)) then
     begin
       FRange := FRange.Parent;
-      if Assigned(FRange) then
-        if LCloseParent then
-          FRange := FRange.Parent;
+
+      if Assigned(FRange) and LCloseParent then
+        FRange := FRange.Parent;
     end;
 
     if Ord(FLine[FRunPosition]) < TCharacters.AnsiCharCount then
@@ -325,6 +329,7 @@ begin
     if not LParser.GetToken(FRange, FLine, FRunPosition, FToken) then
     begin
       FToken := FRange.DefaultToken;
+      FSkipWhitespace := False;
 
       if FRange.AllowedCharacters <> [] then
       begin
@@ -367,6 +372,7 @@ begin
     begin
       FRange := TTextEditorRange(FToken.OpenRule);
       FRange.ClosingToken := FToken.ClosingToken;
+      FSkipWhitespace := FRange.SkipWhitespaceOnce;
 
       if FRange.OpenBeginningOfLine and not FBeginningOfLine then
       begin
@@ -539,11 +545,13 @@ var
     else
     if Assigned(LElement) then
       AAttribute.Background := LElement.Background;
+
     if AAttribute.ParentForeground and Assigned(AParentRange) then
       AAttribute.Foreground := AParentRange.Attribute.Foreground
     else
     if Assigned(LElement) then
       AAttribute.Foreground := LElement.Foreground;
+
     if Assigned(LElement) then
       AAttribute.FontStyles := LElement.FontStyles;
   end;
@@ -553,8 +561,10 @@ begin
 
   for LIndex := 0 to ARange.KeyListCount - 1 do
     SetAttributes(ARange.KeyList[LIndex].Attribute, ARange);
+
   for LIndex := 0 to ARange.SetCount - 1 do
     SetAttributes(ARange.Sets[LIndex].Attribute, ARange);
+
   for LIndex := 0 to ARange.RangeCount - 1 do
     UpdateAttributes(ARange.Ranges[LIndex], ARange);
 end;
@@ -717,6 +727,7 @@ end;
 function TTextEditorHighlighter.GetAttribute(const AIndex: Integer): TTextEditorHighlighterAttribute;
 begin
   Result := nil;
+
   if (AIndex >= 0) and (AIndex < FAttributes.Count) then
     Result := TTextEditorHighlighterAttribute(FAttributes.Objects[AIndex]);
 end;

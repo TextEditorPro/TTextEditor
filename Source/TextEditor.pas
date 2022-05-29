@@ -408,6 +408,7 @@ type
     function GetViewTextLineNumber(const AViewLineNumber: Integer): Integer;
     function GetVisibleChars(const ARow: Integer; const ALineText: string = ''): Integer;
     function IsCommentAtCaretPosition: Boolean;
+    function IsFixedSizeFont: Boolean;
     function IsKeywordAtCaretPosition(const APOpenKeyWord: PBoolean = nil): Boolean;
     function IsKeywordAtCaretPositionOrAfter(const ATextPosition: TTextEditorTextPosition): Boolean;
     function IsMultiEditCaretFound(const ALine: Integer): Boolean;
@@ -3135,6 +3136,12 @@ begin
     Result := Length(AToken);
 end;
 
+function TCustomTextEditor.IsFixedSizeFont: Boolean;
+begin
+  Result := FPaintHelper.FixedSizeFont and ((FLines.Encoding = System.SysUtils.TEncoding.ANSI) or
+    (FLines.Encoding = System.SysUtils.TEncoding.ASCII));
+end;
+
 function TCustomTextEditor.GetTokenWidth(const AToken: string; const ALength: Integer; const ACharsBefore: Integer;
   const AMinimap: Boolean = False; const ARTLReading: Boolean = False): Integer;
 var
@@ -3143,12 +3150,6 @@ var
   LPToken: PChar;
   LToken: string;
   LFlags: Cardinal;
-
-  function FixedSizeFont: Boolean;
-  begin
-    Result := FPaintHelper.FixedSizeFont and (AMinimap or (FLines.Encoding = System.SysUtils.TEncoding.ANSI) or
-      (FLines.Encoding = System.SysUtils.TEncoding.ASCII));
-  end;
 
   function GetTokenWidth(const AToken: string; const ATokenLength: Integer = -1): Integer;
   var
@@ -3171,7 +3172,7 @@ var
     LToken := ControlCharacterToName(LChar);
     LLength := Length(LToken);
 
-    if FixedSizeFont then
+    if IsFixedSizeFont or AMinimap then
       Result := FPaintHelper.FontStock.CharWidth * LLength
     else
       Result := GetTokenWidth(LToken, LLength);
@@ -3243,7 +3244,7 @@ begin
     Result := Result * FPaintHelper.FontStock.CharWidth + (ALength - 1) * FPaintHelper.FontStock.CharWidth * FTabs.Width;
   end
   else
-  if FixedSizeFont then
+  if IsFixedSizeFont or AMinimap then
     Result := FPaintHelper.FontStock.CharWidth * ALength
   else
   if not FPaintHelper.FixedSizeFont then
@@ -6060,6 +6061,8 @@ begin
 
       FLines.Insert(LTextPosition.Line, '');
 
+      FLines.LineState[LTextPosition.Line] := lsModified;
+
       LTextPosition.Line := Min(LTextPosition.Line + 1, FLines.Count);
       LTextPosition.Char := 1;
 
@@ -6067,8 +6070,6 @@ begin
         GetPosition(1, LTextPosition.Line), '', smNormal);
 
       FUndoList.AddChange(crCaret, LTextPosition, LTextPosition, LTextPosition, '', smNormal);
-
-      FLines.LineState[LTextPosition.Line] := lsModified;
     end;
 
     SelectionBeginPosition := LTextPosition;
@@ -7523,6 +7524,7 @@ var
     LPText: PChar;
   begin
     Result := 0;
+
     LPText := APText - 1;
     while LPText^ = Character do
     begin
@@ -7534,6 +7536,7 @@ var
   function OddCountOfStringEscapeChars(const APText: PChar): Boolean;
   begin
     Result := False;
+
     if LCurrentCodeFoldingRegion.StringEscapeChar <> TControlCharacters.Null then
       Result := Odd(CountCharsBefore(APText, LCurrentCodeFoldingRegion.StringEscapeChar));
   end;
@@ -7541,6 +7544,7 @@ var
   function EscapeChar(const APText: PChar): Boolean;
   begin
     Result := False;
+
     if LCurrentCodeFoldingRegion.EscapeChar <> TControlCharacters.Null then
       Result := APText^ = LCurrentCodeFoldingRegion.EscapeChar;
   end;
@@ -7548,6 +7552,7 @@ var
   function IsNextSkipChar(const APText: PChar; const ASkipRegionItem: TTextEditorSkipRegionItem): Boolean;
   begin
     Result := False;
+
     if ASkipRegionItem.SkipIfNextCharIsNot <> TControlCharacters.Null then
       Result := APText^ = ASkipRegionItem.SkipIfNextCharIsNot;
   end;
@@ -10218,8 +10223,13 @@ begin
     else
       LSpaces := TControlCharacters.Tab;
 
-    for LIndex := LBlockBeginPosition.Line to LEndOfLine - 1 do //FI:W528 Variable not used in FOR-loop
+    LIndex := LBlockBeginPosition.Line;
+    while LIndex < LEndOfLine do
+    begin
       LStringToInsert := LStringToInsert + LSpaces + FLines.DefaultLineBreak;
+      Inc(LIndex);
+    end;
+
     LStringToInsert := LStringToInsert + LSpaces;
 
     FUndoList.BeginBlock(1);
@@ -12644,10 +12654,12 @@ begin
                 LY := LCollapseMarkRect.Top + (LCollapseMarkRect.Bottom - LCollapseMarkRect.Top) div 2;
                 LX := LCollapseMarkRect.Left + LDotSpace + (LCollapseMarkRect.Width - LDotSpace * 4 - 6) div 2;
 
-                for LIndex := 1 to 3 do //FI:W528 Variable not used in FOR-loop
+                LIndex := 1;
+                while LIndex <= 3 do
                 begin
                   Canvas.Rectangle(LX, LY, LX + 2, LY + 2);
                   LX := LX + LDotSpace + 2;
+                  Inc(LIndex);
                 end;
               end;
             imsTriangle:
@@ -14124,13 +14136,16 @@ var
 
       LName := ControlCharacterToName(AToken[1]);
 
-      for LIndex := 0 to LTokenLength - 1 do //FI:W528 Variable not used in FOR-loop
+      LIndex := 0;
+      while LIndex < LTokenLength do
       begin
         Winapi.Windows.ExtTextOut(Canvas.Handle, LRect.Left + 1, LRect.Top - 1, ETO_OPAQUE or ETO_CLIPPED, @LRect, PChar(LName),
           Length(LName), nil);
 
         Inc(LRect.Left, LCharWidth);
         LRect.Right := LRect.Left + LCharWidth - 1;
+
+        Inc(LIndex);
       end;
     end;
 
@@ -14148,11 +14163,13 @@ var
       LRect.Bottom := LRect.Top + 2;
       LRect.Left := LTextRect.Left + LSpaceWidth div 2;
 
-      for LIndex := 0 to LTokenLength - 1 do //FI:W528 Variable not used in FOR-loop
+      LIndex := 0;
+      while LIndex < LTokenLength do
       begin
         LRect.Right := LRect.Left + 2;
         Canvas.Rectangle(LRect);
         Inc(LRect.Left, LSpaceWidth);
+        Inc(LIndex);
       end;
     end;
 
@@ -17583,8 +17600,12 @@ begin
       begin
         LEmptyBeginPosition := GetPosition(LSelectionEndPosition.Char - 1, LSelectionBeginPosition.Line);
         LEmptyEndPosition := LSelectionEndPosition;
-        for LIndex := 0 to LEmptyEndPosition.Line - LEmptyBeginPosition.Line - 1 do //FI:W528 Variable not used in FOR-loop
+        LIndex := 0;
+        while LIndex < LEmptyEndPosition.Line - LEmptyBeginPosition.Line do
+        begin
           LEmptyText := ' ' + FLines.DefaultLineBreak;
+          Inc(LIndex);
+        end;
         LEmptyText := LEmptyText + ' ';
         Dec(LSelectionBeginPosition.Char);
         SelectionBeginPosition := LSelectionBeginPosition;
@@ -17597,8 +17618,12 @@ begin
       begin
         LEmptyBeginPosition := LSelectionBeginPosition;
         LEmptyEndPosition := GetPosition(LSelectionBeginPosition.Char + 1, LSelectionEndPosition.Line);
-        for LIndex := 0 to LEmptyEndPosition.Line - LEmptyBeginPosition.Line - 1 do //FI:W528 Variable not used in FOR-loop
+        LIndex := 0;
+        while LIndex < LEmptyEndPosition.Line - LEmptyBeginPosition.Line do
+        begin
           LEmptyText := ' ' + FLines.DefaultLineBreak;
+          Inc(LIndex);
+        end;
         LEmptyText := LEmptyText + ' ';
         Inc(LSelectionEndPosition.Char);
         SelectionBeginPosition := LSelectionBeginPosition;

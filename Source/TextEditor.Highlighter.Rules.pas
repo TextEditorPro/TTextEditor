@@ -115,6 +115,7 @@ type
     FRanges: TList;
     FSets: TList;
     FSkipWhitespace: Boolean;
+    FSkipWhitespaceOnce: Boolean;
     FStringCaseFunct: TTextEditorStringCaseFunction;
     FSymbolList: TTextEditorAbstractParserArray;
     FTokens: TList;
@@ -152,6 +153,7 @@ type
     property CloseOnEndOfLine: Boolean read FCloseOnEndOfLine write FCloseOnEndOfLine;
     property CloseOnTerm: Boolean read FCloseOnTerm write FCloseOnTerm;
     property SkipWhitespace: Boolean read FSkipWhitespace write FSkipWhitespace;
+    property SkipWhitespaceOnce: Boolean read FSkipWhitespaceOnce write FSkipWhitespaceOnce;
     property CloseParent: Boolean read FCloseParent write FCloseParent;
     property CloseToken: TTextEditorMultiToken read FCloseToken write FCloseToken;
     property ClosingToken: TTextEditorToken read FClosingToken write FClosingToken;

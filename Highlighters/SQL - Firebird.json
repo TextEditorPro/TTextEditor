@@ -58,6 +58,29 @@
             }
           },
           {
+            "Type": "Number",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "TokenRange": {
+              "Open": "[",
+              "Close": "]"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "]"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
             "Type": "Method",
             "Attributes": {
               "Element": "MethodName"
@@ -68,6 +91,372 @@
             },
             "TokenRange": {
               "Open": "rdb$"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "table"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "view"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "into",
+              "Close": ":"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    ":"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "procedure"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "function"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "package"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "from"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "trigger"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "for"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "select"
+                  }
+                }
+              ] 
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "update"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "on"
+                  }
+                }
+              ] 
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "on"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "function"
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "procedure"
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "table"
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "view"
+                  }
+                }
+              ] 
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "sequence"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "exception"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "domain"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "index"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "references"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "Symbol",
+                  "Attributes": {
+                    "Element": "Symbol"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": ","
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "on"
+                  }
+                }
+              ]
             }
           },
           {
@@ -88,11 +477,8 @@
           {
             "Type": "ReservedWord",
             "Words": [
-              "abs",
               "absolute",
               "accent",
-              "acos",
-              "acosh",
               "action",
               "active",
               "add",
@@ -107,14 +493,7 @@
               "as",
               "asc",
               "ascending",
-              "ascii_char",
-              "ascii_val",
-              "asin",
-              "asinh",
               "at",
-              "atan",
-              "atan2",
-              "atanh",
               "auto",
               "autonomous",
               "avg",
@@ -124,38 +503,20 @@
               "before",
               "begin",
               "between",
-              "bigint",
               "binary",
               "bind",
-              "bin_and",
-              "bin_not",
-              "bin_or",
-              "bin_shl",
-              "bin_shr",
-              "bin_xor",
               "bit_length",
-              "blob",
               "block",
               "body",
-              "boolean",
               "both",
               "break",
               "by",
               "caller",
               "cascade",
               "case",
-              "cast",
-              "ceil",
-              "ceiling",
-              "char",
-              "character",
-              "character_length",
-              "char_length",
-              "char_to_uuid",
               "check",
               "clear",
               "close",
-              "coalesce",
               "collate",
               "collation",
               "column",
@@ -173,9 +534,6 @@
               "containing",
               "continue",
               "corr",
-              "cos",
-              "cosh",
-              "cot",
               "count",
               "counter",
               "covar_pop",
@@ -199,16 +557,11 @@
               "cursor",
               "data",
               "database",
-              "date",
-              "dateadd",
-              "datediff",
               "day",
               "ddl",
               "dec",
               "decfloat",
-              "decimal",
               "declare",
-              "decode",
               "decrypt",
               "default",
               "definer",
@@ -225,7 +578,6 @@
               "distinct",
               "do",
               "domain",
-              "double",
               "drop",
               "else",
               "enable",
@@ -240,20 +592,15 @@
               "execute",
               "exists",
               "exit",
-              "exp",
               "extended",
               "external",
-              "extract",
               "false",
               "fetch",
               "file",
               "filter",
               "first",
-              "firstname",
               "first_day",
               "first_value",
-              "float",
-              "floor",
               "following",
               "for",
               "foreign",
@@ -264,13 +611,10 @@
               "gdscode",
               "generated",
               "generator",
-              "gen_id",
-              "gen_uuid",
               "global",
               "grant",
               "granted",
               "group",
-              "hash",
               "having",
               "hex_decode",
               "hex_encode",
@@ -279,7 +623,6 @@
               "idle",
               "if",
               "ignore",
-              "iif",
               "in",
               "inactive",
               "include",
@@ -290,9 +633,6 @@
               "insensitive",
               "insert",
               "inserting",
-              "int",
-              "int128",
-              "integer",
               "into",
               "invoker",
               "is",
@@ -302,7 +642,6 @@
               "key",
               "lag",
               "last",
-              "lastname",
               "last_day",
               "last_value",
               "lateral",
@@ -318,16 +657,11 @@
               "limbo",
               "linger",
               "list",
-              "ln",
               "local",
               "localtime",
               "localtimestamp",
               "lock",
-              "log",
-              "log10",
               "long",
-              "lower",
-              "lpad",
               "lparam",
               "make_dbkey",
               "manual",
@@ -336,15 +670,12 @@
               "matching",
               "max",
               "maximum_segment",
-              "maxvalue",
               "merge",
               "message",
               "middlename",
               "millisecond",
               "min",
               "minute",
-              "minvalue",
-              "mod",
               "mode",
               "module_name",
               "month",
@@ -355,22 +686,16 @@
               "natural",
               "nchar",
               "next",
-              "new",
               "no",
               "normalize_decfloat",
               "not",
               "now",
               "nth_value",
               "ntile",
-              "null",
-              "nullif",
               "nulls",
               "number",
-              "numeric",
-              "octet_length",
               "of",
               "offset",
-              "old",
               "oldest",
               "on",
               "only",
@@ -384,7 +709,6 @@
               "output_type",
               "over",
               "overflow",
-              "overlay",
               "overriding",
               "package",
               "pad",
@@ -395,16 +719,12 @@
               "partition",
               "password",
               "percent_rank",
-              "pi",
               "placing",
               "plan",
               "plugin",
               "pool",
-              "position",
               "post_event",
-              "power",
               "preceding",
-              "precision",
               "preserve",
               "primary",
               "prior",
@@ -414,16 +734,13 @@
               "protected",
               "publication",
               "quantize",
-              "rand",
               "range",
               "rank",
               "rdb$db_key",
               "rdb$error",
-              "rdb$get_context",
               "rdb$get_transaction_cn",
               "rdb$record_version",
               "rdb$role_in_use",
-              "rdb$set_context",
               "rdb$system_privilege",
               "read",
               "real",
@@ -442,7 +759,6 @@
               "regr_syy",
               "relative",
               "release",
-              "replace",
               "requests",
               "reserv",
               "reserving",
@@ -455,17 +771,13 @@
               "returning",
               "returning_values",
               "returns",
-              "reverse",
               "revoke",
-              "right",
               "role",
               "rollback",
-              "round",
               "row",
               "rows",
               "row_count",
               "row_number",
-              "rpad",
               "rsa_decrypt",
               "rsa_encrypt",
               "rsa_private",
@@ -488,12 +800,9 @@
               "set",
               "shadow",
               "shared",
-              "sign",
               "signature",
               "similar",
-              "sin",
               "singular",
-              "sinh",
               "size",
               "skip",
               "smallint",
@@ -505,7 +814,6 @@
               "sql",
               "sqlcode",
               "sqlstate",
-              "sqrt",
               "stability",
               "start",
               "starting",
@@ -514,22 +822,16 @@
               "statistics",
               "stddev_pop",
               "stddev_samp",
-              "substring",
-              "sub_type",
               "sum",
               "suspend",
               "system",
               "table",
               "tags",
-              "tan",
-              "tanh",
               "temporary",
               "term",
               "then",
               "ties",
-              "time",
               "timeout",
-              "timestamp",
               "timezone_hour",
               "timezone_minute",
               "to",
@@ -538,9 +840,7 @@
               "transaction",
               "traps",
               "trigger",
-              "trim",
               "true",
-              "trunc",
               "trusted",
               "two_phase",
               "type",
@@ -552,17 +852,13 @@
               "unknown",
               "update",
               "updating",
-              "upper",
               "usage",
               "user",
               "using",
               "uuid_to_char",
-              "value",
               "values",
               "varbinary",
-              "varchar",
               "variable",
-              "varying",
               "var_pop",
               "var_samp",
               "view",
@@ -586,16 +882,135 @@
             }
           },
           {
+            "Type": "MethodItalic",
+            "Words": [
+              "bigint",
+              "blob",
+              "boolean",
+              "char",
+              "character",
+              "date",
+              "decimal",
+              "double",
+              "float",
+              "int",
+              "int64",
+              "int128",
+              "integer",
+              "numeric",
+              "precision",
+              "smallint",
+              "sub_type",
+              "text",
+              "time",
+              "timestamp",
+              "varchar",
+              "varying"
+            ],
+            "Attributes": {
+              "Element": "MethodItalic"
+            }
+          },
+          {
+            "Type": "Number",
+            "Words": [
+              "new",
+              "old"
+            ],
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Value",
+            "Words": [
+              "check",
+              "default",
+              "null"
+            ],
+            "Attributes": {
+              "Element": "Value"
+            }
+          },
+          {
             "Type": "Method",
             "Words": [
+              "abs",
+              "acos",
+              "acosh",
+              "ascii_char",
+              "ascii_val",
+              "asin",
+              "asinh",
+              "atan",
+              "atan2",
+              "atanh",
               "avg",
+              "bin_and",
+              "bin_not",
+              "bin_or",
+              "bin_shl",
+              "bin_shr",
+              "bin_xor",
+              "cast",
+              "ceil",
+              "ceiling",
+              "char_length",
+              "char_to_uuid",
+              "character_length",
+              "coalesce",
+              "cos",
+              "cosh",
+              "cot",
               "count",
+              "dateadd",
+              "datediff",
+              "decode",
+              "exp",
+              "extract",
               "first",
+              "floor",
+              "gen_id",
+              "gen_uuid",
+              "hash",
+              "iif",
               "last",
+              "ln",
+              "log",
+              "log10",
+              "lower",
+              "lpad",
               "max",
+              "maxvalue",
               "min",
+              "minvalue",
+              "mod",
+              "nullif",
+              "octet_length",
+              "overlay",
+              "pi",
+              "position",
+              "power",
+              "rand",
+              "rdb$get_context",
+              "rdb$set_context",
+              "replace",
+              "reverse",
+              "right",
+              "round",
+              "rpad",
+              "sign",
+              "sin",
+              "sinh",
+              "sqrt",
+              "substring",
               "sum",
-              "trim"
+              "tan",
+              "tanh",
+              "trim",
+              "trim",
+              "trunc",
+              "upper"
             ],
             "Attributes": {
               "Element": "Method"
@@ -606,9 +1021,6 @@
             "Words": [
               ":",
               ";",
-              "<",
-              ">",
-              "=",
               "/",
               "*",
               ".",
@@ -625,6 +1037,20 @@
             ],
             "Attributes": {
               "Element": "Symbol"
+            }
+          },
+          {
+            "Type": "LogicalOperator",
+            "Words": [
+              "<",
+              ">",
+              "=",
+              "and",
+              "or",
+              "not"
+            ],
+            "Attributes": {
+              "Element": "LogicalOperator"
             }
           }
         ],

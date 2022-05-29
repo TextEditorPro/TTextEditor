@@ -774,8 +774,12 @@ procedure TTextEditorBasicEvent.Playback(const AEditor: TCustomControl);
 var
   LIndex: Integer;
 begin
-  for LIndex := 1 to RepeatCount do //FI:W528 Variable not used in FOR-loop
+  LIndex := 1;
+  while LIndex <= RepeatCount do
+  begin
     TCustomTextEditor(AEditor).CommandProcessor(Command, TControlCharacters.Null, nil);
+    Inc(LIndex);
+  end;
 end;
 
 procedure TTextEditorBasicEvent.SaveToStream(const AStream: TStream);
@@ -815,8 +819,12 @@ procedure TTextEditorCharEvent.Playback(const AEditor: TCustomControl);
 var
   LIndex: Integer;
 begin
-  for LIndex := 1 to RepeatCount do //FI:W528 Variable not used in FOR-loop
+  LIndex := 1;
+  while LIndex <= RepeatCount do
+  begin
     TCustomTextEditor(AEditor).CommandProcessor(TKeyCommands.Char, Key, nil);
+    Inc(LIndex);
+  end;
 end;
 
 procedure TTextEditorCharEvent.SaveToStream(const AStream: TStream);
@@ -948,9 +956,13 @@ procedure TTextEditorTextEvent.Playback(const AEditor: TCustomControl);
 var
   LIndex, LIndex2: Integer;
 begin
-  for LIndex := 1 to RepeatCount do //FI:W528 Variable not used in FOR-loop
+  LIndex := 1;
+  while LIndex <= RepeatCount do
+  begin
     for LIndex2 := 1 to Length(Value) do
       TCustomTextEditor(AEditor).CommandProcessor(TKeyCommands.Char, Value[LIndex2], nil);
+    Inc(LIndex);
+  end;
 end;
 
 procedure TTextEditorTextEvent.SaveToStream(const AStream: TStream);

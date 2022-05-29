@@ -755,14 +755,14 @@ begin
       LHTML := FormatForClipboard(AHTML) + #0;
       LLength := Length(LHTML);
 
-      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, (LLength + 1) * SizeOf(Char));
+      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, LLength);
       if LGlobalMem <> 0 then
       begin
         LPGlobalLock := GlobalLock(LGlobalMem);
         try
           if Assigned(LPGlobalLock) then
           begin
-            Move(PAnsiChar(LHTML)^, LPGlobalLock^, (LLength + 1) * SizeOf(Char));
+            Move(PAnsiChar(LHTML)^, LPGlobalLock^, LLength);
             Clipboard.SetAsHandle(GetHTMLClipboardFormat, LGlobalMem);
           end;
         finally

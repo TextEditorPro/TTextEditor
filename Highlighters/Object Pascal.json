@@ -90,6 +90,15 @@
             "SubRules": {
               "KeyList": [
                 {
+                  "Type": "ReservedWord",
+                  "Words": [
+                    "function"
+                  ],
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  }
+                },
+                {
                   "Type": "Symbol",
                   "Words": [
                     ":",
@@ -122,6 +131,15 @@
             },
             "SubRules": {
               "KeyList": [
+                {
+                  "Type": "ReservedWord",
+                  "Words": [
+                    "procedure"
+                  ],
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  }
+                },
                 {
                   "Type": "Symbol",
                   "Words": [

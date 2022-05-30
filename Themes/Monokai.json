@@ -177,6 +177,11 @@
         "Name": "Value",
         "Foreground": "$007224F9",
         "Background": "$00232928"
+      },
+      {
+        "Name": "WebLink",
+        "Foreground": "$00EFD867",
+        "Background": "$00232928"
       }
     ]
   }

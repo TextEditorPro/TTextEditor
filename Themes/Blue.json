@@ -184,6 +184,11 @@
         "Foreground": "$009f6f2f",
         "Background": "clWhite",
         "Style": "Bold"
+      },
+      {
+        "Name": "WebLink",
+        "Foreground": "$009f6f2f",
+        "Background": "clWhite"
       }
     ]
   }

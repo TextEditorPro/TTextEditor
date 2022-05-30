@@ -193,8 +193,8 @@ begin
 
       with LEditor.Caret.MultiEdit.Colors do
       begin
-        Background :=  StringToColorDef(LColorsObject['MultiEditBackground'].Value, Background);
-        Foreground :=  StringToColorDef(LColorsObject['MultiEditForeground'].Value, Foreground);
+        Background := StringToColorDef(LColorsObject['MultiEditBackground'].Value, Background);
+        Foreground := StringToColorDef(LColorsObject['MultiEditForeground'].Value, Foreground);
       end;
 
       with LEditor.CodeFolding.Colors do
@@ -824,6 +824,7 @@ var
   LIndex, LCount: Integer;
   LCodeFoldingObject: TJSONObject;
   LArray: TJSONArray;
+  LEditor: TCustomTextEditor;
 begin
   if not Assigned(ACodeFoldingObject) then
     Exit;
@@ -844,6 +845,9 @@ begin
       ImportCodeFoldingFoldRegion(FHighlighter.CodeFoldingRegions[LIndex], LCodeFoldingObject);
     end;
   end;
+
+  LEditor := FHighlighter.Editor as TCustomTextEditor;
+  LEditor.CodeFolding.Visible := LCount > 0;
 end;
 
 procedure TTextEditorHighlighterImportJSON.ImportMatchingPair(const AMatchingPairObject: TJSONObject);

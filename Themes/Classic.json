@@ -176,6 +176,11 @@
         "Name": "Value",
         "Foreground": "clWhite",
         "Background": "clNavy"
+      },
+      {
+        "Name": "WebLink",
+        "Foreground": "clAqua",
+        "Background": "clNavy"
       }
     ]
   }

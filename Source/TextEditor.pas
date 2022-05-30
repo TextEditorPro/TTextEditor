@@ -17980,6 +17980,7 @@ begin
   ClearMatchingPair;
   FLineNumbers.ResetCache := True;
 
+  if Length(FCodeFoldings.RangeFromLine) > 0 then
   for LIndex := LFromLine to LToLine do
   begin
     LCodeFoldingRange := FCodeFoldings.RangeFromLine[LIndex];
@@ -18020,6 +18021,7 @@ begin
   FLineNumbers.ResetCache := True;
   LLevel := -1;
 
+  if Length(FCodeFoldings.RangeFromLine) > 0 then
   for LIndex := LFromLine to LToLine do
   begin
     LCodeFoldingRange := FCodeFoldings.RangeFromLine[LIndex];

@@ -180,6 +180,11 @@
         "Foreground": "$00efd966",
         "Background": "$00222827",
         "Style": "Bold"
+      },
+      {
+        "Name": "WebLink",
+        "Foreground": "$00efd966",
+        "Background": "$00222827"
       }
     ]
   }

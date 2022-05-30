@@ -9,8 +9,7 @@
       "news:comp.lang.pascal.borland"
     ],
     "Editor": {
-      "URIOpener": true,
-      "TextFolding": true
+      "URIOpener": true
     },
     "MainRules": {
       "Attributes": {
@@ -21,7 +20,7 @@
           {
             "Type": "WebLink",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^|\"",
             "Properties": {
@@ -36,7 +35,7 @@
           {
             "Type": "WebLink",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^|\"",
             "Properties": {
@@ -51,7 +50,7 @@
           {
             "Type": "News",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^|\"",
             "Properties": {
@@ -66,7 +65,7 @@
           {
             "Type": "News",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^|\"",
             "Properties": {
@@ -81,7 +80,7 @@
           {
             "Type": "Gopher",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^|\"",
             "Properties": {
@@ -96,7 +95,7 @@
           {
             "Type": "Prospero",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^|\"",
             "Properties": {
@@ -111,7 +110,7 @@
           {
             "Type": "Nntp",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^|\"",
             "Properties": {
@@ -126,7 +125,7 @@
           {
             "Type": "Ftp",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^|\"",
             "Properties": {
@@ -141,7 +140,7 @@
           {
             "Type": "Wais",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^|\"",
             "Properties": {
@@ -156,7 +155,7 @@
           {
             "Type": "Telnet",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^|\"",
             "Properties": {
@@ -171,7 +170,7 @@
           {
             "Type": "MailtoLink",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\",
             "Properties": {
@@ -186,7 +185,7 @@
           {
             "Type": "WWW",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^|\"",
             "Properties": {

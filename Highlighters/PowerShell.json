@@ -80,6 +80,19 @@
             }
           },
           {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
             "Type": "Method",
             "Attributes": {
               "Element": "MethodName"

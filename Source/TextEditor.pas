@@ -9913,7 +9913,9 @@ begin
   if (ssCtrl in AShift) and not (ssAlt in AShift)  then
     LLinesToScroll := VisibleLineCount shr Ord(soHalfPage in FScroll.Options)
   else
+  if not SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, @LLinesToScroll, 0) then
     LLinesToScroll := 3;
+
   Inc(FMouse.WheelAccumulator, AWheelDelta);
   LWheelClicks := FMouse.WheelAccumulator div TMouseWheel.Divisor;
   FMouse.WheelAccumulator := FMouse.WheelAccumulator mod TMouseWheel.Divisor;

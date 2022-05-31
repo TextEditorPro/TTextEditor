@@ -90,15 +90,6 @@
             "SubRules": {
               "KeyList": [
                 {
-                  "Type": "ReservedWord",
-                  "Words": [
-                    "function"
-                  ],
-                  "Attributes": {
-                    "Element": "ReservedWord"
-                  }
-                },
-                {
                   "Type": "Symbol",
                   "Words": [
                     ":",
@@ -131,15 +122,6 @@
             },
             "SubRules": {
               "KeyList": [
-                {
-                  "Type": "ReservedWord",
-                  "Words": [
-                    "procedure"
-                  ],
-                  "Attributes": {
-                    "Element": "ReservedWord"
-                  }
-                },
                 {
                   "Type": "Symbol",
                   "Words": [
@@ -383,7 +365,7 @@
             "Attributes": {
               "Element": "HexNumber"
             },
-            "AllowedCharacters": "0123456789abcdeABCDE",
+            "AllowedCharacters": "0123456789abcdefABCDEF",
             "Properties": {
               "CloseOnTerm": true,
               "CloseOnEndOfLine": true

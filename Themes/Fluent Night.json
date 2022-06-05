@@ -161,7 +161,7 @@
       },
       {
         "Name": "Method",
-        "Foreground": "$00E19153",
+        "Foreground": "$00FFAA82",
         "Background": "$00201915"
       },
       {
@@ -172,7 +172,7 @@
       },
       {
         "Name": "MethodName",
-        "Foreground": "$00C5BEB0",
+        "Foreground": "$00A7B459",
         "Background": "$00201915"
       },
       {

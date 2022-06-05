@@ -31,6 +31,7 @@ type
     procedure Clear;
     procedure LoadFromFile(const AFilename: string);
     procedure LoadFromStream(AStream: TStream);
+    procedure SetOption(const AOption: TTextEditorHighlighterColorOption; const AEnabled: Boolean);
     property Filename: string read FFilename write FFilename;
     property Name: string read FName write FName;
     property Options: TTextEditorHighlighterColorOptions read FOptions write FOptions default DEFAULT_OPTIONS;
@@ -74,6 +75,7 @@ var
   LElement: PTextEditorHighlighterElement;
 begin
   Result := nil;
+
   for LIndex := 0 to FElements.Count - 1 do
   begin
     LElement := PTextEditorHighlighterElement(FElements.Items[LIndex]);
@@ -101,14 +103,24 @@ begin
   LHighlighter := TTextEditorHighlighter(FOwner);
 
   LHighlighter.Loading := True;
+
   with TTextEditorHighlighterImportJSON.Create(LHighlighter) do
   try
     ImportColorsFromStream(AStream);
   finally
     Free;
   end;
+
   LHighlighter.UpdateColors;
   LHighlighter.Loading := False;
+end;
+
+procedure TTextEditorHighlighterColors.SetOption(const AOption: TTextEditorHighlighterColorOption; const AEnabled: Boolean);
+begin
+  if AEnabled then
+    Options := Options + [AOption]
+  else
+    Options := Options - [AOption];
 end;
 
 end.

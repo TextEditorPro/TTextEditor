@@ -490,7 +490,6 @@
               "and",
               "any",
               "array",
-              "as",
               "asc",
               "ascending",
               "at",
@@ -530,7 +529,6 @@
               "connect",
               "connections",
               "consistency",
-              "constraint",
               "containing",
               "continue",
               "corr",
@@ -546,14 +544,6 @@
               "ctr_length",
               "ctr_little_endian",
               "cume_dist",
-              "current",
-              "current_connection",
-              "current_date",
-              "current_role",
-              "current_time",
-              "current_timestamp",
-              "current_transaction",
-              "current_user",
               "cursor",
               "data",
               "database",
@@ -563,7 +553,6 @@
               "decfloat",
               "declare",
               "decrypt",
-              "default",
               "definer",
               "delete",
               "deleting",
@@ -590,7 +579,6 @@
               "excess",
               "exclude",
               "execute",
-              "exists",
               "exit",
               "extended",
               "external",
@@ -603,7 +591,6 @@
               "first_value",
               "following",
               "for",
-              "foreign",
               "free_it",
               "from",
               "full",
@@ -726,7 +713,6 @@
               "post_event",
               "preceding",
               "preserve",
-              "primary",
               "prior",
               "privilege",
               "privileges",
@@ -915,6 +901,7 @@
             "Type": "Number",
             "Words": [
               "new",
+              "null",
               "old"
             ],
             "Attributes": {
@@ -925,8 +912,10 @@
             "Type": "Value",
             "Words": [
               "check",
+              "constraint",
               "default",
-              "null"
+              "foreign key",
+              "primary key"
             ],
             "Attributes": {
               "Element": "Value"
@@ -963,6 +952,14 @@
               "cosh",
               "cot",
               "count",
+              "current",
+              "current_connection",
+              "current_date",
+              "current_role",
+              "current_time",
+              "current_timestamp",
+              "current_transaction",
+              "current_user",
               "dateadd",
               "datediff",
               "decode",
@@ -1019,21 +1016,22 @@
           {
             "Type": "Symbol",
             "Words": [
-              ":",
-              ";",
-              "/",
-              "*",
-              ".",
-              ",",
               "-",
-              "+",
+              "#",
               "(",
               ")",
+              "*",
+              ",",
+              ".",
+              "/",
+              ":",
+              ";",
               "[",
               "]",
               "{",
+              "|",
               "}",
-              "|"
+              "+"
             ],
             "Attributes": {
               "Element": "Symbol"
@@ -1043,11 +1041,13 @@
             "Type": "LogicalOperator",
             "Words": [
               "<",
-              ">",
               "=",
+              ">",
               "and",
-              "or",
-              "not"
+              "as",
+              "exists",
+              "not",
+              "or"
             ],
             "Attributes": {
               "Element": "LogicalOperator"

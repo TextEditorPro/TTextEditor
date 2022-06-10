@@ -76,7 +76,7 @@
             "Name": "HTML",
             "Type": "Tag",
             "Attributes": {
-              "Element": "ReservedWord"
+              "Element": "Value"
             },
             "TokenRange": {
               "Open": "<",
@@ -208,7 +208,7 @@
                 {
                   "Type": "Attribute",
                   "Attributes": {
-                    "Element": "MethodName"
+                    "Element": "Attribute"
                   },
                   "Properties": {
                     "AlternativeClose": [

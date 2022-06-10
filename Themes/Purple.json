@@ -120,7 +120,7 @@
       },
       {
         "Name": "LogicalOperator",
-        "Foreground": "$00333333",
+        "Foreground": "$005d1da7",
         "Background": "clWhite"
       },
       {

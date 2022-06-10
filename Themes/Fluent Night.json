@@ -121,7 +121,7 @@
       },
       {
         "Name": "LogicalOperator",
-        "Foreground": "$006C8CF7",
+        "Foreground": "$007871F0",
         "Background": "$00201915"
       },
       {
@@ -177,7 +177,7 @@
       },
       {
         "Name": "Value",
-        "Foreground": "$007871F0",
+        "Foreground": "$006C8CF7",
         "Background": "$00201915"
       },
       {

@@ -118,8 +118,9 @@
       },
       {
         "Name": "LogicalOperator",
-        "Foreground": "$00939393",
-        "Background": "$00FFFFFF"
+        "Foreground": "$009874DB",
+        "Background": "$00FFFFFF",
+        "Style": "Bold"
       },
       {
         "Name": "Number",

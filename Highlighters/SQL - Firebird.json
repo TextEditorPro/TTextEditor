@@ -834,7 +834,6 @@
               "uncommitted",
               "undo",
               "union",
-              "unique",
               "unknown",
               "update",
               "updating",
@@ -911,11 +910,13 @@
           {
             "Type": "Value",
             "Words": [
+              "as", 
               "check",
               "constraint",
               "default",
               "foreign key",
-              "primary key"
+              "primary key",
+              "unique"
             ],
             "Attributes": {
               "Element": "Value"
@@ -1018,6 +1019,7 @@
             "Words": [
               "-",
               "#",
+              "$",
               "(",
               ")",
               "*",
@@ -1044,7 +1046,6 @@
               "=",
               ">",
               "and",
-              "as",
               "exists",
               "not",
               "or"

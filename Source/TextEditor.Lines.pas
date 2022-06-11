@@ -1018,6 +1018,10 @@ begin
           while (LBuffer[LPosition + LLength] = TControlCharacters.Keys.Linefeed) or
             (LBuffer[LPosition + LLength] = TControlCharacters.Keys.CarriageReturn) do
             Inc(LLength);
+
+          if LLength = 0 then
+            LLength := TMaxValues.BufferSize - LPreambleLength;
+
           LString := Encoding.GetString(LBuffer, LPosition, LLength);
           Dec(LBufferLength, LLength);
           Inc(LPosition, LLength);

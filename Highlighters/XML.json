@@ -87,7 +87,7 @@
                 {
                   "Type": "Attribute",
                   "Attributes": {
-                    "Element": "MethodName"
+                    "Element": "Attribute"
                   },
                   "Properties": {
                     "AlternativeClose": [

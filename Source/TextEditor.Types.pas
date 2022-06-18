@@ -304,8 +304,8 @@ type
   TTextEditorFrameTypes = set of TTextEditorFrameType;
   TTextEditorUnitSystem = (usMM, usCm, usInch, muThousandthsOfInches);
   TTextEditorPrintStatus = (psBegin, psNewPage, psEnd);
-  TTextEditorPrintStatusEvent = procedure(ASender: TObject; const AStatus: TTextEditorPrintStatus; const APageNumber: Integer;
-    var AAbort: Boolean) of object;
+  TTextEditorPrintStatusEvent = procedure(ASender: TObject; const AStatus: TTextEditorPrintStatus;
+    const APageNumber: Integer; var AAbort: Boolean) of object;
   TTextEditorPrintLineEvent = procedure(ASender: TObject; const ALineNumber: Integer; const APageNumber: Integer) of object;
 
   TTextEditorWrapPosition = class
@@ -346,6 +346,7 @@ type
     const APageIndex: Integer) of object;
   TTextEditorReplaceTextEvent = procedure(const ASender: TObject; const ASearch, AReplace: string;
     const ALine, AColumn: Integer; const ADeleteLine: Boolean; var AAction: TTextEditorReplaceAction) of object;
+  TTextEditorSaveToFileEvent = procedure(const ASender: TObject; const AFilename: string; var AEncoding: TEncoding; var ACancel: Boolean) of object;
   TTextEditorScrollEvent = procedure(const ASender: TObject; const AScrollBar: TScrollBarKind) of object;
   TTextEditorSearchChangeEvent = procedure(const AEvent: TTextEditorSearchChanges) of object;
 

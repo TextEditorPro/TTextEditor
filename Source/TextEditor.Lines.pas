@@ -84,6 +84,7 @@ type
     function GetLengthOfLongestLine: Integer;
     function GetLineBreak(const AIndex: Integer): string;
     function GetTextLength: Integer;
+    function InternationalCharacterFound(var AChar, ALine: Integer): Boolean;
     function LineBreakLength(const AIndex: Integer): Integer;
     function StringLength(const AIndex: Integer): Integer;
     procedure AddLine(const AValue: string);
@@ -148,7 +149,7 @@ uses
 { TTextEditorLines }
 
 {$IFDEF TEXT_EDITOR_RANGE_CHECKS}
-procedure ListIndexOutOfBounds(AIndex: Integer);
+procedure ListIndexOutOfBounds(const AIndex: Integer);
 begin
   raise ETextEditorLinesException.CreateFmt(STextEditorListIndexOutOfBounds, [AIndex]);
 end;
@@ -177,8 +178,10 @@ destructor TTextEditorLines.Destroy;
 begin
   FOnChange := nil;
   FOnChanging := nil;
+
   if FCount > 0 then
     Finalize(FItems^[0], FCount);
+
   FCount := 0;
   SetCapacity(0);
 
@@ -314,9 +317,11 @@ begin
     Finalize(FItems^[0], FCount);
     FCount := 0;
     SetCapacity(0);
+
     if Assigned(FOnCleared) then
       FOnCleared(Self);
   end;
+
   FIndexOfLongestLine := -1;
   FLengthOfLongestLine := 0;
 end;
@@ -329,9 +334,12 @@ begin
 {$ENDIF}
   Finalize(FItems^[AIndex]);
   Dec(FCount);
+
   if AIndex < FCount then
     System.Move(FItems[AIndex + 1], FItems[AIndex], (FCount - AIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
+
   FIndexOfLongestLine := -1;
+
   if Assigned(FOnDeleted) then
     FOnDeleted(Self, AIndex, 1);
 end;
@@ -371,6 +379,7 @@ begin
     if TextLine = '' then
     begin
       Result := '';
+
       Exclude(Flags, sfExpandedLengthUnknown);
       Exclude(Flags, sfHasTabs);
       Include(Flags, sfHasNoTabs);
@@ -384,6 +393,7 @@ begin
       Exclude(Flags, sfExpandedLengthUnknown);
       Exclude(Flags, sfHasTabs);
       Exclude(Flags, sfHasNoTabs);
+
       if LHasTabs then
         Include(Flags, sfHasTabs)
       else
@@ -413,6 +423,7 @@ end;
 function TTextEditorLines.GetExpandedString(const AIndex: Integer): string;
 begin
   Result := '';
+
   if (AIndex >= 0) and (AIndex < FCount) then
   begin
     if sfHasNoTabs in FItems^[AIndex].Flags then
@@ -508,6 +519,42 @@ begin
   end;
 end;
 
+function TTextEditorLines.InternationalCharacterFound(var AChar, ALine: Integer): Boolean;
+var
+  LIndex, LLength: Integer;
+  LPValue, LPLastChar, LPStart: PChar;
+  LStringRecord: TTextEditorStringRecord;
+begin
+  Result := True;
+
+  for LIndex := 0 to FCount - 1 do
+  begin
+    LStringRecord := FItems^[LIndex];
+
+    LLength := Length(LStringRecord.TextLine);
+    if LLength > 0 then
+    begin
+      LPValue := @LStringRecord.TextLine[1];
+      LPStart := LPValue;
+      LPLastChar := @LStringRecord.TextLine[LLength];
+
+      while LPValue <= LPLastChar do
+      begin
+        if Ord(LPValue^) > 255 then
+        begin
+          ALine := LIndex;
+          AChar := LPValue - LPStart + 1;
+          Exit;
+        end;
+
+        Inc(LPValue);
+      end;
+    end;
+  end;
+
+  Result := False;
+end;
+
 function TTextEditorLines.GetPartialTextLength(const AStart, AEnd: Integer): Integer;
 var
   LIndex: Integer;
@@ -540,6 +587,7 @@ begin
   begin
     Finalize(FItems^[LIndex]);
     Dec(FCount);
+
     if LIndex < FCount then
       System.Move(FItems[LIndex + 1], FItems[LIndex], (FCount - LIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
   end;
@@ -571,14 +619,14 @@ begin
   FTextLength := 0;
 
   SetString(Result, nil, LSize);
-  LPValue := PChar(Result);
+  LPValue := @Result[1];
+
   for LIndex := AStart to AEnd - 1 do
   begin
     LStringRecord := FItems^[LIndex];
 
-    if FSavingToStream then
-      if sfEmptyLine in LStringRecord.Flags then
-        Continue;
+    if FSavingToStream and (sfEmptyLine in LStringRecord.Flags) then
+      Continue;
 
     if (sfLineBreakCR in LStringRecord.Flags) and (sfLineBreakLF in LStringRecord.Flags) then
       LLineBreak := TControlCharacters.CarriageReturnLinefeed
@@ -590,17 +638,20 @@ begin
       LLineBreak := TControlCharacters.CarriageReturn
     else
       LLineBreak := DefaultLineBreak;
+
     LLineBreakLength := Length(LLineBreak);
 
     LLength := Length(LStringRecord.TextLine);
     if LLength <> 0 then
     begin
       System.Move(Pointer(LStringRecord.TextLine)^, LPValue^, LLength * SizeOf(Char));
+
       LIndex2 := 0;
       while LIndex2 < LLength do
       begin
         if LPValue^ = TControlCharacters.Substitute then
           LPValue^ := TControlCharacters.Null;
+
         Inc(LPValue);
         Inc(LIndex2);
       end;
@@ -629,14 +680,14 @@ begin
   FTextLength := 0;
 
   SetString(Result, nil, LSize);
-  LPValue := PChar(Result);
+  LPValue := @Result[1];
+
   for LIndex := 0 to FCount - 1 do
   begin
     LStringRecord := FItems^[LIndex];
 
-    if FSavingToStream then
-      if sfEmptyLine in LStringRecord.Flags then
-        Continue;
+    if FSavingToStream and (sfEmptyLine in LStringRecord.Flags) then
+      Continue;
 
     if (sfLineBreakCR in LStringRecord.Flags) and (sfLineBreakLF in LStringRecord.Flags) then
       LLineBreak := TControlCharacters.CarriageReturnLinefeed
@@ -648,17 +699,20 @@ begin
       LLineBreak := TControlCharacters.CarriageReturn
     else
       LLineBreak := DefaultLineBreak;
-    LLineBreakLength := Length(LLineBreak);
 
+    LLineBreakLength := Length(LLineBreak);
     LLength := Length(LStringRecord.TextLine);
+
     if LLength <> 0 then
     begin
       System.Move(Pointer(LStringRecord.TextLine)^, LPValue^, LLength * SizeOf(Char));
       LIndex2 := 0;
+
       while LIndex2 < LLength do
       begin
         if LPValue^ = TControlCharacters.Substitute then
           LPValue^ := TControlCharacters.Null;
+
         Inc(LPValue);
         Inc(LIndex2);
       end;
@@ -695,8 +749,10 @@ begin
 {$ENDIF}
   BeginUpdate;
   InsertItem(AIndex, AValue);
+
   if Assigned(FOnInserted) then
     FOnInserted(Self, AIndex, 1);
+
   EndUpdate;
 end;
 
@@ -709,6 +765,7 @@ begin
     System.Move(FItems^[AIndex], FItems^[AIndex + 1], (FCount - AIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
 
   FIndexOfLongestLine := -1;
+
   with FItems^[AIndex] do
   begin
     Pointer(TextLine) := nil;
@@ -717,6 +774,7 @@ begin
     ExpandedLength := -1;
     Flags := [sfExpandedLengthUnknown];
   end;
+
   Inc(FCount);
 end;
 
@@ -727,9 +785,12 @@ begin
     ListIndexOutOfBounds(AIndex);
 {$ENDIF}
   SetCapacity(FCount + 1);
+
   if AIndex < FCount then
     System.Move(FItems^[AIndex], FItems^[AIndex + 1], (FCount - AIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
+
   FIndexOfLongestLine := -1;
+
   with FItems^[AIndex] do
   begin
     Pointer(TextLine) := nil;
@@ -738,6 +799,7 @@ begin
     ExpandedLength := -1;
     Flags := [AFlag];
   end;
+
   Inc(FCount);
 
   if Assigned(OnInserted) and (AFlag <> sfEmptyLine) then
@@ -756,20 +818,25 @@ begin
   if ACount > 0 then
   begin
     SetCapacity(FCount + ACount);
+
     if AIndex < FCount then
       System.Move(FItems^[AIndex], FItems^[AIndex + ACount], (FCount - AIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);
 
     FIndexOfLongestLine := -1;
     LIndex := 0;
+
     for LLine := AIndex to AIndex + ACount - 1 do
     with FItems^[LLine] do
     begin
       Pointer(TextLine) := nil;
+
       if Assigned(AStrings) then
         TextLine := AStrings[LIndex];
+
       Inc(LIndex);
       Range := nil;
       ExpandedLength := -1;
+
       if AModified then
         Flags := [sfExpandedLengthUnknown, sfLineStateModified]
       else
@@ -801,6 +868,7 @@ end;
 procedure TTextEditorLines.SetUnknownCharHigh;
 begin
   FUnknownCharHigh := 0;
+
   if FUnknownCharsVisible then
   begin
     if Encoding = System.SysUtils.TEncoding.ANSI then
@@ -891,11 +959,13 @@ begin
     begin
       if LLeft <> LRight then
         ExchangeItems(LLeft, LRight);
+
       if LMiddle = LLeft then
         LMiddle := LRight
       else
       if LMiddle = LRight then
         LMiddle := LLeft;
+
       Inc(LLeft);
       Dec(LRight);
     end;
@@ -1036,7 +1106,7 @@ begin
 
         if LLength > 0 then
         begin
-          LPValue := PChar(LString);
+          LPValue := @LString[1];
           LPLastChar := @LString[LLength];
 
           while LPValue <= LPLastChar do
@@ -1049,6 +1119,7 @@ begin
             begin
               if LPValue^ = TControlCharacters.Null then
                 LPValue^ := TControlCharacters.Substitute;
+
               Inc(LPValue);
             end;
 
@@ -1314,7 +1385,7 @@ begin
   try
     Clear;
     FIndexOfLongestLine := -1;
-    LPValue := PChar(AValue);
+    LPValue := @AValue[1];
     if Assigned(LPValue) then
     begin
       LLength := Length(AValue);

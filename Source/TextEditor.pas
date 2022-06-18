@@ -54,6 +54,7 @@ type
       OnBeforeDeleteMark: TTextEditorMarkEvent;
       OnBeforeMarkPanelPaint: TTextEditorMarkPanelPaintEvent;
       OnBeforeMarkPlaced: TTextEditorMarkEvent;
+      OnBeforeSaveToFile: TTextEditorSaveToFileEvent;
       OnCaretChanged: TTextEditorCaretChangedEvent;
       OnChainLinesChanged: TNotifyEvent;
       OnChainLinesChanging: TNotifyEvent;
@@ -408,7 +409,6 @@ type
     function GetViewTextLineNumber(const AViewLineNumber: Integer): Integer;
     function GetVisibleChars(const ARow: Integer; const ALineText: string = ''): Integer;
     function IsCommentAtCaretPosition: Boolean;
-    function IsFixedSizeFont: Boolean;
     function IsKeywordAtCaretPosition(const APOpenKeyWord: PBoolean = nil): Boolean;
     function IsKeywordAtCaretPositionOrAfter(const ATextPosition: TTextEditorTextPosition): Boolean;
     function IsMultiEditCaretFound(const ALine: Integer): Boolean;
@@ -713,6 +713,7 @@ type
     function PixelsToTextPosition(const X, Y: Integer): TTextEditorTextPosition;
     function ReplaceSelectedText(const AReplaceText: string; const ASearchText: string; const ADeleteLine: Boolean): Boolean;
     function ReplaceText(const ASearchText: string; const AReplaceText: string; const APageIndex: Integer = -1): Integer;
+    function SaveToFile(const AFilename: string; const AEncoding: System.SysUtils.TEncoding = nil): Boolean;
     function SearchStatus: string;
     function TextToHTML(const AClipboardFormat: Boolean = False): string;
     function TextToViewPosition(const ATextPosition: TTextEditorTextPosition): TTextEditorViewPosition;
@@ -817,7 +818,6 @@ type
     procedure RemoveMouseUpHandler(AHandler: TMouseEvent);
     procedure ReplaceLine(const ALineNumber: Integer; const AValue: string; const AFlags: TTextEditorStringFlags);
     procedure RescanCodeFoldingRanges;
-    procedure SaveToFile(const AFilename: string; const AEncoding: System.SysUtils.TEncoding = nil);
     procedure SaveToStream(const AStream: TStream; const AEncoding: System.SysUtils.TEncoding = nil);
     procedure SelectAll;
     procedure SetBookmark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition; const AImageIndex: Integer = -1);
@@ -901,6 +901,7 @@ type
     property OnBeforeDeleteMark: TTextEditorMarkEvent read FEvents.OnBeforeDeleteMark write FEvents.OnBeforeDeleteMark;
     property OnBeforeMarkPanelPaint: TTextEditorMarkPanelPaintEvent read FEvents.OnBeforeMarkPanelPaint write FEvents.OnBeforeMarkPanelPaint;
     property OnBeforeMarkPlaced: TTextEditorMarkEvent read FEvents.OnBeforeMarkPlaced write FEvents.OnBeforeMarkPlaced;
+    property OnBeforeSaveToFile: TTextEditorSaveToFileEvent read FEvents.OnBeforeSaveToFile write FEvents.OnBeforeSaveToFile;
     property OnCaretChanged: TTextEditorCaretChangedEvent read FEvents.OnCaretChanged write FEvents.OnCaretChanged;
     property OnChange: TNotifyEvent read FEvents.OnChange write FEvents.OnChange;
     property OnCommandProcessed: TTextEditorProcessCommandEvent read FEvents.OnCommandProcessed write FEvents.OnCommandProcessed;
@@ -1014,6 +1015,7 @@ type
     property OnBeforeDeleteMark;
     property OnBeforeMarkPanelPaint;
     property OnBeforeMarkPlaced;
+    property OnBeforeSaveToFile;
     property OnCaretChanged;
     property OnChange;
     property OnClick;
@@ -1166,6 +1168,7 @@ type
     property OnBeforeDeleteMark;
     property OnBeforeMarkPanelPaint;
     property OnBeforeMarkPlaced;
+    property OnBeforeSaveToFile;
     property OnCaretChanged;
     property OnChange;
     property OnClick;
@@ -1254,7 +1257,6 @@ uses
   Vcl.Menus, TextEditor.Encoding, TextEditor.Export.HTML, TextEditor.Highlighter.Rules, TextEditor.Language,
   TextEditor.LeftMargin.Border, TextEditor.LeftMargin.LineNumbers, TextEditor.Scroll.Hint, TextEditor.Search.Map,
   TextEditor.Search.Normal, TextEditor.Search.RegularExpressions, TextEditor.Search.WildCard, TextEditor.Undo.Item
-
 {$IFDEF VCL_STYLES}, TextEditor.StyleHooks{$ENDIF}
 {$IFDEF ALPHASKINS}, acGlow, sConst, sMessages, sSkinManager, sStyleSimply, sVCLUtils{$ENDIF};
 
@@ -1851,9 +1853,9 @@ begin
   if (ALine > 0) and (ALine < Length(FCodeFoldings.RangeToLine)) then
   begin
     LCodeFoldingRange := FCodeFoldings.RangeToLine[ALine];
-    if Assigned(LCodeFoldingRange) then
-      if (LCodeFoldingRange.ToLine = ALine) and not LCodeFoldingRange.ParentCollapsed then
-        Result := LCodeFoldingRange;
+
+    if Assigned(LCodeFoldingRange) and (LCodeFoldingRange.ToLine = ALine) and not LCodeFoldingRange.ParentCollapsed then
+      Result := LCodeFoldingRange;
   end;
 end;
 
@@ -1866,10 +1868,13 @@ begin
 
   LLine := ALine;
   LLength := Length(FCodeFoldings.RangeFromLine) - 1;
+
   if LLine > LLength then
     LLine := LLength;
+
   while (LLine > 0) and not Assigned(FCodeFoldings.RangeFromLine[LLine]) do
     Dec(LLine);
+
   if (LLine > 0) and Assigned(FCodeFoldings.RangeFromLine[LLine]) then
     Result := FCodeFoldings.RangeFromLine[LLine]
 end;
@@ -1877,6 +1882,7 @@ end;
 function TCustomTextEditor.CodeFoldingRangeForLine(const ALine: Integer): TTextEditorCodeFoldingRange;
 begin
   Result := nil;
+
   if (ALine > 0) and (ALine < Length(FCodeFoldings.RangeFromLine)) then
     Result := FCodeFoldings.RangeFromLine[ALine]
 end;
@@ -1884,6 +1890,7 @@ end;
 function TCustomTextEditor.CodeFoldingTreeEndForLine(const ALine: Integer): Boolean;
 begin
   Result := False;
+
   if (ALine > 0) and (ALine < Length(FCodeFoldings.RangeToLine)) then
     Result := Assigned(FCodeFoldings.RangeToLine[ALine]);
 end;
@@ -1891,6 +1898,7 @@ end;
 function TCustomTextEditor.CodeFoldingTreeLineForLine(const ALine: Integer): Boolean;
 begin
   Result := False;
+
   if (ALine > 0) and (ALine < Length(FCodeFoldings.TreeLine)) then
     Result := FCodeFoldings.TreeLine[ALine]
 end;
@@ -3136,12 +3144,6 @@ begin
     Result := Length(AToken);
 end;
 
-function TCustomTextEditor.IsFixedSizeFont: Boolean;
-begin
-  Result := FPaintHelper.FixedSizeFont and ((FLines.Encoding = System.SysUtils.TEncoding.ANSI) or
-    (FLines.Encoding = System.SysUtils.TEncoding.ASCII));
-end;
-
 function TCustomTextEditor.GetTokenWidth(const AToken: string; const ALength: Integer; const ACharsBefore: Integer;
   const AMinimap: Boolean = False; const ARTLReading: Boolean = False): Integer;
 var
@@ -3150,6 +3152,7 @@ var
   LPToken: PChar;
   LToken: string;
   LFlags: Cardinal;
+  LIsFixedSizeFont: Boolean;
 
   function GetTokenWidth(const AToken: string; const ATokenLength: Integer = -1): Integer;
   var
@@ -3172,7 +3175,7 @@ var
     LToken := ControlCharacterToName(LChar);
     LLength := Length(LToken);
 
-    if IsFixedSizeFont or AMinimap then
+    if LIsFixedSizeFont or AMinimap then
       Result := FPaintHelper.FontStock.CharWidth * LLength
     else
       Result := GetTokenWidth(LToken, LLength);
@@ -3187,6 +3190,8 @@ begin
     Exit;
 
   LChar := AToken[1];
+
+  LIsFixedSizeFont := FPaintHelper.FixedSizeFont and (Ord(LChar) <= 255);
 
   LFlags := DT_LEFT or DT_CALCRECT or DT_NOPREFIX or DT_SINGLELINE;
   if ARTLReading then
@@ -3244,7 +3249,7 @@ begin
     Result := Result * FPaintHelper.FontStock.CharWidth + (ALength - 1) * FPaintHelper.FontStock.CharWidth * FTabs.Width;
   end
   else
-  if IsFixedSizeFont or AMinimap then
+  if LIsFixedSizeFont or AMinimap then
     Result := FPaintHelper.FontStock.CharWidth * ALength
   else
   if not FPaintHelper.FixedSizeFont then
@@ -19310,16 +19315,31 @@ begin
   Invalidate;
 end;
 
-procedure TCustomTextEditor.SaveToFile(const AFilename: string; const AEncoding: System.SysUtils.TEncoding = nil);
+function TCustomTextEditor.SaveToFile(const AFilename: string; const AEncoding: System.SysUtils.TEncoding = nil): Boolean;
 var
   LFileStream: TFileStream;
+  LCancel: Boolean;
+  LEncoding: System.SysUtils.TEncoding;
 begin
+  Result := False;
+
+  LCancel := False;
+  LEncoding := AEncoding;
+
+  if Assigned(FEvents.OnBeforeSaveToFile) then
+    FEvents.OnBeforeSaveToFile(Self, AFilename, LEncoding, LCancel);
+
+  if LCancel then
+    Exit;
+
   LFileStream := TFileStream.Create(AFilename, fmCreate);
   try
-    SaveToStream(LFileStream, AEncoding);
+    SaveToStream(LFileStream, LEncoding);
   finally
     LFileStream.Free;
   end;
+
+  Result := True;
 end;
 
 procedure TCustomTextEditor.SaveToStream(const AStream: TStream; const AEncoding: System.SysUtils.TEncoding = nil);

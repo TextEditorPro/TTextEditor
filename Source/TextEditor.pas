@@ -256,8 +256,8 @@ type
       ExpandedCharsBefore: Integer;
       FontStyle: TFontStyles;
       Foreground: TColor;
-      IsItalic: Boolean;
       Length: Integer;
+      Overhang: Boolean;
       RightToLeftToken: Boolean;
       Text: string;
       Underline: TTextEditorUnderline;
@@ -3193,7 +3193,7 @@ begin
 
   LIsFixedSizeFont := FPaintHelper.FixedSizeFont and (Ord(LChar) <= 255);
 
-  LFlags := DT_LEFT or DT_CALCRECT or DT_NOPREFIX or DT_SINGLELINE;
+  LFlags := DT_LEFT or DT_CALCRECT or DT_NOCLIP or DT_NOPREFIX or DT_SINGLELINE;
   if ARTLReading then
     LFlags := LFlags or DT_RTLREADING;
 
@@ -14258,15 +14258,15 @@ var
 
       if not AMinimap then
       begin
-        if LTokenHelper.IsItalic and (LPChar^ <> TCharacters.Space) and (ATokenLength = Length(AToken)) then
+        if LTokenHelper.Overhang and (LPChar^ <> TCharacters.Space) and (ATokenLength = Length(AToken)) then
           Inc(LTextRect.Right, FPaintHelper.CharWidth);
 
-        if (FItalic.Offset <> 0) and (not LTokenHelper.IsItalic or (LPChar^ = TCharacters.Space)) then
+        if (FItalic.Offset <> 0) and (not LTokenHelper.Overhang or (LPChar^ = TCharacters.Space)) then
         begin
           Inc(LTextRect.Left, FItalic.Offset);
           Inc(LTextRect.Right, FItalic.Offset);
 
-          if not LTokenHelper.IsItalic then
+          if not LTokenHelper.Overhang then
             Dec(LTextRect.Left);
 
           if LPChar^ = TCharacters.Space then
@@ -14334,7 +14334,7 @@ var
           Winapi.Windows.ExtTextOut(Canvas.Handle, LTextRect.Left, LTextRect.Top, ETO_OPAQUE or ETO_CLIPPED, @LTextRect,
             LPChar, LTokenLength, nil);
 
-        if not AMinimap and LTokenHelper.IsItalic and (LPChar^ <> TCharacters.Space) and (ATokenLength <> 0) and
+        if not AMinimap and LTokenHelper.Overhang and (LPChar^ <> TCharacters.Space) and (ATokenLength <> 0) and
           (ATokenLength = Length(AToken)) then
         begin
           LLastChar := AToken[ATokenLength];
@@ -14865,7 +14865,7 @@ var
       LTokenHelper.Background := LBackground;
       LTokenHelper.Border := ABorder;
       LTokenHelper.FontStyle := AFontStyle;
-      LTokenHelper.IsItalic := not AMinimap and (fsItalic in AFontStyle);
+      LTokenHelper.Overhang := not AMinimap and ((fsItalic in AFontStyle) or not FPaintHelper.FixedSizeFont);
       LTokenHelper.Underline := AUnderline;
       LTokenHelper.UnderlineColor := AUnderlineColor;
       LTokenHelper.RightToLeftToken := FHighlighter.RightToLeftToken;

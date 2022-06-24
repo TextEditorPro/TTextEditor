@@ -136,7 +136,7 @@
             "Attributes": {
               "Element": "Character"
             },
-            "Delimiters": "*/=\\|&()[]{}`~!@,$%^?:;'\".><#'",
+            "Delimiters": "*/=\\|&()[]{}`~!@,$%^?:;'\".><#",
             "Properties": {
               "CloseOnTerm": true,
               "CloseOnEndOfLine": true
@@ -151,7 +151,7 @@
             "Attributes": {
               "Element": "Character"
             },
-            "Delimiters": "*/+-=\\|&()[]{}`~@,$%?:;'\".><#'",
+            "Delimiters": "*/+-=\\|&()[]{}`~@,$%?:;'\".><#",
             "Properties": {
               "CloseOnTerm": true,
               "CloseOnEndOfLine": true
@@ -166,7 +166,7 @@
             "Attributes": {
               "Element": "Character"
             },
-            "Delimiters": "*/=\\|&()[]{}`~!@,$%^?:;'\".><#'",
+            "Delimiters": "*/=\\|&()[]{}`~!@,$%^?:;'\".><#",
             "Properties": {
               "CloseOnTerm": true,
               "CloseOnEndOfLine": true
@@ -174,20 +174,6 @@
             "TokenRange": {
               "Open": "@",
               "Close": " "
-            }
-          },
-          {
-            "Type": "HexNumber",
-            "Attributes": {
-              "Element": "HexNumber"
-            },
-            "AllowedCharacters": "0123456789abcdeABCDE",
-            "Properties": {
-              "CloseOnTerm": true,
-              "CloseOnEndOfLine": true
-            },
-            "TokenRange": {
-              "Open": "0x"
             }
           }
         ],
@@ -511,7 +497,7 @@
         "Set": [
           {
             "Type": "Numbers",
-            "Symbols": "0123456789",
+            "Symbols": "0123456789abcdefxABCDEFX",
             "Attributes": {
               "Element": "Number"
             }

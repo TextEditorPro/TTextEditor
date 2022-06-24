@@ -3,7 +3,7 @@
     "Sample": [
       "// Hello, World! in DWScript\r\n",
       "\r\n",
-      "var s: string = ''Hello, World!'';\r\n",
+      "var s: string = 'Hello, World!';\r\n",
       "ShowMessage(s);"
     ],
     "MainRules": {
@@ -363,7 +363,7 @@
             "Attributes": {
               "Element": "HexNumber"
             },
-            "AllowedCharacters": "0123456789abcdeABCDE",
+            "AllowedCharacters": "0123456789abcdefABCDEF",
             "Properties": {
               "CloseOnTerm": true,
               "CloseOnEndOfLine": true

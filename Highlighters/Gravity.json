@@ -4,7 +4,7 @@
       "// Hello, World! in Gravity\r\n",
       "\r\n",
       "func main() {\r\n",
-      "System.print(\"Hello World!\");\r\n",
+      "  System.print(\"Hello World!\");\r\n",
       "}"
     ],
     "MainRules": {
@@ -158,20 +158,6 @@
             },
             "TokenRange": {
               "Open": "#"
-            }
-          },
-          {
-            "Type": "HexNumber",
-            "Attributes": {
-              "Element": "HexNumber"
-            },
-            "AllowedCharacters": "0123456789abcdeABCDE",
-            "Properties": {
-              "CloseOnTerm": true,
-              "CloseOnEndOfLine": true
-            },
-            "TokenRange": {
-              "Open": "0x"
             }
           }
         ],
@@ -343,7 +329,7 @@
         "Set": [
           {
             "Type": "Numbers",
-            "Symbols": "0123456789",
+            "Symbols": "0123456789abcdefxABCDEFX",
             "Attributes": {
               "Element": "Number"
             }

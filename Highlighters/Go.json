@@ -8,7 +8,7 @@
       "import \"fmt\"\r\n",
       "\r\n",
       "func main() {\r\n",
-      "   fmt.Println(\"Hello, World!\")\r\n",
+      "  fmt.Println(\"Hello, World!\")\r\n",
       "}"
     ],
     "MainRules": {
@@ -140,20 +140,6 @@
             "TokenRange": {
               "Open": "#"
             }
-          },
-          {
-            "Type": "HexNumber",
-            "Attributes": {
-              "Element": "HexNumber"
-            },
-            "AllowedCharacters": "0123456789abcdeABCDE",
-            "Properties": {
-              "CloseOnTerm": true,
-              "CloseOnEndOfLine": true
-            },
-            "TokenRange": {
-              "Open": "0x"
-            }
           }
         ],
         "KeyList": [
@@ -225,7 +211,7 @@
         "Set": [
           {
             "Type": "Numbers",
-            "Symbols": "0123456789",
+            "Symbols": "0123456789abcdefxABCDEFX",
             "Attributes": {
               "Element": "Number"
             }

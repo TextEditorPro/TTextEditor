@@ -331,37 +331,26 @@ begin
       FToken := FRange.DefaultToken;
       FSkipWhitespace := False;
 
-      if FRange.AllowedCharacters <> [] then
+      if IsRightToLeftCharacter(FLine[FRunPosition], False) then
       begin
-        Dec(FRunPosition);
-        while FLine[FRunPosition] in FRange.AllowedCharacters do
+        FRightToLeftToken := True;
+
+        while IsRightToLeftCharacter(FLine[FRunPosition]) do
           Inc(FRunPosition);
 
-        FRange := FRange.Parent;
+        while (FRunPosition > 1) and (FLine[FRunPosition - 1] in [TControlCharacters.Tab, TCharacters.Space]) do
+          Dec(FRunPosition);
       end
       else
       begin
-        if IsRightToLeftCharacter(FLine[FRunPosition], False) then
-        begin
-          FRightToLeftToken := True;
-
-          while IsRightToLeftCharacter(FLine[FRunPosition]) do
-            Inc(FRunPosition);
-
-          while (FRunPosition > 1) and (FLine[FRunPosition - 1] in [TControlCharacters.Tab, TCharacters.Space]) do
-            Dec(FRunPosition);
-        end
+        if FRange.UseDelimitersForText then
+          LDelimiters := FRange.Delimiters + [TControlCharacters.Null]
         else
-        begin
-          if FRange.UseDelimitersForText then
-            LDelimiters := FRange.Delimiters + [TControlCharacters.Null]
-          else
-            LDelimiters := FAllDelimiters;
+          LDelimiters := FAllDelimiters;
 
-          LStartPosition := FRunPosition;
-          while not (FLine[FRunPosition] in LDelimiters) and (FRunPosition - LStartPosition < 100) do
-            Inc(FRunPosition);
-        end;
+        LStartPosition := FRunPosition;
+        while not (FLine[FRunPosition] in LDelimiters) and (FRunPosition - LStartPosition < 100) do
+          Inc(FRunPosition);
       end;
     end
     else
@@ -374,6 +363,14 @@ begin
       FRange.ClosingToken := FToken.ClosingToken;
       FSkipWhitespace := FRange.SkipWhitespaceOnce;
 
+      if FRange.AllowedCharacters <> [] then
+      begin
+        while FLine[FRunPosition] in FRange.AllowedCharacters do
+          Inc(FRunPosition);
+
+        FRange := FRange.Parent;
+      end
+      else
       if FRange.OpenBeginningOfLine and not FBeginningOfLine then
       begin
         FRange := FRange.Parent;

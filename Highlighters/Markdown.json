@@ -245,7 +245,7 @@
             "Attributes": {
               "Element": "String"
             },
-            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'_",
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#_",
             "Properties": {
               "CloseOnEndOfLine": true,
               "UseDelimitersForText": true
@@ -261,7 +261,7 @@
             "Attributes": {
               "Element": "String"
             },
-            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#'_",
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?:;'\".><#_",
             "Properties": {
               "CloseOnEndOfLine": true,
               "UseDelimitersForText": true

@@ -179,20 +179,6 @@
             }
           },
           {
-            "Type": "HexNumber",
-            "Attributes": {
-              "Element": "HexNumber"
-            },
-            "AllowedCharacters": "0123456789abcdeABCDE",
-            "Properties": {
-              "CloseOnTerm": true,
-              "CloseOnEndOfLine": true
-            },
-            "TokenRange": {
-              "Open": "0x"
-            }
-          },
-          {
             "File": "PHP",
             "IncludeRange": "PHP"
           }
@@ -434,14 +420,14 @@
         "Set": [
           {
             "Type": "Number",
-            "Symbols": "0123456789",
+            "Symbols": "0123456789abcdefxABCDEFX",
             "Attributes": {
               "Element": "Number"
             }
           },
           {
             "Type": "Float",
-            "Symbols": ".0123456789",
+            "Symbols": ".0123456789e",
             "Attributes": {
               "Element": "Number"
             }

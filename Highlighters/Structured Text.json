@@ -4,7 +4,7 @@
       "// Hello, World! in Structured Text\r\n",
       "\r\n",
       "VAR\r\n",
-      "  HelloWorld: STRING := ''Hello, World!'';\r\n",
+      "  HelloWorld: STRING := \"Hello, World!\";\r\n",
       "END_VAR"
     ],
     "MainRules": {

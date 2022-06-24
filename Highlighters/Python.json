@@ -87,7 +87,7 @@
             "Attributes": {
               "Element": "HexNumber"
             },
-            "AllowedCharacters": "0123456789abcdeABCDE",
+            "AllowedCharacters": "0123456789abcdefABCDEF",
             "Properties": {
               "CloseOnTerm": true,
               "CloseOnEndOfLine": true

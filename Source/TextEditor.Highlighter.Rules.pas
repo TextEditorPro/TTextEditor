@@ -295,7 +295,7 @@ begin
           if LCurrentTokenNode.Char in ACurrentRange.Delimiters then
           begin
             LStartTokenNode := LCurrentTokenNode;
-            lNextPosition := ARun;
+            LNextPosition := ARun;
           end;
       end;
 
@@ -337,6 +337,7 @@ begin
       Exit(True);
     end;
   end;
+
   ARun := LStartPosition + 1;
 end;
 

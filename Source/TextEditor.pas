@@ -98,6 +98,7 @@ type
       Loaded: Boolean;
       Name: string;
       Path: string;
+      Saved: Boolean;
     end;
 
     TTextEditorItalic = record
@@ -1302,6 +1303,7 @@ begin
   ControlStyle := ControlStyle + [csOpaque, csSetCaption, csNeedsBorderPaint];
   FState.CanChangeSize := True;
   FFile.Loaded := False;
+  FFile.Saved := False;
 
   FSystemMetrics.HorizontalDrag := GetSystemMetrics(SM_CXDRAG);
   FSystemMetrics.VerticalDrag := GetSystemMetrics(SM_CYDRAG);
@@ -5844,19 +5846,17 @@ var
   LBlockStartPosition: TTextEditorTextPosition;
 begin
   LTextPosition := TextPosition;
-  LLength := Length(PChar(AData));
-
+  LLength := StrLen(PChar(AData));
   SetString(S, PChar(AData), LLength);
+
   if GetSelectionAvailable then
   begin
     FUndoList.BeginBlock;
     try
-      FUndoList.AddChange(crDelete, LTextPosition, FPosition.SelectionBegin, FPosition.SelectionEnd, LHelper,
-        smNormal);
+      FUndoList.AddChange(crDelete, LTextPosition, FPosition.SelectionBegin, FPosition.SelectionEnd, LHelper, smNormal);
       LBlockStartPosition := FPosition.SelectionBegin;
       DoSelectedText(S);
-      FUndoList.AddChange(crInsert, LTextPosition, FPosition.SelectionBegin, FPosition.SelectionEnd, LHelper,
-        smNormal);
+      FUndoList.AddChange(crInsert, LTextPosition, FPosition.SelectionBegin, FPosition.SelectionEnd, LHelper, smNormal);
     finally
       FUndoList.EndBlock;
     end;
@@ -5867,8 +5867,10 @@ begin
   begin
     LLineText := FLines[LTextPosition.Line];
     LLength := Length(LLineText);
+
     if LLength < LTextPosition.Char then
       LLineText := LLineText + StringOfChar(TCharacters.Space, LTextPosition.Char - LLength - 1);
+
     LChangeScrollPastEndOfLine := not (soPastEndOfLine in FScroll.Options);
     try
       if LChangeScrollPastEndOfLine then
@@ -5885,8 +5887,10 @@ begin
       Insert(S, LLineText, LTextPosition.Char);
       FViewPosition.Column := FViewPosition.Column + Length(S);
       SetLine(FPosition.Text.Line, LLineText);
+
       if FOvertypeMode = omInsert then
         LHelper := '';
+
       FUndoList.AddChange(crInsert, LTextPosition, LBlockStartPosition, TextPosition, LHelper, smNormal);
     finally
       if LChangeScrollPastEndOfLine then
@@ -16381,7 +16385,7 @@ begin
     if LChangeScrollPastEndOfLine then
       FScroll.SetOption(soPastEndOfLine, False);
 
-    if FUndoList.ChangeCount = 0 then
+    if not FFile.Saved and (FUndoList.ChangeCount = 0) then
       SetModified(False);
 
     LUndoItem.Free;
@@ -19055,7 +19059,7 @@ procedure TCustomTextEditor.LoadFromStream(const AStream: TStream; const AEncodi
 var
   LWordWrapEnabled: Boolean;
 begin
-  FLines.ShowProgress := AStream.Size > TMaxValues.BufferSize;
+  FLines.ShowProgress := AStream.Size > TMaxValues.ShowProgressSize;
   if FLines.ShowProgress then
     FLines.FileSize := AStream.Size;
 
@@ -19354,6 +19358,8 @@ begin
 
   if not (uoUndoAfterSave in FUndo.Options) then
     UndoList.Clear;
+
+  FFile.Saved := True;
 end;
 
 procedure TCustomTextEditor.SelectAll;

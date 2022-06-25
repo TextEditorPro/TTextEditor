@@ -160,10 +160,11 @@ type
 
   TMaxValues = record
   const
-    TokenLength = 128;
-    ScrollRange = High(Smallint);
     BufferSize = 10485760; // = 1024 * 1024 * 10;
+    ScrollRange = High(Smallint);
+    ShowProgressSize = BufferSize * 4;
     TextLength = (MaxInt div SizeOf(WideChar)) div 4;
+    TokenLength = 128;
   end;
 
   TMouseWheelScrollCursors = record

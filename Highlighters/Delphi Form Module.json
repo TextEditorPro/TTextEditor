@@ -54,8 +54,7 @@
               "CloseOnEndOfLine": true
             },
             "TokenRange": {
-              "Open": "$",
-              "OpenBreakType": "Any"
+              "Open": "$"
             }
           },
           {

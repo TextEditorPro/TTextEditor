@@ -1385,54 +1385,51 @@ begin
   try
     Clear;
     FIndexOfLongestLine := -1;
-    LPValue := @AValue[1];
-    if Assigned(LPValue) then
+    LLength := Length(AValue);
+    if LLength > 0 then
     begin
-      LLength := Length(AValue);
-      if LLength > 0 then
+      LPValue := @AValue[1];
+      LPLastChar := @AValue[LLength];
+      while LPValue <= LPLastChar do
       begin
-        LPLastChar := @AValue[LLength];
-        while LPValue <= LPLastChar do
+        LPStartValue := LPValue;
+        while (LPValue <= LPLastChar) and
+          (LPValue^ <> TControlCharacters.CarriageReturn) and
+          (LPValue^ <> TControlCharacters.Linefeed) and
+          (LPValue^ <> TCharacters.LineSeparator) do
+          Inc(LPValue);
+
+        if FCount = FCapacity then
+          Grow;
+
+        with FItems^[FCount] do
         begin
-          LPStartValue := LPValue;
-          while (LPValue <= LPLastChar) and
-            (LPValue^ <> TControlCharacters.CarriageReturn) and
-            (LPValue^ <> TControlCharacters.Linefeed) and
-            (LPValue^ <> TCharacters.LineSeparator) do
-            Inc(LPValue);
+          Pointer(TextLine) := nil;
+          if LPValue = LPStartValue then
+            TextLine := ''
+          else
+            SetString(TextLine, LPStartValue, LPValue - LPStartValue);
+          Range := nil;
+          ExpandedLength := -1;
+          Flags := [sfExpandedLengthUnknown];
+          OriginalLineNumber := FCount;
 
-          if FCount = FCapacity then
-            Grow;
+          Inc(FCount);
 
-          with FItems^[FCount] do
+          if LPValue^ = TControlCharacters.CarriageReturn then
           begin
-            Pointer(TextLine) := nil;
-            if LPValue = LPStartValue then
-              TextLine := ''
-            else
-              SetString(TextLine, LPStartValue, LPValue - LPStartValue);
-            Range := nil;
-            ExpandedLength := -1;
-            Flags := [sfExpandedLengthUnknown];
-            OriginalLineNumber := FCount;
-
-            Inc(FCount);
-
-            if LPValue^ = TControlCharacters.CarriageReturn then
-            begin
-              Inc(LPValue);
-              Include(Flags, sfLineBreakCR);
-            end;
-
-            if LPValue^ = TControlCharacters.Linefeed then
-            begin
-              Inc(LPValue);
-              Include(Flags, sfLineBreakLF);
-            end;
-
-            if LPValue^ = TCharacters.LineSeparator then
-              Inc(LPValue);
+            Inc(LPValue);
+            Include(Flags, sfLineBreakCR);
           end;
+
+          if LPValue^ = TControlCharacters.Linefeed then
+          begin
+            Inc(LPValue);
+            Include(Flags, sfLineBreakLF);
+          end;
+
+          if LPValue^ = TCharacters.LineSeparator then
+            Inc(LPValue);
         end;
       end;
     end;

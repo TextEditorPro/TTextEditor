@@ -14,14 +14,14 @@ type
     LowerCharacters = ['a'..'z'];
     UpperCharacters = ['A'..'Z'];
     Characters = LowerCharacters + UpperCharacters;
-    DefaultDelimiters = ['!', '"', '#', '$', '%', '&', '''', '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=',
-      '>', '?', '@', '[', '\', ']', '^', '`', '{', '|', '}', '~'];
+    DefaultDelimiters = ['''', '-', '!', '"', '#', '$', '%', '&', '(', ')', '*', ',', '.', '/', ':', ';', '?', '@', '[',
+      '\', ']', '^', '`', '{', '|', '}', '~', '+', '<', '=', '>'];
     DefaultSelectionPrefix = '$%:@';
     Numbers = ['0'..'9'];
-    RealNumbers = Numbers + ['e', 'E', '.'];
-    ValidFoldingWord = Numbers + Characters + ['\', '@', '_'];
+    RealNumbers = Numbers + ['.', 'e', 'E'];
+    ValidFoldingWord = Numbers + Characters + ['@', '\', '_'];
     ValidKeyword = UpperCharacters + Numbers;
-    WordBreak = DefaultDelimiters + [' ', '§', '°', '´'];
+    WordBreak = DefaultDelimiters + [' ', '´', '§', '°'];
     CharactersAndNumbers = Characters + Numbers;
   end;
 

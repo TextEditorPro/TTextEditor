@@ -98,6 +98,22 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "collation"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -112,6 +128,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -126,6 +143,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -154,6 +172,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -168,6 +187,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -182,6 +202,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -196,6 +217,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -210,6 +232,22 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "join"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -224,6 +262,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -256,6 +295,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -288,80 +328,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Properties": {
-              "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
-            },
-            "TokenRange": {
-              "Open": "on"
-            },
-            "SubRules": {
-              "Range": [
-                {
-                  "Type": "ReservedWord",
-                  "Attributes": {
-                    "Element": "ReservedWord"
-                  },
-                  "Properties": {
-                    "CloseParent": true,
-                    "CloseOnTerm": true,
-                    "CloseOnEndOfLine": true
-                  },
-                  "TokenRange": {
-                    "Open": "function"
-                  }
-                },
-                {
-                  "Type": "ReservedWord",
-                  "Attributes": {
-                    "Element": "ReservedWord"
-                  },
-                  "Properties": {
-                    "CloseParent": true,
-                    "CloseOnTerm": true,
-                    "CloseOnEndOfLine": true
-                  },
-                  "TokenRange": {
-                    "Open": "procedure"
-                  }
-                },
-                {
-                  "Type": "ReservedWord",
-                  "Attributes": {
-                    "Element": "ReservedWord"
-                  },
-                  "Properties": {
-                    "CloseParent": true,
-                    "CloseOnTerm": true,
-                    "CloseOnEndOfLine": true
-                  },
-                  "TokenRange": {
-                    "Open": "table"
-                  }
-                },
-                {
-                  "Type": "ReservedWord",
-                  "Attributes": {
-                    "Element": "ReservedWord"
-                  },
-                  "Properties": {
-                    "CloseParent": true,
-                    "CloseOnTerm": true,
-                    "CloseOnEndOfLine": true
-                  },
-                  "TokenRange": {
-                    "Open": "view"
-                  }
-                }
-              ] 
-            }
-          },
-          {
-            "Type": "MethodName",
-            "Attributes": {
-              "Element": "MethodName"
-            },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -376,6 +343,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -390,6 +358,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -404,6 +373,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -418,6 +388,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,

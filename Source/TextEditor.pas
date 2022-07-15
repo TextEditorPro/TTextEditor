@@ -822,7 +822,7 @@ type
     procedure SaveToStream(const AStream: TStream; const AEncoding: System.SysUtils.TEncoding = nil);
     procedure SelectAll;
     procedure SetBookmark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition; const AImageIndex: Integer = -1);
-    procedure SetCaretAndSelection(const ATextPosition, ABlockBeginPosition, ABlockEndPosition: TTextEditorTextPosition);
+    procedure SetTextPositionAndSelection(const ATextPosition, ABlockBeginPosition, ABlockEndPosition: TTextEditorTextPosition);
     procedure SetFocus; override;
     procedure SetMark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition; const AImageIndex: Integer; const AColor: TColor = TColors.SysNone);
     procedure SetOption(const AOption: TTextEditorOption; const AEnabled: Boolean);
@@ -7389,7 +7389,7 @@ begin
       Dec(LSelectionEndPosition.Line);
     end;
 
-    SetCaretAndSelection(LTextPosition, LSelectionBeginPosition, LSelectionEndPosition);
+    SetTextPositionAndSelection(LTextPosition, LSelectionBeginPosition, LSelectionEndPosition);
     FUndoList.EndBlock;
   end;
 end;
@@ -7425,7 +7425,7 @@ begin
       Inc(LSelectionEndPosition.Line);
     end;
 
-    SetCaretAndSelection(LTextPosition, LSelectionBeginPosition, LSelectionEndPosition);
+    SetTextPositionAndSelection(LTextPosition, LSelectionBeginPosition, LSelectionEndPosition);
     FUndoList.EndBlock;
   end;
 end;
@@ -9109,7 +9109,7 @@ begin
 
   LBlockBeginPosition.Line := LTextPosition.Line;
   LBlockEndPosition.Line := LTextPosition.Line;
-  SetCaretAndSelection(LBlockEndPosition, LBlockBeginPosition, LBlockEndPosition);
+  SetTextPositionAndSelection(LBlockEndPosition, LBlockBeginPosition, LBlockEndPosition);
 
   Invalidate;
 end;
@@ -9925,6 +9925,10 @@ begin
   if not SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, @LLinesToScroll, 0) then
     LLinesToScroll := 3;
 
+  { Roll the mouse wheel to scroll: One screen at a time }
+  if LLinesToScroll = -1 then
+    LLinesToScroll := VisibleLineCount;
+
   Inc(FMouse.WheelAccumulator, AWheelDelta);
   LWheelClicks := FMouse.WheelAccumulator div TMouseWheel.Divisor;
   FMouse.WheelAccumulator := FMouse.WheelAccumulator mod TMouseWheel.Divisor;
@@ -10264,7 +10268,7 @@ begin
     if LCaretPositionX <> 1 then
       LBlockEndPosition := GetPosition(LBlockEndPosition.Char + Length(LSpaces), LBlockEndPosition.Line);
   finally
-    SetCaretAndSelection(LOldCaretPosition, GetPosition(LBlockBeginPosition.Char + Length(LSpaces),
+    SetTextPositionAndSelection(LOldCaretPosition, GetPosition(LBlockBeginPosition.Char + Length(LSpaces),
       LBlockBeginPosition.Line), LBlockEndPosition);
     FSelection.ActiveMode := LOldSelectionMode;
   end;
@@ -10384,13 +10388,13 @@ begin
       LFirstIndent := 0;
 
     if FSelection.ActiveMode = smColumn then
-      SetCaretAndSelection(LOldCaretPosition, LBlockBeginPosition, LBlockEndPosition)
+      SetTextPositionAndSelection(LOldCaretPosition, LBlockBeginPosition, LBlockEndPosition)
     else
     begin
       LOldCaretPosition.Char := LCaretPositionX;
       Dec(LBlockBeginPosition.Char, LFirstIndent);
       Dec(LBlockEndPosition.Char, LLastIndent);
-      SetCaretAndSelection(LOldCaretPosition, LBlockBeginPosition, LBlockEndPosition);
+      SetTextPositionAndSelection(LOldCaretPosition, LBlockBeginPosition, LBlockEndPosition);
     end;
 
     FSelection.ActiveMode := LOldSelectionMode;
@@ -15553,7 +15557,7 @@ begin
           begin
             FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
               LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
-            SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
+            SetTextPositionAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
               LUndoItem.ChangeEndPosition);
           end;
         crInsert, crPaste, crDragDropInsert:
@@ -15562,7 +15566,7 @@ begin
             LSelectionBeginPosition := SelectionBeginPosition;
             LSelectionEndPosition := SelectionEndPosition;
 
-            SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
+            SetTextPositionAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
               LUndoItem.ChangeBeginPosition);
             DoSelectedText(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False,
               LUndoItem.ChangeBeginPosition, LUndoItem.ChangeBlockNumber);
@@ -15578,7 +15582,7 @@ begin
             LSelectionBeginPosition := SelectionBeginPosition;
             LSelectionEndPosition := SelectionEndPosition;
 
-            SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
+            SetTextPositionAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
               LUndoItem.ChangeEndPosition);
             LTempString := SelectedText;
 
@@ -15597,12 +15601,12 @@ begin
         crLineBreak:
           begin
             LTextPosition := LUndoItem.ChangeBeginPosition;
-            SetCaretAndSelection(LTextPosition, LTextPosition, LTextPosition);
+            SetTextPositionAndSelection(LTextPosition, LTextPosition, LTextPosition);
             DoLineBreak(False);
           end;
         crIndent:
           begin
-            SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
+            SetTextPositionAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
               LUndoItem.ChangeEndPosition);
             FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
               LUndoItem.ChangeEndPosition, LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode,
@@ -15640,13 +15644,13 @@ begin
               LStrToDelete := LRun;
             until LRun^ = TControlCharacters.Null;
             if LUndoItem.ChangeSelectionMode = smColumn then
-              SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
+              SetTextPositionAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
                 LUndoItem.ChangeEndPosition)
             else
             begin
               LTextPosition.Char := LUndoItem.ChangeBeginPosition.Char - FTabs.Width;
               LTextPosition.Line := LUndoItem.ChangeBeginPosition.Line;
-              SetCaretAndSelection(LTextPosition, LTextPosition,
+              SetTextPositionAndSelection(LTextPosition, LTextPosition,
                 GetPosition(LUndoItem.ChangeEndPosition.Char - LLength, LUndoItem.ChangeEndPosition.Line));
             end;
             FUndoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
@@ -16304,12 +16308,12 @@ begin
         begin
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
-          SetCaretAndSelection(LUndoItem.ChangeBeginPosition, LUndoItem.ChangeBeginPosition,
+          SetTextPositionAndSelection(LUndoItem.ChangeBeginPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeBeginPosition);
         end;
       crInsert, crPaste, crDragDropInsert:
         begin
-          SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition, LUndoItem.ChangeEndPosition);
+          SetTextPositionAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition, LUndoItem.ChangeEndPosition);
           LTempText := SelectedText;
           DoSelectedText(LUndoItem.ChangeSelectionMode, PChar(LUndoItem.ChangeString), False,
             LUndoItem.ChangeBeginPosition, LUndoItem.ChangeBlockNumber);
@@ -16335,7 +16339,7 @@ begin
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, '', LUndoItem.ChangeSelectionMode, LUndoItem.ChangeBlockNumber);
 
-          SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition, LUndoItem.ChangeEndPosition);
+          SetTextPositionAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition, LUndoItem.ChangeEndPosition);
 
           EnsureCursorPositionVisible;
         end;
@@ -16356,7 +16360,7 @@ begin
         end;
       crIndent:
         begin
-          SetCaretAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
+          SetTextPositionAndSelection(LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition);
           FRedoList.AddChange(LUndoItem.ChangeReason, LUndoItem.ChangeCaretPosition, LUndoItem.ChangeBeginPosition,
             LUndoItem.ChangeEndPosition, LUndoItem.ChangeString, LUndoItem.ChangeSelectionMode,
@@ -19031,7 +19035,7 @@ var
   LSelectionMode: TTextEditorSelectionMode;
 begin
   LSelectionMode := FSelection.ActiveMode;
-  SetCaretAndSelection(ABlockBeginPosition, ABlockBeginPosition, ABlockEndPosition);
+  SetTextPositionAndSelection(ABlockBeginPosition, ABlockBeginPosition, ABlockEndPosition);
   FSelection.ActiveMode := smColumn;
   DoSelectedText(smColumn, AChangeStr, AAddToUndoList, TextPosition);
   FSelection.ActiveMode := LSelectionMode;
@@ -19377,7 +19381,7 @@ begin
       Inc(LLastTextPosition.Char, FLines.GetLengthOfLongestLine);
   end;
 
-  SetCaretAndSelection(LOldCaretPosition, GetBOFPosition, LLastTextPosition);
+  SetTextPositionAndSelection(LOldCaretPosition, GetBOFPosition, LLastTextPosition);
   FreeMultiCarets;
   TextPosition := LLastTextPosition;
 
@@ -19420,7 +19424,7 @@ begin
   end;
 end;
 
-procedure TCustomTextEditor.SetCaretAndSelection(const ATextPosition, ABlockBeginPosition, ABlockEndPosition: TTextEditorTextPosition);
+procedure TCustomTextEditor.SetTextPositionAndSelection(const ATextPosition, ABlockBeginPosition, ABlockEndPosition: TTextEditorTextPosition);
 var
   LOldSelectionMode: TTextEditorSelectionMode;
 begin

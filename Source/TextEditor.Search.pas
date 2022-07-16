@@ -219,13 +219,13 @@ var
   function IsSearchItemGreaterThanTextPosition: Boolean;
   begin
     Result := (LSearchItem^.EndTextPosition.Line > ATextPosition.Line) or
-      (LSearchItem^.EndTextPosition.Line = ATextPosition.Line) and (LSearchItem^.EndTextPosition.Char >= ATextPosition.Char)
+      (LSearchItem^.EndTextPosition.Line = ATextPosition.Line) and (LSearchItem^.EndTextPosition.Char > ATextPosition.Char)
   end;
 
   function IsSearchItemLowerThanTextPosition: Boolean;
   begin
     Result := (LSearchItem^.EndTextPosition.Line < ATextPosition.Line) or
-      (LSearchItem^.EndTextPosition.Line = ATextPosition.Line) and (LSearchItem^.EndTextPosition.Char <= ATextPosition.Char)
+      (LSearchItem^.EndTextPosition.Line = ATextPosition.Line) and (LSearchItem^.EndTextPosition.Char < ATextPosition.Char)
   end;
 
 begin
@@ -289,13 +289,13 @@ var
   function IsSearchItemGreaterThanTextPosition: Boolean;
   begin
     Result := (LSearchItem^.BeginTextPosition.Line > ATextPosition.Line) or
-      (LSearchItem^.BeginTextPosition.Line = ATextPosition.Line) and (LSearchItem^.BeginTextPosition.Char >= ATextPosition.Char)
+      (LSearchItem^.BeginTextPosition.Line = ATextPosition.Line) and (LSearchItem^.BeginTextPosition.Char > ATextPosition.Char)
   end;
 
   function IsSearchItemLowerThanTextPosition: Boolean;
   begin
     Result := (LSearchItem^.BeginTextPosition.Line < ATextPosition.Line) or
-      (LSearchItem^.BeginTextPosition.Line = ATextPosition.Line) and (LSearchItem^.BeginTextPosition.Char <= ATextPosition.Char)
+      (LSearchItem^.BeginTextPosition.Line = ATextPosition.Line) and (LSearchItem^.BeginTextPosition.Char < ATextPosition.Char)
   end;
 
 begin

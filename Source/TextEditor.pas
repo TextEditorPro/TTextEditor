@@ -603,7 +603,7 @@ type
     procedure WordWrapChanged(ASender: TObject);
   protected
     function DoMouseWheel(AShift: TShiftState; AWheelDelta: Integer; AMousePos: TPoint): Boolean; override;
-    function DoOnReplaceText(const ASearch, AReplace: string; const ALine, AColumn: Integer; const ADeleteLine: Boolean): TTextEditorReplaceAction;
+    function DoOnReplaceText(const AParams: TTextEditorReplaceTextParams): TTextEditorReplaceAction;
     function DoSearchMatchNotFoundWraparoundDialog: Boolean; virtual;
     function GetReadOnly: Boolean; virtual;
     function PixelAndRowToViewPosition(const X, ARow: Integer; const ALineText: string = ''): TTextEditorViewPosition;
@@ -712,7 +712,7 @@ type
     function IsTextPositionInSelection(const ATextPosition: TTextEditorTextPosition): Boolean;
     function IsWordBreakChar(const AChar: Char): Boolean; inline;
     function PixelsToTextPosition(const X, Y: Integer): TTextEditorTextPosition;
-    function ReplaceSelectedText(const AReplaceText: string; const ASearchText: string; const ADeleteLine: Boolean): Boolean;
+    function ReplaceSelectedText(const AReplaceText: string; const ASearchText: string; const AAction: TTextEditorReplaceTextAction = rtaReplace): Boolean;
     function ReplaceText(const ASearchText: string; const AReplaceText: string; const APageIndex: Integer = -1): Integer;
     function SaveToFile(const AFilename: string; const AEncoding: System.SysUtils.TEncoding = nil): Boolean;
     function SearchStatus: string;
@@ -9942,11 +9942,12 @@ begin
   Result := True;
 end;
 
-function TCustomTextEditor.DoOnReplaceText(const ASearch, AReplace: string; const ALine, AColumn: Integer; const ADeleteLine: Boolean): TTextEditorReplaceAction;
+function TCustomTextEditor.DoOnReplaceText(const AParams: TTextEditorReplaceTextParams): TTextEditorReplaceAction;
 begin
   Result := raCancel;
+
   if Assigned(FEvents.OnReplaceText) then
-    FEvents.OnReplaceText(Self, ASearch, AReplace, ALine, AColumn, ADeleteLine, Result);
+    FEvents.OnReplaceText(Self, AParams, Result);
 end;
 
 function TCustomTextEditor.DoSearchMatchNotFoundWraparoundDialog: Boolean;
@@ -16604,6 +16605,9 @@ begin
         DoSearchStringNotFoundDialog;
     end
     else
+    if FSearch.Items.Count = 1 then
+      Result := True
+    else
     if soWrapAround in FSearch.Options then
     begin
       MoveCaretToEnd;
@@ -16647,6 +16651,9 @@ begin
       if soShowSearchStringNotFound in FSearch.Options then
         DoSearchStringNotFoundDialog;
     end
+    else
+    if FSearch.Items.Count = 1 then
+      Result := True
     else
     if (soWrapAround in FSearch.Options) or
       (soShowSearchMatchNotFound in FSearch.Options) and DoSearchMatchNotFoundWraparoundDialog then
@@ -16793,7 +16800,8 @@ begin
     Result := False;
 end;
 
-function TCustomTextEditor.ReplaceSelectedText(const AReplaceText: string; const ASearchText: string; const ADeleteLine: Boolean): Boolean;
+function TCustomTextEditor.ReplaceSelectedText(const AReplaceText: string; const ASearchText: string;
+  const AAction: TTextEditorReplaceTextAction = rtaReplace): Boolean;
 var
   LOptions: TRegExOptions;
   LReplaceText: string;
@@ -16804,31 +16812,38 @@ begin
     Exit;
 
   LReplaceText := AReplaceText;
-  if ADeleteLine then
-  begin
-    SelectedText := '';
-    ExecuteCommand(TKeyCommands.DeleteLine, 'Y', nil);
-  end
-  else
-  case FReplace.Engine of
-    seNormal, seWildcard:
-      SelectedText := LReplaceText;
-    seExtended:
+  case AAction of
+    rtaAddLineBreak:
       begin
-        LReplaceText := StringReplace(LReplaceText, '\n', FLines.DefaultLineBreak, [rfReplaceAll]);
-        LReplaceText := StringReplace(LReplaceText, '\' + FLines.DefaultLineBreak, '\n', [rfReplaceAll]);
-        LReplaceText := StringReplace(LReplaceText, '\t', TControlCharacters.Tab, [rfReplaceAll]);
-        LReplaceText := StringReplace(LReplaceText, '\' + TControlCharacters.Tab, '\t', [rfReplaceAll]);
-        LReplaceText := StringReplace(LReplaceText, '\0', TControlCharacters.Null, [rfReplaceAll]);
-        LReplaceText := StringReplace(LReplaceText, '\' + TControlCharacters.Null, '\0', [rfReplaceAll]);
-        SelectedText := LReplaceText;
-      end
-    else
-      LOptions := [roMultiLine, roNotEmpty];
-      if not (roCaseSensitive in FReplace.Options) then
-        Include(LOptions, roIgnoreCase);
+        SelectedText := '';
+        ExecuteCommand(TKeyCommands.LineBreak, TControlCharacters.Null, nil);
+      end;
+    rtaDeleteLine:
+      begin
+        SelectedText := '';
+        ExecuteCommand(TKeyCommands.DeleteLine, 'Y', nil);
+      end;
+    rtaReplace:
+      case FReplace.Engine of
+        seNormal, seWildcard:
+          SelectedText := LReplaceText;
+        seExtended:
+          begin
+            LReplaceText := StringReplace(LReplaceText, '\n', FLines.DefaultLineBreak, [rfReplaceAll]);
+            LReplaceText := StringReplace(LReplaceText, '\' + FLines.DefaultLineBreak, '\n', [rfReplaceAll]);
+            LReplaceText := StringReplace(LReplaceText, '\t', TControlCharacters.Tab, [rfReplaceAll]);
+            LReplaceText := StringReplace(LReplaceText, '\' + TControlCharacters.Tab, '\t', [rfReplaceAll]);
+            LReplaceText := StringReplace(LReplaceText, '\0', TControlCharacters.Null, [rfReplaceAll]);
+            LReplaceText := StringReplace(LReplaceText, '\' + TControlCharacters.Null, '\0', [rfReplaceAll]);
+            SelectedText := LReplaceText;
+          end
+        else
+          LOptions := [roMultiLine, roNotEmpty];
+          if not (roCaseSensitive in FReplace.Options) then
+            Include(LOptions, roIgnoreCase);
 
-      SelectedText := TRegEx.Replace(SelectedText, ASearchText, LReplaceText, LOptions);
+          SelectedText := TRegEx.Replace(SelectedText, ASearchText, LReplaceText, LOptions);
+      end;
   end;
 
   Result := True;
@@ -16838,7 +16853,6 @@ function TCustomTextEditor.ReplaceText(const ASearchText: string; const AReplace
   const APageIndex: Integer = -1): Integer;
 var
   LPaintLocked: Boolean;
-  LPrompt, LReplaceAll, LDeleteLine: Boolean;
   LFound: Boolean;
   LActionReplace: TTextEditorReplaceAction;
   LTextPosition: TTextEditorTextPosition;
@@ -16846,11 +16860,11 @@ var
   LItemIndex: Integer;
   LSearchItem: PTextEditorSearchItem;
   LIsWrapAround: Boolean;
-  LBackwards: Boolean;
+  LReplaceTextParams: TTextEditorReplaceTextParams;
 
   procedure LockPainting;
   begin
-    if not LPaintLocked and LReplaceAll and not LPrompt then
+    if not LPaintLocked and LReplaceTextParams.ReplaceAll and not LReplaceTextParams.Prompt then
     begin
       IncPaintLock;
       LPaintLocked := True;
@@ -16867,11 +16881,26 @@ begin
 
   LOriginalTextPosition := TextPosition;
 
-  LBackwards := roBackwards in FReplace.Options;
-  LPrompt := roPrompt in FReplace.Options;
-  LReplaceAll := roReplaceAll in FReplace.Options;
-  LDeleteLine := eraDeleteLine = FReplace.Action;
   LIsWrapAround := soWrapAround in FSearch.Options;
+
+  with LReplaceTextParams do
+  begin
+    AddLineBreak := rtaAddLineBreak = FReplace.Action;
+    Backwards := roBackwards in FReplace.Options;
+    DeleteLine := rtaDeleteLine = FReplace.Action;
+    Prompt := roPrompt in FReplace.Options;
+    ReplaceAll := roReplaceAll in FReplace.Options;
+    ReplaceText := AReplaceText;
+    SearchText := ASearchText;
+
+    if AddLineBreak then
+      ReplaceTextAction := rtaAddLineBreak
+    else
+    if DeleteLine then
+      ReplaceTextAction := rtaDeleteLine
+    else
+      ReplaceTextAction := rtaReplace;
+  end;
 
   if LIsWrapAround then
     FSearch.SetOption(soWrapAround, False);
@@ -16889,7 +16918,7 @@ begin
   try
     if roEntireScope in FReplace.Options then
     begin
-      if LBackwards then
+      if LReplaceTextParams.Backwards then
         MoveCaretToEnd
       else
         MoveCaretToBeginning;
@@ -16905,7 +16934,7 @@ begin
     LFound := True;
     while LFound do
     begin
-      if LBackwards then
+      if LReplaceTextParams.Backwards then
         LFound := FindPrevious(False)
       else
         LFound := FindNext(False);
@@ -16913,10 +16942,17 @@ begin
       if not LFound then
         Exit;
 
-      if LPrompt and Assigned(FEvents.OnReplaceText) then
+      if LReplaceTextParams.Prompt and Assigned(FEvents.OnReplaceText) then
       begin
         LTextPosition := TextPosition;
-        LActionReplace := DoOnReplaceText(ASearchText, AReplaceText, LTextPosition.Line, LTextPosition.Char, LDeleteLine);
+
+        with LReplaceTextParams do
+        begin
+          Char := LTextPosition.Char;
+          Line := LTextPosition.Line;
+        end;
+
+        LActionReplace := DoOnReplaceText(LReplaceTextParams);
 
         if LActionReplace = raCancel then
           Exit(-9);
@@ -16946,25 +16982,23 @@ begin
         begin
           LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LItemIndex]);
 
-          if not (roEntireScope in FReplace.Options) or LPrompt then
-            if LBackwards and (
-              (LSearchItem.BeginTextPosition.Line > LOriginalTextPosition.Line) or
-              (LSearchItem.BeginTextPosition.Line = LOriginalTextPosition.Line) and
-              (LSearchItem.BeginTextPosition.Char > LOriginalTextPosition.Char)
-              )
-              or
-              not LBackwards and (
-             (LSearchItem.BeginTextPosition.Line < LOriginalTextPosition.Line) or
-              (LSearchItem.BeginTextPosition.Line = LOriginalTextPosition.Line) and
-              (LSearchItem.BeginTextPosition.Char < LOriginalTextPosition.Char)
-              ) then
+          if not (roEntireScope in FReplace.Options) or LReplaceTextParams.Prompt then
+            if LReplaceTextParams.Backwards and
+              ( (LSearchItem.BeginTextPosition.Line > LOriginalTextPosition.Line) or
+                (LSearchItem.BeginTextPosition.Line = LOriginalTextPosition.Line) and
+                (LSearchItem.BeginTextPosition.Char > LOriginalTextPosition.Char) )
+              or not LReplaceTextParams.Backwards and
+              ( (LSearchItem.BeginTextPosition.Line < LOriginalTextPosition.Line) or
+                (LSearchItem.BeginTextPosition.Line = LOriginalTextPosition.Line) and
+                (LSearchItem.BeginTextPosition.Char < LOriginalTextPosition.Char) ) then
               Continue;
 
           SelectionBeginPosition := LSearchItem.BeginTextPosition;
           SelectionEndPosition := LSearchItem.EndTextPosition;
 
-          if not LDeleteLine or LDeleteLine and (FLast.DeletedLine <> LSearchItem.BeginTextPosition.Line) then
-            ReplaceSelectedText(AReplaceText, ASearchText, LDeleteLine);
+          if not LReplaceTextParams.DeleteLine or
+            LReplaceTextParams.DeleteLine and (FLast.DeletedLine <> LSearchItem.BeginTextPosition.Line) then
+            ReplaceSelectedText(AReplaceText, ASearchText, LReplaceTextParams.ReplaceTextAction);
 
           FLast.DeletedLine := LSearchItem.BeginTextPosition.Line;
         end;
@@ -16972,29 +17006,29 @@ begin
         Exit;
       end;
 
-      ReplaceSelectedText(AReplaceText, ASearchText, LDeleteLine);
+      ReplaceSelectedText(AReplaceText, ASearchText, LReplaceTextParams.ReplaceTextAction);
 
-      if (LActionReplace = raReplace) and LPrompt then
+      if (LActionReplace = raReplace) and LReplaceTextParams.Prompt then
         SearchAll(ASearchText);
 
-      if (LActionReplace = raReplace) and not LPrompt then
+      if (LActionReplace = raReplace) and not LReplaceTextParams.Prompt then
         Exit;
     end;
   finally
     FSearch.ClearItems;
+
     if LIsWrapAround then
       FSearch.SetOption(soWrapAround, True);
+
     FUndoList.EndBlock;
     FState.ReplaceLock := False;
+
     if LPaintLocked then
       DecPaintLock;
 
     InitCodeFolding;
-
     SelectionEndPosition := SelectionBeginPosition;
-
     EnsureCursorPositionVisible;
-
     Invalidate;
     SetFocus;
   end;

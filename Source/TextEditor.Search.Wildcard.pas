@@ -14,30 +14,27 @@ type
 
 implementation
 
+uses
+  System.SysUtils;
+
 procedure TTextEditorWildcardSearch.SetPattern(const AValue: string);
 begin
   FPattern := WildCardToRegExpr(AValue);
 end;
 
 function TTextEditorWildcardSearch.WildCardToRegExpr(const AWildCard: string): string;
-var
-  LIndex: Integer;
 begin
-  Result := '';
+  Result := AWildCard;
 
-  for LIndex := 1 to Length(AWildCard) do
-  case AWildCard[LIndex] of
-    '*':
-      Result := Result + '.*';
-    '?':
-      Result := Result + '.?';
-    '|':
-      Result := Result + '\|';
-    '#':
-      Result := Result + '[0-9]';
-  else
-    Result := Result + AWildCard[LIndex];
-  end;
+  Result := StringReplace(Result, '*', '.*', [rfReplaceAll]);
+  Result := StringReplace(Result, '?', '.?', [rfReplaceAll]);
+  Result := StringReplace(Result, '#', '[0-9]', [rfReplaceAll]);
+  Result := StringReplace(Result, '\', '\\', [rfReplaceAll]);
+  Result := StringReplace(Result, '|', '\|', [rfReplaceAll]);
+  Result := StringReplace(Result, '(', '\(', [rfReplaceAll]);
+  Result := StringReplace(Result, ')', '\)', [rfReplaceAll]);
+  Result := StringReplace(Result, '^', '\^', [rfReplaceAll]);
+  Result := StringReplace(Result, '$', '\$', [rfReplaceAll]);
 end;
 
 end.

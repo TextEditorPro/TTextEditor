@@ -8,7 +8,7 @@ uses
 type
   TTextEditorReplace = class(TPersistent)
   strict private
-    FAction: TTextEditorReplaceActionOption;
+    FAction: TTextEditorReplaceTextAction;
     FEngine: TTextEditorSearchEngine;
     FOnChange: TTextEditorReplaceChangeEvent;
     FOptions: TTextEditorReplaceOptions;
@@ -18,7 +18,7 @@ type
     procedure Assign(ASource: TPersistent); override;
     procedure SetOption(const AOption: TTextEditorReplaceOption; const AEnabled: Boolean);
   published
-    property Action: TTextEditorReplaceActionOption read FAction write FAction default eraReplace;
+    property Action: TTextEditorReplaceTextAction read FAction write FAction default rtaReplace;
     property Engine: TTextEditorSearchEngine read FEngine write SetEngine default seNormal;
     property OnChange: TTextEditorReplaceChangeEvent read FOnChange write FOnChange;
     property Options: TTextEditorReplaceOptions read FOptions write FOptions default [roPrompt];
@@ -30,7 +30,7 @@ constructor TTextEditorReplace.Create;
 begin
   inherited;
 
-  FAction := eraReplace;
+  FAction := rtaReplace;
   FEngine := seNormal;
   FOptions := [roPrompt];
 end;
@@ -67,3 +67,4 @@ begin
 end;
 
 end.
+

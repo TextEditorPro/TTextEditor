@@ -100,7 +100,20 @@ type
   TTextEditorReplaceOption = (roBackwards, roCaseSensitive, roEntireScope, roPrompt, roReplaceAll, roSelectedOnly,
     roWholeWordsOnly);
   TTextEditorReplaceOptions = set of TTextEditorReplaceOption;
-  TTextEditorReplaceActionOption = (eraReplace, eraDeleteLine);
+  TTextEditorReplaceTextAction = (rtaAddLineBreak, rtaDeleteLine, rtaReplace);
+
+  TTextEditorReplaceTextParams = record
+    AddLineBreak: Boolean;
+    Backwards: Boolean;
+    Char: Integer;
+    DeleteLine: Boolean;
+    Line: Integer;
+    Prompt: Boolean;
+    ReplaceAll: Boolean;
+    ReplaceText: string;
+    ReplaceTextAction: TTextEditorReplaceTextAction;
+    SearchText: string;
+  end;
 
   { Completion proposal }
   TCompletionProposalOptions = record
@@ -344,8 +357,8 @@ type
   TTextEditorReplaceChangeEvent = procedure(const AEvent: TTextEditorReplaceChanges) of object;
   TTextEditorReplaceSearchCountEvent = procedure(const ASender: TObject; const ACount: Integer;
     const APageIndex: Integer) of object;
-  TTextEditorReplaceTextEvent = procedure(const ASender: TObject; const ASearch, AReplace: string;
-    const ALine, AColumn: Integer; const ADeleteLine: Boolean; var AAction: TTextEditorReplaceAction) of object;
+  TTextEditorReplaceTextEvent = procedure(const ASender: TObject; const AParams: TTextEditorReplaceTextParams;
+    var AAction: TTextEditorReplaceAction) of object;
   TTextEditorSaveToFileEvent = procedure(const ASender: TObject; const AFilename: string; var AEncoding: TEncoding; var ACancel: Boolean) of object;
   TTextEditorScrollEvent = procedure(const ASender: TObject; const AScrollBar: TScrollBarKind) of object;
   TTextEditorSearchChangeEvent = procedure(const AEvent: TTextEditorSearchChanges) of object;

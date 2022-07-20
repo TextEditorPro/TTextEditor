@@ -619,7 +619,7 @@ begin
   FTextLength := 0;
 
   SetString(Result, nil, LSize);
-  LPValue := @Result[1];
+  LPValue := Pointer(Result);
 
   for LIndex := AStart to AEnd - 1 do
   begin
@@ -680,7 +680,7 @@ begin
   FTextLength := 0;
 
   SetString(Result, nil, LSize);
-  LPValue := @Result[1];
+  LPValue := Pointer(Result);
 
   for LIndex := 0 to FCount - 1 do
   begin

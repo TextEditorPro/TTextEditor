@@ -101,8 +101,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "collation"
@@ -116,8 +115,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "table"
@@ -131,8 +129,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "view"
@@ -175,8 +172,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "procedure"
@@ -190,8 +186,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "function"
@@ -205,8 +200,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "package"
@@ -220,8 +214,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "from"
@@ -235,8 +228,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "join"
@@ -250,8 +242,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "trigger"
@@ -331,8 +322,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "sequence"
@@ -346,8 +336,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "exception"
@@ -361,8 +350,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "domain"
@@ -376,8 +364,7 @@
             "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "index"

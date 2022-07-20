@@ -177,8 +177,7 @@
             },
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "defmodule"
@@ -191,8 +190,7 @@
             },
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "def"
@@ -205,8 +203,7 @@
             },
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "defp"
@@ -219,8 +216,7 @@
             },
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "defmacro"
@@ -233,8 +229,7 @@
             },
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "defimpl"
@@ -247,8 +242,7 @@
             },
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "raise"
@@ -313,8 +307,7 @@
             },
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "require"
@@ -339,8 +332,7 @@
             },
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "defstruct"
@@ -353,8 +345,7 @@
             },
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "CloseOnTerm": true
             },
             "TokenRange": {
               "Open": "defexception"

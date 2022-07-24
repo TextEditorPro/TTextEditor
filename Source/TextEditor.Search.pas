@@ -289,7 +289,7 @@ var
   function IsSearchItemGreaterThanTextPosition: Boolean;
   begin
     Result := (LSearchItem^.BeginTextPosition.Line > ATextPosition.Line) or
-      (LSearchItem^.BeginTextPosition.Line = ATextPosition.Line) and (LSearchItem^.BeginTextPosition.Char > ATextPosition.Char)
+      (LSearchItem^.BeginTextPosition.Line = ATextPosition.Line) and (LSearchItem^.BeginTextPosition.Char >= ATextPosition.Char)
   end;
 
   function IsSearchItemLowerThanTextPosition: Boolean;

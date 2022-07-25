@@ -19394,6 +19394,7 @@ begin
 
   SetModified(False);
 
+  UndoList.Changed := False;
   if not (uoUndoAfterSave in FUndo.Options) then
     UndoList.Clear;
 

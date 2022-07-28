@@ -59,7 +59,7 @@
         "SyncEditEditBorder": "clBlack",
         "SyncEditWordBorder": "$009B9B9B",
         "WordWrapIndicatorArrow": "$009B9B9B",
-        "WordWrapIndicatorLines": "clBlack"
+        "WordWrapIndicatorLines": "clSilver"
       },
       "Fonts": {
         "LineNumbers": "Consolas",

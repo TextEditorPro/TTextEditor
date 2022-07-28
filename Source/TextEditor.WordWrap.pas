@@ -24,7 +24,8 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Assign(ASource: TPersistent); override;
-    procedure CreateInternalBitmap;
+    procedure CreateIndicatorBitmap;
+    procedure FreeIndicatorBitmap;
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
   published
     property Active: Boolean read FActive write SetActive default False;
@@ -46,13 +47,13 @@ begin
   FColors := TTextEditorWordWrapColors.Create;
   FIndicator := TTextEditorGlyph.Create(HInstance, '', TColors.Fuchsia);
   FWidth := wwwPage;
-
-  CreateInternalBitmap;
+  FBitmap := nil;
 end;
 
 destructor TTextEditorWordWrap.Destroy;
 begin
-  FBitmap.Free;
+  FreeIndicatorBitmap;
+
   FIndicator.Free;
   FColors.Free;
 
@@ -74,13 +75,19 @@ begin
     inherited Assign(ASource);
 end;
 
-procedure TTextEditorWordWrap.CreateInternalBitmap;
+procedure TTextEditorWordWrap.FreeIndicatorBitmap;
 begin
   if Assigned(FBitmap) then
   begin
     FBitmap.Free;
     FBitmap := nil;
   end;
+end;
+
+procedure TTextEditorWordWrap.CreateIndicatorBitmap;
+begin
+  if Assigned(FBitmap) then
+    Exit;
 
   FBitmap := Vcl.Graphics.TBitmap.Create;
   with FBitmap do

@@ -20,6 +20,7 @@ type
     procedure ImportColors(const AJSONObject: TJSONObject);
     procedure ImportColorsEditorProperties(const AEditorObject: TJSONObject);
     procedure ImportCompletionProposal(const ACompletionProposalObject: TJSONObject);
+    procedure ImportDefaultColors;
     procedure ImportEditorProperties(const AEditorObject: TJSONObject);
     procedure ImportElements(const AColorsObject: TJSONObject);
     procedure ImportHighlighter(const AJSONObject: TJSONObject);
@@ -175,9 +176,6 @@ begin
   begin
     LEditor := FHighlighter.Editor as TCustomTextEditor;
 
-    if hcoUseDefaultColors in LEditor.Highlighter.Colors.Options then
-      Exit;
-
     LColorsObject := AEditorObject['Colors'].ObjectValue;
     if Assigned(LColorsObject) then
     begin
@@ -316,7 +314,7 @@ begin
         Lines := StringToColorDef(LColorsObject['WordWrapIndicatorLines'].Value, Lines);
       end;
 
-      LEditor.WordWrap.CreateInternalBitmap;
+      LEditor.WordWrap.FreeIndicatorBitmap;
     end;
 
     if hcoUseColorThemeFontNames in LEditor.Highlighter.Colors.Options then
@@ -899,6 +897,60 @@ begin
   end;
 end;
 
+procedure TTextEditorHighlighterImportJSON.ImportDefaultColors;
+const
+  Elements: array [1..20, 1..4] of string = (
+    ('Editor', 'clBlack', 'clWhite', ''),
+    ('Comment', 'clGreen', 'clWhite', 'Italic'),
+    ('String', 'clBlue', 'clWhite', ''),
+    ('Directive', 'clTeal', 'clWhite', ''),
+    ('Character', 'clPurple', 'clWhite', ''),
+    ('ReservedWord', 'clNavy', 'clWhite', 'Bold'),
+    ('Symbol', 'clNavy', 'clWhite', ''),
+    ('LogicalOperator', 'clNavy', 'clWhite', 'Bold'),
+    ('Number', 'clBlue', 'clWhite', ''),
+    ('HexNumber', 'clBlue', 'clWhite', ''),
+    ('HighlightedBlock', 'clBlack', '$00EEFFFF', ''),
+    ('HighlightedBlockSymbol', 'clNavy', '$00EEFFFF', ''),
+    ('AssemblerComment', 'clGreen', '$00EEFFFF', 'Italic'),
+    ('AssemblerReservedWord', 'clNavy', '$00EEFFFF', 'Bold'),
+    ('Attribute', 'clMaroon', 'clWhite', ''),
+    ('Method', 'clNavy', 'clNone', 'Bold'),
+    ('MethodItalic', 'clNavy', 'clNone', 'Italic'),
+    ('MethodName', 'clBlack', 'clNone', ''),
+    ('Value', 'clNavy', 'clWhite', 'Bold'),
+    ('WebLink', 'clBlue', 'clWhite', '')
+  );
+var
+  LIndex: Integer;
+  LElement: PTextEditorHighlighterElement;
+  LEditor: TCustomTextEditor;
+begin
+  LEditor := nil;
+  if Assigned(FHighlighter.Editor) then
+    LEditor := FHighlighter.Editor as TCustomTextEditor;
+
+  for LIndex := 1 to 20 do
+  begin
+    New(LElement);
+    LElement.Name := Elements[LIndex, 1];
+    LElement.Foreground := StringToColorDef(Elements[LIndex, 2], TColors.SysWindowText);
+    LElement.Background := StringToColorDef(Elements[LIndex, 3], TColors.SysWindow);
+    LElement.FontStyles := StrToFontStyle(Elements[LIndex, 4]);
+
+    FHighlighter.Colors.Styles.Add(LElement);
+
+    if Assigned(LEditor) then
+    begin
+      if LElement.Name = 'Editor' then
+        LEditor.Colors.Foreground := LElement.Foreground
+      else
+      if LElement.Name = 'ReservedWord' then
+        LEditor.Colors.ReservedWord := LElement.Foreground;
+    end;
+  end;
+end;
+
 procedure TTextEditorHighlighterImportJSON.ImportElements(const AColorsObject: TJSONObject);
 var
   LIndex: Integer;
@@ -914,21 +966,24 @@ begin
   if Assigned(FHighlighter.Editor) then
     LEditor := FHighlighter.Editor as TCustomTextEditor;
 
-  LElementsArray :=  AColorsObject['Elements'].ArrayValue;
+  LElementsArray := AColorsObject['Elements'].ArrayValue;
   for LIndex := 0 to LElementsArray.Count - 1 do
   begin
     LJSONDataValue := LElementsArray.Items[LIndex];
+
     New(LElement);
     LElement.Background := StringToColorDef(LJSONDataValue.ObjectValue['Background'].Value, TColors.SysWindow);
+    LElement.FontStyles := StrToFontStyle(LJSONDataValue.ObjectValue['Style'].Value);
     LElement.Foreground := StringToColorDef(LJSONDataValue.ObjectValue['Foreground'].Value, TColors.SysWindowText);
     LElement.Name := LJSONDataValue.ObjectValue['Name'].Value;
-    LElement.FontStyles := StrToFontStyle(LJSONDataValue.ObjectValue['Style'].Value);
+
     FHighlighter.Colors.Styles.Add(LElement);
 
     if Assigned(LEditor) then
     begin
       if LElement.Name = 'Editor' then
-        LEditor.Colors.Foreground := LElement.Foreground;
+        LEditor.Colors.Foreground := LElement.Foreground
+      else
       if LElement.Name = 'ReservedWord' then
         LEditor.Colors.ReservedWord := LElement.Foreground;
     end;
@@ -958,6 +1013,9 @@ begin
   ImportMatchingPair(AJSONObject['MatchingPair'].ObjectValue);
   ImportCompletionProposal(AJSONObject['CompletionProposal'].ObjectValue);
   ImportHighlightLine(AJSONObject['HighlightLine'].ObjectValue);
+
+  if hcoUseDefaultColors in FHighlighter.Colors.Options then
+    ImportDefaultColors;
 end;
 
 procedure TTextEditorHighlighterImportJSON.ImportHighlightLine(const AHighlightLineObject: TJSONObject);

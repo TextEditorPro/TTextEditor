@@ -13149,16 +13149,20 @@ var
     LIndex, LY: Integer;
   begin
     if FWordWrap.Active and FWordWrap.Indicator.Visible then
-    for LIndex := AFirstLine to ALastLine do
     begin
-      LLine := GetViewTextLineNumber(LIndex);
-      LPreviousLine := GetViewTextLineNumber(LIndex - 1);
-      if LLine = LPreviousLine then
+      FWordWrap.CreateIndicatorBitmap;
+
+      for LIndex := AFirstLine to ALastLine do
       begin
-        LY := (LIndex - TopLine) * LLineHeight;
-        if FRuler.Visible then
-          Inc(LY, FRuler.Height);
-        FWordWrap.Indicator.Draw(Canvas, AClipRect.Left + FWordWrap.Indicator.Left, LY, LLineHeight);
+        LLine := GetViewTextLineNumber(LIndex);
+        LPreviousLine := GetViewTextLineNumber(LIndex - 1);
+        if LLine = LPreviousLine then
+        begin
+          LY := (LIndex - TopLine) * LLineHeight;
+          if FRuler.Visible then
+            Inc(LY, FRuler.Height);
+          FWordWrap.Indicator.Draw(Canvas, AClipRect.Left + FWordWrap.Indicator.Left, LY, LLineHeight);
+        end;
       end;
     end;
   end;

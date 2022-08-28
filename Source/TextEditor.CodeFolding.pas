@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, System.SysUtils, Vcl.Graphics, TextEditor.CodeFolding.Colors, TextEditor.CodeFolding.Hint,
+  System.Classes, System.SysUtils, Vcl.Graphics, TextEditor.CodeFolding.Hint,
   TextEditor.TextFolding, TextEditor.Types;
 
 const
@@ -14,7 +14,6 @@ type
   TTextEditorCodeFolding = class(TPersistent)
   strict private
     FCollapsedRowCharacterCount: Integer;
-    FColors: TTextEditorCodeFoldingColors;
     FDelayInterval: Cardinal;
     FGuideLineStyle: TTextEditorCodeFoldingGuideLineStyle;
     FHint: TTextEditorCodeFoldingHint;
@@ -28,7 +27,6 @@ type
     FVisible: Boolean;
     FWidth: Integer;
     procedure DoChange;
-    procedure SetColors(const AValue: TTextEditorCodeFoldingColors);
     procedure SetGuideLineStyle(const AValue: TTextEditorCodeFoldingGuideLineStyle);
     procedure SetHint(const AValue: TTextEditorCodeFoldingHint);
     procedure SetMarkStyle(const AValue: TTextEditorCodeFoldingMarkStyle);
@@ -47,7 +45,6 @@ type
     property MouseOverHint: Boolean read FMouseOverHint write FMouseOverHint;
   published
     property CollapsedRowCharacterCount: Integer read FCollapsedRowCharacterCount write FCollapsedRowCharacterCount default 20;
-    property Colors: TTextEditorCodeFoldingColors read FColors write SetColors;
     property DelayInterval: Cardinal read FDelayInterval write FDelayInterval default 300;
     property GuideLineStyle: TTextEditorCodeFoldingGuideLineStyle read FGuideLineStyle write SetGuideLineStyle default lsDot;
     property Hint: TTextEditorCodeFoldingHint read FHint write SetHint;
@@ -74,7 +71,6 @@ begin
   FOptions := TEXTEDITOR_CODE_FOLDING_DEFAULT_OPTIONS;
   FGuideLineStyle := lsDot;
   FMarkStyle := msSquare;
-  FColors := TTextEditorCodeFoldingColors.Create;
   FCollapsedRowCharacterCount := 20;
   FHint := TTextEditorCodeFoldingHint.Create;
   FPadding := 2;
@@ -87,7 +83,6 @@ end;
 
 destructor TTextEditorCodeFolding.Destroy;
 begin
-  FColors.Free;
   FHint.Free;
   FTextFolding.Free;
 
@@ -101,7 +96,6 @@ begin
   begin
     Self.FVisible := FVisible;
     Self.FOptions := FOptions;
-    Self.FColors.Assign(FColors);
     Self.FCollapsedRowCharacterCount := FCollapsedRowCharacterCount;
     Self.FHint.Assign(FHint);
     Self.FWidth := FWidth;
@@ -119,7 +113,6 @@ begin
   FWidth := MulDiv(FWidth, AMultiplier, ADivider);
   FPadding := MulDiv(FPadding, AMultiplier, ADivider);
   FHint.Indicator.Glyph.ChangeScale(AMultiplier, ADivider);
-  FHint.Font.Height := MulDiv(FHint.Font.Height, AMultiplier, ADivider);
   DoChange;
 end;
 
@@ -169,11 +162,6 @@ begin
     Include(FOptions, AOption)
   else
     Exclude(FOptions, AOption);
-end;
-
-procedure TTextEditorCodeFolding.SetColors(const AValue: TTextEditorCodeFoldingColors);
-begin
-  FColors.Assign(AValue);
 end;
 
 procedure TTextEditorCodeFolding.SetHint(const AValue: TTextEditorCodeFoldingHint);

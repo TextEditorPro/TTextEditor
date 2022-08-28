@@ -5,12 +5,12 @@ unit TextEditor.Highlighter.Import.JSON.Parser;
   Based on: https://github.com/ahausladen/JsonDataObjects
   MIT license: https://github.com/ahausladen/JsonDataObjects/blob/master/LICENSE
 
-  Unnecessary bloat for TTextEditor removed. }
+  Unnecessary bloat for TTextEditor removed and useful fearures added. }
 
 interface
 
 uses
-  System.Classes, System.SysUtils;
+  System.Classes, System.SysUtils, System.UITypes, Vcl.Graphics, TextEditor.Consts;
 
 type
   TJSONBaseObject = class;
@@ -175,6 +175,10 @@ type
     class operator Implicit(const AValue: TJSONDataValueHelper): TJSONArray; overload;
     class operator Implicit(const AValue: TJSONDataValueHelper): TJSONObject; overload;
     class operator Implicit(const AValue: TJSONObject): TJSONDataValueHelper; overload;
+    function ToColor: TColor;
+    function ToInt(Default: Integer): Integer;
+    function ToSet: TTextEditorCharSet;
+    function ToStr(const ADefault: string): string;
     property ArrayValue: TJSONArray read GetValueArrayValue write SetValueArrayValue;
     property BoolValue: Boolean read GetValueBooleanValue write SetValueBooleanValue;
     property Count: Integer read GetValueArrayCount;
@@ -3081,6 +3085,42 @@ begin
     FData.FIntern.ObjectValue := AValue
   else
     Self := AValue;
+end;
+
+function TJSONDataValueHelper.ToColor: TColor;
+begin
+  if string(Self).Trim.IsEmpty then
+    Result := TColors.SysDefault
+  else
+    Result := Vcl.Graphics.StringToColor(Self);
+end;
+
+function TJSONDataValueHelper.ToInt(Default: Integer): Integer;
+var
+  LErrorCode: Integer;
+begin
+  Val(Self, Result, LErrorCode);
+
+  if LErrorCode <> 0 then
+    Result := Default;
+end;
+
+function TJSONDataValueHelper.ToSet: TTextEditorCharSet;
+var
+  LIndex: Integer;
+begin
+  Result := [];
+
+  for LIndex := 1 to Length(Self) do
+    Result := Result + [string(Self)[LIndex]];
+end;
+
+function TJSONDataValueHelper.ToStr(const ADefault: string): string;
+begin
+  if string(Self).Trim.IsEmpty then
+    Result := ADefault
+  else
+    Result := Self;
 end;
 
 function TJSONDataValueHelper.GetTyp: TJSONDataType;

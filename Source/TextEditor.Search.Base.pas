@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, TextEditor.Lines, TextEditor.Types;
+  System.Classes, System.Generics.Collections, TextEditor.Lines, TextEditor.Types;
 
 type
   TTextEditorSearchBase = class
@@ -15,7 +15,7 @@ type
     procedure SetCaseSensitive(const AValue: Boolean);
   protected
     FPattern: string;
-    FResults: TList;
+    FResults: TList<Integer>;
     function GetLength(const AIndex: Integer): Integer; virtual; abstract;
     function GetResult(const AIndex: Integer): Integer; virtual;
     function GetResultCount: Integer; virtual;
@@ -38,6 +38,9 @@ type
 
 implementation
 
+uses
+  System.SysUtils;
+
 constructor TTextEditorSearchBase.Create;
 begin
   inherited;
@@ -45,12 +48,13 @@ begin
   FCaseSensitive := False;
   FWholeWordsOnly := False;
   FPattern := '';
-  FResults := TList.Create;
+  FResults := TList<Integer>.Create;
 end;
 
 destructor TTextEditorSearchBase.Destroy;
 begin
-  FResults.Free;
+  FreeAndNil(FResults);
+
   inherited Destroy;
 end;
 
@@ -64,7 +68,7 @@ function TTextEditorSearchBase.GetResult(const AIndex: Integer): Integer;
 begin
   Result := 0;
   if (AIndex >= 0) and (AIndex < FResults.Count) then
-    Result := Integer(FResults[AIndex]);
+    Result := FResults[AIndex];
 end;
 
 function TTextEditorSearchBase.GetResultCount: Integer;

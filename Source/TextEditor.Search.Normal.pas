@@ -194,7 +194,7 @@ begin
   LPosition := FindFirst(ALines.Text);
   while LPosition > 0 do
   begin
-    FResults.Add(Pointer(LPosition));
+    FResults.Add(LPosition);
     LPosition := Next;
   end;
 

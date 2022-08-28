@@ -128,43 +128,61 @@ end;
 
 procedure TTextEditorCompletionProposalPopupWindow.AddKeyHandlers;
 var
-  LEditor: TCustomTextEditor;
+  LTextEditor: TCustomTextEditor;
 begin
-  LEditor := Owner as TCustomTextEditor;
-  if Assigned(LEditor) then
+  LTextEditor := nil;
+  if Assigned(Owner) then
+    LTextEditor := Owner as TCustomTextEditor;
+
+  if Assigned(LTextEditor) then
   begin
-    LEditor.AddKeyPressHandler(EditorKeyPress);
-    LEditor.AddKeyDownHandler(EditorKeyDown);
+    LTextEditor.AddKeyPressHandler(EditorKeyPress);
+    LTextEditor.AddKeyDownHandler(EditorKeyDown);
   end;
 end;
 
 procedure TTextEditorCompletionProposalPopupWindow.RemoveKeyHandlers;
 var
-  LEditor: TCustomTextEditor;
+  LTextEditor: TCustomTextEditor;
 begin
-  LEditor := Owner as TCustomTextEditor;
-  if Assigned(LEditor) then
+  LTextEditor := nil;
+  if Assigned(Owner) then
+    LTextEditor := Owner as TCustomTextEditor;
+
+  if Assigned(LTextEditor) then
   begin
-    LEditor.RemoveKeyPressHandler(EditorKeyPress);
-    LEditor.RemoveKeyDownHandler(EditorKeyDown);
+    LTextEditor.RemoveKeyPressHandler(EditorKeyPress);
+    LTextEditor.RemoveKeyDownHandler(EditorKeyDown);
   end;
 end;
 
 function TTextEditorCompletionProposalPopupWindow.GetItemHeight: Integer;
+var
+  LTextEditor: TCustomTextEditor;
 begin
-  FBitmapBuffer.Canvas.Font.Assign(FCompletionProposal.Font);
-  Result := TextHeight(FBitmapBuffer.Canvas, 'X');
+  LTextEditor := nil;
+  if Assigned(Owner) then
+    LTextEditor := Owner as TCustomTextEditor;
+
+  if Assigned(LTextEditor) then
+  begin
+    FBitmapBuffer.Canvas.Font.Assign(LTextEditor.Fonts.CompletionProposal);
+    Result := TextHeight(FBitmapBuffer.Canvas, 'X');
+  end
+  else
+    Result := 0;
 end;
 
 procedure TTextEditorCompletionProposalPopupWindow.EditorKeyDown(ASender: TObject; var AKey: Word; AShift: TShiftState); //FI:O804 Method parameter is declared but never used
 var
   LChar: Char;
-  LEditor: TCustomTextEditor;
+  LTextEditor: TCustomTextEditor;
   LTextPosition: TTextEditorTextPosition;
 begin
-  LEditor := nil;
+  LTextEditor := nil;
   if Assigned(Owner) then
-    LEditor := Owner as TCustomTextEditor;
+    LTextEditor := Owner as TCustomTextEditor;
+
   case AKey of
     vkReturn, vkTab:
       if Assigned(FOnValidate) then
@@ -175,18 +193,18 @@ begin
       if Length(FCurrentString) > 0 then
       begin
         CurrentString := Copy(FCurrentString, 1, Length(FCurrentString) - 1);
-        if Assigned(LEditor) then
-          LEditor.CommandProcessor(TKeyCommands.Left, TControlCharacters.Null, nil);
+        if Assigned(LTextEditor) then
+          LTextEditor.CommandProcessor(TKeyCommands.Left, TControlCharacters.Null, nil);
       end
       else
       begin
-        if Assigned(LEditor) then
-          LEditor.CommandProcessor(TKeyCommands.Left, TControlCharacters.Null, nil);
+        if Assigned(LTextEditor) then
+          LTextEditor.CommandProcessor(TKeyCommands.Left, TControlCharacters.Null, nil);
         Hide;
       end;
     vkRight:
-      if Assigned(LEditor) then
-      with LEditor do
+      if Assigned(LTextEditor) then
+      with LTextEditor do
       begin
         LTextPosition := TextPosition;
         if LTextPosition.Char <= Length(FLines[LTextPosition.Line]) then
@@ -226,13 +244,13 @@ begin
         begin
           CurrentString := Copy(FCurrentString, 1, Length(FCurrentString) - 1);
 
-          if Assigned(LEditor) then
-            LEditor.CommandProcessor(TKeyCommands.Backspace, TControlCharacters.Null, nil);
+          if Assigned(LTextEditor) then
+            LTextEditor.CommandProcessor(TKeyCommands.Backspace, TControlCharacters.Null, nil);
         end
         else
         begin
-          if Assigned(LEditor) then
-            LEditor.CommandProcessor(TKeyCommands.Backspace, TControlCharacters.Null, nil);
+          if Assigned(LTextEditor) then
+            LTextEditor.CommandProcessor(TKeyCommands.Backspace, TControlCharacters.Null, nil);
 
           Hide;
         end;
@@ -269,6 +287,7 @@ begin
       with Owner as TCustomTextEditor do
         CommandProcessor(TKeyCommands.Char, AKey, nil);
   end;
+
   Invalidate;
 end;
 
@@ -280,10 +299,16 @@ var
   LText, LTemp, LDescription: string;
   LPosition, LWidth: Integer;
   LItem: TTextEditorCompletionProposalItem;
+  LTextEditor: TCustomTextEditor;
 begin
+  LTextEditor := nil;
+  if Assigned(Owner) then
+    LTextEditor := Owner as TCustomTextEditor;
+
+  if Assigned(LTextEditor) then
   with FBitmapBuffer do
   begin
-    Canvas.Brush.Color := FCompletionProposal.Colors.Background;
+    Canvas.Brush.Color := LTextEditor.Colors.CompletionProposalBackground;
     Height := 0;
     Width := ClientWidth;
     Height := ClientHeight;
@@ -297,15 +322,15 @@ begin
 
       if (LIndex + TopLine = FSelectedLine) and not CodeInsight then
       begin
-        Canvas.Font.Color := FCompletionProposal.Colors.SelectedText;
-        Canvas.Brush.Color := FCompletionProposal.Colors.SelectedBackground;
-        Canvas.Pen.Color := FCompletionProposal.Colors.SelectedBackground;
+        Canvas.Font.Color := LTextEditor.Colors.CompletionProposalSelectedText;
+        Canvas.Brush.Color := LTextEditor.Colors.CompletionProposalSelectedBackground;
+        Canvas.Pen.Color := LTextEditor.Colors.CompletionProposalSelectedBackground;
         Canvas.Rectangle(0, FItemHeight * LIndex, ClientWidth, FItemHeight * (LIndex + 1));
       end
       else
       begin
-        Canvas.Font.Color := FCompletionProposal.Colors.Foreground;
-        Canvas.Brush.Color := FCompletionProposal.Colors.Background;
+        Canvas.Font.Color := LTextEditor.Colors.CompletionProposalForeground;
+        Canvas.Brush.Color := LTextEditor.Colors.CompletionProposalBackground;
       end;
 
       LItemIndex := FItemIndexArray[TopLine + LIndex];
@@ -597,7 +622,7 @@ end;
 
 procedure TTextEditorCompletionProposalPopupWindow.HandleOnValidate(ASender: TObject; const AEndToken: Char); //FI:O804 Method parameter is declared but never used
 var
-  LEditor: TCustomTextEditor;
+  LTextEditor: TCustomTextEditor;
   LValue, LLine: string;
   LTextPosition: TTextEditorTextPosition;
   LLineText: string;
@@ -615,17 +640,21 @@ var
   function GetBeginChar(const ARow: Integer): Integer;
   begin
     if ARow = 1 then
-      Result := LEditor.SelectionBeginPosition.Char
+      Result := LTextEditor.SelectionBeginPosition.Char
     else
       Result := LCharCount + 1;
   end;
 
 begin
-  if not Assigned(Owner) or CodeInsight then
+  if CodeInsight then
     Exit;
 
-  LEditor := Owner as TCustomTextEditor;
-  with LEditor do
+  LTextEditor := nil;
+  if Assigned(Owner) then
+    LTextEditor := Owner as TCustomTextEditor;
+
+  if Assigned(LTextEditor) then
+  with LTextEditor do
   begin
     BeginUpdate;
     BeginUndoBlock;
@@ -637,7 +666,7 @@ begin
       begin
         LIndex := LTextPosition.Char - 1;
         if LIndex <= Length(LLineText) then
-        while (LIndex > 0) and (LLineText[LIndex] > TCharacters.Space) and not LEditor.IsWordBreakChar(LLineText[LIndex]) do
+        while (LIndex > 0) and (LLineText[LIndex] > TCharacters.Space) and not LTextEditor.IsWordBreakChar(LLineText[LIndex]) do
           Dec(LIndex);
 
         SelectionBeginPosition := GetPosition(LIndex + 1, LTextPosition.Line);
@@ -675,7 +704,7 @@ begin
 
             LCharCount := 0;
             LPLineText := PChar(LLineText);
-            for LIndex := 0 to SelectionBeginPosition.Char - 1 do
+            for LIndex := 0 to SelectionBeginPosition.Char - 1 do //FI:W528 Variable 'LIndex' not used in FOR-loop
             begin
               if LPLineText^ = TControlCharacters.Tab then
                 Inc(LCharCount, Tabs.Width)
@@ -778,23 +807,28 @@ function TTextEditorCompletionProposalPopupWindow.GetCurrentInput: string;
 var
   LIndex: Integer;
   LLineText: string;
-  LEditor: TCustomTextEditor;
+  LTextEditor: TCustomTextEditor;
   LTextPosition: TTextEditorTextPosition;
 begin
   Result := '';
 
-  LEditor := Owner as TCustomTextEditor;
+  LTextEditor := nil;
+  if Assigned(Owner) then
+    LTextEditor := Owner as TCustomTextEditor;
 
-  LTextPosition := LEditor.TextPosition;
-
-  LLineText := FLines[LTextPosition.Line];
-  LIndex := LTextPosition.Char - 1;
-  if LIndex <= Length(LLineText) then
+  if Assigned(LTextEditor) then
   begin
-    while (LIndex > 0) and (LLineText[LIndex] > TCharacters.Space) and not LEditor.IsWordBreakChar(LLineText[LIndex]) do
-      Dec(LIndex);
+    LTextPosition := LTextEditor.TextPosition;
 
-    Result := Copy(LLineText, LIndex + 1, LTextPosition.Char - LIndex - 1);
+    LLineText := FLines[LTextPosition.Line];
+    LIndex := LTextPosition.Char - 1;
+    if LIndex <= Length(LLineText) then
+    begin
+      while (LIndex > 0) and (LLineText[LIndex] > TCharacters.Space) and not LTextEditor.IsWordBreakChar(LLineText[LIndex]) do
+        Dec(LIndex);
+
+      Result := Copy(LLineText, LIndex + 1, LTextPosition.Char - LIndex - 1);
+    end;
   end;
 end;
 

@@ -1,192 +1,163 @@
 {
-  "Colors": {
-    "Editor": {
-      "Colors": {
-        "Background": "clAqua",
-        "ActiveLineBackground": "$00CCFFCC",
-        "ActiveLineForeground": "clNone",
-        "CodeFoldingActiveLineBackground": "$00CCFFCC",
-        "CodeFoldingBackground": "clAqua",
-        "CodeFoldingCollapsedLine": "clTeal",
-        "CodeFoldingFoldingLine": "clTeal",
-        "CodeFoldingFoldingLineHighlight": "clTeal",
-        "CodeFoldingIndent": "clTeal",
-        "CodeFoldingIndentHighlight": "clTeal",
-        "CodeFoldingHintBackground": "clAqua",
-        "CodeFoldingHintBorder": "clTeal",
-        "CodeFoldingHintText": "clBlack",
-        "CodeFoldingHintIndicatorBackground": "clAqua",
-        "CodeFoldingHintIndicatorBorder": "clTeal",
-        "CodeFoldingHintIndicatorMark": "clTeal",
-        "CompletionProposalBackground": "clAqua",
-        "CompletionProposalForeground": "clBlack",
-        "CompletionProposalSelectedBackground": "clBlue",
-        "CompletionProposalSelectedText": "clAqua",
-        "LeftMarginActiveLineBackground": "$00CCFFCC",
-        "LeftMarginBackground": "clAqua",
-        "LeftMarginBorder": "clAqua",
-        "LeftMarginLineNumberLine": "clTeal",
-        "LeftMarginLineNumbers": "clTeal",
-        "LeftMarginLineStateModified": "clYellow",
-        "LeftMarginLineStateNormal": "clLime",
-        "LeftMarginBookmarkPanel": "clAqua",
-        "MatchingPairMatched": "clWhite",
-        "MatchingPairUnderline": "clBlue",
-        "MatchingPairUnmatched": "clYellow",
-        "MinimapBackground": "clNone",
-        "MinimapBookmark": "clTeal",
-        "MinimapVisibleLines": "$00CCFFCC",
-        "MultiEditBackground": "clBlue",
-        "MultiEditForeground": "clAqua",
-        "RightMargin": "clTeal",
-        "RightMovingEdge": "clSilver",
-        "RulerBackground": "clAqua",
-        "RulerBorder": "clTeal",
-        "RulerLines": "clTeal",
-        "RulerMovingEdge": "clSilver",
-        "RulerNumbers": "clTeal",
-        "RulerSelection": "$00CCFFCC",
-        "SearchHighlighterBackground": "$00FCFDCD",
-        "SearchHighlighterBorder": "clNone",
-        "SearchHighlighterForeground": "clBlack",
-        "SearchInSelectionBackground": "$00FCFDCD",
-        "SearchMapActiveLine": "$00F0F0F0",
-        "SearchMapBackground": "clNone",
-        "SearchMapForeground": "clYellow",
-        "SelectionBackground": "clBlue",
-        "SelectionForeground": "clAqua",
-        "SyncEditBackground": "$00FCFDCD",
-        "SyncEditEditBorder": "clBlack",
-        "SyncEditWordBorder": "clBlue",
-        "WordWrapIndicatorArrow": "clBlue",
-        "WordWrapIndicatorLines": "clBlack"
-      },
-      "Fonts": {
-        "LineNumbers": "Courier New",
-        "Text": "Courier New",
-        "Minimap": "Courier New",
-        "CodeFoldingHint": "Courier New",
-        "CompletionProposal": "Courier New",
-        "Ruler": "Courier New"
-      },
-      "FontSizes": {
-        "LineNumbers": "8",
-        "Text": "9",
-        "Minimap": "1",
-        "CodeFoldingHint": "8",
-        "CompletionProposal": "9",
-        "Ruler": "8"
-      }
+  "Theme": {
+    "Colors": {
+      "ActiveLineBackground": "$00CCFFCC",
+      "ActiveLineBackgroundUnfocused": "$00CCFFCC",
+      "ActiveLineForeground": "clNone",
+      "ActiveLineForegroundUnfocused": "clNone",
+      "CodeFoldingActiveLineBackground": "$00CCFFCC",
+      "CodeFoldingActiveLineBackgroundUnfocused": "$00CCFFCC",
+      "CodeFoldingBackground": "clAqua",
+      "CodeFoldingCollapsedLine": "clTeal",
+      "CodeFoldingFoldingLine": "clTeal",
+      "CodeFoldingFoldingLineHighlight": "clTeal",
+      "CodeFoldingHintBackground": "clAqua",
+      "CodeFoldingHintBorder": "clTeal",
+      "CodeFoldingHintIndicatorBackground": "clAqua",
+      "CodeFoldingHintIndicatorBorder": "clTeal",
+      "CodeFoldingHintIndicatorMark": "clTeal",
+      "CodeFoldingHintText": "clBlack",
+      "CodeFoldingIndent": "clTeal",
+      "CodeFoldingIndentHighlight": "clTeal",
+      "CompletionProposalBackground": "clAqua",
+      "CompletionProposalForeground": "clBlack",
+      "CompletionProposalSelectedBackground": "clBlue",
+      "CompletionProposalSelectedText": "clAqua",
+      "EditorAssemblerCommentBackground": "clAqua",
+      "EditorAssemblerCommentForeground": "clTeal",
+      "EditorAssemblerReservedWordBackground": "clAqua",
+      "EditorAssemblerReservedWordForeground": "clBlack",
+      "EditorAttributeBackground": "clWhite",
+      "EditorAttributeForeground": "clBlue",
+      "EditorBackground": "clAqua",
+      "EditorCharacterBackground": "clAqua",
+      "EditorCharacterForeground": "clBlack",
+      "EditorCommentBackground": "clAqua",
+      "EditorCommentForeground": "clTeal",
+      "EditorDirectiveBackground": "clAqua",
+      "EditorDirectiveForeground": "clBlack",
+      "EditorForeground": "clBlue",
+      "EditorHexNumberBackground": "clAqua",
+      "EditorHexNumberForeground": "clOlive",
+      "EditorHighlightedBlockBackground": "clAqua",
+      "EditorHighlightedBlockForeground": "clBlue",
+      "EditorHighlightedBlockSymbolBackground": "clAqua",
+      "EditorHighlightedBlockSymbolForeground": "clBlack",
+      "EditorLogicalOperatorBackground": "clAqua",
+      "EditorLogicalOperatorForeground": "clBlack",
+      "EditorMethodBackground": "clAqua",
+      "EditorMethodForeground": "clBlack",
+      "EditorMethodItalicBackground": "clAqua",
+      "EditorMethodItalicForeground": "clBlack",
+      "EditorMethodNameBackground": "clAqua",
+      "EditorMethodNameForeground": "clBlue",
+      "EditorNumberBackground": "clAqua",
+      "EditorNumberForeground": "clOlive",
+      "EditorReservedWordBackground": "clAqua",
+      "EditorReservedWordForeground": "clBlack",
+      "EditorStringBackground": "clAqua",
+      "EditorStringForeground": "clPurple",
+      "EditorSymbolBackground": "clAqua",
+      "EditorSymbolForeground": "clBlack",
+      "EditorValueBackground": "clAqua",
+      "EditorValueForeground": "clBlack",
+      "EditorWebLinkBackground": "clAqua",
+      "EditorWebLinkForeground": "clBlue",
+      "LeftMarginActiveLineBackground": "$00CCFFCC",
+      "LeftMarginActiveLineBackgroundUnfocused": "$00CCFFCC",
+      "LeftMarginActiveLineNumber": "clTeal",
+      "LeftMarginBackground": "clAqua",
+      "LeftMarginBookmarkPanelBackground": "clAqua",
+      "LeftMarginBorder": "clAqua",
+      "LeftMarginLineNumberLine": "clTeal",
+      "LeftMarginLineNumbers": "clTeal",
+      "LeftMarginLineStateModified": "clYellow",
+      "LeftMarginLineStateNormal": "clLime",
+      "MatchingPairMatched": "clWhite",
+      "MatchingPairUnderline": "clBlue",
+      "MatchingPairUnmatched": "clYellow",
+      "MinimapBackground": "clNone",
+      "MinimapBookmark": "clTeal",
+      "MinimapVisibleLines": "$00CCFFCC",
+      "MultiEditBackground": "clBlue",
+      "MultiEditForeground": "clAqua",
+      "RightMargin": "clTeal",
+      "RightMovingEdge": "clSilver",
+      "RulerBackground": "clAqua",
+      "RulerBorder": "clTeal",
+      "RulerLines": "clTeal",
+      "RulerMovingEdge": "clSilver",
+      "RulerNumbers": "clTeal",
+      "RulerSelection": "$00CCFFCC",
+      "SearchHighlighterBackground": "$00FCFDCD",
+      "SearchHighlighterBorder": "clNone",
+      "SearchHighlighterForeground": "clBlack",
+      "SearchInSelectionBackground": "$00FCFDCD",
+      "SearchMapActiveLine": "$00F0F0F0",
+      "SearchMapBackground": "clNone",
+      "SearchMapForeground": "clYellow",
+      "SelectionBackground": "clBlue",
+      "SelectionBackgroundUnfocused": "clBlue",
+      "SelectionForeground": "clAqua",
+      "SelectionForegroundUnfocused": "clAqua",
+      "SyncEditBackground": "$00FCFDCD",
+      "SyncEditEditBorder": "clBlack",
+      "SyncEditWordBorder": "clBlue",
+      "WordWrapIndicatorArrow": "clBlue",
+      "WordWrapIndicatorLines": "clBlack"
     },
-    "Elements": [
-      {
-        "Name": "Editor",
-        "Foreground": "clBlue",
-        "Background": "clAqua"
-      },
-      {
-        "Name": "Comment",
-        "Foreground": "clTeal",
-        "Background": "clAqua",
-        "Style": "Italic"
-      },
-      {
-        "Name": "String",
-        "Foreground": "clPurple",
-        "Background": "clAqua"
-      },
-      {
-        "Name": "Directive",
-        "Foreground": "clBlack",
-        "Background": "clAqua",
-        "Style": "Italic"
-      },
-      {
-        "Name": "Character",
-        "Foreground": "clBlack",
-        "Background": "clAqua"
-      },
-      {
-        "Name": "ReservedWord",
-        "Foreground": "clBlack",
-        "Background": "clAqua",
-        "Style": "Bold"
-      },
-      {
-        "Name": "Symbol",
-        "Foreground": "clBlack",
-        "Background": "clAqua"
-      },
-      {
-        "Name": "LogicalOperator",
-        "Foreground": "clBlack",
-        "Background": "clAqua",
-        "Style": "Bold"
-      },
-      {
-        "Name": "Number",
-        "Foreground": "clOlive",
-        "Background": "clAqua"
-      },
-      {
-        "Name": "HexNumber",
-        "Foreground": "clOlive",
-        "Background": "clAqua"
-      },
-      {
-        "Name": "HighlightedBlock",
-        "Foreground": "clBlue",
-        "Background": "clAqua"
-      },
-      {
-        "Name": "HighlightedBlockSymbol",
-        "Foreground": "clBlack",
-        "Background": "clAqua"
-      },
+    "Fonts": {
+      "CodeFoldingHint": "Courier New",
+      "CompletionProposal": "Courier New",
+      "LineNumbers": "Courier New",
+      "Minimap": "Courier New",
+      "Ruler": "Courier New",
+      "Text": "Courier New"
+    },
+    "FontSizes": {
+      "CodeFoldingHint": "8",
+      "CompletionProposal": "9",
+      "LineNumbers": "8",
+      "Minimap": "1",
+      "Ruler": "8",
+      "Text": "9"
+    },
+    "Styles": [
       {
         "Name": "AssemblerComment",
-        "Foreground": "clTeal",
-        "Background": "clAqua",
         "Style": "Italic"
       },
       {
         "Name": "AssemblerReservedWord",
-        "Foreground": "clBlack",
-        "Background": "clAqua",
         "Style": "Bold"
       },
       {
-        "Name": "Attribute",
-        "Foreground": "clBlue",
-        "Background": "clWhite"
+        "Name": "Comment",
+        "Style": "Italic"
+      },
+      {
+        "Name": "Directive",
+        "Style": "Italic"
+      },
+      {
+        "Name": "LogicalOperator",
+        "Style": "Bold"
       },
       {
         "Name": "Method",
-        "Foreground": "clBlack",
-        "Background": "clAqua",
         "Style": "Bold"
       },
       {
         "Name": "MethodItalic",
-        "Foreground": "clBlack",
-        "Background": "clAqua",
         "Style": "Italic"
       },
       {
-        "Name": "MethodName",
-        "Foreground": "clBlue",
-        "Background": "clAqua"
-      },
-      {
-        "Name": "Value",
-        "Foreground": "clBlack",
-        "Background": "clAqua",
+        "Name": "ReservedWord",
         "Style": "Bold"
       },
       {
-        "Name": "WebLink",
-        "Foreground": "clBlue",
-        "Background": "clAqua"
+        "Name": "Value",
+        "Style": "Bold"
       }
     ]
   }

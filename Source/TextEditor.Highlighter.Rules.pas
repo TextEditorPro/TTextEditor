@@ -309,7 +309,7 @@ begin
       if APLine[ARun] <> TControlCharacters.Null then
         Inc(ARun);
 
-      if (LFindTokenNode.BreakType = btAny) or (APLine[ARun] in ACurrentRange.Delimiters) then
+      if not (LFindTokenNode.Char in TCharacterSets.Numbers) and ((LFindTokenNode.BreakType = btAny) or (APLine[ARun] in ACurrentRange.Delimiters)) then
       begin
         AToken := LFindTokenNode.Token;
         Exit(True);
@@ -350,8 +350,8 @@ end;
 
 destructor TTextEditorDefaultParser.Destroy;
 begin
-  FToken.Free;
-  FToken := nil;
+  FreeAndNil(FToken);
+
   inherited;
 end;
 
@@ -359,6 +359,7 @@ function TTextEditorDefaultParser.GetToken(const ACurrentRange: TTextEditorRange
   var AToken: TTextEditorToken): Boolean;
 begin
   Inc(ARun);
+
   Result := False;
 end;
 
@@ -371,8 +372,7 @@ end;
 
 destructor TDelimitersParser.Destroy;
 begin
-  FToken.Free;
-  FToken := nil;
+  FreeAndNil(FToken);
 
   inherited;
 end;
@@ -381,6 +381,7 @@ function TDelimitersParser.GetToken(const ACurrentRange: TTextEditorRange; const
 begin
   if APLine[ARun] <> TControlCharacters.Null then
     Inc(ARun);
+
   AToken := Self.Token;
   Result := True;
 end;
@@ -430,18 +431,13 @@ begin
   Clear;
   Reset;
 
-  FOpenToken.Free;
-  FOpenToken := nil;
-  FCloseToken.Free;
-  FCloseToken := nil;
-  FAttribute.Free;
-  FAttribute := nil;
-  FKeyList.Free;
-  FSets.Free;
-  FTokens.Free;
-  FTokens := nil;
-  FRanges.Free;
-  FRanges := nil;
+  FreeAndNil(FOpenToken);
+  FreeAndNil(FCloseToken);
+  FreeAndNil(FAttribute);
+  FreeAndNil(FKeyList);
+  FreeAndNil(FSets);
+  FreeAndNil(FTokens);
+  FreeAndNil(FRanges);
 
   inherited;
 end;
@@ -760,17 +756,16 @@ begin
   for LIndex := 0 to 255 do
   begin
     LAnsiChar := AnsiChar(LIndex);
+
     if Assigned(SymbolList[LAnsiChar]) and (SymbolList[LAnsiChar] <> FDefaultTermSymbol) and (SymbolList[LAnsiChar] <> FDefaultSymbols) then
       FSymbolList[LAnsiChar].Free;
+
     FSymbolList[LAnsiChar] := nil;
   end;
 
-  FDefaultToken.Free;
-  FDefaultToken := nil;
-  FDefaultTermSymbol.Free;
-  FDefaultTermSymbol := nil;
-  FDefaultSymbols.Free;
-  FDefaultSymbols := nil;
+  FreeAndNil(FDefaultToken);
+  FreeAndNil(FDefaultTermSymbol);
+  FreeAndNil(FDefaultSymbols);
 
   if Assigned(FRanges) then
   for LIndex := 0 to FRanges.Count - 1 do
@@ -816,6 +811,7 @@ begin
     if Assigned(LKeyList) and (LKeyList.TokenType = ttReservedWord) then
     begin
       LKeyList.Free;
+
       FKeyList.Delete(LIndex);
     end;
   end;
@@ -833,8 +829,7 @@ end;
 
 destructor TTextEditorKeyList.Destroy;
 begin
-  FKeyList.Free;
-  FKeyList := nil;
+  FreeAndNil(FKeyList);
 
   inherited;
 end;
@@ -844,6 +839,7 @@ begin
   inherited Create;
 
   FCharSet := ACharSet;
+
   FAttribute.Foreground := TColors.SysWindowText;
   FAttribute.Background := TColors.SysWindow;
 end;

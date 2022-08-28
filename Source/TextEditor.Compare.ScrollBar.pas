@@ -189,7 +189,7 @@ begin
     Exit;
 
   LClipRect := ClientRect;
-  Canvas.Brush.Color := FEditorLeft.Colors.Background;
+  Canvas.Brush.Color := FEditorLeft.Colors.EditorBackground;
   FillRect(LClipRect);
 
   if FEditorLeft.Lines.Count <> FEditorRight.Lines.Count then

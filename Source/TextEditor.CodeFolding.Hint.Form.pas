@@ -56,7 +56,7 @@ uses
   System.SysUtils, TextEditor, TextEditor.Consts, TextEditor.KeyCommands, TextEditor.PaintHelper, TextEditor.Utils
 {$IFDEF ALPHASKINS}, sSkinProvider{$ENDIF};
 
-constructor TTextEditorCodeFoldingHintForm.Create(AOwner: TComponent); //FI:W525 Missing INHERITED call in constructor
+constructor TTextEditorCodeFoldingHintForm.Create(AOwner: TComponent);
 begin
   CreateNew(AOwner);
 

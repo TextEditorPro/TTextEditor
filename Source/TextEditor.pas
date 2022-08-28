@@ -9,20 +9,23 @@ uses
   TextEditor.ActiveLine, TextEditor.Caret, TextEditor.CodeFolding, TextEditor.CodeFolding.Hint.Form,
   TextEditor.CodeFolding.Ranges, TextEditor.CodeFolding.Regions, TextEditor.Colors, TextEditor.CompletionProposal,
   TextEditor.CompletionProposal.PopupWindow, TextEditor.CompletionProposal.Snippets, TextEditor.Consts,
-  TextEditor.Glyph, TextEditor.Highlighter, TextEditor.Highlighter.Attributes, TextEditor.HighlightLine,
-  TextEditor.InternalImage, TextEditor.KeyboardHandler, TextEditor.KeyCommands, TextEditor.LeftMargin,
-  TextEditor.Lines, TextEditor.MacroRecorder, TextEditor.Marks, TextEditor.MatchingPairs, TextEditor.Minimap,
-  TextEditor.PaintHelper, TextEditor.Replace, TextEditor.RightMargin, TextEditor.Ruler, TextEditor.Scroll,
-  TextEditor.Search, TextEditor.Search.Base, TextEditor.Selection, TextEditor.SkipRegions, TextEditor.SpecialChars,
-  TextEditor.SyncEdit, TextEditor.Tabs, TextEditor.Types, TextEditor.Undo, TextEditor.Undo.List,
-  TextEditor.UnknownChars, TextEditor.Utils, TextEditor.WordWrap
+  TextEditor.Fonts, TextEditor.Glyph, TextEditor.Highlighter, TextEditor.Highlighter.Attributes,
+  TextEditor.HighlightLine, TextEditor.InternalImage, TextEditor.KeyboardHandler, TextEditor.KeyCommands,
+  TextEditor.LeftMargin, TextEditor.Lines, TextEditor.MacroRecorder, TextEditor.Marks, TextEditor.MatchingPairs,
+  TextEditor.Minimap, TextEditor.PaintHelper, TextEditor.Replace, TextEditor.RightMargin, TextEditor.Ruler,
+  TextEditor.Scroll, TextEditor.Search, TextEditor.Search.Base, TextEditor.Selection, TextEditor.SkipRegions,
+  TextEditor.SpecialChars, TextEditor.SyncEdit, TextEditor.Tabs, TextEditor.Types, TextEditor.Undo,
+  TextEditor.Undo.List, TextEditor.UnknownChars, TextEditor.Utils, TextEditor.WordWrap
 {$IFDEF ALPHASKINS}, acSBUtils, sCommonData{$ENDIF}
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}, TextEditor.SpellCheck{$ENDIF};
 
-const
-  TEXTEDITOR_DEFAULT_OPTIONS = [eoAutoIndent, eoDragDropEditing, eoShowNullCharacters, eoShowControlCharacters];
-
 type
+  TTextEditorDefaults = record
+  const
+    Options = [eoAutoIndent, eoDragDropEditing, eoLoadColors, eoLoadFontNames, eoLoadFontSizes, eoLoadFontStyles,
+      eoShowNullCharacters, eoShowControlCharacters];
+  end;
+
   TCustomTextEditor = class(TCustomControl)
   private type
     TTextEditorCaretHelper = record
@@ -189,8 +192,6 @@ type
     end;
 
     TTextEditorOriginal = record
-      FontSize: Integer;
-      LeftMarginFontSize: Integer;
       Lines: TTextEditorLines;
       RedoList: TTextEditorUndoList;
       UndoList: TTextEditorUndoList;
@@ -291,6 +292,8 @@ type
     FDoubleClickTime: Cardinal;
     FEvents: TTextEditorEvents;
     FFile: TTextEditorFile;
+    FFonts: TTextEditorFonts;
+    FFontStyles: TTextEditorFontStyles;
     FHighlightedFoldRange: TTextEditorCodeFoldingRange;
     FHighlighter: TTextEditorHighlighter;
     FHighlightLine: TTextEditorHighlightLine;
@@ -352,6 +355,7 @@ type
     FViewPosition: TTextEditorViewPosition;
     FWordWrap: TTextEditorWordWrap;
     FWordWrapLine: TTextEditorWordWrapLine;
+    FZoomDivider: Integer;
     function AddSnippet(const AExecuteWith: TTextEditorSnippetExecuteWith; const ATextPosition: TTextEditorTextPosition): Boolean;
     function AllWhiteUpToTextPosition(const ATextPosition: TTextEditorTextPosition; const ALine: string; const ALength: Integer): Boolean;
     function AreTextPositionsEqual(const ATextPosition1: TTextEditorTextPosition; const ATextPosition2: TTextEditorTextPosition): Boolean; inline;
@@ -391,7 +395,6 @@ type
     function GetPreviousCharAtCursor: Char;
     function GetRowCountFromPixel(const AY: Integer): Integer;
     function GetScrollPageWidth: Integer;
-    function GetSearchResultCount: Integer;
     function GetSelectedRow(const AY: Integer): Integer;
     function GetSelectedText: string;
     function GetSelectionAvailable: Boolean;
@@ -436,11 +439,12 @@ type
     procedure CheckIfAtMatchingKeywords;
     procedure ClearCodeFolding;
     procedure ClearMinimapBuffer;
+    procedure CMGestureManagerChanged(var Message: TMessage); message CM_GESTUREMANAGERCHANGED;
     procedure CodeFoldingCollapse(const AFoldRange: TTextEditorCodeFoldingRange);
     procedure CodeFoldingLinesDeleted(const AFirstLine: Integer; const ACount: Integer);
     procedure CodeFoldingOnChange(const AEvent: TTextEditorCodeFoldingChanges);
     procedure CodeFoldingResetCaches;
-    procedure ColorsOnChange(const AEvent: TTextEditorColorChanges);
+    procedure ColorsChanged(ASender: TObject);
     procedure CompletionProposalTimerHandler(ASender: TObject);
     procedure ComputeScroll(const APoint: TPoint);
     procedure CreateBookmarkImages;
@@ -606,6 +610,7 @@ type
     function DoOnReplaceText(const AParams: TTextEditorReplaceTextParams): TTextEditorReplaceAction;
     function DoSearchMatchNotFoundWraparoundDialog: Boolean; virtual;
     function GetReadOnly: Boolean; virtual;
+    function IsTouchPropertyStored(AProperty: TTouchProperty): Boolean; override;
     function PixelAndRowToViewPosition(const X, ARow: Integer; const ALineText: string = ''): TTextEditorViewPosition;
     function PixelsToViewPosition(const X, Y: Integer): TTextEditorViewPosition;
     function TextPositionToCharIndex(const ATextPosition: TTextEditorTextPosition): Integer;
@@ -625,6 +630,7 @@ type
     procedure DoBlockUnindent;
     procedure DoChange; virtual;
     procedure DoCopyToClipboard(const AText: string);
+    procedure DoGetGestureOptions(var Gestures: TInteractiveGestures; var Options: TInteractiveGestureOptions); override;
     procedure DoKeyPressW(var AMessage: TWMKey);
     procedure DoOnCommandProcessed(ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer);
     procedure DoOnLeftMarginClick(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer);
@@ -742,7 +748,7 @@ type
     procedure BeginUndoBlock;
     procedure BeginUpdate;
     procedure ChainEditor(const AEditor: TCustomTextEditor);
-    procedure ChangeObjectScale(const AMultiplier, ADivider: Integer);
+    procedure ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer);
     procedure Clear;
     procedure ClearBookmarks;
     procedure ClearHighlightLine;
@@ -843,8 +849,10 @@ type
     procedure UnlockUndo;
     procedure UnregisterCommandHandler(AHookedCommandEvent: TTextEditorHookedCommandEvent);
     procedure UpdateCaret;
+    procedure UpdateColors;
     procedure WndProc(var AMessage: TMessage); override;
-        property Action;
+    procedure Zoom(const APercentage: Integer = -1);
+    property Action;
     property ActiveLine: TTextEditorActiveLine read FActiveLine write SetActiveLine;
     property AllCodeFoldingRanges: TTextEditorAllCodeFoldingRanges read FCodeFoldings.AllRanges;
     property AlwaysShowCaret: Boolean read FCaretHelper.ShowAlways write SetAlwaysShowCaret;
@@ -871,7 +879,8 @@ type
     property FilePath: string read FFile.Path write FFile.Path;
     property FoldingExists: Boolean read FCodeFoldings.Exists;
     property FoldingOnCurrentLine: Boolean read GetFoldingOnCurrentLine;
-    property Font;
+    property Fonts: TTextEditorFonts read FFonts write FFonts;
+    property FontStyles: TTextEditorFontStyles read FFontStyles write FFontStyles;
     property FullFilename: string read FFile.FullName write SetFullFilename;
     property Highlighter: TTextEditorHighlighter read FHighlighter;
     property HighlightLine: TTextEditorHighlightLine read FHighlightLine write SetHighlightLine;
@@ -883,7 +892,7 @@ type
     property LineHeight: Integer read GetLineHeight;
     property LineNumbersCount: Integer read FLineNumbers.Count;
     property Lines: TTextEditorLines read FLines write SetLines;
-    property LineSpacing: Integer read FLineSpacing write FLineSpacing;
+    property LineSpacing: Integer read FLineSpacing write FLineSpacing default 0;
     property MacroRecorder: TTextEditorMacroRecorder read FMacroRecorder write FMacroRecorder;
     property Marks: TTextEditorMarkList read FMarkList;
     property MatchingPairs: TTextEditorMatchingPairs read FMatchingPairs write FMatchingPairs;
@@ -930,9 +939,7 @@ type
     property OnScroll: TTextEditorScrollEvent read FEvents.OnScroll write FEvents.OnScroll;
     property OnSearchEngineChanged: TNotifyEvent read FEvents.OnSearchEngineChanged write FEvents.OnSearchEngineChanged;
     property OnSelectionChanged: TNotifyEvent read FEvents.OnSelectionChanged write FEvents.OnSelectionChanged;
-    property Options: TTextEditorOptions read FOptions write SetOptions default TEXTEDITOR_DEFAULT_OPTIONS;
-    property OriginalFontSize: Integer read FOriginal.FontSize write FOriginal.FontSize;
-    property OriginalLeftMarginFontSize: Integer read FOriginal.LeftMarginFontSize write FOriginal.LeftMarginFontSize;
+    property Options: TTextEditorOptions read FOptions write SetOptions default TTextEditorDefaults.Options;
     property PaintLock: Integer read FPaintLock write FPaintLock;
     property ParentColor default False;
     property ParentFont default False;
@@ -944,7 +951,6 @@ type
     property Ruler: TTextEditorRuler read FRuler write FRuler;
     property Scroll: TTextEditorScroll read FScroll write SetScroll;
     property Search: TTextEditorSearch read FSearch write SetSearch;
-    property SearchResultCount: Integer read GetSearchResultCount;
     property SearchString: string read FSearchString write FSearchString;
     property SelectedText: string read GetSelectedText write SetSelectedText;
     property Selection: TTextEditorSelection read FSelection write SetSelection;
@@ -992,11 +998,14 @@ type
 {$ENDIF}
     property Caret;
     property CodeFolding;
+    property Colors;
     property CompletionProposal;
     property Constraints;
     property Ctl3D;
+    property Cursor;
     property Enabled;
-    property Font;
+    property Fonts;
+    property FontStyles;
     property Height;
     property HighlightLine;
     property ImeMode;
@@ -1062,7 +1071,6 @@ type
     property OvertypeMode;
     property ParentColor;
     property ParentCtl3D;
-    property ParentFont;
     property ParentShowHint;
     property PopupMenu;
     property ReadOnly;
@@ -1080,11 +1088,13 @@ type
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
     property SpellCheck;
 {$ENDIF}
+    property StyleElements;
     property SyncEdit;
     property TabOrder;
     property Tabs;
     property TabStop;
     property Tag;
+    property Touch;
     property Undo;
     property UnknownChars;
     property Visible;
@@ -1142,14 +1152,17 @@ type
 {$ENDIF}
     property Caret;
     property CodeFolding;
+    property Colors;
     property CompletionProposal;
     property Constraints;
     property Ctl3D;
+    property Cursor;
     property DataField;
     property DataSource;
     property Enabled;
     property Field;
-    property Font;
+    property Fonts;
+    property FontStyles;
     property Height;
     property HighlightLine;
     property ImeMode;
@@ -1216,7 +1229,6 @@ type
     property OvertypeMode;
     property ParentColor;
     property ParentCtl3D;
-    property ParentFont;
     property ParentShowHint;
     property PopupMenu;
     property ReadOnly;
@@ -1234,11 +1246,13 @@ type
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
     property SpellCheck;
 {$ENDIF}
+    property StyleElements;
     property SyncEdit;
     property TabOrder;
     property Tabs;
     property TabStop;
     property Tag;
+    property Touch;
     property Undo;
     property UnknownChars;
     property Visible;
@@ -1258,6 +1272,7 @@ uses
   Vcl.Menus, TextEditor.Encoding, TextEditor.Export.HTML, TextEditor.Highlighter.Rules, TextEditor.Language,
   TextEditor.LeftMargin.Border, TextEditor.LeftMargin.LineNumbers, TextEditor.Scroll.Hint, TextEditor.Search.Map,
   TextEditor.Search.Normal, TextEditor.Search.RegularExpressions, TextEditor.Search.WildCard, TextEditor.Undo.Item
+
 {$IFDEF VCL_STYLES}, TextEditor.StyleHooks{$ENDIF}
 {$IFDEF ALPHASKINS}, acGlow, sConst, sMessages, sSkinManager, sStyleSimply, sVCLUtils{$ENDIF};
 
@@ -1283,7 +1298,6 @@ end;
 constructor TCustomTextEditor.Create(AOwner: TComponent);
 var
   LIndex: Integer;
-  LFont: TFont;
 begin
 {$IFDEF ALPHASKINS}
   FSkinData := TsScrollWndData.Create(Self, True);
@@ -1305,6 +1319,9 @@ begin
   FFile.Loaded := False;
   FFile.Saved := False;
 
+  Touch.InteractiveGestures := [igPan, igPressAndTap];
+  Touch.InteractiveGestureOptions := [igoPanInertia, igoPanSingleFingerVertical, igoPanGutter, igoParentPassthrough];
+
   FSystemMetrics.HorizontalDrag := GetSystemMetrics(SM_CXDRAG);
   FSystemMetrics.VerticalDrag := GetSystemMetrics(SM_CYDRAG);
   FSystemMetrics.VerticalScroll := GetSystemMetrics(SM_CYVSCROLL);
@@ -1316,7 +1333,7 @@ begin
   FState.URIOpener := False;
   FState.ReplaceLock := False;
   FMultiEdit.Position.Row := -1;
-
+  FZoomDivider := 0;
   { Code folding }
   FCodeFoldings.AllRanges := TTextEditorAllCodeFoldingRanges.Create;
   FCodeFolding := TTextEditorCodeFolding.Create;
@@ -1325,7 +1342,8 @@ begin
   FCodeFoldings.DelayTimer.OnTimer := OnCodeFoldingDelayTimer;
   { Colors }
   FColors := TTextEditorColors.Create;
-  FColors.OnChange := ColorsOnChange;
+  FColors.OnChange := ColorsChanged;
+  FColors.InDesign := csDesigning in ComponentState;
   { Matching pair }
   FMatchingPairs := TTextEditorMatchingPairs.Create;
   { Line spacing }
@@ -1355,18 +1373,17 @@ begin
   { Unknown chars }
   FUnknownChars := TTextEditorUnknownChars.Create;
   FUnknownChars.OnChange := UnknownCharsChanged;
-  { Font }
-  LFont := TFont.Create;
-  try
-    LFont.Name := 'Courier New';
-    LFont.Size := 9;
-    Font.Assign(LFont);
-    Font.OnChange := FontChanged;
-    FPaintHelper := TTextEditorPaintHelper.Create([], LFont);
-  finally
-    LFont.Free;
-  end;
+  { Fonts }
+  FFonts := TTextEditorFonts.Create;
+  FFonts.CodeFoldingHint.OnChange := FontChanged;
+  FFonts.CompletionProposal.OnChange := FontChanged;
+  FFonts.LineNumbers.OnChange := FontChanged;
+  FFonts.Minimap.OnChange := FontChanged;
+  FFonts.Ruler.OnChange := FontChanged;
+  FFonts.Text.OnChange := FontChanged;
+  FFontStyles := TTextEditorFontStyles.Create;
   { Painting }
+  FPaintHelper := TTextEditorPaintHelper.Create([], FFonts.Text);
   FItalic.Bitmap := TBitmap.Create;
   FItalic.Offset := 0;
   ParentFont := False;
@@ -1412,7 +1429,7 @@ begin
   FPosition.SelectionBegin.Char := 1;
   FPosition.SelectionBegin.Line := 1;
   FPosition.SelectionEnd := FPosition.SelectionBegin;
-  FOptions := TEXTEDITOR_DEFAULT_OPTIONS;
+  FOptions := TTextEditorDefaults.Options;
   { Scroll }
   with FScrollHelper.Shadow.BlendFunction do
   begin
@@ -1473,7 +1490,7 @@ begin
   FLeftMarginCharWidth := FPaintHelper.CharWidth;
   FLeftMarginWidth := GetLeftMarginWidth;
   { Update character constraints }
-  FontChanged(nil);
+  SizeOrFontChanged;
   TabsChanged(nil);
   { Highlight line }
   FHighlightLine := TTextEditorHighlightLine.Create(Self);
@@ -1492,96 +1509,66 @@ destructor TCustomTextEditor.Destroy;
 begin
 {$IFDEF ALPHASKINS}
   if Assigned(FScrollHelper.Wnd) then
-  begin
-    FScrollHelper.Wnd.Free;
-    FScrollHelper.Wnd := nil;
-  end;
+    FreeAndNil(FScrollHelper.Wnd);
 
   if Assigned(FSkinData) then
-  begin
-    FSkinData.Free;
-    FSkinData := nil;
-  end;
+    FreeAndNil(FSkinData);
 {$ENDIF}
+
   if Assigned(FChainedEditor) then
     RemoveChainedEditor;
+
   ClearCodeFolding;
-  FCodeFolding.Free;
-  FCodeFolding := nil;
-  FCodeFoldings.DelayTimer.Free;
-  FCodeFoldings.DelayTimer := nil;
-  FColors.Free;
-  FColors := nil;
-  FCodeFoldings.AllRanges.Free;
-  FCodeFoldings.AllRanges := nil;
-  FHighlightLine.Free;
-  FHighlightLine := nil;
-  FHighlighter.Free;
-  FHighlighter := nil;
+
+  FreeAndNil(FCodeFolding);
+  FreeAndNil(FCodeFoldings.DelayTimer);
+  FreeAndNil(FColors);
+  FreeAndNil(FCodeFoldings.AllRanges);
+  FreeAndNil(FFonts);
+  FreeAndNil(FFontStyles);
+  FreeAndNil(FHighlightLine);
+  FreeAndNil(FHighlighter);
+
   FreeCompletionProposalPopupWindow;
   { Do not use FreeAndNil, it first nils and then frees causing problems with code accessing FHookedCommandHandlers
     while destruction }
   FHookedCommandHandlers.Free;
   FHookedCommandHandlers := nil;
-  FBookmarkList.Free;
-  FBookmarkList := nil;
-  FMarkList.Free;
-  FMarkList := nil;
-  FKeyCommands.Free;
-  FKeyCommands := nil;
-  FKeyboardHandler.Free;
-  FKeyboardHandler := nil;
-  FSelection.Free;
-  FSelection := nil;
-  FOriginal.UndoList.Free;
-  FOriginal.UndoList := nil;
-  FOriginal.RedoList.Free;
-  FOriginal.RedoList := nil;
+
+  FreeAndNil(FBookmarkList);
+  FreeAndNil(FMarkList);
+  FreeAndNil(FKeyCommands);
+  FreeAndNil(FKeyboardHandler);
+  FreeAndNil(FSelection);
+  FreeAndNil(FOriginal.UndoList);
+  FreeAndNil(FOriginal.RedoList);
+
   FLeftMargin.Free;
   FLeftMargin := nil; { Notification has a check }
-  FMinimap.Free;
-  FMinimap := nil;
-  FRuler.Free;
-  FRuler := nil;
-  FWordWrap.Free;
-  FWordWrap := nil;
-  FPaintHelper.Free;
-  FPaintHelper := nil;
-  FImagesBookmark.Free;
-  FImagesBookmark := nil;
-  FOriginal.Lines.Free;
-  FOriginal.Lines := nil;
+
+  FreeAndNil(FMinimap);
+  FreeAndNil(FRuler);
+  FreeAndNil(FWordWrap);
+  FreeAndNil(FPaintHelper);
+  FreeAndNil(FImagesBookmark);
+  FreeAndNil(FOriginal.Lines);
   FreeScrollShadowBitmap;
   FreeMinimapBitmaps;
-  FActiveLine.Free;
-  FActiveLine := nil;
-  FRightMargin.Free;
-  FRightMargin := nil;
-  FScroll.Free;
-  FScroll := nil;
-  FSearch.Free;
-  FSearch := nil;
-  FReplace.Free;
-  FReplace := nil;
-  FTabs.Free;
-  FTabs := nil;
-  FUndo.Free;
-  FUndo := nil;
-  FSpecialChars.Free;
-  FSpecialChars := nil;
-  FUnknownChars.Free;
-  FUnknownChars := nil;
-  FCaret.Free;
-  FCaret := nil;
+  FreeAndNil(FActiveLine);
+  FreeAndNil(FRightMargin);
+  FreeAndNil(FScroll);
+  FreeAndNil(FSearch);
+  FreeAndNil(FReplace);
+  FreeAndNil(FTabs);
+  FreeAndNil(FUndo);
+  FreeAndNil(FSpecialChars);
+  FreeAndNil(FUnknownChars);
+  FreeAndNil(FCaret);
   FreeMultiCarets;
-  FMatchingPairs.Free;
-  FMatchingPairs := nil;
-  FCompletionProposal.Free;
-  FCompletionProposal := nil;
-  FSyncEdit.Free;
-  FSyncEdit := nil;
-  FItalic.Bitmap.Free;
-  FItalic.Bitmap := nil;
+  FreeAndNil(FMatchingPairs);
+  FreeAndNil(FCompletionProposal);
+  FreeAndNil(FSyncEdit);
+  FreeAndNil(FItalic.Bitmap);
 
   if Assigned(FMinimapHelper.Shadow.AlphaByteArray) then
   begin
@@ -1596,16 +1583,10 @@ begin
   end;
 
   if Assigned(FSearchEngine) then
-  begin
-    FSearchEngine.Free;
-    FSearchEngine := nil;
-  end;
+    FreeAndNil(FSearchEngine);
 
   if Assigned(FCodeFoldings.HintForm) then
-  begin
-    FCodeFoldings.HintForm.Free;
-    FCodeFoldings.HintForm := nil;
-  end;
+    FreeAndNil(FCodeFoldings.HintForm);
 
   if Length(FWordWrapLine.Length) > 0 then
     SetLength(FWordWrapLine.Length, 0);
@@ -1693,7 +1674,7 @@ begin
       LLineText := FLines[ATextPosition.Line];
       LCharCount := 0;
       LPLineText := PChar(LLineText);
-      for LIndex := 0 to SelectionBeginPosition.Char - 1 do
+      for LIndex := 0 to SelectionBeginPosition.Char - 1 do //FI:W528 Variable 'LIndex' not used in FOR-loop
       begin
         if LPLineText^ = TControlCharacters.Tab then
           Inc(LCharCount, Tabs.Width)
@@ -2410,13 +2391,13 @@ var
 begin
   Result := TColors.SysNone;
   { Bookmarks }
-  if FLeftMargin.Colors.BookmarkBackground <> TColors.SysNone then
+  if FColors.BookmarkLineBackground <> TColors.SysNone then
   for LIndex := 0 to FBookmarkList.Count - 1 do
   begin
     LMark := FBookmarkList.Items[LIndex];
     if LMark.Line + 1 = ALine then
     begin
-      Result := FLeftMargin.Colors.BookmarkBackground;
+      Result := FColors.BookmarkLineBackground;
       Break;
     end;
   end;
@@ -3028,11 +3009,6 @@ begin
     Result := DoGetSelectedText;
 end;
 
-function TCustomTextEditor.GetSearchResultCount: Integer;
-begin
-  Result := FSearch.Items.Count;
-end;
-
 function TCustomTextEditor.GetSelectionBeginPosition: TTextEditorTextPosition;
 var
   LLineLength: Integer;
@@ -3515,7 +3491,7 @@ var
   LAlpha: Single;
 begin
   ABitmap.Height := 0; { background color }
-  ABitmap.Height := AClipRect.Height; //FI:W508 Variable is assigned twice successively
+  ABitmap.Height := AClipRect.Height;
 
   for LRow := 0 to ABitmap.Height - 1 do
   begin
@@ -4520,13 +4496,20 @@ begin
   end;
 end;
 
-procedure TCustomTextEditor.ColorsOnChange(const AEvent: TTextEditorColorChanges);
+procedure TCustomTextEditor.UpdateColors;
 begin
-  if (AEvent = ccBoth) or (AEvent = ccBackground) then
-    Color := FColors.Background;
+  Color := FColors.EditorBackground;
 
-  if (AEvent = ccBoth) or (AEvent = ccForeground) then
-    Font.Color := FColors.Foreground;
+  FFonts.CodeFoldingHint.Color := FColors.CodeFoldingHintText;
+  FFonts.CompletionProposal.Color := FColors.CompletionProposalForeground;
+  FFonts.LineNumbers.Color := FColors.LeftMarginLineNumbers;
+  FFonts.Ruler.Color := FColors.RulerNumbers;
+  FFonts.Text.Color := FColors.EditorForeground;
+end;
+
+procedure TCustomTextEditor.ColorsChanged(ASender: TObject); //FI:O804: Method parameter 'ASender' is declared but never used
+begin
+  UpdateColors;
 
   Invalidate;
 end;
@@ -5911,24 +5894,28 @@ begin
     if FLeftMargin.LineNumbers.Visible then
       FLeftMargin.AutosizeDigitCount(FLines.Count);
 
-    FPaintHelper.SetBaseFont(FLeftMargin.Font);
+    FPaintHelper.SetBaseFont(FFonts.LineNumbers);
+
     LWidth := FLeftMargin.RealLeftMarginWidth(FPaintHelper.CharWidth);
     FLeftMarginCharWidth := FPaintHelper.CharWidth;
-    FPaintHelper.SetBaseFont(Font);
+
+    FPaintHelper.SetBaseFont(FFonts.Text);
 
     if FLeftMargin.Width <> LWidth then
     begin
       FLeftMargin.OnChange := nil;
       FLeftMargin.Width := LWidth;
       FLeftMargin.OnChange := LeftMarginChanged;
+
       FScrollHelper.PageWidth := GetScrollPageWidth;
-      if HandleAllocated then
-        if FWordWrap.Active then
-        begin
-          FLineNumbers.ResetCache := True;
-          UpdateScrollBars;
-        end;
+
+      if HandleAllocated and FWordWrap.Active then
+      begin
+        FLineNumbers.ResetCache := True;
+        UpdateScrollBars;
+      end;
     end;
+
     FLeftMarginWidth := GetLeftMarginWidth;
   end;
 end;
@@ -6656,14 +6643,14 @@ begin
 
   if Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) or (FMultiEdit.Position.Row <> -1) then
   begin
-    LBackgroundColor := FCaret.MultiEdit.Colors.Background;
-    LForegroundColor := FCaret.MultiEdit.Colors.Foreground;
+    LBackgroundColor := FColors.CaretMultiEditBackground;
+    LForegroundColor := FColors.CaretMultiEditForeground;
     LCaretStyle := FCaret.MultiEdit.Style
   end
   else
   begin
-    LBackgroundColor := FCaret.NonBlinking.Colors.Background;
-    LForegroundColor := FCaret.NonBlinking.Colors.Foreground;
+    LBackgroundColor := FColors.CaretNonBlinkingBackground;
+    LForegroundColor := FColors.CaretNonBlinkingForeground;
     if FOvertypeMode = omInsert then
       LCaretStyle := FCaret.Styles.Insert
     else
@@ -6700,6 +6687,7 @@ begin
         X := 1;
       end;
   end;
+
   LTempBitmap := Vcl.Graphics.TBitmap.Create;
   try
     { Background }
@@ -6709,11 +6697,14 @@ begin
     LTempBitmap.Width := FPaintHelper.CharWidth;
     LTempBitmap.Height := GetLineHeight;
     { Character }
-    LTempBitmap.Canvas.Brush.Style := bsClear;
-    LTempBitmap.Canvas.Font.Name := Font.Name;
-    LTempBitmap.Canvas.Font.Color := LForegroundColor;
-    LTempBitmap.Canvas.Font.Style := Font.Style;
-    LTempBitmap.Canvas.Font.Size := Font.Size;
+    with LTempBitmap.Canvas do
+    begin
+      Brush.Style := bsClear;
+      Font.Name := FFonts.Text.Name;
+      Font.Color := LForegroundColor;
+      Font.Style := FFonts.Text.Style;
+      Font.Size := FFonts.Text.Size;
+    end;
 
     LLineText := FLines[AViewPosition.Row - 1];
     if (AViewPosition.Column > 0) and (AViewPosition.Column <= Length(LLineText)) then
@@ -7030,8 +7021,7 @@ end;
 
 procedure TCustomTextEditor.FontChanged(ASender: TObject); //FI:O804 Method parameter is declared but never used
 begin
-  if Assigned(FHighlighter) and not FHighlighter.Loading then
-    SizeOrFontChanged;
+  Invalidate;
 end;
 
 procedure TCustomTextEditor.GetMinimapLeftRight(var ALeft: Integer; var ARight: Integer);
@@ -7117,6 +7107,20 @@ procedure TCustomTextEditor.ClearMinimapBuffer;
 begin
   if Assigned(FMinimapHelper.BufferBitmap) then
     FMinimapHelper.BufferBitmap.Height := 0;
+end;
+
+procedure TCustomTextEditor.CMGestureManagerChanged(var Message: TMessage);
+begin
+  if not (csDestroying in ComponentState) then
+  begin
+    if (Touch.GestureManager <> nil) then
+      ControlStyle := ControlStyle + [csGestures]
+    else
+      ControlStyle := ControlStyle - [csGestures];
+
+    if HandleAllocated then
+      RecreateWnd;
+  end;
 end;
 
 procedure TCustomTextEditor.MinimapChanged(ASender: TObject); //FI:O804 Method parameter is declared but never used
@@ -7502,10 +7506,12 @@ end;
 
 procedure TCustomTextEditor.RulerChanged(ASender: TObject); //FI:O804 Method parameter is declared but never used
 begin
-  if not (csLoading in ComponentState) and FFile.Loaded then
+  if not (csLoading in ComponentState) and FRuler.Visible and FFile.Loaded then
+  begin
     SizeOrFontChanged(False);
 
-  Invalidate;
+    Invalidate;
+  end;
 end;
 
 procedure TCustomTextEditor.ScanCodeFoldingRanges;
@@ -9130,33 +9136,34 @@ begin
 
   if Visible and HandleAllocated and (FPaintHelper.CharWidth <> 0) and FState.CanChangeSize then
   begin
-    FPaintHelper.SetBaseFont(Font);
+    FPaintHelper.SetBaseFont(FFonts.Text);
     LScrollPageWidth := GetScrollPageWidth;
 
     LVisibleLineCount := ClientHeight div GetLineHeight;
+
     if FRuler.Visible then
       Dec(LVisibleLineCount);
+
     LWidthChanged := LScrollPageWidth <> FScrollHelper.PageWidth;
 
+    if not FHighlighter.Changed and not LWidthChanged and (LVisibleLineCount = VisibleLineCount) then
+      Exit;
+
     GetMinimapLeftRight(FMinimapHelper.Left, FMinimapHelper.Right);
-
     FillChar(FItalic.OffsetCache, SizeOf(FItalic.OffsetCache), 0);
-
-    if not FHighlighter.Changed then
-      if not LWidthChanged and (LVisibleLineCount = VisibleLineCount) then
-        Exit;
-
     FScrollHelper.PageWidth := LScrollPageWidth;
     FLineNumbers.VisibleCount := LVisibleLineCount;
 
     if FMinimap.Visible then
     begin
-      FPaintHelper.SetBaseFont(FMinimap.Font);
+      FPaintHelper.SetBaseFont(FFonts.Minimap);
+
       FMinimap.CharHeight := FPaintHelper.CharHeight - 1;
       FMinimap.VisibleLineCount := ClientHeight div FMinimap.CharHeight;
       FMinimap.TopLine := Max(FLineNumbers.TopLine - Abs(Trunc((FMinimap.VisibleLineCount - VisibleLineCount) *
         (FLineNumbers.TopLine / Max(FLineNumbers.Count - VisibleLineCount, 1)))), 1);
-      FPaintHelper.SetBaseFont(Font);
+
+      FPaintHelper.SetBaseFont(FFonts.Text);
     end;
 
     if FWordWrap.Active and LWidthChanged then
@@ -9170,6 +9177,7 @@ begin
     begin
       if LeftMargin.LineNumbers.Visible then
         LeftMarginChanged(Self);
+
       ResetCaret;
       Exclude(FState.Flags, sfCaretChanged);
     end;
@@ -9177,6 +9185,7 @@ begin
     if cfoAutoWidth in FCodeFolding.Options then
     begin
       FCodeFolding.Width := FPaintHelper.CharHeight;
+
       if Odd(FCodeFolding.Width) then
         FCodeFolding.Width := FCodeFolding.Width - 1;
     end;
@@ -9185,7 +9194,6 @@ begin
       FCodeFolding.Padding := 2;
 
     DoLeftMarginAutoSize;
-
     UpdateScrollBars;
   end;
 end;
@@ -9208,23 +9216,29 @@ var
   LSelectionAvailable: Boolean;
 begin
   FSyncEdit.ClearSyncItems;
+
   if FSyncEdit.Visible then
   begin
     FWordWrap.Active := False;
     LSelectionAvailable := GetSelectionAvailable;
     LIsWordSelected := IsWordSelected;
+
     if LSelectionAvailable and LIsWordSelected then
     begin
       FUndoList.BeginBlock;
+
       FSyncEdit.InEditor := True;
       FSyncEdit.EditBeginPosition := SelectionBeginPosition;
       FSyncEdit.EditEndPosition := SelectionEndPosition;
       FSyncEdit.EditWidth := FSyncEdit.EditEndPosition.Char - FSyncEdit.EditBeginPosition.Char;
+
       FindWords(SelectedText, FSyncEdit.SyncItems, seCaseSensitive in FSyncEdit.Options, True);
+
       LIndex := 0;
       while LIndex < FSyncEdit.SyncItems.Count do
       begin
         LTextPosition := PTextEditorTextPosition(FSyncEdit.SyncItems.Items[LIndex])^;
+
         if IsSamePosition(LTextPosition, FSyncEdit.EditBeginPosition) or
           FSyncEdit.BlockSelected and not FSyncEdit.IsTextPositionInBlock(LTextPosition) then
         begin
@@ -9242,6 +9256,7 @@ begin
       FSyncEdit.BlockBeginPosition := SelectionBeginPosition;
       FSyncEdit.BlockEndPosition := SelectionEndPosition;
       FSyncEdit.Abort;
+
       FPosition.SelectionBegin := TextPosition;
       FPosition.SelectionEnd := FPosition.SelectionBegin;
     end
@@ -9251,6 +9266,7 @@ begin
   else
   begin
     FSyncEdit.BlockSelected := False;
+
     if FSyncEdit.InEditor then
     begin
       FSyncEdit.InEditor := False;
@@ -9304,6 +9320,7 @@ begin
   for LIndex := 0 to FCodeFoldings.AllRanges.AllCount - 1 do
   begin
     LCodeFoldingRange := FCodeFoldings.AllRanges[LIndex];
+
     if not LCodeFoldingRange.ParentCollapsed then
     begin
       if LCodeFoldingRange.FromLine > ACurrentLine then
@@ -9322,9 +9339,8 @@ begin
         Continue;
       end;
 
-      if not LCodeFoldingRange.Collapsed then
-        if LCodeFoldingRange.ToLine >= ACurrentLine then
-          LCodeFoldingRange.Widen(ALineCount)
+      if not LCodeFoldingRange.Collapsed and (LCodeFoldingRange.ToLine >= ACurrentLine) then
+        LCodeFoldingRange.Widen(ALineCount)
     end;
   end;
 end;
@@ -9338,6 +9354,7 @@ begin
   for LIndex := 0 to AFoldRanges.Count - 1 do
   begin
     LCodeFoldingRange := AFoldRanges[LIndex];
+
     UpdateFoldingRanges(LCodeFoldingRange.SubCodeFoldingRanges, ALineCount);
     LCodeFoldingRange.MoveBy(ALineCount);
   end;
@@ -9408,6 +9425,7 @@ begin
         Inc(LVerticalMaxScroll, VisibleLineCount - 1);
 
       LScrollInfo.nMin := 0;
+
       if LVerticalMaxScroll <= TMaxValues.ScrollRange then
       begin
         LScrollInfo.nMax := Max(0, LVerticalMaxScroll);
@@ -9422,6 +9440,7 @@ begin
       end;
 
       LShowScrollBar := LScrollInfo.nMax > VisibleLineCount;
+
       if LShowScrollBar then
         LScrollInfo.fMask := SIF_ALL
       else
@@ -9453,14 +9472,16 @@ begin
   if FWordWrap.Active <> AValue then
   begin
     LShowCaret := CaretInView;
-
     LOldTopLine := TopLine;
+
     if AValue then
     begin
       SetHorizontalScrollPosition(0);
+
       if FWordWrap.Width = wwwRightMargin then
         FRightMargin.Visible := True;
     end;
+
     TopLine := LOldTopLine;
 
     if soPastEndOfLine in FScroll.Options then
@@ -9521,11 +9542,13 @@ begin
       try
         LNumberDropped := DragQueryFile(THandle(AMessage.wParam), Cardinal(-1), nil, 0);
         DragQueryPoint(THandle(AMessage.wParam), LPoint);
+
         for LIndex := 0 to LNumberDropped - 1 do
         begin
           DragQueryFileW(THandle(AMessage.wParam), LIndex, LFilename, SizeOf(LFilename) div 2);
           LFilesList.Add(LFilename)
         end;
+
         FEvents.OnDropFiles(Self, LPoint, LFilesList);
       finally
         LFilesList.Free;
@@ -9658,9 +9681,10 @@ begin
   if wParam = IMN_SETOPENSTATUS then
   begin
     LIMCHandle := ImmGetContext(Handle);
+
     if LIMCHandle <> 0 then
     begin
-      GetObjectW(Font.Handle, SizeOf(TLogFontW), @LLogFontW);
+      GetObjectW(FFonts.Text.Handle, SizeOf(TLogFontW), @LLogFontW);
       ImmSetCompositionFontW(LIMCHandle, @LLogFontW);
       ImmReleaseContext(Handle, LIMCHandle);
     end;
@@ -9763,6 +9787,7 @@ begin
       Text := string(PAnsiChar(AMessage.Text));
   except
     AMessage.Result := 0;
+
     raise
   end
 end;
@@ -9881,6 +9906,7 @@ begin
   begin
     LPoint := ClientToScreen(ViewPositionToPixels(FPosition.CompletionProposal));
     Inc(LPoint.Y, GetLineHeight);
+
     FCompletionProposalPopupWindow.Left := LPoint.X;
     FCompletionProposalPopupWindow.Top := LPoint.Y;
   end;
@@ -9959,6 +9985,19 @@ end;
 function TCustomTextEditor.GetReadOnly: Boolean;
 begin
   Result := FState.ReadOnly;
+end;
+
+function TCustomTextEditor.IsTouchPropertyStored(AProperty: TTouchProperty): Boolean;
+begin
+  Result := inherited IsTouchPropertyStored(AProperty);
+
+  case AProperty of
+    tpInteractiveGestures:
+      Result := Touch.InteractiveGestures <> [igPan, igPressAndTap];
+    tpInteractiveGestureOptions:
+      Result := Touch.InteractiveGestureOptions <> [igoPanInertia,
+        igoPanSingleFingerVertical, igoPanGutter, igoParentPassthrough];
+  end;
 end;
 
 function TCustomTextEditor.GetSelectionLength: Integer;
@@ -10069,8 +10108,14 @@ begin
   LUndoList.OnAddedUndo(ASender);
 end;
 
-procedure TCustomTextEditor.ChangeObjectScale(const AMultiplier, ADivider: Integer);
+procedure TCustomTextEditor.ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer);
 begin
+  if AMultiplier = ADivider then
+    Exit;
+
+  if Assigned(FFonts) then
+    FFonts.ChangeScale(AMultiplier, ADivider);
+
   if Assigned(FLeftMargin) then
     FLeftMargin.ChangeScale(AMultiplier, ADivider);
 
@@ -10100,6 +10145,8 @@ begin
 
   if Assigned(FSearch.Map) then
     FSearch.Map.ChangeScale(AMultiplier, ADivider);
+
+  SizeOrFontChanged;
 end;
 
 procedure TCustomTextEditor.ChangeScale(AMultiplier, ADivider: Integer; AIsDpiChange: Boolean);
@@ -10121,6 +10168,8 @@ begin
 end;
 
 procedure TCustomTextEditor.CreateParams(var AParams: TCreateParams);
+const
+  BorderStyles: array[TBorderStyle] of DWORD = (0, WS_BORDER);
 begin
   StrDispose(WindowText);
   WindowText := nil;
@@ -10129,15 +10178,13 @@ begin
 
   with AParams do
   begin
-    WindowClass.Style := WindowClass.Style and not (CS_VREDRAW or CS_HREDRAW);
+    Style := Style or BorderStyles[FBorderStyle];
 
-    if (FBorderStyle = bsNone) or (FBorderStyle = bsSingle) and Ctl3D then
-      Style := Style and not WS_BORDER
-    else
-      Style := Style or WS_BORDER;
-
-    if (FBorderStyle = bsSingle) and Ctl3D then
+    if NewStyleControls and Ctl3D and (FBorderStyle = bsSingle) then
+    begin
+      Style := Style and not WS_BORDER;
       ExStyle := ExStyle or WS_EX_CLIENTEDGE;
+    end;
   end;
 end;
 
@@ -10438,6 +10485,7 @@ begin
   LTextPosition := TextPosition;
   LLineText := FLines[LTextPosition.Line];
   Dec(LTextPosition.Char);
+
   if LTextPosition.Char <= Length(LLineText) then
   begin
     while (LTextPosition.Char > 0) and IsWordBreakChar(LLineText[LTextPosition.Char]) do
@@ -10445,6 +10493,15 @@ begin
 
     Result := WordAtTextPosition(LTextPosition);
   end;
+end;
+
+procedure TCustomTextEditor.DoGetGestureOptions(var Gestures: TInteractiveGestures;
+  var Options: TInteractiveGestureOptions);
+begin
+  inherited DoGetGestureOptions(Gestures, Options);
+
+  if (igPan in Gestures) and ((FScroll.Bars = ssNone) or (FScroll.Bars = ssHorizontal)) then
+    Gestures := Gestures - [igPan];
 end;
 
 procedure TCustomTextEditor.DoExecuteCompletionProposal(const ATriggered: Boolean = False);
@@ -10718,7 +10775,7 @@ var
 
     for LIndex := 9 to 13 do
     begin
-      LBitmap := FImagesBookmark.GetBitmap(LIndex, LeftMargin.Colors.Background);
+      LBitmap := FImagesBookmark.GetBitmap(LIndex, FColors.LeftMarginBackground);
       try
         LPopupMenu.Images.Add(LBitmap, nil);
       finally
@@ -10874,8 +10931,8 @@ procedure TCustomTextEditor.DoOnPaint;
 begin
   if Assigned(FEvents.OnPaint) then
   begin
-    Canvas.Font.Assign(Font);
-    Canvas.Brush.Color := FColors.Background;
+    Canvas.Font.Assign(FFonts.Text);
+    Canvas.Brush.Color := FColors.EditorBackground;
 
     FEvents.OnPaint(Self, Canvas);
   end;
@@ -10958,8 +11015,7 @@ begin
   begin
     HintForm.Hide;
     HintForm.ItemList.Clear;
-    HintForm.Free;
-    HintForm := nil;
+    FreeAndNil(HintForm);
   end;
 
   FCodeFolding.MouseOverHint := False;
@@ -11542,6 +11598,7 @@ procedure TCustomTextEditor.Loaded;
 begin
   inherited Loaded;
 
+  // FFonts.SaveOriginalFontHeights;
   DoLeftMarginAutoSize;
 {$IFDEF ALPHASKINS}
   FSkinData.Loaded(False);
@@ -11959,9 +12016,9 @@ begin
             FCodeFoldings.HintForm := TTextEditorCodeFoldingHintForm.Create(Self);
             with FCodeFoldings.HintForm do
             begin
-              BackgroundColor := FCodeFolding.Hint.Colors.Background;
-              BorderColor := FCodeFolding.Hint.Colors.Border;
-              Font.Assign(FCodeFolding.Hint.Font);
+              BackgroundColor := FColors.CodeFoldingHintBackground;
+              BorderColor := FColors.CodeFoldingHintBorder;
+              Font.Assign(FFonts.CodeFoldingHint);
             end;
 
             LLine := LFoldRange.ToLine - LFoldRange.FromLine - 1;
@@ -12194,12 +12251,12 @@ begin
 
   FPaintHelper.BeginDrawing(Canvas.Handle);
   try
-    Canvas.Brush.Color := FColors.Background;
+    Canvas.Brush.Color := FColors.EditorBackground;
 
     if FRuler.Visible then
       PaintRuler;
 
-    FPaintHelper.SetBaseFont(Font);
+    FPaintHelper.SetBaseFont(FFonts.Text);
 
     { Text lines }
     LDrawRect.Top := 0;
@@ -12297,7 +12354,7 @@ begin
         end;
       end;
 
-      FPaintHelper.SetBaseFont(FMinimap.Font);
+      FPaintHelper.SetBaseFont(FFonts.Minimap);
 
       LSelectionAvailable := GetSelectionAvailable;
 
@@ -12334,7 +12391,7 @@ begin
       BitBlt(FMinimapHelper.BufferBitmap.Canvas.Handle, 0, 0, LDrawRect.Width, LDrawRect.Height, Canvas.Handle,
         LDrawRect.Left, LDrawRect.Top, SRCCOPY);
 
-      FPaintHelper.SetBaseFont(Font);
+      FPaintHelper.SetBaseFont(FFonts.Text);
     end;
 
     { Search map }
@@ -12397,10 +12454,10 @@ begin
   LOldPenColor := Canvas.Pen.Color;
   LLineHeight := GetLineHeight;
 
-  Canvas.Brush.Color := FCodeFolding.Colors.Background;
+  Canvas.Brush.Color := FColors.CodeFoldingBackground;
   FillRect(LRect);
   Canvas.Pen.Style := psSolid;
-  Canvas.Brush.Color := FCodeFolding.Colors.FoldingLine;
+  Canvas.Brush.Color := FColors.CodeFoldingFoldingLine;
 
   LFoldRange := nil;
   if cfoHighlightFoldingLine in FCodeFolding.Options then
@@ -12416,12 +12473,12 @@ begin
     LRect.Bottom := LRect.Top + LLineHeight;
     if FActiveLine.Visible and (not Assigned(FMultiEdit.Carets) and (FPosition.Text.Line + 1 = LLine) or
       Assigned(FMultiEdit.CArets) and
-      IsMultiEditCaretFound(LLine)) and (FCodeFolding.Colors.ActiveLineBackground <> TColors.SysNone) then
+      IsMultiEditCaretFound(LLine)) and (FColors.CodeFoldingActiveLineBackground <> TColors.SysNone) then
     begin
       if Focused then
-        Canvas.Brush.Color := FCodeFolding.Colors.ActiveLineBackground
+        Canvas.Brush.Color := FColors.CodeFoldingActiveLineBackground
       else
-        Canvas.Brush.Color := FCodeFolding.Colors.ActiveLineBackgroundUnfocused;
+        Canvas.Brush.Color := FColors.CodeFoldingActiveLineBackgroundUnfocused;
 
       FillRect(LRect);
     end
@@ -12437,13 +12494,13 @@ begin
     end;
     if Assigned(LFoldRange) and (LLine >= LFoldRange.FromLine) and (LLine <= LFoldRange.ToLine) then
     begin
-      Canvas.Brush.Color := CodeFolding.Colors.FoldingLineHighlight;
-      Canvas.Pen.Color := CodeFolding.Colors.FoldingLineHighlight;
+      Canvas.Brush.Color := FColors.CodeFoldingFoldingLineHighlight;
+      Canvas.Pen.Color := FColors.CodeFoldingFoldingLineHighlight;
     end
     else
     begin
-      Canvas.Brush.Color := CodeFolding.Colors.FoldingLine;
-      Canvas.Pen.Color := CodeFolding.Colors.FoldingLine;
+      Canvas.Brush.Color := FColors.CodeFoldingFoldingLine;
+      Canvas.Pen.Color := FColors.CodeFoldingFoldingLine;
     end;
 
     PaintCodeFoldingLine(LRect, LLine);
@@ -12507,7 +12564,7 @@ var
       else
       if CodeFolding.MarkStyle = msCircle then
       begin
-        Canvas.Brush.Color := FCodeFolding.Colors.Background;
+        Canvas.Brush.Color := FColors.CodeFoldingBackground;
         Canvas.Ellipse(LRect);
       end;
       { - }
@@ -12599,7 +12656,7 @@ begin
   begin
     LOldPenColor := Canvas.Pen.Color;
 
-    Canvas.Pen.Color := CodeFolding.Colors.CollapsedLine;
+    Canvas.Pen.Color := FColors.CodeFoldingCollapsedLine;
     Canvas.MoveTo(ALineRect.Left, ALineRect.Bottom - 1);
     Canvas.LineTo(Width, ALineRect.Bottom - 1);
 
@@ -12640,9 +12697,9 @@ begin
         FCodeFolding.Hint.Indicator.Glyph.Draw(Canvas, LCollapseMarkRect.Left, ALineRect.Top, ALineRect.Height)
       else
       begin
-        if FColors.Background <> FCodeFolding.Hint.Indicator.Colors.Background then
+        if FColors.EditorBackground <> FColors.CodeFoldingHintIndicatorBackground then
         begin
-          Canvas.Brush.Color := FCodeFolding.Hint.Indicator.Colors.Background;
+          Canvas.Brush.Color := FColors.CodeFoldingHintIndicatorBackground;
           FillRect(LCollapseMarkRect);
         end;
 
@@ -12650,7 +12707,7 @@ begin
         begin
           LBrush := TBrush.Create;
           try
-            LBrush.Color := FCodeFolding.Hint.Indicator.Colors.Border;
+            LBrush.Color := FColors.CodeFoldingHintIndicatorBorder;
             Winapi.Windows.FrameRect(Canvas.Handle, LCollapseMarkRect, LBrush.Handle);
           finally
             LBrush.Free;
@@ -12659,8 +12716,8 @@ begin
 
         if hioShowMark in FCodeFolding.Hint.Indicator.Options then
         begin
-          Canvas.Pen.Color := FCodeFolding.Hint.Indicator.Colors.Mark;
-          Canvas.Brush.Color := FCodeFolding.Hint.Indicator.Colors.Mark;
+          Canvas.Pen.Color := FColors.CodeFoldingHintIndicatorMark;
+          Canvas.Brush.Color := FColors.CodeFoldingHintIndicatorMark;
 
           case FCodeFolding.Hint.Indicator.MarkStyle of
             imsThreeDots:
@@ -12815,13 +12872,13 @@ begin
             if (LDeepestLevel = LCodeFoldingRange.IndentLevel) and (LCurrentLine >= LCodeFoldingRange.FromLine) and
               (LCurrentLine <= LCodeFoldingRange.ToLine) and (cfoHighlightIndentGuides in FCodeFolding.Options) then
             begin
-              Canvas.Pen.Color := FCodeFolding.Colors.IndentHighlight;
+              Canvas.Pen.Color := FColors.CodeFoldingIndentHighlight;
               Canvas.MoveTo(LX, LY);
               Canvas.LineTo(LX, LY + LLineHeight);
             end
             else
             begin
-              Canvas.Pen.Color := FCodeFolding.Colors.Indent;
+              Canvas.Pen.Color := FColors.CodeFoldingIndent;
 
               LZ := LY;
               case FCodeFolding.GuideLineStyle of
@@ -12938,7 +12995,7 @@ var
     LMargin: Integer;
     LLongLineWidth, LShortLineWith: Integer;
   begin
-    FPaintHelper.SetBaseFont(FLeftMargin.Font);
+    FPaintHelper.SetBaseFont(FFonts.LineNumbers);
     try
       LLineRect := AClipRect;
 
@@ -12972,20 +13029,20 @@ var
 
         LLineNumber := '';
 
-        FPaintHelper.SetBackgroundColor(FLeftMargin.Colors.Background);
+        FPaintHelper.SetBackgroundColor(FColors.LeftMarginBackground);
 
         if FActiveLine.Visible and (not Assigned(FMultiEdit.Carets) and (LLine = LCaretY) or
-          Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine)) and (FLeftMargin.Colors.ActiveLineBackground <> TColors.SysNone) then
+          Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine)) and (FColors.LeftMarginActiveLineBackground <> TColors.SysNone) then
         begin
           if Focused then
           begin
-            FPaintHelper.SetBackgroundColor(FLeftMargin.Colors.ActiveLineBackground);
-            Canvas.Brush.Color := FLeftMargin.Colors.ActiveLineBackground;
+            FPaintHelper.SetBackgroundColor(FColors.LeftMarginActiveLineBackground);
+            Canvas.Brush.Color := FColors.LeftMarginActiveLineBackground;
           end
           else
           begin
-            FPaintHelper.SetBackgroundColor(FLeftMargin.Colors.ActiveLineBackgroundUnfocused);
-            Canvas.Brush.Color := FLeftMargin.Colors.ActiveLineBackgroundUnfocused;
+            FPaintHelper.SetBackgroundColor(FColors.LeftMarginActiveLineBackgroundUnfocused);
+            Canvas.Brush.Color := FColors.LeftMarginActiveLineBackgroundUnfocused;
           end;
 
           if Assigned(FMultiEdit.Carets) then
@@ -13002,23 +13059,23 @@ var
           end
         end;
 
-        if (LLine = LCaretY) and FActiveLine.Visible and (FActiveLine.Colors.Foreground <> TColors.SysNone) then
+        if (LLine = LCaretY) and FActiveLine.Visible and (FColors.ActiveLineForeground <> TColors.SysNone) then
         begin
           if Focused then
           begin
-            if FLeftMargin.Colors.ActiveLineNumber = TColors.SysNone then
-              FPaintHelper.SetForegroundColor(FActiveLine.Colors.Foreground)
+            if FColors.LeftMarginActiveLineNumber = TColors.SysNone then
+              FPaintHelper.SetForegroundColor(FColors.ActiveLineForeground)
             else
-              FPaintHelper.SetForegroundColor(FLeftMargin.Colors.ActiveLineNumber)
+              FPaintHelper.SetForegroundColor(FColors.LeftMarginActiveLineNumber)
           end
           else
-            FPaintHelper.SetForegroundColor(FActiveLine.Colors.ForegroundUnfocused)
+            FPaintHelper.SetForegroundColor(FColors.ActiveLineForegroundUnfocused)
         end
         else
-        if (LLine = LCaretY) and (FLeftMargin.Colors.ActiveLineNumber <> TColors.SysNone) then
-          FPaintHelper.SetForegroundColor(FLeftMargin.Colors.ActiveLineNumber)
+        if (LLine = LCaretY) and (FColors.LeftMarginActiveLineNumber <> TColors.SysNone) then
+          FPaintHelper.SetForegroundColor(FColors.LeftMarginActiveLineNumber)
         else
-          FPaintHelper.SetForegroundColor(FLeftMargin.Font.Color);
+          FPaintHelper.SetForegroundColor(FColors.LeftMarginLineNumbers);
 
         LPreviousLine := LLine;
         if FWordWrap.Active then
@@ -13035,7 +13092,7 @@ var
               (LIndex <> LeftMargin.LineNumbers.StartFrom) then
             begin
               LOldColor := Canvas.Pen.Color;
-              Canvas.Pen.Color := LeftMargin.Colors.LineNumberLine;
+              Canvas.Pen.Color := FColors.LeftMarginLineNumberLine;
               LTop := LLineRect.Top + (LLineHeight div 2);
               if LLine mod 5 = 0 then
                 Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + LLongLineWidth - LMargin, LTop)
@@ -13060,7 +13117,7 @@ var
         Winapi.Windows.ExtTextOut(Canvas.Handle, LLeftMarginWidth - 1 - LMargin - LTextSize.cx,
           LLineRect.Top + ((LLineHeight - Integer(LTextSize.cy)) div 2), ETO_OPAQUE, @LLineRect, LPLineNumber, LLength, nil);
       end;
-      FPaintHelper.SetBackgroundColor(FLeftMargin.Colors.Background);
+      FPaintHelper.SetBackgroundColor(FColors.LeftMarginBackground);
       { Erase the remaining area }
       if AClipRect.Bottom > LLineRect.Bottom then
       begin
@@ -13069,7 +13126,7 @@ var
         Winapi.Windows.ExtTextOut(Canvas.Handle, LLineRect.Left, LLineRect.Top, ETO_OPAQUE, @LLineRect, '', 0, nil);
       end;
     finally
-      FPaintHelper.SetBaseFont(Font);
+      FPaintHelper.SetBaseFont(FFonts.Text);
     end;
   end;
 
@@ -13104,9 +13161,9 @@ var
       if FRuler.Visible then
         Inc(LPanelRect.Top, FRuler.Height);
 
-      if FLeftMargin.Colors.BookmarkPanelBackground <> TColors.SysNone then
+      if FColors.LeftMarginBookmarkPanelBackground <> TColors.SysNone then
       begin
-        Canvas.Brush.Color := FLeftMargin.Colors.BookmarkPanelBackground;
+        Canvas.Brush.Color := FColors.LeftMarginBookmarkPanelBackground;
         FillRect(LPanelRect);
       end;
 
@@ -13114,16 +13171,16 @@ var
       begin
         LLine := GetViewTextLineNumber(LIndex);
 
-        if FActiveLine.Visible and (FLeftMargin.Colors.ActiveLineBackground <> TColors.SysNone) and
+        if FActiveLine.Visible and (FColors.LeftMarginActiveLineBackground <> TColors.SysNone) and
           not Assigned(FMultiEdit.Carets) and (LLine = FPosition.Text.Line + 1) or
           Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine) then
         begin
           SetPanelActiveLineRect;
 
           if Focused then
-            Canvas.Brush.Color := FLeftMargin.Colors.ActiveLineBackground
+            Canvas.Brush.Color := FColors.LeftMarginActiveLineBackground
           else
-            Canvas.Brush.Color := FLeftMargin.Colors.ActiveLineBackgroundUnfocused;
+            Canvas.Brush.Color := FColors.LeftMarginActiveLineBackgroundUnfocused;
 
           FillRect(LPanelActiveLineRect);
         end
@@ -13150,7 +13207,7 @@ var
   begin
     if FWordWrap.Active and FWordWrap.Indicator.Visible then
     begin
-      FWordWrap.CreateIndicatorBitmap;
+      FWordWrap.CreateIndicatorBitmap(FColors.WordWrapIndicatorArrow, FColors.WordWrapIndicatorLines);
 
       for LIndex := AFirstLine to ALastLine do
       begin
@@ -13175,13 +13232,13 @@ var
     if (FLeftMargin.Border.Style <> mbsNone) and (AClipRect.Right >= LRightPosition) then
     with Canvas do
     begin
-      Pen.Color := FLeftMargin.Colors.Border;
+      Pen.Color := FColors.LeftMarginBorder;
       Pen.Width := 1;
       if FLeftMargin.Border.Style = mbsMiddle then
       begin
         MoveTo(LRightPosition, AClipRect.Top);
         LineTo(LRightPosition, AClipRect.Bottom);
-        Pen.Color := FLeftMargin.Colors.Background;
+        Pen.Color := FColors.LeftMarginBackground;
       end;
       MoveTo(LRightPosition + 1, AClipRect.Top);
       LineTo(LRightPosition + 1, AClipRect.Bottom);
@@ -13289,9 +13346,9 @@ var
             Inc(LLineStateRect.Top, FRuler.Height);
           LLineStateRect.Bottom := LLineStateRect.Top + LLineHeight;
           if LLineState = lsNormal then
-            Canvas.Brush.Color := FLeftMargin.Colors.LineStateNormal
+            Canvas.Brush.Color := FColors.LeftMarginLineStateNormal
           else
-            Canvas.Brush.Color := FLeftMargin.Colors.LineStateModified;
+            Canvas.Brush.Color := FColors.LeftMarginLineStateModified;
           FillRect(LLineStateRect);
         end;
       end;
@@ -13333,8 +13390,8 @@ var
   end;
 
 begin
-  FPaintHelper.SetBackgroundColor(FLeftMargin.Colors.Background);
-  Canvas.Brush.Color := FLeftMargin.Colors.Background;
+  FPaintHelper.SetBackgroundColor(FColors.LeftMarginBackground);
+  Canvas.Brush.Color := FColors.LeftMarginBackground;
   FillRect(AClipRect);
 
   LLineHeight := GetLineHeight;
@@ -13361,7 +13418,7 @@ begin
   with FMinimapHelper.Indicator.Bitmap do
   begin
     Height := 0;
-    Canvas.Brush.Color := FMinimap.Colors.VisibleLines;
+    Canvas.Brush.Color := FColors.MinimapVisibleLines;
     Width := AClipRect.Width;
     Height := VisibleLineCount * FMinimap.CharHeight;
   end;
@@ -13388,7 +13445,7 @@ begin
 
   if ioShowBorder in FMinimap.Indicator.Options then
   begin
-    Canvas.Pen.Color := FMinimap.Colors.VisibleLines;
+    Canvas.Pen.Color := FColors.MinimapVisibleLines;
     Canvas.Brush.Style := bsClear;
     Canvas.Rectangle(Rect(AClipRect.Left, LTop, AClipRect.Right, LTop + FMinimapHelper.Indicator.Bitmap.Height));
   end;
@@ -13426,8 +13483,8 @@ procedure  TCustomTextEditor.PaintProgressBar;
 var
   LTop, LRight: Integer;
 begin
-  Canvas.Brush.Color := FLeftMargin.Font.Color;
-  Canvas.Pen.Color := FLeftMargin.Font.Color;
+  Canvas.Brush.Color := FColors.LeftMarginLineNumbers;
+  Canvas.Pen.Color := FColors.LeftMarginLineNumbers;
   LTop := ClientRect.Bottom - 14;
   LRight := Round((FLines.ProgressPosition / 100) * ClientRect.Width) - 8;
   Canvas.Rectangle(Rect(4, LTop, LRight, LTop + 8));
@@ -13451,18 +13508,18 @@ begin
 
   LOldColor := Canvas.Brush.Color;
   LOldPenColor := Canvas.Pen.Color;
-  Canvas.Brush.Color := FRuler.Colors.Background;
+  Canvas.Brush.Color := FColors.RulerBackground;
 
-  FPaintHelper.SetBaseFont(FRuler.Font);
+  FPaintHelper.SetBaseFont(FFonts.Ruler);
   FPaintHelper.SetBackgroundColor(Canvas.Brush.Color);
-  FPaintHelper.SetForegroundColor(FRuler.Font.Color);
+  FPaintHelper.SetForegroundColor(FColors.RulerNumbers);
 
   LRulerCaretPosition := FLeftMarginWidth + (FViewPosition.Column - 1) * LCharWidth - FScrollHelper.HorizontalPosition;
   try
     FillRect(LClipRect);
     with Canvas do
     begin
-      Pen.Color := FRuler.Colors.Border;
+      Pen.Color := FColors.RulerBorder;
       Pen.Width := 1;
       MoveTo(0, LClipRect.Bottom);
       LineTo(LClipRect.Right, LClipRect.Bottom);
@@ -13474,12 +13531,12 @@ begin
         LRect := LClipRect;
         LRect.Left := FLeftMarginWidth + (FPosition.SelectionBegin.Char - 1) * LCharWidth - FScrollHelper.HorizontalPosition;
         LRect.Right := LRulerCaretPosition;
-        Canvas.Brush.Color := FRuler.Colors.Selection;
+        Canvas.Brush.Color := FColors.RulerSelection;
         FPaintHelper.SetBackgroundColor(Canvas.Brush.Color);
         FillRect(LRect);
-        Canvas.Brush.Color := FRuler.Colors.Background;
+        Canvas.Brush.Color := FColors.RulerBackground;
         FPaintHelper.SetBackgroundColor(Canvas.Brush.Color);
-        Pen.Color := FSelection.Colors.Background;
+        Pen.Color := FColors.SelectionBackground;
         MoveTo(LRect.Left, 0);
         LineTo(LRect.Left, LClipRect.Bottom);
       end;
@@ -13492,7 +13549,7 @@ begin
 
       SetBkMode(Canvas.Handle, TRANSPARENT);
 
-      Pen.Color := FRuler.Colors.Lines;
+      Pen.Color := FColors.RulerLines;
 
       for LIndex := LCharsInView to FScrollHelper.PageWidth div LCharWidth + LCharsInView + 10 do
       begin
@@ -13525,7 +13582,7 @@ begin
   finally
     Canvas.Brush.Color := LOldColor;
     Canvas.Pen.Color := LOldPenColor;
-    FPaintHelper.SetBaseFont(Font);
+    FPaintHelper.SetBaseFont(FFonts.Text);
   end;
 end;
 
@@ -13539,7 +13596,7 @@ begin
       FScrollHelper.HorizontalPosition;
     if (LRightMarginPosition >= AClipRect.Left) and (LRightMarginPosition <= AClipRect.Right) then
     begin
-      Canvas.Pen.Color := FRightMargin.Colors.Margin;
+      Canvas.Pen.Color := FColors.RightMargin;
       LY := 0;
       if FRuler.Visible then
         Inc(LY, FRuler.Height);
@@ -13560,7 +13617,7 @@ begin
     Pen.Width := 1;
     LOldPenStyle := Pen.Style;
     Pen.Style := psDot;
-    Pen.Color := FRightMargin.Colors.MovingEdge;
+    Pen.Color := FColors.RightMovingEdge;
     LOldStyle := Brush.Style;
     Brush.Style := bsClear;
     LY := 0;
@@ -13584,7 +13641,7 @@ begin
     Pen.Width := 1;
     LOldPenStyle := Pen.Style;
     Pen.Style := psDot;
-    Pen.Color := FRuler.Colors.MovingEdge;
+    Pen.Color := FColors.RulerMovingEdge;
     LOldStyle := Brush.Style;
     Brush.Style := bsClear;
     LY := 0;
@@ -13620,20 +13677,20 @@ begin
   LRect := AClipRect;
 
   { Background }
-  if FSearch.Map.Colors.Background <> TColors.SysNone then
-    Canvas.Brush.Color := FSearch.Map.Colors.Background
+  if FColors.SearchMapBackground <> TColors.SysNone then
+    Canvas.Brush.Color := FColors.SearchMapBackground
   else
-    Canvas.Brush.Color := FColors.Background;
+    Canvas.Brush.Color := FColors.EditorBackground;
   FillRect(LRect);
   { Lines in window }
   LHeight := ClientHeight / Max(FLines.Count, 1);
   LRect.Top := Round((TopLine - 1) * LHeight);
   LRect.Bottom := Max(Round((TopLine - 1 + VisibleLineCount) * LHeight), LRect.Top + 1);
-  Canvas.Brush.Color := FColors.Background;
+  Canvas.Brush.Color := FColors.EditorBackground;
   FillRect(LRect);
   { Draw lines }
-  if FSearch.Map.Colors.Foreground <> TColors.SysNone then
-    Canvas.Pen.Color := FSearch.Map.Colors.Foreground
+  if FColors.SearchMapForeground <> TColors.SysNone then
+    Canvas.Pen.Color := FColors.SearchMapForeground
   else
     Canvas.Pen.Color := clHighlight;
   Canvas.Pen.Width := 1;
@@ -13649,10 +13706,10 @@ begin
   { Draw active line }
   if moShowActiveLine in FSearch.Map.Options then
   begin
-    if FSearch.Map.Colors.ActiveLine <> TColors.SysNone then
-      Canvas.Pen.Color := FSearch.Map.Colors.ActiveLine
+    if FColors.SearchMapActiveLine <> TColors.SysNone then
+      Canvas.Pen.Color := FColors.SearchMapActiveLine
     else
-      Canvas.Pen.Color := FActiveLine.Colors.Background;
+      Canvas.Pen.Color := FColors.ActiveLineBackground;
     LLine := Round((FViewPosition.Row - 1) * LHeight);
     Canvas.MoveTo(LRect.Left, LLine);
     Canvas.LineTo(LRect.Right, LLine);
@@ -13663,8 +13720,8 @@ end;
 
 procedure TCustomTextEditor.SetOppositeColors;
 begin
-  FPaintHelper.SetBackgroundColor(Colors.Foreground);
-  FPaintHelper.SetForegroundColor(Colors.Background);
+  FPaintHelper.SetBackgroundColor(Colors.EditorForeground);
+  FPaintHelper.SetForegroundColor(Colors.EditorBackground);
   FPaintHelper.SetStyle([]);
 end;
 
@@ -13841,7 +13898,7 @@ begin
   LOldPenColor := Canvas.Pen.Color;
   LOldBrushStyle := Canvas.Brush.Style;
   Canvas.Brush.Style := bsClear;
-  Canvas.Pen.Color := FSyncEdit.Colors.EditBorder;
+  Canvas.Pen.Color := FColors.SyncEditEditBorder;
   DrawRectangle(FSyncEdit.EditBeginPosition);
 
   for LIndex := 0 to FSyncEdit.SyncItems.Count - 1 do
@@ -13853,7 +13910,7 @@ begin
     else
     if LTextPosition.Line + 1 >= TopLine then
     begin
-      Canvas.Pen.Color := FSyncEdit.Colors.WordBorder;
+      Canvas.Pen.Color := FColors.SyncEditWordBorder;
       DrawRectangle(LTextPosition);
     end;
   end;
@@ -13914,28 +13971,28 @@ var
     LHighlighterAttribute: TTextEditorHighlighterAttribute;
   begin
     if AMinimap and (moShowBookmarks in FMinimap.Options) and LBookmarkOnCurrentLine then
-      Result := FMinimap.Colors.Bookmark
+      Result := FColors.MinimapBookmark
     else
-    if LIsCurrentLine and FActiveLine.Visible and Focused and (FActiveLine.Colors.Background <> TColors.SysNone) then
-      Result := FActiveLine.Colors.Background
+    if LIsCurrentLine and FActiveLine.Visible and Focused and (FColors.ActiveLineBackground <> TColors.SysNone) then
+      Result := FColors.ActiveLineBackground
     else
-    if LIsCurrentLine and FActiveLine.Visible and not Focused and (FActiveLine.Colors.BackgroundUnfocused <> TColors.SysNone) then
-      Result := FActiveLine.Colors.BackgroundUnfocused
+    if LIsCurrentLine and FActiveLine.Visible and not Focused and (FColors.ActiveLineBackgroundUnfocused <> TColors.SysNone) then
+      Result := FColors.ActiveLineBackgroundUnfocused
     else
     if LMarkColor <> TColors.SysNone then
       Result := LMarkColor
     else
     if LIsSyncEditBlock then
-      Result := FSyncEdit.Colors.Background
+      Result := FColors.SyncEditBackground
     else
     if LIsSearchInSelectionBlock then
-      Result := FSearch.InSelection.Background
+      Result := FColors.SearchInSelectionBackground
     else
-    if AMinimap and (FMinimap.Colors.Background <> TColors.SysNone) then
-      Result := FMinimap.Colors.Background
+    if AMinimap and (FColors.MinimapBackground <> TColors.SysNone) then
+      Result := FColors.MinimapBackground
     else
     begin
-      Result := FColors.Background;
+      Result := FColors.EditorBackground;
       if Assigned(FHighlighter) then
       begin
         LHighlighterAttribute := FHighlighter.RangeAttribute;
@@ -13951,15 +14008,19 @@ var
   begin
     { Selection colors }
     if AMinimap and (moShowBookmarks in FMinimap.Options) and LBookmarkOnCurrentLine then
-      LColor := FMinimap.Colors.Bookmark
+      LColor := FColors.MinimapBookmark
     else
     if ASelected then
     begin
-      if FSelection.Colors.Foreground <> TColors.SysNone then
-        FPaintHelper.SetForegroundColor(FSelection.Colors.Foreground)
+      if FColors.SelectionForeground <> TColors.SysNone then
+        FPaintHelper.SetForegroundColor(FColors.SelectionForeground)
       else
         FPaintHelper.SetForegroundColor(LForegroundColor);
-      LColor := FSelection.Colors.Background;
+
+      if Focused then
+        LColor := FColors.SelectionBackground
+      else
+        LColor := FColors.SelectionBackgroundUnfocused
     end
     { Normal colors }
     else
@@ -14039,9 +14100,9 @@ var
       LOldColor := FPaintHelper.Color;
       LOldBackgroundColor := FPaintHelper.BackgroundColor;
 
-      if FSearch.Highlighter.Colors.Foreground <> TColors.SysNone then
-        FPaintHelper.SetForegroundColor(FSearch.Highlighter.Colors.Foreground);
-      FPaintHelper.SetBackgroundColor(FSearch.Highlighter.Colors.Background);
+      if FColors.SearchHighlighterForeground <> TColors.SysNone then
+        FPaintHelper.SetForegroundColor(FColors.SearchHighlighterForeground);
+      FPaintHelper.SetBackgroundColor(FColors.SearchHighlighterBackground);
 
       while True do
       begin
@@ -14295,18 +14356,18 @@ var
       else
       if FSpecialChars.Visible and (LTokenHelper.EmptySpace <> esNone) and
         (not (scoShowOnlyInSelection in FSpecialChars.Options) or
-        (scoShowOnlyInSelection in FSpecialChars.Options) and (Canvas.Brush.Color = FSelection.Colors.Background)) and
+        (scoShowOnlyInSelection in FSpecialChars.Options) and (Canvas.Brush.Color = FColors.SelectionBackground)) and
         (not AMinimap or AMinimap and (moShowSpecialChars in FMinimap.Options)) then
       begin
-        if FSpecialChars.Selection.Visible and (Canvas.Brush.Color = FSelection.Colors.Background) then
+        if FSpecialChars.Selection.Visible and (Canvas.Brush.Color = FColors.SelectionBackground) then
           Canvas.Pen.Color := FSpecialChars.Selection.Color
         else
           Canvas.Pen.Color := LTokenHelper.Foreground;
 
         FillRect(LTextRect);
 
-        if (FSpecialChars.Selection.Visible and (Canvas.Brush.Color = FSelection.Colors.Background) or
-          (Canvas.Brush.Color <> FSelection.Colors.Background)) then
+        if (FSpecialChars.Selection.Visible and (Canvas.Brush.Color = FColors.SelectionBackground) or
+          (Canvas.Brush.Color <> FColors.SelectionBackground)) then
         begin
           if LTokenHelper.EmptySpace = esSpace then
             PaintSpecialCharSpace;
@@ -14326,9 +14387,9 @@ var
             { Size }
             LTempBitmap.Width := Width;
             LTempBitmap.Height := 0; // To avoid FillRect
-            LTempBitmap.Height := LTextRect.Height; //FI:W508 Variable is assigned twice successively
+            LTempBitmap.Height := LTextRect.Height;
             { Character }
-            LTempBitmap.Canvas.Font.Assign(Font);
+            LTempBitmap.Canvas.Font.Assign(FFonts.Text);
 
             LTempRect := LTextRect;
             LTempRect.Top := 0;
@@ -14549,8 +14610,8 @@ var
 
     if AMinimap and not (ioUseBlending in FMinimap.Indicator.Options) then
       if (LViewLine >= TopLine) and (LViewLine < TopLine + VisibleLineCount) then
-        if (LBackgroundColor <> FSearch.Highlighter.Colors.Background) and (LBackgroundColor <> clRed) then
-          LBackgroundColor := FMinimap.Colors.VisibleLines;
+        if (LBackgroundColor <> FColors.SearchHighlighterBackground) and (LBackgroundColor <> clRed) then
+          LBackgroundColor := FColors.MinimapVisibleLines;
 
     if LCustomLineColors and (LCustomForegroundColor <> TColors.SysNone) then
       LForegroundColor := LCustomForegroundColor;
@@ -14689,7 +14750,7 @@ var
 
       if AMinimap and not (ioUseBlending in FMinimap.Indicator.Options) then
         if (LViewLine >= TopLine) and (LViewLine < TopLine + VisibleLineCount) then
-          LBackgroundColor := FMinimap.Colors.VisibleLines;
+          LBackgroundColor := FColors.MinimapVisibleLines;
 
       if LCustomLineColors and (LCustomForegroundColor <> TColors.SysNone) then
         LForegroundColor := LCustomForegroundColor;
@@ -14771,10 +14832,10 @@ var
     LForeground := AForeground;
     LBackground := ABackground;
     if (LBackground = TColors.SysNone) or
-      ((FActiveLine.Colors.Background <> TColors.SysNone) and LIsCurrentLine and not ACustomBackgroundColor) then
+      ((FColors.ActiveLineBackground <> TColors.SysNone) and LIsCurrentLine and not ACustomBackgroundColor) then
       LBackground := GetBackgroundColor;
     if AForeground = TColors.SysNone then
-      LForeground := FColors.Foreground;
+      LForeground := FColors.EditorForeground;
 
     LCanAppend := False;
 
@@ -14949,15 +15010,15 @@ var
       if not (csDesigning in ComponentState) and Assigned(LHighlighterAttribute) then
       begin
         if LHighlighterAttribute.Foreground = TColors.SysNone then
-          LForegroundColor := Colors.Foreground
+          LForegroundColor := Colors.EditorForeground
         else
           LForegroundColor := LHighlighterAttribute.Foreground;
 
-        if not AMinimap and LIsCurrentLine and FActiveLine.Visible and (FActiveLine.Colors.Foreground <> TColors.SysNone) then
-          LForegroundColor := FActiveLine.Colors.Foreground;
+        if not AMinimap and LIsCurrentLine and FActiveLine.Visible and (FColors.ActiveLineForeground <> TColors.SysNone) then
+          LForegroundColor := FColors.ActiveLineForeground;
 
-        if AMinimap and (FMinimap.Colors.Background <> TColors.SysNone) then
-          LBackgroundColor := FMinimap.Colors.Background
+        if AMinimap and (FColors.MinimapBackground <> TColors.SysNone) then
+          LBackgroundColor := FColors.MinimapBackground
         else
           LBackgroundColor := LHighlighterAttribute.Background;
 
@@ -14983,20 +15044,20 @@ var
             begin
               if LIsCustomBackgroundColor then
               begin
-                if LForegroundColor = FMatchingPairs.Colors.Matched then
-                  LForegroundColor := FColors.Background;
+                if LForegroundColor = FColors.MatchingPairMatched then
+                  LForegroundColor := FColors.EditorBackground;
 
-                if not AMinimap and (FActiveLine.Colors.Foreground <> TColors.SysNone) then
-                  LForegroundColor := FActiveLine.Colors.Foreground;
+                if not AMinimap and (FColors.ActiveLineForeground <> TColors.SysNone) then
+                  LForegroundColor := FColors.ActiveLineForeground;
 
                 if not (mpoUnderline in FMatchingPairs.Options) then
-                  LBackgroundColor := FMatchingPairs.Colors.Matched;
+                  LBackgroundColor := FColors.MatchingPairMatched;
               end;
 
               if mpoUnderline in FMatchingPairs.Options then
               begin
                 LUnderline := ulUnderline;
-                LUnderlineColor := FMatchingPairs.Colors.Underline;
+                LUnderlineColor := FColors.MatchingPairUnderline;
               end;
             end
             else
@@ -15004,24 +15065,25 @@ var
             begin
               if LIsCustomBackgroundColor then
               begin
-                if LForegroundColor = FMatchingPairs.Colors.Unmatched then
-                  LForegroundColor := FColors.Background;
-                LBackgroundColor := FMatchingPairs.Colors.Unmatched;
+                if LForegroundColor = FColors.MatchingPairUnmatched then
+                  LForegroundColor := FColors.EditorBackground;
+
+                LBackgroundColor := FColors.MatchingPairUnmatched;
               end;
 
               if mpoUnderline in FMatchingPairs.Options then
               begin
                 LUnderline := ulUnderline;
-                LUnderlineColor := FMatchingPairs.Colors.Underline;
+                LUnderlineColor := FColors.MatchingPairUnderline;
               end;
             end;
           end;
 
         if FSyncEdit.BlockSelected and LIsSyncEditBlock then
-          LBackgroundColor := FSyncEdit.Colors.Background;
+          LBackgroundColor := FColors.SyncEditBackground;
 
         if FSearch.InSelection.Active and LIsSearchInSelectionBlock then
-          LBackgroundColor := FSearch.InSelection.Background;
+          LBackgroundColor := FColors.SearchInSelectionBackground;
 
         if not FSyncEdit.Visible and LAnySelection and (soHighlightSimilarTerms in FSelection.Options) and
           not FSearch.InSelection.Active then
@@ -15055,15 +15117,15 @@ var
 
           if LIsCustomBackgroundColor then
           begin
-            if FSearch.Highlighter.Colors.Foreground <> TColors.SysNone then
-              LForegroundColor := FSearch.Highlighter.Colors.Foreground;
-            LBackgroundColor := FSearch.Highlighter.Colors.Background;
-            LBorderColor := FSearch.Highlighter.Colors.Border;
+            if FColors.SearchHighlighterForeground <> TColors.SysNone then
+              LForegroundColor := FColors.SearchHighlighterForeground;
+            LBackgroundColor := FColors.SearchHighlighterBackground;
+            LBorderColor := FColors.SearchHighlighterBorder;
           end;
         end;
 
         if (LMarkColor <> TColors.SysNone) and not (LIsCurrentLine and FActiveLine.Visible and
-          (FActiveLine.Colors.Background <> TColors.SysNone)) then
+          (FColors.ActiveLineBackground <> TColors.SysNone)) then
         begin
           LIsCustomBackgroundColor := True;
           LBackgroundColor := LMarkColor;
@@ -15096,7 +15158,7 @@ var
       end
       else
         PrepareTokenHelper(LTokenText, LTokenPosition, LTokenLength, LForegroundColor, LBackgroundColor, LBorderColor,
-          Font.Style, ulNone, TColors.SysNone, False);
+          FFonts.Text.Style, ulNone, TColors.SysNone, False);
     end;
 
     procedure SetSelectionVariables;
@@ -15330,7 +15392,7 @@ var
         else
           LIsCurrentLine := LTextCaretY = LCurrentLine;
 
-        LForegroundColor := FColors.Foreground;
+        LForegroundColor := FColors.EditorForeground;
         LBackgroundColor := GetBackgroundColor;
 
         LCustomLineColors := False;
@@ -15341,7 +15403,7 @@ var
           LItem := FHighlightLine.Item[LIndex];
 
           LRegExOptions := [];
-          if LItem.IgnoreCase then
+          if hlIgnoreCase in LItem.Options then
             LRegExOptions := [roIgnoreCase];
 
           LRegEx := TRegex.Create(LItem.Pattern, LRegExOptions);
@@ -15522,7 +15584,7 @@ begin
 
   if LTokenRect.Top < LTokenRect.Bottom then
   begin
-    LBackgroundColor := FColors.Background;
+    LBackgroundColor := FColors.EditorBackground;
     SetDrawingColors(False);
     FillRect(LTokenRect);
   end;
@@ -16589,13 +16651,12 @@ end;
 
 function TCustomTextEditor.FindPrevious(const AHandleNotFound: Boolean = True): Boolean;
 var
-  LItemIndex: Integer;
   LSearchItem: PTextEditorSearchItem;
 begin
   Result := False;
 
-  LItemIndex := FSearch.GetPreviousSearchItemIndex(TextPosition);
-  if LItemIndex = -1 then
+  FSearch.ItemIndex := FSearch.GetPreviousSearchItemIndex(TextPosition);
+  if FSearch.ItemIndex = -1 then
   begin
     if not AHandleNotFound or AHandleNotFound and (FSearch.SearchText = '') then
       Exit;
@@ -16620,7 +16681,7 @@ begin
   end
   else
   begin
-    LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LItemIndex]);
+    LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[FSearch.ItemIndex]);
 
     if LSearchItem.BeginTextPosition.Line < FLineNumbers.TopLine then
       GoToLineAndCenter(LSearchItem.BeginTextPosition.Line, LSearchItem.BeginTextPosition.Char)
@@ -16636,13 +16697,12 @@ end;
 
 function TCustomTextEditor.FindNext(const AHandleNotFound: Boolean = True): Boolean;
 var
-  LItemIndex: Integer;
   LSearchItem: PTextEditorSearchItem;
 begin
   Result := False;
 
-  LItemIndex := FSearch.GetNextSearchItemIndex(TextPosition);
-  if LItemIndex = -1 then
+  FSearch.ItemIndex := FSearch.GetNextSearchItemIndex(TextPosition);
+  if FSearch.ItemIndex = -1 then
   begin
     if not AHandleNotFound or AHandleNotFound and (FSearch.SearchText = '') then
       Exit;
@@ -16668,7 +16728,7 @@ begin
   end
   else
   begin
-    LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LItemIndex]);
+    LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[FSearch.ItemIndex]);
 
     if LSearchItem.BeginTextPosition.Line >= FLineNumbers.TopLine + VisibleLineCount - 1 then
       GoToLineAndCenter(LSearchItem.EndTextPosition.Line, LSearchItem.EndTextPosition.Char)
@@ -17789,9 +17849,15 @@ begin
 end;
 
 procedure TCustomTextEditor.ClearHighlightLine;
+var
+  LIndex: Integer;
 begin
   if Assigned(FHighlightLine) then
-    FHighlightLine.Items.Clear;
+  begin
+    for LIndex := FHighlightLine.Items.Count - 1 downto 0 do
+    if hlDeleteOnHighlighterLoad in FHighlightLine.Item[LIndex].Options then
+      FHighlightLine.Items.Delete(LIndex);
+  end;
 end;
 
 procedure TCustomTextEditor.ClearMatchingPair;
@@ -18913,7 +18979,7 @@ end;
 
 procedure TCustomTextEditor.ExportToHTML(const AStream: TStream; const ACharSet: string = ''; const AEncoding: System.SysUtils.TEncoding = nil);
 begin
-  with TTextEditorExportHTML.Create(Self, Font, ACharSet) do
+  with TTextEditorExportHTML.Create(Self, FFonts.Text, ACharSet) do
   try
     SaveToStream(AStream, AEncoding);
   finally
@@ -18923,7 +18989,7 @@ end;
 
 function TCustomTextEditor.TextToHTML(const AClipboardFormat: Boolean = False): string;
 begin
-  with TTextEditorExportHTML.Create(Self, Font, '') do
+  with TTextEditorExportHTML.Create(Self, FFonts.Text, '') do
   try
     Result := AsText(AClipboardFormat);
   finally
@@ -19505,10 +19571,7 @@ begin
     begin
       Line := ATextPosition.Line;
       Char := ATextPosition.Char;
-      if AColor = TColors.SysNone then
-        Background := FLeftMargin.Colors.MarkDefaultBackground
-      else
-        Background := AColor;
+      Background := AColor;
       ImageIndex := AImageIndex;
       Index := AIndex;
       Visible := True;
@@ -19999,6 +20062,32 @@ begin
   if Assigned(FBoundLabel) then
     FBoundLabel.HandleOwnerMsg(AMessage, Self);
 {$ENDIF}
+end;
+
+procedure TCustomTextEditor.Zoom(const APercentage: Integer = -1);
+var
+  LPixelsPerInch: Integer;
+  LMultiplier: Integer;
+begin
+  LPixelsPerInch := {$IFDEF ALPHASKINS}DefaultManager.Options.PixelsPerInch{$ELSE}PixelsPerInch{$ENDIF};
+
+  if FZoomDivider = 0 then
+    FZoomDivider := LPixelsPerInch;
+
+  if APercentage = -1 then
+  begin
+    LMultiplier := FZoomDivider;
+    FZoomDivider := LPixelsPerInch;
+    FFonts.ChangeScale(LMultiplier, FZoomDivider);
+    FZoomDivider := LMultiplier;
+    Exit;
+  end
+  else
+    LMultiplier := Round((APercentage / 100) * LPixelsPerInch);
+
+  ChangeObjectScale(LMultiplier, FZoomDivider);
+
+  FZoomDivider := LMultiplier;
 end;
 
 procedure TCustomTextEditor.SetFullFilename(const AName: string);

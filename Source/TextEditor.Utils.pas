@@ -16,8 +16,8 @@ function CharInString(const AChar: Char; const AString: string): Boolean; inline
 function ColorToHex(const AColor: TColor): string;
 function ConvertTabs(const ALine: string; ATabWidth: Integer; var AHasTabs: Boolean; const AColumns: Boolean): string;
 function DeleteWhitespace(const AValue: string): string;
-function GetClipboardText: string;
 function GetBOFPosition: TTextEditorTextPosition; inline;
+function GetClipboardText: string;
 function GetPosition(const AChar, ALine: Integer): TTextEditorTextPosition; inline;
 function GetViewPosition(const AColumn: Integer; const ARow: Integer): TTextEditorViewPosition; inline;
 function HexToColor(const AColor: string): TColor;
@@ -28,6 +28,7 @@ function IsSamePosition(const APosition1, APosition2: TTextEditorTextPosition): 
 function IsUTF8Buffer(const ABuffer: TBytes; out AWithBOM: Boolean): Boolean;
 function MessageDialog(const AMessage: string; const ADlgType: TMsgDlgType; const AButtons: TMsgDlgButtons; const ADefaultButton: TMsgDlgBtn): Integer;
 function MiddleColor(const AColor1, AColor2: TColor): TColor;
+function SetColorDef(const AColor: TColor; const ADefault: TColor): TColor; inline;
 function TextHeight(const ACanvas: TCanvas; const AText: string): Integer;
 function TextWidth(const ACanvas: TCanvas; const AText: string): Integer;
 function TitleCase(const AValue: string): string;
@@ -40,7 +41,6 @@ procedure ClearList(var AList: TList);
 procedure FreeList(var AList: TList);
 procedure ResizeBitmap(const ABitmap: TBitmap; const ANewWidth, ANewHeight: Integer);
 procedure SetClipboardText(const AText: string; const AHTML: string);
-
 
 implementation
 
@@ -656,6 +656,14 @@ begin
   finally
     Clipboard.Close;
   end;
+end;
+
+function SetColorDef(const AColor: TColor; const ADefault: TColor): TColor;
+begin
+  if AColor = TColors.SysDefault then
+    Result := ADefault
+  else
+    Result := AColor;
 end;
 
 function GetHTMLClipboardFormat: TClipFormat;

@@ -56,11 +56,8 @@ begin
 end;
 
 procedure TTextEditorLeftMarginMarksPanel.ChangeScale(const AMultiplier, ADivider: Integer);
-var
-  LNumerator: Integer;
 begin
-  LNumerator := (AMultiplier div ADivider) * ADivider;
-  FWidth := MulDiv(FWidth, LNumerator, ADivider);
+  FWidth := MulDiv(FWidth, AMultiplier, ADivider);
 end;
 
 procedure TTextEditorLeftMarginMarksPanel.DoChange;

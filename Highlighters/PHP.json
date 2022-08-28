@@ -99,7 +99,8 @@
                     "CloseOnEndOfLine": true
                   },
                   "TokenRange": {
-                    "Open": "0b"
+                    "Open": "0b",
+                    "OpenBreakType": "Any"
                   }
                 },
                 {
@@ -335,13 +336,6 @@
               "Set": [
                 {
                   "Type": "Number",
-                  "Symbols": "0123456789abcdefxABCDEFX",
-                  "Attributes": {
-                    "Element": "Number"
-                  }
-                },
-                {
-                  "Type": "Float",
                   "Symbols": ".0123456789",
                   "Attributes": {
                     "Element": "Number"

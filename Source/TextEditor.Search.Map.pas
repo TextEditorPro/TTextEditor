@@ -3,13 +3,12 @@
 interface
 
 uses
-  System.Classes, System.UITypes, TextEditor.Search.Map.Colors, TextEditor.Types;
+  System.Classes, System.UITypes, TextEditor.Types;
 
 type
   TTextEditorSearchMap = class(TPersistent)
   strict private
     FAlign: TTextEditorSearchMapAlign;
-    FColors: TTextEditorSearchMapColors;
     FCursor: TCursor;
     FOnChange: TTextEditorSearchChangeEvent;
     FOptions: TTextEditorSearchMapOptions;
@@ -17,19 +16,16 @@ type
     FWidth: Integer;
     procedure DoChange;
     procedure SetAlign(const AValue: TTextEditorSearchMapAlign);
-    procedure SetColors(const AValue: TTextEditorSearchMapColors);
     procedure SetOptions(const AValue: TTextEditorSearchMapOptions);
     procedure SetVisible(const AValue: Boolean);
     procedure SetWidth(const AValue: Integer);
   public
     constructor Create;
-    destructor Destroy; override;
     procedure Assign(ASource: TPersistent); override;
     procedure ChangeScale(const AMultiplier, ADivider: Integer);
     function GetWidth: Integer;
   published
     property Align: TTextEditorSearchMapAlign read FAlign write SetAlign default saRight;
-    property Colors: TTextEditorSearchMapColors read FColors write SetColors;
     property Cursor: TCursor read FCursor write FCursor default crArrow;
     property OnChange: TTextEditorSearchChangeEvent read FOnChange write FOnChange;
     property Options: TTextEditorSearchMapOptions read FOptions write SetOptions default [moShowActiveLine];
@@ -47,17 +43,10 @@ begin
   inherited;
 
   FAlign := saRight;
-  FColors := TTextEditorSearchMapColors.Create;
   FOptions := [moShowActiveLine];
   FVisible := False;
   FWidth := 5;
   FCursor := crArrow;
-end;
-
-destructor TTextEditorSearchMap.Destroy;
-begin
-  FColors.Free;
-  inherited;
 end;
 
 procedure TTextEditorSearchMap.Assign(ASource: TPersistent);
@@ -69,7 +58,6 @@ begin
     Self.FVisible := FVisible;
     Self.FOptions := Options;
     Self.FWidth := FWidth;
-    Self.FColors.Assign(FColors);
     Self.FCursor := FCursor;
     Self.DoChange;
   end
@@ -88,8 +76,10 @@ var
   LValue: Integer;
 begin
   LValue := Max(0, AValue);
+
   if FWidth <> LValue then
     FWidth := LValue;
+
   DoChange;
 end;
 
@@ -132,11 +122,6 @@ begin
     Result := FWidth
   else
     Result := 0;
-end;
-
-procedure TTextEditorSearchMap.SetColors(const AValue: TTextEditorSearchMapColors);
-begin
-  FColors.Assign(AValue);
 end;
 
 end.

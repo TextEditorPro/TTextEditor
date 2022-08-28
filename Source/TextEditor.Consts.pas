@@ -17,6 +17,7 @@ type
     DefaultDelimiters = ['''', '-', '!', '"', '#', '$', '%', '&', '(', ')', '*', ',', '.', '/', ':', ';', '?', '@', '[',
       '\', ']', '^', '`', '{', '|', '}', '~', '+', '<', '=', '>'];
     DefaultSelectionPrefix = '$%:@';
+    DefaultCompletionProposalCloseChars = '()[]. ';
     Numbers = ['0'..'9'];
     RealNumbers = Numbers + ['.', 'e', 'E'];
     ValidFoldingWord = Numbers + Characters + ['@', '\', '_'];
@@ -29,6 +30,7 @@ type
   const
     AnsiCharCount = 256;
     CtrlBackspace = #127;
+    Dot = '.';
     ExclamationMark = #33;
     LineSeparator = Char($2028);
     LowLine = #95;
@@ -131,9 +133,10 @@ type
   TDefaultColors = record
   const
     ActiveLineBackground = $00E6FAFF;
-    ActiveLineBackgroundUnfocused = $00E6FAFF;
+    ActiveLineBackgroundUnfocused = $00F0F0F0;
     ActiveLineForeground = TColors.SysNone;
     ActiveLineForegroundUnfocused = TColors.SysNone;
+    BlockBackground = $00EEFFFF;
     Indent = $00CC9999;
     IndentHighlight = $00CC9999;
     LeftMarginBackground = $00FFFFFF;
@@ -146,7 +149,8 @@ type
     SearchHighlighter = $0078AAFF;
     SearchInSelectionBackground = $00FCFDCD;
     SearchMapActiveLine = $00F4F4F4;
-    SelectionColor = $00A56D53;
+    Selection = $00A56D53;
+    SelectionUnfocused = $006B6B6B;
     SyncEditBackground = $00FCFDCD;
     WordWrapIndicatorArrow = TColors.Navy;
     WordWrapIndicatorLines = TColors.Black;

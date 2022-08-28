@@ -441,13 +441,6 @@
                     "Set": [
                       {
                         "Type": "Number",
-                        "Symbols": "0123456789em",
-                        "Attributes": {
-                          "Element": "Number"
-                        }
-                      },
-                      {
-                        "Type": "Float",
                         "Symbols": ".0123456789empx",
                         "Attributes": {
                           "Element": "Number"
@@ -509,13 +502,6 @@
         "Set": [
           {
             "Type": "Number",
-            "Symbols": "0123456789",
-            "Attributes": {
-              "Element": "Number"
-            }
-          },
-          {
-            "Type": "Float",
             "Symbols": ".0123456789",
             "Attributes": {
               "Element": "Number"

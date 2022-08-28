@@ -18,11 +18,9 @@ type
     procedure ImportCodeFoldingOptions(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
     procedure ImportCodeFoldingSkipRegion(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
     procedure ImportColors(const AJSONObject: TJSONObject);
-    procedure ImportColorsEditorProperties(const AEditorObject: TJSONObject);
+    procedure ImportColorTheme(const AThemeObject: TJSONObject);
     procedure ImportCompletionProposal(const ACompletionProposalObject: TJSONObject);
-    procedure ImportDefaultColors;
     procedure ImportEditorProperties(const AEditorObject: TJSONObject);
-    procedure ImportElements(const AColorsObject: TJSONObject);
     procedure ImportHighlighter(const AJSONObject: TJSONObject);
     procedure ImportHighlightLine(const AHighlightLineObject: TJSONObject);
     procedure ImportKeyList(const AKeyList: TTextEditorKeyList; const AKeyListObject: TJSONObject; const AElementPrefix: string);
@@ -33,6 +31,7 @@ type
     procedure ImportSet(const ASet: TTextEditorSet; const ASetObject: TJSONObject; const AElementPrefix: string);
   public
     constructor Create(const AHighlighter: TTextEditorHighlighter); overload;
+    procedure AddElements;
     procedure ImportFromStream(const AStream: TStream);
     procedure ImportColorsFromStream(const AStream: TStream);
   end;
@@ -44,36 +43,32 @@ implementation
 uses
   System.TypInfo, System.UITypes, Vcl.Dialogs, Vcl.Forms, Vcl.Graphics, Vcl.GraphUtil, TextEditor.Consts,
   TextEditor.Highlighter.Token, TextEditor.HighlightLine, TextEditor.Language, TextEditor.Types, TextEditor.Utils
-{$IFDEF ALPHASKINS}, sCommonData, sConst{$ENDIF};
+{$IFDEF ALPHASKINS}, sSkinManager{$ENDIF};
 
-function StringToColorDef(const AString: string; const DefaultColor: TColor): Integer;
-begin
-  if System.SysUtils.Trim(AString) = '' then
-    Result := DefaultColor
-  else
-  if Pos('clWeb', AString) = 1 then
-    Result := WebColorNameToColor(AString)
-  else
-    Result := StringToColor(AString);
-end;
-
-function StrToSet(const AString: string): TTextEditorCharSet;
-var
-  LIndex: Integer;
-begin
-  Result := [];
-
-  for LIndex := 1 to Length(AString) do
-    Result := Result + [AString[LIndex]];
-end;
-
-function StrToStrDef(const AString: string; const AStringDef: string): string;
-begin
-  if AString.Trim.Isempty then
-    Result := AStringDef
-  else
-    Result := AString
-end;
+type
+  TElement = record
+  const
+    AssemblerComment = 'AssemblerComment';
+    AssemblerReservedWord = 'AssemblerReservedWord';
+    Attribute = 'Attribute';
+    Character = 'Character';
+    Comment = 'Comment';
+    Directive = 'Directive';
+    Editor = 'Editor';
+    HexNumber = 'HexNumber';
+    HighlightedBlock = 'HighlightedBlock';
+    HighlightedBlockSymbol = 'HighlightedBlockSymbol';
+    LogicalOperator = 'LogicalOperator';
+    Method = 'Method';
+    MethodItalic = 'MethodItalic';
+    NameOfMethod = 'MethodName';
+    Number = 'Number';
+    ReservedWord = 'ReservedWord';
+    StringOfCharacters = 'String';
+    Symbol = 'Symbol';
+    Value = 'Value';
+    WebLink = 'WebLink';
+  end;
 
 function StrToFontStyle(const AString: string): TFontStyles;
 begin
@@ -81,10 +76,13 @@ begin
 
   if Pos(TFontStyleNames.Bold, AString) > 0 then
     Include(Result, fsBold);
+
   if Pos(TFontStyleNames.Italic, AString) > 0 then
     Include(Result, fsItalic);
+
   if Pos(TFontStyleNames.Underline, AString) > 0 then
     Include(Result, fsUnderline);
+
   if Pos(TFontStyleNames.StrikeOut, AString) > 0 then
     Include(Result, fsStrikeOut);
 end;
@@ -167,187 +165,239 @@ begin
   end;
 end;
 
-procedure TTextEditorHighlighterImportJSON.ImportColorsEditorProperties(const AEditorObject: TJSONObject);
+procedure TTextEditorHighlighterImportJSON.ImportColorTheme(const AThemeObject: TJSONObject);
 var
+  LIndex: Integer;
   LColorsObject, LFontsObject, LFontSizesObject: TJSONObject;
+  LStylesArray: TJSONArray;
+  LElementName: string;
+  LJSONDataValue: PJSONDataValue;
   LEditor: TCustomTextEditor;
+  LFontStyle: TFontStyles;
 begin
-  if Assigned(AEditorObject) and Assigned(FHighlighter.Editor) then
+  if Assigned(AThemeObject) and Assigned(FHighlighter.Editor) then
   begin
     LEditor := FHighlighter.Editor as TCustomTextEditor;
 
-    LColorsObject := AEditorObject['Colors'].ObjectValue;
-    if Assigned(LColorsObject) then
+    if eoLoadColors in LEditor.Options then
     begin
-      LEditor.Colors.Background := StringToColorDef(LColorsObject['Background'].Value, LEditor.Colors.Background);
-
-      with LEditor.ActiveLine.Colors do
+      LColorsObject := AThemeObject['Colors'].ObjectValue;
+      if Assigned(LColorsObject) then
+      with LEditor.Colors do
       begin
-        Background := StringToColorDef(LColorsObject['ActiveLineBackground'].Value, Background);
-        BackgroundUnfocused := StringToColorDef(LColorsObject['ActiveLineBackgroundUnfocused'].Value, Background);
-        Foreground := StringToColorDef(LColorsObject['ActiveLineForeground'].Value, Foreground);
-        ForegroundUnfocused := StringToColorDef(LColorsObject['ActiveLineForegroundUnfocused'].Value, Foreground);
+        ActiveLineBackground := LColorsObject['ActiveLineBackground'].ToColor;
+        ActiveLineBackgroundUnfocused := LColorsObject['ActiveLineBackgroundUnfocused'].ToColor;
+        ActiveLineForeground := LColorsObject['ActiveLineForeground'].ToColor;
+        ActiveLineForegroundUnfocused := LColorsObject['ActiveLineForegroundUnfocused'].ToColor;
+        CodeFoldingActiveLineBackground := LColorsObject['CodeFoldingActiveLineBackground'].ToColor;
+        CodeFoldingActiveLineBackgroundUnfocused := LColorsObject['CodeFoldingActiveLineBackgroundUnfocused'].ToColor;
+        CodeFoldingBackground := LColorsObject['CodeFoldingBackground'].ToColor;
+        CodeFoldingCollapsedLine := LColorsObject['CodeFoldingCollapsedLine'].ToColor;
+        CodeFoldingFoldingLine := LColorsObject['CodeFoldingFoldingLine'].ToColor;
+        CodeFoldingFoldingLineHighlight := LColorsObject['CodeFoldingFoldingLineHighlight'].ToColor;
+        CodeFoldingHintBackground := LColorsObject['CodeFoldingHintBackground'].ToColor;
+        CodeFoldingHintBorder := LColorsObject['CodeFoldingHintBorder'].ToColor;
+        CodeFoldingHintIndicatorBackground := LColorsObject['CodeFoldingHintIndicatorBackground'].ToColor;
+        CodeFoldingHintIndicatorBorder := LColorsObject['CodeFoldingHintIndicatorBorder'].ToColor;
+        CodeFoldingHintIndicatorMark := LColorsObject['CodeFoldingHintIndicatorMark'].ToColor;
+        CodeFoldingHintText := LColorsObject['CodeFoldingHintText'].ToColor;
+        CodeFoldingIndent := LColorsObject['CodeFoldingIndent'].ToColor;
+        CodeFoldingIndentHighlight := LColorsObject['CodeFoldingIndentHighlight'].ToColor;
+        CompletionProposalBackground := LColorsObject['CompletionProposalBackground'].ToColor;
+        CompletionProposalForeground := LColorsObject['CompletionProposalForeground'].ToColor;
+        CompletionProposalSelectedBackground := LColorsObject['CompletionProposalSelectedBackground'].ToColor;
+        CompletionProposalSelectedText := LColorsObject['CompletionProposalSelectedText'].ToColor;
+        EditorAssemblerCommentBackground := LColorsObject['EditorAssemblerCommentBackground'].ToColor;
+        EditorAssemblerCommentForeground := LColorsObject['EditorAssemblerCommentForeground'].ToColor;
+        EditorAssemblerReservedWordBackground := LColorsObject['EditorAssemblerReservedWordBackground'].ToColor;
+        EditorAssemblerReservedWordForeground := LColorsObject['EditorAssemblerReservedWordForeground'].ToColor;
+        EditorAttributeBackground := LColorsObject['EditorAttributeBackground'].ToColor;
+        EditorAttributeForeground := LColorsObject['EditorAttributeForeground'].ToColor;
+        EditorBackground := LColorsObject['EditorBackground'].ToColor;
+        EditorCharacterBackground := LColorsObject['EditorCharacterBackground'].ToColor;
+        EditorCharacterForeground := LColorsObject['EditorCharacterForeground'].ToColor;
+        EditorCommentBackground := LColorsObject['EditorCommentBackground'].ToColor;
+        EditorCommentForeground := LColorsObject['EditorCommentForeground'].ToColor;
+        EditorDirectiveBackground := LColorsObject['EditorDirectiveBackground'].ToColor;
+        EditorDirectiveForeground := LColorsObject['EditorDirectiveForeground'].ToColor;
+        EditorForeground := LColorsObject['EditorForeground'].ToColor;
+        EditorHexNumberBackground := LColorsObject['EditorHexNumberBackground'].ToColor;
+        EditorHexNumberForeground := LColorsObject['EditorHexNumberForeground'].ToColor;
+        EditorHighlightedBlockBackground := LColorsObject['EditorHighlightedBlockBackground'].ToColor;
+        EditorHighlightedBlockForeground := LColorsObject['EditorHighlightedBlockForeground'].ToColor;
+        EditorHighlightedBlockSymbolBackground := LColorsObject['EditorHighlightedBlockSymbolBackground'].ToColor;
+        EditorHighlightedBlockSymbolForeground := LColorsObject['EditorHighlightedBlockSymbolForeground'].ToColor;
+        EditorLogicalOperatorBackground := LColorsObject['EditorLogicalOperatorBackground'].ToColor;
+        EditorLogicalOperatorForeground := LColorsObject['EditorLogicalOperatorForeground'].ToColor;
+        EditorMethodBackground := LColorsObject['EditorMethodBackground'].ToColor;
+        EditorMethodForeground := LColorsObject['EditorMethodForeground'].ToColor;
+        EditorMethodItalicBackground := LColorsObject['EditorMethodItalicBackground'].ToColor;
+        EditorMethodItalicForeground := LColorsObject['EditorMethodItalicForeground'].ToColor;
+        EditorMethodNameBackground := LColorsObject['EditorMethodNameBackground'].ToColor;
+        EditorMethodNameForeground := LColorsObject['EditorMethodNameForeground'].ToColor;
+        EditorNumberBackground := LColorsObject['EditorNumberBackground'].ToColor;
+        EditorNumberForeground := LColorsObject['EditorNumberForeground'].ToColor;
+        EditorReservedWordBackground := LColorsObject['EditorReservedWordBackground'].ToColor;
+        EditorReservedWordForeground := LColorsObject['EditorReservedWordForeground'].ToColor;
+        EditorStringBackground := LColorsObject['EditorStringBackground'].ToColor;
+        EditorStringForeground := LColorsObject['EditorStringForeground'].ToColor;
+        EditorSymbolBackground := LColorsObject['EditorSymbolBackground'].ToColor;
+        EditorSymbolForeground := LColorsObject['EditorSymbolForeground'].ToColor;
+        EditorValueBackground := LColorsObject['EditorValueBackground'].ToColor;
+        EditorValueForeground := LColorsObject['EditorValueForeground'].ToColor;
+        EditorWebLinkBackground := LColorsObject['EditorWebLinkBackground'].ToColor;
+        EditorWebLinkForeground := LColorsObject['EditorWebLinkForeground'].ToColor;
+        LeftMarginActiveLineBackground := LColorsObject['LeftMarginActiveLineBackground'].ToColor;
+        LeftMarginActiveLineBackgroundUnfocused := LColorsObject['LeftMarginActiveLineBackgroundUnfocused'].ToColor;
+        LeftMarginActiveLineNumber := LColorsObject['LeftMarginActiveLineNumber'].ToColor;
+        LeftMarginBackground := LColorsObject['LeftMarginBackground'].ToColor;
+        LeftMarginBookmarkPanelBackground := LColorsObject['LeftMarginBookmarkPanelBackground'].ToColor;
+        LeftMarginBorder := LColorsObject['LeftMarginBorder'].ToColor;
+        LeftMarginLineNumberLine := LColorsObject['LeftMarginLineNumberLine'].ToColor;
+        LeftMarginLineNumbers := LColorsObject['LeftMarginLineNumbers'].ToColor;
+        LeftMarginLineStateModified := LColorsObject['LeftMarginLineStateModified'].ToColor;
+        LeftMarginLineStateNormal := LColorsObject['LeftMarginLineStateNormal'].ToColor;
+        MatchingPairMatched := LColorsObject['MatchingPairMatched'].ToColor;
+        MatchingPairUnderline := LColorsObject['MatchingPairUnderline'].ToColor;
+        MatchingPairUnmatched := LColorsObject['MatchingPairUnmatched'].ToColor;
+        MinimapBackground := LColorsObject['MinimapBackground'].ToColor;
+        MinimapBookmark := LColorsObject['MinimapBookmark'].ToColor;
+        MinimapVisibleLines := LColorsObject['MinimapVisibleLines'].ToColor;
+        MultiEditBackground := LColorsObject['MultiEditBackground'].ToColor;
+        MultiEditForeground := LColorsObject['MultiEditForeground'].ToColor;
+        RightMargin := LColorsObject['RightMargin'].ToColor;
+        RightMovingEdge := LColorsObject['RightMovingEdge'].ToColor;
+        RulerBackground := LColorsObject['RulerBackground'].ToColor;
+        RulerBorder := LColorsObject['RulerBorder'].ToColor;
+        RulerLines := LColorsObject['RulerLines'].ToColor;
+        RulerMovingEdge := LColorsObject['RulerMovingEdge'].ToColor;
+        RulerNumbers := LColorsObject['RulerNumbers'].ToColor;
+        RulerSelection := LColorsObject['RulerSelection'].ToColor;
+        SearchHighlighterBackground := LColorsObject['SearchHighlighterBackground'].ToColor;
+        SearchHighlighterBorder := LColorsObject['SearchHighlighterBorder'].ToColor;
+        SearchHighlighterForeground := LColorsObject['SearchHighlighterForeground'].ToColor;
+        SearchInSelectionBackground := LColorsObject['SearchInSelectionBackground'].ToColor;
+        SearchMapActiveLine := LColorsObject['SearchMapActiveLine'].ToColor;
+        SearchMapBackground := LColorsObject['SearchMapBackground'].ToColor;
+        SearchMapForeground := LColorsObject['SearchMapForeground'].ToColor;
+        SelectionBackground := LColorsObject['SelectionBackground'].ToColor;
+        SelectionBackgroundUnfocused := LColorsObject['SelectionBackgroundUnfocused'].ToColor;
+        SelectionForeground := LColorsObject['SelectionForeground'].ToColor;
+        SelectionForegroundUnfocused := LColorsObject['SelectionForegroundUnfocused'].ToColor;
+        SyncEditBackground := LColorsObject['SyncEditBackground'].ToColor;
+        SyncEditEditBorder := LColorsObject['SyncEditEditBorder'].ToColor;
+        SyncEditWordBorder := LColorsObject['SyncEditWordBorder'].ToColor;
+        WordWrapIndicatorArrow := LColorsObject['WordWrapIndicatorArrow'].ToColor;
+        WordWrapIndicatorLines := LColorsObject['WordWrapIndicatorLines'].ToColor;
       end;
 
-      with LEditor.Caret.MultiEdit.Colors do
-      begin
-        Background := StringToColorDef(LColorsObject['MultiEditBackground'].Value, Background);
-        Foreground := StringToColorDef(LColorsObject['MultiEditForeground'].Value, Foreground);
-      end;
-
-      with LEditor.CodeFolding.Colors do
-      begin
-        ActiveLineBackground := StringToColorDef(LColorsObject['CodeFoldingActiveLineBackground'].Value, ActiveLineBackground);
-        ActiveLineBackgroundUnfocused := StringToColorDef(LColorsObject['CodeFoldingActiveLineBackgroundUnfocused'].Value, ActiveLineBackground);
-        Background := StringToColorDef(LColorsObject['CodeFoldingBackground'].Value, Background);
-        CollapsedLine := StringToColorDef(LColorsObject['CodeFoldingCollapsedLine'].Value, CollapsedLine);
-        FoldingLine := StringToColorDef(LColorsObject['CodeFoldingFoldingLine'].Value, FoldingLine);
-        FoldingLineHighlight := StringToColorDef(LColorsObject['CodeFoldingFoldingLineHighlight'].Value, FoldingLineHighlight);
-        Indent := StringToColorDef(LColorsObject['CodeFoldingIndent'].Value, Indent);
-        IndentHighlight := StringToColorDef(LColorsObject['CodeFoldingIndentHighlight'].Value, IndentHighlight);
-      end;
-
-      with LEditor.CodeFolding.Hint.Colors do
-      begin
-        Background := StringToColorDef(LColorsObject['CodeFoldingHintBackground'].Value, Background);
-        Border := StringToColorDef(LColorsObject['CodeFoldingHintBorder'].Value, Border);
-      end;
-
-      with LEditor.CodeFolding.Hint.Font do
-        Color := StringToColorDef(LColorsObject['CodeFoldingHintText'].Value, Color);
-
-      with LEditor.CodeFolding.Hint.Indicator.Colors do
-      begin
-        Background := StringToColorDef(LColorsObject['CodeFoldingHintIndicatorBackground'].Value, Background);
-        Border := StringToColorDef(LColorsObject['CodeFoldingHintIndicatorBorder'].Value, Border);
-        Mark := StringToColorDef(LColorsObject['CodeFoldingHintIndicatorMark'].Value, Mark);
-      end;
-
-      with LEditor.CompletionProposal.Colors do
-      begin
-        Background := StringToColorDef(LColorsObject['CompletionProposalBackground'].Value, Background);
-        Foreground := StringToColorDef(LColorsObject['CompletionProposalForeground'].Value, Foreground);
-        SelectedBackground := StringToColorDef(LColorsObject['CompletionProposalSelectedBackground'].Value, SelectedBackground);
-        SelectedText := StringToColorDef(LColorsObject['CompletionProposalSelectedText'].Value, SelectedText);
-      end;
-
-      with LEditor.LeftMargin.Colors do
-      begin
-        ActiveLineBackground := StringToColorDef(LColorsObject['LeftMarginActiveLineBackground'].Value, ActiveLineBackground);
-        ActiveLineBackgroundUnfocused := StringToColorDef(LColorsObject['LeftMarginActiveLineBackgroundUnfocused'].Value, ActiveLineBackground);
-        Background := StringToColorDef(LColorsObject['LeftMarginBackground'].Value, Background);
-        Border := StringToColorDef(LColorsObject['LeftMarginBorder'].Value, Border);
-        ActiveLineNumber := StringToColorDef(LColorsObject['LeftMarginActiveLineNumber'].Value, ActiveLineNumber);
-        LineNumberLine := StringToColorDef(LColorsObject['LeftMarginLineNumberLine'].Value, LineNumberLine);
-        BookmarkPanelBackground := StringToColorDef(LColorsObject['LeftMarginBookmarkPanel'].Value, BookmarkPanelBackground);
-        LineStateModified := StringToColorDef(LColorsObject['LeftMarginLineStateModified'].Value, LineStateModified);
-        LineStateNormal := StringToColorDef(LColorsObject['LeftMarginLineStateNormal'].Value, LineStateNormal);
-      end;
-
-      LEditor.LeftMargin.Font.Color := StringToColorDef(LColorsObject['LeftMarginLineNumbers'].Value, LEditor.LeftMargin.Font.Color);
-
-      with LEditor.Minimap.Colors do
-      begin
-        Background := StringToColorDef(LColorsObject['MinimapBackground'].Value, Background);
-        Bookmark := StringToColorDef(LColorsObject['MinimapBookmark'].Value, Bookmark);
-        VisibleLines := StringToColorDef(LColorsObject['MinimapVisibleLines'].Value, VisibleLines);
-      end;
-
-      with LEditor.MatchingPairs.Colors do
-      begin
-        Matched := StringToColorDef(LColorsObject['MatchingPairMatched'].Value, Matched);
-        Underline := StringToColorDef(LColorsObject['MatchingPairUnderline'].Value, Underline);
-        Unmatched := StringToColorDef(LColorsObject['MatchingPairUnmatched'].Value, Unmatched);
-      end;
-
-      with LEditor.RightMargin.Colors do
-      begin
-        Margin := StringToColorDef(LColorsObject['RightMargin'].Value, Margin);
-        MovingEdge := StringToColorDef(LColorsObject['RightMovingEdge'].Value, MovingEdge);
-      end;
-
-      with LEditor.Ruler.Colors do
-      begin
-        Background := StringToColorDef(LColorsObject['RulerBackground'].Value, Background);
-        Border := StringToColorDef(LColorsObject['RulerBorder'].Value, Border);
-        Lines := StringToColorDef(LColorsObject['RulerLines'].Value, Lines);
-        MovingEdge := StringToColorDef(LColorsObject['RulerMovingEdge'].Value, MovingEdge);
-        Selection := StringToColorDef(LColorsObject['RulerSelection'].Value, Selection);
-      end;
-
-      with LEditor.Ruler.Font do
-        Color := StringToColorDef(LColorsObject['RulerNumbers'].Value, Color);
-
-      with LEditor.Search.Highlighter.Colors do
-      begin
-        Background := StringToColorDef(LColorsObject['SearchHighlighterBackground'].Value, Background);
-        Border := StringToColorDef(LColorsObject['SearchHighlighterBorder'].Value, Border);
-        Foreground := StringToColorDef(LColorsObject['SearchHighlighterForeground'].Value, Foreground);
-      end;
-
-      with LEditor.Search.InSelection do
-        Background := StringToColorDef(LColorsObject['SearchInSelectionBackground'].Value, Background);
-
-      with LEditor.Search.Map.Colors do
-      begin
-        ActiveLine := StringToColorDef(LColorsObject['SearchMapActiveLine'].Value, ActiveLine);
-        Background := StringToColorDef(LColorsObject['SearchMapBackground'].Value, Background);
-        Foreground := StringToColorDef(LColorsObject['SearchMapForeground'].Value, Foreground);
-      end;
-
-      with LEditor.Selection.Colors do
-      begin
-        Background := StringToColorDef(LColorsObject['SelectionBackground'].Value, Background);
-        Foreground := StringToColorDef(LColorsObject['SelectionForeground'].Value, Foreground);
-      end;
-
-      with LEditor.SyncEdit.Colors do
-      begin
-        Background := StringToColorDef(LColorsObject['SyncEditBackground'].Value, Background);
-        EditBorder := StringToColorDef(LColorsObject['SyncEditEditBorder'].Value, EditBorder);
-        WordBorder := StringToColorDef(LColorsObject['SyncEditWordBorder'].Value, WordBorder);
-      end;
-
-      with LEditor.WordWrap.Colors do
-      begin
-        Arrow := StringToColorDef(LColorsObject['WordWrapIndicatorArrow'].Value, Arrow);
-        Lines := StringToColorDef(LColorsObject['WordWrapIndicatorLines'].Value, Lines);
-      end;
-
-      LEditor.WordWrap.FreeIndicatorBitmap;
+      LEditor.WordWrap.FreeIndicatorBitmap; { Colors are changed }
+      LEditor.UpdateColors;
     end;
 
-    if hcoUseColorThemeFontNames in LEditor.Highlighter.Colors.Options then
+    if eoLoadFontNames in LEditor.Options then
     begin
-      LFontsObject := AEditorObject['Fonts'].ObjectValue;
+      LFontsObject := AThemeObject['Fonts'].ObjectValue;
       if Assigned(LFontsObject) then
-      with LEditor do
+      with LEditor.Fonts do
       begin
-        LeftMargin.Font.Name := StrToStrDef(LFontsObject['LineNumbers'].Value, LeftMargin.Font.Name);
-        Font.Name := StrToStrDef(LFontsObject['Text'].Value, Font.Name);
-        Minimap.Font.Name := StrToStrDef(LFontsObject['Minimap'].Value, Minimap.Font.Name);
-        CodeFolding.Hint.Font.Name := StrToStrDef(LFontsObject['CodeFoldingHint'].Value, CodeFolding.Hint.Font.Name);
-        CompletionProposal.Font.Name := StrToStrDef(LFontsObject['CompletionProposal'].Value, CompletionProposal.Font.Name);
+        CodeFoldingHint.Name := LFontsObject['CodeFoldingHint'].ToStr(CodeFoldingHint.Name);
+        CompletionProposal.Name := LFontsObject['CompletionProposal'].ToStr(CompletionProposal.Name);
+        LineNumbers.Name := LFontsObject['LineNumbers'].ToStr(LineNumbers.Name);
+        Minimap.Name := LFontsObject['Minimap'].ToStr(Minimap.Name);
+        Ruler.Name := LFontsObject['Ruler'].ToStr(Ruler.Name);
+        Text.Name := LFontsObject['Text'].ToStr(Text.Name);
       end;
     end;
 
-    if hcoUseColorThemeFontSizes in LEditor.Highlighter.Colors.Options then
+    if eoLoadFontSizes in LEditor.Options then
     begin
-      LFontSizesObject := AEditorObject['FontSizes'].ObjectValue;
+      LFontSizesObject := AThemeObject['FontSizes'].ObjectValue;
       if Assigned(LFontSizesObject) then
-      with LEditor do
+      with LEditor.Fonts do
       begin
-        LeftMargin.Font.Size := StrToIntDef(LFontSizesObject['LineNumbers'].Value, LeftMargin.Font.Size);
-        Minimap.Font.Size := StrToIntDef(LFontSizesObject['Minimap'].Value, Minimap.Font.Size);
-        CodeFolding.Hint.Font.Size := StrToIntDef(LFontSizesObject['CodeFoldingHint'].Value, CodeFolding.Hint.Font.Size);
-        CompletionProposal.Font.Size := StrToIntDef(LFontSizesObject['CompletionProposal'].Value, CompletionProposal.Font.Size);
-        Font.Size := StrToIntDef(LFontSizesObject['Text'].Value, Font.Size);
-        OriginalFontSize := Font.Size;
-        OriginalLeftMarginFontSize := LeftMargin.Font.Size;
-{$IFDEF ALPHASKINS}
-        if SkinData.SkinManager.Options.ScaleMode <> smVCL then
-          LEditor.ChangeScale(PixelsPerInch, 96, True);
-{$ENDIF}
+        CodeFoldingHint.Size := LFontSizesObject['CodeFoldingHint'].ToInt(CodeFoldingHint.Size);
+        CompletionProposal.Size := LFontSizesObject['CompletionProposal'].ToInt(CompletionProposal.Size);
+        LineNumbers.Size := LFontSizesObject['LineNumbers'].ToInt(LineNumbers.Size);
+        Minimap.Size := LFontSizesObject['Minimap'].ToInt(Minimap.Size);
+        Ruler.Size := LFontSizesObject['Ruler'].ToInt(Ruler.Size);
+        Text.Size := LFontSizesObject['Text'].ToInt(Text.Size);
+      end;
+    end;
+
+    if eoLoadFontStyles in LEditor.Options then
+    begin
+      LStylesArray := AThemeObject['Styles'].ArrayValue;
+      with LEditor.FontStyles do
+      begin
+        Clear;
+
+        for LIndex := 0 to LStylesArray.Count - 1 do
+        begin
+          LJSONDataValue := LStylesArray.Items[LIndex];
+          LElementName := LJSONDataValue.ObjectValue['Name'].Value;
+          LFontStyle := StrToFontStyle(LJSONDataValue.ObjectValue['Style'].Value);
+
+          if LElementName = TElement.MethodItalic then
+            MethodItalic := LFontStyle
+          else
+          if LElementName = TElement.ReservedWord then
+            ReservedWord := LFontStyle
+          else
+          if LElementName = TElement.AssemblerReservedWord then
+            AssemblerReservedWord := LFontStyle
+          else
+          if LElementName = TElement.Value then
+            Value := LFontStyle
+          else
+          if LElementName = TElement.Comment then
+            Comment := LFontStyle
+          else
+          if LElementName = TElement.Method then
+            Method := LFontStyle
+          else
+          if LElementName = TElement.AssemblerComment then
+            AssemblerComment := LFontStyle
+          else
+          if LElementName = TElement.LogicalOperator then
+            LogicalOperator := LFontStyle
+          else
+          if LElementName = TElement.Directive then
+            Directive := LFontStyle
+          else
+          if LElementName = TElement.Attribute then
+            Attribute := LFontStyle
+          else
+          if LElementName = TElement.Character then
+            Character := LFontStyle
+          else
+          if LElementName = TElement.HexNumber then
+            HexNumber := LFontStyle
+          else
+          if LElementName = TElement.HighlightedBlock then
+            HighlightedBlock := LFontStyle
+          else
+          if LElementName = TElement.HighlightedBlockSymbol then
+            HighlightedBlockSymbol := LFontStyle
+          else
+          if LElementName = TElement.NameOfMethod then
+            NameOfMethod := LFontStyle
+          else
+          if LElementName = TElement.Number then
+            Number := LFontStyle
+          else
+          if LElementName = TElement.StringOfCharacters then
+            StringOfCharacters := LFontStyle
+          else
+          if LElementName = TElement.Symbol then
+            Symbol := LFontStyle
+          else
+          if LElementName = TElement.WebLink then
+            WebLink := LFontStyle
+          else
+          if LElementName = TElement.Editor then
+            Editor := LFontStyle
+        end;
       end;
     end;
   end;
@@ -362,6 +412,7 @@ begin
     Element := AElementPrefix + AAttributesObject['Element'].Value;
     ParentForeground := StrToBoolDef(AAttributesObject['ParentForeground'].Value, False);
     ParentBackground := StrToBoolDef(AAttributesObject['ParentBackground'].Value, True);
+
     if AAttributesObject.Contains('EscapeChar') then
       EscapeChar := AAttributesObject['EscapeChar'].Value[1];
   end;
@@ -388,7 +439,7 @@ procedure TTextEditorHighlighterImportJSON.ImportSet(const ASet: TTextEditorSet;
 begin
   if Assigned(ASetObject) then
   begin
-    ASet.CharSet := StrToSet(ASetObject['Symbols'].Value);
+    ASet.CharSet := ASetObject['Symbols'].ToSet;
     ImportAttributes(ASet.Attribute, ASetObject['Attributes'].ObjectValue, AElementPrefix);
   end;
 end;
@@ -463,10 +514,10 @@ begin
         ImportAttributes(ARange.Attribute, ARangeObject['Attributes'].ObjectValue, AElementPrefix);
 
         if ARangeObject['AllowedCharacters'].Value <> '' then
-          ARange.AllowedCharacters := StrToSet(ARangeObject['AllowedCharacters'].Value);
+          ARange.AllowedCharacters := ARangeObject['AllowedCharacters'].ToSet;
 
         if ARangeObject['Delimiters'].Value <> '' then
-          ARange.Delimiters := StrToSet(ARangeObject['Delimiters'].Value);
+          ARange.Delimiters := ARangeObject['Delimiters'].ToSet;
 
         ARange.TokenType := StrToRangeType(ARangeObject['Type'].Value);
 
@@ -567,7 +618,7 @@ var
 begin
   if not Assigned(ACompletionProposalObject) then
     Exit;
-  { Skip regions }
+
   LSkipRegionArray := ACompletionProposalObject['SkipRegion'].ArrayValue;
   for LIndex := 0 to LSkipRegionArray.Count - 1 do
   begin
@@ -575,7 +626,6 @@ begin
 
     if hoMultiHighlighter in FHighlighter.Options then
     begin
-      { Multi highlighter code folding skip region include }
       LName := LJSONDataValue.ObjectValue['File'].Value;
       if LName <> '' then
       begin
@@ -594,7 +644,7 @@ begin
           end;
         end;
       end;
-      { Skip duplicates }
+
       if FHighlighter.CompletionProposalSkipRegions.Contains(LJSONDataValue.ObjectValue['OpenToken'].Value, LJSONDataValue.ObjectValue['CloseToken'].Value) then
         Continue;
     end;
@@ -632,7 +682,6 @@ begin
 
       if hoMultiHighlighter in FHighlighter.Options then
       begin
-        { Multi highlighter code folding skip region include }
         LName := LJSONDataValue.ObjectValue['File'].Value;
         if LName <> '' then
         begin
@@ -651,7 +700,7 @@ begin
             end;
           end;
         end;
-        { Skip duplicates }
+
         if ACodeFoldingRegion.SkipRegions.Contains(LOpenToken, LCloseToken) then
           Continue;
       end;
@@ -714,7 +763,6 @@ begin
 
       if hoMultiHighlighter in FHighlighter.Options then
       begin
-        { Multi highlighter code folding fold region include }
         LName := LJSONDataValue.ObjectValue['File'].Value;
         if LName <> '' then
         begin
@@ -733,7 +781,7 @@ begin
             end;
           end;
         end;
-        { Skip duplicates }
+
         if ACodeFoldingRegion.Contains(LOpenToken, LCloseToken) then
           Continue;
       end;
@@ -861,7 +909,7 @@ var
 begin
   if not Assigned(AMatchingPairObject) then
     Exit;
-  { Matching token pairs }
+
   LArray := AMatchingPairObject['Pairs'].ArrayValue;
   for LIndex := 0 to LArray.Count - 1 do
   begin
@@ -869,7 +917,6 @@ begin
 
     if hoMultiHighlighter in FHighlighter.Options then
     begin
-      { Multi highlighter code folding fold region include }
       LName := LJSONDataValue.ObjectValue['File'].Value;
       if LName <> '' then
       begin
@@ -897,96 +944,66 @@ begin
   end;
 end;
 
-procedure TTextEditorHighlighterImportJSON.ImportDefaultColors;
-const
-  Elements: array [1..20, 1..4] of string = (
-    ('Editor', 'clBlack', 'clWhite', ''),
-    ('Comment', 'clGreen', 'clWhite', 'Italic'),
-    ('String', 'clBlue', 'clWhite', ''),
-    ('Directive', 'clTeal', 'clWhite', ''),
-    ('Character', 'clPurple', 'clWhite', ''),
-    ('ReservedWord', 'clNavy', 'clWhite', 'Bold'),
-    ('Symbol', 'clNavy', 'clWhite', ''),
-    ('LogicalOperator', 'clNavy', 'clWhite', 'Bold'),
-    ('Number', 'clBlue', 'clWhite', ''),
-    ('HexNumber', 'clBlue', 'clWhite', ''),
-    ('HighlightedBlock', 'clBlack', '$00EEFFFF', ''),
-    ('HighlightedBlockSymbol', 'clNavy', '$00EEFFFF', ''),
-    ('AssemblerComment', 'clGreen', '$00EEFFFF', 'Italic'),
-    ('AssemblerReservedWord', 'clNavy', '$00EEFFFF', 'Bold'),
-    ('Attribute', 'clMaroon', 'clWhite', ''),
-    ('Method', 'clNavy', 'clNone', 'Bold'),
-    ('MethodItalic', 'clNavy', 'clNone', 'Italic'),
-    ('MethodName', 'clBlack', 'clNone', ''),
-    ('Value', 'clNavy', 'clWhite', 'Bold'),
-    ('WebLink', 'clBlue', 'clWhite', '')
-  );
-var
-  LIndex: Integer;
-  LElement: PTextEditorHighlighterElement;
-  LEditor: TCustomTextEditor;
-begin
-  LEditor := nil;
-  if Assigned(FHighlighter.Editor) then
-    LEditor := FHighlighter.Editor as TCustomTextEditor;
+procedure TTextEditorHighlighterImportJSON.AddElements;
 
-  for LIndex := 1 to 20 do
+  function GetElement(const AName: string; const ABackground: TColor; const AForeground: TColor;
+    const AFontStyles: TFontStyles): TTextEditorHighlighterElement;
   begin
-    New(LElement);
-    LElement.Name := Elements[LIndex, 1];
-    LElement.Foreground := StringToColorDef(Elements[LIndex, 2], TColors.SysWindowText);
-    LElement.Background := StringToColorDef(Elements[LIndex, 3], TColors.SysWindow);
-    LElement.FontStyles := StrToFontStyle(Elements[LIndex, 4]);
-
-    FHighlighter.Colors.Styles.Add(LElement);
-
-    if Assigned(LEditor) then
-    begin
-      if LElement.Name = 'Editor' then
-        LEditor.Colors.Foreground := LElement.Foreground
-      else
-      if LElement.Name = 'ReservedWord' then
-        LEditor.Colors.ReservedWord := LElement.Foreground;
-    end;
+    Result.Name := AName;
+    Result.Background := ABackground;
+    Result.Foreground := AForeground;
+    Result.FontStyles := AFontStyles;
   end;
-end;
 
-procedure TTextEditorHighlighterImportJSON.ImportElements(const AColorsObject: TJSONObject);
 var
-  LIndex: Integer;
-  LElement: PTextEditorHighlighterElement;
-  LJSONDataValue: PJSONDataValue;
-  LElementsArray: TJSONArray;
   LEditor: TCustomTextEditor;
 begin
-  if not Assigned(AColorsObject) then
-    Exit;
+  LEditor := FHighlighter.Editor as TCustomTextEditor;
 
-  LEditor := nil;
-  if Assigned(FHighlighter.Editor) then
-    LEditor := FHighlighter.Editor as TCustomTextEditor;
+  FHighlighter.Colors.Elements.Clear;
 
-  LElementsArray := AColorsObject['Elements'].ArrayValue;
-  for LIndex := 0 to LElementsArray.Count - 1 do
+  with FHighlighter.Colors.Elements do
   begin
-    LJSONDataValue := LElementsArray.Items[LIndex];
-
-    New(LElement);
-    LElement.Background := StringToColorDef(LJSONDataValue.ObjectValue['Background'].Value, TColors.SysWindow);
-    LElement.FontStyles := StrToFontStyle(LJSONDataValue.ObjectValue['Style'].Value);
-    LElement.Foreground := StringToColorDef(LJSONDataValue.ObjectValue['Foreground'].Value, TColors.SysWindowText);
-    LElement.Name := LJSONDataValue.ObjectValue['Name'].Value;
-
-    FHighlighter.Colors.Styles.Add(LElement);
-
-    if Assigned(LEditor) then
-    begin
-      if LElement.Name = 'Editor' then
-        LEditor.Colors.Foreground := LElement.Foreground
-      else
-      if LElement.Name = 'ReservedWord' then
-        LEditor.Colors.ReservedWord := LElement.Foreground;
-    end;
+    Add(TElement.AssemblerComment, GetElement(TElement.AssemblerComment, LEditor.Colors.EditorAssemblerCommentBackground,
+      LEditor.Colors.EditorAssemblerCommentForeground, LEditor.FontStyles.AssemblerComment));
+    Add(TElement.AssemblerReservedWord, GetElement(TElement.AssemblerReservedWord, LEditor.Colors.EditorAssemblerReservedWordBackground,
+      LEditor.Colors.EditorAssemblerReservedWordForeground, LEditor.FontStyles.AssemblerReservedWord));
+    Add(TElement.Attribute, GetElement(TElement.Attribute, LEditor.Colors.EditorAttributeBackground,
+      LEditor.Colors.EditorAttributeForeground, LEditor.FontStyles.Attribute));
+    Add(TElement.Character, GetElement(TElement.Character, LEditor.Colors.EditorCharacterBackground,
+      LEditor.Colors.EditorCharacterForeground, LEditor.FontStyles.Character));
+    Add(TElement.Comment, GetElement(TElement.Comment, LEditor.Colors.EditorCommentBackground, LEditor.Colors.EditorCommentForeground,
+      LEditor.FontStyles.Comment));
+    Add(TElement.Directive, GetElement(TElement.Directive, LEditor.Colors.EditorDirectiveBackground,
+      LEditor.Colors.EditorDirectiveForeground, LEditor.FontStyles.Directive));
+    Add(TElement.Editor, GetElement(TElement.Editor, LEditor.Colors.EditorBackground, LEditor.Colors.EditorForeground,
+      LEditor.FontStyles.Editor));
+    Add(TElement.HexNumber, GetElement(TElement.HexNumber, LEditor.Colors.EditorHexNumberBackground,
+      LEditor.Colors.EditorHexNumberForeground, LEditor.FontStyles.HexNumber));
+    Add(TElement.HighlightedBlock, GetElement(TElement.HighlightedBlock, LEditor.Colors.EditorHighlightedBlockBackground,
+      LEditor.Colors.EditorHighlightedBlockForeground, LEditor.FontStyles.HighlightedBlock));
+    Add(TElement.HighlightedBlockSymbol, GetElement(TElement.HighlightedBlockSymbol, LEditor.Colors.EditorHighlightedBlockSymbolBackground,
+      LEditor.Colors.EditorHighlightedBlockSymbolForeground, LEditor.FontStyles.HighlightedBlockSymbol));
+    Add(TElement.LogicalOperator, GetElement(TElement.LogicalOperator, LEditor.Colors.EditorLogicalOperatorBackground,
+      LEditor.Colors.EditorLogicalOperatorForeground, LEditor.FontStyles.LogicalOperator));
+    Add(TElement.Method, GetElement(TElement.Method, LEditor.Colors.EditorMethodBackground,
+      LEditor.Colors.EditorMethodForeground, LEditor.FontStyles.Method));
+    Add(TElement.MethodItalic, GetElement(TElement.MethodItalic, LEditor.Colors.EditorMethodItalicBackground,
+      LEditor.Colors.EditorMethodItalicForeground, LEditor.FontStyles.MethodItalic));
+    Add(TElement.NameOfMethod, GetElement(TElement.NameOfMethod, LEditor.Colors.EditorMethodNameBackground,
+      LEditor.Colors.EditorMethodNameForeground, LEditor.FontStyles.NameOfMethod));
+    Add(TElement.Number, GetElement(TElement.Number, LEditor.Colors.EditorNumberBackground,
+      LEditor.Colors.EditorNumberForeground, LEditor.FontStyles.Number));
+    Add(TElement.ReservedWord, GetElement(TElement.ReservedWord, LEditor.Colors.EditorReservedWordBackground,
+      LEditor.Colors.EditorReservedWordForeground, LEditor.FontStyles.ReservedWord));
+    Add(TElement.StringOfCharacters, GetElement(TElement.StringOfCharacters, LEditor.Colors.EditorStringBackground,
+      LEditor.Colors.EditorStringForeground, LEditor.FontStyles.StringOfCharacters));
+    Add(TElement.Symbol, GetElement(TElement.Symbol, LEditor.Colors.EditorSymbolBackground,
+      LEditor.Colors.EditorSymbolForeground, LEditor.FontStyles.Symbol));
+    Add(TElement.Value, GetElement(TElement.Value, LEditor.Colors.EditorValueBackground,
+      LEditor.Colors.EditorValueForeground, LEditor.FontStyles.Value));
+    Add(TElement.WebLink, GetElement(TElement.WebLink, LEditor.Colors.EditorWebLinkBackground,
+      LEditor.Colors.EditorWebLinkForeground, LEditor.FontStyles.WebLink));
   end;
 end;
 
@@ -999,7 +1016,7 @@ begin
   LHighlighterObject := AJSONObject['Highlighter'];
 
   FHighlighter.SetOption(hoMultiHighlighter, LHighlighterObject.ValueBoolean['MultiHighlighter']);
-  FHighlighter.ExludedWordBreakCharacters := StrToSet(LHighlighterObject.ValueString['ExcludedWordBreakCharacters']);
+  FHighlighter.ExludedWordBreakCharacters := LHighlighterObject.Values['ExcludedWordBreakCharacters'].ToSet;
 
   if LHighlighterObject.ValueBoolean['YAML'] then
     FHighlighter.BeforePrepare := FHighlighter.PrepareYAMLHighlighter
@@ -1014,8 +1031,7 @@ begin
   ImportCompletionProposal(AJSONObject['CompletionProposal'].ObjectValue);
   ImportHighlightLine(AJSONObject['HighlightLine'].ObjectValue);
 
-  if hcoUseDefaultColors in FHighlighter.Colors.Options then
-    ImportDefaultColors;
+  AddElements;
 end;
 
 procedure TTextEditorHighlighterImportJSON.ImportHighlightLine(const AHighlightLineObject: TJSONObject);
@@ -1031,7 +1047,7 @@ var
 begin
   if not Assigned(AHighlightLineObject) then
     Exit;
-  { Matching token pairs }
+
   LArray := AHighlightLineObject['Items'].ArrayValue;
   for LIndex := 0 to LArray.Count - 1 do
   begin
@@ -1039,7 +1055,6 @@ begin
 
     if hoMultiHighlighter in FHighlighter.Options then
     begin
-      { Multi highlighter code folding fold region include }
       LName := LJSONDataValue.ObjectValue['File'].Value;
       if LName <> '' then
       begin
@@ -1062,23 +1077,21 @@ begin
 
     LEditor := FHighlighter.Editor as TCustomTextEditor;
     LEditor.HighlightLine.Active := True;
+
     LItem := LEditor.HighlightLine.Items.Add;
-    LItem.Background := StringToColorDef(LJSONDataValue.ObjectValue['BackgroundColor'].Value, LItem.Background);
-    LItem.Foreground := StringToColorDef(LJSONDataValue.ObjectValue['ForegroundColor'].Value, LItem.Foreground);
-    LItem.IgnoreCase := LJSONDataValue.ObjectValue.ValueBoolean['IgnoreCase'];
+    LItem.Background := LJSONDataValue.ObjectValue['BackgroundColor'].ToColor;
+    LItem.Foreground := LJSONDataValue.ObjectValue['ForegroundColor'].ToColor;
+    if not LJSONDataValue.ObjectValue.ValueBoolean['IgnoreCase'] then
+      LItem.Options := LItem.Options - [hlIgnoreCase];
     LItem.Pattern := LJSONDataValue.ObjectValue['Pattern'].Value;
   end;
 end;
 
 procedure TTextEditorHighlighterImportJSON.ImportColors(const AJSONObject: TJSONObject);
-var
-  LColorsObject: TJSONObject;
 begin
-  FHighlighter.Colors.Clear;
+  ImportColorTheme(AJSONObject['Theme']);
 
-  LColorsObject := AJSONObject['Colors'];
-  ImportColorsEditorProperties(LColorsObject['Editor'].ObjectValue);
-  ImportElements(AJSONObject['Colors'].ObjectValue);
+  AddElements;
 end;
 
 procedure TTextEditorHighlighterImportJSON.ImportFromStream(const AStream: TStream);

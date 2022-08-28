@@ -14,23 +14,27 @@ type
     FActive: Boolean;
     FChars: string;
     FInterval: Integer;
+    function IsCharsStored: Boolean;
   public
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
   published
     property Active: Boolean read FActive write FActive default False;
-    property Chars: string read FChars write FChars;
+    property Chars: string read FChars write FChars stored IsCharsStored;
     property Interval: Integer read FInterval write FInterval default DEFAULT_INTERVAL;
   end;
 
 implementation
+
+uses
+  TextEditor.Consts;
 
 constructor TTextEditorCompletionProposalTrigger.Create;
 begin
   inherited;
 
   FActive := False;
-  FChars := '.';
+  FChars := TCharacters.Dot;
   FInterval := DEFAULT_INTERVAL;
 end;
 
@@ -45,6 +49,11 @@ begin
   end
   else
     inherited Assign(ASource);
+end;
+
+function TTextEditorCompletionProposalTrigger.IsCharsStored: Boolean;
+begin
+  Result := FChars <> TCharacters.Dot;
 end;
 
 end.

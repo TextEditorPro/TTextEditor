@@ -82,6 +82,7 @@ type
     FItems: TTextEditorCompletionProposalSnippetItems;
     FOwner: TPersistent;
     function GetItem(const AIndex: Integer): TTextEditorCompletionProposalSnippetItem;
+    function IsItemsStored: Boolean;
     procedure SetItems(const AValue: TTextEditorCompletionProposalSnippetItems);
   protected
     function GetOwner: TPersistent; override;
@@ -92,7 +93,7 @@ type
     property Item[const AIndex: Integer]: TTextEditorCompletionProposalSnippetItem read GetItem;
   published
     property Active: Boolean read FActive write FActive default True;
-    property Items: TTextEditorCompletionProposalSnippetItems read FItems write SetItems;
+    property Items: TTextEditorCompletionProposalSnippetItems read FItems write SetItems stored IsItemsStored;
   end;
 
   ETextEditorCompletionProposalSnippetException = class(Exception);
@@ -270,6 +271,11 @@ begin
   end
   else
     inherited Assign(ASource);
+end;
+
+function TTextEditorCompletionProposalSnippets.IsItemsStored: Boolean;
+begin
+  Result := FItems.Count > 0;
 end;
 
 function TTextEditorCompletionProposalSnippets.GetItem(const AIndex: Integer): TTextEditorCompletionProposalSnippetItem;

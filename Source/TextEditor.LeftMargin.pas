@@ -4,8 +4,8 @@ interface
 
 uses
   System.Classes, System.UITypes, Vcl.Graphics, TextEditor.Consts, TextEditor.LeftMargin.Bookmarks,
-  TextEditor.LeftMargin.Border, TextEditor.LeftMargin.Colors, TextEditor.LeftMargin.LineNumbers,
-  TextEditor.LeftMargin.LineState, TextEditor.LeftMargin.Marks, TextEditor.LeftMargin.MarksPanel, TextEditor.Marks;
+  TextEditor.LeftMargin.Border, TextEditor.LeftMargin.LineNumbers, TextEditor.LeftMargin.LineState,
+  TextEditor.LeftMargin.Marks, TextEditor.LeftMargin.MarksPanel, TextEditor.Marks;
 
 type
   TLeftMarginGetTextEvent = procedure(ASender: TObject; ALine: Integer; var AText: string) of object;
@@ -17,9 +17,7 @@ type
     FAutosize: Boolean;
     FBookmarks: TTextEditorLeftMarginBookmarks;
     FBorder: TTextEditorLeftMarginBorder;
-    FColors: TTextEditorLeftMarginColors;
     FCursor: TCursor;
-    FFont: TFont;
     FLineState: TTextEditorLeftMarginLineState;
     FLineNumbers: TTextEditorLeftMarginLineNumbers;
     FMarks: TTextEditorLeftMarginMarks;
@@ -30,8 +28,6 @@ type
     procedure DoChange;
     procedure SetAutosize(const AValue: Boolean);
     procedure SetBookmarks(const AValue: TTextEditorLeftMarginBookmarks);
-    procedure SetColors(const AValue: TTextEditorLeftMarginColors);
-    procedure SetFont(const AValue: TFont);
     procedure SetMarks(const AValue: TTextEditorLeftMarginMarks);
     procedure SetOnChange(const AValue: TNotifyEvent);
     procedure SetVisible(const AValue: Boolean);
@@ -39,7 +35,6 @@ type
   public
     constructor Create(AOwner: TComponent);
     destructor Destroy; override;
-
     function GetWidth: Integer;
     function FormatLineNumber(const ALine: Integer): string;
     function RealLeftMarginWidth(const ACharWidth: Integer): Integer;
@@ -51,15 +46,13 @@ type
     property Autosize: Boolean read FAutosize write SetAutosize default True;
     property Bookmarks: TTextEditorLeftMarginBookmarks read FBookmarks write SetBookmarks;
     property Border: TTextEditorLeftMarginBorder read FBorder write FBorder;
-    property Colors: TTextEditorLeftMarginColors read FColors write SetColors;
     property Cursor: TCursor read FCursor write FCursor default crDefault;
-    property Font: TFont read FFont write SetFont;
     property LineNumbers: TTextEditorLeftMarginLineNumbers read FLineNumbers write FLineNumbers;
     property LineState: TTextEditorLeftMarginLineState read FLineState write FLineState;
     property Marks: TTextEditorLeftMarginMarks read FMarks write SetMarks;
     property MarksPanel: TTextEditorLeftMarginMarksPanel read FMarksPanel write FMarksPanel;
     property Visible: Boolean read FVisible write SetVisible default True;
-    property Width: Integer read FWidth write SetWidth default 57;
+    property Width: Integer read FWidth write SetWidth default 50;
   end;
 
 implementation
@@ -72,15 +65,9 @@ begin
   inherited Create;
 
   FAutosize := True;
-  FColors := TTextEditorLeftMarginColors.Create;
   FCursor := crDefault;
   FBorder := TTextEditorLeftMarginBorder.Create;
-  FFont := TFont.Create;
-  FFont.Name := 'Courier New';
-  FFont.Size := 8;
-  FFont.Style := [];
-  FFont.Color := TDefaultColors.LeftMarginFontForeground;
-  FWidth := 57;
+  FWidth := 50;
   FVisible := True;
 
   FBookmarks := TTextEditorLeftMarginBookmarks.Create(AOwner);
@@ -95,8 +82,6 @@ begin
   FBookmarks.Free;
   FMarks.Free;
   FBorder.Free;
-  FColors.Free;
-  FFont.Free;
   FLineState.Free;
   FLineNumbers.Free;
   FMarksPanel.Free;
@@ -107,11 +92,11 @@ end;
 procedure TTextEditorLeftMargin.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
   FWidth := MulDiv(FWidth, AMultiplier, ADivider);
-  FFont.Height := MulDiv(FFont.Height, AMultiplier, ADivider);
   FBookmarks.ChangeScale(AMultiplier, ADivider);
   FMarks.ChangeScale(AMultiplier, ADivider);
   FLineState.ChangeScale(AMultiplier, ADivider);
   FMarksPanel.ChangeScale(AMultiplier, ADivider);
+
   DoChange;
 end;
 
@@ -123,10 +108,8 @@ begin
     Self.FAutosize := FAutosize;
     Self.FBookmarks.Assign(FBookmarks);
     Self.FMarks.Assign(FMarks);
-    Self.FColors.Assign(FColors);
     Self.FBorder.Assign(FBorder);
     Self.FCursor := FCursor;
-    Self.FFont.Assign(FFont);
     Self.FLineNumbers.Assign(FLineNumbers);
     Self.FMarksPanel.Assign(FMarksPanel);
     Self.FWidth := FWidth;
@@ -143,7 +126,6 @@ begin
 
   FBookmarks.OnChange := AValue;
   FBorder.OnChange := AValue;
-  FFont.OnChange := AValue;
   FLineState.OnChange := AValue;
   FLineNumbers.OnChange := AValue;
   FMarksPanel.OnChange := AValue;
@@ -187,16 +169,6 @@ begin
     FAutosize := AValue;
     DoChange
   end;
-end;
-
-procedure TTextEditorLeftMargin.SetColors(const AValue: TTextEditorLeftMarginColors);
-begin
-  FColors.Assign(AValue);
-end;
-
-procedure TTextEditorLeftMargin.SetFont(const AValue: TFont);
-begin
-  FFont.Assign(AValue);
 end;
 
 procedure TTextEditorLeftMargin.SetWidth(const AValue: Integer);

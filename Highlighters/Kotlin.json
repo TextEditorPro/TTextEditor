@@ -126,6 +126,21 @@
             }
           },
           {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abcdefABCDEFLuU-_",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0x",
+              "OpenBreakType": "Any"
+            }
+          },
+          {
             "Type": "Directive",
             "Attributes": {
               "Element": "Directive"
@@ -257,13 +272,6 @@
         "Set": [
           {
             "Type": "Numbers",
-            "Symbols": "_0123456789abcdefxABCDEFXLuU-",
-            "Attributes": {
-              "Element": "Number"
-            }
-          },
-          {
-            "Type": "Float",
             "Symbols": ".0123456789eEfF",
             "Attributes": {
               "Element": "Number"

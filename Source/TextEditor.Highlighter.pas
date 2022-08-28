@@ -51,7 +51,7 @@ type
     FTokenPosition: Integer;
     procedure AddAllAttributes(const ARange: TTextEditorRange);
     procedure FreeTemporaryTokens;
-    procedure UpdateAttributes(const ARange: TTextEditorRange; const AParentRange: TTextEditorRange);
+    procedure UpdateAttributes(const ARange: TTextEditorRange; const AParentRange: TTextEditorRange); overload;
   protected
     function GetAttribute(const AIndex: Integer): TTextEditorHighlighterAttribute;
     procedure AddAttribute(const AHighlighterAttribute: TTextEditorHighlighterAttribute);
@@ -78,7 +78,7 @@ type
     procedure SetLine(const AValue: string);
     procedure SetOption(const AOption: TTextEditorHighlighterOption; const AEnabled: Boolean);
     procedure SetRange(const AValue: Pointer);
-    procedure UpdateColors;
+    procedure UpdateAttributes; overload;
     property Attribute[const AIndex: Integer]: TTextEditorHighlighterAttribute read GetAttribute;
     property Attributes: TStringList read FAttributes;
     property BeforePrepare: TTextEditorHighlighterPrepare read FBeforePrepare write FBeforePrepare;
@@ -533,24 +533,21 @@ var
 
   procedure SetAttributes(const AAttribute: TTextEditorHighlighterAttribute; const AParentRange: TTextEditorRange);
   var
-    LElement: PTextEditorHighlighterElement;
+    LElement: TTextEditorHighlighterElement;
   begin
-    LElement := FColors.GetElement(AAttribute.Element);
+    FColors.Elements.TryGetValue(AAttribute.Element, LElement);
 
     if AAttribute.ParentBackground and Assigned(AParentRange) then
       AAttribute.Background := AParentRange.Attribute.Background
     else
-    if Assigned(LElement) then
       AAttribute.Background := LElement.Background;
 
     if AAttribute.ParentForeground and Assigned(AParentRange) then
       AAttribute.Foreground := AParentRange.Attribute.Foreground
     else
-    if Assigned(LElement) then
       AAttribute.Foreground := LElement.Foreground;
 
-    if Assigned(LElement) then
-      AAttribute.FontStyles := LElement.FontStyles;
+    AAttribute.FontStyles := LElement.FontStyles;
   end;
 
 begin
@@ -566,27 +563,9 @@ begin
     UpdateAttributes(ARange.Ranges[LIndex], ARange);
 end;
 
-procedure TTextEditorHighlighter.UpdateColors;
-var
-  LEditor: TCustomTextEditor;
-  LFontDummy: TFont;
+procedure TTextEditorHighlighter.UpdateAttributes;
 begin
   UpdateAttributes(MainRules, nil);
-
-  LEditor := TCustomTextEditor(FEditor);
-  if Assigned(LEditor) then
-  begin
-    LFontDummy := TFont.Create;
-    try
-      LFontDummy.Name := LEditor.Font.Name;
-      LFontDummy.Size := LEditor.Font.Size;
-      FChanged := True;
-      LEditor.Font.Assign(LFontDummy);
-      LEditor.SizeOrFontChanged(True);
-    finally
-      LFontDummy.Free;
-    end;
-  end;
 end;
 
 procedure TTextEditorHighlighter.PrepareYAMLHighlighter;
@@ -648,7 +627,7 @@ begin
       if LKeyList.KeyList.Count > 0 then
       begin
         MainRules.AddKeyList(LKeyList);
-        UpdateAttributes(MainRules, nil);
+        UpdateAttributes;
       end
       else
         LKeyList.Free;
@@ -671,54 +650,24 @@ begin
 end;
 
 procedure TTextEditorHighlighter.LoadFromStream(const AStream: TStream);
-var
-  LEditor: TCustomTextEditor;
-  LTempLines: TStringList;
-  LTopLine: Integer;
-  LIndex: Integer;
-  LTextPosition: TTextEditorTextPosition;
 begin
   Clear;
 
-  LEditor := TCustomTextEditor(FEditor);
-  if Assigned(LEditor) then
-  begin
-    FLoading := True;
-    LTempLines := TStringList.Create;
-    try
-      if LEditor.Visible then
-        LTextPosition := LEditor.TextPosition;
-
-      LTopLine := LEditor.TopLine;
-
-      for LIndex := 0 to FLines.Count - 1 do
-      if not (sfEmptyLine in FLines.Items^[LIndex].Flags) then
-        LTempLines.Add(FLines.Items^[LIndex].TextLine);
-
-      FLines.Clear;
-      with TTextEditorHighlighterImportJSON.Create(Self) do
-      try
-        ImportFromStream(AStream);
-      finally
-        Free;
-      end;
-      FLines.LoadFromStrings(LTempLines);
-
-      LEditor.TopLine := LTopLine;
-      if LEditor.Visible then
-        LEditor.TextPosition := LTextPosition;
-    finally
-      LTempLines.Free;
-    end;
-
-    UpdateColors;
-
-    if Assigned(FBeforePrepare) then
-      SetOption(hoExecuteBeforePrepare, True);
-
-    FLoading := False;
-    FLoaded := True;
+  FLoading := True;
+  with TTextEditorHighlighterImportJSON.Create(Self) do
+  try
+    ImportFromStream(AStream);
+  finally
+    Free;
   end;
+
+  UpdateAttributes;
+
+  if Assigned(FBeforePrepare) then
+    SetOption(hoExecuteBeforePrepare, True);
+
+  FLoading := False;
+  FLoaded := True;
 end;
 
 function TTextEditorHighlighter.GetAttribute(const AIndex: Integer): TTextEditorHighlighterAttribute;

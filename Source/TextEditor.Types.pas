@@ -47,8 +47,6 @@ type
   PRGBTripleArray = ^TRGBTripleArray;
   TRGBTripleArray = array[0..100] of TRGBTriple;
 
-  TTextEditorColorChanges = (ccBoth, ccBackground, ccForeground);
-
   TTextEditorStateFlag = (sfCaretChanged, sfLinesChanging, sfIgnoreNextChar, sfCaretVisible, sfDblClicked,
     sfWaitForDragging, sfCodeFoldingCollapseMarkClicked, sfInSelection, sfDragging);
   TTextEditorStateFlags = set of TTextEditorStateFlag;
@@ -142,8 +140,10 @@ type
 
   { Editor options }
   TTextEditorOption = (eoAddHTMLCodeToClipboard, eoAutoIndent, eoDragDropEditing, eoDropFiles,
-    eoShowControlCharacters, eoShowLineNumbersInHTMLExport, eoShowNonBreakingSpaceAsSpace, eoShowNullCharacters
-{$IFDEF TEXT_EDITOR_SPELL_CHECK}, eoSpellCheck{$ENDIF}, eoShowZeroWidthSpaces, eoTrimTrailingSpaces, eoTrailingLineBreak);
+    eoLoadColors, eoLoadFontNames, eoLoadFontSizes, eoLoadFontStyles, eoShowControlCharacters,
+    eoShowLineNumbersInHTMLExport, eoShowNonBreakingSpaceAsSpace, eoShowNullCharacters
+    {$IFDEF TEXT_EDITOR_SPELL_CHECK}, eoSpellCheck{$ENDIF}, eoShowZeroWidthSpaces, eoTrimTrailingSpaces,
+    eoTrailingLineBreak);
   TTextEditorOptions = set of TTextEditorOption;
 
   TTextEditorOvertypeMode = (omInsert, omOverwrite);
@@ -236,9 +236,8 @@ type
   TTextEditorHighlighterOption = (hoExecuteBeforePrepare, hoMultiHighlighter);
   TTextEditorHighlighterOptions = set of TTextEditorHighlighterOption;
 
-  TTextEditorHighlighterColorOption = (hcoUseColorThemeFontNames, hcoUseColorThemeFontSizes, hcoUseDefaultColors);
-  TTextEditorHighlighterColorOptions = set of TTextEditorHighlighterColorOption;
-
+  TTextEditorHighlightLineItemOption = (hlIgnoreCase, hlDeleteOnHighlighterLoad);
+  TTextEditorHighlightLineItemOptions = set of TTextEditorHighlightLineItemOption;
   { Special chars }
   TTextEditorSpecialCharsLineBreakStyle = (eolArrow, eolCRLF, eolEnter, eolPilcrow);
 
@@ -332,7 +331,6 @@ type
   TTextEditorBookmarkDeletedEvent = procedure(const ASender: TObject; const ABookmark: TTextEditorMark) of object;
   TTextEditorBookmarkPlacedEvent = procedure(const ASender: TObject; const AIndex: Integer; const AImageIndex: Integer; const ATextPosition: TTextEditorTextPosition) of object;
   TTextEditorCaretChangedEvent = procedure(const ASender: TObject; const X, Y: Integer; const AOffset: Integer) of object;
-  TTextEditorCodeColorEvent = procedure(const AEvent: TTextEditorColorChanges) of object;
   TTextEditorCodeFoldingChangeEvent = procedure(const AEvent: TTextEditorCodeFoldingChanges) of object;
   TTextEditorContextHelpEvent = procedure(const ASender: TObject; const AWord: string) of object;
   TTextEditorCreateHighlighterStreamEvent = procedure(const ASender: TObject; const AName: string;
@@ -438,7 +436,7 @@ end;
 procedure TTextEditorTimer.Restart;
 begin
   Enabled := False;
-  Enabled := True; //FI:W508 Variable is assigned twice successively
+  Enabled := True;
 end;
 
 end.

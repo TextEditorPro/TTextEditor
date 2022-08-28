@@ -118,10 +118,10 @@ begin
   LLineNumber := '';
   if LShowLineNumbers then
     LLineNumberHTML := '<span style="display:inline-block;text-align:right;text-valign:center;' +
-      ';font-family:' + LTextEditor.LeftMargin.Font.Name +
-      ';font-size:' + IntToStr(LTextEditor.LeftMargin.Font.Size) + 'pt' +
-      ';color:' + ColorToHex(LTextEditor.LeftMargin.Font.Color).ToLower +
-      ';background-color:' + ColorToHex(LTextEditor.LeftMargin.Colors.Background).ToLower +
+      ';font-family:' + LTextEditor.Fonts.LineNumbers.Name +
+      ';font-size:' + IntToStr(LTextEditor.Fonts.LineNumbers.Size) + 'pt' +
+      ';color:' + ColorToHex(LTextEditor.Colors.LeftMarginLineNumbers).ToLower +
+      ';background-color:' + ColorToHex(LTextEditor.Colors.LeftMarginBackground).ToLower +
       ';width:' + LTextEditor.Canvas.TextWidth(StringOfChar('X', LEndLine.ToString.Length + 1)).ToString + 'px' +
       '">%d&nbsp;</span>'
   else
@@ -176,9 +176,9 @@ begin
     end;
 
     FStringList.Add('<p style="box-sizing:border-box;margin:0px;' +
-      'line-height:' + IntToStr(LTextEditor.Font.Size + 1) + 'pt;' +
-      'color:' + ColorToHex(LTextEditor.Colors.Foreground).ToLower + ';' +
-      'background-color:' + ColorToHex(LTextEditor.Colors.Background).ToLower + '">' +
+      'line-height:' + IntToStr(LTextEditor.Fonts.Text.Size + 1) + 'pt;' +
+      'color:' + ColorToHex(LTextEditor.Colors.EditorForeground).ToLower + ';' +
+      'background-color:' + ColorToHex(LTextEditor.Colors.EditorBackground).ToLower + '">' +
       LLineNumber + LTextLine + '<br style="box-sizing:border-box"></p>');
   end;
 end;

@@ -206,14 +206,7 @@
         "Set": [
           {
             "Type": "Numbers",
-            "Symbols": "0123456789abcdefABCDEF",
-            "Attributes": {
-              "Element": "Number"
-            }
-          },
-          {
-            "Type": "Float",
-            "Symbols": ".0123456789",
+            "Symbols": ".0123456789abcdefABCDEF",
             "Attributes": {
               "Element": "Number"
             }

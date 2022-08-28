@@ -3,12 +3,12 @@
 interface
 
 uses
-  System.Classes, System.RegularExpressions, TextEditor.Lines, TextEditor.Search.Base;
+  System.Classes, System.Generics.Collections, System.RegularExpressions, TextEditor.Lines, TextEditor.Search.Base;
 
 type
   TTextEditorRegexSearch = class(TTextEditorSearchBase)
   strict private
-    FLengths: TList;
+    FLengths: TList<Integer>;
     FOptions: TRegexOptions;
   protected
     function GetLength(const AIndex: Integer): Integer; override;
@@ -30,13 +30,14 @@ begin
   inherited Create;
 
   FOptions := [roMultiLine, roNotEmpty];
-  FLengths := TList.Create;
+  FLengths := TList<Integer>.Create;
 end;
 
 destructor TTextEditorRegexSearch.Destroy;
 begin
-  inherited;
-  FLengths.Free;
+  FreeAndNil(FLengths);
+
+  inherited Destroy;
 end;
 
 procedure TTextEditorRegexSearch.CaseSensitiveChanged;
@@ -51,8 +52,8 @@ function TTextEditorRegexSearch.SearchAll(const ALines: TTextEditorLines): Integ
 
   procedure AddResult(const APos, ALength: Integer);
   begin
-    FResults.Add(Pointer(APos));
-    FLengths.Add(Pointer(ALength));
+    FResults.Add(APos);
+    FLengths.Add(ALength);
   end;
 
 var
@@ -86,7 +87,7 @@ end;
 
 function TTextEditorRegexSearch.GetLength(const AIndex: Integer): Integer;
 begin
-  Result := Integer(FLengths[AIndex]);
+  Result := FLengths[AIndex];
 end;
 
 end.

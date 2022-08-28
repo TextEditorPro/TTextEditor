@@ -34,7 +34,7 @@ type
     property MultiEdit: TTextEditorCaretMultiEdit read FMultiEdit write SetMultiEdit;
     property NonBlinking: TTextEditorCaretNonBlinking read FNonBlinking write SetNonBlinking;
     property Offsets: TTextEditorCaretOffsets read FOffsets write SetOffsets;
-    property Options: TTextEditorCaretOptions read FOptions write SetOptions;
+    property Options: TTextEditorCaretOptions read FOptions write SetOptions default [];
     property Styles: TTextEditorCaretStyles read FStyles write SetStyles;
     property Visible: Boolean read FVisible write SetVisible default True;
   end;
@@ -50,6 +50,7 @@ begin
   FOffsets := TTextEditorCaretOffsets.Create;
   FStyles := TTextEditorCaretStyles.Create;
   FVisible := True;
+  FOptions := [];
 end;
 
 destructor TTextEditorCaret.Destroy;

@@ -159,13 +159,6 @@
         "Set": [
           {
             "Type": "Numbers",
-            "Symbols": "0123456789",
-            "Attributes": {
-              "Element": "Number"
-            }
-          },
-          {
-            "Type": "Float",
             "Symbols": ".0123456789",
             "Attributes": {
               "Element": "Number"

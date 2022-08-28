@@ -389,6 +389,21 @@
             "TokenRange": {
               "Open": ":"
             }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abcdefABCDEF_",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0x",
+              "OpenBreakType": "Any"
+            }
           }
         ],
         "KeyList": [
@@ -547,13 +562,6 @@
         "Set": [
           {
             "Type": "Numbers",
-            "Symbols": "0123456789abcdefxABCDEFX_",
-            "Attributes": {
-              "Element": "Number"
-            }
-          },
-          {
-            "Type": "Float",
             "Symbols": ".0123456789e",
             "Attributes": {
               "Element": "Number"

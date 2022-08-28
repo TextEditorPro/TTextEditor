@@ -819,7 +819,7 @@ procedure TTextEditorPrint.SetEditor(const AValue: TCustomTextEditor);
 begin
   FEditor := AValue;
   Highlighter := AValue.Highlighter;
-  Font := AValue.Font;
+  Font := AValue.Fonts.Text;
   CharWidth := AValue.CharWidth;
   FColumns := toColumns in AValue.Tabs.Options;
   FTabWidth := AValue.Tabs.Width;

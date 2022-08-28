@@ -3,17 +3,16 @@
 interface
 
 uses
-  System.Classes, System.UITypes, TextEditor.ActiveLine.Colors, TextEditor.Consts, TextEditor.Glyph;
+  System.Classes, System.UITypes, TextEditor.Consts, TextEditor.Glyph;
 
 type
   TTextEditorActiveLine = class(TPersistent)
   strict private
-    FColors: TTextEditorActiveLineColors;
     FIndicator: TTextEditorGlyph;
     FOnChange: TNotifyEvent;
     FVisible: Boolean;
+    function IsIndicatorStored: Boolean;
     procedure DoChange(const ASender: TObject);
-    procedure SetColors(const AValue: TTextEditorActiveLineColors);
     procedure SetIndicator(const AValue: TTextEditorGlyph);
     procedure SetOnChange(const AValue: TNotifyEvent);
     procedure SetVisible(const AValue: Boolean);
@@ -23,8 +22,7 @@ type
     procedure Assign(ASource: TPersistent); override;
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
   published
-    property Colors: TTextEditorActiveLineColors read FColors write SetColors;
-    property Indicator: TTextEditorGlyph read FIndicator write SetIndicator;
+    property Indicator: TTextEditorGlyph read FIndicator write SetIndicator stored IsIndicatorStored;
     property Visible: Boolean read FVisible write SetVisible default True;
   end;
 
@@ -34,7 +32,6 @@ constructor TTextEditorActiveLine.Create;
 begin
   inherited;
 
-  FColors := TTextEditorActiveLineColors.Create;
   FIndicator := TTextEditorGlyph.Create(HInstance, TResourceBitmap.ActiveLine, TColors.Fuchsia);
   FIndicator.Visible := False;
   FVisible := True;
@@ -42,7 +39,6 @@ end;
 
 destructor TTextEditorActiveLine.Destroy;
 begin
-  FColors.Free;
   FIndicator.Free;
 
   inherited;
@@ -53,13 +49,17 @@ begin
   if Assigned(ASource) and (ASource is TTextEditorActiveLine) then
   with ASource as TTextEditorActiveLine do
   begin
-    Self.FColors.Assign(FColors);
     Self.FVisible := FVisible;
     Self.FIndicator.Assign(FIndicator);
     Self.DoChange(Self);
   end
   else
     inherited Assign(ASource);
+end;
+
+function TTextEditorActiveLine.IsIndicatorStored: Boolean;
+begin
+  Result := FIndicator.Visible or (FIndicator.MaskColor <> TColors.SysNone) or (FIndicator.Left <> 2);
 end;
 
 procedure TTextEditorActiveLine.SetOnChange(const AValue: TNotifyEvent);
@@ -72,12 +72,6 @@ procedure TTextEditorActiveLine.DoChange(const ASender: TObject);
 begin
   if Assigned(FOnChange) then
     FOnChange(ASender);
-end;
-
-procedure TTextEditorActiveLine.SetColors(const AValue: TTextEditorActiveLineColors);
-begin
-  FColors.Assign(AValue);
-  DoChange(Self);
 end;
 
 procedure TTextEditorActiveLine.SetIndicator(const AValue: TTextEditorGlyph);

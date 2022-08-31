@@ -671,6 +671,13 @@
           {
             "OpenToken": "DO",
             "CloseToken": "UNTIL"
+          },
+          {
+            "OpenToken": "SELECT",
+            "CloseToken": "ENDSELECT",
+            "Properties": {
+              "NoSubs": true
+            }
           }
         ]
       }

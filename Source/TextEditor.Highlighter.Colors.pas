@@ -26,6 +26,7 @@ type
     destructor Destroy; override;
     procedure LoadFromFile(const AFilename: string);
     procedure LoadFromStream(AStream: TStream);
+    procedure SaveToFile(const AFilename: string);
     procedure SetDefaults;
     property Elements: TTextEditorElements read FElements write FElements;
     property Filename: string read FFilename write FFilename;
@@ -35,7 +36,7 @@ type
 implementation
 
 uses
-  System.SysUtils, TextEditor, TextEditor.Highlighter, TextEditor.Highlighter.Import.JSON;
+  System.SysUtils, Vcl.Dialogs, TextEditor, TextEditor.Highlighter, TextEditor.Highlighter.Import.JSON;
 
 constructor TTextEditorHighlighterColors.Create(AOwner: TObject);
 begin
@@ -84,6 +85,11 @@ begin
   LHighlighter.Loading := False;
 
   LHighlighter.Editor.Invalidate;
+end;
+
+procedure TTextEditorHighlighterColors.SaveToFile(const AFilename: string);
+begin
+  ShowMessage('Upcoming feature'); // TODO: Remove Vcl.Dialogs
 end;
 
 procedure TTextEditorHighlighterColors.SetDefaults;

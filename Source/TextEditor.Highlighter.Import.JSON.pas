@@ -17,7 +17,6 @@ type
     procedure ImportCodeFoldingFoldRegion(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
     procedure ImportCodeFoldingOptions(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
     procedure ImportCodeFoldingSkipRegion(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
-    procedure ImportColors(const AJSONObject: TJSONObject);
     procedure ImportColorTheme(const AThemeObject: TJSONObject);
     procedure ImportCompletionProposal(const ACompletionProposalObject: TJSONObject);
     procedure ImportEditorProperties(const AEditorObject: TJSONObject);
@@ -179,7 +178,7 @@ begin
   begin
     LEditor := FHighlighter.Editor as TCustomTextEditor;
 
-    if eoLoadColors in LEditor.Options then
+    if (csDesigning in LEditor.ComponentState) or (eoLoadColors in LEditor.Options) then
     begin
       LColorsObject := AThemeObject['Colors'].ObjectValue;
       if Assigned(LColorsObject) then
@@ -295,7 +294,7 @@ begin
       LEditor.UpdateColors;
     end;
 
-    if eoLoadFontNames in LEditor.Options then
+    if (csDesigning in LEditor.ComponentState) or (eoLoadFontNames in LEditor.Options) then
     begin
       LFontsObject := AThemeObject['Fonts'].ObjectValue;
       if Assigned(LFontsObject) then
@@ -310,7 +309,7 @@ begin
       end;
     end;
 
-    if eoLoadFontSizes in LEditor.Options then
+    if (csDesigning in LEditor.ComponentState) or (eoLoadFontSizes in LEditor.Options) then
     begin
       LFontSizesObject := AThemeObject['FontSizes'].ObjectValue;
       if Assigned(LFontSizesObject) then
@@ -325,7 +324,7 @@ begin
       end;
     end;
 
-    if eoLoadFontStyles in LEditor.Options then
+    if (csDesigning in LEditor.ComponentState) or (eoLoadFontStyles in LEditor.Options) then
     begin
       LStylesArray := AThemeObject['Styles'].ArrayValue;
       with LEditor.FontStyles do
@@ -960,6 +959,9 @@ var
 begin
   LEditor := FHighlighter.Editor as TCustomTextEditor;
 
+  if csDesigning in LEditor.ComponentState then
+    Exit;
+
   FHighlighter.Colors.Elements.Clear;
 
   with FHighlighter.Colors.Elements do
@@ -1087,13 +1089,6 @@ begin
   end;
 end;
 
-procedure TTextEditorHighlighterImportJSON.ImportColors(const AJSONObject: TJSONObject);
-begin
-  ImportColorTheme(AJSONObject['Theme']);
-
-  AddElements;
-end;
-
 procedure TTextEditorHighlighterImportJSON.ImportFromStream(const AStream: TStream);
 var
   LJSONObject: TJSONObject;
@@ -1122,7 +1117,8 @@ begin
     LJSONObject := TJSONObject.ParseFromStream(AStream) as TJSONObject;
     if Assigned(LJSONObject) then
     try
-      ImportColors(LJSONObject);
+      ImportColorTheme(LJSONObject['Theme']);
+      AddElements;
     finally
       LJSONObject.Free;
     end;

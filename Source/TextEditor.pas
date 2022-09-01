@@ -407,6 +407,8 @@ type
     function GetText: string;
     function GetTextBetween(const ATextBeginPosition: TTextEditorTextPosition; const ATextEndPosition: TTextEditorTextPosition): string;
     function GetTextPosition: TTextEditorTextPosition;
+    function GetThemeLoad: TFileName;
+    function GetThemeSave: TFileName;
     function GetTokenCharCount(const AToken: string; const ACharsBefore: Integer): Integer; inline;
     function GetTokenWidth(const AToken: string; const ALength: Integer; const ACharsBefore: Integer; const AMinimap: Boolean = False; const ARTLReading: Boolean = False): Integer;
     function GetViewLineNumber(const AViewLineNumber: Integer): Integer;
@@ -561,6 +563,8 @@ type
     procedure SetTextCaretX(const AValue: Integer);
     procedure SetTextCaretY(const AValue: Integer);
     procedure SetTextPosition(const AValue: TTextEditorTextPosition);
+    procedure SetThemeLoad(const AFileName: TFileName);
+    procedure SetThemeSave(const AFileName: TFileName);
     procedure SetTopLine(const AValue: Integer);
     procedure SetUndo(const AValue: TTextEditorUndo);
     procedure SetUnknownChars(const AValue: TTextEditorUnknownChars);
@@ -968,12 +972,14 @@ type
     property SpellCheck: TTextEditorSpellCheck read FSpellCheck write FSpellCheck;
 {$ENDIF}
     property SyncEdit: TTextEditorSyncEdit read FSyncEdit write SetSyncEdit;
+    property OvertypeMode: TTextEditorOvertypeMode read FOvertypeMode write SetOvertypeMode default omInsert;
     property Tabs: TTextEditorTabs read FTabs write SetTabs;
     property TabStop default True;
     property Text: string read GetText write SetText;
     property TextBetween[const ATextBeginPosition: TTextEditorTextPosition; const ATextEndPosition: TTextEditorTextPosition]: string read GetTextBetween write SetTextBetween;
     property TextPosition: TTextEditorTextPosition read GetTextPosition write SetTextPosition;
-    property OvertypeMode: TTextEditorOvertypeMode read FOvertypeMode write SetOvertypeMode default omInsert;
+    property ThemeLoad: TFileName read GetThemeLoad write SetThemeLoad stored False;
+    property ThemeSave: TFileName read GetThemeSave write SetThemeSave stored False;
     property TopLine: Integer read FLineNumbers.TopLine write SetTopLine;
     property Undo: TTextEditorUndo read FUndo write SetUndo;
     property UndoList: TTextEditorUndoList read FUndoList;
@@ -1094,6 +1100,8 @@ type
     property Tabs;
     property TabStop;
     property Tag;
+    property ThemeLoad;
+    property ThemeSave;
     property Touch;
     property Undo;
     property UnknownChars;
@@ -1252,6 +1260,8 @@ type
     property Tabs;
     property TabStop;
     property Tag;
+    property ThemeLoad;
+    property ThemeSave;
     property Touch;
     property Undo;
     property UnknownChars;
@@ -2382,6 +2392,16 @@ begin
 
     Inc(LPLine);
   end;
+end;
+
+function TCustomTextEditor.GetThemeLoad: TFileName;
+begin
+  Result := STextEditorThemeLoadFromFile;
+end;
+
+function TCustomTextEditor.GetThemeSave: TFileName;
+begin
+  Result := STextEditorThemeSaveToFile;
 end;
 
 function TCustomTextEditor.GetMarkBackgroundColor(const ALine: Integer): TColor;
@@ -4845,7 +4865,10 @@ var
     begin
       LLine := FLines[Result.Line];
 
-      LPChar := PChar(@LLine[Result.Char]);
+      if Result.Char > Length(LLine) then
+        Exit;
+
+      LPChar := @LLine[Result.Char];
 
       if SelectNextLine(Result) then
         Exit;
@@ -8791,6 +8814,24 @@ begin
   CreateLineNumbersCache(True);
   SizeOrFontChanged;
   InitCodeFolding;
+end;
+
+procedure TCustomTextEditor.SetThemeLoad(const AFileName: TFileName);
+begin
+  if AFileName = STextEditorThemeLoadFromFile then
+    Exit;
+
+  if Assigned(FHighlighter) then
+    FHighlighter.Colors.LoadFromFile(AFileName);
+end;
+
+procedure TCustomTextEditor.SetThemeSave(const AFileName: TFileName);
+begin
+  if AFileName = STextEditorThemeSaveToFile then
+    Exit;
+
+  if Assigned(FHighlighter) then
+    FHighlighter.Colors.SaveToFile(AFileName);
 end;
 
 procedure TCustomTextEditor.SetModified(const AValue: Boolean);

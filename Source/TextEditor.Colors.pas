@@ -247,19 +247,19 @@ type
     property CodeFoldingActiveLineBackground: TColor read FCodeFoldingActiveLineBackground write SetCodeFoldingActiveLineBackground default TDefaultColors.ActiveLineBackground;
     property CodeFoldingActiveLineBackgroundUnfocused: TColor read FCodeFoldingActiveLineBackgroundUnfocused write SetCodeFoldingActiveLineBackgroundUnfocused default TDefaultColors.ActiveLineBackgroundUnfocused;
     property CodeFoldingBackground: TColor read FCodeFoldingBackground write SetCodeFoldingBackground default TDefaultColors.LeftMarginBackground;
-    property CodeFoldingCollapsedLine: TColor read FCodeFoldingCollapsedLine write SetCodeFoldingCollapsedLine default TDefaultColors.LeftMarginFontForeground;
-    property CodeFoldingFoldingLine: TColor read FCodeFoldingFoldingLine write SetCodeFoldingFoldingLine default TDefaultColors.LeftMarginFontForeground;
-    property CodeFoldingFoldingLineHighlight: TColor read FCodeFoldingFoldingLineHighlight write SetCodeFoldingFoldingLineHighlight default TDefaultColors.LeftMarginFontForeground;
-    property CodeFoldingHintBackground: TColor read FCodeFoldingHintBackground write SetCodeFoldingHintBackground default TColors.SysWindow;
-    property CodeFoldingHintBorder: TColor read FCodeFoldingHintBorder write SetCodeFoldingHintBorder default TColors.SysBtnFace;
+    property CodeFoldingCollapsedLine: TColor read FCodeFoldingCollapsedLine write SetCodeFoldingCollapsedLine default TDefaultColors.LineNumbers;
+    property CodeFoldingFoldingLine: TColor read FCodeFoldingFoldingLine write SetCodeFoldingFoldingLine default TDefaultColors.LineNumbers;
+    property CodeFoldingFoldingLineHighlight: TColor read FCodeFoldingFoldingLineHighlight write SetCodeFoldingFoldingLineHighlight default TDefaultColors.LineNumbers;
+    property CodeFoldingHintBackground: TColor read FCodeFoldingHintBackground write SetCodeFoldingHintBackground default TColors.White;
+    property CodeFoldingHintBorder: TColor read FCodeFoldingHintBorder write SetCodeFoldingHintBorder default TDefaultColors.LineNumbers;
     property CodeFoldingHintIndicatorBackground: TColor read FCodeFoldingHintIndicatorBackground write SetCodeFoldingHintIndicatorBackground default TDefaultColors.LeftMarginBackground;
-    property CodeFoldingHintIndicatorBorder: TColor read FCodeFoldingHintIndicatorBorder write SetCodeFoldingHintIndicatorBorder default TDefaultColors.LeftMarginFontForeground;
-    property CodeFoldingHintIndicatorMark: TColor read FCodeFoldingHintIndicatorMark write SetCodeFoldingHintIndicatorMark default TDefaultColors.LeftMarginFontForeground;
-    property CodeFoldingHintText: TColor read FCodeFoldingHintText write SetCodeFoldingHintText default TColors.SysWindowText;
-    property CodeFoldingIndent: TColor read FCodeFoldingIndent write SetCodeFoldingIndent default TDefaultColors.Indent;
-    property CodeFoldingIndentHighlight: TColor read FCodeFoldingIndentHighlight write SetCodeFoldingIndentHighlight default TDefaultColors.IndentHighlight;
-    property CompletionProposalBackground: TColor read FCompletionProposalBackground write SetCompletionProposalBackground default TColors.SysWindow;
-    property CompletionProposalForeground: TColor read FCompletionProposalForeground write SetCompletionProposalForeground default TColors.SysWindowText;
+    property CodeFoldingHintIndicatorBorder: TColor read FCodeFoldingHintIndicatorBorder write SetCodeFoldingHintIndicatorBorder default TDefaultColors.LineNumbers;
+    property CodeFoldingHintIndicatorMark: TColor read FCodeFoldingHintIndicatorMark write SetCodeFoldingHintIndicatorMark default TDefaultColors.LineNumbers;
+    property CodeFoldingHintText: TColor read FCodeFoldingHintText write SetCodeFoldingHintText default TColors.Black;
+    property CodeFoldingIndent: TColor read FCodeFoldingIndent write SetCodeFoldingIndent default TDefaultColors.LineNumbers;
+    property CodeFoldingIndentHighlight: TColor read FCodeFoldingIndentHighlight write SetCodeFoldingIndentHighlight default TDefaultColors.LineNumbers;
+    property CompletionProposalBackground: TColor read FCompletionProposalBackground write SetCompletionProposalBackground default TColors.White;
+    property CompletionProposalForeground: TColor read FCompletionProposalForeground write SetCompletionProposalForeground default TColors.Black;
     property CompletionProposalSelectedBackground: TColor read FCompletionProposalSelectedBackground write SetCompletionProposalSelectedBackground default TColors.SysHighlight;
     property CompletionProposalSelectedText: TColor read FCompletionProposalSelectedText write SetCompletionProposalSelectedText default TColors.SysHighlightText;
     property EditorAssemblerCommentBackground: TColor read FEditorAssemblerCommentBackground write SetEditorAssemblerCommentBackground default TDefaultColors.BlockBackground;
@@ -304,12 +304,12 @@ type
     property EditorWebLinkForeground: TColor read FEditorWebLinkForeground write SetEditorWebLinkForeground default TColors.Blue;
     property LeftMarginActiveLineBackground: TColor read FLeftMarginActiveLineBackground write SetLeftMarginActiveLineBackground default TDefaultColors.ActiveLineBackground;
     property LeftMarginActiveLineBackgroundUnfocused: TColor read FLeftMarginActiveLineBackgroundUnfocused write SetLeftMarginActiveLineBackgroundUnfocused default TDefaultColors.ActiveLineBackgroundUnfocused;
-    property LeftMarginActiveLineNumber: TColor read FLeftMarginActiveLineNumber write SetLeftMarginActiveLineNumber default TDefaultColors.LeftMarginFontForeground;
+    property LeftMarginActiveLineNumber: TColor read FLeftMarginActiveLineNumber write SetLeftMarginActiveLineNumber default TDefaultColors.LineNumbers;
     property LeftMarginBackground: TColor read FLeftMarginBackground write SetLeftMarginBackground default TDefaultColors.LeftMarginBackground;
     property LeftMarginBookmarkPanelBackground: TColor read FLeftMarginBookmarkPanelBackground write SetLeftMarginBookmarkPanelBackground default TColors.White;
     property LeftMarginBorder: TColor read FLeftMarginBorder write SetLeftMarginBorder default TDefaultColors.LeftMarginBackground;
-    property LeftMarginLineNumberLine: TColor read FLeftMarginLineNumberLine write SetLeftMarginLineNumberLine default TDefaultColors.LeftMarginFontForeground;
-    property LeftMarginLineNumbers: TColor read FLeftMarginLineNumbers write SetLeftMarginLineNumbers default TDefaultColors.LeftMarginFontForeground;
+    property LeftMarginLineNumberLine: TColor read FLeftMarginLineNumberLine write SetLeftMarginLineNumberLine default TDefaultColors.LineNumbers;
+    property LeftMarginLineNumbers: TColor read FLeftMarginLineNumbers write SetLeftMarginLineNumbers default TDefaultColors.LineNumbers;
     property LeftMarginLineStateModified: TColor read FLeftMarginLineStateModified write SetLeftMarginLineStateModified default TColors.Yellow;
     property LeftMarginLineStateNormal: TColor read FLeftMarginLineStateNormal write SetLeftMarginLineStateNormal default TColors.Lime;
     property MatchingPairMatched: TColor read FMatchingPairMatched write SetMatchingPairMatched default TColors.Aqua;
@@ -317,32 +317,32 @@ type
     property MatchingPairUnmatched: TColor read FMatchingPairUnmatched write SetMatchingPairUnmatched default TColors.Yellow;
     property MinimapBackground: TColor read FMinimapBackground write SetMinimapBackground default TColors.SysNone;
     property MinimapBookmark: TColor read FMinimapBookmark write SetMinimapBookmark default TDefaultColors.MinimapBookmark;
-    property MinimapVisibleLines: TColor read FMinimapVisibleLines write SetMinimapVisibleLines default TDefaultColors.MinimapVisibleLines;
-    property MultiEditBackground: TColor read FMultiEditBackground write SetMultiEditBackground default TColors.SysWindow;
-    property MultiEditForeground: TColor read FMultiEditForeground write SetMultiEditForeground default TColors.SysWindowText;
+    property MinimapVisibleLines: TColor read FMinimapVisibleLines write SetMinimapVisibleLines default TDefaultColors.ActiveLineBackground;
+    property MultiEditBackground: TColor read FMultiEditBackground write SetMultiEditBackground default TColors.Black;
+    property MultiEditForeground: TColor read FMultiEditForeground write SetMultiEditForeground default TColors.White;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property RightMargin: TColor read FRightMargin write SetRightMargin default TColors.Silver;
     property RightMovingEdge: TColor read FRightMovingEdge write SetRightMovingEdge default TColors.Silver;
     property RulerBackground: TColor read FRulerBackground write SetRulerBackground default TDefaultColors.LeftMarginBackground;
-    property RulerBorder: TColor read FRulerBorder write SetRulerBorder default TDefaultColors.LeftMarginFontForeground;
-    property RulerLines: TColor read FRulerLines write SetRulerLines default TDefaultColors.LeftMarginFontForeground;
+    property RulerBorder: TColor read FRulerBorder write SetRulerBorder default TDefaultColors.LineNumbers;
+    property RulerLines: TColor read FRulerLines write SetRulerLines default TDefaultColors.LineNumbers;
     property RulerMovingEdge: TColor read FRulerMovingEdge write SetRulerMovingEdge default TColors.Silver;
-    property RulerNumbers: TColor read FRulerNumbers write SetRulerNumbers default TColors.SysWindowText;
-    property RulerSelection: TColor read FRulerSelection write SetRulerSelection default TColors.SysBtnFace;
+    property RulerNumbers: TColor read FRulerNumbers write SetRulerNumbers default TDefaultColors.LineNumbers;
+    property RulerSelection: TColor read FRulerSelection write SetRulerSelection default TDefaultColors.ActiveLineBackground;
     property SearchHighlighterBackground: TColor read FSearchHighlighterBackground write SetSearchHighlighterBackground default TDefaultColors.SearchHighlighter;
     property SearchHighlighterBorder: TColor read FSearchHighlighterBorder write SetSearchHighlighterBorder default TColors.SysNone;
-    property SearchHighlighterForeground: TColor read FSearchHighlighterForeground write SetSearchHighlighterForeground default TColors.SysWindowText;
+    property SearchHighlighterForeground: TColor read FSearchHighlighterForeground write SetSearchHighlighterForeground default TColors.Black;
     property SearchInSelectionBackground: TColor read FSearchInSelectionBackground write SetSearchInSelectionBackground default TDefaultColors.SearchInSelectionBackground;
-    property SearchMapActiveLine: TColor read FSearchMapActiveLine write SetSearchMapActiveLine default TDefaultColors.SearchMapActiveLine;
-    property SearchMapBackground: TColor read FSearchMapBackground write SetSearchMapBackground default TDefaultColors.LeftMarginBackground;
+    property SearchMapActiveLine: TColor read FSearchMapActiveLine write SetSearchMapActiveLine default TDefaultColors.ActiveLineBackgroundUnfocused;
+    property SearchMapBackground: TColor read FSearchMapBackground write SetSearchMapBackground default TColors.SysNone;
     property SearchMapForeground: TColor read FSearchMapForeground write SetSearchMapForeground default TDefaultColors.SearchHighlighter;
     property SelectionBackground: TColor read FSelectionBackground write SetSelectionBackground default TDefaultColors.Selection;
     property SelectionBackgroundUnfocused: TColor read FSelectionBackgroundUnfocused write SetSelectionBackgroundUnfocused default TDefaultColors.SelectionUnfocused;
-    property SelectionForeground: TColor read FSelectionForeground write SetSelectionForeground default TColors.SysHighlightText;
-    property SelectionForegroundUnfocused: TColor read FSelectionForegroundUnfocused write SetSelectionForegroundUnfocused default TColors.SysHighlightText;
-    property SyncEditBackground: TColor read FSyncEditBackground write SetSyncEditBackground default TDefaultColors.SyncEditBackground;
-    property SyncEditEditBorder: TColor read FSyncEditEditBorder write SetSyncEditEditBorder default TColors.SysWindowText;
-    property SyncEditWordBorder: TColor read FSyncEditWordBorder write SetSyncEditWordBorder default TColors.SysHighlight;
+    property SelectionForeground: TColor read FSelectionForeground write SetSelectionForeground default TColors.White;
+    property SelectionForegroundUnfocused: TColor read FSelectionForegroundUnfocused write SetSelectionForegroundUnfocused default TColors.White;
+    property SyncEditBackground: TColor read FSyncEditBackground write SetSyncEditBackground default TDefaultColors.SearchInSelectionBackground;
+    property SyncEditEditBorder: TColor read FSyncEditEditBorder write SetSyncEditEditBorder default TColors.Black;
+    property SyncEditWordBorder: TColor read FSyncEditWordBorder write SetSyncEditWordBorder default TDefaultColors.Selection;
     property WordWrapIndicatorArrow: TColor read FWordWrapIndicatorArrow write SetWordWrapIndicatorArrow default TDefaultColors.WordWrapIndicatorArrow;
     property WordWrapIndicatorLines: TColor read FWordWrapIndicatorLines write SetWordWrapIndicatorLines default TDefaultColors.WordWrapIndicatorLines;
   end;
@@ -378,22 +378,22 @@ begin
   FCodeFoldingActiveLineBackground := TDefaultColors.ActiveLineBackground;
   FCodeFoldingActiveLineBackgroundUnfocused := TDefaultColors.ActiveLineBackgroundUnfocused;
   FCodeFoldingBackground := TDefaultColors.LeftMarginBackground;
-  FCodeFoldingCollapsedLine := TDefaultColors.LeftMarginFontForeground;
-  FCodeFoldingFoldingLine := TDefaultColors.LeftMarginFontForeground;
-  FCodeFoldingFoldingLineHighlight := TDefaultColors.LeftMarginFontForeground;
-  FCodeFoldingIndent := TDefaultColors.Indent;
-  FCodeFoldingIndentHighlight := TDefaultColors.IndentHighlight;
+  FCodeFoldingCollapsedLine := TDefaultColors.LineNumbers;
+  FCodeFoldingFoldingLine := TDefaultColors.LineNumbers;
+  FCodeFoldingFoldingLineHighlight := TDefaultColors.LineNumbers;
+  FCodeFoldingIndent := TDefaultColors.LineNumbers;
+  FCodeFoldingIndentHighlight := TDefaultColors.LineNumbers;
   { Code folding hint }
-  FCodeFoldingHintBackground := TColors.SysWindow;
-  FCodeFoldingHintBorder := TColors.SysBtnFace;
-  FCodeFoldingHintText := TColors.SysWindowText;
+  FCodeFoldingHintBackground := TColors.White;
+  FCodeFoldingHintBorder := TDefaultColors.LineNumbers;
+  FCodeFoldingHintText := TColors.Black;
   { Code folding hint indicator }
   FCodeFoldingHintIndicatorBackground := TDefaultColors.LeftMarginBackground;
-  FCodeFoldingHintIndicatorBorder := TDefaultColors.LeftMarginFontForeground;
-  FCodeFoldingHintIndicatorMark := TDefaultColors.LeftMarginFontForeground;
+  FCodeFoldingHintIndicatorBorder := TDefaultColors.LineNumbers;
+  FCodeFoldingHintIndicatorMark := TDefaultColors.LineNumbers;
   { Completion proposal }
-  FCompletionProposalBackground := TColors.SysWindow;
-  FCompletionProposalForeground := TColors.SysWindowText;
+  FCompletionProposalBackground := TColors.White;
+  FCompletionProposalForeground := TColors.Black;
   FCompletionProposalSelectedBackground := TColors.SysHighlight;
   FCompletionProposalSelectedText := TColors.SysHighlightText;
   { Editor }
@@ -440,12 +440,12 @@ begin
   { Left margin }
   FLeftMarginActiveLineBackground := TDefaultColors.ActiveLineBackground;
   FLeftMarginActiveLineBackgroundUnfocused := TDefaultColors.ActiveLineBackgroundUnfocused;
-  FLeftMarginActiveLineNumber := TDefaultColors.LeftMarginFontForeground;
+  FLeftMarginActiveLineNumber := TDefaultColors.LineNumbers;
   FLeftMarginBackground := TDefaultColors.LeftMarginBackground;
   FLeftMarginBookmarkPanelBackground := TColors.White;
   FLeftMarginBorder := TDefaultColors.LeftMarginBackground;
-  FLeftMarginLineNumberLine := TDefaultColors.LeftMarginFontForeground;
-  FLeftMarginLineNumbers := TDefaultColors.LeftMarginFontForeground;
+  FLeftMarginLineNumberLine := TDefaultColors.LineNumbers;
+  FLeftMarginLineNumbers := TDefaultColors.LineNumbers;
   FLeftMarginLineStateModified := TColors.Yellow;
   FLeftMarginLineStateNormal := TColors.Lime;
   { Matching pair }
@@ -455,39 +455,39 @@ begin
   { Minimap }
   FMinimapBackground := TColors.SysNone;
   FMinimapBookmark := TDefaultColors.MinimapBookmark;
-  FMinimapVisibleLines := TDefaultColors.MinimapVisibleLines;
+  FMinimapVisibleLines := TDefaultColors.ActiveLineBackground;
   { Multi-edit }
-  FMultiEditBackground := TColors.SysWindow;
-  FMultiEditForeground := TColors.SysWindowText;
+  FMultiEditBackground := TColors.Black;
+  FMultiEditForeground := TColors.White;
   { Right margin }
   FRightMargin := TColors.Silver;
   FRightMovingEdge := TColors.Silver;
   { Ruler }
   FRulerBackground := TDefaultColors.LeftMarginBackground;
-  FRulerBorder := TDefaultColors.LeftMarginFontForeground;
-  FRulerLines := TDefaultColors.LeftMarginFontForeground;
+  FRulerBorder := TDefaultColors.LineNumbers;
+  FRulerLines := TDefaultColors.LineNumbers;
   FRulerMovingEdge := TColors.Silver;
-  FRulerNumbers := TColors.SysWindowText;
-  FRulerSelection := TColors.SysBtnFace;
+  FRulerNumbers := TDefaultColors.LineNumbers;
+  FRulerSelection := TDefaultColors.ActiveLineBackground;
   { Search highlighter }
   FSearchHighlighterBackground := TDefaultColors.SearchHighlighter;
   FSearchHighlighterBorder := TColors.SysNone;
-  FSearchHighlighterForeground := TColors.SysWindowText;
+  FSearchHighlighterForeground := TColors.Black;
   { Search in selection }
   FSearchInSelectionBackground := TDefaultColors.SearchInSelectionBackground;
   { Search map }
-  FSearchMapActiveLine := TDefaultColors.SearchMapActiveLine;
-  FSearchMapBackground := TDefaultColors.LeftMarginBackground;
+  FSearchMapActiveLine := TDefaultColors.ActiveLineBackgroundUnfocused;
+  FSearchMapBackground := TColors.SysNone;
   FSearchMapForeground := TDefaultColors.SearchHighlighter;
   { Selection }
   FSelectionBackground := TDefaultColors.Selection;
   FSelectionBackgroundUnfocused := TDefaultColors.SelectionUnfocused;
-  FSelectionForeground := TColors.SysHighlightText;
-  FSelectionForegroundUnfocused := TColors.SysHighlightText;
+  FSelectionForeground := TColors.White;
+  FSelectionForegroundUnfocused := TColors.White;
   { Sync edit }
-  FSyncEditBackground := TDefaultColors.SyncEditBackground;
-  FSyncEditEditBorder := TColors.SysWindowText;
-  FSyncEditWordBorder := TColors.SysHighlight;
+  FSyncEditBackground := TDefaultColors.SearchInSelectionBackground;
+  FSyncEditEditBorder := TColors.Black;
+  FSyncEditWordBorder := TDefaultColors.Selection;
   { Word wrap indicator }
   FWordWrapIndicatorArrow := TDefaultColors.WordWrapIndicatorArrow;
   FWordWrapIndicatorLines := TDefaultColors.WordWrapIndicatorLines;
@@ -679,12 +679,12 @@ end;
 
 procedure TTextEditorColors.SetCaretNonBlinkingBackground(const AValue: TColor);
 begin
-  FCaretNonBlinkingBackground := SetColorDef(AValue, TColors.Black);;
+  FCaretNonBlinkingBackground := SetColorDef(AValue, TColors.Black);
 end;
 
 procedure TTextEditorColors.SetCaretNonBlinkingForeground(const AValue: TColor);
 begin
-  FCaretNonBlinkingForeground := SetColorDef(AValue, TColors.White);;
+  FCaretNonBlinkingForeground := SetColorDef(AValue, TColors.White);
 end;
 
 procedure TTextEditorColors.SetCodeFoldingActiveLineBackground(const AValue: TColor);
@@ -704,27 +704,27 @@ end;
 
 procedure TTextEditorColors.SetCodeFoldingCollapsedLine(const AValue: TColor);
 begin
-  FCodeFoldingCollapsedLine := SetColorDef(AValue, TDefaultColors.LeftMarginFontForeground);
+  FCodeFoldingCollapsedLine := SetColorDef(AValue, TDefaultColors.LineNumbers);
 end;
 
 procedure TTextEditorColors.SetCodeFoldingFoldingLine(const AValue: TColor);
 begin
-  FCodeFoldingFoldingLine := SetColorDef(AValue, TDefaultColors.LeftMarginFontForeground);
+  FCodeFoldingFoldingLine := SetColorDef(AValue, TDefaultColors.LineNumbers);
 end;
 
 procedure TTextEditorColors.SetCodeFoldingFoldingLineHighlight(const AValue: TColor);
 begin
-  FCodeFoldingFoldingLineHighlight := SetColorDef(AValue, TDefaultColors.LeftMarginFontForeground);
+  FCodeFoldingFoldingLineHighlight := SetColorDef(AValue, TDefaultColors.LineNumbers);
 end;
 
 procedure TTextEditorColors.SetCodeFoldingHintBackground(const AValue: TColor);
 begin
-  FCodeFoldingHintBackground := SetColorDef(AValue, TColors.SysWindow);
+  FCodeFoldingHintBackground := SetColorDef(AValue, TColors.White);
 end;
 
 procedure TTextEditorColors.SetCodeFoldingHintBorder(const AValue: TColor);
 begin
-  FCodeFoldingHintBorder := SetColorDef(AValue, TColors.SysBtnFace);
+  FCodeFoldingHintBorder := SetColorDef(AValue, TDefaultColors.LineNumbers);
 end;
 
 procedure TTextEditorColors.SetCodeFoldingHintIndicatorBackground(const AValue: TColor);
@@ -734,37 +734,37 @@ end;
 
 procedure TTextEditorColors.SetCodeFoldingHintIndicatorBorder(const AValue: TColor);
 begin
-  FCodeFoldingHintIndicatorBorder := SetColorDef(AValue, TDefaultColors.LeftMarginFontForeground);
+  FCodeFoldingHintIndicatorBorder := SetColorDef(AValue, TDefaultColors.LineNumbers);
 end;
 
 procedure TTextEditorColors.SetCodeFoldingHintIndicatorMark(const AValue: TColor);
 begin
-  FCodeFoldingHintIndicatorMark := SetColorDef(AValue, TDefaultColors.LeftMarginFontForeground);
+  FCodeFoldingHintIndicatorMark := SetColorDef(AValue, TDefaultColors.LineNumbers);
 end;
 
 procedure TTextEditorColors.SetCodeFoldingHintText(const AValue: TColor);
 begin
-  FCodeFoldingHintText := SetColorDef(AValue, TColors.SysWindowText);
+  FCodeFoldingHintText := SetColorDef(AValue, TColors.Black);
 end;
 
 procedure TTextEditorColors.SetCodeFoldingIndent(const AValue: TColor);
 begin
-  FCodeFoldingIndent := SetColorDef(AValue, TDefaultColors.Indent)
+  FCodeFoldingIndent := SetColorDef(AValue, TDefaultColors.LineNumbers)
 end;
 
 procedure TTextEditorColors.SetCodeFoldingIndentHighlight(const AValue: TColor);
 begin
-  FCodeFoldingIndentHighlight := SetColorDef(AValue, TDefaultColors.IndentHighlight)
+  FCodeFoldingIndentHighlight := SetColorDef(AValue, TDefaultColors.LineNumbers)
 end;
 
 procedure TTextEditorColors.SetCompletionProposalBackground(const AValue: TColor);
 begin
-  FCompletionProposalBackground := SetColorDef(AValue, TColors.SysWindow);
+  FCompletionProposalBackground := SetColorDef(AValue, TColors.White);
 end;
 
 procedure TTextEditorColors.SetCompletionProposalForeground(const AValue: TColor);
 begin
-  FCompletionProposalForeground := SetColorDef(AValue, TColors.SysWindowText);
+  FCompletionProposalForeground := SetColorDef(AValue, TColors.Black);
 end;
 
 procedure TTextEditorColors.SetCompletionProposalSelectedBackground(const AValue: TColor);
@@ -1016,7 +1016,7 @@ end;
 
 procedure TTextEditorColors.SetLeftMarginLineNumberLine(const AValue: TColor);
 begin
-  FLeftMarginLineNumberLine := SetColorDef(AValue, TDefaultColors.LeftMarginFontForeground);
+  FLeftMarginLineNumberLine := SetColorDef(AValue, TDefaultColors.LineNumbers);
   DoChange;
 end;
 
@@ -1063,17 +1063,17 @@ end;
 
 procedure TTextEditorColors.SetMinimapVisibleLines(const AValue: TColor);
 begin
-  FMinimapVisibleLines := SetColorDef(AValue, TDefaultColors.MinimapVisibleLines);
+  FMinimapVisibleLines := SetColorDef(AValue, TDefaultColors.ActiveLineBackground);
 end;
 
 procedure TTextEditorColors.SetMultiEditBackground(const AValue: TColor);
 begin
-  FMultiEditBackground := SetColorDef(AValue, TColors.SysWindow);
+  FMultiEditBackground := SetColorDef(AValue, TColors.Black);
 end;
 
 procedure TTextEditorColors.SetMultiEditForeground(const AValue: TColor);
 begin
-  FMultiEditForeground := SetColorDef(AValue, TColors.SysWindowText);
+  FMultiEditForeground := SetColorDef(AValue, TColors.White);
 end;
 
 procedure TTextEditorColors.SetRightMargin(const AValue: TColor);
@@ -1093,12 +1093,12 @@ end;
 
 procedure TTextEditorColors.SetRulerBorder(const AValue: TColor);
 begin
-  FRulerBorder := SetColorDef(AValue, TDefaultColors.LeftMarginFontForeground);
+  FRulerBorder := SetColorDef(AValue, TDefaultColors.LineNumbers);
 end;
 
 procedure TTextEditorColors.SetRulerLines(const AValue: TColor);
 begin
-  FRulerLines := SetColorDef(AValue, TDefaultColors.LeftMarginFontForeground);
+  FRulerLines := SetColorDef(AValue, TDefaultColors.LineNumbers);
 end;
 
 procedure TTextEditorColors.SetRulerMovingEdge(const AValue: TColor);
@@ -1108,12 +1108,12 @@ end;
 
 procedure TTextEditorColors.SetRulerNumbers(const AValue: TColor);
 begin
-  FRulerNumbers := SetColorDef(AValue, TColors.SysWindowText);
+  FRulerNumbers := SetColorDef(AValue, TDefaultColors.LineNumbers);
 end;
 
 procedure TTextEditorColors.SetRulerSelection(const AValue: TColor);
 begin
-  FRulerSelection := SetColorDef(AValue, TColors.SysBtnFace);
+  FRulerSelection := SetColorDef(AValue, TDefaultColors.ActiveLineBackground);
 end;
 
 procedure TTextEditorColors.SetSearchHighlighterBackground(const AValue: TColor);
@@ -1128,7 +1128,7 @@ end;
 
 procedure TTextEditorColors.SetSearchHighlighterForeground(const AValue: TColor);
 begin
-  FSearchHighlighterForeground := SetColorDef(AValue, TColors.SysWindowText);
+  FSearchHighlighterForeground := SetColorDef(AValue, TColors.Black);
 end;
 
 procedure TTextEditorColors.SetSearchInSelectionBackground(const AValue: TColor);
@@ -1138,12 +1138,12 @@ end;
 
 procedure TTextEditorColors.SetSearchMapActiveLine(const AValue: TColor);
 begin
-  FSearchMapActiveLine := SetColorDef(AValue, TDefaultColors.SearchMapActiveLine);
+  FSearchMapActiveLine := SetColorDef(AValue, TDefaultColors.ActiveLineBackgroundUnfocused);
 end;
 
 procedure TTextEditorColors.SetSearchMapBackground(const AValue: TColor);
 begin
-  FSearchMapBackground := SetColorDef(AValue, TDefaultColors.LeftMarginBackground);
+  FSearchMapBackground := SetColorDef(AValue, TColors.SysNone);
 end;
 
 procedure TTextEditorColors.SetSearchMapForeground(const AValue: TColor);
@@ -1163,27 +1163,27 @@ end;
 
 procedure TTextEditorColors.SetSelectionForeground(const AValue: TColor);
 begin
-  FSelectionForeground := SetColorDef(AValue, TColors.SysHighlightText);
+  FSelectionForeground := SetColorDef(AValue, TColors.White);
 end;
 
 procedure TTextEditorColors.SetSelectionForegroundUnfocused(const AValue: TColor);
 begin
-  FSelectionForegroundUnfocused := SetColorDef(AValue, TColors.SysHighlightText);
+  FSelectionForegroundUnfocused := SetColorDef(AValue, TColors.White);
 end;
 
 procedure TTextEditorColors.SetSyncEditBackground(const AValue: TColor);
 begin
-  FSyncEditBackground := SetColorDef(AValue, TDefaultColors.SyncEditBackground);
+  FSyncEditBackground := SetColorDef(AValue, TDefaultColors.SearchInSelectionBackground);
 end;
 
 procedure TTextEditorColors.SetSyncEditEditBorder(const AValue: TColor);
 begin
-  FSyncEditEditBorder := SetColorDef(AValue, TColors.SysWindowText);
+  FSyncEditEditBorder := SetColorDef(AValue, TColors.Black);
 end;
 
 procedure TTextEditorColors.SetSyncEditWordBorder(const AValue: TColor);
 begin
-  FSyncEditWordBorder := SetColorDef(AValue, TColors.SysHighlight);
+  FSyncEditWordBorder := SetColorDef(AValue, TDefaultColors.Selection);
 end;
 
 procedure TTextEditorColors.SetWordWrapIndicatorArrow(const AValue: TColor);

@@ -4,16 +4,18 @@ interface
 
 resourcestring
   { TextEditor }
-  STextEditorScrollInfoTopLine = 'Top line: %d';
-  STextEditorScrollInfo = '%d - %d';
-  STextEditorSearchStringNotFound = 'Search string ''%s'' not found';
-  STextEditorSearchMatchNotFound = 'Search match not found.%sRestart search from the beginning of the file?';
   STextEditorRightMarginPosition = 'Position: %d';
+  STextEditorScrollInfo = '%d - %d';
+  STextEditorScrollInfoTopLine = 'Top line: %d';
   STextEditorSearchEngineNotAssigned = 'Search engine has not been assigned';
+  STextEditorSearchMatchNotFound = 'Search match not found.%sRestart search from the beginning of the file?';
+  STextEditorSearchStringNotFound = 'Search string ''%s'' not found';
+  STextEditorThemeLoadFromFile = 'Load theme from file';
+  STextEditorThemeSaveToFile = 'Save theme to file';
 
   { TextEditor.CompletionProposal }
-  STextEditorSnippet = 'Snippet';
   STextEditorKeyword = 'Keyword';
+  STextEditorSnippet = 'Snippet';
   STextEditorText = 'Text';
 
   { TextEditor.CompletionProposal.Snippet }
@@ -26,12 +28,12 @@ resourcestring
   STextEditorDuplicateShortcut = 'Shortcut already exists';
 
   { TextEditor.MacroRecorder }
-  STextEditorCannotRecord = 'Cannot record macro; already recording or playing';
-  STextEditorCannotPlay = 'Cannot playback macro; already playing or recording';
   STextEditorCannotPause = 'Can only pause when recording';
+  STextEditorCannotPlay = 'Cannot playback macro; already playing or recording';
+  STextEditorCannotRecord = 'Cannot record macro; already recording or playing';
   STextEditorCannotResume = 'Can only resume when paused';
-  STextEditorShortcutAlreadyExists = 'Shortcut already exists';
   STextEditorMacroNameUnnamed = 'unnamed';
+  STextEditorShortcutAlreadyExists = 'Shortcut already exists';
 
   { TextEditor.Lines }
 {$IFDEF TEXTEDITOR_RANGE_CHECKS}
@@ -40,8 +42,8 @@ resourcestring
   STextEditorInvalidCapacity = 'List capacity cannot be smaller than count';
 
   { TextEditor.Highlighter.Import.JSON }
-  STextEditorErrorInHighlighterParse = 'JSON parse error on line %d column %d: %s';
   STextEditorErrorInHighlighterImport = 'Error in highlighter import: %s';
+  STextEditorErrorInHighlighterParse = 'JSON parse error on line %d column %d: %s';
 
   { TextEditor.Search }
   STextEditorPatternIsEmpty = 'Pattern is empty';
@@ -51,30 +53,30 @@ resourcestring
 
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
   { Spell check }
+  STextEditorContainsInvalidChars = 'Invalid word: ''%s'' contains characters that cannot be represented in the loaded dictionary''s codepage';
+  STextEditorHunspellHandleNeeded = 'Operation requires a dictionary to be loaded first';
+  STextEditorSpellCheckEngineCantInitialize = 'Can''t initialize spell check engine.';
   STextEditorSpellCheckEngineCantLoadLibrary = 'Can''t load spell check dynamic link library (DLL).' + sLineBreak + sLineBreak +
     'Check the DLL version - 32-bit application can''t work with 64-bit version and vice versa.';
-  STextEditorSpellCheckEngineCantInitialize = 'Can''t initialize spell check engine.';
-  STextEditorHunspellHandleNeeded = 'Operation requires a dictionary to be loaded first';
-  STextEditorContainsInvalidChars = 'Invalid word: ''%s'' contains characters that cannot be represented in the loaded dictionary''s codepage';
 {$ENDIF}
 
   { JSON parser }
-  STextEditorUnsupportedFileEncoding = 'File encoding is not supported';
-  STextEditorUnexpectedEndOfFile = 'Unexpected end of file where %s was expected';
-  STextEditorUnexpectedToken = 'Expected %s but found %s';
-  STextEditorInvalidStringCharacter = 'Invalid character in string';
-  STextEditorStringNotClosed = 'String not closed';
-  STextEditorTypeCastError = 'Cannot cast %s into %s';
   STextEditorInvalidJSONPath = 'Invalid JSON path "%s"';
+  STextEditorInvalidStringCharacter = 'Invalid character in string';
   STextEditorJSONPathContainsNullValue = 'JSON path contains null value ("%s")';
   STextEditorJSONPathIndexError = 'JSON path index out of bounds (%d) "%s"';
+  STextEditorStringNotClosed = 'String not closed';
+  STextEditorTypeCastError = 'Cannot cast %s into %s';
+  STextEditorUnexpectedEndOfFile = 'Unexpected end of file where %s was expected';
+  STextEditorUnexpectedToken = 'Expected %s but found %s';
+  STextEditorUnsupportedFileEncoding = 'File encoding is not supported';
 
   { Bookmark colors }
-  STextEditorBookmarkYellow = 'Yellow';
-  STextEditorBookmarkRed = 'Red';
-  STextEditorBookmarkGreen = 'Green';
   STextEditorBookmarkBlue = 'Blue';
+  STextEditorBookmarkGreen = 'Green';
   STextEditorBookmarkPurple = 'Purple';
+  STextEditorBookmarkRed = 'Red';
+  STextEditorBookmarkYellow = 'Yellow';
 
 implementation
 

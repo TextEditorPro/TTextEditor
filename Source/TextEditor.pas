@@ -20104,7 +20104,7 @@ var
   LPixelsPerInch: Integer;
   LMultiplier: Integer;
 begin
-  LPixelsPerInch := {$IFDEF ALPHASKINS}DefaultManager.Options.PixelsPerInch{$ELSE}PixelsPerInch{$ENDIF};
+  LPixelsPerInch := {$IFDEF ALPHASKINS}DefaultManager.Options.PixelsPerInch{$ELSE}Screen.PixelsPerInch{$ENDIF};
 
   if FZoomDivider = 0 then
     FZoomDivider := LPixelsPerInch;

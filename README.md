@@ -13,11 +13,16 @@ Development takes place elsewhere.
 
 - Arabic and Hebrew support
 - Code/text folding
-- Color themes (JSON file/stream)
+- Color themes 
+  - Colors, Fonts, and FontStyles properties
+  - ThemeLoad and ThemeSave properties 
+  - JSON file/stream import
 - Completion proposal
   - Snippets
 - Data-aware
-- Highlighters (JSON file/stream)
+- Highlight line
+- Highlighters 
+  - JSON file/stream import
 - HTML export (clipboard support)
 - Large file support
 - Left margin

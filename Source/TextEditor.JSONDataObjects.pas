@@ -1,11 +1,12 @@
 ﻿{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
-unit TextEditor.Highlighter.Import.JSON.Parser;
+unit TextEditor.JSONDataObjects;
 
-{ Copyright (c) 2015 Andreas Hausladen
-  Based on: https://github.com/ahausladen/JsonDataObjects
+{ Based on: https://github.com/ahausladen/JsonDataObjects
+
+  Copyright (c) 2015-2016 Andreas Hausladen
   MIT license: https://github.com/ahausladen/JsonDataObjects/blob/master/LICENSE
 
-  Unnecessary bloat for TTextEditor removed and useful fearures added. }
+  Unnecessary bloat for TTextEditor removed and some useful features added. }
 
 interface
 
@@ -224,15 +225,17 @@ type
     procedure InternToJSON(var Writer: TJSONOutputWriter); virtual; abstract;
   public const
     DataTypeNames: array [TJSONDataType] of string = ('null', 'String', 'Bool', 'Array', 'Object');
-
-    class function ParseUtf8Bytes(const S: PByte; Len: Integer = -1): TJSONBaseObject; static;
     class function Parse(const Bytes: TBytes; const ByteIndex: Integer = 0; ByteCount: Integer = -1): TJSONBaseObject; overload; static;
+    class function Parse(const S: UnicodeString): TJSONBaseObject; overload; static; inline;
+    class function Parse(S: PWideChar; Len: Integer = -1): TJSONBaseObject; overload; static;
     class function ParseFromStream(const Stream: TStream): TJSONBaseObject; static;
-
-    procedure LoadFromStream(const Stream: TStream);
-    procedure FromUtf8JSON(const S: PByte; Len: Integer = -1); overload;
+    class function ParseUtf8Bytes(const S: PByte; Len: Integer = -1): TJSONBaseObject; static;
     function ToJSON(const ACompact: Boolean = True): string;
     function ToString: string; override;
+    procedure FromJSON(const S: UnicodeString); overload;
+    procedure FromJSON(S: PWideChar; Len: Integer = -1); overload;
+    procedure FromUtf8JSON(const S: PByte; Len: Integer = -1); overload;
+    procedure LoadFromStream(const Stream: TStream);
   end;
 
   PJSONDataValueArray = ^TJSONDataValueArray;
@@ -412,6 +415,13 @@ const
   sNull = 'null';
   sQuoteChar = '"';
 
+resourcestring
+  RsInvalidHexNumber = 'Invalid hex number "%s"';
+  RsInvalidStringCharacter = 'Invalid character in string';
+  RsStringNotClosed = 'String not closed';
+  RsUnexpectedEndOfFile = 'Unexpected end of file where %s was expected';
+  RsUnexpectedToken = 'Expected %s but found %s';
+
 type
   PStrRec = ^TStrRec;
 
@@ -470,35 +480,57 @@ type
 
   TJSONReader = class(TObject)
   private
-    FIdents: TStringIntern;
     FPropName: string;
-    FText: PByte;
-    FTextEnd: PByte;
-    procedure Accept(const ATokenKind: TJSONTokenKind);
-    procedure AcceptFailed(const ATokenKind: TJSONTokenKind);
-    procedure ParseArrayBody(const Data: TJSONArray);
-    procedure ParseArrayPropertyValue(const Data: TJSONArray);
+    procedure Accept(TokenKind: TJSONTokenKind);
     procedure ParseObjectBody(const Data: TJSONObject);
     procedure ParseObjectProperty(const Data: TJSONObject);
     procedure ParseObjectPropertyValue(const Data: TJSONObject);
+    procedure ParseArrayBody(const Data: TJSONArray);
+    procedure ParseArrayPropertyValue(const Data: TJSONArray);
+    procedure AcceptFailed(TokenKind: TJSONTokenKind);
   protected
     FLook: TJSONToken;
     FLineNum: Integer;
     FStart: Pointer;
     FLineStart: Pointer;
-    class procedure InvalidStringCharacterError(const Reader: TJSONReader); static;
-    class procedure JSONUtf8StrToStr(P, EndP: PByte; FirstEscapeIndex: Integer; var S: string; const Reader: TJSONReader); static;
-    class procedure StringNotClosedError(const Reader: TJSONReader); static;
-    function GetCharOffset(const StartPos: Pointer): NativeInt; virtual;
     function GetLineColumn: NativeInt;
     function GetPosition: NativeInt;
-    function Next: Boolean; virtual;
-    procedure LexIdent(P: PByte);
-    procedure LexString(P: PByte);
+    function GetCharOffset(const StartPos: Pointer): NativeInt; virtual; abstract;
+    function Next: Boolean; virtual; abstract;
+    class procedure InvalidStringCharacterError(const Reader: TJSONReader); static;
+    class procedure StringNotClosedError(const Reader: TJSONReader); static;
+    class procedure JSONStrToStr(P, EndP: PChar; FirstEscapeIndex: Integer; var S: string; const Reader: TJSONReader); static;
+    class procedure JSONUtf8StrToStr(P, EndP: PByte; FirstEscapeIndex: Integer; var S: string; const Reader: TJSONReader); static;
   public
-    constructor Create(const S: PByte; const Len: NativeInt);
+    constructor Create(AStart: Pointer);
     destructor Destroy; override;
-    procedure Parse(const Data: TJSONBaseObject);
+    procedure Parse(Data: TJSONBaseObject);
+  end;
+
+  TUTF8JSONReader = class sealed(TJSONReader)
+  private
+    FText: PByte;
+    FTextEnd: PByte;
+  protected
+    function GetCharOffset(const StartPos: Pointer): NativeInt; override; final;
+    function Next: Boolean; override; final;
+    procedure LexString(P: PByte);
+    procedure LexIdent(P: PByte);
+  public
+    constructor Create(S: PByte; Len: NativeInt);
+  end;
+
+  TStringJSONReader = class sealed(TJSONReader)
+  private
+    FText: PChar;
+    FTextEnd: PChar;
+  protected
+    function GetCharOffset(const StartPos: Pointer): NativeInt; override; final;
+    function Next: Boolean; override; final;
+    procedure LexString(P: PChar);
+    procedure LexIdent(P: PChar);
+  public
+    constructor Create(S: PChar; Len: Integer);
   end;
 
   TMemoryStreamAccess = class(TMemoryStream);
@@ -574,32 +606,25 @@ end;
 
 { TJSONReader }
 
-constructor TJSONReader.Create(const S: PByte; const Len: NativeInt);
+constructor TJSONReader.Create(AStart: Pointer);
 begin
-  // inherited Create;
+  //inherited Create;
 
-  FIdents.Init;
-
-  FStart := S;
-  FLineNum := 1;
+  FStart := AStart;
+  FLineNum := 1; // base 1
   FLineStart := nil;
-
-  FText := S;
-  FTextEnd := S + Len;
 end;
 
-destructor TJSONReader.Destroy; //FI:W504 FixInsight ignore - Missing INHERITED call in destructor
+destructor TJSONReader.Destroy;
 begin
-  FIdents.Done;
-
-  // inherited Destroy;
+  //inherited Destroy;
 end;
 
 function TJSONReader.GetLineColumn: NativeInt;
 begin
   if FLineStart = nil then
     FLineStart := FStart;
-  Result := GetCharOffset(FLineStart) + 1;
+  Result := GetCharOffset(FLineStart) + 1; // base 1
 end;
 
 function TJSONReader.GetPosition: NativeInt;
@@ -609,13 +634,171 @@ end;
 
 class procedure TJSONReader.InvalidStringCharacterError(const Reader: TJSONReader);
 begin
-  raise EJSONParserException.CreateRes(@STextEditorInvalidStringCharacter, Reader.FLineNum, Reader.GetLineColumn,
-    Reader.GetPosition);
+  raise EJSONParserException.CreateRes(@RsInvalidStringCharacter,
+    Reader.FLineNum, Reader.GetLineColumn, Reader.GetPosition);
 end;
 
 class procedure TJSONReader.StringNotClosedError(const Reader: TJSONReader);
 begin
-  raise EJSONParserException.CreateRes(@STextEditorStringNotClosed, Reader.FLineNum, Reader.GetLineColumn, Reader.GetPosition);
+  raise EJSONParserException.CreateRes(@RsStringNotClosed,
+    Reader.FLineNum, Reader.GetLineColumn, Reader.GetPosition);
+end;
+
+function GetHexDigits(P: PChar; Count: Integer; const Reader: TJSONReader): LongWord;
+var
+  Ch: Char;
+begin
+  Result := 0;
+  while Count > 0 do
+  begin
+    Ch := P^;
+    case P^ of
+      '0'..'9': Result := (Result shl 4) or LongWord(Ord(Ch) - Ord('0'));
+      'A'..'F': Result := (Result shl 4) or LongWord(Ord(Ch) - (Ord('A') - 10));
+      'a'..'f': Result := (Result shl 4) or LongWord(Ord(Ch) - (Ord('a') - 10));
+    else
+      Break;
+    end;
+    Inc(P);
+    Dec(Count);
+  end;
+  if Count > 0 then
+    raise EJSONParserException.CreateResFmt(@RsInvalidHexNumber, [P^], Reader.FLineNum, Reader.GetLineColumn,
+      Reader.GetPosition);
+end;
+
+procedure AppendString(var S: string; P: PChar; Len: Integer);
+var
+  OldLen: Integer;
+begin
+  if (P = nil) or (Len = 0) then
+    Exit;
+  OldLen := Length(S);
+  SetLength(S, OldLen + Len);
+  Move(P^, PChar(Pointer(S))[OldLen], Len * SizeOf(Char));
+end;
+
+class procedure TJSONReader.JSONStrToStr(P, EndP: PChar; FirstEscapeIndex: Integer; var S: string;
+  const Reader: TJSONReader);
+const
+  MaxBufPos = 127;
+var
+  Buf: array[0..MaxBufPos] of Char;
+  F: PChar;
+  BufPos, Len: Integer;
+begin
+  Dec(FirstEscapeIndex);
+
+  if FirstEscapeIndex > 0 then
+  begin
+    SetString(S, P, FirstEscapeIndex);
+    Inc(P, FirstEscapeIndex);
+  end
+  else
+    S := '';
+
+  while True do
+  begin
+    BufPos := 0;
+    while (P < EndP) and (P^ = '\') do
+    begin
+      Inc(P);
+      if P = EndP then // broken escaped character
+        Break;
+      case P^ of
+        '"': Buf[BufPos] := '"';
+        '\': Buf[BufPos] := '\';
+        '/': Buf[BufPos] := '/';
+        'b': Buf[BufPos] := #8;
+        'f': Buf[BufPos] := #12;
+        'n': Buf[BufPos] := #10;
+        'r': Buf[BufPos] := #13;
+        't': Buf[BufPos] := #9;
+        'u':
+          begin
+            Inc(P);
+            if P + 3 >= EndP then
+              Break;
+            Buf[BufPos] := Char(GetHexDigits(P, 4, TJSONReader(Reader)));
+            Inc(P, 3);
+          end;
+      else
+        Break;
+      end;
+      Inc(P);
+
+      Inc(BufPos);
+      if BufPos > MaxBufPos then
+      begin
+        Len := Length(S);
+        SetLength(S, Len + BufPos);
+        Move(Buf[0], PChar(Pointer(S))[Len], BufPos * SizeOf(Char));
+        BufPos := 0;
+      end;
+    end;
+    // append remaining buffer
+    if BufPos > 0 then
+    begin
+      Len := Length(S);
+      SetLength(S, Len + BufPos);
+      Move(Buf[0], PChar(Pointer(S))[Len], BufPos * SizeOf(Char));
+    end;
+
+    // fast forward
+    F := P;
+    while (P < EndP) and (P^ <> '\') do
+      Inc(P);
+
+    if P > F then
+      AppendString(S, F, P - F);
+
+    if P >= EndP then
+      Break;
+  end;
+end;
+
+
+procedure SetStringUtf8(var S: string; P: PByte; Len: Integer);
+var
+  L: Integer;
+begin
+  if S <> '' then
+    S := '';
+  if (P = nil) or (Len = 0) then
+    Exit;
+  SetLength(S, Len);
+
+  L := Utf8ToUnicode(PWideChar(Pointer(S)), Len + 1, PAnsiChar(P), Len);
+  if L > 0 then
+  begin
+    if L - 1 <> Len then
+      SetLength(S, L - 1);
+  end
+  else
+    S := '';
+end;
+
+function GetHexDigitsUtf8(P: PByte; Count: Integer; const Reader: TJSONReader): LongWord;
+var
+  Ch: Byte;
+begin
+  Result := 0;
+  while Count > 0 do
+  begin
+    Ch := P^;
+    case P^ of
+      Ord('0')..Ord('9'): Result := (Result shl 4) or LongWord(Ch - Ord('0'));
+      Ord('A')..Ord('F'): Result := (Result shl 4) or LongWord(Ch - (Ord('A') - 10));
+      Ord('a')..Ord('f'): Result := (Result shl 4) or LongWord(Ch - (Ord('a') - 10));
+    else
+      Break;
+    end;
+    Inc(P);
+    Dec(Count);
+  end;
+  if Count > 0 then
+    raise EJSONParserException.CreateResFmt(@RsInvalidHexNumber, [P^], Reader.FLineNum, Reader.GetLineColumn,
+      Reader.GetPosition);
 end;
 
 class procedure TJSONReader.JSONUtf8StrToStr(P, EndP: PByte; FirstEscapeIndex: Integer; var S: string;
@@ -623,7 +806,7 @@ class procedure TJSONReader.JSONUtf8StrToStr(P, EndP: PByte; FirstEscapeIndex: I
 const
   MaxBufPos = 127;
 var
-  LBuffer: array [0 .. MaxBufPos] of Char;
+  Buf: array[0..MaxBufPos] of Char;
   F: PByte;
   BufPos, Len: Integer;
 begin
@@ -631,7 +814,7 @@ begin
 
   if FirstEscapeIndex > 0 then
   begin
-    SetValueStringUtf8(S, P, FirstEscapeIndex);
+    SetStringUtf8(S, P, FirstEscapeIndex);
     Inc(P, FirstEscapeIndex);
   end
   else
@@ -643,21 +826,25 @@ begin
     while (P < EndP) and (P^ = Byte(Ord('\'))) do
     begin
       Inc(P);
-      if P = EndP then
+      if P = EndP then // broken escaped character
         Break;
       case P^ of
-        Ord('"'):
-          LBuffer[BufPos] := '"';
-        Ord('\'):
-          LBuffer[BufPos] := '\';
-        Ord('/'):
-          LBuffer[BufPos] := '/';
-        Ord('n'):
-          LBuffer[BufPos] := #10;
-        Ord('r'):
-          LBuffer[BufPos] := #13;
-        Ord('t'):
-          LBuffer[BufPos] := #9;
+        Ord('"'): Buf[BufPos] := '"';
+        Ord('\'): Buf[BufPos] := '\';
+        Ord('/'): Buf[BufPos] := '/';
+        Ord('b'): Buf[BufPos] := #8;
+        Ord('f'): Buf[BufPos] := #12;
+        Ord('n'): Buf[BufPos] := #10;
+        Ord('r'): Buf[BufPos] := #13;
+        Ord('t'): Buf[BufPos] := #9;
+        Ord('u'):
+          begin
+            Inc(P);
+            if P + 3 >= EndP then
+              Break;
+            Buf[BufPos] := Char(GetHexDigitsUtf8(P, 4, TJSONReader(Reader)));
+            Inc(P, 3);
+          end;
       else
         Break;
       end;
@@ -668,16 +855,19 @@ begin
       begin
         Len := Length(S);
         SetLength(S, Len + BufPos);
-        Move(LBuffer[0], PChar(Pointer(S))[Len], BufPos * SizeOf(Char));
+        Move(Buf[0], PChar(Pointer(S))[Len], BufPos * SizeOf(Char));
         BufPos := 0;
       end;
     end;
+    // append remaining buffer
     if BufPos > 0 then
     begin
       Len := Length(S);
       SetLength(S, Len + BufPos);
-      Move(LBuffer[0], PChar(Pointer(S))[Len], BufPos * SizeOf(Char));
+      Move(Buf[0], PChar(Pointer(S))[Len], BufPos * SizeOf(Char));
     end;
+
+    // fast forward
     F := P;
     while (P < EndP) and (P^ <> Byte(Ord('\'))) do
       Inc(P);
@@ -688,21 +878,20 @@ begin
   end;
 end;
 
-procedure TJSONReader.Parse(const Data: TJSONBaseObject);
+procedure TJSONReader.Parse(Data: TJSONBaseObject);
 begin
   if Data is TJSONObject then
   begin
     TJSONObject(Data).Clear;
-    Next;
+    Next; // initialize Lexer
     Accept(jtkLBrace);
     ParseObjectBody(TJSONObject(Data));
     Accept(jtkRBrace);
   end
-  else
-  if Data is TJSONArray then
+  else if Data is TJSONArray then
   begin
     TJSONArray(Data).Clear;
-    Next;
+    Next; // initialize Lexer
     Accept(jtkLBracket);
     ParseArrayBody(TJSONArray(Data));
     Accept(jtkRBracket)
@@ -712,12 +901,16 @@ end;
 procedure TJSONReader.ParseObjectBody(const Data: TJSONObject);
 begin
   if FLook.Kind <> jtkRBrace then
-  while FLook.Kind <> jtkEof do
   begin
-    ParseObjectProperty(Data);
-    if FLook.Kind = jtkRBrace then
-      Break;
-    Accept(jtkComma);
+    while FLook.Kind <> jtkEof do
+    begin
+      ParseObjectProperty(Data);
+
+      if FLook.Kind = jtkRBrace then
+        Break;
+
+      Accept(jtkComma);
+    end;
   end;
 end;
 
@@ -725,7 +918,9 @@ procedure TJSONReader.ParseObjectProperty(const Data: TJSONObject);
 begin
   if FLook.Kind >= jtkIdent then
   begin
-    FIdents.Intern(FLook.S, FPropName);
+    FPropName := '';
+    Pointer(FPropName) := Pointer(FLook.S);
+    Pointer(FLook.S) := nil;
     Next;
   end
   else
@@ -837,23 +1032,21 @@ begin
   end;
 end;
 
-procedure TJSONReader.AcceptFailed(const ATokenKind: TJSONTokenKind);
+procedure TJSONReader.AcceptFailed(TokenKind: TJSONTokenKind);
 var
   Col, Position: NativeInt;
 begin
   Col := GetLineColumn;
   Position := GetPosition;
   if FLook.Kind = jtkEof then
-    raise EJSONParserException.CreateResFmt(@STextEditorUnexpectedEndOfFile, [JSONTokenKindToStr[ATokenKind]], FLineNum, Col,
-      Position);
-  raise EJSONParserException.CreateResFmt(@STextEditorUnexpectedToken, [JSONTokenKindToStr[ATokenKind],
-    JSONTokenKindToStr[FLook.Kind]], FLineNum, Col, Position);
+    raise EJSONParserException.CreateResFmt(@RsUnexpectedEndOfFile, [JSONTokenKindToStr[TokenKind]], FLineNum, Col, Position);
+  raise EJSONParserException.CreateResFmt(@RsUnexpectedToken, [JSONTokenKindToStr[TokenKind], JSONTokenKindToStr[FLook.Kind]], FLineNum, Col, Position);
 end;
 
-procedure TJSONReader.Accept(const ATokenKind: TJSONTokenKind);
+procedure TJSONReader.Accept(TokenKind: TJSONTokenKind);
 begin
-  if FLook.Kind <> ATokenKind then
-    AcceptFailed(ATokenKind);
+  if FLook.Kind <> TokenKind then
+    AcceptFailed(TokenKind);
   Next;
 end;
 
@@ -1163,10 +1356,73 @@ begin
   L := Length(Bytes);
   if ByteCount = -1 then
     ByteCount := L - ByteIndex;
+
   if (ByteCount <= 0) or (ByteIndex + ByteCount > L) then
     Result := nil
   else
     Result := ParseUtf8Bytes(PByte(@Bytes[ByteIndex]), ByteCount)
+end;
+
+class function TJSONBaseObject.Parse(const S: UnicodeString): TJSONBaseObject;
+begin
+  Result := Parse(PWideChar(Pointer(S)), Length(S));
+end;
+
+class function TJSONBaseObject.Parse(S: PWideChar; Len: Integer): TJSONBaseObject;
+var
+  P: PWideChar;
+  L: Integer;
+begin
+  if (S = nil) or (Len = 0) then
+    Result := nil
+  else
+  begin
+    if Len < 0 then
+      Len := StrLen(S);
+    P := S;
+    L := Len;
+    while (L > 0) and (P^ <= #32) do
+    begin
+      Inc(P);
+      Dec(L);
+    end;
+    if L = 0 then
+      Result := nil
+    else
+    begin
+      if (L > 0) and (P^ = '[') then
+        Result := TJSONArray.Create
+      else
+        Result := TJSONObject.Create;
+
+      try
+        Result.FromJSON(S, Len);
+      except
+        Result.Free;
+        raise;
+      end;
+    end;
+  end;
+end;
+
+procedure TJSONBaseObject.FromJSON(const S: UnicodeString);
+begin
+  FromJSON(PWideChar(S), Length(S));
+end;
+
+procedure TJSONBaseObject.FromJSON(S: PWideChar; Len: Integer);
+var
+  Reader: TJSONReader;
+begin
+  if Len < 0 then
+    Len := StrLen(S);
+
+  Reader := TStringJSONReader.Create(S, Len);
+  try
+    Reader.Parse(Self);
+  finally
+    Reader.Free;
+  end;
 end;
 
 class function TJSONBaseObject.ParseFromStream(const Stream: TStream): TJSONBaseObject;
@@ -1189,7 +1445,8 @@ var
 begin
   if Len < 0 then
     Len := System.AnsiStrings.StrLen(PAnsiChar(S));
-  Reader := TJSONReader.Create(S, Len);
+
+  Reader := TUTF8JSONReader.Create(S, Len);
   try
     Reader.Parse(Self);
   finally
@@ -2722,81 +2979,40 @@ begin
   end;
 end;
 
-{ TJSONReader }
+{ TUTF8JSONReader }
 
-function TJSONReader.GetCharOffset(const StartPos: Pointer): NativeInt;
+constructor TUTF8JSONReader.Create(S: PByte; Len: NativeInt);
+begin
+  inherited Create(S);
+  FText := S;
+  FTextEnd := S + Len;
+end;
+
+function TUTF8JSONReader.GetCharOffset(const StartPos: Pointer): NativeInt;
 begin
   Result := FText - PByte(StartPos);
 end;
 
-function TJSONReader.Next: Boolean;
+function TUTF8JSONReader.Next: Boolean;
+label
+  EndReached;
 var
   P, EndP: PByte;
   Ch: Byte;
-
-  function EndReached: Boolean;
-  begin
-    if P < EndP then
-    begin
-      case P^ of
-        Ord('{'):
-          begin
-            FLook.Kind := jtkLBrace;
-            FText := P + 1;
-          end;
-        Ord('}'):
-          begin
-            FLook.Kind := jtkRBrace;
-            FText := P + 1;
-          end;
-        Ord('['):
-          begin
-            FLook.Kind := jtkLBracket;
-            FText := P + 1;
-          end;
-        Ord(']'):
-          begin
-            FLook.Kind := jtkRBracket;
-            FText := P + 1;
-          end;
-        Ord(':'):
-          begin
-            FLook.Kind := jtkColon;
-            FText := P + 1;
-          end;
-        Ord(','):
-          begin
-            FLook.Kind := jtkComma;
-            FText := P + 1;
-          end;
-        Ord('"'):
-          LexString(P);
-      else
-        LexIdent(P);
-      end;
-      Result := True;
-    end
-    else
-    begin
-      FText := EndP;
-      FLook.Kind := jtkEof;
-      Result := False;
-    end;
-  end;
-
 begin
   P := FText;
   EndP := FTextEnd;
+
   while True do
   begin
     while True do
     begin
       if P = EndP then
-        Exit(EndReached);
+        goto EndReached;
       Ch := P^;
       if Ch > 32 then
         Break;
-      if not(Ch in [9, 32]) then
+      if not (Ch in [9, 32]) then
         Break;
       Inc(P);
     end;
@@ -2820,10 +3036,56 @@ begin
     Inc(P);
   end;
 
-  Result := EndReached;
+EndReached:
+  if P < EndP then
+  begin
+    case P^ of
+      Ord('{'):
+        begin
+          FLook.Kind := jtkLBrace;
+          FText := P + 1;
+        end;
+      Ord('}'):
+        begin
+          FLook.Kind := jtkRBrace;
+          FText := P + 1;
+        end;
+      Ord('['):
+        begin
+          FLook.Kind := jtkLBracket;
+          FText := P + 1;
+        end;
+      Ord(']'):
+        begin
+          FLook.Kind := jtkRBracket;
+          FText := P + 1;
+        end;
+      Ord(':'):
+        begin
+          FLook.Kind := jtkColon;
+          FText := P + 1;
+        end;
+      Ord(','):
+        begin
+          FLook.Kind := jtkComma;
+          FText := P + 1;
+        end;
+      Ord('"'): // String
+        LexString(P);
+    else
+      LexIdent(P);
+    end;
+    Result := True;
+  end
+  else
+  begin
+    FText := EndP;
+    FLook.Kind := jtkEof;
+    Result := False;
+  end;
 end;
 
-procedure TJSONReader.LexString(P: PByte);
+procedure TUTF8JSONReader.LexString(P: PByte);
 var
   EndP: PByte;
   EscapeSequences: PByte;
@@ -2860,9 +3122,9 @@ begin
 
   EndP := @EndP[Idx];
   if EscapeSequences = nil then
-    SetValueStringUtf8(FLook.S, P, EndP - P)
+    SetStringUtf8(FLook.S, P, EndP - P)
   else
-    TJSONReader.JSONUtf8StrToStr(P, EndP, EscapeSequences - P, FLook.S, Self);
+    TUTF8JSONReader.JSONUtf8StrToStr(P, EndP, EscapeSequences - P, FLook.S, Self);
 
   if Ch = Byte(Ord('"')) then
     Inc(EndP);
@@ -2873,7 +3135,7 @@ begin
     TJSONReader.InvalidStringCharacterError(Self);
 end;
 
-procedure TJSONReader.LexIdent(P: PByte);
+procedure TUTF8JSONReader.LexIdent(P: PByte);
 const
   NullStr = LongWord(Ord('n') or (Ord('u') shl 8) or (Ord('l') shl 16) or (Ord('l') shl 24));
   TrueStr = LongWord(Ord('t') or (Ord('r') shl 8) or (Ord('u') shl 16) or (Ord('e') shl 24));
@@ -2886,16 +3148,16 @@ begin
   F := P;
   EndP := FTextEnd;
   case P^ of
-    Ord('A') .. Ord('Z'), Ord('a') .. Ord('z'), Ord('_'), Ord('$'):
+    Ord('A')..Ord('Z'), Ord('a')..Ord('z'), Ord('_'), Ord('$'):
       begin
         Inc(P);
+
         while P < EndP do
-        case P^ of
-          Ord('A') .. Ord('Z'), Ord('a') .. Ord('z'), Ord('_'), Ord('0') .. Ord('9'):
-            Inc(P);
-        else
-          Break;
-        end;
+          case P^ of
+            Ord('A')..Ord('Z'), Ord('a')..Ord('z'), Ord('_'), Ord('0')..Ord('9'): Inc(P);
+          else
+            Break;
+          end;
 
         L := P - F;
         if L = 4 then
@@ -2903,21 +3165,203 @@ begin
           L := PLongWord(F)^;
           if L = NullStr then
             FLook.Kind := jtkNull
-          else
-          if L = TrueStr then
+          else if L = TrueStr then
             FLook.Kind := jtkTrue
           else
           begin
-            SetValueStringUtf8(FLook.S, F, P - F);
+            SetStringUtf8(FLook.S, F, P - F);
             FLook.Kind := jtkIdent;
           end;
         end
-        else
-        if (L = 5) and (F^ = Ord('f')) and (PLongWord(F + 1)^ = FalseStr) then
+        else if (L = 5) and (F^ = Ord('f')) and (PLongWord(F + 1)^ = FalseStr) then
           FLook.Kind := jtkFalse
         else
         begin
-          SetValueStringUtf8(FLook.S, F, P - F);
+          SetStringUtf8(FLook.S, F, P - F);
+          FLook.Kind := jtkIdent;
+        end;
+      end;
+  else
+    FLook.Kind := jtkInvalidSymbol;
+    Inc(P);
+  end;
+  FText := P;
+end;
+
+{ TStringJSONReader }
+
+constructor TStringJSONReader.Create(S: PChar; Len: Integer);
+begin
+  inherited Create(S);
+
+  FText := S;
+  FTextEnd := S + Len;
+end;
+
+function TStringJSONReader.GetCharOffset(const StartPos: Pointer): NativeInt;
+begin
+  Result := FText - PChar(StartPos);
+end;
+
+function TStringJSONReader.Next: Boolean;
+var
+  P, EndP: PChar;
+begin
+  P := FText;
+  EndP := FTextEnd;
+  while (P < EndP) and (P^ <= #32) do
+    Inc(P);
+
+  if P < EndP then
+  begin
+    case P^ of
+      '{':
+        begin
+          FLook.Kind := jtkLBrace;
+          FText := P + 1;
+        end;
+      '}':
+        begin
+          FLook.Kind := jtkRBrace;
+          FText := P + 1;
+        end;
+      '[':
+        begin
+          FLook.Kind := jtkLBracket;
+          FText := P + 1;
+        end;
+      ']':
+        begin
+          FLook.Kind := jtkRBracket;
+          FText := P + 1;
+        end;
+      ':':
+        begin
+          FLook.Kind := jtkColon;
+          FText := P + 1;
+        end;
+      ',':
+        begin
+          FLook.Kind := jtkComma;
+          FText := P + 1;
+        end;
+      '"':
+        LexString(P);
+    else
+      LexIdent(P);
+    end;
+    Result := True;
+  end
+  else
+  begin
+    FText := EndP;
+    FLook.Kind := jtkEof;
+    Result := False;
+  end;
+end;
+
+procedure TStringJSONReader.LexString(P: PChar);
+var
+  EndP: PChar;
+  EscapeSequences: PChar;
+  Ch: Char;
+  Idx: Integer;
+begin
+  Inc(P);
+  EndP := FTextEnd;
+  EscapeSequences := nil;
+  Ch := #0;
+  Idx := P - EndP;
+
+  repeat
+    if Idx = 0 then
+      Break;
+
+    Ch := EndP[Idx];
+
+    if (Ch = '"') or (Ch = #10) or (Ch = #13) then
+      Break;
+    Inc(Idx);
+
+    if Ch <> '\' then
+      Continue;
+
+    if Idx = 0 then
+      Break;
+
+    if EscapeSequences = nil then
+      EscapeSequences := @EndP[Idx];
+
+    Inc(Idx);
+  until False;
+
+  if Idx = 0 then
+  begin
+    FText := P - 1;
+    TJSONReader.StringNotClosedError(Self);
+  end;
+
+  EndP := @EndP[Idx];
+  if EscapeSequences = nil then
+    SetString(FLook.S, P, EndP - P)
+  else
+    TJSONReader.JSONStrToStr(P, EndP, EscapeSequences - P, FLook.S, Self);
+
+  if Ch = '"' then
+    Inc(EndP);
+  FLook.Kind := jtkString;
+  FText := EndP;
+
+  if Ch in [#10, #13] then
+    TJSONReader.InvalidStringCharacterError(Self);
+end;
+
+procedure TStringJSONReader.LexIdent(P: PChar{$IFDEF CPUARM}; EndP: PChar{$ENDIF});
+const
+  NullStr1 = LongWord(Ord('n') or (Ord('u') shl 16));
+  NullStr2 = LongWord(Ord('l') or (Ord('l') shl 16));
+  TrueStr1 = LongWord(Ord('t') or (Ord('r') shl 16));
+  TrueStr2 = LongWord(Ord('u') or (Ord('e') shl 16));
+  FalseStr1 = LongWord(Ord('a') or (Ord('l') shl 16));
+  FalseStr2 = LongWord(Ord('s') or (Ord('e') shl 16));
+var
+  F: PChar;
+  EndP: PChar;
+  L: LongWord;
+begin
+  F := P;
+  EndP := FTextEnd;
+  case P^ of
+    'A'..'Z', 'a'..'z', '_', '$':
+      begin
+        Inc(P);
+
+        while P < EndP do
+          case P^ of
+            'A'..'Z', 'a'..'z', '_', '0'..'9': Inc(P);
+          else
+            Break;
+          end;
+
+        L := P - F;
+        if L = 4 then
+        begin
+          L := PLongWord(F)^;
+          if (L = NullStr1) and (PLongWord(F + 2)^ = NullStr2) then
+            FLook.Kind := jtkNull
+          else if (L = TrueStr1) and (PLongWord(F + 2)^ = TrueStr2) then
+            FLook.Kind := jtkTrue
+          else
+          begin
+            SetString(FLook.S, F, P - F);
+            FLook.Kind := jtkIdent;
+          end;
+        end
+        else if (L = 5) and (F^ = 'f') and (PLongWord(F + 1)^ = FalseStr1) and (PLongWord(F + 3)^ = FalseStr2) then
+          FLook.Kind := jtkFalse
+        else
+        begin
+          SetString(FLook.S, F, P - F);
           FLook.Kind := jtkIdent;
         end;
       end;

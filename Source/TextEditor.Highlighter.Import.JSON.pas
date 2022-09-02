@@ -4,12 +4,12 @@ interface
 
 uses
   System.Classes, System.SysUtils, TextEditor, TextEditor.CodeFolding.Regions, TextEditor.Highlighter,
-  TextEditor.Highlighter.Attributes, TextEditor.Highlighter.Colors, TextEditor.Highlighter.Import.JSON.Parser,
-  TextEditor.Highlighter.Rules, TextEditor.SkipRegions;
+  TextEditor.Highlighter.Attributes, TextEditor.Highlighter.Colors, TextEditor.Highlighter.Rules,
+  TextEditor.JSONDataObjects, TextEditor.SkipRegions;
 
 type
   TTextEditorHighlighterImportJSON = class(TObject)
-  private
+  strict private
     FHighlighter: TTextEditorHighlighter;
     procedure ImportAttributes(const AHighlighterAttribute: TTextEditorHighlighterAttribute; const AAttributesObject: TJSONObject;
       const AElementPrefix: string);

@@ -36,7 +36,8 @@ type
 implementation
 
 uses
-  System.SysUtils, Vcl.Dialogs, TextEditor, TextEditor.Highlighter, TextEditor.Highlighter.Import.JSON;
+  System.SysUtils, Vcl.Dialogs, TextEditor, TextEditor.Highlighter, TextEditor.Highlighter.Export.JSON,
+  TextEditor.Highlighter.Import.JSON;
 
 constructor TTextEditorHighlighterColors.Create(AOwner: TObject);
 begin
@@ -88,8 +89,17 @@ begin
 end;
 
 procedure TTextEditorHighlighterColors.SaveToFile(const AFilename: string);
+var
+  LTextEditor: TCustomTextEditor;
 begin
-  ShowMessage('Upcoming feature'); // TODO: Remove Vcl.Dialogs
+  LTextEditor := TTextEditorHighlighter(FOwner).Editor as TCustomTextEditor;
+
+  with TTextEditorHighlighterExportJSON.Create(LTextEditor) do
+  try
+    SaveThemeToFile(AFilename);
+  finally
+    Free;
+  end;
 end;
 
 procedure TTextEditorHighlighterColors.SetDefaults;

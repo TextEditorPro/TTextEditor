@@ -8818,18 +8818,12 @@ end;
 
 procedure TCustomTextEditor.SetThemeLoad(const AFileName: TFileName);
 begin
-  if AFileName = STextEditorThemeLoadFromFile then
-    Exit;
-
   if Assigned(FHighlighter) then
     FHighlighter.Colors.LoadFromFile(AFileName);
 end;
 
 procedure TCustomTextEditor.SetThemeSave(const AFileName: TFileName);
 begin
-  if AFileName = STextEditorThemeSaveToFile then
-    Exit;
-
   if Assigned(FHighlighter) then
     FHighlighter.Colors.SaveToFile(AFileName);
 end;

@@ -10302,7 +10302,7 @@ var
   LOldCaretPosition: TTextEditorTextPosition;
   LBlockBeginPosition, LBlockEndPosition: TTextEditorTextPosition;
   LStringToInsert: string;
-  LEndOfLine, LCaretPositionX, LIndex: Integer;
+  LEndOfLine, LIndex: Integer;
   LTab: string;
   LOldSelectionMode: TTextEditorSelectionMode;
   LInsertionPosition: TTextEditorTextPosition;
@@ -10325,15 +10325,7 @@ begin
 
     LEndOfLine := LBlockEndPosition.Line;
     if LBlockEndPosition.Char = 1 then
-    begin
-      LCaretPositionX := 1;
       Dec(LEndOfLine);
-    end
-    else
-    if toTabsToSpaces in FTabs.Options then
-      LCaretPositionX := LOldCaretPosition.Char + FTabs.Width
-    else
-      LCaretPositionX := LOldCaretPosition.Char + 1;
 
     if toTabsToSpaces in FTabs.Options then
       LTab := StringOfChar(TCharacters.Space, FTabs.Width)

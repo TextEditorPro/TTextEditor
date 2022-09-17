@@ -183,6 +183,30 @@
                   }
                 },
                 {
+                  "Name": "PyScript",
+                  "Type": "Tag",
+                  "Attributes": {
+                    "Element": "Editor"
+                  },
+                  "Properties": {
+                    "AlternativeClose": [
+                      "/>"
+                    ]
+                  },
+                  "TokenRange": {
+                    "Open": "py-script",
+                    "Close": "/py-script"
+                  },
+                  "SubRules": {
+                    "Range": [
+                      {
+                        "File": "Python",
+                        "IncludeRange": "Python"
+                      }
+                    ]
+                  }
+                },
+                {
                   "Name": "Style",
                   "Type": "Tag",
                   "Attributes": {
@@ -240,6 +264,7 @@
                   "Name": "HTML Keywords",
                   "Type": "ReservedWord",
                   "Words": [
+                    "py-script",
                     "script",
                     "style"
                   ],

@@ -6,6 +6,7 @@
       "print (\"Hello, World!\")"
     ],
     "MainRules": {
+      "Name": "Python",
       "Attributes": {
         "Element": "Editor"
       },
@@ -101,6 +102,8 @@
           {
             "Type": "ReservedWord",
             "Words": [
+              "/py-script",
+              "py-script",
               "and",
               "as",
               "assert",

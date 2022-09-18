@@ -356,6 +356,7 @@ type
     FWordWrap: TTextEditorWordWrap;
     FWordWrapLine: TTextEditorWordWrapLine;
     FZoomDivider: Integer;
+    FZoomPercentage: Integer;
     function AddSnippet(const AExecuteWith: TTextEditorSnippetExecuteWith; const ATextPosition: TTextEditorTextPosition): Boolean;
     function AllWhiteUpToTextPosition(const ATextPosition: TTextEditorTextPosition; const ALine: string; const ALength: Integer): Boolean;
     function AreTextPositionsEqual(const ATextPosition1: TTextEditorTextPosition; const ATextPosition2: TTextEditorTextPosition): Boolean; inline;
@@ -989,6 +990,7 @@ type
     property VisibleLineCount: Integer read FLineNumbers.VisibleCount;
     property WantReturns: Boolean read FState.WantReturns write SetWantReturns default True;
     property WordWrap: TTextEditorWordWrap read FWordWrap write SetWordWrap;
+    property ZoomPercentage: Integer read FZoomPercentage write FZoomPercentage default 100;
   end;
 
   [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
@@ -1344,6 +1346,7 @@ begin
   FState.ReplaceLock := False;
   FMultiEdit.Position.Row := -1;
   FZoomDivider := 0;
+  FZoomPercentage := 100;
   { Code folding }
   FCodeFoldings.AllRanges := TTextEditorAllCodeFoldingRanges.Create;
   FCodeFolding := TTextEditorCodeFolding.Create;
@@ -7241,8 +7244,6 @@ begin
     end;
   finally
     DecPaintLock;
-
-    Invalidate;
   end;
 
   ComputeScroll(LCursorPoint);
@@ -20123,25 +20124,24 @@ var
   LPixelsPerInch: Integer;
   LMultiplier: Integer;
 begin
-  LPixelsPerInch := {$IFDEF ALPHASKINS}DefaultManager.Options.PixelsPerInch{$ELSE}Screen.PixelsPerInch{$ENDIF};
+  FZoomPercentage := APercentage;
 
-  if FZoomDivider = 0 then
-    FZoomDivider := LPixelsPerInch;
+  IncPaintLock;
+  try
+    LPixelsPerInch := {$IFDEF ALPHASKINS}DefaultManager.Options.PixelsPerInch{$ELSE}Screen.PixelsPerInch{$ENDIF};
 
-  if APercentage = -1 then
-  begin
-    LMultiplier := FZoomDivider;
-    FZoomDivider := LPixelsPerInch;
-    FFonts.ChangeScale(LMultiplier, FZoomDivider);
-    FZoomDivider := LMultiplier;
-    Exit;
-  end
-  else
+    if FZoomDivider = 0 then
+      FZoomDivider := LPixelsPerInch;
+
     LMultiplier := Round((APercentage / 100) * LPixelsPerInch);
 
-  ChangeObjectScale(LMultiplier, FZoomDivider);
+    ChangeObjectScale(LPixelsPerInch, FZoomDivider);
+    ChangeObjectScale(LMultiplier, LPixelsPerInch);
 
-  FZoomDivider := LMultiplier;
+    FZoomDivider := LMultiplier;
+  finally
+    DecPaintLock;
+  end;
 end;
 
 procedure TCustomTextEditor.SetFullFilename(const AName: string);

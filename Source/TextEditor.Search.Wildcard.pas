@@ -26,6 +26,7 @@ function TTextEditorWildcardSearch.WildCardToRegExpr(const AWildCard: string): s
 begin
   Result := AWildCard;
 
+  Result := StringReplace(Result, '.', '[.]', [rfReplaceAll]);
   Result := StringReplace(Result, '*', '.*', [rfReplaceAll]);
   Result := StringReplace(Result, '?', '.?', [rfReplaceAll]);
   Result := StringReplace(Result, '#', '[0-9]', [rfReplaceAll]);

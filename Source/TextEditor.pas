@@ -7540,7 +7540,7 @@ end;
 
 procedure TCustomTextEditor.RulerChanged(ASender: TObject); //FI:O804 Method parameter is declared but never used
 begin
-  if not (csLoading in ComponentState) and FRuler.Visible and FFile.Loaded then
+  if not (csLoading in ComponentState) and FFile.Loaded then
   begin
     SizeOrFontChanged(False);
 
@@ -16376,7 +16376,9 @@ begin
         TextPosition := LBeginTextPosition;
     end;
 
-    if AValue <> '' then
+    if AValue = '' then
+      ClearSelection
+    else
       InsertText;
   finally
     DecPaintLock;

@@ -78,7 +78,7 @@
       "MatchingPairUnmatched": "clYellow",
       "MinimapBackground": "clNone",
       "MinimapBookmark": "$00999999",
-      "MinimapVisibleLines": "$00E6FAFF",
+      "MinimapVisibleRows": "$00E6FAFF",
       "MultiEditBackground": "$00333333",
       "MultiEditForeground": "clWhite",
       "RightMargin": "$00CC9999",

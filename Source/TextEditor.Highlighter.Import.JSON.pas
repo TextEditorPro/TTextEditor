@@ -261,7 +261,7 @@ begin
         MatchingPairUnmatched := LColorsObject['MatchingPairUnmatched'].ToColor;
         MinimapBackground := LColorsObject['MinimapBackground'].ToColor;
         MinimapBookmark := LColorsObject['MinimapBookmark'].ToColor;
-        MinimapVisibleLines := LColorsObject['MinimapVisibleLines'].ToColor;
+        MinimapVisibleRows := LColorsObject['MinimapVisibleRows'].ToColor;
         MultiEditBackground := LColorsObject['MultiEditBackground'].ToColor;
         MultiEditForeground := LColorsObject['MultiEditForeground'].ToColor;
         RightMargin := LColorsObject['RightMargin'].ToColor;

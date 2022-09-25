@@ -13461,7 +13461,7 @@ begin
   with FMinimapHelper.Indicator.Bitmap do
   begin
     Height := 0;
-    Canvas.Brush.Color := FColors.MinimapVisibleLines;
+    Canvas.Brush.Color := FColors.MinimapVisibleRows;
     Width := AClipRect.Width;
     Height := VisibleLineCount * FMinimap.CharHeight;
   end;
@@ -13488,7 +13488,7 @@ begin
 
   if ioShowBorder in FMinimap.Indicator.Options then
   begin
-    Canvas.Pen.Color := FColors.MinimapVisibleLines;
+    Canvas.Pen.Color := FColors.MinimapVisibleRows;
     Canvas.Brush.Style := bsClear;
     Canvas.Rectangle(Rect(AClipRect.Left, LTop, AClipRect.Right, LTop + FMinimapHelper.Indicator.Bitmap.Height));
   end;
@@ -14654,7 +14654,7 @@ var
     if AMinimap and not (ioUseBlending in FMinimap.Indicator.Options) then
       if (LViewLine >= TopLine) and (LViewLine < TopLine + VisibleLineCount) then
         if (LBackgroundColor <> FColors.SearchHighlighterBackground) and (LBackgroundColor <> clRed) then
-          LBackgroundColor := FColors.MinimapVisibleLines;
+          LBackgroundColor := FColors.MinimapVisibleRows;
 
     if LCustomLineColors and (LCustomForegroundColor <> TColors.SysNone) then
       LForegroundColor := LCustomForegroundColor;
@@ -14793,7 +14793,7 @@ var
 
       if AMinimap and not (ioUseBlending in FMinimap.Indicator.Options) then
         if (LViewLine >= TopLine) and (LViewLine < TopLine + VisibleLineCount) then
-          LBackgroundColor := FColors.MinimapVisibleLines;
+          LBackgroundColor := FColors.MinimapVisibleRows;
 
       if LCustomLineColors and (LCustomForegroundColor <> TColors.SysNone) then
         LForegroundColor := LCustomForegroundColor;

@@ -1304,6 +1304,7 @@ begin
       Include(Flags, sfExpandedLengthUnknown);
       Exclude(Flags, sfHasTabs);
       Exclude(Flags, sfHasNoTabs);
+      Exclude(Flags, sfEmptyLine);
       TextLine := AValue;
       Include(Flags, sfLineStateModified);
     end;

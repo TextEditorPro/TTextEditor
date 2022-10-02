@@ -81,27 +81,14 @@
             }
           },
           {
-            "Type": "Method",
-            "Attributes": {
-              "Element": "MethodName"
-            },
-            "Properties": {
-              "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
-            },
-            "TokenRange": {
-              "Open": "rdb$"
-            }
-          },
-          {
             "Type": "MethodName",
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "collation"
@@ -112,10 +99,10 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "table"
@@ -126,10 +113,10 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "view"
@@ -140,14 +127,13 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
               "SkipWhitespaceOnce": true
             },
             "TokenRange": {
-              "Open": "into",
+              "Open": "insert into",
               "Close": ":"
             },
             "SubRules": {
@@ -169,10 +155,10 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "procedure"
@@ -183,10 +169,10 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "function"
@@ -197,10 +183,10 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "package"
@@ -211,13 +197,45 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "from"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "MethodName",
+                  "Attributes": {
+                    "Element": "MethodName"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "rdb$"
+                  }
+                },
+                {
+                  "Type": "MethodName",
+                  "Attributes": {
+                    "Element": "MethodName"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "mon$"
+                  }
+                }
+              ]
             }
           },
           {
@@ -225,10 +243,10 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "join"
@@ -239,10 +257,10 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "trigger"
@@ -253,7 +271,6 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -278,7 +295,7 @@
                     "Open": "select"
                   }
                 }
-              ] 
+              ]
             }
           },
           {
@@ -286,7 +303,6 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -311,7 +327,7 @@
                     "Open": "on"
                   }
                 }
-              ] 
+              ]
             }
           },
           {
@@ -319,10 +335,10 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "sequence"
@@ -333,10 +349,10 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "exception"
@@ -347,10 +363,10 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "domain"
@@ -361,10 +377,10 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
-              "CloseOnTerm": true
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
             },
             "TokenRange": {
               "Open": "index"
@@ -375,7 +391,6 @@
             "Attributes": {
               "Element": "MethodName"
             },
-            "Delimiters": "'-!\"#%&()*,./:;?@[\\]^`{|}~+<=>",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -415,6 +430,32 @@
                   }
                 }
               ]
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "rdb$"
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "mon$"
             }
           },
           {
@@ -576,6 +617,7 @@
               "inner",
               "input_type",
               "insensitive",
+              "insert into",
               "insert",
               "inserting",
               "into",
@@ -799,6 +841,7 @@
               "user",
               "using",
               "uuid_to_char",
+              "value",
               "values",
               "varbinary",
               "variable",
@@ -868,7 +911,7 @@
           {
             "Type": "Value",
             "Words": [
-              "as", 
+              "as",
               "check",
               "constraint",
               "default",

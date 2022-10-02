@@ -856,7 +856,7 @@ type
     procedure UpdateCaret;
     procedure UpdateColors;
     procedure WndProc(var AMessage: TMessage); override;
-    procedure Zoom(const APercentage: Integer = -1);
+    procedure Zoom(const APercentage: Integer);
     property Action;
     property ActiveLine: TTextEditorActiveLine read FActiveLine write SetActiveLine;
     property AllCodeFoldingRanges: TTextEditorAllCodeFoldingRanges read FCodeFoldings.AllRanges;
@@ -990,6 +990,7 @@ type
     property VisibleLineCount: Integer read FLineNumbers.VisibleCount;
     property WantReturns: Boolean read FState.WantReturns write SetWantReturns default True;
     property WordWrap: TTextEditorWordWrap read FWordWrap write SetWordWrap;
+    property ZoomDivider: Integer read FZoomDivider write FZoomDivider default 0;
     property ZoomPercentage: Integer read FZoomPercentage write FZoomPercentage default 100;
   end;
 
@@ -20119,7 +20120,7 @@ begin
 {$ENDIF}
 end;
 
-procedure TCustomTextEditor.Zoom(const APercentage: Integer = -1);
+procedure TCustomTextEditor.Zoom(const APercentage: Integer);
 var
   LPixelsPerInch: Integer;
   LMultiplier: Integer;
@@ -20133,7 +20134,7 @@ begin
     if FZoomDivider = 0 then
       FZoomDivider := LPixelsPerInch;
 
-    LMultiplier := Round((APercentage / 100) * LPixelsPerInch);
+    LMultiplier := Round((FZoomPercentage / 100) * LPixelsPerInch);
 
     ChangeObjectScale(LPixelsPerInch, FZoomDivider);
     ChangeObjectScale(LMultiplier, LPixelsPerInch);

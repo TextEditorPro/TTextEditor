@@ -103,10 +103,7 @@ begin
   ListBoxThemes.Enabled := not CheckBoxUseDefaultTheme.Checked;
 
   if CheckBoxUseDefaultTheme.Checked then
-  begin
-    TextEditor.Highlighter.Colors.SetDefaults;
-    TextEditor.Zoom;
-  end
+    TextEditor.Highlighter.Colors.SetDefaults
   else
     SetSelectedColor;
 end;
@@ -136,7 +133,6 @@ procedure TMainForm.SetSelectedColor;
 begin
   with ListBoxThemes do
   TextEditor.Highlighter.Colors.LoadFromFile(TDemoPaths.Themes + Items[ItemIndex]);
-  TextEditor.Zoom;
 end;
 
 procedure TMainForm.SetSelectedHighlighter;

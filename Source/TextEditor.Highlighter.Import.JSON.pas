@@ -173,6 +173,7 @@ var
   LJSONDataValue: PJSONDataValue;
   LEditor: TCustomTextEditor;
   LFontStyle: TFontStyles;
+  LZoomDivider: Integer;
 begin
   if Assigned(AThemeObject) and Assigned(FHighlighter.Editor) then
   begin
@@ -322,6 +323,9 @@ begin
         Ruler.Size := LFontSizesObject['Ruler'].ToInt(Ruler.Size);
         Text.Size := LFontSizesObject['Text'].ToInt(Text.Size);
       end;
+
+      LZoomDivider := {$IFDEF ALPHASKINS}DefaultManager.Options.PixelsPerInch{$ELSE}Screen.PixelsPerInch{$ENDIF};
+      LEditor.Fonts.ChangeScale(LEditor.ZoomPercentage, LZoomDivider);
     end;
 
     if (csDesigning in LEditor.ComponentState) or (eoLoadFontStyles in LEditor.Options) then

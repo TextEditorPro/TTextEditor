@@ -4825,7 +4825,6 @@ begin
     FUndoList.AddChange(crDelete, LTextPosition, LTextBeginPosition, LTextEndPosition, LTextLine, smNormal);
 
     SetSelectionBeginPosition(LTextPosition);
-    SetSelectionEndPosition(LTextPosition);
   finally
     FUndoList.EndBlock;
   end;

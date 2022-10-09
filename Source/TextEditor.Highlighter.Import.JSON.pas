@@ -42,7 +42,7 @@ implementation
 uses
   System.TypInfo, System.UITypes, Vcl.Dialogs, Vcl.Forms, Vcl.Graphics, Vcl.GraphUtil, TextEditor.Consts,
   TextEditor.Highlighter.Token, TextEditor.HighlightLine, TextEditor.Language, TextEditor.Types, TextEditor.Utils
-{$IFDEF ALPHASKINS}, sSkinManager{$ENDIF};
+{$IFDEF ALPHASKINS}, sCommonData{$ENDIF};
 
 type
   TElement = record
@@ -324,7 +324,7 @@ begin
         Text.Size := LFontSizesObject['Text'].ToInt(Text.Size);
       end;
 
-      LZoomDivider := {$IFDEF ALPHASKINS}DefaultManager.Options.PixelsPerInch{$ELSE}Screen.PixelsPerInch{$ENDIF};
+      LZoomDivider := {$IFDEF ALPHASKINS}GetPPI(LEditor.SkinData){$ELSE}Screen.PixelsPerInch{$ENDIF};
       LEditor.Fonts.ChangeScale(LEditor.ZoomPercentage, LZoomDivider);
     end;
 

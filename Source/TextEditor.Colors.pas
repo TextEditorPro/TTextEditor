@@ -92,8 +92,6 @@ type
     FMinimapBackground: TColor;
     FMinimapBookmark: TColor;
     FMinimapVisibleRows: TColor;
-    FMultiEditBackground: TColor;
-    FMultiEditForeground: TColor;
     FOnChange: TNotifyEvent;
     FRightMargin: TColor;
     FRightMovingEdge: TColor;
@@ -203,8 +201,8 @@ type
     procedure SetMinimapBackground(const AValue: TColor);
     procedure SetMinimapBookmark(const AValue: TColor);
     procedure SetMinimapVisibleRows(const AValue: TColor);
-    procedure SetMultiEditBackground(const AValue: TColor);
-    procedure SetMultiEditForeground(const AValue: TColor);
+    //procedure SetMultiEditBackground(const AValue: TColor);
+    //procedure SetMultiEditForeground(const AValue: TColor);
     procedure SetRightMargin(const AValue: TColor);
     procedure SetRightMovingEdge(const AValue: TColor);
     procedure SetRulerBackground(const AValue: TColor);
@@ -318,8 +316,6 @@ type
     property MinimapBackground: TColor read FMinimapBackground write SetMinimapBackground default TColors.SysNone;
     property MinimapBookmark: TColor read FMinimapBookmark write SetMinimapBookmark default TDefaultColors.MinimapBookmark;
     property MinimapVisibleRows: TColor read FMinimapVisibleRows write SetMinimapVisibleRows default TDefaultColors.ActiveLineBackground;
-    property MultiEditBackground: TColor read FMultiEditBackground write SetMultiEditBackground default TColors.Black;
-    property MultiEditForeground: TColor read FMultiEditForeground write SetMultiEditForeground default TColors.White;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
     property RightMargin: TColor read FRightMargin write SetRightMargin default TColors.Silver;
     property RightMovingEdge: TColor read FRightMovingEdge write SetRightMovingEdge default TColors.Silver;
@@ -456,9 +452,6 @@ begin
   FMinimapBackground := TColors.SysNone;
   FMinimapBookmark := TDefaultColors.MinimapBookmark;
   FMinimapVisibleRows := TDefaultColors.ActiveLineBackground;
-  { Multi-edit }
-  FMultiEditBackground := TColors.Black;
-  FMultiEditForeground := TColors.White;
   { Right margin }
   FRightMargin := TColors.Silver;
   FRightMovingEdge := TColors.Silver;
@@ -593,9 +586,6 @@ begin
     Self.FMinimapBackground := FMinimapBackground;
     Self.FMinimapBookmark := FMinimapBookmark;
     Self.FMinimapVisibleRows := FMinimapVisibleRows;
-    { Multi-edit }
-    Self.FMultiEditBackground := FMultiEditBackground;
-    Self.FMultiEditForeground := FMultiEditForeground;
     { Right margin }
     Self.FRightMargin := FRightMargin;
     Self.FRightMovingEdge := FRightMovingEdge;
@@ -1064,16 +1054,6 @@ end;
 procedure TTextEditorColors.SetMinimapVisibleRows(const AValue: TColor);
 begin
   FMinimapVisibleRows := SetColorDef(AValue, TDefaultColors.ActiveLineBackground);
-end;
-
-procedure TTextEditorColors.SetMultiEditBackground(const AValue: TColor);
-begin
-  FMultiEditBackground := SetColorDef(AValue, TColors.Black);
-end;
-
-procedure TTextEditorColors.SetMultiEditForeground(const AValue: TColor);
-begin
-  FMultiEditForeground := SetColorDef(AValue, TColors.White);
 end;
 
 procedure TTextEditorColors.SetRightMargin(const AValue: TColor);

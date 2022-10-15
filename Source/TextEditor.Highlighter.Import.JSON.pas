@@ -41,8 +41,7 @@ implementation
 
 uses
   System.TypInfo, System.UITypes, Vcl.Dialogs, Vcl.Forms, Vcl.Graphics, Vcl.GraphUtil, TextEditor.Consts,
-  TextEditor.Highlighter.Token, TextEditor.HighlightLine, TextEditor.Language, TextEditor.Types, TextEditor.Utils
-{$IFDEF ALPHASKINS}, sCommonData{$ENDIF};
+  TextEditor.Highlighter.Token, TextEditor.HighlightLine, TextEditor.Language, TextEditor.Types, TextEditor.Utils;
 
 type
   TElement = record
@@ -173,7 +172,6 @@ var
   LJSONDataValue: PJSONDataValue;
   LEditor: TCustomTextEditor;
   LFontStyle: TFontStyles;
-  LZoomDivider: Integer;
 begin
   if Assigned(AThemeObject) and Assigned(FHighlighter.Editor) then
   begin
@@ -189,6 +187,8 @@ begin
         ActiveLineBackgroundUnfocused := LColorsObject['ActiveLineBackgroundUnfocused'].ToColor;
         ActiveLineForeground := LColorsObject['ActiveLineForeground'].ToColor;
         ActiveLineForegroundUnfocused := LColorsObject['ActiveLineForegroundUnfocused'].ToColor;
+        CaretMultiEditBackground := LColorsObject['CaretMultiEditBackground'].ToColor;
+        CaretMultiEditForeground := LColorsObject['CaretMultiEditForeground'].ToColor;
         CodeFoldingActiveLineBackground := LColorsObject['CodeFoldingActiveLineBackground'].ToColor;
         CodeFoldingActiveLineBackgroundUnfocused := LColorsObject['CodeFoldingActiveLineBackgroundUnfocused'].ToColor;
         CodeFoldingBackground := LColorsObject['CodeFoldingBackground'].ToColor;
@@ -263,8 +263,6 @@ begin
         MinimapBackground := LColorsObject['MinimapBackground'].ToColor;
         MinimapBookmark := LColorsObject['MinimapBookmark'].ToColor;
         MinimapVisibleRows := LColorsObject['MinimapVisibleRows'].ToColor;
-        MultiEditBackground := LColorsObject['MultiEditBackground'].ToColor;
-        MultiEditForeground := LColorsObject['MultiEditForeground'].ToColor;
         RightMargin := LColorsObject['RightMargin'].ToColor;
         RightMovingEdge := LColorsObject['RightMovingEdge'].ToColor;
         RulerBackground := LColorsObject['RulerBackground'].ToColor;
@@ -323,9 +321,6 @@ begin
         Ruler.Size := LFontSizesObject['Ruler'].ToInt(Ruler.Size);
         Text.Size := LFontSizesObject['Text'].ToInt(Text.Size);
       end;
-
-      LZoomDivider := {$IFDEF ALPHASKINS}GetPPI(LEditor.SkinData){$ELSE}Screen.PixelsPerInch{$ENDIF};
-      LEditor.Fonts.ChangeScale(LEditor.ZoomPercentage, LZoomDivider);
     end;
 
     if (csDesigning in LEditor.ComponentState) or (eoLoadFontStyles in LEditor.Options) then

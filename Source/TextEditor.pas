@@ -10202,7 +10202,7 @@ begin
     Exit;
 
 {$IF DEFINED(ALPHASKINS)}
-  if SkinData.SkinManager.Options.ScaleMode = smCustomPPI then
+ // if SkinData.SkinManager.Options.ScaleMode = smCustomPPI then
   begin
 {$ENDIF}
     if AIsDpiChange or (AMultiplier <> ADivider) then
@@ -12515,7 +12515,7 @@ begin
       Inc(LRect.Top, FRuler.Height);
     LRect.Bottom := LRect.Top + LLineHeight;
     if FActiveLine.Visible and (not Assigned(FMultiEdit.Carets) and (FPosition.Text.Line + 1 = LLine) or
-      Assigned(FMultiEdit.CArets) and
+      Assigned(FMultiEdit.Carets) and
       IsMultiEditCaretFound(LLine)) and (FColors.CodeFoldingActiveLineBackground <> TColors.SysNone) then
     begin
       if Focused then
@@ -16027,7 +16027,7 @@ var
       SelectionEndPosition := GetPosition(LLineSelectionEnd, LMultiCaretRecord.SelectionBegin.Line);
       TextPosition := SelectionEndPosition;
 
-      SetSelectedText
+      SetSelectedText;
     end;
   end;
 
@@ -17576,6 +17576,7 @@ begin
   for LIndex := 0 to FMultiEdit.Carets.Count - 1 do
   begin
     LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex]);
+
     if (LPMultiCaretRecord^.ViewPosition.Row = AViewPosition.Row) and
       (LPMultiCaretRecord^.ViewPosition.Column = AViewPosition.Column) then
       Exit;
@@ -17585,6 +17586,7 @@ begin
   LPMultiCaretRecord^.ViewPosition.Column := AViewPosition.Column;
   LPMultiCaretRecord^.ViewPosition.Row := AViewPosition.Row;
   FMultiEdit.Carets.Add(LPMultiCaretRecord);
+
   FMultiEdit.Carets.Sort(CompareCaretRecords);
 
   HideCaret;
@@ -18231,8 +18233,9 @@ var
   LPMultiCaretRecord: PTextEditorMultiCaretRecord;
   LCommand: TTextEditorCommand;
   LChar: Char;
-  LLength: Integer;
+  LRows, LPasteRows, LLength: Integer;
   LLineSelectionStart, LLineSelectionEnd: Integer;
+  LStringList: TStringList;
 
   function CodeFoldingExpandLine(const ALine: Integer): Integer;
   var
@@ -18316,9 +18319,29 @@ begin
         TKeyCommands.Cut, TKeyCommands.Paste, TKeyCommands.Left, TKeyCommands.SelectionLeft, TKeyCommands.Right,
         TKeyCommands.SelectionRight, TKeyCommands.SelectionLineBegin, TKeyCommands.SelectionLineEnd:
           begin
-            LLength := 1;
+            if FMultiEdit.SelectionAvailable then
+              LLength := 0
+            else
+              LLength := 1;
+
+            LRows := 0;
+
             if (LCommand = TKeyCommands.Paste) and CanPaste then
-              LLength := GetClipboardText.Length;
+            begin
+              LStringList := TStringList.Create;
+              try
+                LStringList.Text := GetClipboardText;
+                if Trim(LStringList.Text) <> '' then
+                begin
+                  LRows := LStringList.Count - 1;
+                  LLength := Length(LStringList[LStringList.Count - 1]);
+                end;
+              finally
+                LStringList.Free;
+              end;
+            end;
+
+            LPasteRows := LRows;
 
             if (LCommand in [TKeyCommands.SelectionLeft, TKeyCommands.SelectionRight, TKeyCommands.SelectionLineBegin,
               TKeyCommands.SelectionLineEnd]) and
@@ -18338,7 +18361,7 @@ begin
             if LCommand in [TKeyCommands.Left, TKeyCommands.Right] then
               FMultiEdit.SelectionAvailable := False;
 
-            for LIndex1 := 0 to FMultiEdit.Carets.Count - 1 do
+            for LIndex1 := FMultiEdit.Carets.Count - 1 downto 0 do
             begin
               case LCommand of
                 TKeyCommands.Char, TKeyCommands.Cut, TKeyCommands.Tab, TKeyCommands.Backspace, TKeyCommands.Paste:
@@ -18353,18 +18376,22 @@ begin
                       LLength := Length(GetTabText(LTextPosition));
                     end;
 
+                    // TODO: Undo multi-edit carets
+
                     ExecuteCommand(LCommand, LChar, AData);
 
                     if FMultiEdit.SelectionAvailable then
                     begin
-                      for LIndex2 := 0 to FMultiEdit.Carets.Count - 1 do
+                      for LIndex2 := FMultiEdit.Carets.Count - 1 downto 0 do
                       begin
                         LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex2]);
 
                         LLineSelectionStart := LPMultiCaretRecord^.SelectionBegin.Char;
                         LLineSelectionEnd := LPMultiCaretRecord^.ViewPosition.Column;
+
                         if LLineSelectionStart > LLineSelectionEnd then
                           SwapInt(LLineSelectionStart, LLineSelectionEnd);
+
                         LPMultiCaretRecord^.ViewPosition := GetViewPosition(LLineSelectionStart, LPMultiCaretRecord^.ViewPosition.Row);
 
                         case LCommand of
@@ -18387,36 +18414,42 @@ begin
                 TKeyCommands.Left, TKeyCommands.SelectionLeft:
                   begin
                     LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex1]);
+
                     if LPMultiCaretRecord^.ViewPosition.Column > 1 then
                       Dec(LPMultiCaretRecord^.ViewPosition.Column);
                   end;
               end;
+            end;
 
-              case LCommand of
-                TKeyCommands.Char, TKeyCommands.Paste, TKeyCommands.Backspace, TKeyCommands.Tab, TKeyCommands.LineBegin,
-                TKeyCommands.LineEnd, TKeyCommands.SelectionLineBegin, TKeyCommands.SelectionLineEnd:
-                  for LIndex2 := 0 to FMultiEdit.Carets.Count - 1 do
-                  begin
-                    LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex2]);
-                    case LCommand of
-                      TKeyCommands.Char, TKeyCommands.Tab, TKeyCommands.Paste, TKeyCommands.Backspace:
-                        if (LPMultiCaretRecord^.ViewPosition.Row = LViewPosition.Row) and
-                          (LPMultiCaretRecord^.ViewPosition.Column >= LViewPosition.Column) then
-                        case LCommand of
-                          TKeyCommands.Char, TKeyCommands.Tab, TKeyCommands.Paste:
-                            Inc(LPMultiCaretRecord^.ViewPosition.Column, LLength);
-                          TKeyCommands.Backspace:
-                            if LPMultiCaretRecord^.ViewPosition.Column > 1 then
-                              Dec(LPMultiCaretRecord^.ViewPosition.Column);
-                        end;
-                      TKeyCommands.LineBegin, TKeyCommands.SelectionLineBegin:
-                        LPMultiCaretRecord^.ViewPosition.Column := 1;
-                      TKeyCommands.LineEnd, TKeyCommands.SelectionLineEnd:
-                        LPMultiCaretRecord^.ViewPosition.Column := FLines.ExpandedStringLengths[LPMultiCaretRecord^.ViewPosition.Row - 1] + 1;
-                    end;
+            if FMultiEdit.Carets.Count > 0 then
+            case LCommand of
+              TKeyCommands.Char, TKeyCommands.Paste, TKeyCommands.Backspace, TKeyCommands.Tab, TKeyCommands.LineBegin,
+              TKeyCommands.LineEnd, TKeyCommands.SelectionLineBegin, TKeyCommands.SelectionLineEnd:
+                for LIndex2 := 0 to FMultiEdit.Carets.Count - 1 do
+                begin
+                  LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex2]);
+                  case LCommand of
+                    TKeyCommands.Char, TKeyCommands.Tab, TKeyCommands.Paste, TKeyCommands.Backspace:
+                      case LCommand of
+                        TKeyCommands.Char, TKeyCommands.Tab:
+                          Inc(LPMultiCaretRecord^.ViewPosition.Column, LLength);
+                        TKeyCommands.Backspace:
+                          if LPMultiCaretRecord^.ViewPosition.Column > 1 then
+                            Dec(LPMultiCaretRecord^.ViewPosition.Column);
+                        TKeyCommands.Paste:
+                          begin
+                            LPMultiCaretRecord^.ViewPosition.Column := LLength + 1;
+                            Inc(LPMultiCaretRecord^.ViewPosition.Row, LRows);
+                            Inc(LRows, LPasteRows);
+                          end;
+                      end;
+                    TKeyCommands.LineBegin, TKeyCommands.SelectionLineBegin:
+                      LPMultiCaretRecord^.ViewPosition.Column := 1;
+                    TKeyCommands.LineEnd, TKeyCommands.SelectionLineEnd:
+                      LPMultiCaretRecord^.ViewPosition.Column := FLines.ExpandedStringLengths[LPMultiCaretRecord^.ViewPosition.Row - 1] + 1;
                   end;
                 end;
-              end;
+            end;
           end;
         TKeyCommands.Undo:
           begin
@@ -20128,7 +20161,7 @@ begin
 
   IncPaintLock;
   try
-    LPixelsPerInch := {$IFDEF ALPHASKINS}DefaultManager.Options.PixelsPerInch{$ELSE}Screen.PixelsPerInch{$ENDIF};
+    LPixelsPerInch := {$IFDEF ALPHASKINS}GetPPI(SkinData){$ELSE}Screen.PixelsPerInch{$ENDIF};
 
     if FZoomDivider = 0 then
       FZoomDivider := LPixelsPerInch;
@@ -20294,21 +20327,25 @@ end;
 
 procedure TCustomDBTextEditor.CMEnter(var AMessage: TCMEnter);
 begin
-  SetEditing(True);
+  if not ReadOnly then
+    SetEditing(True);
 
   inherited;
 end;
 
 procedure TCustomDBTextEditor.CMExit(var AMessage: TCMExit);
 begin
-  try
-    FDataLink.UpdateRecord;
-  except
-    SetFocus;
-    raise;
-  end;
+  if not ReadOnly then
+  begin
+    try
+      FDataLink.UpdateRecord;
+    except
+      SetFocus;
+      raise;
+    end;
 
-  SetEditing(False);
+    SetEditing(False);
+  end;
 
   inherited;
 end;

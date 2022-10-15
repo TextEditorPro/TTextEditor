@@ -202,13 +202,23 @@ begin
 end;
 
 procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivider: Integer);
+
+  procedure Scale(const AFont: TFont);
+  begin
+    if AFont.PixelsPerInch <> AMultiplier then
+    begin
+      AFont.Height := MulDiv(AFont.Height, AMultiplier, ADivider);
+      AFont.PixelsPerInch := AMultiplier;
+    end;
+  end;
+
 begin
-  FCodeFoldingHint.Height := MulDiv(FCodeFoldingHint.Height, AMultiplier, ADivider);
-  FCompletionProposal.Height := MulDiv(FCompletionProposal.Height, AMultiplier, ADivider);
-  FLineNumbers.Height := MulDiv(FLineNumbers.Height, AMultiplier, ADivider);
-  FMinimap.Height := MulDiv(FMinimap.Height, AMultiplier, ADivider);
-  FRuler.Height := MulDiv(FRuler.Height, AMultiplier, ADivider);
-  FText.Height := MulDiv(FText.Height, AMultiplier, ADivider);
+  Scale(FCodeFoldingHint);
+  Scale(FCompletionProposal);
+  Scale(FLineNumbers);
+  Scale(FMinimap);
+  Scale(FRuler);
+  Scale(FText);
 end;
 
 procedure TTextEditorFonts.SetCodeFoldingHint(const AValue: TFont);

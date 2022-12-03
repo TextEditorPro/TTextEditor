@@ -227,6 +227,7 @@ begin
   if Assigned(AItem) then
   begin
     FItems.Add(AItem);
+
     if (AItem.ChangeReason <> crGroupBreak) and Assigned(OnAddedUndo) then
       OnAddedUndo(Self);
   end;

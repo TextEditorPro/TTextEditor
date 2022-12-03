@@ -1,0 +1,338 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "-- Hello, World! in Ada\r\n",
+      "\r\n",
+      "with Text_IO; use Text_IO;\r\n",
+      "procedure HelloWorld is\r\n",
+      "begin\r\n",
+      "  Put_Line('Hello, World!');\r\n",
+      "end HelloWorld;"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "--"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "TokenRange": {
+              "Open": "{$",
+              "Close": "}"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abcdefABCDEF",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "$"
+            }
+          },
+          {
+            "Type": "Character",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#",
+              "Close": " "
+            }
+          },
+          {
+            "Type": "Address",
+            "Attributes": {
+              "Element": "Character"
+            },
+            "Properties": {
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "@"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "abort",
+              "abs",
+              "abstract",
+              "accept",
+              "access",
+              "aliased",
+              "all",
+              "and",
+              "array",
+              "at",
+              "begin",
+              "body",
+              "case",
+              "constant",
+              "declare",
+              "delay",
+              "delta",
+              "digits",
+              "do",
+              "else",
+              "elsif",
+              "end",
+              "entry",
+              "exception",
+              "exit",
+              "for",
+              "generic",
+              "goto",
+              "if",
+              "in",
+              "interface",
+              "is",
+              "limited",
+              "loop",
+              "mod",
+              "new",
+              "not",
+              "null",
+              "of",
+              "or",
+              "others",
+              "out",
+              "overriding",
+              "package",
+              "pragma",
+              "private",
+              "protected",
+              "raise",
+              "range",
+              "record",
+              "rem",
+              "renames",
+              "requeue",
+              "return",
+              "reverse",
+              "select",
+              "separate",
+              "some",
+              "subtype",
+              "synchronized",
+              "tagged",
+              "task",
+              "terminate",
+              "then",
+              "type",
+              "until",
+              "use",
+              "when",
+              "while",
+              "with",
+              "xor"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord",
+              "EscapeChar": "&"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "function",
+              "procedure"
+            ],
+            "Attributes": {
+              "Element": "Method",
+              "EscapeChar": "&"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789E",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "EscapeChar": "&"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "--",
+            "RegionType": "SingleLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "BEGIN",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "IF",
+            "CloseToken": "END IF",
+            "Properties": {
+							"SkipIfFoundAfterOpenToken": [
+                ";"
+              ]
+            }
+          },
+          {
+            "OpenToken": "LOOP",
+            "CloseToken": "END LOOP",
+            "Properties": {
+              "NoSubs": true,
+							"SkipIfFoundAfterOpenToken": [
+                ";"
+              ]
+            }
+          },
+          {
+            "OpenToken": "REPEAT",
+            "CloseToken": "UNTIL"
+          },
+          {
+            "OpenToken": "CASE",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "PACKAGE",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "RECORD",
+            "CloseToken": "END RECORD",
+            "Properties": {
+              "NoSubs": true,
+							"SkipIfFoundAfterOpenToken": [
+                ";"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      },
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "for",
+        "CloseToken": "do"
+      },
+      {
+        "OpenToken": "while",
+        "CloseToken": "do"
+      },
+      {
+        "OpenToken": "if",
+        "CloseToken": "then"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "--",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

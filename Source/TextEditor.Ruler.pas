@@ -5,6 +5,9 @@ interface
 uses
   System.Classes, System.UITypes, Vcl.Graphics, TextEditor.Types;
 
+const
+  TEXTEDITOR_DEFAULT_RULER_OPTIONS = [roShowLegerLine, roShowSelection];
+
 type
   TTextEditorRuler = class(TPersistent)
   strict private
@@ -28,7 +31,7 @@ type
   published
     property Cursor: TCursor read FCursor write FCursor default crDefault;
     property Height: Integer read FHeight write SetHeight default 18;
-    property Options: TTextEditorRulerOptions read FOptions write FOptions default [roShowSelection];
+    property Options: TTextEditorRulerOptions read FOptions write FOptions default TEXTEDITOR_DEFAULT_RULER_OPTIONS;
     property Visible: Boolean read FVisible write SetVisible default False;
   end;
 
@@ -45,7 +48,7 @@ begin
   FHeight := 18;
   FMoving := False;
   FVisible := False;
-  FOptions := [roShowSelection];
+  FOptions := TEXTEDITOR_DEFAULT_RULER_OPTIONS;
 end;
 
 procedure TTextEditorRuler.Assign(ASource: TPersistent);

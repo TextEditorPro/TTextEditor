@@ -608,22 +608,23 @@ end;
 
 constructor TJSONReader.Create(AStart: Pointer);
 begin
-  //inherited Create;
+  // inherited Create;
 
   FStart := AStart;
   FLineNum := 1; // base 1
   FLineStart := nil;
 end;
 
-destructor TJSONReader.Destroy;
+destructor TJSONReader.Destroy; //FI:W504 Missing INHERITED call in destructor
 begin
-  //inherited Destroy;
+  // inherited Destroy;
 end;
 
 function TJSONReader.GetLineColumn: NativeInt;
 begin
   if FLineStart = nil then
     FLineStart := FStart;
+
   Result := GetCharOffset(FLineStart) + 1; // base 1
 end;
 

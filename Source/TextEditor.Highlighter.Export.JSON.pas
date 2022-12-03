@@ -62,7 +62,7 @@ begin
   if Assigned(LIntToIdent) and LIntToIdent(AValue, LIdent) then
     Result := LIdent
   else
-    Result := '$' + IntToHex(AValue);
+    Result := '$' + IntToHex(AValue, SizeOf(Integer) * 2);
 end;
 
 function SetAsString(const ATypeInfo: PTypeInfo; const AValue: Integer): string;

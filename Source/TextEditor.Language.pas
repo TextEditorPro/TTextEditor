@@ -62,13 +62,9 @@ resourcestring
 
   { JSON parser }
   STextEditorInvalidJSONPath = 'Invalid JSON path "%s"';
-  STextEditorInvalidStringCharacter = 'Invalid character in string';
   STextEditorJSONPathContainsNullValue = 'JSON path contains null value ("%s")';
   STextEditorJSONPathIndexError = 'JSON path index out of bounds (%d) "%s"';
-  STextEditorStringNotClosed = 'String not closed';
   STextEditorTypeCastError = 'Cannot cast %s into %s';
-  STextEditorUnexpectedEndOfFile = 'Unexpected end of file where %s was expected';
-  STextEditorUnexpectedToken = 'Expected %s but found %s';
   STextEditorUnsupportedFileEncoding = 'File encoding is not supported';
 
   { Bookmark colors }

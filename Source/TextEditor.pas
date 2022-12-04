@@ -17276,6 +17276,8 @@ begin
       end;
   end;
 
+  ResetCharacterCount;
+
   Result := True;
 end;
 
@@ -17456,6 +17458,7 @@ begin
     if LPaintLocked then
       DecPaintLock;
 
+    ResetCharacterCount;
     InitCodeFolding;
     SelectionEndPosition := SelectionBeginPosition;
     EnsureCursorPositionVisible;

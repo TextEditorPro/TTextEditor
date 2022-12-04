@@ -12100,7 +12100,7 @@ begin
       TextPosition := LTextPosition;
 
       FRulerMovePosition := -1;
-      FRuler.Moving := roShowLegerLine in FRuler.Options;
+      FRuler.Moving := roShowGuideLine in FRuler.Options;
 
       ShowRulerLegerLine(X, Y);
       Exit;

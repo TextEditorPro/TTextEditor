@@ -190,7 +190,7 @@ type
   TTextEditorSyncEditOptions = set of TTextEditorSyncEditOption;
 
   { Ruler }
-  TTextEditorRulerOption = (roShowLegerLine, roShowSelection);
+  TTextEditorRulerOption = (roShowGuideLine, roShowSelection);
   TTextEditorRulerOptions = set of TTextEditorRulerOption;
 
   { Search map }

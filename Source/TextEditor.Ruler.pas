@@ -6,7 +6,7 @@ uses
   System.Classes, System.UITypes, Vcl.Graphics, TextEditor.Types;
 
 const
-  TEXTEDITOR_DEFAULT_RULER_OPTIONS = [roShowLegerLine, roShowSelection];
+  TEXTEDITOR_DEFAULT_RULER_OPTIONS = [roShowGuideLine, roShowSelection];
 
 type
   TTextEditorRuler = class(TPersistent)

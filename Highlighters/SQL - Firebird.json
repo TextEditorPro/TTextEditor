@@ -203,9 +203,21 @@
               "SkipWhitespaceOnce": true
             },
             "TokenRange": {
-              "Open": "from"
+              "Open": "from",
+              "Close": "("
             },
             "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "("
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ],
               "Range": [
                 {
                   "Type": "MethodName",

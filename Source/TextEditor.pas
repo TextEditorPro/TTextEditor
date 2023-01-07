@@ -7089,6 +7089,9 @@ var
   begin
     LInBlockComment := False;
 
+    if not FHighlighter.Loaded then
+      Exit;
+
     for LLine := 0 to FLines.Count - 1 do
     begin
       if LLine = 0 then
@@ -12003,15 +12006,15 @@ begin
       FHighlighter.SetOption(hoExecuteBeforePrepare, True);
   end;
 
-  if Assigned(Parent) then
-    if Assigned(FHighlighter) and (FLines.Count > 0) then
-    begin
-      LLastScan := AIndex;
-      repeat
-        LLastScan := ScanHighlighterRangesFrom(LLastScan);
-        Inc(LLastScan);
-      until LLastScan >= AIndex + ACount;
-    end;
+  if Assigned(FHighlighter) and FHighlighter.Loaded and (FLines.Count > 0) then
+  begin
+    LLastScan := AIndex;
+    repeat
+      LLastScan := ScanHighlighterRangesFrom(LLastScan);
+      Inc(LLastScan);
+    until LLastScan >= AIndex + ACount;
+  end;
+
   CreateLineNumbersCache(True);
 
   if not FState.UndoRedo then

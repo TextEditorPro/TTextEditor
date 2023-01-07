@@ -379,7 +379,9 @@ begin
 
     if Assigned(FToken) and FToken.Temporary then
       FTemporaryTokens.Add(FToken);
-  end;
+  end
+  else
+    Inc(FRunPosition);
 
   if FBeginningOfLine and (FRunPosition >= 1) and not (FLine[FRunPosition - 1] in TCharacterSets.AbsoluteDelimiters) then
     FBeginningOfLine := False;
@@ -459,6 +461,11 @@ var
   LTokenType: TTextEditorRangeType;
   LRangeKeyList: TTextEditorKeyList;
 begin
+  Result := ttUnspecified;
+
+  if not Assigned(FRange) then
+    Exit;
+
   LTokenType := FRange.TokenType;
 
   if LTokenType <> ttUnspecified then
@@ -475,8 +482,6 @@ begin
       if LRangeKeyList.KeyList.IndexOf(LToken) <> -1 then
         Exit(LRangeKeyList.TokenType);
     end;
-
-    Result := ttUnspecified
   end;
 end;
 

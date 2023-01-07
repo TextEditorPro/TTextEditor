@@ -117,6 +117,9 @@ type
     UpperCaseBlock = 625;
     LowerCaseBlock = 626;
     AlternatingCaseBlock = 627;
+    KeywordsUpperCase = 628;
+    KeywordsLowerCase = 629;
+    KeywordsTitleCase = 630;
     { Move }
     MoveLineUp = 701;
     MoveLineDown = 702;

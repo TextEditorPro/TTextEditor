@@ -128,6 +128,7 @@ begin
   if FEngine <> AValue then
   begin
     FEngine := AValue;
+
     if Assigned(FOnChange) then
       FOnChange(scEngineUpdate);
   end;
@@ -142,6 +143,7 @@ end;
 procedure TTextEditorSearch.SetSearchText(const AValue: string);
 begin
   FSearchText := AValue;
+
   Execute;
 end;
 
@@ -150,6 +152,7 @@ begin
   if FEnabled <> AValue then
   begin
     FEnabled := AValue;
+
     Execute;
   end;
 end;
@@ -159,6 +162,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     if Assigned(FOnChange) then
       FOnChange(scVisible);
   end;
@@ -185,6 +189,7 @@ var
 begin
   for LIndex := FItems.Count - 1 downto 0 do
     Dispose(PTextEditorSearchItem(FItems[LIndex]));
+
   FItems.Clear;
 end;
 

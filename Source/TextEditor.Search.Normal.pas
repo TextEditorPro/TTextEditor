@@ -62,6 +62,7 @@ var
   LIndex: Integer;
 begin
   FPatternLength := Length(FPattern);
+
   if FPatternLength = 0 then
     Status := STextEditorPatternIsEmpty;
 
@@ -78,8 +79,10 @@ begin
   begin
     if FPattern[FPatternLength] = FPattern[FPatternLength - FLookAt] then
       Break;
+
     Inc(FLookAt);
   end;
+
   FShiftInitialized := True;
 end;
 
@@ -110,6 +113,7 @@ var
   LPValue: PChar;
 begin
   Result := 0;
+
   Inc(FRun, FPatternLength);
   while FRun < FTheEnd do
   begin

@@ -23,6 +23,7 @@ type
     FShortCut: TShortCut;
     FSnippets: TTextEditorCompletionProposalSnippets;
     FTrigger: TTextEditorCompletionProposalTrigger;
+    FVisible: Boolean;
     FVisibleLines: Integer;
     FWidth: Integer;
     function IsCloseCharsStored: Boolean;
@@ -35,6 +36,7 @@ type
     procedure Assign(ASource: TPersistent); override;
     procedure ChangeScale(const AMultiplier, ADivider: Integer);
     procedure SetOption(const AOption: TTextEditorCompletionProposalOption; const AEnabled: Boolean);
+    property Visible: Boolean read FVisible write FVisible;
   published
     property CloseChars: string read FCloseChars write FCloseChars stored IsCloseCharsStored;
     property Active: Boolean read FActive write FActive default True;

@@ -118,6 +118,7 @@ end;
 constructor TTextEditorAbstractToken.Create(const AToken: TTextEditorAbstractToken);
 begin
   inherited Create;
+
   FAttribute := AToken.Attribute;
   FBreakType := AToken.BreakType;
 end;
@@ -190,6 +191,8 @@ function TTextEditorMultiToken.SymbolCount: Integer;
 begin
   Result := FSymbols.Count;
 end;
+
+{ TTextEditorToken }
 
 constructor TTextEditorToken.Create;
 begin
@@ -282,6 +285,7 @@ begin
   for LIndex := FNodeList.Count - 1 downto 0 do
   begin
     LTokenNode := TTextEditorTokenNode(FNodeList.List[LIndex]);
+
     if LTokenNode.Char = AChar then
       Exit(LTokenNode);
   end;

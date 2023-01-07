@@ -112,11 +112,70 @@
                 "(",
                 "'",
                 "/",
-                "{"
+                "{",
+                "begin"
               ]
             },
             "TokenRange": {
               "Open": "procedure",
+              "Close": ";"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    ";",
+                    "("
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "AlternativeClose": [
+                "("
+              ]
+            },
+            "TokenRange": {
+              "Open": "constructor",
+              "Close": ";"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    ";",
+                    "("
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "AlternativeClose": [
+                "("
+              ]
+            },
+            "TokenRange": {
+              "Open": "destructor",
               "Close": ";"
             },
             "SubRules": {
@@ -142,7 +201,9 @@
             },
             "TokenRange": {
               "Open": "asm",
-              "Close": "end"
+              "OpenBreakType": "Term",
+              "Close": "end",
+              "CloseBreakType": "Term"
             },
             "SubRules": {
               "Range": [
@@ -179,6 +240,19 @@
                   }
                 },
                 {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
                   "Type": "Directive",
                   "Attributes": {
                     "Element": "Directive"
@@ -186,6 +260,19 @@
                   "TokenRange": {
                     "Open": "{$",
                     "Close": "}"
+                  }
+                },
+                {
+                  "Type": "Directive",
+                  "Attributes": {
+                    "Element": "Directive"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "@",
+                    "Close": ":"
                   }
                 }
               ],
@@ -312,6 +399,79 @@
             "TokenRange": {
               "Open": "@"
             }
+          },
+          {
+            "Attributes": {
+              "Element": "Editor"
+            },
+            "TokenRange": {
+              "Open": "property",
+              "Close": ";"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "BlockComment",
+                  "Attributes": {
+                    "Element": "Comment"
+                  },
+                  "TokenRange": {
+                    "Open": "{",
+                    "Close": "}"
+                  }
+                },
+                {
+                  "Type": "BlockComment",
+                  "Attributes": {
+                    "Element": "Comment"
+                  },
+                  "TokenRange": {
+                    "Open": "(*",
+                    "Close": "*)"
+                  }
+                },
+                {
+                  "Type": "LineComment",
+                  "Attributes": {
+                    "Element": "Comment"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "//"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                }
+              ],
+              "KeyList": [
+                {
+                  "Type": "ReservedWord",
+                  "Words": [
+                    "default",
+                    "index",
+                    "read",
+                    "stored",
+                    "write"
+                  ],
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  }
+                }
+              ]
+            }
           }
         ],
         "KeyList": [
@@ -326,50 +486,62 @@
               "as",
               "assembler",
               "begin",
+              "bitpacked",
               "break",
               "case",
               "cdecl",
               "class",
               "const",
-              "constructor",
               "continue",
               "cppdecl",
+              "cvar",
               "default",
-              "destructor",
-              "dispose",
+              "deprecated",
+              "dispinterface",
               "div",
               "do",
               "downto",
+              "dynamic",
               "else",
               "end",
+              "enumerator",
               "except",
-              "exit",
+              "experimental",
               "export",
               "exports",
               "external",
-              "false",
+              "far",
+              "far16",
               "file",
               "finalization",
               "finally",
               "for",
               "forward",
+              "generic",
               "goto",
+              "helper",
               "if",
               "implementation",
+              "implements",
               "in",
               "index",
               "inherited",
               "initialization",
               "inline",
               "interface",
+              "interrupt",
+              "iocheck",
               "is",
               "label",
               "library",
               "local",
+              "message",
               "mod",
               "name",
-              "new",
+              "near",
               "nil",
+              "nodefault",
+              "noreturn",
               "nostackframe",
               "not",
               "object",
@@ -378,10 +550,13 @@
               "on",
               "operator",
               "or",
+              "otherwise",
               "out",
+              "overload",
               "override",
               "packed",
               "pascal",
+              "platform",
               "private",
               "program",
               "property",
@@ -391,53 +566,58 @@
               "raise",
               "read",
               "record",
+              "register",
               "reintroduce",
               "repeat",
+              "resourcestring",
+              "result",
               "safecall",
+              "saveregisters",
               "self",
               "set",
               "shl",
               "shr",
               "softfloat",
+              "specialize",
+              "static",
               "stdcall",
+              "stored",
+              "strict",
               "string",
               "then",
               "threadvar",
               "to",
-              "true",
-              "try",
+              "try ",
               "type",
+              "unaligned",
+              "unimplemented",
               "unit",
               "until",
               "uses",
               "var",
+              "varargs",
               "virtual",
               "while",
               "with",
-              "write",
-              "xor"
+              "write ",
+              "xor "
             ],
             "Attributes": {
-              "Element": "ReservedWord"
+              "Element": "ReservedWord",
+              "EscapeChar": "&"
             }
           },
           {
             "Type": "Method",
             "Words": [
+              "constructor",
+              "destructor",
               "function",
               "procedure"
             ],
             "Attributes": {
-              "Element": "Method"
-            }
-          },
-          {
-            "Type": "AssemblerReservedWord",
-            "Words": [
-              "asm"
-            ],
-            "Attributes": {
-              "Element": "AssemblerReservedWord"
+              "Element": "Method",
+              "EscapeChar": "&"
             }
           },
           {
@@ -462,6 +642,16 @@
             "Attributes": {
               "Element": "Symbol"
             }
+          },
+          {
+            "Type": "AssemblerReservedWord",
+            "Words": [
+              "asm"
+            ],
+            "Attributes": {
+              "Element": "AssemblerReservedWord",
+              "ParentBackground": false
+            }
           }
         ],
         "Set": [
@@ -479,6 +669,9 @@
   "CodeFolding": {
     "Ranges": [
       {
+        "Options": {
+          "EscapeChar": "&"
+        },
         "SkipRegion": [
           {
             "OpenToken": "'",
@@ -551,7 +744,9 @@
             "OpenToken": "INTERFACE",
             "CloseToken": "IMPLEMENTATION",
             "Properties": {
-              "OpenTokenBeginningOfLine": true
+              "OpenTokenBeginningOfLine": true,
+              "TokenEndIsPreviousLine": true,
+              "ShowGuideLine": false
             }
           },
           {
@@ -570,7 +765,8 @@
             "Properties": {
               "OpenTokenBeginningOfLine": true,
               "OpenIsClose": true,
-              "SharedClose": true
+              "SharedClose": true,
+              "ShowGuideLine": false
             }
           },
           {

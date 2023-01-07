@@ -266,7 +266,6 @@ begin
       FRange := FRange.Parent;
 
     FEndOfLine := True;
-
     Exit;
   end;
 
@@ -503,26 +502,26 @@ begin
 
   FMatchingPairs.Clear;
 
-  for LIndex := 0 to FCodeFoldingRangeCount - 1 do
+  for LIndex := FCodeFoldingRangeCount - 1 downto 0 do
   begin
     FCodeFoldingRegions[LIndex].Free;
     FCodeFoldingRegions[LIndex] := nil;
   end;
+  SetLength(FCodeFoldingRegions, 0);
 
   CodeFoldingRangeCount := 0;
 
-  if Assigned(Editor) then
-  begin
-    LEditor := Editor as TCustomTextEditor;
-    LEditor.ClearMatchingPair;
-    LEditor.ClearHighlightLine;
-  end;
+  LEditor := FEditor as TCustomTextEditor;
+  LEditor.ClearMatchingPair;
+  LEditor.ClearHighlightLine;
 end;
 
 procedure TTextEditorHighlighter.Prepare;
 begin
   FAttributes.Clear;
+
   AddAllAttributes(MainRules);
+
   FMainRules.Reset;
   FMainRules.Prepare;
 end;
@@ -587,6 +586,7 @@ begin
       LKeyList.Attribute.Element := 'ReservedWord';
       LKeyList.Attribute.ParentBackground := True;
       LKeyList.Attribute.ParentForeground := False;
+
       for LLine := FLines.Count - 1 downto 0 do
       begin
         LTextLine := FLines[LLine];
@@ -599,27 +599,27 @@ begin
           if (LPText^ = '"') or (LPText^ = '`') and ((LPText - 1)^ = '`') then
             LInside := not LInside;
 
-          if not LInside then
-            if LPText^ = ':' then
+          if not LInside and (LPText^ = ':') then
+          begin
+            Dec(LPText);
+            { Space or tab characters }
+            LKeyWord := ':';
+            while (LPText >= LPStart) and (LPText^ in [TCharacters.Space, TControlCharacters.Tab]) do
             begin
+              LKeyWord := LPText^ + LKeyWord;
               Dec(LPText);
-              { Space or tab characters }
-              LKeyWord := ':';
-              while (LPText >= LPStart) and (LPText^ in [TCharacters.Space, TControlCharacters.Tab]) do
-              begin
-                LKeyWord := LPText^ + LKeyWord;
-                Dec(LPText);
-              end;
-              { Keyword }
-              while (LPText >= LPStart) and not (LPText^ in [TCharacters.Space, TControlCharacters.Tab, '{', '(']) do
-              begin
-                LKeyWord := LPText^ + LKeyWord;
-                Dec(LPText);
-              end;
-
-              if TextEditor.Utils.Trim(LKeyWord) <> ':' then
-                LKeyList.KeyList.Add(LKeyWord);
             end;
+            { Keyword }
+            while (LPText >= LPStart) and not (LPText^ in [TCharacters.Space, TControlCharacters.Tab, '{', '(']) do
+            begin
+              LKeyWord := LPText^ + LKeyWord;
+              Dec(LPText);
+            end;
+
+            if TextEditor.Utils.Trim(LKeyWord) <> ':' then
+              LKeyList.KeyList.Add(LKeyWord);
+          end;
+
           Dec(LPText);
         end;
       end;
@@ -650,8 +650,14 @@ begin
 end;
 
 procedure TTextEditorHighlighter.LoadFromStream(const AStream: TStream);
+var
+  LEditor: TCustomTextEditor;
+  LEditorIsEmpty: Boolean;
 begin
   Clear;
+
+  LEditor := FEditor as TCustomTextEditor;
+  LEditorIsEmpty := LEditor.Text.IsEmpty;
 
   FLoading := True;
   with TTextEditorHighlighterImportJSON.Create(Self) do
@@ -665,6 +671,9 @@ begin
 
   if Assigned(FBeforePrepare) then
     SetOption(hoExecuteBeforePrepare, True);
+
+  if not LEditorIsEmpty then
+    LEditor.RescanHighlighterRanges;
 
   FLoading := False;
   FLoaded := True;

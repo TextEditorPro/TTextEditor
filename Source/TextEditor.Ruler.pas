@@ -38,7 +38,7 @@ type
 implementation
 
 uses
-  Winapi.Windows, TextEditor.Consts;
+  Winapi.Windows;
 
 constructor TTextEditorRuler.Create;
 begin

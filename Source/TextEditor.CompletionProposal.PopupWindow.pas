@@ -153,6 +153,7 @@ begin
   begin
     LTextEditor.RemoveKeyPressHandler(EditorKeyPress);
     LTextEditor.RemoveKeyDownHandler(EditorKeyDown);
+    LTextEditor.SetFocus;
   end;
 end;
 
@@ -256,6 +257,7 @@ begin
         end;
       end;
   end;
+
   AKey := 0;
   Invalidate;
 end;

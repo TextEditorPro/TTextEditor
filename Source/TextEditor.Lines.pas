@@ -727,18 +727,8 @@ begin
 end;
 
 procedure TTextEditorLines.Grow;
-var
-  LDelta: Integer;
 begin
-  if FCapacity > 64 then
-    LDelta := (FCapacity * 3) div 2
-  else
-  if FCapacity > 8 then
-    LDelta := 16
-  else
-    LDelta :=  4;
-
-  SetCapacity(FCapacity + LDelta);
+  SetCapacity(GrowCollection(FCapacity, FCount + 1));
 end;
 
 procedure TTextEditorLines.Insert(AIndex: Integer; const AValue: string);
@@ -748,6 +738,7 @@ begin
     ListIndexOutOfBounds(AIndex);
 {$ENDIF}
   BeginUpdate;
+
   InsertItem(AIndex, AValue);
 
   if Assigned(FOnInserted) then
@@ -842,6 +833,7 @@ begin
       else
         Flags := [sfExpandedLengthUnknown];
     end;
+
     Inc(FCount, ACount);
 
     if Assigned(OnInserted) then
@@ -988,12 +980,15 @@ begin
   try
     if Assigned(FOnBeforeSetText) then
       FOnBeforeSetText(Self);
+
     Clear;
     FIndexOfLongestLine := -1;
     FCount := AStrings.Count;
+
     if FCount > 0 then
     begin
       SetCapacity(AStrings.Capacity);
+
       for LIndex := 0 to FCount - 1 do
       with FItems^[LIndex] do
       begin
@@ -1005,12 +1000,15 @@ begin
         OriginalLineNumber := LIndex;
       end;
     end;
+
     AStrings.Clear;
 
     if Assigned(FOnInserted) then
       FOnInserted(Self, 0, FCount);
+
     if Assigned(FOnChange) then
       FOnChange(Self);
+
     if Assigned(FOnAfterSetText) then
       FOnAfterSetText(Self);
   finally
@@ -1129,10 +1127,12 @@ begin
             with FItems^[FCount] do
             begin
               Pointer(TextLine) := nil;
+
               if LPValue = LPStartValue then
                 TextLine := ''
               else
                 SetString(TextLine, LPStartValue, LPValue - LPStartValue);
+
               Range := nil;
               ExpandedLength := -1;
               Flags := [sfExpandedLengthUnknown];
@@ -1160,16 +1160,20 @@ begin
             if FShowProgress then
             begin
               Inc(LProgressPosition, LPValue - LPStartValue);
+
               if LProgressPosition > LProgress then
               begin
                 Inc(FProgressPosition);
+
                 if Assigned(FPaintProgress) then
                   FPaintProgress(nil);
+
                 Inc(LProgress, LProgressInc);
               end;
             end;
           end;
         end;
+
         SetLength(LString, 0);
       end;
       { Add the last line, if there was a line break. }
@@ -1346,6 +1350,9 @@ begin
     ReallocMem(FItems, AValue * TEXT_EDITOR_STRING_RECORD_SIZE);
     FCapacity := AValue;
   end;
+
+  if (FCapacity > 0) and not Assigned(FItems) then
+    OutOfMemoryError;
 end;
 
 procedure TTextEditorLines.SetEncoding(const AValue: System.SysUtils.TEncoding);

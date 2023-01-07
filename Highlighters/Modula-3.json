@@ -1,0 +1,387 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "MODULE HelloWorld;\r\n",
+      "\r\n",
+      "(* Hello, World! in Modula-3 *)\r\n",
+      "\r\n",
+      "IMPORT Io;",
+      "\r\n",
+      "BEGIN\r\n",
+      "  IO.Put('Hello, World!\n');\r\n",
+      "END HelloWorld."
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "CaseSensitive": true,
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "(*",
+              "Close": "*)"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "ABS",
+              "ADDRESS",
+              "ADR",
+              "ADRSIZE",
+              "AND",
+              "ANY",
+              "ARRAY",
+              "AS",
+              "BEGIN",
+              "BITS",
+              "BITSIZE",
+              "BOOLEAN",
+              "BRANDED",
+              "BY",
+              "BYTESIZE",
+              "CARDINAL",
+              "CASE",
+              "CEILING",
+              "CHAR",
+              "CONST",
+              "DEC",
+              "DISPOSE",
+              "DIV",
+              "DO",
+              "ELSE",
+              "ELSIF",
+              "END",
+              "EVAL",
+              "EXCEPT",
+              "EXCEPTION",
+              "EXIT",
+              "EXPORTS",
+              "EXTENDED",
+              "FALSE",
+              "FINALLY",
+              "FIRST",
+              "FLOAT",
+              "FLOOR",
+              "FOR",
+              "FROM",
+              "GENERIC",
+              "IF",
+              "IMPORT",
+              "IN",
+              "INC",
+              "INTEGER",
+              "INTERFACE",
+              "ISTYPE",
+              "LAST",
+              "LOCK",
+              "LONGINT",
+              "LONGREAL",
+              "LOOP",
+              "LOOPHOLE",
+              "MAX",
+              "METHODS",
+              "MIN",
+              "MOD",
+              "MODULE",
+              "MUTEX",
+              "NARROW",
+              "NEW",
+              "NIL",
+              "NOT",
+              "NULL",
+              "NUMBER",
+              "OBJECT",
+              "OF",
+              "OR",
+              "ORD",
+              "OVERRIDES",
+              "PROCEDURE",
+              "RAISE",
+              "RAISES",
+              "READONLY",
+              "REAL",
+              "RECORD",
+              "REF",
+              "REFANY",
+              "REPEAT",
+              "RETURN",
+              "REVEAL",
+              "ROOT",
+              "ROUND",
+              "SET",
+              "SUBARRAY",
+              "TEXT",
+              "THEN",
+              "TO",
+              "TRUE",
+              "TRUNC",
+              "TRY",
+              "TYPE",
+              "TYPECASE",
+              "TYPECODE",
+              "UNSAFE",
+              "UNTIL",
+              "UNTRACED",
+              "VAL",
+              "VALUE",
+              "VAR",
+              "WHILE",
+              "WITH"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord",
+              "EscapeChar": "&"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Words": [
+              "IO",
+              "Lex",
+              "Rd",
+              "Wr"
+            ],
+            "Attributes": {
+              "Element": "MethodName",
+              "EscapeChar": "&"
+            }
+          },
+          {
+            "Type": "MethodItalic",
+            "Words": [
+              "BOOLEAN",
+              "CARDINAL",
+              "CHAR",
+              "EXTENDED",
+              "INTEGER",
+              "LONGREAL",
+              "REAL",
+              "TEXT"
+            ],
+            "Attributes": {
+              "Element": "MethodItalic"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "-",
+              "#",
+              "&",
+              "(",
+              ")",
+              "*",
+              ",",
+              ".",
+              "/",
+              ":",
+              ";",
+              "[",
+              "]",
+              "^",
+              "{",
+              "|",
+              "}",
+              "+",
+              "<",
+              "=",
+              ">"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789E",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "EscapeChar": "&"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "(*",
+            "CloseToken": "*)",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "BEGIN",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "IF",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "REPEAT",
+            "CloseToken": "UNTIL"
+          },
+          {
+            "OpenToken": "FOR",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "LOOP",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "WHILE",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "CASE",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "INTERFACE",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "OBJECT",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "TRY",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "TYPECASE",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "CLASS",
+            "CloseToken": "END",
+            "Properties": {
+              "NoSubs": true
+            }
+          },
+          {
+            "OpenToken": "RECORD",
+            "CloseToken": "END",
+            "Properties": {
+              "NoSubs": true
+            }
+          },
+          {
+            "OpenToken": "WITH",
+            "CloseToken": "END"
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "FOR",
+        "CloseToken": "DO"
+      },
+      {
+        "OpenToken": "REPEAT",
+        "CloseToken": "UNTIL"
+      },
+      {
+        "OpenToken": "WHILE",
+        "CloseToken": "DO"
+      },
+      {
+        "OpenToken": "IF",
+        "CloseToken": "THEN"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "(*",
+        "CloseToken": "*)",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

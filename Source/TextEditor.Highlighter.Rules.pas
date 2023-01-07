@@ -37,7 +37,6 @@ type
   public
     constructor Create(const AToken: TTextEditorToken); reintroduce; virtual;
     destructor Destroy; override;
-
     function GetToken(const ACurrentRange: TTextEditorRange; const APLine: PChar; var ARun: Integer; var AToken: TTextEditorToken): Boolean; override;
     property Token: TTextEditorToken read FToken;
   end;
@@ -48,7 +47,6 @@ type
   public
     constructor Create(const AToken: TTextEditorToken); virtual;
     destructor Destroy; override;
-
     function GetToken(const ACurrentRange: TTextEditorRange; const APLine: PChar; var ARun: Integer; var AToken: TTextEditorToken): Boolean; override;
     property Token: TTextEditorToken read FToken;
   end;
@@ -62,7 +60,6 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-
     property Attribute: TTextEditorHighlighterAttribute read FAttribute;
     property Parent: TTextEditorRange read FParent write FParent;
     property Style: string read FStyle;
@@ -74,7 +71,6 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-
     property KeyList: TStringList read FKeyList write FKeyList;
   end;
 
@@ -341,6 +337,8 @@ begin
   ARun := LStartPosition + 1;
 end;
 
+{ TTextEditorDefaultParser }
+
 constructor TTextEditorDefaultParser.Create(const AToken: TTextEditorToken);
 begin
   inherited Create;
@@ -362,6 +360,8 @@ begin
 
   Result := False;
 end;
+
+{ TDelimitersParser }
 
 constructor TDelimitersParser.Create(const AToken: TTextEditorToken);
 begin
@@ -385,6 +385,8 @@ begin
   AToken := Self.Token;
   Result := True;
 end;
+
+{ TTextEditorRule }
 
 constructor TTextEditorRule.Create;
 begin
@@ -575,6 +577,7 @@ end;
 procedure TTextEditorRange.SetCaseSensitive(const AValue: Boolean);
 begin
   FCaseSensitive := AValue;
+
   if AValue then
   begin
     FCaseFunct := CaseNone;
@@ -634,11 +637,13 @@ begin
   Reset;
 
   FDefaultToken := TTextEditorToken.Create(Attribute);
+
   if Assigned(FDefaultTermSymbol) then
   begin
     FDefaultTermSymbol.Free;
     FDefaultTermSymbol := nil;
   end;
+
   FDefaultTermSymbol := TDelimitersParser.Create(TTextEditorToken.Create(Attribute));
   FDefaultSymbols := TTextEditorDefaultParser.Create(TTextEditorToken.Create(Attribute));
 
@@ -714,21 +719,20 @@ begin
     end;
   end;
 
-  if Assigned(FSets) then
-    if FSets.Count > 0 then
-    for LIndex := 0 to 255 do
+  if Assigned(FSets) and (FSets.Count > 0) then
+  for LIndex := 0 to 255 do
+  begin
+    LAnsiChar := AnsiChar(CaseFunct(Char(LIndex)));
+    for LIndex2 := 0 to FSets.Count - 1 do
     begin
-      LAnsiChar := AnsiChar(CaseFunct(Char(LIndex)));
-      for LIndex2 := 0 to FSets.Count - 1 do
-      begin
-        LSet := TTextEditorSet(FSets.List[LIndex2]);
-        if LAnsiChar in LSet.CharSet then
-          if not Assigned(SymbolList[LAnsiChar]) then
-            FSymbolList[LAnsiChar] := TTextEditorParser.Create(LSet)
-          else
-            TTextEditorParser(SymbolList[LAnsiChar]).AddSet(LSet);
-      end;
+      LSet := TTextEditorSet(FSets.List[LIndex2]);
+      if LAnsiChar in LSet.CharSet then
+        if not Assigned(SymbolList[LAnsiChar]) then
+          FSymbolList[LAnsiChar] := TTextEditorParser.Create(LSet)
+        else
+          TTextEditorParser(SymbolList[LAnsiChar]).AddSet(LSet);
     end;
+  end;
 
   for LIndex := 0 to 255 do
   begin
@@ -816,6 +820,8 @@ begin
     end;
   end;
 end;
+
+{ TTextEditorKeyList }
 
 constructor TTextEditorKeyList.Create;
 begin

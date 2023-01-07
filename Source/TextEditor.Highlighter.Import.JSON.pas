@@ -41,7 +41,7 @@ implementation
 
 uses
   System.TypInfo, System.UITypes, Vcl.Dialogs, Vcl.Forms, Vcl.Graphics, Vcl.GraphUtil, TextEditor.Consts,
-  TextEditor.Highlighter.Token, TextEditor.HighlightLine, TextEditor.Language, TextEditor.Types, TextEditor.Utils;
+  TextEditor.Highlighter.Token, TextEditor.HighlightLine, TextEditor.Language, TextEditor.Types;
 
 type
   TElement = record
@@ -426,8 +426,10 @@ begin
   begin
     AKeyList.TokenType := StrToRangeType(AKeyListObject['Type'].Value);
     LWordArray := AKeyListObject.ValueArray['Words'];
+
     for LIndex := 0 to LWordArray.Count - 1 do
       AKeyList.KeyList.Add(LWordArray.ValueString[LIndex]);
+
     ImportAttributes(AKeyList.Attribute, AKeyListObject['Attributes'].ObjectValue, AElementPrefix);
   end;
 end;
@@ -802,15 +804,18 @@ begin
         BeginWithBreakChar := LMemberObject.ValueBoolean['BeginWithBreakChar'];
 
         LSkipIfFoundAfterOpenTokenArray := LMemberObject['SkipIfFoundAfterOpenToken'].ArrayValue;
+
         if LSkipIfFoundAfterOpenTokenArray.Count > 0 then
         begin
           SkipIfFoundAfterOpenTokenArrayCount := LSkipIfFoundAfterOpenTokenArray.Count;
+
           for LIndex2 := 0 to SkipIfFoundAfterOpenTokenArrayCount - 1 do
             SkipIfFoundAfterOpenTokenArray[LIndex2] := LSkipIfFoundAfterOpenTokenArray.Items[LIndex2].Value;
         end;
 
         if LMemberObject.Contains('BreakCharFollows') then
           BreakCharFollows := LMemberObject.ValueBoolean['BreakCharFollows'];
+
         BreakIfNotFoundBeforeNextRegion := LMemberObject['BreakIfNotFoundBeforeNextRegion'].Value;
         OpenTokenEnd := LMemberObject['OpenTokenEnd'].Value;
         ShowGuideLine := StrToBoolDef(LMemberObject['ShowGuideLine'].Value, True);

@@ -28,11 +28,11 @@ type
 
   PTextEditorStringRecord = ^TTextEditorStringRecord;
   TTextEditorStringRecord = record
-    Flags: TTextEditorStringFlags;
     ExpandedLength: Integer;
+    Flags: TTextEditorStringFlags;
+    OriginalLineNumber: Integer;
     Range: TTextEditorLinesRange;
     TextLine: string;
-    OriginalLineNumber: Integer;
   end;
 
   TTextEditorArrayOfString = array of string;
@@ -171,7 +171,7 @@ type
   TTextEditorSearchChanges = (scRefresh, scSearch, scEngineUpdate, scInSelectionActive, scVisible);
 
   TTextEditorSearchOption = (soBeepIfStringNotFound, soCaseSensitive, soEntireScope, soHighlightResults,
-    soSearchOnTyping, soShowSearchStringNotFound, soShowSearchMatchNotFound, soWholeWordsOnly,
+    soIgnoreComments, soSearchOnTyping, soShowSearchStringNotFound, soShowSearchMatchNotFound, soWholeWordsOnly,
     soWrapAround);
   TTextEditorSearchOptions = set of TTextEditorSearchOption;
 
@@ -261,10 +261,11 @@ type
   TTextEditorUndoOptions = set of TTextEditorUndoOption;
 
   TTextEditorChangeReason = (crInsert, crPaste, crDragDropInsert, crDelete, crLineBreak, crIndent, crUnindent, crCaret,
-    crSelection, crNothing, crGroupBreak);
+    crMultiCaret, crSelection, crNothing, crGroupBreak);
 
   { Case }
-  TTextEditorCase = (cNone=-1, cUpper=0, cLower=1, cAlternating=2, cSentence=3, cTitle=4, cOriginal=5);
+  TTextEditorCase = (cNone=-1, cUpper=0, cLower=1, cAlternating=2, cSentence=3, cTitle=4, cOriginal=5, cKeywordsUpper=6,
+    cKeywordsLower=7, cKeywordsTitle=8);
 
   { Trim }
   TTextEditorTrimStyle = (tsBoth, tsLeft, tsRight);

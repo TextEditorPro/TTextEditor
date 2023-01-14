@@ -1527,9 +1527,6 @@ begin
   FLeftMargin.OnChange := LeftMarginChanged;
   FLeftMarginCharWidth := FPaintHelper.CharWidth;
   FLeftMarginWidth := GetLeftMarginWidth;
-  { Update character constraints }
-  SizeOrFontChanged;
-  TabsChanged(nil);
   { Highlight line }
   FHighlightLine := TTextEditorHighlightLine.Create(Self);
   { Highlighter }
@@ -1538,6 +1535,9 @@ begin
   { Mouse wheel scroll cursors }
   for LIndex := 0 to 7 do
     FMouse.ScrollCursors[LIndex] := LoadCursor(HInstance, PChar(TResourceBitmap.MouseMoveScroll + IntToStr(LIndex)));
+  { Update character constraints }
+  SizeOrFontChanged;
+  TabsChanged(nil);
 {$IFDEF ALPHASKINS}
   FBoundLabel := TsBoundLabel.Create(Self, FSkinData);
 {$ENDIF}
@@ -2308,7 +2308,7 @@ var
   LEnd: Integer;
 begin
   LPositionY := ATextPosition.Line;
-  if Assigned(FHighlighter) and (LPositionY >= 0) and (LPositionY < FLines.Count) then
+  if (LPositionY >= 0) and (LPositionY < FLines.Count) then
   begin
     LLine := FLines.Items^[LPositionY].TextLine;
 
@@ -2652,7 +2652,7 @@ var
 begin
   Result := trNotFound;
 
-  if not Assigned(FHighlighter) then
+  if not FHighlighter.Loaded then
     Exit;
 
   LTextPosition := ViewToTextPosition(AViewPosition);
@@ -3847,11 +3847,10 @@ begin
   if not FCodeFolding.Visible or FCodeFolding.TextFolding.Active then
     Exit;
 
-  if Assigned(FHighlighter) and (Length(FHighlighter.Comments.BlockComments) = 0) and
-    (Length(FHighlighter.Comments.LineComments) = 0) then
+  if (Length(FHighlighter.Comments.BlockComments) = 0) and (Length(FHighlighter.Comments.LineComments) = 0) then
     Exit;
 
-  if Assigned(FHighlighter) then
+  if FHighlighter.Loaded then
   begin
     LTextPosition := FPosition.Text;
 
@@ -3922,11 +3921,10 @@ var
 begin
   Result := False;
 
-  if not FCodeFolding.Visible or FCodeFolding.TextFolding.Active or
-    Assigned(FHighlighter) and (Length(FHighlighter.CodeFoldingRegions) = 0) then
+  if not FCodeFolding.Visible or FCodeFolding.TextFolding.Active or (Length(FHighlighter.CodeFoldingRegions) = 0) then
     Exit;
 
-  if Assigned(FHighlighter) then
+  if FHighlighter.Loaded then
   begin
     LCaretPosition := FPosition.Text;
 
@@ -3997,8 +3995,7 @@ var
 begin
   Result := False;
 
-  if not FCodeFolding.Visible or FCodeFolding.TextFolding.Active or
-    Assigned(FHighlighter) and (Length(FHighlighter.CodeFoldingRegions) = 0) then
+  if not FCodeFolding.Visible or FCodeFolding.TextFolding.Active or (Length(FHighlighter.CodeFoldingRegions) = 0) then
     Exit;
 
   LCaretPosition := ATextPosition;
@@ -4027,7 +4024,7 @@ begin
   if LPLine^ = TControlCharacters.Null then
     Exit;
 
-  if Assigned(FHighlighter) then
+  if FHighlighter.Loaded then
   begin
     LLength := Length(FHighlighter.CodeFoldingRegions);
     LIndex1 := 0;
@@ -5373,6 +5370,9 @@ begin
         end;
       end;
     end;
+
+    if FSearch.Enabled and not FSearch.SearchText.IsEmpty and (Pos(FSearch.SearchText, LLineText) > 0) then
+      SearchAll;
   end;
 
   if FSyncEdit.Visible then
@@ -9602,7 +9602,7 @@ var
   LScrollPageWidth, LVisibleLineCount: Integer;
   LWidthChanged: Boolean;
 begin
-  if not Assigned(FHighlighter) or Assigned(FHighlighter) and FHighlighter.Loading then
+  if FHighlighter.Loading then
     Exit;
 
   if Visible and HandleAllocated and (FPaintHelper.CharWidth <> 0) and FState.CanChangeSize then
@@ -11950,7 +11950,7 @@ begin
   if Assigned(FEvents.OnLinesDeleted) then
     FEvents.OnLinesDeleted(Self, LIndex, ACount);
 
-  if Assigned(FHighlighter) then
+  if FHighlighter.Loaded then
   begin
     LIndex := Max(LIndex, 1);
     if FLines.Count > 0 then
@@ -12006,7 +12006,7 @@ begin
       FHighlighter.SetOption(hoExecuteBeforePrepare, True);
   end;
 
-  if Assigned(FHighlighter) and FHighlighter.Loaded and (FLines.Count > 0) then
+  if FHighlighter.Loaded and (FLines.Count > 0) then
   begin
     LLastScan := AIndex;
     repeat
@@ -12033,15 +12033,14 @@ begin
     UpdateSpellCheckItems(AIndex, 0);
 {$ENDIF}
 
-  if Assigned(Parent) then
-    if Assigned(FHighlighter) and (FLines.Count > 0) then
-    begin
-      LIndex := AIndex;
-      repeat
-        LIndex := ScanHighlighterRangesFrom(LIndex);
-        Inc(LIndex);
-      until LIndex >= AIndex + ACount;
-    end;
+  if FHighlighter.Loaded and (FLines.Count > 0) then
+  begin
+    LIndex := AIndex;
+    repeat
+      LIndex := ScanHighlighterRangesFrom(LIndex);
+      Inc(LIndex);
+    until LIndex >= AIndex + ACount;
+  end;
 
   if Assigned(FEvents.OnLinesPutted) then
     FEvents.OnLinesPutted(Self, AIndex, ACount);
@@ -14510,12 +14509,10 @@ var
     else
     begin
       Result := FColors.EditorBackground;
-      if Assigned(FHighlighter) then
-      begin
-        LHighlighterAttribute := FHighlighter.RangeAttribute;
-        if Assigned(LHighlighterAttribute) and (LHighlighterAttribute.Background <> TColors.SysNone) then
-          Result := LHighlighterAttribute.Background;
-      end;
+
+      LHighlighterAttribute := FHighlighter.RangeAttribute;
+      if Assigned(LHighlighterAttribute) and (LHighlighterAttribute.Background <> TColors.SysNone) then
+        Result := LHighlighterAttribute.Background;
     end;
   end;
 
@@ -17453,7 +17450,7 @@ end;
 
 function TCustomTextEditor.IsCommentChar(const AChar: Char): Boolean;
 begin
-  Result := Assigned(FHighlighter) and (AChar in FHighlighter.Comments.Chars);
+  Result := FHighlighter.Loaded and (AChar in FHighlighter.Comments.Chars);
 end;
 
 function TCustomTextEditor.IsTextPositionInSelection(const ATextPosition: TTextEditorTextPosition): Boolean;
@@ -19835,7 +19832,7 @@ end;
 
 procedure TCustomTextEditor.LeftMarginChanged(ASender: TObject); //FI:O804 Method parameter is declared but never used
 begin
-  if not (csLoading in ComponentState) and Assigned(FHighlighter) and not FHighlighter.Loading then
+  if not (csLoading in ComponentState) and not FHighlighter.Loading then
     DoLeftMarginAutoSize
 end;
 

@@ -1,0 +1,48 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{A0056326-3B5E-42A7-B72B-8036D1FF1DF6}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="TextEditor.CBuilder.Alexandria.Runtime.cbproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="TextEditor.CBuilder.Alexandria.Designtime.cbproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="TextEditor_CBuilder_Alexandria_Runtime">
+        <MSBuild Projects="TextEditor.CBuilder.Alexandria.Runtime.cbproj"/>
+    </Target>
+    <Target Name="TextEditor_CBuilder_Alexandria_Runtime:Clean">
+        <MSBuild Projects="TextEditor.CBuilder.Alexandria.Runtime.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TextEditor_CBuilder_Alexandria_Runtime:Make">
+        <MSBuild Projects="TextEditor.CBuilder.Alexandria.Runtime.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="TextEditor_CBuilder_Alexandria_Designtime">
+        <MSBuild Projects="TextEditor.CBuilder.Alexandria.Designtime.cbproj"/>
+    </Target>
+    <Target Name="TextEditor_CBuilder_Alexandria_Designtime:Clean">
+        <MSBuild Projects="TextEditor.CBuilder.Alexandria.Designtime.cbproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TextEditor_CBuilder_Alexandria_Designtime:Make">
+        <MSBuild Projects="TextEditor.CBuilder.Alexandria.Designtime.cbproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="TextEditor_CBuilder_Alexandria_Runtime;TextEditor_CBuilder_Alexandria_Designtime"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="TextEditor_CBuilder_Alexandria_Runtime:Clean;TextEditor_CBuilder_Alexandria_Designtime:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="TextEditor_CBuilder_Alexandria_Runtime:Make;TextEditor_CBuilder_Alexandria_Designtime:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

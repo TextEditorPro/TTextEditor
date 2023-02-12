@@ -431,12 +431,7 @@ type
     function GetViewLineNumber(const AViewLineNumber: Integer): Integer;
     function GetViewTextLineNumber(const AViewLineNumber: Integer): Integer;
     function GetVisibleChars(const ARow: Integer; const ALineText: string = ''): Integer;
-    function IsCommentAtCaretPosition: Boolean;
-    function IsKeywordAtCaretPosition(const APOpenKeyWord: PBoolean = nil): Boolean;
-    function IsKeywordAtCaretPositionOrAfter(const ATextPosition: TTextEditorTextPosition): Boolean;
-    function IsMultiEditCaretFound(const ALine: Integer): Boolean;
     function IsTextPositionInSearchBlock(const ATextPosition: TTextEditorTextPosition): Boolean;
-    function IsWordSelected: Boolean;
     function LeftSpaceCount(const ALine: string; const AWantTabs: Boolean = False): Integer;
     function NextWordPosition(const ATextPosition: TTextEditorTextPosition): TTextEditorTextPosition; overload;
     function NextWordPosition: TTextEditorTextPosition; overload;
@@ -741,9 +736,14 @@ type
     function GetPreviousBreakPosition(const ATextPosition: TTextEditorTextPosition): TTextEditorTextPosition;
     function GetTextPositionOfMouse(out ATextPosition: TTextEditorTextPosition): Boolean;
     function GetWordAtPixels(const X, Y: Integer): string;
+    function IsCommentAtCaretPosition: Boolean;
     function IsCommentChar(const AChar: Char): Boolean;
+    function IsKeywordAtCaretPosition(const APOpenKeyWord: PBoolean = nil): Boolean;
+    function IsKeywordAtCaretPositionOrAfter(const ATextPosition: TTextEditorTextPosition): Boolean;
+    function IsMultiEditCaretFound(const ALine: Integer): Boolean;
     function IsTextPositionInSelection(const ATextPosition: TTextEditorTextPosition): Boolean;
     function IsWordBreakChar(const AChar: Char): Boolean; inline;
+    function IsWordSelected: Boolean;
     function PixelsToTextPosition(const X, Y: Integer): TTextEditorTextPosition;
     function ReplaceSelectedText(const AReplaceText: string; const ASearchText: string; const AAction: TTextEditorReplaceTextAction = rtaReplace): Boolean;
     function ReplaceText(const ASearchText: string; const AReplaceText: string; const APageIndex: Integer = -1): Integer;
@@ -772,6 +772,7 @@ type
     procedure AddMouseUpHandler(AHandler: TMouseEvent);
     procedure AddMultipleCarets(const AViewPosition: TTextEditorViewPosition);
     procedure AfterConstruction; override;
+    procedure Assign(ASource: TPersistent); override;
     procedure BeginUndoBlock;
     procedure BeginUpdate;
     procedure ChainEditor(const AEditor: TCustomTextEditor);
@@ -2877,30 +2878,30 @@ begin
   if LCursorPoint.Y < LTopY then
   begin
     if LCursorPoint.X < LLeftX then
-      Exit(TMouseWheel.ScrollCursor.NorthWest)
+      Exit(TMouseWheelScrollCursors.NorthWest)
     else
     if (LCursorPoint.X >= LLeftX) and (LCursorPoint.X <= LRightX) then
-      Exit(TMouseWheel.ScrollCursor.North)
+      Exit(TMouseWheelScrollCursors.North)
     else
-      Exit(TMouseWheel.ScrollCursor.NorthEast)
+      Exit(TMouseWheelScrollCursors.NorthEast)
   end;
 
   if LCursorPoint.Y > LBottomY then
   begin
     if LCursorPoint.X < LLeftX then
-      Exit(TMouseWheel.ScrollCursor.SouthWest)
+      Exit(TMouseWheelScrollCursors.SouthWest)
     else
     if (LCursorPoint.X >= LLeftX) and (LCursorPoint.X <= LRightX) then
-      Exit(TMouseWheel.ScrollCursor.South)
+      Exit(TMouseWheelScrollCursors.South)
     else
-      Exit(TMouseWheel.ScrollCursor.SouthEast)
+      Exit(TMouseWheelScrollCursors.SouthEast)
   end;
 
   if LCursorPoint.X < LLeftX then
-    Exit(TMouseWheel.ScrollCursor.West);
+    Exit(TMouseWheelScrollCursors.West);
 
   if LCursorPoint.X > LRightX then
-    Exit(TMouseWheel.ScrollCursor.East);
+    Exit(TMouseWheelScrollCursors.East);
 end;
 
 function TCustomTextEditor.GetScrollPageWidth: Integer;
@@ -4761,18 +4762,18 @@ begin
 
     LCursorIndex := GetMouseScrollCursorIndex;
     case LCursorIndex of
-      TMouseWheel.ScrollCursor.NorthWest, TMouseWheel.ScrollCursor.West, TMouseWheel.ScrollCursor.SouthWest:
+      TMouseWheelScrollCursors.NorthWest, TMouseWheelScrollCursors.West, TMouseWheelScrollCursors.SouthWest:
         FScrollHelper.Delta.X := (APoint.X - FMouse.ScrollingPoint.X) div FPaintHelper.CharWidth - 1;
-      TMouseWheel.ScrollCursor.NorthEast, TMouseWheel.ScrollCursor.East, TMouseWheel.ScrollCursor.SouthEast:
+      TMouseWheelScrollCursors.NorthEast, TMouseWheelScrollCursors.East, TMouseWheelScrollCursors.SouthEast:
         FScrollHelper.Delta.X := (APoint.X - FMouse.ScrollingPoint.X) div FPaintHelper.CharWidth + 1;
     else
       FScrollHelper.Delta.X := 0;
     end;
 
     case LCursorIndex of
-      TMouseWheel.ScrollCursor.NorthWest, TMouseWheel.ScrollCursor.North, TMouseWheel.ScrollCursor.NorthEast:
+      TMouseWheelScrollCursors.NorthWest, TMouseWheelScrollCursors.North, TMouseWheelScrollCursors.NorthEast:
         FScrollHelper.Delta.Y := (APoint.Y - FMouse.ScrollingPoint.Y) div GetLineHeight - 1;
-      TMouseWheel.ScrollCursor.SouthWest, TMouseWheel.ScrollCursor.South, TMouseWheel.ScrollCursor.SouthEast:
+      TMouseWheelScrollCursors.SouthWest, TMouseWheelScrollCursors.South, TMouseWheelScrollCursors.SouthEast:
         FScrollHelper.Delta.Y := (APoint.Y - FMouse.ScrollingPoint.Y) div GetLineHeight + 1;
     else
       FScrollHelper.Delta.Y := 0;
@@ -11588,7 +11589,7 @@ begin
   end;
 
   if FCaret.MultiEdit.Active and Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) then
-    if AKey in [TControlCharacters.Keys.CarriageReturn, TControlCharacters.Keys.Escape] then
+    if AKey in [TControlCharacterKeys.CarriageReturn, TControlCharacterKeys.Escape] then
     begin
       FreeMultiCarets;
 
@@ -11598,7 +11599,7 @@ begin
 
   if FSyncEdit.Active then
   begin
-    if FSyncEdit.Visible and (AKey in [TControlCharacters.Keys.CarriageReturn, TControlCharacters.Keys.Escape]) then
+    if FSyncEdit.Visible and (AKey in [TControlCharacterKeys.CarriageReturn, TControlCharacterKeys.Escape]) then
     begin
       FSyncEdit.Visible := False;
       AKey := 0;
@@ -12061,11 +12062,73 @@ begin
 {$ENDIF}
 end;
 
+procedure TCustomTextEditor.Assign(ASource: TPersistent);
+begin
+  if Assigned(ASource) and (ASource is TCustomTextEditor) then
+  with ASource as TCustomTextEditor do
+  begin
+    Self.FActiveLine.Assign(FActiveLine);
+    Self.Align := Align;
+    Self.AlignWithMargins := AlignWithMargins;
+    Self.Anchors := Anchors;
+    Self.BorderStyle := BorderStyle;
+    Self.BorderWidth := BorderWidth;
+    Self.FCaret.Assign(FCaret);
+    Self.FCodeFolding.Assign(FCodeFolding);
+    Self.FColors.Assign(FColors);
+    Self.FCompletionProposal.Assign(FCompletionProposal);
+    Self.Constraints.Assign(Constraints);
+    Self.Ctl3d := Ctl3d;
+    Self.Cursor := Cursor;
+    Self.CustomHint := CustomHint;
+    Self.Enabled := Enabled;
+    Self.FFonts.Assign(FFonts);
+    Self.FFontStyles.Assign(FFontStyles);
+    Self.FHighlightLine.Assign(FHighlightLine);
+    Self.FLeftMargin.Assign(FLeftMargin);
+    Self.LineSpacing := LineSpacing;
+    Self.Margins.Assign(Margins);
+    Self.FMatchingPairs.Assign(FMatchingPairs);
+    Self.FMinimap.Assign(FMinimap);
+    Self.FOptions := FOptions;
+    Self.OvertypeMode := OvertypeMode;
+    Self.ParentColor := ParentColor;
+    Self.ParentCtl3D := ParentCtl3D;
+    Self.ParentFont := ParentFont;
+    Self.ParentCustomHint := ParentCustomHint;
+    Self.ParentShowHint := ParentShowHint;
+    Self.PopupMenu := PopupMenu;
+    Self.ReadOnly := ReadOnly;
+    Self.FReplace.Assign(FReplace);
+    Self.FRightMargin.Assign(FRightMargin);
+    Self.FRuler.Assign(FRuler);
+    Self.FScroll.Assign(FScroll);
+    Self.FSearch.Assign(FSearch);
+    Self.FSelection.Assign(FSelection);
+    Self.ShowHint := ShowHint;
+    Self.FSpecialChars.Assign(FSpecialChars);
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+    Self.SpellCheck := SpellCheck;
+{$ENDIF}
+    Self.StyleElements := StyleElements;
+    Self.FSyncEdit.Assign(FSyncEdit);
+    Self.FTabs.Assign(FTabs);
+    Self.TabStop := TabStop;
+    Self.Touch.Assign(Touch);
+    Self.FUndo.Assign(FUndo);
+    Self.FUnknownChars.Assign(FUnknownChars);
+    Self.Visible := Visible;
+    Self.WantReturns := WantReturns;
+    Self.FWordWrap.Assign(FWordWrap);
+  end
+  else
+    inherited Assign(ASource);
+end;
+
 procedure TCustomTextEditor.Loaded;
 begin
   inherited Loaded;
 
-  // FFonts.SaveOriginalFontHeights;
   DoLeftMarginAutoSize;
 {$IFDEF ALPHASKINS}
   FSkinData.Loaded(False);
@@ -14306,20 +14369,20 @@ begin
           with FLines.Items^[ALine - 1] do
           begin
             if sfLineBreakCR in Flags then
-              LPilcrow := TControlCharacters.Names.CarriageReturn;
+              LPilcrow := TControlCharacterNames.CarriageReturn;
 
             if sfLineBreakLF in Flags then
-              LPilcrow := LPilcrow + TControlCharacters.Names.LineFeed;
+              LPilcrow := LPilcrow + TControlCharacterNames.LineFeed;
           end;
 
           if LPilcrow = '' then
             if FLines.LineBreak = lbCRLF then
-              LPilcrow := TControlCharacters.Names.CarriageReturn + TControlCharacters.Names.LineFeed
+              LPilcrow := TControlCharacterNames.CarriageReturn + TControlCharacterNames.LineFeed
             else
             if FLines.LineBreak = lbLF then
-              LPilcrow := TControlCharacters.Names.LineFeed
+              LPilcrow := TControlCharacterNames.LineFeed
             else
-              LPilcrow := TControlCharacters.Names.CarriageReturn;
+              LPilcrow := TControlCharacterNames.CarriageReturn;
 
           LCharRect.Width := LCharRect.Width * Length(LPilcrow) + 2;
           LCharRect.Top := LCharRect.Top + 2;

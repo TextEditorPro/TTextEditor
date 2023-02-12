@@ -33,6 +33,7 @@ begin
   inherited;
 
   FIndicator := TTextEditorGlyph.Create(HInstance, TResourceBitmap.ActiveLine, TColors.Fuchsia);
+
   FIndicator.Visible := False;
   FVisible := True;
 end;
@@ -40,6 +41,7 @@ end;
 destructor TTextEditorActiveLine.Destroy;
 begin
   FIndicator.Free;
+  FIndicator := nil;
 
   inherited;
 end;

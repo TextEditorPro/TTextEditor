@@ -542,6 +542,7 @@ begin
             for LIndex := 0 to ARange.AlternativeCloseArrayCount - 1 do
               ARange.AlternativeCloseArray[LIndex] := LArrayValue.Items[LIndex].Value;
           end;
+
           ARange.OpenBeginningOfLine := LPropertiesObject.ValueBoolean['OpenBeginningOfLine'];
         end;
 

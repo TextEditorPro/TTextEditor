@@ -23,8 +23,8 @@
 {$WRITEABLECONST ON}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DEFINE TEXT_EDITOR_SPELL_CHECK}
 {$DEFINE DEBUG}
+{$DEFINE TEXT_EDITOR_SPELL_CHECK}
 {$ENDIF IMPLICITBUILDING}
 {$DESCRIPTION 'TTextEditor control package - runtime'}
 {$RUNONLY}
@@ -64,6 +64,7 @@ contains
   TextEditor.Export.HTML in '..\Source\TextEditor.Export.HTML.pas',
   TextEditor.Fonts in '..\Source\TextEditor.Fonts.pas',
   TextEditor.Glyph in '..\Source\TextEditor.Glyph.pas',
+  TextEditor.HighlightLine in '..\Source\TextEditor.HighlightLine.pas',
   TextEditor.Highlighter in '..\Source\TextEditor.Highlighter.pas',
   TextEditor.Highlighter.Attributes in '..\Source\TextEditor.Highlighter.Attributes.pas',
   TextEditor.Highlighter.Colors in '..\Source\TextEditor.Highlighter.Colors.pas',
@@ -72,11 +73,10 @@ contains
   TextEditor.Highlighter.Import.JSON in '..\Source\TextEditor.Highlighter.Import.JSON.pas',
   TextEditor.Highlighter.Rules in '..\Source\TextEditor.Highlighter.Rules.pas',
   TextEditor.Highlighter.Token in '..\Source\TextEditor.Highlighter.Token.pas',
-  TextEditor.HighlightLine in '..\Source\TextEditor.HighlightLine.pas',
   TextEditor.InternalImage in '..\Source\TextEditor.InternalImage.pas',
   TextEditor.JSONDataObjects in '..\Source\TextEditor.JSONDataObjects.pas',
-  TextEditor.KeyboardHandler in '..\Source\TextEditor.KeyboardHandler.pas',
   TextEditor.KeyCommands in '..\Source\TextEditor.KeyCommands.pas',
+  TextEditor.KeyboardHandler in '..\Source\TextEditor.KeyboardHandler.pas',
   TextEditor.Language in '..\Source\TextEditor.Language.pas',
   TextEditor.LeftMargin in '..\Source\TextEditor.LeftMargin.pas',
   TextEditor.LeftMargin.Bookmarks in '..\Source\TextEditor.LeftMargin.Bookmarks.pas',
@@ -118,9 +118,7 @@ contains
   TextEditor.SpecialChars in '..\Source\TextEditor.SpecialChars.pas',
   TextEditor.SpecialChars.LineBreak in '..\Source\TextEditor.SpecialChars.LineBreak.pas',
   TextEditor.SpecialChars.Selection in '..\Source\TextEditor.SpecialChars.Selection.pas',
-{$IFDEF TEXT_EDITOR_SPELL_CHECK}
   TextEditor.SpellCheck in '..\Source\TextEditor.SpellCheck.pas',
-{$ENDIF}
   TextEditor.StyleHooks in '..\Source\TextEditor.StyleHooks.pas',
   TextEditor.SyncEdit in '..\Source\TextEditor.SyncEdit.pas',
   TextEditor.Tabs in '..\Source\TextEditor.Tabs.pas',
@@ -134,4 +132,3 @@ contains
   TextEditor.WordWrap in '..\Source\TextEditor.WordWrap.pas';
 
 end.
-

@@ -348,6 +348,7 @@ begin
           LDelimiters := FAllDelimiters;
 
         LStartPosition := FRunPosition;
+
         while not (FLine[FRunPosition] in LDelimiters) and (FRunPosition - LStartPosition < 100) do
           Inc(FRunPosition);
       end;
@@ -374,7 +375,7 @@ begin
       begin
         FRange := FRange.Parent;
         FToken := FRange.DefaultToken;
-      end;
+      end
     end;
 
     if Assigned(FToken) and FToken.Temporary then

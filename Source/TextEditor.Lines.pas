@@ -1038,6 +1038,7 @@ begin
   AStream.ReadBuffer(LBuffer, Length(LBuffer));
 
   LEncoding := nil;
+
   if Assigned(AEncoding) then
     LEncoding := AEncoding
   else
@@ -1079,12 +1080,12 @@ begin
           LLength := TMaxValues.BufferSize - LPreambleLength;
           { Find the previous line end }
           while (LLength > 0) and
-            (LBuffer[LPosition + LLength] <> TControlCharacters.Keys.Linefeed) and
-            (LBuffer[LPosition + LLength] <> TControlCharacters.Keys.CarriageReturn) do
+            (LBuffer[LPosition + LLength] <> TControlCharacterKeys.Linefeed) and
+            (LBuffer[LPosition + LLength] <> TControlCharacterKeys.CarriageReturn) do
             Dec(LLength);
           { Include line breaks }
-          while (LBuffer[LPosition + LLength] = TControlCharacters.Keys.Linefeed) or
-            (LBuffer[LPosition + LLength] = TControlCharacters.Keys.CarriageReturn) do
+          while (LBuffer[LPosition + LLength] = TControlCharacterKeys.Linefeed) or
+            (LBuffer[LPosition + LLength] = TControlCharacterKeys.CarriageReturn) do
             Inc(LLength);
 
           if LLength = 0 then

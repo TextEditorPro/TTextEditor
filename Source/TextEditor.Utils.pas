@@ -46,8 +46,7 @@ procedure SetClipboardText(const AText: string; const AHTML: string);
 implementation
 
 uses
-  Winapi.ActiveX, System.Character, System.Generics.Collections, Vcl.ClipBrd, Vcl.Controls,
-  Vcl.Forms, TextEditor.Consts
+  Winapi.ActiveX, System.Character, System.Generics.Collections, Vcl.ClipBrd, Vcl.Controls, Vcl.Forms, TextEditor.Consts
 {$IFDEF ALPHASKINS}, sDialogs{$ELSE}, Vcl.Dialogs{$ENDIF};
 
 const
@@ -297,10 +296,10 @@ begin
 
     Delete(Result, LPosition, Length(TControlCharacters.Tab));
 
+    LCount := ATabWidth;
+
     if AColumns then
-      LCount := ATabWidth - (LPosition - ATabWidth - 1) mod ATabWidth
-    else
-      LCount := ATabWidth;
+      LCount := LCount - (LPosition - ATabWidth - 1) mod ATabWidth;
 
     Insert(StringOfChar(TCharacters.Space, LCount), Result, LPosition);
     Inc(LPosition, LCount);
@@ -316,19 +315,10 @@ end;
 function MiddleColor(const AColor1, AColor2: TColor): TColor;
 var
   LRed, LGreen, LBlue: Byte;
-  LRed1, LGreen1, LBlue1: Byte;
-  LRed2, LGreen2, LBlue2: Byte;
 begin
-  LRed1 := GetRValue(AColor1);
-  LRed2 := GetRValue(AColor2);
-  LGreen1 := GetGValue(AColor1);
-  LGreen2 := GetGValue(AColor2);
-  LBlue1 := GetBValue(AColor1);
-  LBlue2 := GetBValue(AColor2);
-
-  LRed := (LRed1 + LRed2) div 2;
-  LGreen := (LGreen1 + LGreen2) div 2;
-  LBlue := (LBlue1 + LBlue2) div 2;
+  LRed := (GetRValue(AColor1) + GetRValue(AColor2)) div 2;
+  LGreen := (GetGValue(AColor1) + GetGValue(AColor2)) div 2;
+  LBlue := (GetBValue(AColor1) + GetBValue(AColor2)) div 2;
 
   Result := RGB(LRed, LGreen, LBlue);
 end;
@@ -336,6 +326,7 @@ end;
 procedure FreeList(var AList: TList);
 begin
   ClearList(AList);
+
   if Assigned(AList) then
   begin
     AList.Free;
@@ -349,12 +340,14 @@ var
 begin
   if not Assigned(AList) then
     Exit;
+
   for LIndex := AList.Count - 1 downto 0 do
   if Assigned(AList[LIndex]) then
   begin
     TObject(AList[LIndex]).Free;
     AList[LIndex] := nil;
   end;
+
   AList.Clear;
 end;
 
@@ -364,12 +357,14 @@ var
 begin
   SetLength(Result, Length(AValue));
   LIndex2 := 0;
+
   for LIndex := 1 to Length(AValue) do
   if not AValue[LIndex].IsWhiteSpace then
   begin
     Inc(LIndex2);
     Result[LIndex2] := AValue[LIndex];
   end;
+
   SetLength(Result, LIndex2);
 end;
 
@@ -674,6 +669,7 @@ function GetHTMLClipboardFormat: TClipFormat;
 begin
   if CF_HTML = 0 then
     CF_HTML := RegisterClipboardFormat('HTML Format');
+
   Result := CF_HTML;
 end;
 

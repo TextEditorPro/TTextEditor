@@ -112,6 +112,7 @@ end;
 constructor TTextEditorAbstractToken.Create(const AHighlighterAttribute: TTextEditorHighlighterAttribute);
 begin
   Create;
+
   FAttribute := AHighlighterAttribute;
 end;
 
@@ -235,13 +236,15 @@ begin
   inherited Create;
 
   FChar := AChar;
-  FNextNodes := TTextEditorTokenNodeList.Create;
   FToken := nil;
+
+  FNextNodes := TTextEditorTokenNodeList.Create;
 end;
 
 constructor TTextEditorTokenNode.Create(const AChar: Char; const AToken: TTextEditorToken; const ABreakType: TTextEditorBreakType);
 begin
   Create(AChar);
+
   FBreakType := ABreakType;
   FToken := AToken;
 end;

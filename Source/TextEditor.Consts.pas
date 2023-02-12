@@ -125,8 +125,6 @@ type
     Tab = #9;
     UnitSeparator = #31;
     VerticalTab = #11;
-    Names: TControlCharacterNames = ();
-    Keys: TControlCharacterKeys = ();
     AsSet = [#1..#31] - [CarriageReturn, Linefeed, Null, Substitute, Tab];
   end;
 
@@ -182,7 +180,6 @@ type
   TMouseWheel = record
   const
     Divisor = 120;
-    ScrollCursor: TMouseWheelScrollCursors = ();
   end;
 
   TResourceBitmap = record

@@ -76,17 +76,16 @@
         <DCC_E>false</DCC_E>
         <DCC_Inlining>auto</DCC_Inlining>
         <DCC_WIDECHAR_REDUCED>false</DCC_WIDECHAR_REDUCED>
+        <DCC_UnitSearchPath>..\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_Namespace>Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_Keys>CompanyName=;FileDescription=TTexteditor;FileVersion=1.0.0.0;InternalName=;LegalCopyright=Copyright © 2021 Lasse Markus Rautiainen. All rights reserved.;LegalTrademarks=;OriginalFilename=;ProductName=TTextEditor;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <VerInfo_Keys>CompanyName=;FileDescription=TTexteditor;FileVersion=1.0.0.0;InternalName=;LegalCopyright=Copyright © 2023 Lasse Markus Rautiainen. All rights reserved.;LegalTrademarks=;OriginalFilename=;ProductName=TTextEditor;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <DCC_Namespace>Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;$(DCC_Namespace)</DCC_Namespace>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Keys>CompanyName=;FileDescription=TTextEditor;FileVersion=1.0.0.0;InternalName=;LegalCopyright=Copyright © 2021 Lasse Markus Rautiainen. All rights reserved.;LegalTrademarks=;OriginalFilename=;ProductName=TTextEditor;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
@@ -97,14 +96,13 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=TTexteditor;FileVersion=1.0.0.0;InternalName=;LegalCopyright=Copyright © 2021 Lasse Markus Rautiainen. All rights reserved.;LegalTrademarks=;OriginalFilename=;ProductName=TTextEditor;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win64)'!=''">
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
         <VerInfo_Locale>1033</VerInfo_Locale>
+        <VerInfo_Keys>CompanyName=;FileDescription=TTextEditor;FileVersion=1.0.0.0;InternalName=;LegalCopyright=Copyright © 2021 Lasse Markus Rautiainen. All rights reserved.;LegalTrademarks=;OriginalFilename=;ProductName=TTextEditor;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <DCC_Define>DEBUG;TEXT_EDITOR_SPELL_CHECK;$(DCC_Define)</DCC_Define>
@@ -113,15 +111,15 @@
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <DCC_Inlining>auto</DCC_Inlining>
         <VerInfo_Keys>CompanyName=;FileDescription=TTexteditor;FileVersion=1.0.0.0;InternalName=;LegalCopyright=Copyright © 2021 Lasse Markus Rautiainen. All rights reserved.;LegalTrademarks=;OriginalFilename=;ProductName=TTextEditor;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
+        <DCC_UnitSearchPath>C:\Delphi\Components\AlphaSkins;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win64)'!=''">
         <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
+        <VerInfo_Keys>CompanyName=;FileDescription=TTextEditor;FileVersion=1.0.0.0;InternalName=;LegalCopyright=Copyright © 2021 Lasse Markus Rautiainen. All rights reserved.;LegalTrademarks=;OriginalFilename=;ProductName=TTextEditor;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
     </PropertyGroup>
     <ItemGroup>
         <DelphiCompile Include="$(MainSource)">
@@ -157,6 +155,7 @@
         <DCCReference Include="..\Source\TextEditor.Export.HTML.pas"/>
         <DCCReference Include="..\Source\TextEditor.Fonts.pas"/>
         <DCCReference Include="..\Source\TextEditor.Glyph.pas"/>
+        <DCCReference Include="..\Source\TextEditor.HighlightLine.pas"/>
         <DCCReference Include="..\Source\TextEditor.Highlighter.pas"/>
         <DCCReference Include="..\Source\TextEditor.Highlighter.Attributes.pas"/>
         <DCCReference Include="..\Source\TextEditor.Highlighter.Colors.pas"/>
@@ -165,11 +164,10 @@
         <DCCReference Include="..\Source\TextEditor.Highlighter.Import.JSON.pas"/>
         <DCCReference Include="..\Source\TextEditor.Highlighter.Rules.pas"/>
         <DCCReference Include="..\Source\TextEditor.Highlighter.Token.pas"/>
-        <DCCReference Include="..\Source\TextEditor.HighlightLine.pas"/>
         <DCCReference Include="..\Source\TextEditor.InternalImage.pas"/>
         <DCCReference Include="..\Source\TextEditor.JSONDataObjects.pas"/>
-        <DCCReference Include="..\Source\TextEditor.KeyboardHandler.pas"/>
         <DCCReference Include="..\Source\TextEditor.KeyCommands.pas"/>
+        <DCCReference Include="..\Source\TextEditor.KeyboardHandler.pas"/>
         <DCCReference Include="..\Source\TextEditor.Language.pas"/>
         <DCCReference Include="..\Source\TextEditor.LeftMargin.pas"/>
         <DCCReference Include="..\Source\TextEditor.LeftMargin.Bookmarks.pas"/>
@@ -271,8 +269,8 @@
                     <VersionInfoKeys Name="Comments"/>
                 </VersionInfoKeys>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k270.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp270.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k280.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp280.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Platforms>

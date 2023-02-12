@@ -2,6 +2,8 @@
 
 interface
 
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+
 uses
   Winapi.Windows, System.Classes, System.SysUtils, System.Types, System.UITypes, TextEditor.Types;
 
@@ -41,7 +43,11 @@ type
 
   ETextEditorSpellCheckException = class(Exception);
 
+{$ENDIF}
+
 implementation
+
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
 
 uses
   System.AnsiStrings, TextEditor.Language;
@@ -407,5 +413,7 @@ finalization
 
   if SpellCheckDLLHandle <> 0 then
     FreeLibrary(SpellCheckDLLHandle);
+
+{$ENDIF}
 
 end.

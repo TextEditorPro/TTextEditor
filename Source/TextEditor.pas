@@ -1396,6 +1396,7 @@ begin
   { Lines }
   FLines := TTextEditorLines.Create(Self);
   FLines.PaintProgress := PaintProgress;
+  FLines.Clear;
   FOriginal.Lines := FLines;
   with FLines do
   begin

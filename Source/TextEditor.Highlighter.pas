@@ -382,6 +382,7 @@ begin
       FTemporaryTokens.Add(FToken);
   end
   else
+  if FLine <> '' then
     Inc(FRunPosition);
 
   if FBeginningOfLine and (FRunPosition >= 1) and not (FLine[FRunPosition - 1] in TCharacterSets.AbsoluteDelimiters) then

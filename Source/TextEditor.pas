@@ -1170,7 +1170,7 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     procedure DragDrop(ASource: TObject; X, Y: Integer); override;
-    procedure ExecuteCommand(const ACommand: TTextEditorCommand; const AChar: Char; const AData: pointer); override;
+    procedure ExecuteCommand(const ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer); override;
     procedure LoadMemo;
     procedure Notification(AComponent: TComponent; AOperation: TOperation); override;
   end;
@@ -1396,7 +1396,6 @@ begin
   { Lines }
   FLines := TTextEditorLines.Create(Self);
   FLines.PaintProgress := PaintProgress;
-  FLines.Clear;
   FOriginal.Lines := FLines;
   with FLines do
   begin
@@ -21106,7 +21105,7 @@ begin
       FBeginEdit := True;
 end;
 
-procedure TCustomDBTextEditor.ExecuteCommand(const ACommand: TTextEditorCommand; const AChar: Char; const AData: pointer);
+procedure TCustomDBTextEditor.ExecuteCommand(const ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer);
 begin
   if (ACommand = TKeyCommands.Char) and (AChar = TControlCharacters.Escape) then
     FDataLink.Reset

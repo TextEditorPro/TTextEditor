@@ -1875,6 +1875,7 @@ begin
   Result := nil;
 
   LCodeFoldingRange := CodeFoldingRangeForLine(ALine);
+
   if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsable then
     Result := LCodeFoldingRange;
 end;
@@ -5512,6 +5513,7 @@ begin
     TextPosition := LTextPosition;
     FPosition.SelectionBegin := LSelectionBeginPosition;
     FPosition.SelectionEnd := LSelectionEndPosition;
+
     RescanCodeFoldingRanges;
     ScanMatchingPair;
   end;
@@ -6513,6 +6515,7 @@ begin
     AutoCursor;
 
     DoInsertText(GetClipboardText);
+
     RescanCodeFoldingRanges;
     EnsureCursorPositionVisible;
   end;
@@ -16450,6 +16453,7 @@ begin
   begin
     LLine := GetViewTextLineNumber(LViewPosition.Row);
     LFoldRange := CodeFoldingCollapsableFoldRangeForLine(LLine);
+
     if not Assigned(LFoldRange) then
       LFoldRange := CodeFoldingFoldRangeForLineTo(LLine);
 

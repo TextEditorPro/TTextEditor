@@ -661,8 +661,6 @@ var
   LEditor: TCustomTextEditor;
   LEditorIsEmpty: Boolean;
 begin
-  Clear;
-
   LEditor := FEditor as TCustomTextEditor;
   LEditorIsEmpty := LEditor.Text.IsEmpty;
 
@@ -680,7 +678,10 @@ begin
     SetOption(hoExecuteBeforePrepare, True);
 
   if not LEditorIsEmpty then
+  begin
     LEditor.RescanHighlighterRanges;
+    LEditor.RescanCodeFoldingRanges;
+  end;
 
   FLoading := False;
   FLoaded := True;

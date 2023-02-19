@@ -17,6 +17,7 @@ type
     procedure ImportCodeFoldingFoldRegion(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
     procedure ImportCodeFoldingOptions(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
     procedure ImportCodeFoldingSkipRegion(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
+    procedure ImportCodeFoldingVoidElements(const ACodeFoldingObject: TJSONObject);
     procedure ImportColorTheme(const AThemeObject: TJSONObject);
     procedure ImportCompletionProposal(const ACompletionProposalObject: TJSONObject);
     procedure ImportEditorProperties(const AEditorObject: TJSONObject);
@@ -621,6 +622,7 @@ begin
     Exit;
 
   LSkipRegionArray := ACompletionProposalObject['SkipRegion'].ArrayValue;
+
   for LIndex := 0 to LSkipRegionArray.Count - 1 do
   begin
     LJSONDataValue := LSkipRegionArray.Items[LIndex];
@@ -628,13 +630,16 @@ begin
     if hoMultiHighlighter in FHighlighter.Options then
     begin
       LName := LJSONDataValue.ObjectValue['File'].Value;
+
       if LName <> '' then
       begin
         LEditor := FHighlighter.Editor as TCustomTextEditor;
         LFileStream := LEditor.CreateHighlighterStream(LName);
+
         if Assigned(LFileStream) then
         begin
           LJSONObject := TJSONObject.ParseFromStream(LFileStream) as TJSONObject;
+
           if Assigned(LJSONObject) then
           try
             if LJSONObject.Contains('CompletionProposal') then
@@ -657,6 +662,33 @@ begin
   end;
 end;
 
+procedure TTextEditorHighlighterImportJSON.ImportCodeFoldingVoidElements(const ACodeFoldingObject: TJSONObject);
+var
+  LIndex: Integer;
+  LVoidElementArray: TJSONArray;
+  LJSONDataValue: PJSONDataValue;
+begin
+  if ACodeFoldingObject.Contains('VoidElements') then
+  begin
+    FHighlighter.CreateCodeFoldingVoidElements;
+
+    FHighlighter.CodeFoldingVoidElements.BeginUpdate;
+    try
+      LVoidElementArray := ACodeFoldingObject['VoidElements'].ArrayValue;
+
+      for LIndex := 0 to LVoidElementArray.Count - 1 do
+      begin
+        LJSONDataValue := LVoidElementArray.Items[LIndex];
+
+        if FHighlighter.CodeFoldingVoidElements.IndexOf(LJSONDataValue.Value) = -1 then
+          FHighlighter.CodeFoldingVoidElements.Add(LJSONDataValue.Value);
+      end;
+    finally
+      FHighlighter.CodeFoldingVoidElements.EndUpdate;
+    end;
+  end;
+end;
+
 procedure TTextEditorHighlighterImportJSON.ImportCodeFoldingSkipRegion(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion;
   const ACodeFoldingObject: TJSONObject);
 var
@@ -675,19 +707,23 @@ begin
   if ACodeFoldingObject.Contains('SkipRegion') then
   begin
     LSkipRegionArray := ACodeFoldingObject['SkipRegion'].ArrayValue;
+
     for LIndex := 0 to LSkipRegionArray.Count - 1 do
     begin
       LJSONDataValue := LSkipRegionArray.Items[LIndex];
+
       LOpenToken := LJSONDataValue.ObjectValue['OpenToken'].Value;
       LCloseToken := LJSONDataValue.ObjectValue['CloseToken'].Value;
 
       if hoMultiHighlighter in FHighlighter.Options then
       begin
         LName := LJSONDataValue.ObjectValue['File'].Value;
+
         if LName <> '' then
         begin
           LEditor := FHighlighter.Editor as TCustomTextEditor;
           LFileStream := LEditor.CreateHighlighterStream(LName);
+
           if Assigned(LFileStream) then
           begin
             LJSONObject := TJSONObject.ParseFromStream(LFileStream) as TJSONObject;
@@ -712,6 +748,7 @@ begin
         LRegionItem := ACodeFoldingRegion.Add(LOpenToken, LCloseToken);
         LRegionItem.NoSubs := True;
         FHighlighter.AddKeyChar(ctFoldOpen, LOpenToken[1]);
+
         if LCloseToken <> '' then
           FHighlighter.AddKeyChar(ctFoldClose, LCloseToken[1]);
       end
@@ -724,6 +761,7 @@ begin
           RegionType := LSkipRegionType;
           SkipEmptyChars := LJSONDataValue.ObjectValue.ValueBoolean['SkipEmptyChars'];
           SkipIfNextCharIsNot := TControlCharacters.Null;
+
           if LJSONDataValue.ObjectValue.Contains('NextCharIsNot') then
             SkipIfNextCharIsNot := LJSONDataValue.ObjectValue['NextCharIsNot'].Value[1];
         end;
@@ -888,9 +926,11 @@ begin
     for LIndex := 0 to LCount - 1 do
     begin
       FHighlighter.CodeFoldingRegions[LIndex] := TTextEditorCodeFoldingRegion.Create(TTextEditorCodeFoldingRegionItem);
+
       LCodeFoldingObject := LArray.Items[LIndex].ObjectValue;
 
       ImportCodeFoldingOptions(FHighlighter.CodeFoldingRegions[LIndex], LCodeFoldingObject);
+      ImportCodeFoldingVoidElements(LCodeFoldingObject);
       ImportCodeFoldingSkipRegion(FHighlighter.CodeFoldingRegions[LIndex], LCodeFoldingObject);
       ImportCodeFoldingFoldRegion(FHighlighter.CodeFoldingRegions[LIndex], LCodeFoldingObject);
     end;

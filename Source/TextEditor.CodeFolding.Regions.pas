@@ -70,15 +70,15 @@ type
     FOpenToken: string;
     FSkipRegions: TTextEditorSkipRegions;
     FStringEscapeChar: Char;
-    function GetItem(AIndex: Integer): TTextEditorCodeFoldingRegionItem;
+    function GetItem(const AIndex: Integer): TTextEditorCodeFoldingRegionItem;
   public
     constructor Create(AItemClass: TCollectionItemClass);
     destructor Destroy; override;
     function Add(const AOpenToken: string; const ACloseToken: string): TTextEditorCodeFoldingRegionItem;
-    property CloseToken: string read FCloseToken write FCloseToken;
     function Contains(const AOpenToken: string; const ACloseToken: string): Boolean;
+    property CloseToken: string read FCloseToken write FCloseToken;
     property EscapeChar: Char read FEscapeChar write FEscapeChar default TControlCharacters.Null;
-    property Items[AIndex: Integer]: TTextEditorCodeFoldingRegionItem read GetItem; default;
+    property Items[const AIndex: Integer]: TTextEditorCodeFoldingRegionItem read GetItem; default;
     property OpenToken: string read FOpenToken write FOpenToken;
     property SkipRegions: TTextEditorSkipRegions read FSkipRegions;
     property StringEscapeChar: Char read FStringEscapeChar write FStringEscapeChar default TControlCharacters.Null;
@@ -119,6 +119,7 @@ end;
 function TTextEditorCodeFoldingRegion.Add(const AOpenToken: string; const ACloseToken: string): TTextEditorCodeFoldingRegionItem;
 begin
   Result := TTextEditorCodeFoldingRegionItem(inherited Add);
+
   with Result do
   begin
     OpenToken := AOpenToken;
@@ -150,15 +151,17 @@ var
   LItem: TTextEditorCodeFoldingRegionItem;
 begin
   Result := False;
+
   for LIndex := 0 to Count - 1 do
   begin
     LItem := Items[LIndex];
+
     if (LItem.OpenToken = AOpenToken) and (LItem.CloseToken = ACloseToken) then
       Exit(True);
   end;
 end;
 
-function TTextEditorCodeFoldingRegion.GetItem(AIndex: Integer): TTextEditorCodeFoldingRegionItem;
+function TTextEditorCodeFoldingRegion.GetItem(const AIndex: Integer): TTextEditorCodeFoldingRegionItem;
 begin
   Result := TTextEditorCodeFoldingRegionItem(inherited Items[AIndex]);
 end;

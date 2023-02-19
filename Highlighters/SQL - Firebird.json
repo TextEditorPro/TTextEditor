@@ -261,7 +261,8 @@
               "SkipWhitespaceOnce": true
             },
             "TokenRange": {
-              "Open": "join"
+              "Open": "join",
+              "Close": "("
             }
           },
           {

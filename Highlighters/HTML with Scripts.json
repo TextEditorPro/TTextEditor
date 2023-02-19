@@ -307,6 +307,27 @@
   "CodeFolding": {
     "Ranges": [
       {
+        "Options": {
+          "FoldTags": "true"
+        },
+        "VoidElements": [
+          "AREA",
+          "BASE",
+          "BR",
+          "COL",
+          "COMMAND",
+          "EMBED",
+          "HR",
+          "IMG",
+          "INPUT",
+          "KEYGEN",
+          "LINK",
+          "META",
+          "PARAM",
+          "SOURCE",
+          "TRACK",
+          "WBR"
+        ],
         "SkipRegion": [
 
         ],

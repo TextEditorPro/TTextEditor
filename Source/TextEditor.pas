@@ -7994,6 +7994,7 @@ var
     Result := 0;
 
     LPText := APText - 1;
+
     while LPText^ = Character do
     begin
       Inc(Result);
@@ -8044,8 +8045,10 @@ var
         if (LPText^ <> TCharacters.Space) and (LPText^ <> TControlCharacters.Tab) and
           (LPText^ <> TControlCharacters.Substitute) then
           Inc(LPKeyWord);
+
         Inc(LPText);
       end;
+
       if LPKeyWord^ = TControlCharacters.Null then { If found, pop skip region from the stack }
       begin
         LOpenTokenSkipFoldRangeList.Delete(LOpenTokenSkipFoldRangeList.Count - 1);
@@ -8063,58 +8066,58 @@ var
   begin
     Result := False;
 
-    if LPText^ in FHighlighter.SkipOpenKeyChars then
-      if LOpenTokenSkipFoldRangeList.Count = 0 then
+    if (LPText^ in FHighlighter.SkipOpenKeyChars) and (LOpenTokenSkipFoldRangeList.Count = 0) then
+    begin
+      LIndex := 0;
+      while LIndex < LCurrentCodeFoldingRegion.SkipRegions.Count do
       begin
-        LIndex := 0;
-        while LIndex < LCurrentCodeFoldingRegion.SkipRegions.Count do
-        begin
-          LSkipRegionItem := LCurrentCodeFoldingRegion.SkipRegions[LIndex];
+        LSkipRegionItem := LCurrentCodeFoldingRegion.SkipRegions[LIndex];
 
-          if (LPText^ = PChar(LSkipRegionItem.OpenToken)^) and not OddCountOfStringEscapeChars(LPText) and
-            not IsNextSkipChar(LPText + Length(LSkipRegionItem.OpenToken), LSkipRegionItem) then
+        if (LPText^ = PChar(LSkipRegionItem.OpenToken)^) and not OddCountOfStringEscapeChars(LPText) and
+          not IsNextSkipChar(LPText + Length(LSkipRegionItem.OpenToken), LSkipRegionItem) then
+        begin
+          LPKeyWord := PChar(LSkipRegionItem.OpenToken);
+          LPBookmarkText := LPText;
+          { Check, if the open keyword found }
+          while (LPText^ <> TControlCharacters.Null) and (LPKeyWord^ <> TControlCharacters.Null) and
+            ((LPText^ = LPKeyWord^) or (LSkipRegionItem.SkipEmptyChars and (LPText^ < TCharacters.ExclamationMark))) do
           begin
-            LPKeyWord := PChar(LSkipRegionItem.OpenToken);
-            LPBookmarkText := LPText;
-            { Check, if the open keyword found }
-            while (LPText^ <> TControlCharacters.Null) and (LPKeyWord^ <> TControlCharacters.Null) and
-              ((LPText^ = LPKeyWord^) or (LSkipRegionItem.SkipEmptyChars and (LPText^ < TCharacters.ExclamationMark))) do
+            if not LSkipRegionItem.SkipEmptyChars or
+              (LSkipRegionItem.SkipEmptyChars and (LPText^ <> TCharacters.Space) and
+              (LPText^ <> TControlCharacters.Tab) and (LPText^ <> TControlCharacters.Substitute)) then
+              Inc(LPKeyWord);
+
+            Inc(LPText);
+          end;
+          if LPKeyWord^ = TControlCharacters.Null then { If found, skip single line comment or push skip region into stack }
+          begin
+            if LSkipRegionItem.RegionType = ritSingleLineString then
             begin
-              if not LSkipRegionItem.SkipEmptyChars or
-                (LSkipRegionItem.SkipEmptyChars and (LPText^ <> TCharacters.Space) and
-                (LPText^ <> TControlCharacters.Tab) and (LPText^ <> TControlCharacters.Substitute)) then
-                Inc(LPKeyWord);
+              LPKeyWord := PChar(LSkipRegionItem.CloseToken);
+
+              while (LPText^ <> TControlCharacters.Null) and
+                ( (LPText^ <> LPKeyWord^) or (LPText^ = LPKeyWord^) and OddCountOfStringEscapeChars(LPText) ) do
+                Inc(LPText);
 
               Inc(LPText);
-            end;
-            if LPKeyWord^ = TControlCharacters.Null then { If found, skip single line comment or push skip region into stack }
-            begin
-              if LSkipRegionItem.RegionType = ritSingleLineString then
-              begin
-                LPKeyWord := PChar(LSkipRegionItem.CloseToken);
-
-                while (LPText^ <> TControlCharacters.Null) and
-                  ( (LPText^ <> LPKeyWord^) or (LPText^ = LPKeyWord^) and OddCountOfStringEscapeChars(LPText) ) do
-                  Inc(LPText);
-                Inc(LPText);
-              end
-              else
-              if LSkipRegionItem.RegionType = ritSingleLineComment then
-                { Single line comment skip until next line }
-                Exit(True)
-              else
-                LOpenTokenSkipFoldRangeList.Add(LSkipRegionItem);
-
-              Dec(LPText); { The end of the while loop will increase }
-              Break;
             end
             else
-              LPText := LPBookmarkText; { Skip region open not found, return pointer back }
-          end;
+            if LSkipRegionItem.RegionType = ritSingleLineComment then
+              { Single line comment skip until next line }
+              Exit(True)
+            else
+              LOpenTokenSkipFoldRangeList.Add(LSkipRegionItem);
 
-          Inc(LIndex);
+            Dec(LPText); { The end of the while loop will increase }
+            Break;
+          end
+          else
+            LPText := LPBookmarkText; { Skip region open not found, return pointer back }
         end;
+
+        Inc(LIndex);
       end;
+    end;
   end;
 
   procedure RegionItemsClose;
@@ -8129,8 +8132,10 @@ var
       if ACodeFoldingRange.RegionItem.TokenEndIsPreviousLine then
       begin
         LIndex := LLine - 1;
+
         while (LIndex > 0) and (FLines[LIndex - 1] = '') do
           Dec(LIndex);
+
         ACodeFoldingRange.ToLine := LIndex
       end
       else
@@ -8147,8 +8152,10 @@ var
         LIndexDecrease := 1;
         repeat
           LIndex := LOpenTokenFoldRangeList.Count - LIndexDecrease;
+
           if LIndex < 0 then
             Break;
+
           LCodeFoldingRange := LOpenTokenFoldRangeList.Items[LIndex];
 
           if LCodeFoldingRange.RegionItem.CloseTokenBeginningOfLine and not LBeginningOfLine then
@@ -8172,12 +8179,12 @@ var
               LOpenTokenFoldRangeList.Remove(LCodeFoldingRange);
               Dec(LFoldCount);
 
-              if LCodeFoldingRange.RegionItem.BreakIfNotFoundBeforeNextRegion <> '' then
-                if not LCodeFoldingRange.IsExtraTokenFound then
-                begin
-                  LPText := LPBookmarkText;
-                  Exit;
-                end;
+              if not LCodeFoldingRange.IsExtraTokenFound and
+                (LCodeFoldingRange.RegionItem.BreakIfNotFoundBeforeNextRegion <> '') then
+              begin
+                LPText := LPBookmarkText;
+                Exit;
+              end;
 
               SetCodeFoldingRangeToLine(LCodeFoldingRange);
 
@@ -8190,12 +8197,14 @@ var
                   begin
                     LPKeyWord := PChar(LCodeFoldingRangeLast.RegionItem.CloseToken);
                     LPText := LPBookmarkText;
+
                     while (LPText^ <> TControlCharacters.Null) and (LPKeyWord^ <> TControlCharacters.Null) and
                       (CaseUpper(LPText^) = LPKeyWord^) do
                     begin
                       Inc(LPText);
                       Inc(LPKeyWord);
                     end;
+
                     if LPKeyWord^ = TControlCharacters.Null then
                     begin
                       SetCodeFoldingRangeToLine(LCodeFoldingRangeLast);
@@ -8268,6 +8277,7 @@ var
                     (LPText^ <> TCharacters.Space) and (LPText^ <> TControlCharacters.Tab) and
                     (LPText^ = TControlCharacters.Substitute) then
                     Inc(LPKeyWord);
+
                   Inc(LPText);
                 end;
 
@@ -8332,6 +8342,7 @@ var
                   begin
                     LPKeyWord := PChar(LRegionItem.SkipIfFoundAfterOpenTokenArray[LArrayIndex]);
                     LPBookmarkText2 := LPText;
+
                     if CaseUpper(LPText^) = LPKeyWord^ then { If first character match }
                     begin
                       while (LPText^ <> TControlCharacters.Null) and (LPKeyWord^ <> TControlCharacters.Null) and
@@ -8363,21 +8374,23 @@ var
                 begin
                   LPTempText := LPText;
                   LLength := 0;
+
                   while LPText^ <> TControlCharacters.Null do
                   begin
                     Inc(LLength);
                     Inc(LPText);
                   end;
+
                   LPText := LPTempText;
                   SetString(LTemp, LPText, LLength + 1); { +1 from #0 }
                   LTemp := TextEditor.Utils.Trim(LTemp);
                   LPosition := Pos('THEN', UpperCase(LTemp));
-                  if LPosition > 0 then
-                    if LPosition + 4 < Length(LTemp) then
-                    begin
-                      LPText := LPBookmarkText; { Skip found, return pointer back }
-                      Continue;
-                    end;
+
+                  if (LPosition > 0) and (LPosition + 4 < Length(LTemp)) then
+                  begin
+                    LPText := LPBookmarkText; { Skip found, return pointer back }
+                    Continue;
+                  end;
                 end;
 
                 if Assigned(LCodeFoldingRange) and (LCodeFoldingRange.RegionItem.BreakIfNotFoundBeforeNextRegion <> '')
@@ -8468,8 +8481,10 @@ var
   begin
     if LOpenTokenSkipFoldRangeList.Count <> 0 then
       Exit;
+
     LChar := CaseUpper(LPText^);
     LPBookmarkText := LPText;
+
     for LIndex := 1 to Highlighter.CodeFoldingRangeCount - 1 do { First (0) is the default range }
     begin
       LCodeFoldingRegion := Highlighter.CodeFoldingRegions[LIndex];
@@ -8491,6 +8506,7 @@ var
         begin
           if LCodeFoldingRangeIndexList.Count > 0 then
             LCodeFoldingRangeIndexList.Delete(LCodeFoldingRangeIndexList.Count - 1);
+
           if LCodeFoldingRangeIndexList.Count > 0 then
             LCurrentCodeFoldingRegion := Highlighter.CodeFoldingRegions[Integer(LCodeFoldingRangeIndexList.Last)]
           else
@@ -8510,71 +8526,77 @@ var
     LOpenToken, LCloseToken: string;
     LRegionItem: TTextEditorCodeFoldingRegionItem;
     LDefaultRegion: TTextEditorCodeFoldingRegion;
-    LMultilineTag: Boolean;
   begin
     LDefaultRegion := FHighlighter.CodeFoldingRegions[0];
 
     LPText := PChar(FLines.Text);
     LAdded := False;
+
     while LPText^ <> TControlCharacters.Null do
     begin
       if LPText^ = '<' then
       begin
         Inc(LPText);
+
         if not (LPText^ in ['?', '!', '/']) then
         begin
           LTokenName := '';
-          LMultilineTag := False;
+
           while (LPText^ <> TControlCharacters.Null) and not (LPText^ in [' ', '>']) do
           begin
             if LPText^ in [TControlCharacters.CarriageReturn, TControlCharacters.Linefeed] then
-            begin
-              LMultilineTag := True;
               Break;
-            end;
 
             LTokenName := LTokenName + CaseUpper(LPText^);
             Inc(LPText);
           end;
 
-          LTokenAttributes := '';
-          if LPText^ = ' ' then
-          while (LPText^ <> TControlCharacters.Null) and not (LPText^ in ['/', '>']) do
+          if not Highlighter.InCodeFoldingVoidElements(LTokenname) then
           begin
-            if LPText^ in [TControlCharacters.CarriageReturn, TControlCharacters.Linefeed] then
+            LTokenAttributes := '';
+
+            if LPText^ = ' ' then
+            while (LPText^ <> TControlCharacters.Null) and not (LPText^ in ['/', '>']) do
             begin
-              LMultilineTag := True;
-              Break;
-            end;
-            LTokenAttributes := LTokenAttributes + CaseUpper(LPText^);
-            Inc(LPText);
-            if (LPText^ in ['"', '''']) then
-            begin
+              if LPText^ in [TControlCharacters.CarriageReturn, TControlCharacters.Linefeed] then
+                Break;
+
               LTokenAttributes := LTokenAttributes + CaseUpper(LPText^);
               Inc(LPText);
-              while (LPText^ <> TControlCharacters.Null) and not (LPText^ in ['"', '''']) do
+
+              if (LPText^ in ['"', '''']) then
               begin
                 LTokenAttributes := LTokenAttributes + CaseUpper(LPText^);
                 Inc(LPText);
+
+                while (LPText^ <> TControlCharacters.Null) and not (LPText^ in ['"', '''']) do
+                begin
+                  LTokenAttributes := LTokenAttributes + CaseUpper(LPText^);
+                  Inc(LPText);
+                end;
+              end;
+            end;
+
+            if (LTokenName <> '') and (LPText^ = '>') and ((LPText - 1)^ <> '/') then
+            begin
+              LOpenToken := '<' + LTokenName + LTokenAttributes + LPText^;
+              LOpenToken := LOpenToken.Trim;
+              LCloseToken := '</' + LTokenName + '>';
+
+              if not LDefaultRegion.Contains(LOpenToken, LCloseToken) then
+              begin
+                LRegionItem := LDefaultRegion.Add(LOpenToken, LCloseToken);
+                LRegionItem.BreakCharFollows := False;
+
+                LAdded := True;
               end;
             end;
           end;
-
-          LOpenToken := '<' + LTokenName + LTokenAttributes + LPText^;
-          LOpenToken := LOpenToken.Trim;
-          LCloseToken := '</' + LTokenName + '>';
-
-          if LMultilineTag or (LPText^ = '>') and ((LPText - 1)^ <> '/') then
-            if not LDefaultRegion.Contains(LOpenToken, LCloseToken) then
-            begin
-              LRegionItem := LDefaultRegion.Add(LOpenToken, LCloseToken);
-              LRegionItem.BreakCharFollows := False;
-              LAdded := True;
-            end;
         end;
       end;
       Inc(LPText);
     end;
+
     if LAdded then
     begin
       FHighlighter.AddKeyChar(ctFoldOpen, '<');
@@ -8607,6 +8629,7 @@ var
       LProgress := 0;
       LProgressPosition := 0;
       LProgressInc := 0;
+
       if FLines.ShowProgress then
       begin
         FLines.ProgressPosition := 0;
@@ -8618,8 +8641,10 @@ var
       begin
         LLine := FLineNumbers.Cache[LIndex];
         LCodeFoldingRange := nil;
+
         if LLine < Length(FCodeFoldings.RangeFromLine) then
           LCodeFoldingRange := FCodeFoldings.RangeFromLine[LLine];
+
         if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
         begin
           LPreviousLine := LLine;
@@ -8630,11 +8655,13 @@ var
         begin
           LPText := PChar(FLines[LLine - 1]); { 0-based }
           LBeginningOfLine := True;
+
           while LPText^ <> TControlCharacters.Null do
           begin
             { SkipEmptySpace }
             while (LPText^ <> TControlCharacters.Null) and (LPText^ < TCharacters.ExclamationMark) do
               Inc(LPText);
+
             if LPText^ = TControlCharacters.Null then
               Break;
 
@@ -8644,18 +8671,21 @@ var
 
             if SkipRegionsClose then
               Continue; { while LPText^ <> TControlCharacters.Null do }
+
             if SkipRegionsOpen then
               Break; { Line comment breaks }
 
             { SkipEmptySpace }
             while (LPText^ <> TControlCharacters.Null) and (LPText^ < TCharacters.ExclamationMark) do
               Inc(LPText);
+
             if LPText^ = TControlCharacters.Null then
               Break;
 
             if LOpenTokenSkipFoldRangeList.Count = 0 then
             begin
               RegionItemsClose;
+
               if RegionItemsOpen then
                 Break; { OpenTokenBreaksLine region item option breaks }
             end;
@@ -8678,18 +8708,22 @@ var
           if LProgressPosition > LProgress then
           begin
             FLines.ProgressPosition := FLines.ProgressPosition + 1;
+
             if Assigned(FEvents.OnLoadingProgress) then
               FEvents.OnLoadingProgress(Self)
             else
               Paint;
+
             Inc(LProgress, LProgressInc);
           end;
         end;
       end;
       { Check the last not empty line }
       LLine := FLines.Count - 1;
+
       while (LLine >= 0) and (System.SysUtils.Trim(FLines[LLine]) = '') do
         Dec(LLine);
+
       if LLine >= 0 then
       begin
         LPText := PChar(FLines[LLine]);
@@ -8700,8 +8734,10 @@ var
           begin
             Inc(LLine);
             LLine := Min(LLine, FLines.Count);
+
             if LLastFoldRange.RegionItem.OpenIsClose then
               LLastFoldRange.ToLine := LLine;
+
             LOpenTokenFoldRangeList.Remove(LLastFoldRange);
             Dec(LFoldCount);
             RegionItemsClose;
@@ -8750,6 +8786,7 @@ var
       LProgress := 0;
       LProgressPosition := 0;
       LProgressInc := 0;
+
       if FLines.ShowProgress then
       begin
         FLines.ProgressPosition := 0;
@@ -8761,8 +8798,10 @@ var
       begin
         LLine := FLineNumbers.Cache[LIndex];
         LCodeFoldingRange := nil;
+
         if LLine < Length(FCodeFoldings.RangeFromLine) then
           LCodeFoldingRange := FCodeFoldings.RangeFromLine[LLine];
+
         if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
         begin
           LPreviousLine := LLine;
@@ -8771,53 +8810,59 @@ var
 
         LTextLine := TextEditor.Utils.Trim(FLines[LLine - 1]);
 
-        if FCodeFolding.Outlining then
-          if LTextLine <> '' then
+        if FCodeFolding.Outlining and (LTextLine <> '') then
+        begin
+          if LInsideBlockComment then
           begin
+            LInsideBlockComment := Pos(FHighlighter.Comments.BlockComments[LBlockCommentIndex], LTextLine) = 0;
+
             if LInsideBlockComment then
+              Continue;
+          end
+          else
+          begin
+            LCommentFound := False;
+            LCommentIndex := 0;
+            LLength := Length(FHighlighter.Comments.LineComments);
+
+            while LCommentIndex < LLength do
             begin
-              LInsideBlockComment := Pos(FHighlighter.Comments.BlockComments[LBlockCommentIndex], LTextLine) = 0;
-              if LInsideBlockComment then
-                Continue;
-            end
-            else
+              if Pos(FHighlighter.Comments.LineComments[LCommentIndex], LTextLine) = 1 then
+              begin
+                LCommentFound := True;
+                Break;
+              end;
+
+              Inc(LCommentIndex);
+            end;
+
+            if LCommentFound then
+              Continue;
+
+            if not (cfoFoldMultilineComments in FCodeFolding.Options) then
             begin
-              LCommentFound := False;
+              LInsideBlockComment := False;
               LCommentIndex := 0;
-              LLength := Length(FHighlighter.Comments.LineComments);
+              LLength := Length(FHighlighter.Comments.BlockComments);
+
               while LCommentIndex < LLength do
               begin
-                if Pos(FHighlighter.Comments.LineComments[LCommentIndex], LTextLine) = 1 then
+                if (Pos(FHighlighter.Comments.BlockComments[LCommentIndex], LTextLine) <> 0) and
+                  (Pos(FHighlighter.Comments.BlockComments[LCommentIndex + 1], LTextLine) = 0)then
                 begin
-                  LCommentFound := True;
+                  LInsideBlockComment := True;
+                  LBlockCommentIndex := LCommentIndex + 1;
                   Break;
                 end;
-                Inc(LCommentIndex);
-              end;
-              if LCommentFound then
-                Continue;
 
-              if not (cfoFoldMultilineComments in FCodeFolding.Options) then
-              begin
-                LInsideBlockComment := False;
-                LCommentIndex := 0;
-                LLength := Length(FHighlighter.Comments.BlockComments);
-                while LCommentIndex < LLength do
-                begin
-                  if (Pos(FHighlighter.Comments.BlockComments[LCommentIndex], LTextLine) <> 0) and
-                    (Pos(FHighlighter.Comments.BlockComments[LCommentIndex + 1], LTextLine) = 0)then
-                  begin
-                    LInsideBlockComment := True;
-                    LBlockCommentIndex := LCommentIndex + 1;
-                    Break;
-                  end;
-                  Inc(LCommentIndex, 2);
-                end;
-                if LInsideBlockComment then
-                  Continue;
+                Inc(LCommentIndex, 2);
               end;
+
+              if LInsideBlockComment then
+                Continue;
             end;
           end;
+        end;
 
         if LPreviousLine <> LLine then
         begin
@@ -8844,6 +8889,7 @@ var
           begin
             LLastFoldRange.ToLine := LLine - 1;
             LFoldRangeList.Remove(LLastFoldRange);
+
             if LFoldRangeList.Count > 0 then
               LLastFoldRange := TTextEditorCodeFoldingRange(LFoldRangeList.Last);
           end
@@ -8857,9 +8903,11 @@ var
             begin
               LLastFoldRange.ToLine := LLine - 1;
               LFoldRangeList.Remove(LLastFoldRange);
+
               if LFoldRangeList.Count > 0 then
                 LLastFoldRange := TTextEditorCodeFoldingRange(LFoldRangeList.Last);
             end;
+
             if (LFoldRangeList.Count = 0) or (TTextEditorCodeFoldingRange(LFoldRangeList.Last).FoldRangeLevel <> LCharCount) then
               LFoldRangeList.Add(LFoldRanges.Add(FCodeFoldings.AllRanges, LLine, 0, LCharCount, nil, LLine));
           end
@@ -8869,18 +8917,22 @@ var
 
           LPreviousCharCount := LCharCount;
         end;
+
         LPreviousLine := LLine;
 
         if FLines.ShowProgress then
         begin
           Inc(LProgressPosition);
+
           if LProgressPosition > LProgress then
           begin
             FLines.ProgressPosition := FLines.ProgressPosition + 1;
+
             if Assigned(FEvents.OnLoadingProgress) then
               FEvents.OnLoadingProgress(Self)
             else
               Paint;
+
             Inc(LProgress, LProgressInc);
           end;
         end;
@@ -8894,6 +8946,7 @@ var
       while LFoldRangeList.Count > 0 do
       begin
         LFoldRange := TTextEditorCodeFoldingRange(LFoldRangeList.First);
+
         if Assigned(LFoldRange) then
         begin
           Inc(LLine);

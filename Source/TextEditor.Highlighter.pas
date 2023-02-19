@@ -19,6 +19,7 @@ type
     FChanged: Boolean;
     FCodeFoldingRangeCount: Integer;
     FCodeFoldingRegions: TTextEditorCodeFoldingRegions;
+    FCodeFoldingVoidElements: TStringList;
     FColors: TTextEditorHighlighterColors;
     FComments: TTextEditorHighlighterComments;
     FCompletionProposalSkipRegions: TTextEditorSkipRegions;
@@ -61,12 +62,14 @@ type
   public
     constructor Create(AOwner: TWinControl);
     destructor Destroy; override;
+    function InCodeFoldingVoidElements(const AName: string): Boolean;
     function RangeAttribute: TTextEditorHighlighterAttribute;
     function TokenAttribute: TTextEditorHighlighterAttribute;
     function TokenLength: Integer;
     function TokenType: TTextEditorRangeType;
     procedure AddKeyChar(const AKeyCharType: TTextEditorKeyCharType; const AChar: Char);
     procedure Clear;
+    procedure CreateCodeFoldingVoidElements;
     procedure GetKeywords(var AStringList: TStringList);
     procedure GetToken(var AResult: string);
     procedure LoadFromFile(const AFilename: string);
@@ -85,6 +88,7 @@ type
     property Changed: Boolean read FChanged write FChanged default False;
     property CodeFoldingRangeCount: Integer read FCodeFoldingRangeCount write SetCodeFoldingRangeCount;
     property CodeFoldingRegions: TTextEditorCodeFoldingRegions read FCodeFoldingRegions write FCodeFoldingRegions;
+    property CodeFoldingVoidElements: TStringList read FCodeFoldingVoidElements write FCodeFoldingVoidElements;
     property Colors: TTextEditorHighlighterColors read FColors write FColors;
     property Comments: TTextEditorHighlighterComments read FComments write FComments;
     property CompletionProposalSkipRegions: TTextEditorSkipRegions read FCompletionProposalSkipRegions write FCompletionProposalSkipRegions;
@@ -194,6 +198,14 @@ begin
   FTemporaryTokens := nil;
 
   inherited;
+end;
+
+function TTextEditorHighlighter.InCodeFoldingVoidElements(const AName: string): Boolean;
+begin
+  Result := False;
+
+  if Assigned(FCodeFoldingVoidElements) and (FCodeFoldingVoidElements.Count > 0) then
+    Result := FCodeFoldingVoidElements.IndexOf(AName) <> -1;
 end;
 
 procedure TTextEditorHighlighter.AddAllAttributes(const ARange: TTextEditorRange);
@@ -514,6 +526,7 @@ begin
     FCodeFoldingRegions[LIndex].Free;
     FCodeFoldingRegions[LIndex] := nil;
   end;
+
   SetLength(FCodeFoldingRegions, 0);
 
   CodeFoldingRangeCount := 0;
@@ -521,6 +534,18 @@ begin
   LEditor := FEditor as TCustomTextEditor;
   LEditor.ClearMatchingPair;
   LEditor.ClearHighlightLine;
+
+  if Assigned(FCodeFoldingVoidElements) then
+    FreeAndNil(FCodeFoldingVoidElements);
+end;
+
+procedure TTextEditorHighlighter.CreateCodeFoldingVoidElements;
+begin
+  if not Assigned(FCodeFoldingVoidElements) then
+  begin
+    FCodeFoldingVoidElements := TStringList.Create;
+    FCodeFoldingVoidElements.Sorted := True;
+  end;
 end;
 
 procedure TTextEditorHighlighter.Prepare;

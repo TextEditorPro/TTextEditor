@@ -1,7 +1,7 @@
 # TTextEditor [![License](https://img.shields.io/badge/License-MIT-yellowgreen.svg)](https://opensource.org/licenses/MIT) [![File count](https://tokei.rs/b1/github/TextEditorPro/TTextEditor?category=files)](https://github.com/TextEditorPro/TTextEditor/tree/main/Source) [![Lines of code](https://tokei.rs/b1/github/TextEditorPro/TTextEditor?category=code)](https://github.com/TextEditorPro/TTextEditor/tree/main/Source)
 
 The latest stable release of TTextEditor control for C++ Builder/Delphi. 
-The development environment is RAD Studio 11.3 Alexandria but can work with older versions as well (not tested). 
+The development environment is RAD Studio 11.2 Alexandria but can work with older versions as well (not tested). 
 The use of namespaces requires at least XE2.
 
 ## Updates

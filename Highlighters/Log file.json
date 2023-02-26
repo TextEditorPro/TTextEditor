@@ -4,6 +4,7 @@
       "2022-01-06 08:32:34.117 OK      *** Hello, World! ***\r\n",
       "2022-01-06 08:32:34.119 OK      \"Hello, World!\"\r\n",
       "2022-01-06 08:32:48.973 ERROR   Hell o world!\r\n",
+      "2022-01-06T08:32:36.439 OK      '758162c5-3536-48ab-b0ba-62b0a587bd89'\r\n",
       "2022-01-06 08:32:48.974 OK      1234567890 true false\r\n",
       "2022-01-06 08:32:48.976 WARNING 'Hello world!'"
     ],
@@ -210,7 +211,7 @@
         "Set": [
           {
             "Type": "Numbers",
-            "Symbols": ".0123456789",
+            "Symbols": ".-0123456789T",
             "Attributes": {
               "Element": "Number"
             }

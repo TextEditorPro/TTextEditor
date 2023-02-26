@@ -29,6 +29,7 @@ type
   TCharacters = record
   const
     AnsiCharCount = 256;
+    CloseTagOpen = '</';
     CtrlBackspace = #127;
     Dot = '.';
     ExclamationMark = #33;
@@ -38,6 +39,8 @@ type
     Pilcrow = Char($00B6);
     Slash = '/';
     Space = #32;
+    TagClose = '>';
+    TagOpen = '<';
     ThreeDots = '...';
     Underscore = '_';
     ZeroWidthSpace = Char($200B);

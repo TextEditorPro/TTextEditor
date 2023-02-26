@@ -794,6 +794,7 @@ begin
   if ACodeFoldingObject.Contains('FoldRegion') then
   begin
     LFoldRegionArray := ACodeFoldingObject['FoldRegion'].ArrayValue;
+
     for LIndex := 0 to LFoldRegionArray.Count - 1 do
     begin
       LJSONDataValue := LFoldRegionArray.Items[LIndex];

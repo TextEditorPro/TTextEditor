@@ -493,6 +493,10 @@
         ],
         "FoldRegion": [
           {
+            "OpenToken": "<SCRIPT",
+            "CloseToken": "</SCRIPT"
+          },
+          {
             "OpenToken": "{",
             "CloseToken": "}",
             "Properties": {

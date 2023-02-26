@@ -316,20 +316,10 @@
                     "]",
                     "{",
                     "}",
-                    "?>"
+                    "?"
                   ],
                   "Attributes": {
                     "Element": "Symbol"
-                  }
-                },
-                {
-                  "Type": "Symbol",
-                  "Words": [
-                    "?>"
-                  ],
-                  "Attributes": {
-                    "Element": "HighlightedBlockSymbol",
-                    "ParentBackground": false
                   }
                 }
               ],

@@ -4264,6 +4264,7 @@ begin
     Exit;
 
   LRow := ARow;
+
   if FWordWrap.Active then
     LRow := GetViewTextLineNumber(LRow);
 
@@ -4276,6 +4277,7 @@ begin
     FHighlighter.ResetRange
   else
     FHighlighter.SetRange(FLines.Ranges[LRow - 2]);
+
   FHighlighter.SetLine(LLineText);
 
   LCurrentRow := ARow;
@@ -4292,9 +4294,12 @@ begin
   LLength := 0;
 
   LHighlighterAttribute := FHighlighter.TokenAttribute;
+
   if Assigned(LHighlighterAttribute) then
     LPreviousFontStyles := LHighlighterAttribute.FontStyles;
+
   FPaintHelper.SetStyle(LPreviousFontStyles);
+
   while not FHighlighter.EndOfLine do
   begin
     if LNextTokenText = '' then
@@ -4306,6 +4311,7 @@ begin
     LTokenLength := Length(LToken);
 
     LHighlighterAttribute := FHighlighter.TokenAttribute;
+
     if Assigned(LHighlighterAttribute) then
       LFontStyles := LHighlighterAttribute.FontStyles;
 
@@ -4315,24 +4321,24 @@ begin
       LPreviousFontStyles := LFontStyles;
     end;
 
-    if FWordWrap.Active and (LCurrentRow < ARow) then
-      if LLength + LTokenLength > FWordWrapLine.Length[LCurrentRow] then
-      begin
-        LNextTokenText := Copy(LToken, FWordWrapLine.Length[LCurrentRow] - LLength + 1, LTokenLength);
-        LTokenLength := FWordWrapLine.Length[LCurrentRow] - LLength;
-        LToken := Copy(LToken, 1, LTokenLength);
+    if FWordWrap.Active and (LCurrentRow < ARow) and (LLength + LTokenLength > FWordWrapLine.Length[LCurrentRow]) then
+    begin
+      LNextTokenText := Copy(LToken, FWordWrapLine.Length[LCurrentRow] - LLength + 1, LTokenLength);
+      LTokenLength := FWordWrapLine.Length[LCurrentRow] - LLength;
+      LToken := Copy(LToken, 1, LTokenLength);
 
-        Inc(LCurrentRow);
-        LLength := 0;
-        LTextWidth := 0;
-        Inc(LCharsBefore, GetTokenCharCount(LToken, LCharsBefore));
+      Inc(LCurrentRow);
+      LLength := 0;
+      LTextWidth := 0;
+      Inc(LCharsBefore, GetTokenCharCount(LToken, LCharsBefore));
 
-        Continue;
-      end;
+      Continue;
+    end;
 
     if LCurrentRow = ARow then
     begin
       LTokenWidth := GetTokenWidth(LToken, LTokenLength, LCharsBefore);
+
       if (LXInEditor > 0) and (LTextWidth + LTokenWidth > LXInEditor) then
       begin
         LPToken := PChar(LToken);
@@ -4465,6 +4471,7 @@ begin
 
   LProgress := 0;
   LProgressInc := 0;
+
   if FLines.ShowProgress then
   begin
     FLines.ProgressPosition := 0;
@@ -8628,10 +8635,7 @@ var
     LCodeFoldingRangeIndexList := TList.Create;
     try
       if FHighlighter.FoldTags then
-      begin
         AddTagFolds;
-        CodeFoldingResetCaches;
-      end;
 
       { Go through the text line by line, character by character }
       LPreviousLine := -1;
@@ -16577,7 +16581,7 @@ begin
       begin
         FMatchingPair.Current := trOpenAndCloseTokenFound;
 
-        LLineText := FLines.ExpandedStrings[LFoldRange.FromLine - 1];
+        LLineText := FLines[LFoldRange.FromLine - 1];
 
         LOpenLineText := AnsiUpperCase(LLineText);
         LTempPosition := Pos(LFoldRange.RegionItem.OpenToken, LOpenLineText);
@@ -16591,7 +16595,7 @@ begin
         FMatchingPair.CurrentMatch.OpenTokenPos := GetPosition(LTempPosition, LFoldRange.FromLine - 1);
 
         LLine := LFoldRange.ToLine;
-        LLineText := FLines.ExpandedStrings[LLine - 1];
+        LLineText := FLines[LLine - 1];
         LTempPosition := Pos(LFoldRange.RegionItem.CloseToken, AnsiUpperCase(LLineText));
 
         if FHighlighter.FoldTags then

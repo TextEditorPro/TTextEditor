@@ -116,6 +116,7 @@ var
   LIndex: Integer;
 begin
   LIndex := GetEnumValue(TypeInfo(TTextEditorRangeType), 'tt' + AString);
+
   if LIndex = -1 then
     Result := ttUnspecified
   else
@@ -523,6 +524,7 @@ begin
         ARange.TokenType := StrToRangeType(ARangeObject['Type'].Value);
 
         LPropertiesObject := ARangeObject['Properties'].ObjectValue;
+
         if Assigned(LPropertiesObject) then
         begin
           with ARange do
@@ -537,9 +539,11 @@ begin
           end;
 
           LArrayValue := LPropertiesObject['AlternativeClose'].ArrayValue;
+
           if LArrayValue.Count > 0 then
           begin
             ARange.AlternativeCloseArrayCount := LArrayValue.Count;
+
             for LIndex := 0 to ARange.AlternativeCloseArrayCount - 1 do
               ARange.AlternativeCloseArray[LIndex] := LArrayValue.Items[LIndex].Value;
           end;
@@ -556,6 +560,7 @@ begin
         end;
 
         LTokenRangeObject := ARangeObject['TokenRange'].ObjectValue;
+
         if Assigned(LTokenRangeObject) then
         begin
           LOpenToken := LTokenRangeObject['Open'].Value;

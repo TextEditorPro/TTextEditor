@@ -506,6 +506,7 @@ type
     procedure DoWordLeft(const ACommand: TTextEditorCommand);
     procedure DoWordRight(const ACommand: TTextEditorCommand);
     procedure DragMinimap(const AY: Integer);
+    procedure EnsureCaretPositionInsideLines(const ATextPosition: TTextEditorTextPosition);
     procedure FindWords(const AWord: string; const AList: TList; const ACaseSensitive: Boolean; const AWholeWordsOnly: Boolean);
     procedure FontChanged(ASender: TObject);
     procedure FreeMultiCarets;
@@ -18810,6 +18811,18 @@ begin
   SetFocus;
 end;
 
+procedure TCustomTextEditor.EnsureCaretPositionInsideLines(const ATextPosition: TTextEditorTextPosition);
+var
+  LTextPosition: TTextEditorTextPosition;
+begin
+  LTextPosition := ATextPosition;
+
+  if LTextPosition.Line > FLines.Count - 1 then
+    LTextPosition.Line := FLines.Count - 1;
+
+  TextPosition := LTextPosition;
+end;
+
 procedure TCustomTextEditor.CollapseAll(const AFromLineNumber: Integer = -1; const AToLineNumber: Integer = -1);
 var
   LIndex: Integer;
@@ -18845,10 +18858,7 @@ begin
 
   CheckIfAtMatchingKeywords;
   UpdateScrollBars;
-
-  if LTextPosition.Line > FLines.Count - 1 then
-    LTextPosition.Line := FLines.Count - 1;
-  TextPosition := LTextPosition;
+  EnsureCaretPositionInsideLines(LTextPosition);
 end;
 
 procedure TCustomTextEditor.CollapseAllByLevel(const AFromLevel: Integer; const AToLevel: Integer);
@@ -18896,11 +18906,7 @@ begin
 
   CheckIfAtMatchingKeywords;
   UpdateScrollBars;
-
-  if LTextPosition.Line > FLines.Count - 1 then
-    LTextPosition.Line := FLines.Count - 1;
-
-  TextPosition := LTextPosition;
+  EnsureCaretPositionInsideLines(LTextPosition);
 end;
 
 procedure TCustomTextEditor.TrimText(const ATrimStyle: TTextEditorTrimStyle);
@@ -20777,11 +20783,11 @@ begin
       LTextPosition.Line := LIndex;
 
       FUndoList.AddChange(crDelete, LTextPosition, LTextPosition, LTextPosition, FLines.GetLineBreak(LIndex), smNormal);
-     // AddUndoDelete(LTextPosition, LTextPosition, LTextPosition, '', smNormal);
     end;
 
     FLines.EndUpdate;
   finally
+    EnsureCaretPositionInsideLines(LTextPosition);
     FUndoList.EndBlock;
     DoChange;
   end;

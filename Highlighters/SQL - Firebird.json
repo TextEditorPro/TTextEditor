@@ -319,7 +319,12 @@
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "SkipWhitespaceOnce": true,
+              "AlternativeClose": [
+                "no",
+                "cascade",
+                "set"
+              ]
             },
             "TokenRange": {
               "Open": "update"
@@ -491,7 +496,6 @@
             "Words": [
               "absolute",
               "accent",
-              "action",
               "active",
               "add",
               "admin",
@@ -523,7 +527,6 @@
               "break",
               "by",
               "caller",
-              "cascade",
               "case",
               "check",
               "clear",
@@ -685,7 +688,6 @@
               "natural",
               "nchar",
               "next",
-              "no",
               "normalize_decfloat",
               "not",
               "now",
@@ -795,7 +797,6 @@
               "sequence",
               "serverwide",
               "session",
-              "set",
               "shadow",
               "shared",
               "signature",
@@ -1024,6 +1025,18 @@
             ],
             "Attributes": {
               "Element": "Method"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Words": [
+              "action",
+              "cascade",
+              "no",
+              "set"
+            ],
+            "Attributes": {
+              "Element": "MethodName"
             }
           },
           {

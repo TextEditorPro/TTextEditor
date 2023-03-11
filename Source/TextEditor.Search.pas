@@ -21,6 +21,7 @@ type
     FNearOperator: TTextEditorSearchNearOperator;
     FOnChange: TTextEditorSearchChangeEvent;
     FOptions: TTextEditorSearchOptions;
+    FResultPosition: TTextEditorResultPosition;
     FSearchText: string;
     FVisible: Boolean;
     procedure DoChange;
@@ -52,6 +53,7 @@ type
     property NearOperator: TTextEditorSearchNearOperator read FNearOperator write SetNearOperator;
     property OnChange: TTextEditorSearchChangeEvent read FOnChange write SetOnChange;
     property Options: TTextEditorSearchOptions read FOptions write FOptions default TEXTEDITOR_SEARCH_OPTIONS;
+    property ResultPosition: TTextEditorResultPosition read FResultPosition write FResultPosition default rpMiddle;
     property SearchText: string read FSearchText write SetSearchText;
   end;
 
@@ -70,6 +72,7 @@ begin
   FNearOperator := TTextEditorSearchNearOperator.Create;
   FOptions := TEXTEDITOR_SEARCH_OPTIONS;
   FSearchText := '';
+  FResultPosition := rpMiddle;
 end;
 
 destructor TTextEditorSearch.Destroy;

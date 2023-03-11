@@ -795,6 +795,7 @@ type
     procedure DecPaintLock;
     procedure DeleteBookmark(ABookmark: TTextEditorMark); overload;
     procedure DeleteComments;
+    procedure DeleteEmptyLines;
     procedure DeleteLines(const ALineNumber: Integer; const ACount: Integer);
     procedure DeleteMark(AMark: TTextEditorMark);
     procedure DeleteSelection;
@@ -825,6 +826,7 @@ type
     procedure GoToBookmark(const AIndex: Integer);
     procedure GoToLine(const ALine: Integer);
     procedure GoToLineAndCenter(const ALine: Integer; const AChar: Integer = 1);
+    procedure GoToLineAndSetPosition(const ALine: Integer; const AChar: Integer = 1; const AResultPosition: TTextEditorResultPosition = rpMiddle);
     procedure GoToNextBookmark;
     procedure GoToOriginalLineAndCenter(const ALine: Integer; const AChar: Integer; const AText: string = '');
     procedure GoToPreviousBookmark;
@@ -5019,6 +5021,7 @@ var
   LBeginCaretPosition: TTextEditorTextPosition;
   LEndCaretPosition: TTextEditorTextPosition;
   LHelper: string;
+  LIndex: Integer;
 
   function DeleteWord(const ATextPosition: TTextEditorTextPosition): TTextEditorTextPosition;
   var
@@ -5084,31 +5087,51 @@ begin
   LSelectionEndPosition := SelectionEndPosition;
 
   LLineText := FLines.Items^[LBeginCaretPosition.Line].TextLine;
-  if ACommand = TKeyCommands.DeleteWord then
-  begin
-    LBeginCaretPosition := LTextPosition;
-    LEndCaretPosition := DeleteWord(LBeginCaretPosition);
-  end
+
+  case ACommand of
+    TKeyCommands.DeleteWord:
+      begin
+        LBeginCaretPosition := LTextPosition;
+        LEndCaretPosition := DeleteWord(LTextPosition);
+      end;
+    TKeyCommands.DeleteWordBackward:
+      begin
+        LBeginCaretPosition := WordStart(LTextPosition);
+        LEndCaretPosition := LTextPosition;
+      end;
+    TKeyCommands.DeleteWordForward:
+      begin
+        LBeginCaretPosition := LTextPosition;
+        LEndCaretPosition := WordEnd(LTextPosition);
+      end;
+    TKeyCommands.DeleteWhitespaceBackward:
+      begin
+        LBeginCaretPosition := LTextPosition;
+        LIndex := LBeginCaretPosition.Char - 1;
+        while (LIndex > 0) and LLineText[LIndex].IsWhiteSpace do
+        begin
+          Dec(LBeginCaretPosition.Char);
+          Dec(LIndex);
+        end;
+        LEndCaretPosition := LTextPosition;
+      end;
+    TKeyCommands.DeleteWhitespaceForward:
+      begin
+        LBeginCaretPosition := LTextPosition;
+        LEndCaretPosition := LTextPosition;
+        LIndex := LEndCaretPosition.Char;
+        while (LIndex <= Length(LLineText)) and LLineText[LIndex].IsWhiteSpace do
+        begin
+          Inc(LEndCaretPosition.Char);
+          Inc(LIndex);
+        end;
+      end;
+    TKeyCommands.DeleteBeginningOfLine:
+      begin
+        LBeginCaretPosition.Char := 1;
+        LEndCaretPosition := LTextPosition;
+      end;
   else
-  if ACommand = TKeyCommands.DeleteWordBackward then
-  begin
-    LBeginCaretPosition := WordStart;
-    LEndCaretPosition := LTextPosition;
-  end
-  else
-  if ACommand = TKeyCommands.DeleteWordForward then
-  begin
-    LBeginCaretPosition := LTextPosition;
-    LEndCaretPosition := WordEnd(LBeginCaretPosition);
-  end
-  else
-  if ACommand = TKeyCommands.DeleteBeginningOfLine then
-  begin
-    LBeginCaretPosition.Char := 1;
-    LEndCaretPosition := LTextPosition;
-  end
-  else
-  begin
     LEndCaretPosition.Char := Length(LLineText) + 1;
     LEndCaretPosition.Line := LBeginCaretPosition.Line;
   end;
@@ -7374,13 +7397,16 @@ begin
     LLastLine := FLines.Count - 1;
     LLastChar := 0;
   end;
+
   for LLine := LFirstLine to LLastLine do
   begin
     LLineText := FLines.Items^[LLine].TextLine;
     LPText := PChar(LLineText);
     LPTextBegin := LPText;
+
     if (LLine = LFirstLine) and (LFirstChar > 0) then
       Inc(LPText, LFirstChar);
+
     while LPText^ <> TControlCharacters.Null do
     begin
       if AreCharsSame(LPText, PChar(AWord)) then { If the first character is a match }
@@ -7394,6 +7420,7 @@ begin
           Inc(LPText);
           Inc(LPKeyWord);
         end;
+
         if (LPKeyWord^ = TControlCharacters.Null) and
           (not AWholeWordsOnly or AWholeWordsOnly and IsWholeWord(LPBookmarkText - 1, LPText)) then
         begin
@@ -11271,13 +11298,14 @@ begin
 
   if FMatchingPairs.Active and not FSyncEdit.Visible then
   case ACommand of
-    TKeyCommands.Paste, TKeyCommands.Undo, TKeyCommands.Redo, TKeyCommands.Backspace, TKeyCommands.Tab, TKeyCommands.Left,
-      TKeyCommands.Right, TKeyCommands.Up, TKeyCommands.Down, TKeyCommands.PageUp, TKeyCommands.PageDown,
-      TKeyCommands.PageTop, TKeyCommands.PageBottom, TKeyCommands.EditorTop, TKeyCommands.EditorBottom, TKeyCommands.GoToXY,
-      TKeyCommands.BlockIndent, TKeyCommands.BlockUnindent, TKeyCommands.ShiftTab, TKeyCommands.InsertLine,
-      TKeyCommands.Char, TKeyCommands.Text, TKeyCommands.LineBreak, TKeyCommands.DeleteChar, TKeyCommands.DeleteWord,
-      TKeyCommands.DeleteWordForward, TKeyCommands.DeleteWordBackward, TKeyCommands.DeleteBeginningOfLine,
-      TKeyCommands.DeleteEndOfLine, TKeyCommands.DeleteLine, TKeyCommands.Clear, TKeyCommands.WordLeft, TKeyCommands.WordRight:
+    TKeyCommands.Paste, TKeyCommands.Undo, TKeyCommands.Redo, TKeyCommands.Backspace, TKeyCommands.Tab,
+      TKeyCommands.Left, TKeyCommands.Right, TKeyCommands.Up, TKeyCommands.Down, TKeyCommands.PageUp,
+      TKeyCommands.PageDown, TKeyCommands.PageTop, TKeyCommands.PageBottom, TKeyCommands.EditorTop,
+      TKeyCommands.EditorBottom, TKeyCommands.GoToXY, TKeyCommands.BlockIndent, TKeyCommands.BlockUnindent,
+      TKeyCommands.ShiftTab, TKeyCommands.InsertLine, TKeyCommands.Char, TKeyCommands.Text, TKeyCommands.LineBreak,
+      TKeyCommands.DeleteChar, TKeyCommands.DeleteWord, TKeyCommands.DeleteWordForward, TKeyCommands.DeleteWordBackward,
+      TKeyCommands.DeleteBeginningOfLine, TKeyCommands.DeleteEndOfLine, TKeyCommands.DeleteLine, TKeyCommands.Clear,
+      TKeyCommands.WordLeft, TKeyCommands.WordRight:
       ScanMatchingPair;
   end;
 
@@ -17550,10 +17578,7 @@ begin
   begin
     LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[FSearch.ItemIndex]);
 
-    if LSearchItem.BeginTextPosition.Line < FLineNumbers.TopLine then
-      GoToLineAndCenter(LSearchItem.BeginTextPosition.Line, LSearchItem.BeginTextPosition.Char)
-    else
-      TextPosition := LSearchItem.BeginTextPosition;
+    GoToLineAndSetPosition(LSearchItem.BeginTextPosition.Line, LSearchItem.BeginTextPosition.Char, FSearch.ResultPosition);
 
     SelectionBeginPosition := LSearchItem.BeginTextPosition;
     SelectionEndPosition := LSearchItem.EndTextPosition;
@@ -17599,10 +17624,7 @@ begin
   begin
     LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[FSearch.ItemIndex]);
 
-    if LSearchItem.BeginTextPosition.Line >= FLineNumbers.TopLine + VisibleLineCount - 1 then
-      GoToLineAndCenter(LSearchItem.EndTextPosition.Line, LSearchItem.EndTextPosition.Char)
-    else
-      TextPosition := LSearchItem.EndTextPosition;
+    GoToLineAndSetPosition(LSearchItem.EndTextPosition.Line, LSearchItem.EndTextPosition.Char, FSearch.ResultPosition);
 
     SelectionBeginPosition := LSearchItem.BeginTextPosition;
     SelectionEndPosition := LSearchItem.EndTextPosition;
@@ -18302,10 +18324,12 @@ begin
     repeat
       if IsWordBreakChar((LPChar + 1)^) and not IsWordBreakChar(LPChar^) then
         Exit(AStart + 1);
+
       Inc(LPChar);
       Inc(AStart);
     until LPChar^ = TControlCharacters.Null;
   end;
+
   Result := 0;
 end;
 
@@ -18314,6 +18338,7 @@ var
   LIndex: Integer;
 begin
   Result := 0;
+
   if (AStart > 0) and (AStart <= Length(ALine)) then
   for LIndex := AStart downto 1 do
   if (LIndex - 1 > 0) and IsWordBreakChar(ALine[LIndex - 1]) and not IsWordBreakChar(ALine[LIndex]) then
@@ -18329,9 +18354,11 @@ begin
   if (Result.Char >= 1) and (Result.Line < FLines.Count) then
   begin
     LLine := FLines.Items^[Result.Line].TextLine;
+
     if Result.Char <= Length(LLine) then
     begin
       Result.Char := StringWordEnd(LLine, Result.Char);
+
       if Result.Char = 0 then
         Result.Char := Length(LLine) + 1;
     end;
@@ -18352,8 +18379,10 @@ begin
   if (Result.Line >= 0) and (Result.Line < FLines.Count) then
   begin
     LLine := FLines.Items^[Result.Line].TextLine;
+
     Result.Char := Min(Result.Char, Length(LLine));
     Result.Char := StringWordStart(LLine, Result.Char);
+
     if Result.Char = 0 then
       Result.Char := 1;
   end;
@@ -19314,15 +19343,16 @@ begin
   DoOnCommandProcessed(LCommand, LChar, AData);
 
   case LCommand of
-    TKeyCommands.Backspace, TKeyCommands.DeleteChar, TKeyCommands.DeleteWord, TKeyCommands.DeleteWordForward,
-    TKeyCommands.DeleteWordBackward, TKeyCommands.DeleteBeginningOfLine, TKeyCommands.DeleteEndOfLine,
-    TKeyCommands.DeleteLine, TKeyCommands.Clear, TKeyCommands.LineBreak, TKeyCommands.InsertLine, TKeyCommands.Char,
-    TKeyCommands.Text, TKeyCommands.ImeStr, TKeyCommands.Undo, TKeyCommands.Redo, TKeyCommands.Cut, TKeyCommands.Paste,
-    TKeyCommands.BlockIndent, TKeyCommands.BlockUnindent, TKeyCommands.Tab, TKeyCommands.ShiftTab, TKeyCommands.UpperCase,
-    TKeyCommands.LowerCase, TKeyCommands.AlternatingCase, TKeyCommands.SentenceCase, TKeyCommands.TitleCase,
-    TKeyCommands.KeywordsUpperCase, TKeyCommands.KeywordsLowerCase, TKeyCommands.KeywordsTitleCase,
-    TKeyCommands.UpperCaseBlock, TKeyCommands.LowerCaseBlock, TKeyCommands.AlternatingCaseBlock, TKeyCommands.MoveLineUp,
-    TKeyCommands.MoveLineDown, TKeyCommands.LineComment, TKeyCommands.BlockComment:
+    TKeyCommands.Backspace, TKeyCommands.DeleteChar, TKeyCommands.DeleteWord, TKeyCommands.DeleteWhitespaceForward,
+    TKeyCommands.DeleteWhitespaceBackward, TKeyCommands.DeleteWordForward, TKeyCommands.DeleteWordBackward,
+    TKeyCommands.DeleteBeginningOfLine, TKeyCommands.DeleteEndOfLine, TKeyCommands.DeleteLine, TKeyCommands.Clear,
+    TKeyCommands.LineBreak, TKeyCommands.InsertLine, TKeyCommands.Char, TKeyCommands.Text, TKeyCommands.ImeStr,
+    TKeyCommands.Undo, TKeyCommands.Redo, TKeyCommands.Cut, TKeyCommands.Paste, TKeyCommands.BlockIndent,
+    TKeyCommands.BlockUnindent, TKeyCommands.Tab, TKeyCommands.ShiftTab, TKeyCommands.UpperCase, TKeyCommands.LowerCase,
+    TKeyCommands.AlternatingCase, TKeyCommands.SentenceCase, TKeyCommands.TitleCase, TKeyCommands.KeywordsUpperCase,
+    TKeyCommands.KeywordsLowerCase, TKeyCommands.KeywordsTitleCase, TKeyCommands.UpperCaseBlock,
+    TKeyCommands.LowerCaseBlock, TKeyCommands.AlternatingCaseBlock, TKeyCommands.MoveLineUp, TKeyCommands.MoveLineDown,
+    TKeyCommands.LineComment, TKeyCommands.BlockComment:
       DoChange;
   end;
 end;
@@ -19727,8 +19757,9 @@ begin
       TKeyCommands.DeleteChar:
         if not ReadOnly then
           DeleteChar;
-      TKeyCommands.DeleteWord, TKeyCommands.DeleteWordBackward, TKeyCommands.DeleteWordForward,
-        TKeyCommands.DeleteBeginningOfLine, TKeyCommands.DeleteEndOfLine:
+      TKeyCommands.DeleteWord, TKeyCommands.DeleteWhitespaceBackward, TKeyCommands.DeleteWhitespaceForward,
+        TKeyCommands.DeleteWordBackward, TKeyCommands.DeleteWordForward, TKeyCommands.DeleteBeginningOfLine,
+        TKeyCommands.DeleteEndOfLine:
         if not ReadOnly then
           DeleteText(ACommand);
       TKeyCommands.DeleteLine:
@@ -19970,6 +20001,11 @@ begin
 end;
 
 procedure TCustomTextEditor.GoToLineAndCenter(const ALine: Integer; const AChar: Integer = 1);
+begin
+  GoToLineAndSetPosition(ALine, AChar);
+end;
+
+procedure TCustomTextEditor.GoToLineAndSetPosition(const ALine: Integer; const AChar: Integer = 1; const AResultPosition: TTextEditorResultPosition = rpMiddle);
 var
   LIndex: Integer;
   LCodeFoldingRange: TTextEditorCodeFoldingRange;
@@ -19979,6 +20015,7 @@ begin
   for LIndex := 0 to FCodeFoldings.AllRanges.AllCount - 1 do
   begin
     LCodeFoldingRange := FCodeFoldings.AllRanges[LIndex];
+
     if LCodeFoldingRange.FromLine > ALine then
       Break
     else
@@ -19988,7 +20025,16 @@ begin
 
   LTextPosition := GetPosition(AChar, ALine);
   SetTextPosition(LTextPosition);
-  TopLine := Max(LTextPosition.Line - VisibleLineCount div 2 + 1, 1);
+
+  case AResultPosition of
+    rpTop:
+      TopLine := LTextPosition.Line + 1;
+    rpMiddle:
+      TopLine := Max(LTextPosition.Line - VisibleLineCount div 2 + 1, 1);
+    rpBottom:
+      TopLine := Max(LTextPosition.Line - VisibleLineCount + 2, 1);
+  end;
+
   FPosition.SelectionBegin := LTextPosition;
   FPosition.SelectionEnd := FPosition.SelectionBegin;
 
@@ -20126,6 +20172,7 @@ begin
     end;
 
     FLines.LoadFromStream(AStream, AEncoding);
+
     if FLines.Count = 0 then
       FLines.Add(EmptyStr);
 
@@ -20705,6 +20752,39 @@ begin
   DoChange;
 
   Invalidate;
+end;
+
+procedure TCustomTextEditor.DeleteEmptyLines;
+var
+  LIndex: Integer;
+  LTextPosition: TTextEditorTextPosition;
+begin
+  if ReadOnly then
+    Exit;
+
+  FUndoList.BeginBlock;
+  try
+    LTextPosition := TextPosition;
+    FUndoList.AddChange(crCaret, LTextPosition, LTextPosition, LTextPosition, '', smNormal);
+
+    FLines.BeginUpdate;
+    LTextPosition.Char := 1;
+
+    for LIndex := FLines.Count - 1 downto 0 do
+    if Trim(FLines[LIndex]) = '' then
+    begin
+      FLines.Delete(LIndex);
+      LTextPosition.Line := LIndex;
+
+      FUndoList.AddChange(crDelete, LTextPosition, LTextPosition, LTextPosition, FLines.GetLineBreak(LIndex), smNormal);
+     // AddUndoDelete(LTextPosition, LTextPosition, LTextPosition, '', smNormal);
+    end;
+
+    FLines.EndUpdate;
+  finally
+    FUndoList.EndBlock;
+    DoChange;
+  end;
 end;
 
 procedure TCustomTextEditor.ToggleBookmark(const AIndex: Integer = -1);

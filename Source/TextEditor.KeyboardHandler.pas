@@ -14,11 +14,10 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-
     procedure Add(const AHandler: TMethod);
     procedure Remove(const AHandler: TMethod);
     property Count: Integer read GetCount;
-    property Items[const Aindex: Integer]: TMethod read GetItem; default;
+    property Items[const AIndex: Integer]: TMethod read GetItem; default;
   end;
 
   TTextEditorKeyboardHandler = class(TObject)
@@ -38,7 +37,6 @@ type
   public
     constructor Create;
     destructor Destroy; override;
-
     procedure AddKeyDownHandler(const AHandler: TKeyEvent);
     procedure AddKeyPressHandler(const AHandler: TTextEditorKeyPressWEvent);
     procedure AddKeyUpHandler(const AHandler: TKeyEvent);
@@ -90,6 +88,7 @@ var
   LIndex: Integer;
 begin
   LIndex := AIndex * 2;
+
   Result.Data := FData[LIndex];
   Result.Code := FData[LIndex + 1];
 end;
@@ -107,6 +106,7 @@ begin
   if Assigned(FData) then
   begin
     LIndex := FData.Count - 2;
+
     while LIndex >= 0 do
     begin
       if (FData.List[LIndex] = AHandler.Data) and (FData.List[LIndex + 1] = AHandler.Code) then
@@ -115,6 +115,7 @@ begin
         FData.Delete(LIndex);
         Exit;
       end;
+
       Dec(LIndex, 2);
     end;
   end;
@@ -211,6 +212,7 @@ begin
     for LIndex := Count - 1 downto 0 do
     begin
       TKeyEvent(Items[LIndex])(ASender, Key, Shift);
+
       if Key = 0 then
       begin
         FInKeyUp := False;
@@ -234,6 +236,7 @@ begin
     for LIndex := Count - 1 downto 0 do
     begin
       TTextEditorKeyPressWEvent(Items[LIndex])(ASender, Key);
+
       if Key = TControlCharacters.Null then
       begin
         FInKeyPress := False;
@@ -252,6 +255,7 @@ var
 begin
   if FInMouseDown then
     Exit;
+
   FInMouseDown := True;
   try
     for LIndex := FMouseDownChain.Count - 1 downto 0 do
@@ -268,6 +272,7 @@ var
 begin
   if FInMouseUp then
     Exit;
+
   FInMouseUp := True;
   try
     for LIndex := FMouseUpChain.Count - 1 downto 0 do
@@ -284,6 +289,7 @@ var
 begin
   if FInMouseCursor then
     Exit;
+
   FInMouseCursor := True;
   try
     for LIndex := FMouseCursorChain.Count - 1 downto 0 do

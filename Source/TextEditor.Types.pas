@@ -168,6 +168,7 @@ type
   TTextEditorSelectionOptions = set of TTextEditorSelectionOption;
 
   { Search }
+  TTextEditorResultPosition = (rpBottom, rpMiddle, rpTop);
   TTextEditorSearchChanges = (scRefresh, scSearch, scEngineUpdate, scInSelectionActive, scVisible);
 
   TTextEditorSearchOption = (soBeepIfStringNotFound, soCaseSensitive, soEntireScope, soHighlightResults,

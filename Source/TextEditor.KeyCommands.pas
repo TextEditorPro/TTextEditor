@@ -83,19 +83,21 @@ type
     GoToPreviousBookmark = 331;
     { Deletion }
     Backspace = 501;
-    DeleteChar = 502;
-    DeleteWord = 503;
-    DeleteWordForward = 504;
-    DeleteWordBackward = 505;
-    DeleteBeginningOfLine = 506;
-    DeleteEndOfLine = 507;
-    DeleteLine = 508;
-    Clear = 509;
+    Clear = 502;
+    DeleteBeginningOfLine = 503;
+    DeleteChar = 504;
+    DeleteEndOfLine = 505;
+    DeleteLine = 506;
+    DeleteWhitespaceBackward = 507;
+    DeleteWhitespaceForward = 508;
+    DeleteWord = 509;
+    DeleteWordBackward = 510;
+    DeleteWordForward = 511;
     { Insert }
-    LineBreak = 510;
-    InsertLine = 511;
-    Char = 512;
-    Text = 513;
+    LineBreak = 512;
+    InsertLine = 513;
+    Char = 514;
+    Text = 515;
     ImeStr = 550;
     { Clipboard }
     Undo = 601;
@@ -225,7 +227,7 @@ type
   end;
 
 const
-  EditorCommandStrings: array [0 .. 106] of TTextEditorCommandString = (
+  EditorCommandStrings: array [0 .. 108] of TTextEditorCommandString = (
     (Value: TKeyCommands.None; Name: 'TKeyCommands.None'),
     (Value: TKeyCommands.Left; Name: 'TKeyCommands.Left'),
     (Value: TKeyCommands.Right; Name: 'TKeyCommands.Right'),
@@ -269,6 +271,8 @@ const
     (Value: TKeyCommands.ScrollRight; Name: 'TKeyCommands.ScrollRight'),
     (Value: TKeyCommands.Backspace; Name: 'TKeyCommands.Backspace'),
     (Value: TKeyCommands.DeleteChar; Name: 'TKeyCommands.DeleteChar'),
+    (Value: TKeyCommands.DeleteWhitespaceForward; Name: 'TKeyCommands.DeleteWhitespaceForward'),
+    (Value: TKeyCommands.DeleteWhitespaceBackward; Name: 'TKeyCommands.DeleteWhitespaceBackward'),
     (Value: TKeyCommands.DeleteWord; Name: 'TKeyCommands.DeleteWord'),
     (Value: TKeyCommands.DeleteWordForward; Name: 'TKeyCommands.DeleteWordForward'),
     (Value: TKeyCommands.DeleteWordBackward; Name: 'TKeyCommands.DeleteWordBackward'),
@@ -689,6 +693,8 @@ begin
   Add(TKeyCommands.BlockUnindent, [ssCtrl, ssShift], Ord('U'));
   { Fragment deletion }
   Add(TKeyCommands.DeleteWord, [ssCtrl], Ord('W'));
+  Add(TKeyCommands.DeleteWhitespaceBackward, [ssCtrl, ssShift], vkBack);
+  Add(TKeyCommands.DeleteWhitespaceForward, [ssCtrl, ssShift], vkDelete);
   Add(TKeyCommands.DeleteWordBackward, [ssCtrl], vkBack);
   Add(TKeyCommands.DeleteWordForward, [ssCtrl], vkDelete);
   { Line operations }

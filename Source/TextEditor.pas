@@ -392,7 +392,7 @@ type
     function GetCanUndo: Boolean;
     function GetCaretIndex: Integer;
     function GetCharAtCursor: Char;
-    function GetCharAtTextPosition(const ATextPosition: TTextEditorTextPosition): Char;
+    function GetCharAtTextPosition(const ATextPosition: TTextEditorTextPosition; const ASelect: Boolean = False): Char;
     function GetCharWidth: Integer;
     function GetEndOfLine(const ALine: PChar): PChar;
     function GetFoldingOnCurrentLine: Boolean;
@@ -439,6 +439,7 @@ type
     function PreviousWordPosition(const ATextPosition: TTextEditorTextPosition): TTextEditorTextPosition; overload;
     function PreviousWordPosition: TTextEditorTextPosition; overload;
     function ScanHighlighterRangesFrom(const AIndex: Integer): Integer;
+    function SelectSearchItem(const AIndex: Integer): Boolean;
     function ShortCutPressed: Boolean;
     function StringWordEnd(const ALine: string; var AStart: Integer): Integer;
     function StringWordStart(const ALine: string; var AStart: Integer): Integer;
@@ -729,6 +730,8 @@ type
     function CharacterCount(const ASelected: Boolean = False): Integer;
     function CreateHighlighterStream(const AName: string): TStream; virtual;
     function DeleteBookmark(const ALine: Integer; const AIndex: Integer): Boolean; overload;
+    function FindFirst: Boolean;
+    function FindLast: Boolean;
     function FindNext(const AHandleNotFound: Boolean = True): Boolean;
     function FindPrevious(const AHandleNotFound: Boolean = True): Boolean;
     function GetBookmark(const AIndex: Integer; var ATextPosition: TTextEditorTextPosition): Boolean;
@@ -1664,7 +1667,11 @@ begin
 
   LTextPosition := ATextPosition;
   Dec(LTextPosition.Char);
+
   LKeyword := WordAtTextPosition(LTextPosition).Trim;
+
+  if LKeyword = '' then
+    LKeyword := GetCharAtTextPosition(LTextPosition);
 
   if LKeyword = '' then
     Exit;
@@ -1708,6 +1715,9 @@ begin
   BeginUndoBlock;
   try
     WordAtTextPosition(ATextPosition, True);
+
+    if not SelectionAvailable then
+      GetCharAtTextPosition(ATextPosition, True);
 
     LStringList := TStringList.Create;
     LStringList.TrailingLineBreak := False;
@@ -2165,21 +2175,31 @@ begin
   Result := GetCharAtTextPosition(TextPosition);
 end;
 
-function TCustomTextEditor.GetCharAtTextPosition(const ATextPosition: TTextEditorTextPosition): Char;
+function TCustomTextEditor.GetCharAtTextPosition(const ATextPosition: TTextEditorTextPosition; const ASelect: Boolean = False): Char;
 var
   LTextLine: string;
   LLength: Integer;
 begin
   Result := TControlCharacters.Null;
+
   if (ATextPosition.Line >= 0) and (ATextPosition.Line < FLines.Count) then
   begin
     LTextLine := FLines.Items^[ATextPosition.Line].TextLine;
     LLength := Length(LTextLine);
+
     if LLength = 0 then
       Exit;
 
     if ATextPosition.Char <= LLength then
       Result := LTextLine[ATextPosition.Char];
+
+    if ASelect then
+    begin
+      FPosition.SelectionBegin.Char := ATextPosition.Char;
+      FPosition.SelectionBegin.Line := ATextPosition.Line;
+      FPosition.SelectionEnd.Char := ATextPosition.Char + 1;
+      FPosition.SelectionEnd.Line := ATextPosition.Line;
+    end;
   end;
 end;
 
@@ -8375,16 +8395,9 @@ var
                 LSkipIfFoundAfterOpenToken := False;
 
                 if LRegionItem.SkipIfFoundAfterOpenTokenArrayCount > 0 then
+                while (LPText^ <> TControlCharacters.Null) and not LSkipIfFoundAfterOpenToken do
                 begin
-                  while LPText^ <> TControlCharacters.Null do
-                  begin
-                    if not LPText^.IsWhiteSpace then
-                      Break;
-
-                    Inc(LPText);
-                  end;
-
-                  if LPText^ <> TControlCharacters.Null then
+                  if not LPText^.IsWhiteSpace then
                   for LArrayIndex := 0 to LRegionItem.SkipIfFoundAfterOpenTokenArrayCount - 1 do
                   begin
                     LPKeyWord := PChar(LRegionItem.SkipIfFoundAfterOpenTokenArray[LArrayIndex]);
@@ -8408,6 +8421,8 @@ var
                         LPText := LPBookmarkText2; { Region not found, return pointer back }
                     end;
                   end;
+
+                  Inc(LPText);
                 end;
 
                 if LSkipIfFoundAfterOpenToken then
@@ -10603,11 +10618,13 @@ var
   LIndex: Integer;
 begin
   LIndex := KeyCommands.FindKeycodes(FLast.Key, FLast.ShiftState, ACode, AShift);
+
   if LIndex >= 0 then
     Result := KeyCommands[LIndex].Command
   else
   begin
     LIndex := KeyCommands.FindKeycode(ACode, AShift);
+
     if LIndex >= 0 then
       Result := KeyCommands[LIndex].Command
     else
@@ -17545,6 +17562,35 @@ begin
   end;
 end;
 
+function TCustomTextEditor.SelectSearchItem(const AIndex: Integer): Boolean;
+var
+  LSearchItem: PTextEditorSearchItem;
+begin
+  Result := False;
+
+  if (FSearch.Items.Count > 0) and (AIndex >= 0) and (AIndex < FSearch.Items.Count) then
+  begin
+    LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[AIndex]);
+
+    GoToLineAndSetPosition(LSearchItem.BeginTextPosition.Line, LSearchItem.BeginTextPosition.Char, FSearch.ResultPosition);
+
+    SelectionBeginPosition := LSearchItem.BeginTextPosition;
+    SelectionEndPosition := LSearchItem.EndTextPosition;
+
+    Result := True;
+  end;
+end;
+
+function TCustomTextEditor.FindFirst: Boolean;
+begin
+  Result := SelectSearchItem(0);
+end;
+
+function TCustomTextEditor.FindLast: Boolean;
+begin
+  Result := SelectSearchItem(FSearch.Items.Count - 1);
+end;
+
 function TCustomTextEditor.FindPrevious(const AHandleNotFound: Boolean = True): Boolean;
 var
   LSearchItem: PTextEditorSearchItem;
@@ -17552,6 +17598,7 @@ begin
   Result := False;
 
   FSearch.ItemIndex := FSearch.GetPreviousSearchItemIndex(TextPosition);
+
   if FSearch.ItemIndex = -1 then
   begin
     if not AHandleNotFound or AHandleNotFound and (FSearch.SearchText = '') then
@@ -17572,6 +17619,7 @@ begin
     if soWrapAround in FSearch.Options then
     begin
       MoveCaretToEnd;
+
       Result := FindPrevious;
     end
   end
@@ -20016,6 +20064,7 @@ var
   LIndex: Integer;
   LCodeFoldingRange: TTextEditorCodeFoldingRange;
   LTextPosition: TTextEditorTextPosition;
+  LViewPosition: TTextEditorViewPosition;
 begin
   if FCodeFolding.Visible then
   for LIndex := 0 to FCodeFoldings.AllRanges.AllCount - 1 do
@@ -20032,13 +20081,15 @@ begin
   LTextPosition := GetPosition(AChar, ALine);
   SetTextPosition(LTextPosition);
 
+  LViewPosition := TextToViewPosition(LTextPosition);
+
   case AResultPosition of
     rpTop:
-      TopLine := LTextPosition.Line + 1;
+      TopLine := LViewPosition.Row;
     rpMiddle:
-      TopLine := Max(LTextPosition.Line - VisibleLineCount div 2 + 1, 1);
+      TopLine := Max(LViewPosition.Row - VisibleLineCount div 2 + 1, 1);
     rpBottom:
-      TopLine := Max(LTextPosition.Line - VisibleLineCount + 2, 1);
+      TopLine := Max(LViewPosition.Row - VisibleLineCount + 1, 1);
   end;
 
   FPosition.SelectionBegin := LTextPosition;

@@ -735,10 +735,7 @@
           },
           {
             "OpenToken": "RECORD",
-            "CloseToken": "END",
-            "Properties": {
-              "NoSubs": true
-            }
+            "CloseToken": "END"
           },
           {
             "OpenToken": "INTERFACE",

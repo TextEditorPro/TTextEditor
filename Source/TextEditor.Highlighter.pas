@@ -361,6 +361,7 @@ begin
 
         LStartPosition := FRunPosition;
 
+        if (FRunPosition > 0) and (FLine[FRunPosition - 1] > TControlCharacters.UnitSeparator) then
         while not (FLine[FRunPosition] in LDelimiters) and (FRunPosition - LStartPosition < 100) do
           Inc(FRunPosition);
       end;

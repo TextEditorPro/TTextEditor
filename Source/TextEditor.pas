@@ -7739,6 +7739,7 @@ procedure TCustomTextEditor.MoveCaretAndSelection(const ABeforeTextPosition, AAf
   const ASelectionCommand: Boolean);
 var
   LReason: TTextEditorChangeReason;
+  LSelectionAvailable: Boolean;
 begin
   IncPaintLock;
 
@@ -7751,16 +7752,25 @@ begin
     LReason := crSelection
   else
     LReason := crCaret;
+
   FUndoList.AddChange(LReason, FPosition.Text, SelectionBeginPosition, SelectionEndPosition, '', FSelection.ActiveMode);
+
+  LSelectionAvailable := GetSelectionAvailable;
 
   if ASelectionCommand then
   begin
-    if not GetSelectionAvailable then
+    if not LSelectionAvailable then
       SetSelectionBeginPosition(ABeforeTextPosition);
+
     SetSelectionEndPosition(AAfterTextPosition);
   end
   else
+  begin
     SetSelectionBeginPosition(AAfterTextPosition);
+
+    if LSelectionAvailable then
+      SetSelectionEndPosition(AAfterTextPosition);
+  end;
 
   TextPosition := AAfterTextPosition;
 
@@ -7778,6 +7788,7 @@ var
   LPLine: PChar;
 begin
   LTextPosition := TextPosition;
+
   if not GetSelectionAvailable then
   begin
     FPosition.SelectionBegin := LTextPosition;
@@ -7805,12 +7816,14 @@ begin
   begin
     if LDestinationPosition.Line + 1 >= FLines.Count then
       Exit;
+
     Line := LDestinationPosition.Line + 1;
     Char := 1;
   end
   else
   begin
     LDestinationPosition.Char := Max(1, LDestinationPosition.Char + X);
+
     if (X > 0) and LChangeY then
       LDestinationPosition.Char := Min(LDestinationPosition.Char, LCurrentLineLength + 1);
 
@@ -7872,12 +7885,6 @@ begin
   begin
     DoTrimTrailingSpaces(FPosition.SelectionBegin.Line);
     DoTrimTrailingSpaces(LDestinationLineChar.Line);
-  end;
-
-  if not GetSelectionAvailable then
-  begin
-    FPosition.SelectionBegin := TextPosition;
-    FPosition.SelectionEnd := FPosition.SelectionBegin;
   end;
 
   MoveCaretAndSelection(FPosition.SelectionBegin, LDestinationLineChar, ASelectionCommand);
@@ -9504,6 +9511,7 @@ begin
   LValue := AValue;
 
   LValue.Line := EnsureRange(LValue.Line, 0, Max(FLines.Count - 1, 0));
+
   if FSelection.Mode = smNormal then
     LValue.Char := EnsureRange(LValue.Char, 1, FLines.StringLength(LValue.Line) + 1)
   else
@@ -9590,7 +9598,6 @@ begin
   FLines.Text := AValue;
   TopLine := 1;
   MoveCaretToBeginning;
-  FPosition.SelectionEnd := FPosition.SelectionBegin;
   ClearUndo;
 end;
 
@@ -11904,7 +11911,6 @@ begin
   MoveCaretToBeginning;
   ClearCodeFolding;
   ClearMatchingPair;
-  ClearSelection;
   FBookmarkList.Clear;
   FMarkList.Clear;
   FUndoList.Clear;
@@ -12300,6 +12306,7 @@ begin
   if AButton = mbLeft then
   begin
     FMouse.Down.X := X;
+
     if not FRuler.Visible or FRuler.Visible and (Y > FRuler.Height) then
       FMouse.Down.Y := Y;
 
@@ -12320,6 +12327,7 @@ begin
         begin
           if not Assigned(FMultiEdit.Carets) then
             AddCaret(TextToViewPosition(TextPosition));
+
           AddCaret(LViewPosition);
         end;
 
@@ -12347,6 +12355,7 @@ begin
     begin
       LRowCount := GetRowCountFromPixel(Y);
       LRow := LViewPosition.Row - TopLine;
+
       if (LRowCount <= LRow) and (LRowCount > LRow - 1) then
       begin
         FSyncEdit.Visible := True;
@@ -12358,6 +12367,7 @@ begin
   if not ReadOnly and FSyncEdit.Active then
   begin
     LTextPosition := PixelsToTextPosition(X, Y);
+
     if FSyncEdit.BlockSelected and not FSyncEdit.IsTextPositionInBlock(LTextPosition) then
       FSyncEdit.Visible := False;
 
@@ -12393,6 +12403,7 @@ begin
     begin
       FRightMargin.Moving := True;
       FRightMarginMovePosition := FRightMargin.Position * FPaintHelper.CharWidth + FLeftMarginWidth;
+
       Exit;
     end;
 
@@ -12451,8 +12462,8 @@ begin
           TextPosition := LTextPosition;
 
           MouseCapture := True;
-
           Exclude(FState.Flags, sfWaitForDragging);
+
           if LSelectionAvailable and (eoDragDropEditing in FOptions) and (X > FLeftMarginWidth) and
             (FSelection.Mode = smNormal) and IsTextPositionInSelection(LTextPosition) then
             Include(FState.Flags, sfWaitForDragging);
@@ -12486,7 +12497,11 @@ begin
                 FState.AltDown := False;
               end;
 
-            SelectionBeginPosition := TextPosition;
+            TextPosition := LTextPosition;
+            SelectionBeginPosition := LTextPosition;
+
+            if LSelectionAvailable then
+              SelectionEndPosition := LTextPosition;
           end;
         end;
       end
@@ -17188,6 +17203,7 @@ begin
     if LDeleteSelection then
     begin
       DeleteSelection;
+
       if AValue <> '' then
         LTextPosition := LBeginTextPosition
       else
@@ -17201,6 +17217,7 @@ begin
   finally
     if not FState.ReplaceLock then
       SearchAll;
+
     DecPaintLock;
   end;
 end;

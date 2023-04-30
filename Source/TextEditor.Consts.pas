@@ -62,6 +62,7 @@ type
   TControlCharacterNames = record
   const
     Acknowledge = 'ACK';
+    Backspace = 'BS';
     Bell = 'BEL';
     Cancel = 'CAN';
     CarriageReturn = 'CR';
@@ -239,6 +240,8 @@ begin
   case AChar of
     TControlCharacters.Acknowledge:
       Result := TControlCharacterNames.Acknowledge;
+    TControlCharacters.Backspace:
+      Result := TControlCharacterNames.Backspace;
     TControlCharacters.Bell:
       Result := TControlCharacterNames.Bell;
     TControlCharacters.Cancel:

@@ -54,8 +54,8 @@ const
 
 type
   TCursorPair = record
-    OriginalCursor: TCursor;
     NewCursor : TCursor;
+    OriginalCursor: TCursor;
     procedure Initalize(const AOriginalCursor, ANewCursor: TCursor);
   end;
 
@@ -65,10 +65,10 @@ type
     function AddCursorToStack(const ACursor: TCursor): Integer;
     procedure EndCursor(const AResetToFirst: Boolean); overload;
   public
-    procedure BeginCursor(const ACursor: TCursor);
-    procedure EndCursor; overload;
     constructor Create(const ACursor: TCursor);
     destructor Destroy; override;
+    procedure BeginCursor(const ACursor: TCursor);
+    procedure EndCursor; overload;
   end;
 
 var
@@ -87,6 +87,7 @@ begin
   Result := UpperCase(AValue);
 
   LValue := LowerCase(AValue);
+
   for LIndex := 1 to Length(AValue) do
   if Result[LIndex] = AValue[LIndex] then
     Result[LIndex] := LValue[LIndex];
@@ -101,10 +102,13 @@ begin
 
   LIndex := 1;
   LLength := Length(AValue);
+
   SetLength(Result, LLength);
+
   while LIndex <= LLength do
   begin
     LChar := AValue[LIndex];
+
     if LIndex > 1 then
     begin
       if AValue[LIndex - 1] = ' ' then
@@ -204,12 +208,14 @@ var
   LParam: Boolean;
 begin
   LParam := True;
+
   if IsXP and SystemParametersInfo(SPI_SETDROPSHADOW, 0, @LParam, 0) then
   begin
     LClassLong := GetClassLong(AHandle, GCL_STYLE);
     LClassLong := LClassLong or CS_DROPSHADOW;
 
     Result := SetClassLong(AHandle, GCL_STYLE, LClassLong) <> 0;
+
     if Result then
       SendMessage(AHandle, CM_RECREATEWND, 0, 0);
   end
@@ -230,6 +236,7 @@ end;
 function CaseUpper(const AChar: Char): Char;
 begin
   Result := AChar;
+
   case AChar of
     'a'..'z':
       Result := Char(Word(AChar) and $FFDF);
@@ -253,6 +260,7 @@ begin
   Result := False;
 
   LLength := AString.Length;
+
   if LLength = 0 then
     Exit;
 
@@ -266,9 +274,11 @@ var
   LColor: string;
 begin
   Result := TColors.SysNone;
+
   if AColor.Length = 7 then
   begin
     LColor := '$00' + Copy(AColor, 6, 2) + Copy(AColor, 4, 2) + Copy(AColor, 2, 2);
+
     Result := StrToIntDef(LColor, TColors.SysNone);
   end;
 end;
@@ -283,9 +293,11 @@ var
   LPosition: Integer;
   LCount: Integer;
 begin
-  AHasTabs := False;
   Result := ALine;
+
+  AHasTabs := False;
   LPosition := 1;
+
   while True do
   begin
     LPosition := Pos(TControlCharacters.Tab, Result, LPosition);
@@ -391,11 +403,13 @@ begin
   Result := False;
 
   ACharsBefore := 0;
+
   if Assigned(ALine) then
   while ALine^ <> TControlCharacters.Null do
   begin
     if ALine^ = TControlCharacters.Tab then
       Exit(True);
+
     Inc(ACharsBefore);
     Inc(ALine);
   end;
@@ -437,7 +451,7 @@ end;
 
 function IsRightToLeftCharacter(const AChar: Char; const AAllowEmptySpace: Boolean = True): Boolean;
 begin
-  // Hebrew: 1424-1535, Arabic: 1536-1791, Arabic Supplement: 1872–1919
+  { Hebrew: 1424-1535, Arabic: 1536-1791, Arabic Supplement: 1872–1919 }
   case Ord(AChar) of
     9, 32:
       Result := AAllowEmptySpace;
@@ -453,7 +467,7 @@ begin
   Result := (APosition1.Line = APosition2.Line) and (APosition1.Char = APosition2.Char);
 end;
 
-{ checks for a BOM in UTF-8 format or searches the Buffer for typical UTF-8 octet sequences }
+{ checks for a BOM in UTF-8 format or searches the buffer for typical UTF-8 octet sequences }
 function IsUTF8Buffer(const ABuffer: TBytes; out AWithBOM: Boolean): Boolean;
 const
   MinimumCountOfUTF8Strings = 1;
@@ -466,6 +480,7 @@ var
   begin
     Result := 0;
     Inc(LIndex);
+
     while (LIndex < LBufferSize) and (Result < 4) do
     begin
       case ABuffer[LIndex] of
@@ -474,6 +489,7 @@ var
       else
         Break;
       end;
+
       Inc(LIndex);
     end;
   end;
@@ -489,21 +505,21 @@ begin
     if (LBufferSize >= Length(TEXT_EDITOR_UTF8_BOM)) and CompareMem(@ABuffer[0], @TEXT_EDITOR_UTF8_BOM[0], Length(TEXT_EDITOR_UTF8_BOM)) then
     begin
       AWithBOM := True;
-      Result := True;
-      Exit;
+      Exit(True);
     end;
 
     { If no BOM was found, check for leading/trailing byte sequences, which are uncommon in usual non UTF-8 encoded text.
 
-      NOTE: There is no 100% save way to detect UTF-8 streams. The bigger MinimumCountOfUTF8Strings, the lower is the
+      NOTE: There is no 100% safe way to detect UTF-8 streams. The bigger MinimumCountOfUTF8Strings, the lower is the
       probability of a false positive. On the other hand, a big MinimumCountOfUTF8Strings makes it unlikely to detect
       files with only little usage of non US-ASCII chars, like usual in European languages. }
     LFoundUTF8Strings := 0;
     LIndex := 0;
+
     while LIndex < LBufferSize do
     begin
       case ABuffer[LIndex] of
-        $00 .. $7F: // skip US-ASCII characters as they could belong to various charsets
+        $00 .. $7F: { skip US-ASCII characters as they could belong to various charsets }
           ;
         $C2 .. $DF:
           if CountOfTrailingBytes = 1 then
@@ -552,18 +568,15 @@ begin
             else
               Break;
           end;
-        $C0, $C1, $F5 .. $FF: // invalid UTF-8 bytes
+        $C0, $C1, $F5 .. $FF: { invalid UTF-8 bytes }
           Break;
-        $80 .. $BF: // trailing bytes are consumed when handling leading bytes,
-          // any occurence of "orphaned" trailing bytes is invalid UTF-8
+        $80 .. $BF: { trailing bytes are consumed when handling leading bytes, any occurence of "orphaned" trailing
+                      bytes is invalid UTF-8 }
           Break;
       end;
 
       if LFoundUTF8Strings = MinimumCountOfUTF8Strings then
-      begin
-        Result := True;
-        Break;
-      end;
+        Exit(True);
 
       Inc(LIndex);
     end;
@@ -575,8 +588,10 @@ var
   LRetryCount: Integer;
   LDelayStepMs: Integer;
 begin
-  LDelayStepMs := TClipboardDefaults.DelayStepMs;
   Result := False;
+
+  LDelayStepMs := TClipboardDefaults.DelayStepMs;
+
   for LRetryCount := 1 to TClipboardDefaults.MaxRetries do
   try
     Clipboard.Open;
@@ -625,6 +640,7 @@ begin
     if Clipboard.HasFormat(CF_UNICODETEXT) then
     begin
       LGlobalMem := Clipboard.GetAsHandle(CF_UNICODETEXT);
+
       if LGlobalMem <> 0 then
       try
         Result := PChar(GlobalLock(LGlobalMem));
@@ -636,6 +652,7 @@ begin
     begin
       LLocaleID := 0;
       LGlobalMem := Clipboard.GetAsHandle(CF_LOCALE);
+
       if LGlobalMem <> 0 then
       try
         LLocaleID := PInteger(GlobalLock(LGlobalMem))^;
@@ -644,6 +661,7 @@ begin
       end;
 
       LGlobalMem := Clipboard.GetAsHandle(CF_TEXT);
+
       if LGlobalMem <> 0 then
       try
         LBytePointer := GlobalLock(LGlobalMem);
@@ -714,11 +732,13 @@ var
   LPGlobalLock: PByte;
   LHTML: UTF8String;
   LLength: Integer;
+  LText: string;
 begin
   if AText.IsEmpty then
     Exit;
 
-  LLength := Length(AText);
+  LText := StringReplace(AText, TControlCharacters.Null, '', [rfReplaceAll]);
+  LLength := Length(LText);
 
   if OpenClipboard then
   try
@@ -733,7 +753,7 @@ begin
         try
           if Assigned(LPGlobalLock) then
           begin
-            Move(PAnsiChar(AnsiString(AText))^, LPGlobalLock^, LLength + 1);
+            Move(PAnsiChar(AnsiString(LText))^, LPGlobalLock^, LLength + 1);
             Clipboard.SetAsHandle(CF_TEXT, LGlobalMem);
           end;
         finally
@@ -750,7 +770,7 @@ begin
       try
         if Assigned(LPGlobalLock) then
         begin
-          Move(PChar(AText)^, LPGlobalLock^, (LLength + 1) * SizeOf(Char));
+          Move(PChar(LText)^, LPGlobalLock^, (LLength + 1) * SizeOf(Char));
           Clipboard.SetAsHandle(CF_UNICODETEXT, LGlobalMem);
         end;
       finally
@@ -831,6 +851,7 @@ begin
       else
         Break;
     end;
+
     Inc(LPosition);
   end;
 

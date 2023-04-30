@@ -5621,13 +5621,6 @@ begin
 
   FUndoList.BeginBlock(3);
 
-  if (rmoAutoLinebreak in FRightMargin.Options) and (FViewPosition.Column > FRightMargin.Position) then
-  begin
-    DoLineBreak;
-    LTextPosition.Char := 1;
-    Inc(LTextPosition.Line);
-  end;
-
   if GetSelectionAvailable or FMultiEdit.SelectionAvailable then
   begin
     if FSyncEdit.Visible then
@@ -5637,6 +5630,13 @@ begin
   end
   else
   begin
+    if (rmoAutoLinebreak in FRightMargin.Options) and (FViewPosition.Column > FRightMargin.Position) then
+    begin
+      DoLineBreak;
+      LTextPosition.Char := 1;
+      Inc(LTextPosition.Line);
+    end;
+
     if FSyncEdit.Visible then
       FSyncEdit.MoveEndPositionChar(1);
 

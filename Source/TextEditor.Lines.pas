@@ -726,10 +726,27 @@ begin
   end;
 end;
 
+{$IF CompilerVersion >= 33.0}
 procedure TTextEditorLines.Grow;
 begin
   SetCapacity(GrowCollection(FCapacity, FCount + 1));
 end;
+{$ELSE}
+procedure TTextEditorLines.Grow;
+var
+  LDelta: Integer;
+begin
+  if FCapacity > 64 then
+    LDelta := (FCapacity * 3) div 2
+  else
+  if FCapacity > 8 then
+    LDelta := 16
+  else
+    LDelta :=  4;
+
+  SetCapacity(FCapacity + LDelta);
+end;
+{$ENDIF}
 
 procedure TTextEditorLines.Insert(AIndex: Integer; const AValue: string);
 begin

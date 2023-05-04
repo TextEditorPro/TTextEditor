@@ -21487,7 +21487,7 @@ end;
 
 function TCustomDBTextEditor.GetReadOnly: Boolean;
 begin
-  Result := FDataLink.ReadOnly;
+  Result := not FDataLink.CanModify;
 end;
 
 procedure TCustomDBTextEditor.Loaded;
@@ -21560,7 +21560,7 @@ var
   LStream: TStream;
   LBlobField: TBlobField;
 begin
-  if FDataLink.ReadOnly then
+  if not FDataLink.CanModify then
     Exit;
 
   FDataLink.Edit;

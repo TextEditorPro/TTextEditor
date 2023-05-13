@@ -85,6 +85,7 @@ begin
   LHighlighter.UpdateAttributes;
   LHighlighter.Loading := False;
 
+  TCustomTextEditor(LHighlighter.Editor).ClearMinimapBuffer;
   LHighlighter.Editor.Invalidate;
 end;
 

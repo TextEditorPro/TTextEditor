@@ -454,7 +454,6 @@ type
     procedure CaretChanged(ASender: TObject);
     procedure CheckIfAtMatchingKeywords;
     procedure ClearCodeFolding;
-    procedure ClearMinimapBuffer;
     procedure CMGestureManagerChanged(var Message: TMessage); message CM_GESTUREMANAGERCHANGED;
     procedure CodeFoldingCollapse(const AFoldRange: TTextEditorCodeFoldingRange);
     procedure CodeFoldingLinesDeleted(const AFirstLine: Integer; const ACount: Integer);
@@ -786,6 +785,7 @@ type
     procedure ClearHighlightLine;
     procedure ClearMarks;
     procedure ClearMatchingPair;
+    procedure ClearMinimapBuffer;
     procedure ClearSelection;
     procedure ClearUndo;
     procedure CollapseAll(const AFromLineNumber: Integer = -1; const AToLineNumber: Integer = -1);
@@ -2292,6 +2292,7 @@ begin
       else
       begin
         Result := LPivot;
+
         if FWordWrap.Active then
         begin
           Dec(LPivot);
@@ -3457,6 +3458,7 @@ var
         FWordWrapLine.Length[LCacheLength] := LLength;
         FWordWrapLine.ViewLength[LCacheLength] := LViewLength;
         FWordWrapLine.Width[LCacheLength] := LWidth;
+
         AddLineNumberIntoCache;
 
         Inc(LCharsBefore, GetTokenCharCount(LFirstPartOfToken, LCharsBefore));
@@ -4913,7 +4915,7 @@ end;
 
 procedure TCustomTextEditor.DeleteChar;
 var
-  LLineText: string;
+  LLineText, LOriginalLineText: string;
   LLength: Integer;
   LHelper: string;
   LSpaceBuffer: string;
@@ -4933,7 +4935,9 @@ begin
   else
   begin
     LLineText := FLines.Items^[LTextPosition.Line].TextLine;
+    LOriginalLineText := LLineText;
     LLength := Length(LLineText);
+
     if LTextPosition.Char <= LLength then
     begin
       LHelper := Copy(LLineText, LTextPosition.Char, 1);
@@ -4981,6 +4985,10 @@ begin
 
       FLineNumbers.ResetCache := True;
     end;
+
+    if FSearch.Enabled and not FSearch.SearchText.IsEmpty and
+      ((Pos(FSearch.SearchText, LOriginalLineText) > 0) or (Pos(FSearch.SearchText, LLineText) > 0)) then
+      SearchAll;
   end;
 end;
 
@@ -5179,7 +5187,7 @@ end;
 
 procedure TCustomTextEditor.DoBackspace;
 var
-  LLineText: string;
+  LLineText, LOriginalLineText: string;
   LLength: Integer;
   LHelper: string;
   LSpaceCount1, LSpaceCount2: Integer;
@@ -5225,6 +5233,7 @@ begin
     end;
 
     LLineText := FLines[LTextPosition.Line];
+    LOriginalLineText := LLineText;
     LLength := Length(LLineText);
 
     if LTextPosition.Char > LLength + 1 then
@@ -5434,7 +5443,8 @@ begin
       end;
     end;
 
-    if FSearch.Enabled and not FSearch.SearchText.IsEmpty and (Pos(FSearch.SearchText, LLineText) > 0) then
+    if FSearch.Enabled and not FSearch.SearchText.IsEmpty and
+      ((Pos(FSearch.SearchText, LOriginalLineText) > 0) or (Pos(FSearch.SearchText, LLineText) > 0)) then
       SearchAll;
   end;
 
@@ -5642,8 +5652,8 @@ begin
 
     LLineText := FLines[LTextPosition.Line];
     LLength := Length(LLineText);
-
     LSpaceCount1 := 0;
+
     if LLength < LTextPosition.Char - 1 then
     begin
       LCharCount := LTextPosition.Char - LLength - 1 - Ord(FOvertypeMode);
@@ -5665,6 +5675,7 @@ begin
     if FOvertypeMode = omInsert then
     begin
       LCloseToken := '';
+
       if FMatchingPairs.AutoComplete then
       for LIndex := 0 to FHighlighter.MatchingPairs.Count - 1 do
       begin
@@ -5731,6 +5742,7 @@ begin
           GetPosition(LTextPosition.Char + Length(LCloseToken), LTextPosition.Line), '', smNormal);
         FLines.LineState[LTextPosition.Line] := lsModified;
       end;
+
       FUndoList.AddChange(crSelection, LTextPosition, LBlockStartPosition, LBlockStartPosition, '', smNormal);
     end
     else
@@ -5773,6 +5785,7 @@ begin
       if FViewPosition.Row < Length(FWordWrapLine.ViewLength) then
       begin
         LWidth := GetTokenWidth(LSpaceBuffer, Length(LSpaceBuffer), 0) + GetTokenWidth(AChar, 1, 0);
+
         if (LCharAtCursor = TControlCharacters.Tab) or
           (FWordWrapLine.Width[FViewPosition.Row] + LWidth > FScrollHelper.PageWidth) or
           (FViewPosition.Column > FWordWrapLine.ViewLength[FViewPosition.Row]) then
@@ -5789,6 +5802,9 @@ begin
   end;
 
   FUndoList.EndBlock;
+
+  if FSearch.Enabled and not FSearch.SearchText.IsEmpty and (Pos(FSearch.SearchText, LLineText) > 0) then
+    SearchAll;
 
   if FSyncEdit.Visible then
     DoSyncEdit;
@@ -6883,6 +6899,7 @@ var
   LTabText, LTextLine: string;
   LChangeScrollPastEndOfLine: Boolean;
   LWidth: Integer;
+  LLength: Integer;
 begin
   if GetSelectionAvailable and (FPosition.SelectionBegin.Line <> FPosition.SelectionEnd.Line) and
     (toSelectedBlockIndent in FTabs.Options) then
@@ -6911,12 +6928,18 @@ begin
       if FViewPosition.Row < Length(FWordWrapLine.ViewLength) then
       begin
         LWidth := GetTokenWidth(LTabText, 1, 0);
+
         if (FWordWrapLine.Width[FViewPosition.Row] + LWidth > FScrollHelper.PageWidth) or
           (FViewPosition.Column > FWordWrapLine.ViewLength[FViewPosition.Row]) then
           CreateLineNumbersCache(True)
         else
         begin
-          FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] + 1;
+          if toTabsToSpaces in Tabs.Options then
+            LLength := Tabs.Width
+          else
+            LLength := 1;
+
+          FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] + LLength;
           FWordWrapLine.ViewLength[FViewPosition.Row] := FWordWrapLine.ViewLength[FViewPosition.Row] +
             GetTokenCharCount(LTabText, FViewPosition.Column - 1);
           FWordWrapLine.Width[FViewPosition.Row] := FWordWrapLine.Width[FViewPosition.Row] + LWidth;

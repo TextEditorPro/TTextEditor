@@ -749,7 +749,7 @@ type
     function IsWordSelected: Boolean;
     function PixelsToTextPosition(const X, Y: Integer): TTextEditorTextPosition;
     function ReplaceSelectedText(const AReplaceText: string; const ASearchText: string; const AAction: TTextEditorReplaceTextAction = rtaReplace): Boolean;
-    function ReplaceText(const ASearchText: string; const AReplaceText: string; const APageIndex: Integer = -1): Integer;
+    function ReplaceText(const ASearchText: string; const AReplaceText: string; const AReplaceAll: Boolean = True; const APageIndex: Integer = -1): Integer;
     function SaveToFile(const AFilename: string; const AEncoding: System.SysUtils.TEncoding = nil): Boolean;
     function SearchStatus: string;
     function TextToHTML(const AClipboardFormat: Boolean = False): string;
@@ -17897,7 +17897,7 @@ begin
 end;
 
 function TCustomTextEditor.ReplaceText(const ASearchText: string; const AReplaceText: string;
-  const APageIndex: Integer = -1): Integer;
+  const AReplaceAll: Boolean = True; const APageIndex: Integer = -1): Integer;
 var
   LPaintLocked: Boolean;
   LFound: Boolean;
@@ -17923,6 +17923,7 @@ begin
     raise ETextEditorBaseException.Create(STextEditorSearchEngineNotAssigned);
 
   Result := 0;
+
   if Length(ASearchText) = 0 then
     Exit;
 
@@ -17956,6 +17957,7 @@ begin
   FState.ReplaceLock := True;
 
   SearchAll(ASearchText);
+
   Result := FSearch.Items.Count - 1;
 
   if Assigned(FEvents.OnReplaceSearchCount) then
@@ -17977,7 +17979,11 @@ begin
     LPaintLocked := False;
     LockPainting;
 
-    LActionReplace := raReplaceAll;
+    if AReplaceAll then
+      LActionReplace := raReplaceAll
+    else
+      LActionReplace := raReplace;
+
     LFound := True;
     while LFound do
     begin

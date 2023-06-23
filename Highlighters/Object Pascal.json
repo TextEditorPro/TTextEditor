@@ -647,7 +647,8 @@
     "Ranges": [
       {
         "Options": {
-          "EscapeChar": "&"
+          "EscapeChar": "&",
+          "HideGuideLineAtFirstColumn": true
         },
         "SkipRegion": [
           {
@@ -728,6 +729,7 @@
             "CloseToken": "END",
             "Properties": {
               "NoSubs": true,
+              "ShowGuideLine": false,
               "SkipIfFoundAfterOpenToken": [
                 ";"
               ]
@@ -747,6 +749,7 @@
             "OpenToken": "UNIT",
             "CloseToken": "END.",
             "Properties": {
+              "ShowGuideLine": false,
               "OpenTokenBeginningOfLine": true,
               "SharedClose": true
             }
@@ -755,6 +758,7 @@
             "OpenToken": "PROGRAM",
             "CloseToken": "END.",
             "Properties": {
+              "ShowGuideLine": false,
               "OpenTokenBeginningOfLine": true,
               "SharedClose": true
             }

@@ -3,8 +3,8 @@
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.SysUtils, System.WideStrUtils, Vcl.Controls, Vcl.Graphics, Vcl.Menus,
-  TextEditor.KeyCommands, TextEditor.Language, TextEditor.Types;
+  Winapi.Windows, System.Classes, System.SysUtils, System.WideStrUtils, Vcl.Controls, Vcl.Menus, TextEditor.KeyCommands,
+  TextEditor.Language, TextEditor.Types;
 
 type
   TTextEditorMacroState = (msStopped, msRecording, msPlaying, msPaused);

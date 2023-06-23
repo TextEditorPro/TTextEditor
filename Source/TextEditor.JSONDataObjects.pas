@@ -397,7 +397,7 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.AnsiStrings, System.RTLConsts, System.Variants, TextEditor.Language;
+  Winapi.Windows, System.AnsiStrings, System.RTLConsts, TextEditor.Language;
 
 type
   TJSONTokenKind = (jtkEof, jtkInvalidSymbol, jtkLBrace, jtkRBrace, jtkLBracket, jtkRBracket, jtkComma, jtkColon,

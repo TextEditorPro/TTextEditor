@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Consts, TextEditor.Types;
+  System.Classes, TextEditor.Consts, TextEditor.Types;
 
 type
   TTextEditorSelection = class(TPersistent)

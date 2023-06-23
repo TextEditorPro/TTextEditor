@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, System.SysUtils, Vcl.Graphics, TextEditor.Consts, TextEditor.Types, TextEditor.Utils;
+  System.Classes, System.SysUtils, TextEditor.Consts, TextEditor.Types, TextEditor.Utils;
 
 const
   TEXT_EDITOR_STRING_RECORD_SIZE = SizeOf(TTextEditorStringRecord);

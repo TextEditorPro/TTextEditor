@@ -3,8 +3,7 @@
 interface
 
 uses
-  System.Classes, Vcl.Controls, TextEditor.Search.InSelection, TextEditor.Search.Map,
-  TextEditor.Search.NearOperator, TextEditor.Types;
+  System.Classes, TextEditor.Search.InSelection, TextEditor.Search.Map, TextEditor.Search.NearOperator, TextEditor.Types;
 
 const
   TEXTEDITOR_SEARCH_OPTIONS = [soHighlightResults, soSearchOnTyping, soBeepIfStringNotFound, soShowSearchMatchNotFound];

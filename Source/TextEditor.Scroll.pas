@@ -41,7 +41,7 @@ type
 implementation
 
 uses
-  Vcl.Graphics, TextEditor.Consts;
+  TextEditor.Consts;
 
 constructor TTextEditorScroll.Create;
 begin

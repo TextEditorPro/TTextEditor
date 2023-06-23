@@ -288,9 +288,11 @@ type
   TTextEditorCodeFoldingHintIndicatorOptions = set of TTextEditorCodeFoldingHintIndicatorOption;
 
   TTextEditorCodeFoldingOption = (cfoAutoPadding, cfoAutoWidth, cfoFoldMultilineComments, cfoHighlightFoldingLine,
-    cfoHighlightIndentGuides, cfoHighlightMatchingPair, cfoShowCollapsedLine, cfoShowIndentGuides, cfoShowTreeLine,
-    cfoShowCollapseMarkAtTheEnd, cfoExpandByHintClick);
+    cfoHighlightMatchingPair, cfoShowCollapsedLine, cfoShowTreeLine, cfoShowCollapseMarkAtTheEnd, cfoExpandByHintClick);
   TTextEditorCodeFoldingOptions = set of TTextEditorCodeFoldingOption;
+
+  TTextEditorCodeFoldingGuideLineOption = (cfgHideAtFirstColumn, cfgHideOverText, cgfHideInActiveRow, cfgHighlightIndentGuides);
+  TTextEditorCodeFoldingGuideLineOptions = set of TTextEditorCodeFoldingGuideLineOption;
 
   TTextEditorCodeFoldingHintIndicatorPadding = class(TPadding)
   protected
@@ -362,6 +364,17 @@ type
   TTextEditorSaveToFileEvent = procedure(const ASender: TObject; const AFilename: string; var AEncoding: TEncoding; var ACancel: Boolean) of object;
   TTextEditorScrollEvent = procedure(const ASender: TObject; const AScrollBar: TScrollBarKind) of object;
   TTextEditorSearchChangeEvent = procedure(const AEvent: TTextEditorSearchChanges) of object;
+
+  { Defaults options }
+  TTextEditorDefaultOptions = record
+  const
+    CodeFolding = [cfoAutoPadding, cfoAutoWidth, cfoHighlightMatchingPair, cfoShowTreeLine, cfoExpandByHintClick];
+    CodeFoldingGuideLines = [cfgHideOverText, cfgHighlightIndentGuides];
+    CodeFoldingHint = [hioShowBorder, hioShowMark];
+    CompletionProposal = [cpoAutoConstraints, cpoAddHighlighterKeywords, cpoFiltered, cpoParseItemsFromText];
+    HighlightLine = [hlIgnoreCase, hlDeleteOnHighlighterLoad];
+    MultiEdit = [meoShowActiveLine, meoShowGhost];
+  end;
 
   TTextEditorTimer = class(TTimer)
   public

@@ -4,8 +4,8 @@ unit TextEditor.Highlighter.Rules;
 interface
 
 uses
-  System.Classes, System.SysUtils, Vcl.Graphics, TextEditor.Consts, TextEditor.Highlighter.Attributes,
-  TextEditor.Highlighter.Token, TextEditor.Types;
+  System.Classes, System.SysUtils, TextEditor.Consts, TextEditor.Highlighter.Attributes, TextEditor.Highlighter.Token,
+  TextEditor.Types;
 
 type
   TTextEditorRange = class;
@@ -173,7 +173,7 @@ type
 implementation
 
 uses
-  System.Types, System.UITypes, TextEditor.Utils;
+  System.UITypes, TextEditor.Utils;
 
 { TTextEditorParser }
 

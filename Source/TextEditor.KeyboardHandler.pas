@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, System.SysUtils, Vcl.Controls, Vcl.Forms, Vcl.Graphics, TextEditor.Types;
+  System.Classes, System.SysUtils, Vcl.Controls, TextEditor.Types;
 
 type
   TTextEditorMethodList = class

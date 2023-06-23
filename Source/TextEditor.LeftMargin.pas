@@ -3,9 +3,9 @@
 interface
 
 uses
-  System.Classes, System.UITypes, Vcl.Graphics, TextEditor.LeftMargin.Bookmarks,
-  TextEditor.LeftMargin.Border, TextEditor.LeftMargin.LineNumbers, TextEditor.LeftMargin.LineState,
-  TextEditor.LeftMargin.Marks, TextEditor.LeftMargin.MarksPanel, TextEditor.Marks;
+  System.Classes, System.UITypes, TextEditor.LeftMargin.Bookmarks, TextEditor.LeftMargin.Border,
+  TextEditor.LeftMargin.LineNumbers, TextEditor.LeftMargin.LineState, TextEditor.LeftMargin.Marks,
+  TextEditor.LeftMargin.MarksPanel, TextEditor.Marks;
 
 type
   TLeftMarginGetTextEvent = procedure(ASender: TObject; ALine: Integer; var AText: string) of object;

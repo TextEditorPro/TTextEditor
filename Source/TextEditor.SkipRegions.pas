@@ -34,8 +34,7 @@ type
 
 implementation
 
-uses
-  Winapi.Windows;
+
 
 { TTextEditorSkipRegions }
 

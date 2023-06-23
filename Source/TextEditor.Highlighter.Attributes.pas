@@ -3,7 +3,7 @@
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.UITypes, TextEditor.Consts;
+  System.Classes, System.UITypes, TextEditor.Consts;
 
 type
   TTextEditorHighlighterAttribute = class(TPersistent)
@@ -32,8 +32,7 @@ type
 
 implementation
 
-uses
-  System.SysUtils;
+
 
 constructor TTextEditorHighlighterAttribute.Create(const AttributeName: string);
 begin

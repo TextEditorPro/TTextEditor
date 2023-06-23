@@ -3,12 +3,7 @@
 interface
 
 uses
-  System.Classes, Vcl.Controls, Vcl.Graphics, TextEditor.CompletionProposal.Snippets,
-  TextEditor.CompletionProposal.Trigger, TextEditor.Types;
-
-const
-  TEXTEDITOR_COMPLETION_PROPOSAL_DEFAULT_OPTIONS = [cpoAutoConstraints, cpoAddHighlighterKeywords, cpoFiltered,
-    cpoParseItemsFromText];
+  System.Classes, TextEditor.CompletionProposal.Snippets, TextEditor.CompletionProposal.Trigger, TextEditor.Types;
 
 type
   TTextEditorCompletionProposal = class(TPersistent)
@@ -43,7 +38,7 @@ type
     property KeywordCase: TTextEditorCompletionProposalKeywordCase read FKeywordCase write FKeywordCase default kcLowerCase;
     property MinHeight: Integer read FMinHeight write FMinHeight default 0;
     property MinWidth: Integer read FMinWidth write FMinWidth default 0;
-    property Options: TTextEditorCompletionProposalOptions read FOptions write FOptions default TEXTEDITOR_COMPLETION_PROPOSAL_DEFAULT_OPTIONS;
+    property Options: TTextEditorCompletionProposalOptions read FOptions write FOptions default TTextEditorDefaultOptions.CompletionProposal;
     property ShortCut: TShortCut read FShortCut write FShortCut default 16416; // Ctrl+Space
     property Snippets: TTextEditorCompletionProposalSnippets read FSnippets write SetSnippets;
     property Trigger: TTextEditorCompletionProposalTrigger read FTrigger write FTrigger;
@@ -64,7 +59,7 @@ begin
   FActive := True;
   FCloseChars := TCharacterSets.DefaultCompletionProposalCloseChars;
   FSnippets := TTextEditorCompletionProposalSnippets.Create(Self);
-  FOptions := TEXTEDITOR_COMPLETION_PROPOSAL_DEFAULT_OPTIONS;
+  FOptions := TTextEditorDefaultOptions.CompletionProposal;
   FShortCut := Vcl.Menus.ShortCut(Ord(' '), [ssCtrl]);
   FTrigger := TTextEditorCompletionProposalTrigger.Create;
   FVisibleLines := 8;

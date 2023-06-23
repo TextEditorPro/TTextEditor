@@ -3,7 +3,7 @@
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.SysUtils, System.Types, System.UITypes, Vcl.Graphics, TextEditor.Types;
+  Winapi.Windows, System.Classes, System.SysUtils, System.Types, System.UITypes, Vcl.Graphics;
 
 const
   CFontStyleCount = Ord(High(TFontStyle)) + 1;

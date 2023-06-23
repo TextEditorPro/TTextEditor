@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, Vcl.Graphics, TextEditor.Types;
+  System.Classes, TextEditor.Types;
 
 type
   TTextEditorLeftMarginMarksPanel = class(TPersistent)

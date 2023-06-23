@@ -5,9 +5,6 @@ interface
 uses
   System.Classes, Vcl.Controls, TextEditor.Glyph, TextEditor.Types;
 
-const
-  TEXTEDITOR_CODE_FOLDING_HINT_INDICATOR_DEFAULT_OPTIONS = [hioShowBorder, hioShowMark];
-
 type
   TTextEditorCodeFoldingHintIndicator = class(TPersistent)
   strict private
@@ -26,7 +23,7 @@ type
   published
     property Glyph: TTextEditorGlyph read FGlyph write SetGlyph stored IsGlyphStored;
     property MarkStyle: TTextEditorCodeFoldingHintIndicatorMarkStyle read FMarkStyle write FMarkStyle default imsThreeDots;
-    property Options: TTextEditorCodeFoldingHintIndicatorOptions read FOptions write FOptions default TEXTEDITOR_CODE_FOLDING_HINT_INDICATOR_DEFAULT_OPTIONS;
+    property Options: TTextEditorCodeFoldingHintIndicatorOptions read FOptions write FOptions default TTextEditorDefaultOptions.CodeFoldingHint;
     property Padding: TTextEditorCodeFoldingHintIndicatorPadding read FPadding write FPadding;
     property Visible: Boolean read FVisible write FVisible default True;
     property Width: Integer read FWidth write FWidth default 26;
@@ -46,7 +43,7 @@ begin
   FGlyph.Visible := False;
   FMarkStyle := imsThreeDots;
   FVisible := True;
-  FOptions := TEXTEDITOR_CODE_FOLDING_HINT_INDICATOR_DEFAULT_OPTIONS;
+  FOptions := TTextEditorDefaultOptions.CodeFoldingHint;
   FWidth := 26;
 end;
 

@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, System.UITypes, TextEditor.Types;
+  System.Classes, TextEditor.Types;
 
 type
   TTextEditorSearchInSelection = class(TPersistent)

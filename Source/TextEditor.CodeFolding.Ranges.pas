@@ -46,11 +46,12 @@ type
   TTextEditorCodeFoldingRange = class
   strict private
     FAllCodeFoldingRanges: TTextEditorAllCodeFoldingRanges;
+    FCollapseMarkRect: TRect;
     FCollapsed: Boolean;
     FCollapsedBy: Integer;
-    FCollapseMarkRect: TRect;
     FFoldRangeLevel: Integer;
     FFromLine: Integer;
+    FGuideLineOffset: Integer;
     FIndentLevel: Integer;
     FIsExtraTokenFound: Boolean;
     FParentCollapsed: Boolean;
@@ -67,11 +68,12 @@ type
     procedure SetParentCollapsedOfSubCodeFoldingRanges(const AParentCollapsed: Boolean; const ACollapsedBy: Integer);
     procedure Widen(const ALineCount: Integer);
     property AllCodeFoldingRanges: TTextEditorAllCodeFoldingRanges read FAllCodeFoldingRanges write FAllCodeFoldingRanges;
+    property CollapseMarkRect: TRect read FCollapseMarkRect write FCollapseMarkRect;
     property Collapsed: Boolean read FCollapsed write FCollapsed default False;
     property CollapsedBy: Integer read FCollapsedBy write FCollapsedBy;
-    property CollapseMarkRect: TRect read FCollapseMarkRect write FCollapseMarkRect;
     property FoldRangeLevel: Integer read FFoldRangeLevel write FFoldRangeLevel;
     property FromLine: Integer read FFromLine write FFromLine;
+    property GuideLineOffset: Integer read FGuideLineOffset write FGuideLineOffset;
     property IndentLevel: Integer read FIndentLevel write FIndentLevel;
     property IsExtraTokenFound: Boolean read FIsExtraTokenFound write FIsExtraTokenFound default False;
     property ParentCollapsed: Boolean read FParentCollapsed write FParentCollapsed;
@@ -247,10 +249,11 @@ constructor TTextEditorCodeFoldingRange.Create;
 begin
   inherited;
 
-  FSubCodeFoldingRanges := TTextEditorCodeFoldingRanges.Create;
   FCollapsed := False;
   FCollapsedBy := -1;
+  FGuideLineOffset := 0;
   FIsExtraTokenFound := False;
+  FSubCodeFoldingRanges := TTextEditorCodeFoldingRanges.Create;
   FUndoListed := False;
 end;
 

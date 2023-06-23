@@ -4,7 +4,9 @@ interface
 
 uses
   Winapi.Messages, System.Classes, System.Types, Vcl.Controls
-{$IFDEF ALPHASKINS}, acSBUtils, sCommonData, sStyleSimply{$ENDIF};
+{$IFDEF ALPHASKINS}
+  , acSBUtils, sCommonData, sStyleSimply
+{$ENDIF};
 
 type
   TTextEditorPopupWindow = class(TCustomControl)
@@ -34,8 +36,10 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.SysUtils
-{$IFDEF ALPHASKINS}, sConst, sMessages, sSkinProps{$ENDIF};
+  Winapi.Windows
+{$IFDEF ALPHASKINS}
+  , System.SysUtils, sConst, sMessages, sSkinProps
+{$ENDIF};
 
 constructor TTextEditorPopupWindow.Create(AOwner: TComponent);
 begin
@@ -66,6 +70,7 @@ begin
 {$IFDEF ALPHASKINS}
   if Assigned(FScrollWnd) then
     FreeAndNil(FScrollWnd);
+
   if Assigned(FSkinData) then
     FreeAndNil(FSkinData);
 {$ENDIF}

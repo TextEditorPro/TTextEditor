@@ -54,7 +54,9 @@ implementation
 
 uses
   System.SysUtils, TextEditor, TextEditor.Consts, TextEditor.KeyCommands, TextEditor.PaintHelper, TextEditor.Utils
-{$IFDEF ALPHASKINS}, sSkinProvider{$ENDIF};
+{$IFDEF ALPHASKINS}
+  , sSkinProvider
+{$ENDIF};
 
 constructor TTextEditorCodeFoldingHintForm.Create(AOwner: TComponent);
 begin

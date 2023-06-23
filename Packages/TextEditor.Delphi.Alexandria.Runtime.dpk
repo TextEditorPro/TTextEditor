@@ -48,6 +48,7 @@ contains
   TextEditor.Caret.Offsets in '..\Source\TextEditor.Caret.Offsets.pas',
   TextEditor.Caret.Styles in '..\Source\TextEditor.Caret.Styles.pas',
   TextEditor.CodeFolding in '..\Source\TextEditor.CodeFolding.pas',
+  TextEditor.CodeFolding.GuideLines in '..\Source\TextEditor.CodeFolding.GuideLines.pas',
   TextEditor.CodeFolding.Hint in '..\Source\TextEditor.CodeFolding.Hint.pas',
   TextEditor.CodeFolding.Hint.Form in '..\Source\TextEditor.CodeFolding.Hint.Form.pas',
   TextEditor.CodeFolding.Hint.Indicator in '..\Source\TextEditor.CodeFolding.Hint.Indicator.pas',

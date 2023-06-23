@@ -13,8 +13,7 @@ interface
 {$WARN UNSAFE_CODE OFF}
 
 uses
-  Winapi.Messages, Winapi.UxTheme, Winapi.Windows, System.Classes, System.UITypes, Vcl.Controls, Vcl.Forms,
-  Vcl.Graphics, Vcl.Themes;
+  Winapi.Messages, Winapi.Windows, System.Classes, Vcl.Controls, Vcl.Forms, Vcl.Graphics, Vcl.Themes;
 
 const
   CM_UPDATE_VCLSTYLE_SCROLLBARS = CM_BASE + 2050;

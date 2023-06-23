@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, System.UITypes, Vcl.Graphics, TextEditor.CodeFolding.Hint.Indicator;
+  System.Classes, System.UITypes, TextEditor.CodeFolding.Hint.Indicator;
 
 type
   TTextEditorCodeFoldingHint = class(TPersistent)
@@ -32,8 +32,8 @@ constructor TTextEditorCodeFoldingHint.Create;
 begin
   inherited;
 
-  FIndicator := TTextEditorCodeFoldingHintIndicator.Create;
   FCursor := crHandPoint;
+  FIndicator := TTextEditorCodeFoldingHintIndicator.Create;
   FRowCount := 40;
   FVisible := True;
 end;
@@ -50,8 +50,10 @@ begin
   if Assigned(ASource) and (ASource is TTextEditorCodeFoldingHint) then
   with ASource as TTextEditorCodeFoldingHint do
   begin
-    Self.FIndicator.Assign(FIndicator);
     Self.FCursor := FCursor;
+    Self.FIndicator.Assign(FIndicator);
+    Self.FRowCount := FRowCount;
+    Self.FVisible := FVisible;
   end
   else
     inherited Assign(ASource);

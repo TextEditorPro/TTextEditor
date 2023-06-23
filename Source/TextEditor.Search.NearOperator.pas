@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, System.UITypes, TextEditor.Types;
+  System.Classes;
 
 type
   TTextEditorSearchNearOperator = class(TPersistent)

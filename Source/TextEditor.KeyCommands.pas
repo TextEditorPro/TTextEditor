@@ -218,7 +218,7 @@ function EditorCommandToIdent(ACommand: Integer; var AIdent: string): Boolean;
 implementation
 
 uses
-  Winapi.Windows, System.UITypes, TextEditor.Language;
+  System.UITypes, TextEditor.Language;
 
 type
   TTextEditorCommandString = record

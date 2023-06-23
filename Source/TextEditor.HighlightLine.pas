@@ -5,9 +5,6 @@ interface
 uses
   System.Classes, System.UITypes, Vcl.Graphics, TextEditor.Types;
 
-const
-  TEXTEDITOR_HIGHLIGHT_LINE_DEFAULT_OPTIONS = [hlIgnoreCase, hlDeleteOnHighlighterLoad];
-
 type
   TTextEditorHighlightLineItem = class(TCollectionItem)
   strict private
@@ -23,7 +20,7 @@ type
   published
     property Background: TColor read FBackground write FBackground default TColors.SysNone;
     property Foreground: TColor read FForeground write FForeground default TColors.SysNone;
-    property Options: TTextEditorHighlightLineItemOptions read FOptions write FOptions default TEXTEDITOR_HIGHLIGHT_LINE_DEFAULT_OPTIONS;
+    property Options: TTextEditorHighlightLineItemOptions read FOptions write FOptions default TTextEditorDefaultOptions.HighlightLine;
     property Pattern: string read FPattern write FPattern;
   end;
 
@@ -70,7 +67,7 @@ begin
 
   FBackground := TColors.SysNone;
   FForeground := TColors.SysNone;
-  FOptions := TEXTEDITOR_HIGHLIGHT_LINE_DEFAULT_OPTIONS;
+  FOptions := TTextEditorDefaultOptions.HighlightLine;
 end;
 
 procedure TTextEditorHighlightLineItem.Assign(ASource: TPersistent);

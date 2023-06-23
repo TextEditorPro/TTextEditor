@@ -17,8 +17,7 @@ procedure Register;
 implementation
 
 uses
-  System.Classes, Vcl.Controls, Vcl.Dialogs, Vcl.Forms, StrEdit, TextEditor.Language, TextEditor.MacroRecorder,
-  VCLEditors;
+  System.Classes, Vcl.Dialogs, Vcl.Forms, StrEdit, TextEditor.Language, TextEditor.MacroRecorder, VCLEditors;
 
 { Register }
 

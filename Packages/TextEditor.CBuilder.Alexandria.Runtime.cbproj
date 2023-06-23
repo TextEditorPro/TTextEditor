@@ -172,6 +172,9 @@
         <DelphiCompile Include="..\Source\TextEditor.CodeFolding.Hint.Indicator.pas">
             <BuildOrder>10</BuildOrder>
         </DelphiCompile>
+        <DelphiCompile Include="..\Source\TextEditor.CodeFolding.GuideLines.pas">
+            <BuildOrder>11</BuildOrder>
+        </DelphiCompile>
         <DelphiCompile Include="..\Source\TextEditor.CodeFolding.Hint.pas">
             <BuildOrder>11</BuildOrder>
         </DelphiCompile>

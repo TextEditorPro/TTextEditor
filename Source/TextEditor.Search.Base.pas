@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, System.Generics.Collections, TextEditor.Lines, TextEditor.Types;
+  System.Generics.Collections, TextEditor.Lines, TextEditor.Types;
 
 type
   TTextEditorSearchBase = class

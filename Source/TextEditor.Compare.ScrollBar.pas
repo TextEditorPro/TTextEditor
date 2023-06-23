@@ -4,7 +4,9 @@ interface
 
 uses
   Winapi.Messages, System.Classes, System.Types, Vcl.Controls, TextEditor
-{$IFDEF ALPHASKINS}, acSBUtils, sCommonData{$ENDIF};
+{$IFDEF ALPHASKINS}
+  , acSBUtils, sCommonData
+{$ENDIF};
 
 type
   [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
@@ -64,9 +66,10 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.Math, System.SysUtils, System.UITypes, Vcl.Forms, Vcl.Graphics, TextEditor.Consts,
-  TextEditor.Types
-{$IFDEF ALPHASKINS}, Winapi.CommCtrl, sConst, sMessages, sStyleSimply, sVCLUtils{$ENDIF};
+  Winapi.Windows, System.Math, System.SysUtils, System.UITypes, Vcl.Graphics, TextEditor.Consts, TextEditor.Types
+{$IFDEF ALPHASKINS}
+  , Winapi.CommCtrl, Vcl.Forms, sConst, sMessages, sStyleSimply, sVCLUtils
+{$ENDIF};
 
 constructor TTextEditorCompareScrollBar.Create(AOwner: TComponent);
 begin

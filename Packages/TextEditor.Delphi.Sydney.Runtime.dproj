@@ -143,6 +143,7 @@
         <DCCReference Include="..\Source\TextEditor.Caret.Offsets.pas"/>
         <DCCReference Include="..\Source\TextEditor.Caret.Styles.pas"/>
         <DCCReference Include="..\Source\TextEditor.CodeFolding.pas"/>
+        <DCCReference Include="..\Source\TextEditor.CodeFolding.GuideLines.pas"/>
         <DCCReference Include="..\Source\TextEditor.CodeFolding.Hint.pas"/>
         <DCCReference Include="..\Source\TextEditor.CodeFolding.Hint.Form.pas"/>
         <DCCReference Include="..\Source\TextEditor.CodeFolding.Hint.Indicator.pas"/>

@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, System.UITypes, Vcl.Graphics, TextEditor.Types;
+  System.Classes, System.UITypes, TextEditor.Types;
 
 type
   TTextEditorRightMargin = class(TPersistent)

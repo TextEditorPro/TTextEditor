@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, TextEditor.Search.RegularExpressions;
+  TextEditor.Search.RegularExpressions;
 
 type
   TTextEditorWildcardSearch = class(TTextEditorRegexSearch)

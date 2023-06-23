@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, System.Generics.Collections, System.RegularExpressions, TextEditor.Lines, TextEditor.Search.Base;
+  System.Generics.Collections, System.RegularExpressions, TextEditor.Lines, TextEditor.Search.Base;
 
 type
   TTextEditorRegexSearch = class(TTextEditorSearchBase)

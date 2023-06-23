@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, System.SysUtils, TextEditor.Lines, TextEditor.Search.Base;
+  System.SysUtils, TextEditor.Lines, TextEditor.Search.Base;
 
 type
   TTextEditorNormalSearch = class(TTextEditorSearchBase)

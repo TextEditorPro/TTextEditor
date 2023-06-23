@@ -65,7 +65,7 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.Generics.Defaults, System.Math, System.SysUtils, System.UITypes, Vcl.Dialogs, TextEditor,
+  Winapi.Windows, System.Generics.Defaults, System.Math, System.SysUtils, System.UITypes, TextEditor,
   TextEditor.CompletionProposal.Snippets, TextEditor.Consts, TextEditor.Highlighter, TextEditor.KeyCommands,
   TextEditor.PaintHelper;
 

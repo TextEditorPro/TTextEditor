@@ -5,8 +5,7 @@ unit TextEditor.Utils;
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.SysUtils, System.UITypes, Vcl.Graphics, TextEditor.KeyCommands,
-  TextEditor.Types;
+  Winapi.Windows, System.Classes, System.SysUtils, System.UITypes, Vcl.Graphics, TextEditor.Types;
 
 function ActivateDropShadow(const AHandle: THandle): Boolean;
 function AutoCursor(const ACursor: TCursor = crHourGlass): IAutoCursor;
@@ -47,7 +46,11 @@ implementation
 
 uses
   Winapi.ActiveX, System.Character, System.Generics.Collections, Vcl.ClipBrd, Vcl.Controls, Vcl.Forms, TextEditor.Consts
-{$IFDEF ALPHASKINS}, sDialogs{$ELSE}, Vcl.Dialogs{$ENDIF};
+{$IFDEF ALPHASKINS}
+  , sDialogs
+{$ELSE}
+  , Vcl.Dialogs
+{$ENDIF};
 
 const
   TEXT_EDITOR_UTF8_BOM: array [0 .. 2] of Byte = ($EF, $BB, $BF);

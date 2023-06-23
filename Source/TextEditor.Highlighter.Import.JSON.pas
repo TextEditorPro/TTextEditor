@@ -15,7 +15,6 @@ type
       const AElementPrefix: string);
     procedure ImportCodeFolding(const ACodeFoldingObject: TJSONObject);
     procedure ImportCodeFoldingFoldRegion(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
-    procedure ImportCodeFoldingOptions(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
     procedure ImportCodeFoldingSkipRegion(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion; const ACodeFoldingObject: TJSONObject);
     procedure ImportCodeFoldingVoidElements(const ACodeFoldingObject: TJSONObject);
     procedure ImportColorTheme(const AThemeObject: TJSONObject);
@@ -41,8 +40,8 @@ type
 implementation
 
 uses
-  System.TypInfo, System.UITypes, Vcl.Dialogs, Vcl.Forms, Vcl.Graphics, Vcl.GraphUtil, TextEditor.Consts,
-  TextEditor.Highlighter.Token, TextEditor.HighlightLine, TextEditor.Language, TextEditor.Types;
+  System.TypInfo, System.UITypes, Vcl.Graphics, TextEditor.Consts, TextEditor.Highlighter.Token,
+  TextEditor.HighlightLine, TextEditor.Language, TextEditor.Types;
 
 type
   TElement = record
@@ -881,69 +880,86 @@ begin
   end;
 end;
 
-procedure TTextEditorHighlighterImportJSON.ImportCodeFoldingOptions(const ACodeFoldingRegion: TTextEditorCodeFoldingRegion;
-  const ACodeFoldingObject: TJSONObject);
-var
-  LCodeFoldingObject: TJSONObject;
-begin
-  if ACodeFoldingObject.Contains('Options') then
-  begin
-    LCodeFoldingObject := ACodeFoldingObject['Options'].ObjectValue;
-
-    with ACodeFoldingRegion do
-    begin
-      if LCodeFoldingObject.Contains('OpenToken') then
-        OpenToken := LCodeFoldingObject['OpenToken'].Value;
-
-      if LCodeFoldingObject.Contains('CloseToken') then
-        CloseToken := LCodeFoldingObject['CloseToken'].Value;
-
-      if LCodeFoldingObject.Contains('EscapeChar') then
-        EscapeChar := LCodeFoldingObject['EscapeChar'].Value[1];
-
-      if LCodeFoldingObject.Contains('StringEscapeChar') then
-        StringEscapeChar := LCodeFoldingObject['StringEscapeChar'].Value[1];
-    end;
-
-    if LCodeFoldingObject.Contains('FoldTags') and LCodeFoldingObject.ValueBoolean['FoldTags'] then
-      FHighlighter.FoldTags := True;
-
-    if LCodeFoldingObject.Contains('MatchingPairHighlight') and not LCodeFoldingObject.ValueBoolean['MatchingPairHighlight'] then
-      FHighlighter.MatchingPairHighlight := False;
-  end;
-end;
-
 procedure TTextEditorHighlighterImportJSON.ImportCodeFolding(const ACodeFoldingObject: TJSONObject);
 var
-  LIndex, LCount: Integer;
-  LCodeFoldingObject: TJSONObject;
+  LIndex, LRegionIndex: Integer;
+  LCount, LRangeCount: Integer;
+  LCodeFoldingObject, LObject: TJSONObject;
   LArray: TJSONArray;
   LEditor: TCustomTextEditor;
+  LCodeFoldingRegion: TTextEditorCodeFoldingRegion;
+  LEscapeChar, LStringEscapeChar: Char;
+  LHideGuideLineAtFirstColumn: Boolean;
 begin
   if not Assigned(ACodeFoldingObject) then
     Exit;
 
   LArray := ACodeFoldingObject['Ranges'].ArrayValue;
   LCount := LArray.Count;
+  LHideGuideLineAtFirstColumn := False;
+
   if LCount > 0 then
   begin
-    FHighlighter.CodeFoldingRangeCount := LCount;
+    LRangeCount := 0;
+    LEscapeChar := TControlCharacters.Null;
+    LStringEscapeChar := TControlCharacters.Null;
 
     for LIndex := 0 to LCount - 1 do
     begin
-      FHighlighter.CodeFoldingRegions[LIndex] := TTextEditorCodeFoldingRegion.Create(TTextEditorCodeFoldingRegionItem);
-
       LCodeFoldingObject := LArray.Items[LIndex].ObjectValue;
 
-      ImportCodeFoldingOptions(FHighlighter.CodeFoldingRegions[LIndex], LCodeFoldingObject);
+      if LCodeFoldingObject.Contains('Options') then
+      begin
+        LObject := LCodeFoldingObject['Options'].ObjectValue;
+
+        if LObject.Contains('EscapeChar') then
+          LEscapeChar := LObject['EscapeChar'].Value[1];
+
+        if LObject.Contains('StringEscapeChar') then
+          LStringEscapeChar := LObject['StringEscapeChar'].Value[1];
+
+        if LObject.Contains('FoldTags') and LObject.ValueBoolean['FoldTags'] then
+          FHighlighter.FoldTags := True;
+
+        if LObject.Contains('MatchingPairHighlight') and not LObject.ValueBoolean['MatchingPairHighlight'] then
+          FHighlighter.MatchingPairHighlight := False;
+
+        if LObject.Contains('HideGuideLineAtFirstColumn') and LObject.ValueBoolean['HideGuideLineAtFirstColumn'] then
+          LHideGuideLineAtFirstColumn := True;
+      end;
+
+      if LCodeFoldingObject.Contains('FoldRegion') or LCodeFoldingObject.Contains('SkipRegion') then
+        Inc(LRangeCount);
+    end;
+
+    FHighlighter.CodeFoldingRangeCount := LRangeCount;
+    LRegionIndex := 0;
+
+    for LIndex := 0 to LCount - 1 do
+    begin
+      LCodeFoldingObject := LArray.Items[LIndex].ObjectValue;
+
       ImportCodeFoldingVoidElements(LCodeFoldingObject);
-      ImportCodeFoldingSkipRegion(FHighlighter.CodeFoldingRegions[LIndex], LCodeFoldingObject);
-      ImportCodeFoldingFoldRegion(FHighlighter.CodeFoldingRegions[LIndex], LCodeFoldingObject);
+
+      if LCodeFoldingObject.Contains('FoldRegion') or LCodeFoldingObject.Contains('SkipRegion') then
+      begin
+        LCodeFoldingRegion := TTextEditorCodeFoldingRegion.Create(TTextEditorCodeFoldingRegionItem);
+        LCodeFoldingRegion.EscapeChar := LEscapeChar;
+        LCodeFoldingRegion.StringEscapeChar := LStringEscapeChar;
+        FHighlighter.CodeFoldingRegions[LRegionIndex] := LCodeFoldingRegion;
+        Inc(LRegionIndex);
+
+        ImportCodeFoldingSkipRegion(LCodeFoldingRegion, LCodeFoldingObject);
+        ImportCodeFoldingFoldRegion(LCodeFoldingRegion, LCodeFoldingObject);
+      end;
     end;
   end;
 
   LEditor := FHighlighter.Editor as TCustomTextEditor;
   LEditor.CodeFolding.Visible := LCount > 0;
+
+  if LHideGuideLineAtFirstColumn then
+    LEditor.CodeFolding.GuideLines.SetOption(cfgHideAtFirstColumn, True);
 end;
 
 procedure TTextEditorHighlighterImportJSON.ImportMatchingPair(const AMatchingPairObject: TJSONObject);

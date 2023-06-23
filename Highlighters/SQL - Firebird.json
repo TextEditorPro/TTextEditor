@@ -290,7 +290,11 @@
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "SkipWhitespaceOnce": true,
+              "AlternativeClose": [
+                "\"",
+                "'"
+              ]
             },
             "TokenRange": {
               "Open": "from",
@@ -348,7 +352,11 @@
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
-              "SkipWhitespaceOnce": true
+              "SkipWhitespaceOnce": true,
+              "AlternativeClose": [
+                "\"",
+                "'"
+              ]
             },
             "TokenRange": {
               "Open": "join",
@@ -1007,6 +1015,7 @@
               "sequence",
               "serverwide",
               "session",
+              "set",
               "shadow",
               "shared",
               "signature",
@@ -1242,8 +1251,7 @@
             "Words": [
               "action",
               "cascade",
-              "no",
-              "set"
+              "no"
             ],
             "Attributes": {
               "Element": "MethodName"

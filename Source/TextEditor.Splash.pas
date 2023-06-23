@@ -7,7 +7,7 @@ implementation
 {$R TextEditor.res}
 
 uses
-  Winapi.Windows, System.Classes, TextEditor.Consts, ToolsAPI;
+  Winapi.Windows, ToolsAPI;
 
 const
   TEXT_EDITOR_VERSION = '1.0.0';

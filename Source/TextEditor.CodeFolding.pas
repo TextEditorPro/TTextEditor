@@ -3,19 +3,15 @@
 interface
 
 uses
-  System.Classes, System.SysUtils, Vcl.Graphics, TextEditor.CodeFolding.Hint,
+  System.Classes, System.SysUtils, TextEditor.CodeFolding.GuideLines, TextEditor.CodeFolding.Hint,
   TextEditor.TextFolding, TextEditor.Types;
-
-const
-  TEXTEDITOR_CODE_FOLDING_DEFAULT_OPTIONS = [cfoAutoPadding, cfoAutoWidth, cfoHighlightIndentGuides, cfoHighlightMatchingPair, cfoShowIndentGuides,
-    cfoShowTreeLine, cfoExpandByHintClick];
 
 type
   TTextEditorCodeFolding = class(TPersistent)
   strict private
     FCollapsedRowCharacterCount: Integer;
     FDelayInterval: Cardinal;
-    FGuideLineStyle: TTextEditorCodeFoldingGuideLineStyle;
+    FGuideLines: TTextEditorCodeFoldingGuideLines;
     FHint: TTextEditorCodeFoldingHint;
     FMarkStyle: TTextEditorCodeFoldingMarkStyle;
     FMouseOverHint: Boolean;
@@ -27,7 +23,7 @@ type
     FVisible: Boolean;
     FWidth: Integer;
     procedure DoChange;
-    procedure SetGuideLineStyle(const AValue: TTextEditorCodeFoldingGuideLineStyle);
+    procedure SetGuideLines(const AValue: TTextEditorCodeFoldingGuideLines);
     procedure SetHint(const AValue: TTextEditorCodeFoldingHint);
     procedure SetMarkStyle(const AValue: TTextEditorCodeFoldingMarkStyle);
     procedure SetOptions(const AValue: TTextEditorCodeFoldingOptions);
@@ -46,11 +42,11 @@ type
   published
     property CollapsedRowCharacterCount: Integer read FCollapsedRowCharacterCount write FCollapsedRowCharacterCount default 20;
     property DelayInterval: Cardinal read FDelayInterval write FDelayInterval default 300;
-    property GuideLineStyle: TTextEditorCodeFoldingGuideLineStyle read FGuideLineStyle write SetGuideLineStyle default lsDot;
+    property GuideLines: TTextEditorCodeFoldingGuideLines read FGuideLines write SetGuideLines;
     property Hint: TTextEditorCodeFoldingHint read FHint write SetHint;
     property MarkStyle: TTextEditorCodeFoldingMarkStyle read FMarkStyle write SetMarkStyle default msSquare;
     property OnChange: TTextEditorCodeFoldingChangeEvent read FOnChange write FOnChange;
-    property Options: TTextEditorCodeFoldingOptions read FOptions write SetOptions default TEXTEDITOR_CODE_FOLDING_DEFAULT_OPTIONS;
+    property Options: TTextEditorCodeFoldingOptions read FOptions write SetOptions default TTextEditorDefaultOptions.CodeFolding;
     property Outlining: Boolean read FOutlining write FOutlining default False;
     property Padding: Integer read FPadding write SetPadding default 2;
     property TextFolding: TTextEditorTextFolding read FTextFolding write SetTextFolding;
@@ -67,22 +63,23 @@ constructor TTextEditorCodeFolding.Create;
 begin
   inherited;
 
-  FVisible := False;
-  FOptions := TEXTEDITOR_CODE_FOLDING_DEFAULT_OPTIONS;
-  FGuideLineStyle := lsDot;
-  FMarkStyle := msSquare;
   FCollapsedRowCharacterCount := 20;
-  FHint := TTextEditorCodeFoldingHint.Create;
-  FPadding := 2;
-  FWidth := 14;
   FDelayInterval := 300;
-  FOutlining := False;
+  FGuideLines := TTextEditorCodeFoldingGuideLines.Create;
+  FHint := TTextEditorCodeFoldingHint.Create;
+  FMarkStyle := msSquare;
   FMouseOverHint := False;
+  FOptions := TTextEditorDefaultOptions.CodeFolding;
+  FOutlining := False;
+  FPadding := 2;
   FTextFolding := TTextEditorTextFolding.Create;
+  FVisible := False;
+  FWidth := 14;
 end;
 
 destructor TTextEditorCodeFolding.Destroy;
 begin
+  FGuideLines.Free;
   FHint.Free;
   FTextFolding.Free;
 
@@ -94,14 +91,16 @@ begin
   if Assigned(ASource) and (ASource is TTextEditorCodeFolding) then
   with ASource as TTextEditorCodeFolding do
   begin
-    Self.FVisible := FVisible;
-    Self.FOptions := FOptions;
     Self.FCollapsedRowCharacterCount := FCollapsedRowCharacterCount;
-    Self.FHint.Assign(FHint);
-    Self.FWidth := FWidth;
     Self.FDelayInterval := FDelayInterval;
-    Self.FTextFolding.Assign(FTextFolding);
+    Self.FGuideLines.Assign(FGuideLines);
+    Self.FHint.Assign(FHint);
+    Self.FOptions := FOptions;
     Self.FPadding := FPadding;
+    Self.FTextFolding.Assign(FTextFolding);
+    Self.FVisible := FVisible;
+    Self.FWidth := FWidth;
+
     Self.DoChange;
   end
   else
@@ -110,9 +109,11 @@ end;
 
 procedure TTextEditorCodeFolding.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
-  FWidth := MulDiv(FWidth, AMultiplier, ADivider);
-  FPadding := MulDiv(FPadding, AMultiplier, ADivider);
+  FGuideLines.Padding := MulDiv(FGuideLines.Padding, AMultiplier, ADivider);
   FHint.Indicator.Glyph.ChangeScale(AMultiplier, ADivider);
+  FPadding := MulDiv(FPadding, AMultiplier, ADivider);
+  FWidth := MulDiv(FWidth, AMultiplier, ADivider);
+
   DoChange;
 end;
 
@@ -120,15 +121,6 @@ procedure TTextEditorCodeFolding.DoChange;
 begin
   if Assigned(FOnChange) then
     FOnChange(fcRefresh);
-end;
-
-procedure TTextEditorCodeFolding.SetGuideLineStyle(const AValue: TTextEditorCodeFoldingGuideLineStyle);
-begin
-  if FGuideLineStyle <> AValue then
-  begin
-    FGuideLineStyle := AValue;
-    DoChange;
-  end;
 end;
 
 procedure TTextEditorCodeFolding.SetMarkStyle(const AValue: TTextEditorCodeFoldingMarkStyle);
@@ -145,6 +137,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     if Assigned(FOnChange) then
       FOnChange(fcVisible);
   end;
@@ -162,6 +155,11 @@ begin
     Include(FOptions, AOption)
   else
     Exclude(FOptions, AOption);
+end;
+
+procedure TTextEditorCodeFolding.SetGuideLines(const AValue: TTextEditorCodeFoldingGuideLines);
+begin
+  FGuideLines.Assign(AValue);
 end;
 
 procedure TTextEditorCodeFolding.SetHint(const AValue: TTextEditorCodeFoldingHint);
@@ -196,6 +194,7 @@ var
   LValue: Integer;
 begin
   LValue := Max(0, AValue);
+
   if FWidth <> LValue then
   begin
     FWidth := LValue;

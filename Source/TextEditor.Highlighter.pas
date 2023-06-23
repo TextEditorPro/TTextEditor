@@ -4,7 +4,7 @@ unit TextEditor.Highlighter;
 interface
 
 uses
-  System.Classes, System.SysUtils, Vcl.Controls, Vcl.Graphics, TextEditor.CodeFolding.Regions, TextEditor.Consts,
+  System.Classes, System.SysUtils, Vcl.Controls, TextEditor.CodeFolding.Regions, TextEditor.Consts,
   TextEditor.Highlighter.Attributes, TextEditor.Highlighter.Colors, TextEditor.Highlighter.Comments,
   TextEditor.Highlighter.Rules, TextEditor.Highlighter.Token, TextEditor.Lines, TextEditor.SkipRegions,
   TextEditor.Types;

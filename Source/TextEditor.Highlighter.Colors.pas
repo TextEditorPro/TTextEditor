@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, System.Generics.Collections, Vcl.Graphics, TextEditor.Types;
+  System.Classes, System.Generics.Collections, Vcl.Graphics;
 
 type
   TTextEditorHighlighterElement = record
@@ -36,7 +36,7 @@ type
 implementation
 
 uses
-  System.SysUtils, Vcl.Dialogs, TextEditor, TextEditor.Highlighter, TextEditor.Highlighter.Export.JSON,
+  System.SysUtils, TextEditor, TextEditor.Highlighter, TextEditor.Highlighter.Export.JSON,
   TextEditor.Highlighter.Import.JSON;
 
 constructor TTextEditorHighlighterColors.Create(AOwner: TObject);

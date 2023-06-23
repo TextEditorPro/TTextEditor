@@ -3,8 +3,7 @@
 interface
 
 uses
-  System.Classes, System.UITypes, Vcl.Graphics, TextEditor.Minimap.Indicator, TextEditor.Minimap.Shadow,
-  TextEditor.Types;
+  System.Classes, System.UITypes, TextEditor.Minimap.Indicator, TextEditor.Minimap.Shadow, TextEditor.Types;
 
 type
   TTextEditorMinimap = class(TPersistent)

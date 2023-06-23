@@ -97,7 +97,10 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.SysUtils, Vcl.Forms{$IFDEF ALPHASKINS}, sSkinManager{$ENDIF};
+  Winapi.Windows, System.SysUtils
+{$IFDEF ALPHASKINS}
+  , sSkinManager
+{$ENDIF};
 
 const
   DEFAULT_FONT = 'Courier New';

@@ -5,9 +5,6 @@ interface
 uses
   System.Classes, TextEditor.Types;
 
-const
-  TEXTEDITOR_MULTIEDIT_DEFAULT_OPTIONS = [meoShowActiveLine, meoShowGhost];
-
 type
   TTextEditorCaretMultiEdit = class(TPersistent)
   strict private
@@ -26,7 +23,7 @@ type
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
     property Active: Boolean read FActive write SetActive default True;
-    property Options: TTextEditorCaretMultiEditOptions read FOptions write SetOptions default TEXTEDITOR_MULTIEDIT_DEFAULT_OPTIONS;
+    property Options: TTextEditorCaretMultiEditOptions read FOptions write SetOptions default TTextEditorDefaultOptions.MultiEdit;
     property Style: TTextEditorCaretStyle read FStyle write SetStyle default csThinVerticalLine;
   end;
 
@@ -38,7 +35,7 @@ begin
 
   FActive := True;
   FStyle := csThinVerticalLine;
-  FOptions := TEXTEDITOR_MULTIEDIT_DEFAULT_OPTIONS;
+  FOptions := TTextEditorDefaultOptions.MultiEdit;
 end;
 
 procedure TTextEditorCaretMultiEdit.Assign(ASource: TPersistent);

@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.Classes, System.Types, TextEditor.Caret.MultiEdit, TextEditor.Caret.NonBlinking, TextEditor.Caret.Offsets,
+  System.Classes, TextEditor.Caret.MultiEdit, TextEditor.Caret.NonBlinking, TextEditor.Caret.Offsets,
   TextEditor.Caret.Styles, TextEditor.Types;
 
 type

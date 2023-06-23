@@ -56,7 +56,7 @@ type
 implementation
 
 uses
-  System.UITypes, Vcl.Graphics, Vcl.Menus, TextEditor.Consts;
+  System.UITypes, Vcl.Menus, TextEditor.Consts;
 
 constructor TTextEditorSyncEdit.Create;
 begin

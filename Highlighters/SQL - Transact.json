@@ -433,6 +433,9 @@
   "CodeFolding": {
     "Ranges": [
       {
+        "Options": {
+          "HideGuideLineAtFirstColumn": true
+        },
         "SkipRegion": [
           {
             "OpenToken": "'",

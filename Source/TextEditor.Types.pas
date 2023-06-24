@@ -369,7 +369,7 @@ type
   TTextEditorDefaultOptions = record
   const
     CodeFolding = [cfoAutoPadding, cfoAutoWidth, cfoHighlightMatchingPair, cfoShowTreeLine, cfoExpandByHintClick];
-    CodeFoldingGuideLines = [cfgHideOverText, cfgHighlightIndentGuides];
+    CodeFoldingGuideLines = [cfgHideOverText];
     CodeFoldingHint = [hioShowBorder, hioShowMark];
     CompletionProposal = [cpoAutoConstraints, cpoAddHighlighterKeywords, cpoFiltered, cpoParseItemsFromText];
     HighlightLine = [hlIgnoreCase, hlDeleteOnHighlighterLoad];

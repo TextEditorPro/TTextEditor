@@ -13526,7 +13526,7 @@ var
   LCodeFoldingRange, LCodeFoldingRangeTo: TTextEditorCodeFoldingRange;
   LTopLine, LBottomLine, LLineHeight: Integer;
   LCodeFoldingRanges: array of TTextEditorCodeFoldingRange;
-  LHideAtFirstColumn, LHideOverText, LHideInActiveRow: Boolean;
+  LHighlightIndentGuides, LHideAtFirstColumn, LHideOverText, LHideInActiveRow: Boolean;
   LColor: TColor;
   LSkip: Boolean;
   LHeight: Integer;
@@ -13657,6 +13657,7 @@ begin
   LHideAtFirstColumn := cfgHideAtFirstColumn in FCodeFolding.GuideLines.Options;
   LHideOverText := cfgHideOverText in FCodeFolding.GuideLines.Options;
   LHideInActiveRow := cgfHideInActiveRow in FCodeFolding.GuideLines.Options;
+  LHighlightIndentGuides := cfgHighlightIndentGuides in FCodeFolding.GuideLines.Options;
 
   GetCodeFoldingRanges;
   CreateBitmap;
@@ -13713,7 +13714,8 @@ begin
         if not AMinimap and (LX - FLeftMarginWidth > 0) or AMinimap and (LX > 0) then
         begin
           if (FCodeFolding.GuideLines.Style = lsSolid) or
-            FCodeFolding.GuideLines.Visible and (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
+            LHighlightIndentGuides and FCodeFolding.GuideLines.Visible and
+            (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
             (LCurrentLine >= LCodeFoldingRange.FromLine) and (LCurrentLine <= LCodeFoldingRange.ToLine) then
           begin
             if FCodeFolding.GuideLines.Style = lsSolid then

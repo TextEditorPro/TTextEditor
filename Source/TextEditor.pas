@@ -13701,7 +13701,10 @@ begin
           end;
 
           if LSkip then
+          begin
+            LCodeFoldingRange.GuideLineOffset := 0;
             Continue;
+          end;
         end;
 
         if not AMinimap then

@@ -8,7 +8,7 @@
       "IMPORT Io;",
       "\r\n",
       "BEGIN\r\n",
-      "  IO.Put('Hello, World!\n');\r\n",
+      "  IO.Put('Hello, World!\\n');\r\n",
       "END HelloWorld."
     ],
     "MainRules": {
@@ -243,7 +243,8 @@
     "Ranges": [
       {
         "Options": {
-          "EscapeChar": "&"
+          "EscapeChar": "&",
+          "HideGuideLineAtFirstColumn": true
         },
         "SkipRegion": [
           {

@@ -6548,6 +6548,7 @@ begin
         TextPosition := LTextPosition;
       end;
     end;
+
     FUndoList.EndBlock;
     FLines.EndUpdate;
 
@@ -6567,8 +6568,10 @@ var
   LVisibleChars: Integer;
 begin
   LVisibleChars := GetVisibleChars(FViewPosition.Row);
+
   if ACommand in [TKeyCommands.PageLeft, TKeyCommands.SelectionPageLeft] then
     LVisibleChars := -LVisibleChars;
+
   MoveCaretHorizontally(LVisibleChars, ACommand in [TKeyCommands.SelectionPageLeft, TKeyCommands.SelectionPageRight]);
 end;
 
@@ -6580,8 +6583,10 @@ var
 begin
   LTextPosition := TextPosition;
   LLineCount := 0;
+
   if ACommand in [TKeyCommands.PageBottom, TKeyCommands.SelectionPageBottom] then
     LLineCount := VisibleLineCount - 1;
+
   LCaretNewPosition := ViewToTextPosition(GetViewPosition(FViewPosition.Column, TopLine + LLineCount));
   MoveCaretAndSelection(LTextPosition, LCaretNewPosition, ACommand in [TKeyCommands.SelectionPageTop, TKeyCommands.SelectionPageBottom]);
 end;
@@ -6591,8 +6596,10 @@ var
   LLineCount: Integer;
 begin
   LLineCount := VisibleLineCount shr Ord(soHalfPage in FScroll.Options);
+
   if ACommand in [TKeyCommands.PageUp, TKeyCommands.SelectionPageUp] then
     LLineCount := -LLineCount;
+
   TopLine := TopLine + LLineCount;
 
   MoveCaretVertically(LLineCount, ACommand in [TKeyCommands.SelectionPageUp, TKeyCommands.SelectionPageDown]);

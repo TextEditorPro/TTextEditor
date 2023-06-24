@@ -223,7 +223,8 @@
     "Ranges": [
       {
         "Options": {
-          "EscapeChar": "&"
+          "EscapeChar": "&",
+          "HideGuideLineAtFirstColumn": true
         },
         "SkipRegion": [
           {

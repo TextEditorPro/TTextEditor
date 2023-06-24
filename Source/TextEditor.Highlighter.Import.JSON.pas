@@ -957,9 +957,7 @@ begin
 
   LEditor := FHighlighter.Editor as TCustomTextEditor;
   LEditor.CodeFolding.Visible := LCount > 0;
-
-  if LHideGuideLineAtFirstColumn then
-    LEditor.CodeFolding.GuideLines.SetOption(cfgHideAtFirstColumn, True);
+  LEditor.CodeFolding.GuideLines.SetOption(cfgHideAtFirstColumn, LHideGuideLineAtFirstColumn);
 end;
 
 procedure TTextEditorHighlighterImportJSON.ImportMatchingPair(const AMatchingPairObject: TJSONObject);

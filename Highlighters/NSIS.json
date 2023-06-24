@@ -484,7 +484,8 @@
     "Ranges": [
       {
         "Options": {
-          "StringEscapeChar": "\\"
+          "StringEscapeChar": "\\",
+          "HideGuideLineAtFirstColumn": true
         },
         "SkipRegion": [
           {

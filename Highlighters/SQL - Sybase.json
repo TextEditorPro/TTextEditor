@@ -473,6 +473,16 @@
           {
             "OpenToken": "BEGIN",
             "CloseToken": "END"
+          },
+          {
+            "OpenToken": "CASE",
+            "CloseToken": "END",
+            "Properties": {
+              "SkipIfFoundAfterOpenToken": [
+                "INSENSITIVE",
+                "SENSITIVE"
+              ]
+            }
           }
         ]
       }

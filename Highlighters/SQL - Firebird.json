@@ -435,6 +435,62 @@
                   "TokenRange": {
                     "Open": "select"
                   }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "delete"
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "insert"
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "update"
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "references"
+                  }
                 }
               ]
             }
@@ -1341,6 +1397,16 @@
           {
             "OpenToken": "BEGIN",
             "CloseToken": "END"
+          },
+          {
+            "OpenToken": "CASE",
+            "CloseToken": "END",
+            "Properties": {
+              "SkipIfFoundAfterOpenToken": [
+                "INSENSITIVE",
+                "SENSITIVE"
+              ]
+            }
           }
         ]
       }

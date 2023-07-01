@@ -5945,6 +5945,7 @@ begin
   LOldCaretPosition := TextPosition;
   try
     LSelectedText := SelectedText;
+
     if LSelectedText <> '' then
     begin
       case ACommand of
@@ -7643,9 +7644,6 @@ begin
       '', smNormal);
 
     FLines.LineState[LTextPosition.Line + 1] := lsModified;
-
-    FViewPosition.Column := 1;
-    FViewPosition.Row := FViewPosition.Row + 1;
   finally
     FUndoList.EndBlock;
 
@@ -20298,6 +20296,7 @@ var
   LTextPosition, LTextEndPosition: TTextEditorTextPosition;
 begin
   LLineNumber := ALineNumber;
+
   if LLineNumber > FLines.Count + 1 then
     LLineNumber := FLines.Count + 1;
 
@@ -21070,9 +21069,6 @@ begin
   LSelectionStart := SelectionBeginPosition;
   LSelectionEnd := SelectionEndPosition;
   LCommand := TKeyCommands.None;
-
-  if FToggleCase.Cycle <= cTitle then
-    SelectedText := FToggleCase.Text;
 
   case FToggleCase.Cycle of
     cUpper:

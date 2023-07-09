@@ -8,6 +8,7 @@ uses
 type
   TTextEditorCodeFoldingGuideLines = class(TPersistent)
   strict private
+    FHighlightStyle: TTextEditorCodeFoldingGuideLineStyle;
     FOptions: TTextEditorCodeFoldingGuideLineOptions;
     FPadding: Integer;
     FStyle: TTextEditorCodeFoldingGuideLineStyle;
@@ -17,6 +18,7 @@ type
     procedure Assign(ASource: TPersistent); override;
     procedure SetOption(const AOption: TTextEditorCodeFoldingGuideLineOption; const AEnabled: Boolean);
   published
+    property HighlightStyle: TTextEditorCodeFoldingGuideLineStyle read FHighlightStyle write FHighlightStyle default lsDash;
     property Options: TTextEditorCodeFoldingGuideLineOptions read FOptions write FOptions default TTextEditorDefaultOptions.CodeFoldingGuideLines;
     property Padding: Integer read FPadding write FPadding default 3;
     property Style: TTextEditorCodeFoldingGuideLineStyle read FStyle write FStyle default lsDash;
@@ -29,6 +31,7 @@ constructor TTextEditorCodeFoldingGuideLines.Create;
 begin
   inherited;
 
+  FHighlightStyle := lsDash;
   FOptions := TTextEditorDefaultOptions.CodeFoldingGuideLines;
   FPadding := 3;
   FStyle := lsDash;
@@ -40,6 +43,7 @@ begin
   if Assigned(ASource) and (ASource is TTextEditorCodeFoldingGuideLines) then
   with ASource as TTextEditorCodeFoldingGuideLines do
   begin
+    Self.FHighlightStyle := FHighlightStyle;
     Self.FOptions := FOptions;
     Self.FPadding := FPadding;
     Self.FStyle := FStyle;

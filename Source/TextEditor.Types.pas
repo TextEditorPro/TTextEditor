@@ -247,8 +247,7 @@ type
   TTextEditorSpecialCharsStyle = (scsDot, scsSolid);
 
   { Minimap }
-  TTextEditorMinimapOption = (moShowBookmarks, moShowIndentGuides, moShowSearchResults, moShowSelection,
-    moShowSpecialChars);
+  TTextEditorMinimapOption = (moShowBookmarks, moShowSearchResults, moShowSelection, moShowSpecialChars);
   TTextEditorMinimapOptions = set of TTextEditorMinimapOption;
   TTextEditorMinimapAlign = (maLeft, maRight);
   TTextEditorMinimapIndicatorOption = (ioInvertBlending, ioShowBorder, ioUseBlending);

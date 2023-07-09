@@ -20,7 +20,7 @@
       "CodeFoldingHintIndicatorMark": "clGray",
       "CodeFoldingHintText": "clNone",
       "CodeFoldingIndent": "clGray",
-      "CodeFoldingIndentHighlight": "clGray",
+      "CodeFoldingIndentHighlight": "clBlack",
       "CompletionProposalBackground": "clWhite",
       "CompletionProposalForeground": "clBlack",
       "CompletionProposalSelectedBackground": "clHighlight",

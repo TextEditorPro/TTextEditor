@@ -697,7 +697,7 @@ type
     procedure PaintCodeFoldingCollapsedLine(const AFoldRange: TTextEditorCodeFoldingRange; const ALineRect: TRect);
     procedure PaintCodeFoldingCollapseMark(const AFoldRange: TTextEditorCodeFoldingRange; const ACurrentLineText: string; const ATokenPosition, ATokenLength, ALine: Integer; const ALineRect: TRect);
     procedure PaintCodeFoldingLine(const AClipRect: TRect; const ALine: Integer);
-    procedure PaintGuides(const AFirstRow, ALastRow: Integer; const AMinimap: Boolean);
+    procedure PaintGuides(const AFirstRow, ALastRow: Integer);
     procedure PaintLeftMargin(const AClipRect: TRect; const AFirstLine, ALastTextLine, ALastLine: Integer);
     procedure PaintMinimapIndicator(const AClipRect: TRect);
     procedure PaintMinimapShadow(const ACanvas: TCanvas; const AClipRect: TRect);
@@ -1942,7 +1942,6 @@ end;
 function TCustomTextEditor.CodeFoldingRangeForLine(const ALine: Integer): TTextEditorCodeFoldingRange;
 begin
   Result := nil;
-
   if (ALine > 0) and (ALine < Length(FCodeFoldings.RangeFromLine)) then
     Result := FCodeFoldings.RangeFromLine[ALine]
 end;
@@ -13026,7 +13025,7 @@ begin
     PaintRightMargin(LDrawRect);
 
     if FCodeFolding.Visible and not FCodeFolding.TextFolding.Active and CodeFolding.GuideLines.Visible then
-      PaintGuides(FLineNumbers.TopLine, Min(FLineNumbers.TopLine + VisibleLineCount, FLineNumbers.Count), False);
+      PaintGuides(FLineNumbers.TopLine, Min(FLineNumbers.TopLine + VisibleLineCount, FLineNumbers.Count));
 
     if not (csDesigning in ComponentState) then
     begin
@@ -13134,9 +13133,6 @@ begin
       end;
 
       PaintTextLines(LDrawRect, LLine1, LLine2, True);
-
-      if FCodeFolding.Visible and (moShowIndentGuides in FMinimap.Options) then
-        PaintGuides(LLine1, LLine2, True);
 
       if ioUseBlending in FMinimap.Indicator.Options then
         PaintMinimapIndicator(LDrawRect);
@@ -13514,21 +13510,14 @@ begin
   Canvas.Brush.Color := LOldBrushColor;
 end;
 
-procedure TCustomTextEditor.PaintGuides(const AFirstRow, ALastRow: Integer; const AMinimap: Boolean);
+procedure TCustomTextEditor.PaintGuides(const AFirstRow, ALastRow: Integer);
 var
-  LIndex, LRow, LRangeIndex: Integer;
-  LX, LX1, LY, LZ: Integer;
-  LLine, LCurrentLine: Integer;
-  LOldColor: TColor;
-  LDeepestLevel: Integer;
+  LCurrentLine: Integer;
   LCodeFoldingRange, LCodeFoldingRangeTo: TTextEditorCodeFoldingRange;
-  LTopLine, LBottomLine, LLineHeight: Integer;
   LCodeFoldingRanges: array of TTextEditorCodeFoldingRange;
-  LHighlightIndentGuides, LHideAtFirstColumn, LHideOverText, LHideInActiveRow: Boolean;
-  LColor: TColor;
-  LSkip: Boolean;
-  LHeight: Integer;
-  LBitmap: Vcl.Graphics.TBitmap;
+  LRangeIndex: Integer;
+  LTopLine, LBottomLine: Integer;
+  LLine: Integer;
 
   function GetDeepestLevel: Integer;
   var
@@ -13601,37 +13590,63 @@ var
     SetLength(LCodeFoldingRanges, LRangeIndex);
   end;
 
-  procedure CreateBitmap;
+  function CreateBitmap(const AHighlightGuide: Boolean): Vcl.Graphics.TBitmap;
   var
     LN: Integer;
     LY: Integer;
+    LStyle: TTextEditorCodeFoldingGuideLineStyle;
   begin
-    if FCodeFolding.GuideLines.Style = lsSolid then
+    Result := nil;
+
+    if not AHighlightGuide and (FCodeFolding.GuideLines.Style = lsSolid) or
+      AHighlightGuide and (FCodeFolding.GuideLines.HighlightStyle = lsSolid) then
       Exit;
 
-    LBitmap := Vcl.Graphics.TBitmap.Create;
-    LBitmap.Canvas.Pen.Color := FColors.CodeFoldingIndent;
-    LBitmap.Canvas.Brush.Color := TColors.Fuchsia;
-    LBitmap.Width := 1;
-    LBitmap.Height := 0; { background color }
-    LBitmap.Height := Height;
+    Result := Vcl.Graphics.TBitmap.Create;
+
+    if AHighlightGuide then
+      Result.Canvas.Pen.Color := FColors.CodeFoldingIndentHighlight
+    else
+      Result.Canvas.Pen.Color := FColors.CodeFoldingIndent;
+
+    Result.Canvas.Brush.Color := TColors.Fuchsia;
+    Result.Width := 1;
+    Result.Height := 0; { background color }
+    Result.Height := Height;
 
     LY := 1;
 
-    if FCodeFolding.GuideLines.Style = lsDash then
+    if AHighlightGuide then
+      LStyle := FCodeFolding.GuideLines.HighlightStyle
+    else
+      LStyle := FCodeFolding.GuideLines.Style;
+
+    if LStyle = lsDash then
       LN := 3
     else
       LN := 1;
 
-    while LY < LBitmap.Height do
+    while LY < Result.Height do
     begin
-      LBitmap.Canvas.MoveTo(0, LY);
+      Result.Canvas.MoveTo(0, LY);
       Inc(LY, LN);
-      LBitmap.Canvas.LineTo(0, LY);
+      Result.Canvas.LineTo(0, LY);
       Inc(LY, LN);
     end;
   end;
 
+var
+  LIndex, LRow: Integer;
+  LX, LX1, LY, LZ: Integer;
+  LOldColor: TColor;
+  LDeepestLevel: Integer;
+  LLineHeight: Integer;
+  LHighlightIndentGuides, LHideAtFirstColumn, LHideOverText, LHideInActiveRow: Boolean;
+  LColor: TColor;
+  LSkip: Boolean;
+  LHeight: Integer;
+  LBitmap, LBitmapGuide, LBitmapHighlightGuide: Vcl.Graphics.TBitmap;
+  LStyle: TTextEditorCodeFoldingGuideLineStyle;
 begin
   LOldColor := Canvas.Pen.Color;
 
@@ -13658,92 +13673,105 @@ begin
   LHighlightIndentGuides := cfgHighlightIndentGuides in FCodeFolding.GuideLines.Options;
 
   GetCodeFoldingRanges;
-  CreateBitmap;
 
-  for LRow := AFirstRow to ALastRow do
-  begin
-    LLine := GetViewTextLineNumber(LRow);
-
-    for LIndex := 0 to LRangeIndex - 1 do
+  LBitmapGuide := CreateBitmap(False);
+  LBitmapHighlightGuide := CreateBitmap(True);
+  try
+    for LRow := AFirstRow to ALastRow do
     begin
-      LCodeFoldingRange := LCodeFoldingRanges[LIndex];
-      LHeight := LY + LLineHeight;
+      LLine := GetViewTextLineNumber(LRow);
 
-      if Assigned(LCodeFoldingRange) and not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
-        (LCodeFoldingRange.FromLine < LLine) and (LCodeFoldingRange.ToLine > LLine) then
+      for LIndex := 0 to LRangeIndex - 1 do
       begin
-        if Assigned(LCodeFoldingRange.RegionItem) and not LCodeFoldingRange.RegionItem.ShowGuideLine then
-          Continue;
+        LCodeFoldingRange := LCodeFoldingRanges[LIndex];
+        LHeight := LY + LLineHeight;
 
-        LX := FLeftMarginWidth + GetLineIndentLevel(LCodeFoldingRange.ToLine - 1) * FPaintHelper.CharWidth + FCodeFolding.GuideLines.Padding;
-
-        if LHideAtFirstColumn and (LX < FLeftMarginWidth + FPaintHelper.CharWidth) or
-          LHideInActiveRow and (LRow = FViewPosition.Row) then
-          Continue;
-
-        if LHideOverText then
+        if Assigned(LCodeFoldingRange) and not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
+          (LCodeFoldingRange.FromLine < LLine) and (LCodeFoldingRange.ToLine > LLine) then
         begin
-          LX1 := LX + 1;
-          LColor := Canvas.Pixels[LX1, LY];
+          if Assigned(LCodeFoldingRange.RegionItem) and not LCodeFoldingRange.RegionItem.ShowGuideLine then
+            Continue;
 
-          LZ := LY;
-          LSkip := False;
-          while LZ < LHeight do
+          LX := FLeftMarginWidth + GetLineIndentLevel(LCodeFoldingRange.ToLine - 1) * FPaintHelper.CharWidth + FCodeFolding.GuideLines.Padding;
+
+          if LHideAtFirstColumn and (LX < FLeftMarginWidth + FPaintHelper.CharWidth) or
+            LHideInActiveRow and (LRow = FViewPosition.Row) then
+            Continue;
+
+          if LHideOverText then
           begin
-            if Canvas.Pixels[LX1, LZ] <> LColor then
+            LX1 := LX + 1;
+            LColor := Canvas.Pixels[LX1, LY];
+
+            LZ := LY;
+            LSkip := False;
+            while LZ < LHeight do
             begin
-              LSkip := True;
-              Break;
+              if Canvas.Pixels[LX1, LZ] <> LColor then
+              begin
+                LSkip := True;
+                Break;
+              end;
+
+              Inc(LZ);
             end;
 
-            Inc(LZ);
+            if LSkip then
+            begin
+              LCodeFoldingRange.GuideLineOffset := 0;
+              Continue;
+            end;
           end;
 
-          if LSkip then
-          begin
-            LCodeFoldingRange.GuideLineOffset := 0;
-            Continue;
-          end;
-        end;
-
-        if not AMinimap then
           Dec(LX, FScrollHelper.HorizontalPosition);
 
-        if not AMinimap and (LX - FLeftMarginWidth > 0) or AMinimap and (LX > 0) then
-        begin
-          if (FCodeFolding.GuideLines.Style = lsSolid) or
-            LHighlightIndentGuides and FCodeFolding.GuideLines.Visible and
-            (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
-            (LCurrentLine >= LCodeFoldingRange.FromLine) and (LCurrentLine <= LCodeFoldingRange.ToLine) then
+          if LX - FLeftMarginWidth > 0 then
           begin
-            if FCodeFolding.GuideLines.Style = lsSolid then
-              Canvas.Pen.Color := FColors.CodeFoldingIndent
-            else
+            if LHighlightIndentGuides and FCodeFolding.GuideLines.Visible and
+              (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
+              (LCurrentLine >= LCodeFoldingRange.FromLine) and (LCurrentLine <= LCodeFoldingRange.ToLine) then
+            begin
+              LBitmap := LBitmapHighlightGuide;
               Canvas.Pen.Color := FColors.CodeFoldingIndentHighlight;
+              LStyle := FCodeFolding.GuideLines.HighlightStyle;
+            end
+            else
+            begin
+              LBitmap := LBitmapGuide;
+              Canvas.Pen.Color := FColors.CodeFoldingIndent;
+              LStyle := FCodeFolding.GuideLines.Style;
+            end;
 
-            Canvas.MoveTo(LX, LY + 1);
-            Canvas.LineTo(LX, LHeight + 1);
-          end
-          else
-          if Assigned(LBitmap) then
-          begin
-            TransparentBlt(Canvas.Handle, LX, LY, 1, LLineHeight + 1, LBitmap.Canvas.Handle, 0,
-              LCodeFoldingRange.GuideLineOffset, 1, LLineHeight + 1, TColors.Fuchsia);
-            LCodeFoldingRange.GuideLineOffset := LCodeFoldingRange.GuideLineOffset + LLineHeight;
+            if LStyle = lsSolid then
+            begin
+              Canvas.MoveTo(LX, LY + 1);
+              Canvas.LineTo(LX, LHeight + 1);
+            end
+            else
+            if Assigned(LBitmap) then
+            begin
+              TransparentBlt(Canvas.Handle, LX, LY, 1, LLineHeight + 1, LBitmap.Canvas.Handle, 0,
+                LCodeFoldingRange.GuideLineOffset, 1, LLineHeight + 1, TColors.Fuchsia);
+
+              LCodeFoldingRange.GuideLineOffset := LCodeFoldingRange.GuideLineOffset + LLineHeight;
+            end;
           end;
         end;
       end;
+
+      Inc(LY, LLineHeight);
     end;
 
-    Inc(LY, LLineHeight);
+    SetLength(LCodeFoldingRanges, 0);
+  finally
+    if Assigned(LBitmapGuide) then
+      LBitmapGuide.Free;
+
+    if Assigned(LBitmapHighlightGuide) then
+      LBitmapHighlightGuide.Free;
+
+    Canvas.Pen.Color := LOldColor;
   end;
-
-  SetLength(LCodeFoldingRanges, 0);
-
-  if Assigned(LBitmap) then
-    LBitmap.Free;
-
-  Canvas.Pen.Color := LOldColor;
 end;
 
 procedure TCustomTextEditor.CreateBookmarkImages;

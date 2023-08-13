@@ -9,11 +9,11 @@ uses
 
 function ActivateDropShadow(const AHandle: THandle): Boolean;
 function AutoCursor(const ACursor: TCursor = crHourGlass): IAutoCursor;
-function CaseNone(const AChar: Char): Char;
-function CaseStringNone(const AString: string): string;
-function CaseUpper(const AChar: Char): Char;
+function CaseNone(const AChar: Char): Char; inline;
+function CaseStringNone(const AString: string): string; inline;
+function CaseUpper(const AChar: Char): Char; inline;
 function CharInString(const AChar: Char; const AString: string): Boolean; inline;
-function ColorToHex(const AColor: TColor): string;
+function ColorToHex(const AColor: TColor): string; inline;
 function ConvertTabs(const ALine: string; ATabWidth: Integer; var AHasTabs: Boolean; const AColumns: Boolean): string;
 function DeleteWhitespace(const AValue: string): string;
 function GetBOFPosition: TTextEditorTextPosition; inline;
@@ -304,6 +304,7 @@ begin
   while True do
   begin
     LPosition := Pos(TControlCharacters.Tab, Result, LPosition);
+
     if LPosition = 0 then
       Break;
 
@@ -317,6 +318,7 @@ begin
       LCount := LCount - (LPosition - ATabWidth - 1) mod ATabWidth;
 
     Insert(StringOfChar(TCharacters.Space, LCount), Result, LPosition);
+
     Inc(LPosition, LCount);
   end;
 end;

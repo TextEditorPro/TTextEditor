@@ -38,6 +38,7 @@ type
   strict private
     FActive: Boolean;
     FItems: TTextEditorHighlightLineItems;
+    FMaxLineLength: Integer;
     FOwner: TPersistent;
     function GetItem(const AIndex: Integer): TTextEditorHighlightLineItem;
     function IsItemsStored: Boolean;
@@ -52,6 +53,7 @@ type
   published
     property Active: Boolean read FActive write FActive default False;
     property Items: TTextEditorHighlightLineItems read FItems write SetItems stored IsItemsStored;
+    property MaxLineLength: Integer read FMaxLineLength write FMaxLineLength default 200;
   end;
 
 implementation
@@ -121,6 +123,7 @@ begin
   FOwner := AOwner;
   FActive := False;
   FItems := TTextEditorHighlightLineItems.Create(Self, TTextEditorHighlightLineItem);
+  FMaxLineLength := 200;
 end;
 
 destructor TTextEditorHighlightLine.Destroy;
@@ -137,6 +140,7 @@ begin
   begin
     Self.FActive := FActive;
     Self.FItems.Assign(FItems);
+    Self.FMaxLineLength := FMaxLineLength;
   end
   else
     inherited Assign(ASource);

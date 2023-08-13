@@ -241,6 +241,7 @@ type
       Flags: TTextEditorStateFlags;
       Modified: Boolean;
       ReadOnly: Boolean;
+      ReplaceCanceled: Boolean;
       ReplaceLock: Boolean;
       UndoRedo: Boolean;
       UnknownChars: TTextEditorUnknownChars;
@@ -987,6 +988,7 @@ type
     property ReadOnly: Boolean read GetReadOnly write SetReadOnly default False;
     property RedoList: TTextEditorUndoList read FRedoList;
     property Replace: TTextEditorReplace read FReplace write FReplace;
+    property ReplaceCanceled: Boolean read FState.ReplaceCanceled;
     property RightMargin: TTextEditorRightMargin read FRightMargin write SetRightMargin;
     property Ruler: TTextEditorRuler read FRuler write FRuler;
     property Scroll: TTextEditorScroll read FScroll write SetScroll;
@@ -1119,6 +1121,7 @@ type
     property PopupMenu;
     property ReadOnly;
     property Replace;
+    property ReplaceCanceled;
     property RightMargin;
     property Ruler;
     property Scroll;
@@ -1279,6 +1282,7 @@ type
     property PopupMenu;
     property ReadOnly;
     property Replace;
+    property ReplaceCanceled;
     property RightMargin;
     property Ruler;
     property Scroll;
@@ -7312,7 +7316,7 @@ begin
   if LSearchText = '' then
     Exit;
 
-  if FSearch.NearOperator.Enabled then
+  if not FState.ReplaceLock and FSearch.NearOperator.Enabled then
   begin
     LSearchTextUpper := LSearchText.ToUpper;
 
@@ -7364,6 +7368,7 @@ begin
 
   LResultIndex := 0;
   LSearchAllCount := FSearchEngine.SearchAll(FLines);
+
   if LSearchAllCount > 0 then
   begin
     LLine := 0;
@@ -12905,6 +12910,7 @@ begin
     LCursorPoint := ScreenToClient(LCursorPoint);
     LTextPosition := PixelsToTextPosition(LCursorPoint.X, LCursorPoint.Y);
     GetHighlighterAttributeAtRowColumn(LTextPosition, LToken, LRangeType, LStart, LHighlighterAttribute);
+
     OpenLink(LToken);
 
     Exit;
@@ -13211,6 +13217,7 @@ begin
   Canvas.Brush.Color := FColors.CodeFoldingFoldingLine;
 
   LFoldRange := nil;
+
   if cfoHighlightFoldingLine in FCodeFolding.Options then
     LFoldRange := CodeFoldingLineInsideRange(FViewPosition.Row);
 
@@ -13219,9 +13226,12 @@ begin
     LLine := GetViewTextLineNumber(LIndex);
 
     LRect.Top := (LIndex - FLineNumbers.TopLine) * LLineHeight;
+
     if FRuler.Visible then
       Inc(LRect.Top, FRuler.Height);
+
     LRect.Bottom := LRect.Top + LLineHeight;
+
     if FActiveLine.Visible and (not Assigned(FMultiEdit.Carets) and (FPosition.Text.Line + 1 = LLine) or
       Assigned(FMultiEdit.Carets) and
       IsMultiEditCaretFound(LLine)) and (FColors.CodeFoldingActiveLineBackground <> TColors.SysNone) then
@@ -13243,6 +13253,7 @@ begin
         FillRect(LRect);
       end
     end;
+
     if Assigned(LFoldRange) and (LLine >= LFoldRange.FromLine) and (LLine <= LFoldRange.ToLine) then
     begin
       Canvas.Brush.Color := FColors.CodeFoldingFoldingLineHighlight;
@@ -13358,6 +13369,7 @@ var
 
 begin
   LRect := AClipRect;
+
   if CodeFolding.Padding > 0 then
     InflateRect(LRect, -CodeFolding.Padding, 0);
 
@@ -13369,12 +13381,14 @@ begin
     if cfoShowTreeLine in FCodeFolding.Options then
     begin
       LEndForLine := CodeFoldingTreeEndForLine(ALine);
+
       if CodeFoldingTreeLineForLine(ALine) and not (LShowCollapseMarkAtTheEnd and LEndForLine) then
       begin
         LX := LRect.Left + ((LRect.Right - LRect.Left) div 2) - 1;
         Canvas.MoveTo(LX, LRect.Top);
         Canvas.LineTo(LX, LRect.Bottom);
       end;
+
       if LEndForLine then
       begin
         if LShowCollapseMarkAtTheEnd then
@@ -13477,10 +13491,12 @@ begin
               begin
                 { [...] }
                 LDotSpace := (LCollapseMarkRect.Width - 8) div 4;
+
                 LY := LCollapseMarkRect.Top + (LCollapseMarkRect.Bottom - LCollapseMarkRect.Top) div 2;
                 LX := LCollapseMarkRect.Left + LDotSpace + (LCollapseMarkRect.Width - LDotSpace * 4 - 6) div 2;
 
                 LIndex := 1;
+
                 while LIndex <= 3 do
                 begin
                   Canvas.Rectangle(LX, LY, LX + 2, LY + 2);
@@ -13549,6 +13565,7 @@ var
         else
           Dec(LTempLine)
       end;
+
       if Assigned(LCodeFoldingRange) then
         Result := LCodeFoldingRange.IndentLevel;
     end;
@@ -13829,6 +13846,7 @@ var
           Inc(LY, FRuler.Height);
 
         LRow := AMarkRow;
+
         if FWordWrap.Active then
           LRow := GetViewLineNumber(LRow);
 
@@ -13857,6 +13875,7 @@ var
       LLineRect := AClipRect;
 
       LLastTextLine := ALastTextLine;
+
       if lnoAfterLastLine in FLeftMargin.LineNumbers.Options then
         LLastTextLine := ALastLine;
 
@@ -13876,14 +13895,16 @@ var
       for LIndex := AFirstLine to LLastTextLine do
       begin
         LLine := GetViewTextLineNumber(LIndex);
+
         if LCompareMode and (FLines.Count > 0) then
           LCompareEmptyLine := sfEmptyLine in FLines.Items^[LIndex - 1].Flags;
 
         LLineRect.Top := (LIndex - TopLine) * LLineHeight;
+
         if FRuler.Visible then
           Inc(LLineRect.Top, FRuler.Height);
-        LLineRect.Bottom := LLineRect.Top + LLineHeight;
 
+        LLineRect.Bottom := LLineRect.Top + LLineHeight;
         LLineNumber := '';
 
         FPaintHelper.SetBackgroundColor(FColors.LeftMarginBackground);
@@ -13951,10 +13972,12 @@ var
               LOldColor := Canvas.Pen.Color;
               Canvas.Pen.Color := FColors.LeftMarginLineNumberLine;
               LTop := LLineRect.Top + (LLineHeight div 2);
+
               if LLine mod 5 = 0 then
                 Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + LLongLineWidth - LMargin, LTop)
               else
                 Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + LShortLineWith - LMargin, LTop);
+
               Canvas.LineTo(LLeftMarginWidth - LShortLineWith - LMargin, LTop);
               Canvas.Pen.Color := LOldColor;
 
@@ -13974,6 +13997,7 @@ var
         Winapi.Windows.ExtTextOut(Canvas.Handle, LLeftMarginWidth - 1 - LMargin - LTextSize.cx,
           LLineRect.Top + ((LLineHeight - Integer(LTextSize.cy)) div 2), ETO_OPAQUE, @LLineRect, LPLineNumber, LLength, nil);
       end;
+
       FPaintHelper.SetBackgroundColor(FColors.LeftMarginBackground);
       { Erase the remaining area }
       if AClipRect.Bottom > LLineRect.Bottom then
@@ -14044,6 +14068,7 @@ var
         else
         begin
           LBackground := GetMarkBackgroundColor(LIndex);
+
           if LBackground <> TColors.SysNone then
           begin
             SetPanelActiveLineRect;
@@ -14242,6 +14267,7 @@ var
 
         LPanelRect.Right := FLeftMargin.MarksPanel.Width;
         LPanelRect.Bottom := AClipRect.Bottom;
+
         for LLine := AFirstLine to ALastLine do
         begin
           LTextLine := LLine;
@@ -14645,10 +14671,12 @@ begin
         Pen.Color := LPenColor;
 
         LCharRect.Top := ALineEndRect.Top;
+
         if (FSpecialChars.LineBreak.Style = eolPilcrow) or (FSpecialChars.LineBreak.Style = eolCRLF) then
           LCharRect.Bottom := ALineEndRect.Bottom
         else
           LCharRect.Bottom := ALineEndRect.Bottom - 3;
+
         LCharRect.Left := ALineEndRect.Left;
 
         if FSpecialChars.LineBreak.Style = eolEnter then
@@ -14700,6 +14728,7 @@ begin
           FPaintHelper.SetForegroundColor(Canvas.Pen.Color);
           FPaintHelper.SetStyle([]);
           LPilcrow := TCharacters.Pilcrow;
+
           SetBkMode(Canvas.Handle, TRANSPARENT);
           Winapi.Windows.ExtTextOut(Canvas.Handle, LCharRect.Left, LCharRect.Top, ETO_OPAQUE or ETO_CLIPPED,
             @LCharRect, PChar(LPilcrow), 1, nil);
@@ -14708,6 +14737,7 @@ begin
         if FSpecialChars.LineBreak.Style = eolArrow then
         begin
           LY := LCharRect.Top + 2;
+
           if FSpecialChars.Style = scsDot then
           while LY < LCharRect.Bottom do
           begin
@@ -14722,6 +14752,7 @@ begin
             LY := LCharRect.Bottom;
             LineTo(LCharRect.Left + 6, LY + 1);
           end;
+
           MoveTo(LCharRect.Left + 6, LY);
           LineTo(LCharRect.Left + 3, LY - 3);
           MoveTo(LCharRect.Left + 6, LY);
@@ -14730,6 +14761,7 @@ begin
         else
         begin
           LY := LCharRect.Top + GetLineHeight div 2;
+
           MoveTo(LCharRect.Left, LY);
           LineTo(LCharRect.Left + 11, LY);
           MoveTo(LCharRect.Left + 1, LY - 1);
@@ -14883,7 +14915,7 @@ var
     end;
   end;
 
-  procedure SetDrawingColors(const ASelected: Boolean);
+  procedure SetDrawingColors(const ASelected: Boolean; const AFocused: Boolean = False);
   var
     LColor: TColor;
   begin
@@ -14898,7 +14930,7 @@ var
       else
         FPaintHelper.SetForegroundColor(LForegroundColor);
 
-      if Focused then
+      if Focused or AFocused then
         LColor := FColors.SelectionBackground
       else
         LColor := FColors.SelectionBackgroundUnfocused
@@ -14911,7 +14943,9 @@ var
     end;
 
     FPaintHelper.SetBackgroundColor(LColor); { Text }
+
     Canvas.Brush.Color := LColor; { Rest of the line }
+
     LBackgroundColorRed := LColor and $FF;
     LBackgroundColorGreen := (LColor shr 8) and $FF;
     LBackgroundColorBlue := (LColor shr 16) and $FF;
@@ -14947,7 +14981,9 @@ var
     function NextItem: Boolean;
     begin
       Result := True;
+
       Inc(LCurrentSearchIndex);
+
       if LCurrentSearchIndex < FSearch.Items.Count then
         LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LCurrentSearchIndex])^
       else
@@ -14965,6 +15001,7 @@ var
       while (LCurrentSearchIndex < FSearch.Items.Count) and (LSearchItem.EndTextPosition.Line < LCurrentLine) do
       begin
         Inc(LCurrentSearchIndex);
+
         if LCurrentSearchIndex < FSearch.Items.Count then
           LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LCurrentSearchIndex])^;
       end;
@@ -14989,6 +15026,7 @@ var
       while True do
       begin
         LSearchTextLength := GetSearchTextLength;
+
         if LSearchTextLength = 0 then
           Break;
 
@@ -15133,7 +15171,9 @@ var
       while LIndex < LTokenLength do
       begin
         LRect.Right := LRect.Left + 2;
+
         Canvas.Rectangle(LRect);
+
         Inc(LRect.Left, LSpaceWidth);
         Inc(LIndex);
       end;
@@ -15150,6 +15190,7 @@ var
       LRect.Right := LTextRect.Left;
 
       Inc(LRect.Right, LTabWidth);
+
       if FLines.Columns then
         Dec(LRect.Right, FPaintHelper.CharWidth * (LTokenHelper.ExpandedCharsBefore mod FTabs.Width));
 
@@ -15162,6 +15203,7 @@ var
         begin
           LLeft := LRect.Left;
           Inc(LLeft);
+
           if Odd(LLeft) then
             Inc(LLeft);
 
@@ -15308,13 +15350,14 @@ var
           begin
             FItalic.Offset := 0;
             LBottom := Min(LTokenRect.Bottom, Canvas.ClipRect.Bottom);
-
             LMaxX := LTokenRect.Right;
             LOrigMaxX := LMaxX;
             FItalic.Bitmap.Height := LBottom - LTokenRect.Top;
             FItalic.Bitmap.Width := 3;
+
             BitBlt(FItalic.Bitmap.Canvas.Handle, 0, 0, FItalic.Bitmap.Width, FItalic.Bitmap.Height, Canvas.Handle, LMaxX,
               LTokenRect.Top, SRCCOPY);
+
             LLeftStart := 0;
 
             for LTop := 0 to FItalic.Bitmap.Height - 1 do
@@ -15352,12 +15395,14 @@ var
       if LTokenHelper.Border <> TColors.SysNone then
       begin
         LOldPenColor := Canvas.Pen.Color;
+
         Canvas.Pen.Color := LTokenHelper.Border;
         Canvas.MoveTo(LTextRect.Left, LTextRect.Bottom - 1);
         Canvas.LineTo(LTokenRect.Right + FItalic.Offset - 1, LTextRect.Bottom - 1);
         Canvas.LineTo(LTokenRect.Right + FItalic.Offset - 1, LTextRect.Top);
         Canvas.LineTo(LTextRect.Left, LTextRect.Top);
         Canvas.LineTo(LTextRect.Left, LTextRect.Bottom - 1);
+
         Canvas.Pen.Color := LOldPenColor;
       end;
 
@@ -15374,6 +15419,7 @@ var
                 Canvas.MoveTo(LTextRect.Left, LTextRect.Bottom - 3);
                 Canvas.LineTo(LTokenRect.Right, LTextRect.Bottom - 3);
               end;
+
               Canvas.MoveTo(LTextRect.Left, LTextRect.Bottom - 1);
               Canvas.LineTo(LTokenRect.Right, LTextRect.Bottom - 1);
             end;
@@ -15384,9 +15430,11 @@ var
               while LStep < LTokenRect.Right - 4 do
               begin
                 LLeft := LTextRect.Left + LStep;
+
                 Canvas.MoveTo(LLeft, LTextRect.Bottom - 3);
                 Canvas.LineTo(LLeft + 2, LTextRect.Bottom - 1);
                 Canvas.LineTo(LLeft + 4, LTextRect.Bottom - 3);
+
                 Inc(LStep, 4);
               end;
             end;
@@ -15398,6 +15446,7 @@ var
               begin
                 Canvas.MoveTo(LLeft, LTextRect.Bottom - 3);
                 Canvas.LineTo(LLeft + 3, LTextRect.Bottom - 3);
+
                 Inc(LLeft, 6);
               end;
 
@@ -15410,6 +15459,7 @@ var
               begin
                 Canvas.MoveTo(LLeft + 1, LTextRect.Bottom - 2);
                 Canvas.LineTo(LLeft + 3, LTextRect.Bottom - 2);
+
                 Inc(LLeft, 3);
               end;
 
@@ -15419,6 +15469,7 @@ var
               begin
                 Canvas.MoveTo(LLeft + 3, LTextRect.Bottom - 1);
                 Canvas.LineTo(LLeft + 6, LTextRect.Bottom - 1);
+
                 Inc(LLeft, 6);
               end;
             end;
@@ -15515,6 +15566,7 @@ var
 
     if LCustomLineColors and (LCustomForegroundColor <> TColors.SysNone) then
       LForegroundColor := LCustomForegroundColor;
+
     if LCustomLineColors and (LCustomBackgroundColor <> TColors.SysNone) and not LTokenHelper.CustomBackgroundColor then
       LBackgroundColor := LCustomBackgroundColor;
 
@@ -15533,10 +15585,12 @@ var
         LTempText := LText;
 
         SetDrawingColors(False);
+
         LTokenLength := Length(LText);
         LTokenRect.Right := LTokenRect.Left + GetTokenWidth(LText, LTokenLength, LTokenHelper.ExpandedCharsBefore,
           AMinimap, True);
         LTempRect := LTokenRect;
+
         PaintToken(LText, LTokenLength);
 
         { Selected part of the token }
@@ -15596,9 +15650,12 @@ var
         if LFirstUnselectedPartOfToken then
         begin
           SetDrawingColors(False);
+
           LTokenLength := LLineSelectionStart - LFirstColumn;
           LTokenRect.Right := LTokenRect.Left + GetTokenWidth(LText, LTokenLength, LTokenHelper.ExpandedCharsBefore, AMinimap);
+
           PaintToken(LText, LTokenLength);
+
           Delete(LText, 1, LTokenLength);
         end;
         { Selected part of the token }
@@ -15608,11 +15665,15 @@ var
         LSelectedTokenLength := LTokenLength;
         LSelectedText := LText;
         LTokenRect.Left := LTokenRect.Right;
+
         if LSecondUnselectedPartOfToken then
         begin
           Delete(LText, 1, LTokenLength);
+
           SetDrawingColors(False);
+
           LTokenRect.Right := LTokenRect.Left + GetTokenWidth(LText, Length(LText), LTokenHelper.ExpandedCharsBefore, AMinimap);
+
           PaintToken(LText, Length(LText));
         end;
       end;
@@ -15621,8 +15682,10 @@ var
     if LText <> '' then
     begin
       SetDrawingColors(LSelected);
+
       LTokenLength := Length(LText);
       LTokenRect.Right := LTokenRect.Left + GetTokenWidth(LText, LTokenLength, LTokenHelper.ExpandedCharsBefore, AMinimap);
+
       PaintToken(LText, LTokenLength)
     end;
 
@@ -15632,15 +15695,19 @@ var
     if (not LSelected or LIsPartOfTokenSelected) and not AMinimap or AMinimap and (moShowSearchResults in FMinimap.Options) then
     begin
       LSearchTokenRect.Right := LTokenRect.Right;
+
       PaintSearchResults(LTokenHelper.Text, LSearchTokenRect);
     end;
 
     if LIsPartOfTokenSelected and not LTokenHelper.RightToLeftToken then
     begin
-      SetDrawingColors(True);
+      SetDrawingColors(True, True);
+
       LTempRect := LTokenRect;
       LTokenRect := LSelectedRect;
+
       PaintToken(LSelectedText, LSelectedTokenLength);
+
       LTokenRect := LTempRect;
     end;
 
@@ -15663,6 +15730,7 @@ var
         SetDrawingColors(not (soToEndOfLine in FSelection.Options) and
           not FMultiEdit.SelectionAvailable and
           (LIsLineSelected or LSelected and (LLineSelectionEnd > LLastColumn)));
+
         LTokenRect.Right := LLineRect.Right;
         FillRect(LTokenRect);
       end
@@ -15671,6 +15739,7 @@ var
         if LLineSelectionStart > LLastColumn then
         begin
           SetDrawingColors(False);
+
           LTokenRect.Right := Min(LTokenRect.Left + (LLineSelectionStart - LLastColumn) * FPaintHelper.CharWidth, LLineRect.Right);
           FillRect(LTokenRect);
         end;
@@ -16323,11 +16392,13 @@ var
           LItem := FHighlightLine.Item[LIndex];
 
           LRegExOptions := [];
+
           if hlIgnoreCase in LItem.Options then
             LRegExOptions := [roIgnoreCase];
 
           LRegEx := TRegex.Create(LItem.Pattern, LRegExOptions);
-          if LRegEx.Match(LCurrentLineText).Success then
+
+          if LRegEx.Match(Copy(LCurrentLineText, 1, FHighlightLine.MaxLineLength)).Success then
           begin
             LCustomForegroundColor := LItem.Foreground;
             LCustomBackgroundColor := LItem.Background;
@@ -18054,6 +18125,8 @@ begin
 
   Result := 0;
 
+  FState.ReplaceCanceled := False;
+
   if Length(ASearchText) = 0 then
     Exit;
 
@@ -18088,7 +18161,7 @@ begin
 
   SearchAll(ASearchText);
 
-  Result := FSearch.Items.Count - 1;
+  Result := FSearch.Items.Count;
 
   if Assigned(FEvents.OnReplaceSearchCount) then
     FEvents.OnReplaceSearchCount(Self, Result, APageIndex);
@@ -18115,6 +18188,10 @@ begin
       LActionReplace := raReplace;
 
     LFound := True;
+
+    if LReplaceTextParams.Prompt then
+      Result := 0;
+
     while LFound do
     begin
       if LReplaceTextParams.Backwards then
@@ -18137,62 +18214,71 @@ begin
 
         LActionReplace := DoOnReplaceText(LReplaceTextParams);
 
-        if LActionReplace = raCancel then
-          Exit(-9);
+        case LActionReplace of
+          raCancel:
+            begin
+              FState.ReplaceCanceled := True;
+              Exit;
+            end;
+          raReplaceAll:
+            begin
+              SearchAll(ASearchText);
 
-        if LActionReplace = raReplaceAll then
-        begin
-          SearchAll(ASearchText);
-
-          LOriginalTextPosition := LTextPosition;
-          Dec(LOriginalTextPosition.Char);
-          LOriginalTextPosition.Char := Max(LOriginalTextPosition.Char, 1);
+              LOriginalTextPosition := LTextPosition;
+              Dec(LOriginalTextPosition.Char);
+              LOriginalTextPosition.Char := Max(LOriginalTextPosition.Char, 1);
+            end;
         end;
       end;
 
-      if LActionReplace = raSkip then
-      begin
-        Dec(Result);
-        Continue
-      end
-      else
-      if LActionReplace = raReplaceAll then
-      begin
-        LockPainting;
+      case LActionReplace of
+        raSkip:
+          begin
+            Dec(Result);
+            Continue
+          end;
+        raReplaceAll:
+          begin
+            LockPainting;
 
-        FLast.DeletedLine := -1;
-        for LItemIndex := FSearch.Items.Count - 1 downto 0 do
-        begin
-          LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LItemIndex]);
+            FLast.DeletedLine := -1;
 
-          if not (roEntireScope in FReplace.Options) or LReplaceTextParams.Prompt then
-            if LReplaceTextParams.Backwards and
-              ( (LSearchItem.BeginTextPosition.Line > LOriginalTextPosition.Line) or
-                (LSearchItem.BeginTextPosition.Line = LOriginalTextPosition.Line) and
-                (LSearchItem.BeginTextPosition.Char > LOriginalTextPosition.Char) )
-              or not LReplaceTextParams.Backwards and
-              ( (LSearchItem.BeginTextPosition.Line < LOriginalTextPosition.Line) or
-                (LSearchItem.BeginTextPosition.Line = LOriginalTextPosition.Line) and
-                (LSearchItem.BeginTextPosition.Char < LOriginalTextPosition.Char) ) then
-              Continue;
+            for LItemIndex := FSearch.Items.Count - 1 downto 0 do
+            begin
+              LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LItemIndex]);
 
-          SelectionBeginPosition := LSearchItem.BeginTextPosition;
-          SelectionEndPosition := LSearchItem.EndTextPosition;
+              if not (roEntireScope in FReplace.Options) or LReplaceTextParams.Prompt then
+                if LReplaceTextParams.Backwards and
+                  ( (LSearchItem.BeginTextPosition.Line > LOriginalTextPosition.Line) or
+                    (LSearchItem.BeginTextPosition.Line = LOriginalTextPosition.Line) and
+                    (LSearchItem.BeginTextPosition.Char > LOriginalTextPosition.Char) )
+                  or not LReplaceTextParams.Backwards and
+                  ( (LSearchItem.BeginTextPosition.Line < LOriginalTextPosition.Line) or
+                    (LSearchItem.BeginTextPosition.Line = LOriginalTextPosition.Line) and
+                    (LSearchItem.BeginTextPosition.Char < LOriginalTextPosition.Char) ) then
+                  Continue;
 
-          if not LReplaceTextParams.DeleteLine or
-            LReplaceTextParams.DeleteLine and (FLast.DeletedLine <> LSearchItem.BeginTextPosition.Line) then
-            ReplaceSelectedText(AReplaceText, ASearchText, LReplaceTextParams.ReplaceTextAction);
+              SelectionBeginPosition := LSearchItem.BeginTextPosition;
+              SelectionEndPosition := LSearchItem.EndTextPosition;
 
-          FLast.DeletedLine := LSearchItem.BeginTextPosition.Line;
-        end;
+              if not LReplaceTextParams.DeleteLine or
+                LReplaceTextParams.DeleteLine and (FLast.DeletedLine <> LSearchItem.BeginTextPosition.Line) then
+                ReplaceSelectedText(AReplaceText, ASearchText, LReplaceTextParams.ReplaceTextAction);
 
-        Exit;
+              FLast.DeletedLine := LSearchItem.BeginTextPosition.Line;
+            end;
+
+            Exit;
+          end;
       end;
 
       ReplaceSelectedText(AReplaceText, ASearchText, LReplaceTextParams.ReplaceTextAction);
 
       if (LActionReplace = raReplace) and LReplaceTextParams.Prompt then
+      begin
+        Inc(Result);
         SearchAll(ASearchText);
+      end;
 
       if (LActionReplace = raReplace) and not LReplaceTextParams.Prompt then
         Exit;

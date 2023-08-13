@@ -151,6 +151,7 @@ function TTextEditorFontsInfoManager.CreateFontsInfo(const ABaseFont: TFont; con
 begin
   New(Result);
   FillChar(Result^, SizeOf(TTextEditorSharedFontsInfo), 0);
+
   with Result^ do
   try
     BaseFont := TFont.Create;
@@ -168,6 +169,7 @@ begin
   with ASharedFontsInfo^ do
   begin
     Dec(LockCount);
+
     if LockCount = 0 then
       DestroyFontHandles(ASharedFontsInfo);
   end;
@@ -184,6 +186,7 @@ begin
       Assert(1 = PTextEditorSharedFontsInfo(FFontsInfo[FFontsInfo.Count - 1])^.RefCount);
       ReleaseFontsInfo(PTextEditorSharedFontsInfo(FFontsInfo[FFontsInfo.Count - 1]));
     end;
+
     FFontsInfo.Free;
   end;
 
@@ -199,6 +202,7 @@ begin
   for LIndex := Low(TTextEditorStockFontPatterns) to High(TTextEditorStockFontPatterns) do
   begin
     LFontData := FontsData[LIndex];
+
     if LFontData.Handle <> 0 then
     begin
       DeleteObject(LFontData.Handle);
@@ -214,6 +218,7 @@ begin
   for LIndex := 0 to FFontsInfo.Count - 1 do
   begin
     Result := PTextEditorSharedFontsInfo(FFontsInfo[LIndex]);
+
     if CompareMem(@(Result^.BaseLogFont), @ALogFont, SizeOf(TLogFont)) then
       Exit;
   end;
@@ -229,6 +234,7 @@ begin
 
   RetrieveLogFontForComparison(ABaseFont, LLogFont);
   Result := FindFontsInfo(LLogFont);
+
   if not Assigned(Result) then
   begin
     Result := CreateFontsInfo(ABaseFont, LLogFont);
@@ -246,6 +252,7 @@ begin
   with ASharedFontsInfo^ do
   begin
     Assert(LockCount < RefCount);
+
     if RefCount > 1 then
       Dec(RefCount)
     else
@@ -262,6 +269,7 @@ var
   LPEnd: PChar;
 begin
   GetObject(ABaseFont.Handle, SizeOf(TLogFont), @ALogFont);
+
   with ALogFont do
   begin
     lfItalic := 0;
@@ -283,6 +291,7 @@ begin
   GetTextMetrics(AHandle, LTextMetric);
 
   LHasABC := GetCharABCWidths(AHandle, Ord(' '), Ord(' '), LCharInfo);
+
   if not LHasABC then
   begin
     with LCharInfo do
@@ -291,11 +300,13 @@ begin
       abcB := LTextMetric.tmAveCharWidth;
       abcC := 0;
     end;
+
     LTextMetric.tmOverhang := 0;
   end;
 
   with LCharInfo do
     ACharWidth^ := abcA + Integer(abcB) + abcC + LTextMetric.tmOverhang;
+
   ACharHeight^ := Abs(LTextMetric.tmHeight)
 end;
 
@@ -309,6 +320,7 @@ end;
 destructor TTextEditorFontStock.Destroy;
 begin
   ReleaseFontsInfo;
+
   Assert(FHandleRefCount = 0);
 
   inherited;
@@ -361,18 +373,23 @@ begin
     Assert(FHandle = 0);
     FHandle := GetDC(0);
   end;
+
   Inc(FHandleRefCount);
+
   Result := FHandle;
 end;
 
 procedure TTextEditorFontStock.InternalReleaseDC(const AValue: HDC);
 begin
   Dec(FHandleRefCount);
+
   if FHandleRefCount <= 0 then
   begin
     Assert((FHandle <> 0) and (FHandle = AValue));
+
     ReleaseDC(0, FHandle);
     FHandle := 0;
+
     Assert(FHandleRefCount = 0);
   end;
 end;
@@ -397,6 +414,7 @@ begin
       UnlockFontsInfo(FSharedFontsInfo);
       FUsingFontHandles := False;
     end;
+
     ReleaseFontsInfo(FSharedFontsInfo);
     FSharedFontsInfo := nil;
   end;
@@ -409,6 +427,7 @@ begin
   if Assigned(AValue) then
   begin
     LSharedFontsInfo := GFontsInfoManager.GetFontsInfo(AValue);
+
     if LSharedFontsInfo = FSharedFontsInfo then
       GFontsInfoManager.ReleaseFontsInfo(LSharedFontsInfo)
     else
@@ -434,14 +453,17 @@ begin
   Assert(SizeOf(TFontStyles) = 1);
 
   LIndex := Byte(AValue);
+
   Assert(LIndex <= High(TTextEditorStockFontPatterns));
 
   UseFontHandles;
   LFontDataPointer := FontData[LIndex];
+
   if FPCurrentFontData = LFontDataPointer then
     Exit;
 
   FPCurrentFontData := LFontDataPointer;
+
   with LFontDataPointer^ do
   if Handle <> 0 then
   begin
@@ -488,9 +510,10 @@ begin
   FStockBitmap := Vcl.Graphics.TBitmap.Create;
   FStockBitmap.Canvas.Brush.Color := TColors.White;
   FCalcExtentBaseStyle := ACalcExtentBaseStyle;
-  SetBaseFont(ABaseFont);
   FColor := TColors.SysWindowText;
   FBackgroundColor := clWindow;
+
+  SetBaseFont(ABaseFont);
 end;
 
 destructor TTextEditorPaintHelper.Destroy;
@@ -508,9 +531,11 @@ begin
   else
   begin
     Assert((FHandle = 0) and (AHandle <> 0) and (FDrawingCount = 0));
+
     FHandle := AHandle;
     FSaveHandle := SaveDC(AHandle);
     SelectObject(AHandle, FCurrentFont);
+
     Winapi.Windows.SetTextColor(AHandle, ColorToRGB(FColor));
     Winapi.Windows.SetBkColor(AHandle, ColorToRGB(FBackgroundColor));
   end;
@@ -521,11 +546,14 @@ end;
 procedure TTextEditorPaintHelper.EndDrawing;
 begin
   Assert(FDrawingCount >= 1);
+
   Dec(FDrawingCount);
+
   if FDrawingCount <= 0 then
   begin
     if FHandle <> 0 then
       RestoreDC(FHandle, FSaveHandle);
+
     FSaveHandle := 0;
     FHandle := 0;
     FDrawingCount := 0;
@@ -538,6 +566,7 @@ begin
   begin
     FStockBitmap.Canvas.Font.Assign(AValue);
     FStockBitmap.Canvas.Font.Style := [];
+
     with FFontStock do
     begin
       SetBaseFont(AValue);
@@ -546,6 +575,7 @@ begin
       FCharHeight := GetCharHeight;
       FFixedSizeFont := GetFixedSizeFont;
     end;
+
     SetStyle(AValue.Style);
   end
   else
@@ -557,6 +587,7 @@ begin
   if FCalcExtentBaseStyle <> AValue then
   begin
     FCalcExtentBaseStyle := AValue;
+
     with FFontStock do
     begin
       SetStyle(AValue);
@@ -574,7 +605,9 @@ begin
     SetStyle(AValue);
     Self.FCurrentFont := FontHandle;
   end;
+
   FStockBitmap.Canvas.Font.Style := AValue;
+
   if FHandle <> 0 then
     SelectObject(FHandle, FCurrentFont);
 end;
@@ -584,6 +617,7 @@ begin
   if FColor <> AValue then
   begin
     FColor := AValue;
+
     if FHandle <> 0 then
       SetTextColor(FHandle, ColorToRGB(AValue));
   end;
@@ -594,6 +628,7 @@ begin
   if FBackgroundColor <> AValue then
   begin
     FBackgroundColor := AValue;
+
     if FHandle <> 0 then
       Winapi.Windows.SetBkColor(FHandle, ColorToRGB(AValue));
   end;

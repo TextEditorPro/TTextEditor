@@ -45,6 +45,11 @@
             "Attributes": {
               "Element": "ReservedWord"
             },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?;'\".><#_ ",
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "UseDelimitersForText": true
+            },
             "TokenRange": {
               "Open": "<",
               "Close": ">"

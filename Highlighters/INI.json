@@ -82,7 +82,8 @@
     "Ranges": [
       {
         "Options": {
-          "MatchingPairHighlight": false
+          "MatchingPairHighlight": false,
+          "HideGuideLineAtFirstColumn": true
         },
         "SkipRegion": [
           {

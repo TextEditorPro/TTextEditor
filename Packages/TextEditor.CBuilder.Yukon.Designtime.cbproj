@@ -1,9 +1,9 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <ProjectGuid>{DFAC0836-119D-4EE2-B4BA-209EDA044C8C}</ProjectGuid>
-        <ProjectVersion>19.5</ProjectVersion>
+        <ProjectGuid>{87F1AC58-DDC2-4E16-970C-833AE9478CCF}</ProjectGuid>
+        <ProjectVersion>20.0</ProjectVersion>
         <FrameworkType>VCL</FrameworkType>
-        <MainSource>TextEditor.CBuilder.Alexandria.Runtime.cpp</MainSource>
+        <MainSource>TextEditor.CBuilder.Yukon.Designtime.cpp</MainSource>
         <Base>True</Base>
         <Config Condition="'$(Config)'==''">Debug</Config>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
@@ -47,7 +47,7 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
+        <DCC_CBuilderOutput>All</DCC_CBuilderOutput>
         <DynamicRTL>true</DynamicRTL>
         <UsePackages>true</UsePackages>
         <IntermediateOutputDir>.\$(Platform)\$(Config)</IntermediateOutputDir>
@@ -63,26 +63,24 @@
         <Multithreaded>true</Multithreaded>
         <IncludePath>..\Source\;$(IncludePath)</IncludePath>
         <ILINK_LibraryPath>..\Source\;$(ILINK_LibraryPath)</ILINK_LibraryPath>
-        <SanitizedProjectName>TextEditor_CBuilder_Alexandria_Runtime</SanitizedProjectName>
-        <RuntimeOnlyPackage>true</RuntimeOnlyPackage>
+        <SanitizedProjectName>TextEditor_CBuilder_Yukon_Designtime</SanitizedProjectName>
         <VerInfo_Locale>1033</VerInfo_Locale>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <TLIB_PageSize>128</TLIB_PageSize>
-        <ILINK_Description>TTextEditor control package - runtime</ILINK_Description>
+        <DCC_UnitSearchPath>..\Source\;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <ILINK_Description>TTextEditor control package - designtime</ILINK_Description>
+        <DesignOnlyPackage>true</DesignOnlyPackage>
+        <DCC_AdditionalSwitches>-LUDesignIde</DCC_AdditionalSwitches>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <PackageImports>adortl;appanalytics;bcbie;bcbsmp;bindcomp;bindcompdbx;bindcompfmx;bindcompvcl;bindcompvclsmp;bindcompvclwinx;bindengine;CloudService;CustomIPTransport;DataSnapClient;DataSnapCommon;DataSnapConnectors;DatasnapConnectorsFreePascal;DataSnapFireDAC;DataSnapIndy10ServerTransport;DataSnapNativeClient;DataSnapProviderClient;DataSnapServer;DataSnapServerMidas;dbexpress;dbrtl;dbxcds;DbxClientDriver;DbxCommonDriver;DBXDb2Driver;DBXFirebirdDriver;DBXInformixDriver;DBXInterBaseDriver;DBXMSSQLDriver;DBXMySQLDriver;DBXOdbcDriver;DBXOracleDriver;DBXSqliteDriver;DBXSybaseASADriver;DBXSybaseASEDriver;dsnap;dsnapcon;dsnapxml;emsclient;emsclientfiredac;emsedge;emshosting;emsserverresource;FireDAC;FireDACADSDriver;FireDACASADriver;FireDACCommon;FireDACCommonDriver;FireDACCommonODBC;FireDACDb2Driver;FireDACDBXDriver;FireDACDSDriver;FireDACIBDriver;FireDACInfxDriver;FireDACMongoDBDriver;FireDACMSAccDriver;FireDACMSSQLDriver;FireDACMySQLDriver;FireDACODBCDriver;FireDACOracleDriver;FireDACPgDriver;FireDACSqliteDriver;FireDACTDataDriver;fmx;fmxase;fmxdae;fmxFireDAC;fmxobj;IndyCore;IndyIPClient;IndyIPCommon;IndyIPServer;IndyProtocols;IndySystem;inet;inetdb;inetdbxpress;RESTBackendComponents;RESTComponents;rtl;soapmidas;soaprtl;soapserver;tethering;vcl;vclactnband;vcldb;vcldsnap;vcledge;vclFireDAC;vclie;vclimg;VCLRESTComponents;VclSmp;vcltouch;vclwinx;vclx;xmlrtl;$(PackageImports)</PackageImports>
         <DCC_Namespace>Winapi;System.Win;Data.Win;Datasnap.Win;Web.Win;Soap.Win;Xml.Win;Bde;$(DCC_Namespace)</DCC_Namespace>
         <BT_BuildType>Debug</BT_BuildType>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
-        <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
-        <VerInfo_Locale>1033</VerInfo_Locale>
-        <BCC_PCHName_Clang>TextEditor.CBuilder.Alexandria.RuntimePCH1.h</BCC_PCHName_Clang>
+        <BCC_PCHName_Clang>TextEditor.CBuilder.Yukon.DesigntimePCH1.h</BCC_PCHName_Clang>
         <IncludePath>$(BDSINCLUDE)\windows\vcl;$(IncludePath)</IncludePath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win64)'!=''">
         <PackageImports>adortl;appanalytics;bcbie;bcbsmp;bindcomp;bindcompdbx;bindcompfmx;bindcompvcl;bindcompvclsmp;bindcompvclwinx;bindengine;CloudService;CustomIPTransport;DataSnapClient;DataSnapCommon;DataSnapConnectors;DatasnapConnectorsFreePascal;DataSnapFireDAC;DataSnapIndy10ServerTransport;DataSnapNativeClient;DataSnapProviderClient;DataSnapServer;DataSnapServerMidas;dbexpress;dbrtl;dbxcds;DbxClientDriver;DbxCommonDriver;DBXDb2Driver;DBXFirebirdDriver;DBXInformixDriver;DBXInterBaseDriver;DBXMSSQLDriver;DBXMySQLDriver;DBXOdbcDriver;DBXOracleDriver;DBXSqliteDriver;DBXSybaseASADriver;DBXSybaseASEDriver;dsnap;dsnapcon;dsnapxml;emsclient;emsclientfiredac;emsedge;emshosting;emsserverresource;FireDAC;FireDACADSDriver;FireDACASADriver;FireDACCommon;FireDACCommonDriver;FireDACCommonODBC;FireDACDb2Driver;FireDACDBXDriver;FireDACDSDriver;FireDACIBDriver;FireDACInfxDriver;FireDACMongoDBDriver;FireDACMSAccDriver;FireDACMSSQLDriver;FireDACMySQLDriver;FireDACODBCDriver;FireDACOracleDriver;FireDACPgDriver;FireDACSqliteDriver;FireDACTDataDriver;fmx;fmxase;fmxdae;fmxFireDAC;fmxobj;IndyCore;IndyIPClient;IndyIPCommon;IndyIPServer;IndyProtocols;IndySystem;inet;inetdb;inetdbxpress;RESTBackendComponents;RESTComponents;rtl;soapmidas;soaprtl;soapserver;tethering;vcl;vclactnband;vcldb;vcldsnap;vcledge;vclFireDAC;vclie;vclimg;VCLRESTComponents;VclSmp;vcltouch;vclwinx;vclx;xmlrtl;$(PackageImports)</PackageImports>
-        <BCC_PCHName_Clang>TextEditor.CBuilder.Alexandria.RuntimePCH1.h</BCC_PCHName_Clang>
+        <BCC_PCHName_Clang>TextEditor.CBuilder.Yukon.DesigntimePCH1.h</BCC_PCHName_Clang>
         <IncludePath>$(BDSINCLUDE)\windows\vcl;$(IncludePath)</IncludePath>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
@@ -110,7 +108,6 @@
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
         <BCC_UseClassicCompiler>false</BCC_UseClassicCompiler>
         <ILINK_LibraryPath>$(BDSLIB)\$(PLATFORM)$(CC_SUFFIX)\debug;$(ILINK_LibraryPath)</ILINK_LibraryPath>
-        <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
         <Defines>NDEBUG;$(Defines)</Defines>
@@ -121,308 +118,84 @@
     </PropertyGroup>
     <ItemGroup>
         <PackageImport Include="bindengine.bpi">
-            <BuildOrder>99</BuildOrder>
+            <BuildOrder>11</BuildOrder>
         </PackageImport>
         <PackageImport Include="dbrtl.bpi">
             <BuildOrder>95</BuildOrder>
         </PackageImport>
-        <PackageImport Include="rtl.bpi">
-            <BuildOrder>1</BuildOrder>
+        <PackageImport Include="designide.bpi">
+            <BuildOrder>7</BuildOrder>
         </PackageImport>
-        <CppCompile Include="TextEditor.CBuilder.Alexandria.Runtime.cpp">
+        <PackageImport Include="designideresources.bpi">
+            <BuildOrder>8</BuildOrder>
+        </PackageImport>
+        <RcItem Include="Images\TDBTextEditor.bmp">
+            <ResourceType>BITMAP</ResourceType>
+            <ResourceId>TDBTextEditor</ResourceId>
+        </RcItem>
+        <RcItem Include="Images\TTextEditor.bmp">
+            <ResourceType>BITMAP</ResourceType>
+            <ResourceId>TTextEditor</ResourceId>
+        </RcItem>
+        <RcItem Include="Images\TTextEditorCompareScrollBar.bmp">
+            <ResourceType>BITMAP</ResourceType>
+            <ResourceId>TTextEditorCompareScrollBar</ResourceId>
+        </RcItem>
+        <RcItem Include="Images\TTextEditorMacroRecorder.bmp">
+            <ResourceType>BITMAP</ResourceType>
+            <ResourceId>TTextEditorMacroRecorder</ResourceId>
+        </RcItem>
+        <RcItem Include="Images\TTextEditorPrint.bmp">
+            <ResourceType>BITMAP</ResourceType>
+            <ResourceId>TTextEditorPrint</ResourceId>
+        </RcItem>
+        <RcItem Include="Images\TTextEditorPrintPreview.bmp">
+            <ResourceType>BITMAP</ResourceType>
+            <ResourceId>TTextEditorPrintPreview</ResourceId>
+        </RcItem>
+        <RcItem Include="Images\TTextEditorSpellCheck.bmp">
+            <ResourceType>BITMAP</ResourceType>
+            <ResourceId>TTextEditorSpellCheck</ResourceId>
+        </RcItem>
+        <PackageImport Include="rtl.bpi">
+            <BuildOrder>6</BuildOrder>
+        </PackageImport>
+        <CppCompile Include="TextEditor.CBuilder.Yukon.Designtime.cpp">
             <BuildOrder>0</BuildOrder>
         </CppCompile>
-        <PCHCompile Include="TextEditor.CBuilder.Alexandria.RuntimePCH1.h">
+        <PCHCompile Include="TextEditor.CBuilder.Yukon.DesigntimePCH1.h">
             <BuildOrder>2</BuildOrder>
             <PCH>true</PCH>
         </PCHCompile>
         <PackageImport Include="vcl.bpi">
-            <BuildOrder>94</BuildOrder>
+            <BuildOrder>5</BuildOrder>
+        </PackageImport>
+        <PackageImport Include="vclactnband.bpi">
+            <BuildOrder>13</BuildOrder>
         </PackageImport>
         <PackageImport Include="vcldb.bpi">
             <BuildOrder>96</BuildOrder>
         </PackageImport>
         <PackageImport Include="vclimg.bpi">
-            <BuildOrder>98</BuildOrder>
+            <BuildOrder>10</BuildOrder>
         </PackageImport>
         <PackageImport Include="vclwinx.bpi">
-            <BuildOrder>97</BuildOrder>
+            <BuildOrder>9</BuildOrder>
         </PackageImport>
-        <DelphiCompile Include="..\Source\TextEditor.ActiveLine.pas">
+        <PackageImport Include="vclx.bpi">
+            <BuildOrder>14</BuildOrder>
+        </PackageImport>
+        <PackageImport Include="xmlrtl.bpi">
+            <BuildOrder>12</BuildOrder>
+        </PackageImport>
+        <DelphiCompile Include="..\Source\TextEditor.Register.pas">
+            <BuildOrder>2</BuildOrder>
+        </DelphiCompile>
+        <DelphiCompile Include="..\Source\TextEditor.RegisterProperty.pas">
             <BuildOrder>3</BuildOrder>
         </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Caret.MultiEdit.pas">
+        <DelphiCompile Include="..\Source\TextEditor.Splash.pas">
             <BuildOrder>4</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Caret.NonBlinking.pas">
-            <BuildOrder>5</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Caret.Offsets.pas">
-            <BuildOrder>6</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Caret.pas">
-            <BuildOrder>7</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Caret.Styles.pas">
-            <BuildOrder>8</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.CodeFolding.GuideLines.pas">
-            <BuildOrder>9</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.CodeFolding.Hint.Form.pas">
-            <BuildOrder>9</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.CodeFolding.Hint.Indicator.pas">
-            <BuildOrder>10</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.CodeFolding.Hint.pas">
-            <BuildOrder>11</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.CodeFolding.pas">
-            <BuildOrder>12</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.CodeFolding.Ranges.pas">
-            <BuildOrder>13</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.CodeFolding.Regions.pas">
-            <BuildOrder>14</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Colors.pas">
-            <BuildOrder>15</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Compare.ScrollBar.pas">
-            <BuildOrder>16</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.CompletionProposal.pas">
-            <BuildOrder>17</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.CompletionProposal.PopupWindow.pas">
-            <BuildOrder>18</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.CompletionProposal.Snippets.pas">
-            <BuildOrder>19</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.CompletionProposal.Trigger.pas">
-            <BuildOrder>20</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Consts.pas">
-            <BuildOrder>21</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Encoding.pas">
-            <BuildOrder>22</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Export.HTML.pas">
-            <BuildOrder>23</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Fonts.pas">
-            <BuildOrder>24</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Glyph.pas">
-            <BuildOrder>25</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Highlighter.Attributes.pas">
-            <BuildOrder>26</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Highlighter.Colors.pas">
-            <BuildOrder>27</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Highlighter.Comments.pas">
-            <BuildOrder>28</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Highlighter.Export.JSON.pas">
-            <BuildOrder>29</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Highlighter.Import.JSON.pas">
-            <BuildOrder>30</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Highlighter.Info.pas">
-            <BuildOrder>31</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Highlighter.pas">
-            <BuildOrder>32</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Highlighter.Rules.pas">
-            <BuildOrder>33</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Highlighter.Token.pas">
-            <BuildOrder>34</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.HighlightLine.pas">
-            <BuildOrder>35</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.InternalImage.pas">
-            <BuildOrder>36</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.JSONDataObjects.pas">
-            <BuildOrder>37</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.KeyboardHandler.pas">
-            <BuildOrder>38</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.KeyCommands.pas">
-            <BuildOrder>39</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Language.pas">
-            <BuildOrder>40</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.LeftMargin.Bookmarks.pas">
-            <BuildOrder>41</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.LeftMargin.Border.pas">
-            <BuildOrder>42</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.LeftMargin.LineNumbers.pas">
-            <BuildOrder>43</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.LeftMargin.LineState.pas">
-            <BuildOrder>44</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.LeftMargin.Marks.pas">
-            <BuildOrder>45</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.LeftMargin.MarksPanel.pas">
-            <BuildOrder>46</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.LeftMargin.pas">
-            <BuildOrder>47</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Lines.pas">
-            <BuildOrder>48</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.MacroRecorder.pas">
-            <BuildOrder>49</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Marks.pas">
-            <BuildOrder>50</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.MatchingPairs.pas">
-            <BuildOrder>51</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Minimap.Indicator.pas">
-            <BuildOrder>52</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Minimap.pas">
-            <BuildOrder>53</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Minimap.Shadow.pas">
-            <BuildOrder>54</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.PaintHelper.pas">
-            <BuildOrder>55</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.pas">
-            <BuildOrder>56</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.PopupWindow.pas">
-            <BuildOrder>57</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Print.HeaderFooter.pas">
-            <BuildOrder>58</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Print.Margins.pas">
-            <BuildOrder>59</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Print.pas">
-            <BuildOrder>60</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Print.Preview.pas">
-            <BuildOrder>61</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Print.PrinterInfo.pas">
-            <BuildOrder>62</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Replace.pas">
-            <BuildOrder>63</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.RightMargin.pas">
-            <BuildOrder>64</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Ruler.pas">
-            <BuildOrder>65</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Scroll.Hint.pas">
-            <BuildOrder>66</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Scroll.pas">
-            <BuildOrder>67</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Scroll.Shadow.pas">
-            <BuildOrder>68</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Search.Base.pas">
-            <BuildOrder>69</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Search.InSelection.pas">
-            <BuildOrder>70</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Search.Map.pas">
-            <BuildOrder>71</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Search.NearOperator.pas">
-            <BuildOrder>72</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Search.Normal.pas">
-            <BuildOrder>73</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Search.pas">
-            <BuildOrder>74</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Search.RegularExpressions.pas">
-            <BuildOrder>75</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Search.Wildcard.pas">
-            <BuildOrder>76</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Selection.pas">
-            <BuildOrder>77</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.SkipRegions.pas">
-            <BuildOrder>78</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.SpecialChars.LineBreak.pas">
-            <BuildOrder>79</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.SpecialChars.pas">
-            <BuildOrder>80</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.SpecialChars.Selection.pas">
-            <BuildOrder>81</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.SpellCheck.pas">
-            <BuildOrder>82</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.StyleHooks.pas">
-            <BuildOrder>83</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.SyncEdit.pas">
-            <BuildOrder>84</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Tabs.pas">
-            <BuildOrder>85</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.TextFolding.pas">
-            <BuildOrder>86</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Types.pas">
-            <BuildOrder>87</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Undo.Item.pas">
-            <BuildOrder>88</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Undo.List.pas">
-            <BuildOrder>89</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Undo.pas">
-            <BuildOrder>90</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.UnknownChars.pas">
-            <BuildOrder>91</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.Utils.pas">
-            <BuildOrder>92</BuildOrder>
-        </DelphiCompile>
-        <DelphiCompile Include="..\Source\TextEditor.WordWrap.pas">
-            <BuildOrder>93</BuildOrder>
         </DelphiCompile>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>
@@ -448,7 +221,7 @@
                     <ProjectProperties Name="IndexFiles">False</ProjectProperties>
                 </ProjectProperties>
                 <Source>
-                    <Source Name="MainSource">TextEditor.CBuilder.Alexandria.Runtime.cpp</Source>
+                    <Source Name="MainSource">TextEditor.CBuilder.Yukon.Designtime.cpp</Source>
                 </Source>
                 <Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k280.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
@@ -498,6 +271,16 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin64\cc64290.dll" Class="DependencyModule">
+                    <Platform Name="Win64">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin64\cc64290mt.dll" Class="DependencyModule">
+                    <Platform Name="Win64">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile Condition="'$(UsingDelphiRTL)'=='true'" LocalName="$(BDS)\bin\borlndmm.dll" Class="DependencyModule">
                     <Platform Name="Win32">
                         <Overwrite>true</Overwrite>
@@ -513,6 +296,16 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32290.dll" Class="DependencyModule">
+                    <Platform Name="Win32">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32290mt.dll" Class="DependencyModule">
+                    <Platform Name="Win32">
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
                 <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32c280.dll" Class="DependencyModule">
                     <Platform Name="Win32">
                         <Overwrite>true</Overwrite>
@@ -523,15 +316,25 @@
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\22.0\BPL\TextEditor.CBuilder.Alexandria.Runtime.bpl" Configuration="Debug" Class="ProjectOutput">
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'!='true'" LocalName="$(BDS)\bin\cc32c290.dll" Class="DependencyModule">
                     <Platform Name="Win32">
-                        <RemoteName>TextEditor_CBuilder_Alexandria_Runtime.bpl</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
-                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\22.0\BPL\TextEditor.CBuilder.Alexandria.Runtime.tds" Configuration="Debug" Class="DebugSymbols">
+                <DeployFile Condition="'$(DynamicRTL)'=='true' And '$(Multithreaded)'=='true'" LocalName="$(BDS)\bin\cc32c290mt.dll" Class="DependencyModule">
                     <Platform Name="Win32">
-                        <RemoteName>TextEditor_CBuilder_Alexandria_Runtime.tds</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\22.0\BPL\TextEditor.CBuilder.Yukon.Designtime.bpl" Configuration="Debug" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>TextEditor_CBuilder_Yukon_Designtime.bpl</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="C:\Users\Public\Documents\Embarcadero\Studio\22.0\BPL\TextEditor.CBuilder.Yukon.Designtime.tds" Configuration="Debug" Class="DebugSymbols">
+                    <Platform Name="Win32">
+                        <RemoteName>TextEditor_CBuilder_Yukon_Designtime.tds</RemoteName>
                         <Overwrite>true</Overwrite>
                     </Platform>
                 </DeployFile>
@@ -621,6 +424,16 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
+                <DeployClass Name="AndroidSplashImageDefV21">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-anydpi-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-anydpi-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
                 <DeployClass Name="AndroidSplashStyles">
                     <Platform Name="Android">
                         <RemoteDir>res\values</RemoteDir>
@@ -641,6 +454,66 @@
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
+                <DeployClass Name="AndroidSplashStylesV31">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values-v31</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\values-v31</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_AdaptiveIcon">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-anydpi-v26</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-anydpi-v26</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_AdaptiveIconBackground">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_AdaptiveIconForeground">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_AdaptiveIconMonochrome">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_AdaptiveIconV33">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-anydpi-v33</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-anydpi-v33</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
                 <DeployClass Name="Android_Colors">
                     <Platform Name="Android">
                         <RemoteDir>res\values</RemoteDir>
@@ -648,6 +521,16 @@
                     </Platform>
                     <Platform Name="Android64">
                         <RemoteDir>res\values</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_ColorsDark">
+                    <Platform Name="Android">
+                        <RemoteDir>res\values-night-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\values-night-v21</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>
@@ -818,6 +701,56 @@
                     </Platform>
                     <Platform Name="Android64">
                         <RemoteDir>res\values</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_VectorizedNotificationIcon">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-anydpi-v24</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-anydpi-v24</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_VectorizedSplash">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_VectorizedSplashDark">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-night-anydpi-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-night-anydpi-v21</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_VectorizedSplashV31">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-anydpi-v31</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-anydpi-v31</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                </DeployClass>
+                <DeployClass Name="Android_VectorizedSplashV31Dark">
+                    <Platform Name="Android">
+                        <RemoteDir>res\drawable-night-anydpi-v31</RemoteDir>
+                        <Operation>1</Operation>
+                    </Platform>
+                    <Platform Name="Android64">
+                        <RemoteDir>res\drawable-night-anydpi-v31</RemoteDir>
                         <Operation>1</Operation>
                     </Platform>
                 </DeployClass>

@@ -27,7 +27,7 @@ type
 implementation
 
 uses
-  System.NetEncoding, System.UITypes, TextEditor, TextEditor.Consts, TextEditor.Types, TextEditor.Utils;
+  Winapi.Windows, System.NetEncoding, System.UITypes, TextEditor, TextEditor.Consts, TextEditor.Types, TextEditor.Utils;
 
 constructor TTextEditorExportHTML.Create(const ATextEditor: TCustomControl; const AFont: TFont; const ACharSet: string);
 begin

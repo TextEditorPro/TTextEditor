@@ -834,10 +834,9 @@ type
     procedure FoldingGoToPrevious;
     procedure GoToBookmark(const AIndex: Integer);
     procedure GoToLine(const ALine: Integer);
-    procedure GoToLineAndCenter(const ALine: Integer; const AChar: Integer = 1);
     procedure GoToLineAndSetPosition(const ALine: Integer; const AChar: Integer = 1; const AResultPosition: TTextEditorResultPosition = rpMiddle);
     procedure GoToNextBookmark;
-    procedure GoToOriginalLineAndCenter(const ALine: Integer; const AChar: Integer; const AText: string = '');
+    procedure GoToOriginalLineAndSetPosition(const ALine: Integer; const AChar: Integer; const AText: string = ''; const AResultPosition: TTextEditorResultPosition = rpMiddle);
     procedure GoToPreviousBookmark;
     procedure HookEditorLines(const ALines: TTextEditorLines; const AUndo, ARedo: TTextEditorUndoList);
     procedure IncPaintLock;
@@ -11587,7 +11586,7 @@ var
   LHeight: Double;
 begin
   LHeight := ClientHeight / Max(FLines.Count, 1);
-  GoToLineAndCenter(Round(Y / LHeight));
+  GoToLineAndSetPosition(Round(Y / LHeight));
 end;
 
 procedure TCustomTextEditor.DoOnPaint;
@@ -20296,7 +20295,7 @@ begin
     LTextPosition.Char := LBookmark.Char;
     LTextPosition.Line := LBookmark.Line;
 
-    GoToLineAndCenter(LTextPosition.Line, LTextPosition.Char);
+    GoToLineAndSetPosition(LTextPosition.Line, LTextPosition.Char);
 
     FPosition.SelectionBegin := TextPosition;
     FPosition.SelectionEnd := FPosition.SelectionBegin;
@@ -20315,11 +20314,6 @@ begin
   FPosition.SelectionEnd := FPosition.SelectionBegin;
 
   Invalidate;
-end;
-
-procedure TCustomTextEditor.GoToLineAndCenter(const ALine: Integer; const AChar: Integer = 1);
-begin
-  GoToLineAndSetPosition(ALine, AChar);
 end;
 
 procedure TCustomTextEditor.GoToLineAndSetPosition(const ALine: Integer; const AChar: Integer = 1; const AResultPosition: TTextEditorResultPosition = rpMiddle);
@@ -21479,11 +21473,9 @@ begin
   FHighlightLine.Assign(AValue);
 end;
 
-procedure TCustomTextEditor.GoToOriginalLineAndCenter(const ALine: Integer; const AChar: Integer; const AText: string = '');
+procedure TCustomTextEditor.GoToOriginalLineAndSetPosition(const ALine: Integer; const AChar: Integer;
+  const AText: string = ''; const AResultPosition: TTextEditorResultPosition = rpMiddle);
 var
-  LIndex: Integer;
-  LCodeFoldingRange: TTextEditorCodeFoldingRange;
-  LTextPosition: TTextEditorTextPosition;
   LLine: Integer;
 
   function GetOriginalLineNumber(const ALine: Integer): Integer;
@@ -21492,6 +21484,7 @@ var
   begin
     LLow := 0;
     LHigh := FLines.Count - 1;
+
     while LLow <= LHigh do
     begin
       LMiddle := (LLow + LHigh) div 2;
@@ -21505,6 +21498,7 @@ var
       else
         Exit(LMiddle);
     end;
+
     Result := -1;
   end;
 
@@ -21521,26 +21515,7 @@ begin
       LLine := GetOriginalLineNumber(ALine);
     end;
 
-  if CodeFolding.Visible then
-  for LIndex := 0 to FCodeFoldings.AllRanges.AllCount - 1 do
-  begin
-    LCodeFoldingRange := FCodeFoldings.AllRanges[LIndex];
-    if LCodeFoldingRange.FromLine > LLine then
-      Break
-    else
-    if (LCodeFoldingRange.FromLine <= LLine) and LCodeFoldingRange.Collapsed then
-      CodeFoldingExpand(LCodeFoldingRange);
-  end;
-
-  LTextPosition := GetPosition(AChar, LLine);
-  TextPosition := LTextPosition;
-
-  TopLine := Max(GetViewLineNumber(LTextPosition.Line + 1) - (ClientHeight div LineHeight) div 2, 1);
-
-  FPosition.SelectionBegin := LTextPosition;
-  FPosition.SelectionEnd := LTextPosition;
-
-  Invalidate;
+  GoToLineAndSetPosition(LLine, AChar, AResultPosition);
 end;
 
 function TCustomTextEditor.WordCount(const ASelected: Boolean = False): Integer;
@@ -21565,6 +21540,7 @@ begin
       Exit;
 
     LIsWord := True;
+
     while (LPText^ >= TCharacters.ExclamationMark) and (LPText^ <> TControlCharacters.Null) and
       not IsWordBreakChar(LPText^) do
     begin

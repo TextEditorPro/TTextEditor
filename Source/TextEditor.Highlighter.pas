@@ -37,6 +37,7 @@ type
     FMainRules: TTextEditorRange;
     FMatchingPairHighlight: Boolean;
     FMatchingPairs: TList;
+    FMaxLengthOfContinuousString: Integer;
     FName: string;
     FOptions: TTextEditorHighlighterOptions;
     FPreviousEndOfLine: Boolean;
@@ -105,6 +106,7 @@ type
     property MainRules: TTextEditorRange read FMainRules;
     property MatchingPairHighlight: Boolean read FMatchingPairHighlight write FMatchingPairHighlight default True;
     property MatchingPairs: TList read FMatchingPairs write FMatchingPairs;
+    property MaxLengthOfContinuousString: Integer read FMaxLengthOfContinuousString write FMaxLengthOfContinuousString default 500;
     property Name: string read FName write FName;
     property Options: TTextEditorHighlighterOptions read FOptions write FOptions;
     property Range: TTextEditorRange read FRange;
@@ -151,6 +153,7 @@ begin
   FAttributes.Sorted := False;
 
   FCodeFoldingRangeCount := 0;
+  FMaxLengthOfContinuousString := 500;
 
   FComments := TTextEditorHighlighterComments.Create;
 
@@ -365,7 +368,7 @@ begin
         while not (FLine[FRunPosition] in LDelimiters) and
           (FLine[FRunPosition] > TControlCharacters.UnitSeparator) and
           ((Ord(FLine[FRunPosition - 1]) < TCharacters.AnsiCharCount) = (Ord(FLine[FRunPosition]) < TCharacters.AnsiCharCount)) and
-          (FRunPosition - LStartPosition < 100) do
+          (FRunPosition - LStartPosition < FMaxLengthOfContinuousString) do
           Inc(FRunPosition);
       end;
     end

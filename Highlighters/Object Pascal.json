@@ -51,6 +51,16 @@
             "Attributes": {
               "Element": "String"
             },
+            "TokenRange": {
+              "Open": "'''",
+              "Close": "'''"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
             "Properties": {
               "CloseOnEndOfLine": true
             },

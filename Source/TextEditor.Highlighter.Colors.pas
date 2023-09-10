@@ -72,8 +72,9 @@ var
   LHighlighter: TTextEditorHighlighter;
 begin
   LHighlighter := TTextEditorHighlighter(FOwner);
-
   LHighlighter.Loading := True;
+
+  AStream.Position := 0;
 
   with TTextEditorHighlighterImportJSON.Create(LHighlighter) do
   try

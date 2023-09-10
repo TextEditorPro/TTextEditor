@@ -38,7 +38,7 @@ end;
 
 procedure TFileNameProperty.Edit;
 begin
-  if GetName = 'ThemeLoad' then
+  if GetName = 'Load' then
   with TOpenDialog.Create(Application) do
   try
     DefaultExt := '.json';
@@ -47,13 +47,14 @@ begin
     Filter := 'JSON Files (*.json)|*.json';
     HelpContext := 0;
     Options := Options + [ofShowHelp, ofPathMustExist, ofFileMustExist];
+
     if Execute then
       SetValue(Filename);
   finally
     Free;
   end;
 
-  if GetName = 'ThemeSave' then
+  if GetName = 'Save' then
   with TSaveDialog.Create(Application) do
   try
     DefaultExt := '.json';
@@ -61,6 +62,7 @@ begin
     Filename := 'Theme.json';
     Filter := 'JSON Files (*.json)|*.json';
     HelpContext := 0;
+
     if Execute then
       SetValue(Filename);
   finally

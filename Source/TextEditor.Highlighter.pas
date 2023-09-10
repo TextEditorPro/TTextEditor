@@ -10,7 +10,7 @@ uses
   TextEditor.Types;
 
 type
-  TTextEditorHighlighter = class(TObject)
+  TTextEditorHighlighter = class(TPersistent)
   strict private
     FAllDelimiters: TTextEditorCharSet;
     FAttributes: TStringList;
@@ -30,6 +30,7 @@ type
     FFoldKeyChars: TTextEditorCharSet;
     FFoldOpenKeyChars: TTextEditorCharSet;
     FFoldTags: Boolean;
+    FJSON: TStrings;
     FLine: PChar;
     FLines: TTextEditorLines;
     FLoaded: Boolean;
@@ -51,8 +52,11 @@ type
     FTemporaryTokens: TList;
     FToken: TTextEditorToken;
     FTokenPosition: Integer;
+    function GetLoad: TFileName;
     procedure AddAllAttributes(const ARange: TTextEditorRange);
     procedure FreeTemporaryTokens;
+    procedure SetJSON(const AValue: TStrings);
+    procedure SetLoad(const AFileName: TFileName);
     procedure UpdateAttributes(const ARange: TTextEditorRange; const AParentRange: TTextEditorRange); overload;
   protected
     function GetAttribute(const AIndex: Integer): TTextEditorHighlighterAttribute;
@@ -69,11 +73,13 @@ type
     function TokenLength: Integer;
     function TokenType: TTextEditorRangeType;
     procedure AddKeyChar(const AKeyCharType: TTextEditorKeyCharType; const AChar: Char);
+    procedure Assign(ASource: TPersistent); override;
     procedure Clear;
     procedure CreateCodeFoldingVoidElements;
     procedure GetKeywords(var AStringList: TStringList);
     procedure GetToken(var AResult: string);
-    procedure LoadFromFile(const AFilename: string);
+    procedure LoadFromFile(const AFileName: string);
+    procedure LoadFromJSON;
     procedure LoadFromStream(const AStream: TStream);
     procedure Next;
     procedure NextToEndOfLine;
@@ -115,30 +121,31 @@ type
     property SkipCloseKeyChars: TTextEditorCharSet read FSkipCloseKeyChars write FSkipCloseKeyChars;
     property SkipOpenKeyChars: TTextEditorCharSet read FSkipOpenKeyChars write FSkipOpenKeyChars;
     property TokenPosition: Integer read FTokenPosition;
+  published
+    property JSON: TStrings read FJSON write SetJSON;
+    property Load: TFileName read GetLoad write SetLoad stored False;
+  end;
+
+  TTextEditorTheme = class(TPersistent)
+  strict private
+    FHighlighter: TTextEditorHighlighter;
+    function GetLoad: TFileName;
+    function GetSave: TFileName;
+    procedure SetLoad(const AFileName: TFileName);
+    procedure SetSave(const AFileName: TFileName);
+  public
+    constructor Create(const AHighlighter: TTextEditorHighlighter); overload;
+  published
+    property Load: TFileName read GetLoad write SetLoad stored False;
+    property Save: TFileName read GetSave write SetSave stored False;
   end;
 
 implementation
 
 uses
-  System.Types, TextEditor, TextEditor.Highlighter.Import.JSON, TextEditor.Utils;
+  System.Types, TextEditor, TextEditor.Highlighter.Import.JSON, TextEditor.Language, TextEditor.Utils;
 
-procedure TTextEditorHighlighter.AddKeyChar(const AKeyCharType: TTextEditorKeyCharType; const AChar: Char);
-begin
-  case AKeyCharType of
-    ctFoldOpen:
-      begin
-        FFoldOpenKeyChars := FFoldOpenKeyChars + [AChar];
-        FFoldKeyChars := FFoldKeyChars + [AChar];
-      end;
-    ctFoldClose:
-      begin
-        FFoldCloseKeyChars := FFoldCloseKeyChars + [AChar];
-        FFoldKeyChars := FFoldKeyChars + [AChar];
-      end;
-    ctSkipOpen: FSkipOpenKeyChars := FSkipOpenKeyChars + [AChar];
-    ctSkipClose: FSkipCloseKeyChars := FSkipCloseKeyChars + [AChar];
-  end;
-end;
+{ TTextEditorHighlighter }
 
 constructor TTextEditorHighlighter.Create(AOwner: TWinControl);
 begin
@@ -147,6 +154,9 @@ begin
   FEditor := AOwner;
   FChanged := False;
   FRightToLeftToken := False;
+
+  FJSON := TStringList.Create;
+  FJSON.TrailingLineBreak := False;
 
   FAttributes := TStringList.Create;
   FAttributes.Duplicates := dupIgnore;
@@ -184,23 +194,46 @@ destructor TTextEditorHighlighter.Destroy;
 begin
   Clear;
 
-  FComments.Free;
-  FComments := nil;
-  FMainRules.Free;
-  FMainRules := nil;
-  FAttributes.Free;
-  FAttributes := nil;
-  FCompletionProposalSkipRegions.Free;
-  FCompletionProposalSkipRegions := nil;
-  FMatchingPairs.Free;
-  FMatchingPairs := nil;
-  FColors.Free;
-  FColors := nil;
-  FreeTemporaryTokens;
-  FTemporaryTokens.Free;
-  FTemporaryTokens := nil;
+  FreeAndNil(FComments);
+  FreeAndNil(FMainRules);
+  FreeAndNil(FAttributes);
+  FreeAndNil(FCompletionProposalSkipRegions);
+  FreeAndNil(FMatchingPairs);
+  FreeAndNil(FColors);
 
-  inherited;
+  FreeTemporaryTokens;
+
+  FreeAndNil(FTemporaryTokens);
+  FreeAndNil(FJSON);
+
+  inherited Destroy;
+end;
+
+procedure TTextEditorHighlighter.AddKeyChar(const AKeyCharType: TTextEditorKeyCharType; const AChar: Char);
+begin
+  case AKeyCharType of
+    ctFoldOpen:
+      begin
+        FFoldOpenKeyChars := FFoldOpenKeyChars + [AChar];
+        FFoldKeyChars := FFoldKeyChars + [AChar];
+      end;
+    ctFoldClose:
+      begin
+        FFoldCloseKeyChars := FFoldCloseKeyChars + [AChar];
+        FFoldKeyChars := FFoldKeyChars + [AChar];
+      end;
+    ctSkipOpen: FSkipOpenKeyChars := FSkipOpenKeyChars + [AChar];
+    ctSkipClose: FSkipCloseKeyChars := FSkipCloseKeyChars + [AChar];
+  end;
+end;
+
+procedure TTextEditorHighlighter.Assign(ASource: TPersistent);
+begin
+  if Assigned(ASource) and (ASource is TTextEditorHighlighter) then
+  with ASource as TTextEditorHighlighter do
+    Self.FJSON.Assign(FJSON)
+  else
+    inherited Assign(ASource);
 end;
 
 function TTextEditorHighlighter.InCodeFoldingVoidElements(const AName: string): Boolean;
@@ -249,6 +282,23 @@ begin
   FRightToLeftToken := False;
   FToken := nil;
   Next;
+end;
+
+procedure TTextEditorHighlighter.SetJSON(const AValue: TStrings);
+begin
+  FJSON.Assign(AValue);
+end;
+
+procedure TTextEditorHighlighter.SetLoad(const AFileName: TFileName);
+var
+  LFileStream: TFileStream;
+begin
+  LFileStream := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
+  try
+    FJSON.LoadFromStream(LFileStream);
+  finally
+    LFileStream.Free;
+  end;
 end;
 
 procedure TTextEditorHighlighter.FreeTemporaryTokens;
@@ -414,6 +464,7 @@ end;
 function TTextEditorHighlighter.RangeAttribute: TTextEditorHighlighterAttribute;
 begin
   Result := nil;
+
   if Assigned(FRange) then
     Result := FRange.Attribute;
 end;
@@ -460,6 +511,11 @@ begin
     for LIndex2 := 0 to LKeyList.KeyList.Count - 1 do
       AStringList.Add(LKeyList.KeyList[LIndex2]);
   end;
+end;
+
+function TTextEditorHighlighter.GetLoad: TFileName;
+begin
+  Result := STextEditorHighlighterLoadFromFile;
 end;
 
 procedure TTextEditorHighlighter.GetToken(var AResult: string);
@@ -676,15 +732,31 @@ begin
   end;
 end;
 
-procedure TTextEditorHighlighter.LoadFromFile(const AFilename: string);
+procedure TTextEditorHighlighter.LoadFromFile(const AFileName: string);
 var
   LFileStream: TFileStream;
 begin
-  LFileStream := TFileStream.Create(AFilename, fmOpenRead or fmShareDenyNone);
+  LFileStream := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
   try
     LoadFromStream(LFileStream);
   finally
     LFileStream.Free;
+  end;
+end;
+
+procedure TTextEditorHighlighter.LoadFromJSON;
+var
+  LStringStream: TStringStream;
+begin
+  if Assigned(FJSON) and (Trim(FJSON.Text) = '') then
+    Exit;
+
+  LStringStream := TStringStream.Create;
+  try
+    FJSON.SaveToStream(LStringStream);
+    LoadFromStream(LStringStream);
+  finally
+    LStringStream.Free;
   end;
 end;
 
@@ -697,6 +769,9 @@ begin
   LEditorIsEmpty := LEditor.Text.IsEmpty;
 
   FLoading := True;
+
+  AStream.Position := 0;
+
   with TTextEditorHighlighterImportJSON.Create(Self) do
   try
     ImportFromStream(AStream);
@@ -749,6 +824,37 @@ end;
 function TTextEditorHighlighter.TokenLength: Integer;
 begin
   Result := FRunPosition - FTokenPosition;
+end;
+
+{ TTextEditorTheme }
+
+constructor TTextEditorTheme.Create(const AHighlighter: TTextEditorHighlighter);
+begin
+  inherited Create;
+
+  FHighlighter := AHighlighter;
+end;
+
+function TTextEditorTheme.GetLoad: TFileName;
+begin
+  Result := STextEditorThemeLoadFromFile;
+end;
+
+function TTextEditorTheme.GetSave: TFileName;
+begin
+  Result := STextEditorThemeSaveToFile;
+end;
+
+procedure TTextEditorTheme.SetLoad(const AFileName: TFileName);
+begin
+  if Assigned(FHighlighter) then
+    FHighlighter.Colors.LoadFromFile(AFileName);
+end;
+
+procedure TTextEditorTheme.SetSave(const AFileName: TFileName);
+begin
+  if Assigned(FHighlighter) then
+    FHighlighter.Colors.SaveToFile(AFileName);
 end;
 
 end.

@@ -360,6 +360,7 @@ type
     FSyncEdit: TTextEditorSyncEdit;
     FSystemMetrics: TTextEditorSystemMetrics;
     FTabs: TTextEditorTabs;
+    FTheme: TTextEditorTheme;
     FToggleCase: TTextEditorToggleCase;
     FUndo: TTextEditorUndo;
     FUndoList: TTextEditorUndoList;
@@ -429,8 +430,6 @@ type
     function GetText: string;
     function GetTextBetween(const ATextBeginPosition: TTextEditorTextPosition; const ATextEndPosition: TTextEditorTextPosition): string;
     function GetTextPosition: TTextEditorTextPosition;
-    function GetThemeLoad: TFileName;
-    function GetThemeSave: TFileName;
     function GetTokenCharCount(const AToken: string; const ACharsBefore: Integer): Integer; inline;
     function GetTokenWidth(const AToken: string; const ALength: Integer; const ACharsBefore: Integer; const AMinimap: Boolean = False; const ARTLReading: Boolean = False): Integer;
     function GetViewLineNumber(const AViewLineNumber: Integer): Integer;
@@ -584,8 +583,6 @@ type
     procedure SetTextCaretX(const AValue: Integer);
     procedure SetTextCaretY(const AValue: Integer);
     procedure SetTextPosition(const AValue: TTextEditorTextPosition);
-    procedure SetThemeLoad(const AFileName: TFileName);
-    procedure SetThemeSave(const AFileName: TFileName);
     procedure SetTopLine(const AValue: Integer);
     procedure SetUndo(const AValue: TTextEditorUndo);
     procedure SetUnknownChars(const AValue: TTextEditorUnknownChars);
@@ -921,7 +918,7 @@ type
     property Fonts: TTextEditorFonts read FFonts write FFonts;
     property FontStyles: TTextEditorFontStyles read FFontStyles write FFontStyles;
     property FullFilename: string read FFile.FullName write SetFullFilename;
-    property Highlighter: TTextEditorHighlighter read FHighlighter;
+    property Highlighter: TTextEditorHighlighter read FHighlighter write FHighlighter;
     property HighlightLine: TTextEditorHighlightLine read FHighlightLine write SetHighlightLine;
     property HorizontalScrollPosition: Integer read FScrollHelper.HorizontalPosition write SetHorizontalScrollPosition;
     property HotFilename: string read FFile.HotName write FFile.HotName;
@@ -1015,8 +1012,7 @@ type
     property Text: string read GetText write SetText;
     property TextBetween[const ATextBeginPosition: TTextEditorTextPosition; const ATextEndPosition: TTextEditorTextPosition]: string read GetTextBetween write SetTextBetween;
     property TextPosition: TTextEditorTextPosition read GetTextPosition write SetTextPosition;
-    property ThemeLoad: TFileName read GetThemeLoad write SetThemeLoad stored False;
-    property ThemeSave: TFileName read GetThemeSave write SetThemeSave stored False;
+    property Theme: TTextEditorTheme read FTheme write FTheme;
     property TopLine: Integer read FLineNumbers.TopLine write SetTopLine;
     property Undo: TTextEditorUndo read FUndo write SetUndo;
     property UndoList: TTextEditorUndoList read FUndoList;
@@ -1049,10 +1045,11 @@ type
     property Ctl3D;
     property Cursor;
     property Enabled;
-    property Fonts;
     property FontStyles;
+    property Fonts;
     property Height;
     property HighlightLine;
+    property Highlighter;
     property ImeMode;
     property ImeName;
     property KeyCommands;
@@ -1140,8 +1137,7 @@ type
     property Tabs;
     property TabStop;
     property Tag;
-    property ThemeLoad;
-    property ThemeSave;
+    property Theme;
     property Touch;
     property Undo;
     property UnknownChars;
@@ -1213,6 +1209,7 @@ type
     property FontStyles;
     property Height;
     property HighlightLine;
+    property Highlighter;
     property ImeMode;
     property ImeName;
     property KeyCommands;
@@ -1301,8 +1298,7 @@ type
     property Tabs;
     property TabStop;
     property Tag;
-    property ThemeLoad;
-    property ThemeSave;
+    property Theme;
     property Touch;
     property Undo;
     property UnknownChars;
@@ -1553,6 +1549,9 @@ begin
   { Highlighter }
   FHighlighter := TTextEditorHighlighter.Create(Self);
   FHighlighter.Lines := FLines;
+  { Theme }
+  if csDesigning in ComponentState then
+    FTheme := TTextEditorTheme.Create(FHighlighter);
   { Mouse wheel scroll cursors }
   for LIndex := 0 to 7 do
     FMouse.ScrollCursors[LIndex] := LoadCursor(HInstance, PChar(TResourceBitmap.MouseMoveScroll + IntToStr(LIndex)));
@@ -1587,6 +1586,9 @@ begin
   FreeAndNil(FFontStyles);
   FreeAndNil(FHighlightLine);
   FreeAndNil(FHighlighter);
+
+  if Assigned(FTheme) then
+    FreeAndNil(FTheme);
 
   FreeCompletionProposalPopupWindow;
   { Do not use FreeAndNil, it first nils and then frees causing problems with code accessing FHookedCommandHandlers
@@ -2484,16 +2486,6 @@ begin
 
     Inc(LPLine);
   end;
-end;
-
-function TCustomTextEditor.GetThemeLoad: TFileName;
-begin
-  Result := STextEditorThemeLoadFromFile;
-end;
-
-function TCustomTextEditor.GetThemeSave: TFileName;
-begin
-  Result := STextEditorThemeSaveToFile;
 end;
 
 function TCustomTextEditor.GetMarkBackgroundColor(const ALine: Integer): TColor;
@@ -9432,18 +9424,6 @@ begin
   InitCodeFolding;
 end;
 
-procedure TCustomTextEditor.SetThemeLoad(const AFileName: TFileName);
-begin
-  if Assigned(FHighlighter) then
-    FHighlighter.Colors.LoadFromFile(AFileName);
-end;
-
-procedure TCustomTextEditor.SetThemeSave(const AFileName: TFileName);
-begin
-  if Assigned(FHighlighter) then
-    FHighlighter.Colors.SaveToFile(AFileName);
-end;
-
 procedure TCustomTextEditor.SetModified(const AValue: Boolean);
 var
   LIndex: Integer;
@@ -12321,6 +12301,9 @@ end;
 procedure TCustomTextEditor.Loaded;
 begin
   inherited Loaded;
+
+  if not (csDesigning in ComponentState) then
+    FHighlighter.LoadFromJSON;
 
   DoLeftMarginAutoSize;
 {$IFDEF ALPHASKINS}
@@ -20471,6 +20454,7 @@ begin
   ResetCharacterCount;
 
   FLines.ShowProgress := AStream.Size > TMaxValues.ShowProgressSize;
+
   if FLines.ShowProgress then
     FLines.FileSize := AStream.Size;
 

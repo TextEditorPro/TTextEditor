@@ -4,6 +4,7 @@ interface
 
 resourcestring
   { TextEditor }
+  STextEditorHighlighterLoadFromFile = 'Load highlighter from file';
   STextEditorRightMarginPosition = 'Position: %d';
   STextEditorScrollInfo = '%d - %d';
   STextEditorScrollInfoTopLine = 'Top line: %d';

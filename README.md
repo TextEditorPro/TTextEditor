@@ -15,13 +15,14 @@ Development takes place elsewhere.
 - Code/text folding
 - Color themes 
   - Colors, Fonts, and FontStyles properties
-  - ThemeLoad and ThemeSave properties 
+  - Theme Load and Save properties 
   - JSON file/stream import
 - Completion proposal
   - Snippets
 - Data-aware
 - Highlight line
 - Highlighters 
+  - Highlighter Load property
   - JSON file/stream import
 - HTML export (clipboard support)
 - Large file support

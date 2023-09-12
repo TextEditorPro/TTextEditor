@@ -21593,7 +21593,7 @@ end;
 
 procedure TCustomDBTextEditor.CMEnter(var AMessage: TCMEnter);
 begin
-  if not ReadOnly then
+  if not ReadOnly and FDataLink.CanModify then
     SetEditing(True);
 
   inherited;
@@ -21601,7 +21601,7 @@ end;
 
 procedure TCustomDBTextEditor.CMExit(var AMessage: TCMExit);
 begin
-  if not ReadOnly then
+  if not ReadOnly and FDataLink.CanModify then
   begin
     try
       FDataLink.UpdateRecord;
@@ -21691,7 +21691,7 @@ end;
 
 function TCustomDBTextEditor.GetReadOnly: Boolean;
 begin
-  Result := not FDataLink.CanModify;
+  Result := FDataLink.ReadOnly;
 end;
 
 procedure TCustomDBTextEditor.Loaded;

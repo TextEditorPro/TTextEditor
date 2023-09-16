@@ -51,6 +51,9 @@
             "Attributes": {
               "Element": "String"
             },
+            "Properties": {
+              "OpenEndOfLine": true
+            },
             "TokenRange": {
               "Open": "'''",
               "Close": "'''"

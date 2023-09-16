@@ -40,6 +40,7 @@ type
     procedure TextEditorCompletionProposalExecute(const ASender: TObject; var AParams: TCompletionProposalParams);
     procedure TextEditorCreateHighlighterStream(const ASender: TObject; const AName: string; var AStream: TStream);
   private
+    procedure AddSnippetExamples;
     procedure SetSelectedColor;
     procedure SetSelectedHighlighter;
   end;
@@ -93,7 +94,7 @@ end;
 
 procedure TMainForm.TextEditorCreateHighlighterStream(const ASender: TObject; const AName: string; var AStream: TStream);
 begin
-  { Multi-highlighter stream loaging. For example HTML with scripts (PHP, Javascript, and CSS). }
+  { Multi-highlighter stream loading. For example HTML with scripts (PHP, Javascript, and CSS). }
   if AName <> '' then
     AStream := TFileStream.Create(TDemoPaths.Highlighters + AName + '.json', fmOpenRead);
 end;
@@ -136,47 +137,57 @@ begin
 end;
 
 procedure TMainForm.SetSelectedHighlighter;
-var
-  LItem: TTextEditorCompletionProposalSnippetItem;
 begin
   with ListBoxHighlighters do
   TextEditor.Highlighter.LoadFromFile(TDemoPaths.Highlighters + Items[ItemIndex]);
 
   TextEditor.Lines.Text := TextEditor.Highlighter.Sample;
 
-  { Snippet examples }
+  AddSnippetExamples;
+end;
+
+procedure TMainForm.AddSnippetExamples;
+var
+  LItem: TTextEditorCompletionProposalSnippetItem;
+begin
   TextEditor.CompletionProposal.Snippets.Items.Clear;
 
   if ListBoxHighlighters.Selected[ListBoxHighlighters.Items.IndexOf('Object Pascal.json')] then
   begin
     { "begin..end" with enter }
     LItem := TextEditor.CompletionProposal.Snippets.Items.Add;
+
     with LItem do
     begin
       Description := 'begin..end';
       Keyword := 'begin';
       ExecuteWith := seEnter;
     end;
+
     with LItem.Position do
     begin
       Active := True;
       Column := 2;
       Row := 2;
     end;
+
     with LItem.Snippet do
     begin
       Add('begin');
       Add('');
       Add('end');
     end;
+
     { "if True then" with space }
     LItem := TextEditor.CompletionProposal.Snippets.Items.Add;
+
     with LItem do
     begin
       Description := 'if True then';
       Keyword := 'if';
       ExecuteWith := seSpace;
     end;
+
     with LItem.Selection do
     begin
       Active := True;
@@ -185,6 +196,7 @@ begin
       FromRow := 1;
       ToRow := 1;
     end;
+
     LItem.Snippet.Add('if True then');
   end
   else
@@ -192,17 +204,20 @@ begin
   begin
     { "<br />" with shortcut shift + enter }
     LItem := TextEditor.CompletionProposal.Snippets.Items.Add;
+
     with LItem do
     begin
       Description := '<br />';
       ShortCut := TextToShortCut('Shift+Enter');
     end;
+
     with LItem.Position do
     begin
       Active := True;
       Column := 7;
       Row := 1;
     end;
+
     LItem.Snippet.Add('<br />');
   end
 end;

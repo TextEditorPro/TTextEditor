@@ -548,6 +548,7 @@ begin
           end;
 
           ARange.OpenBeginningOfLine := LPropertiesObject.ValueBoolean['OpenBeginningOfLine'];
+          ARange.OpenEndOfLine := LPropertiesObject.ValueBoolean['OpenEndOfLine'];
         end;
 
         with ARange do

@@ -106,6 +106,7 @@ type
     FHereDocument: Boolean;
     FKeyList: TList;
     FOpenBeginningOfLine: Boolean;
+    FOpenEndOfLine: Boolean;
     FOpenToken: TTextEditorMultiToken;
     FPrepared: Boolean;
     FRanges: TList;
@@ -143,13 +144,10 @@ type
     property AllowedCharacters: TTextEditorCharSet read FAllowedCharacters write FAllowedCharacters;
     property AlternativeCloseArray: TTextEditorArrayOfString read FAlternativeCloseArray write FAlternativeCloseArray;
     property AlternativeCloseArrayCount: Integer read FAlternativeCloseArrayCount write SetAlternativeCloseArrayCount;
-    property OpenBeginningOfLine: Boolean read FOpenBeginningOfLine write FOpenBeginningOfLine;
     property CaseFunct: TTextEditorCaseFunction read FCaseFunct;
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
     property CloseOnEndOfLine: Boolean read FCloseOnEndOfLine write FCloseOnEndOfLine;
     property CloseOnTerm: Boolean read FCloseOnTerm write FCloseOnTerm;
-    property SkipWhitespace: Boolean read FSkipWhitespace write FSkipWhitespace;
-    property SkipWhitespaceOnce: Boolean read FSkipWhitespaceOnce write FSkipWhitespaceOnce;
     property CloseParent: Boolean read FCloseParent write FCloseParent;
     property CloseToken: TTextEditorMultiToken read FCloseToken write FCloseToken;
     property ClosingToken: TTextEditorToken read FClosingToken write FClosingToken;
@@ -158,12 +156,16 @@ type
     property HereDocument: Boolean read FHereDocument write FHereDocument;
     property KeyListCount: Integer read GetKeyListCount;
     property KeyList[const AIndex: Integer]: TTextEditorKeyList read GetKeyList;
+    property OpenBeginningOfLine: Boolean read FOpenBeginningOfLine write FOpenBeginningOfLine;
+    property OpenEndOfLine: Boolean read FOpenEndOfLine write FOpenEndOfLine;
     property OpenToken: TTextEditorMultiToken read FOpenToken write FOpenToken;
     property Prepared: Boolean read FPrepared;
     property RangeCount: Integer read GetRangeCount;
     property Ranges[const AIndex: Integer]: TTextEditorRange read GetRange;
     property SetCount: Integer read GetSetCount;
     property Sets[const AIndex: Integer]: TTextEditorSet read GetSet;
+    property SkipWhitespace: Boolean read FSkipWhitespace write FSkipWhitespace;
+    property SkipWhitespaceOnce: Boolean read FSkipWhitespaceOnce write FSkipWhitespaceOnce;
     property StringCaseFunct: TTextEditorStringCaseFunction read FStringCaseFunct;
     property SymbolList: TTextEditorAbstractParserArray read FSymbolList;
     property Tokens[const AIndex: Integer]: TTextEditorToken read GetToken;
@@ -220,17 +222,21 @@ begin
   LTokenNodeList := HeadNode.NextNodes;
   LTokenNode := nil;
   LLength := Length(AString);
+
   for LIndex := 1 to LLength do
   begin
     LChar := AString[LIndex];
     LTokenNode := LTokenNodeList.FindNode(LChar);
+
     if not Assigned(LTokenNode) then
     begin
       LTokenNode := TTextEditorTokenNode.Create(LChar);
       LTokenNodeList.AddNode(LTokenNode);
     end;
+
     LTokenNodeList := LTokenNode.NextNodes;
   end;
+
   LTokenNode.BreakType := ABreakType;
   LTokenNode.Token := AToken;
 end;
@@ -726,6 +732,7 @@ begin
     for LIndex2 := 0 to FSets.Count - 1 do
     begin
       LSet := TTextEditorSet(FSets.List[LIndex2]);
+
       if LAnsiChar in LSet.CharSet then
         if not Assigned(SymbolList[LAnsiChar]) then
           FSymbolList[LAnsiChar] := TTextEditorParser.Create(LSet)
@@ -737,6 +744,7 @@ begin
   for LIndex := 0 to 255 do
   begin
     LAnsiChar := AnsiChar(LIndex);
+
     if not Assigned(SymbolList[LAnsiChar]) then
     begin
       if LAnsiChar in FDelimiters then
@@ -785,10 +793,12 @@ var
 begin
   OpenToken.Clear;
   CloseToken.Clear;
+
   FCloseOnTerm := False;
   FCloseOnEndOfLine := False;
   FCloseParent := False;
   FHereDocument := False;
+
   Reset;
 
   if Assigned(FRanges) then
@@ -812,6 +822,7 @@ begin
   for LIndex := FKeyList.Count - 1 downto 0 do
   begin
     LKeyList := TTextEditorKeyList(FKeyList[LIndex]);
+
     if Assigned(LKeyList) and (LKeyList.TokenType = ttReservedWord) then
     begin
       LKeyList.Free;

@@ -440,7 +440,8 @@ begin
         FRange := FRange.Parent;
       end
       else
-      if FRange.OpenBeginningOfLine and not FBeginningOfLine then
+      if FRange.OpenBeginningOfLine and not FBeginningOfLine or
+        FRange.OpenEndOfLine and (FLine[FRunPosition] <> TControlCharacters.Null) then
       begin
         FRange := FRange.Parent;
         FToken := FRange.DefaultToken;

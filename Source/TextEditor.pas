@@ -1117,7 +1117,6 @@ type
     property PopupMenu;
     property ReadOnly;
     property Replace;
-    property ReplaceCanceled;
     property RightMargin;
     property Ruler;
     property Scroll;
@@ -1278,7 +1277,6 @@ type
     property PopupMenu;
     property ReadOnly;
     property Replace;
-    property ReplaceCanceled;
     property RightMargin;
     property Ruler;
     property Scroll;

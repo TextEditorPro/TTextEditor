@@ -89,6 +89,7 @@ type
       OnLinesDeleted: TStringListChangeEvent;
       OnLinesInserted: TStringListChangeEvent;
       OnLinesPutted: TStringListChangeEvent;
+      OnLinkClick: TTextEditorLinkClickEvent;
       OnLoadingProgress: TNotifyEvent;
       OnMarkPanelLinePaint: TTextEditorMarkPanelLinePaintEvent;
       OnModified: TNotifyEvent;
@@ -10786,17 +10787,10 @@ begin
   if csDesigning in ComponentState then
     Exit;
 
-{$IF DEFINED(ALPHASKINS)}
- // if SkinData.SkinManager.Options.ScaleMode = smCustomPPI then
-  begin
-{$ENDIF}
-    if AIsDpiChange or (AMultiplier <> ADivider) then
-      ChangeObjectScale(AMultiplier, ADivider);
+  if AIsDpiChange or (AMultiplier <> ADivider) then
+    ChangeObjectScale(AMultiplier, ADivider);
 
-    inherited ChangeScale(AMultiplier, ADivider, AIsDpiChange);
-{$IF DEFINED(ALPHASKINS)}
-  end;
-{$ENDIF}
+  inherited ChangeScale(AMultiplier, ADivider, AIsDpiChange);
 end;
 
 procedure TCustomTextEditor.CreateParams(var AParams: TCreateParams);
@@ -12819,6 +12813,7 @@ begin
           LRowCount := GetRowCountFromPixel(Y);
           LRow := LViewPosition.Row - TopLine;
           LTextPosition := ViewToTextPosition(LViewPosition);
+
           if LRowCount <= LRow then
           begin
             if not IsSamePosition(FPosition.Text, LTextPosition) then
@@ -12891,7 +12886,10 @@ begin
     LTextPosition := PixelsToTextPosition(LCursorPoint.X, LCursorPoint.Y);
     GetHighlighterAttributeAtRowColumn(LTextPosition, LToken, LRangeType, LStart, LHighlighterAttribute);
 
-    OpenLink(LToken);
+    if Assigned(FEvents.OnLinkClick) then
+      FEvents.OnLinkClick(Self, LToken)
+    else
+      OpenLink(LToken);
 
     Exit;
   end;
@@ -17705,6 +17703,7 @@ begin
   begin
     LRow := AViewPosition.Row - 1;
     LPreviousLine := GetViewTextLineNumber(LRow);
+
     while LPreviousLine = Result.Line do
     begin
       LIsWrapped := True;
@@ -17720,6 +17719,7 @@ begin
       LResultChar := 1;
       LCharsBefore := 0;
       LPLine := PChar(FLines.Items^[Result.Line - 1].TextLine);
+
       while (LPLine^ <> TControlCharacters.Null) and (LResultChar < Result.Char) do
       begin
         if LPLine^ = TControlCharacters.Tab then
@@ -17750,6 +17750,7 @@ begin
     LPLine := PChar(FLines[Result.Line]);
     LChar := 1;
     LResultChar := 1;
+
     while LChar < Result.Char do
     begin
       if LPLine^ = TControlCharacters.Null then
@@ -17768,6 +17769,7 @@ begin
 
         Inc(LPLine);
       end;
+
       Inc(LResultChar);
     end;
 

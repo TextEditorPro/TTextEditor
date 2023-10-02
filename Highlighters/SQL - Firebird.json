@@ -287,6 +287,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,%^?:;'\".><#_ ",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,
@@ -309,36 +310,6 @@
                   ],
                   "Attributes": {
                     "Element": "Symbol"
-                  }
-                }
-              ],
-              "Range": [
-                {
-                  "Type": "MethodName",
-                  "Attributes": {
-                    "Element": "MethodName"
-                  },
-                  "Properties": {
-                    "CloseParent": true,
-                    "CloseOnTerm": true,
-                    "CloseOnEndOfLine": true
-                  },
-                  "TokenRange": {
-                    "Open": "rdb$"
-                  }
-                },
-                {
-                  "Type": "MethodName",
-                  "Attributes": {
-                    "Element": "MethodName"
-                  },
-                  "Properties": {
-                    "CloseParent": true,
-                    "CloseOnTerm": true,
-                    "CloseOnEndOfLine": true
-                  },
-                  "TokenRange": {
-                    "Open": "mon$"
                   }
                 }
               ]

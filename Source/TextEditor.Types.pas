@@ -348,6 +348,7 @@ type
   TTextEditorKeyPressWEvent = procedure(const ASender: TObject; var AKey: Char) of object;
   TTextEditorLinePaintEvent = procedure(const ASender: TObject; const ACanvas: TCanvas; const ARect: TRect;
     const ALineNumber: Integer; const AIsMinimapLine: Boolean) of object;
+  TTextEditorLinkClickEvent = procedure(const ASender: TObject; const ALink: string) of object;
   TTextEditorMarkPanelLinePaintEvent = procedure(const ASender: TObject; const ACanvas: TCanvas; const ARect: TRect;
     const ALineNumber: Integer) of object;
   TTextEditorMarkPanelPaintEvent = procedure(const ASender: TObject; const ACanvas: TCanvas; const ARect: TRect;

@@ -72,7 +72,7 @@
           {
             "Type": "WebLink",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^{|}\"()",
             "Properties": {
@@ -87,7 +87,7 @@
           {
             "Type": "WebLink",
             "Attributes": {
-              "Element": "String"
+              "Element": "WebLink"
             },
             "Delimiters": "<>\\^{|}\"()",
             "Properties": {
@@ -190,9 +190,9 @@
             }
           },
           {
-            "Type": "Directive",
+            "Type": "Method",
             "Attributes": {
-              "Element": "Directive"
+              "Element": "Method"
             },
             "Properties": {
               "CloseOnEndOfLine": true
@@ -225,19 +225,6 @@
             "TokenRange": {
               "Open": "**",
               "Close": "**"
-            }
-          },
-          {
-            "Type": "String",
-            "Attributes": {
-              "Element": "String"
-            },
-            "Properties": {
-              "CloseOnEndOfLine": true
-            },
-            "TokenRange": {
-              "Open": "*",
-              "Close": "*"
             }
           },
           {

@@ -4193,11 +4193,14 @@ function TCustomTextEditor.LeftSpaceCount(const ALine: string; const AWantTabs: 
 var
   LPLine: PChar;
 begin
-  LPLine := PChar(ALine);
-
   Result := 0;
 
-  if Assigned(LPLine) and (eoAutoIndent in FOptions) then
+  if ALine = '' then
+    Exit;
+
+  LPLine := PChar(ALine);
+
+  if eoAutoIndent in FOptions then
   while (LPLine^ > TControlCharacters.Null) and (LPLine^ <= TCharacters.Space) do
   begin
     if (LPLine^ = TControlCharacters.Tab) and AWantTabs then
@@ -6881,7 +6884,7 @@ begin
       while (LPreviousLine >= 0) and (FLines.Items^[LPreviousLine].TextLine = '') do
         Dec(LPreviousLine);
 
-      LPreviousLineCharCount := LeftSpaceCount(FLines.Items^[LPreviousLine].TextLine, toTabsToSpaces in FTabs.Options);
+      LPreviousLineCharCount := LeftSpaceCount(FLines[LPreviousLine], toTabsToSpaces in FTabs.Options);
 
       if LPreviousLineCharCount > ATextPosition.Char then
         LCharCount := LPreviousLineCharCount - LeftSpaceCount(FLines.Items^[ATextPosition.Line].TextLine,

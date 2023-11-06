@@ -55,11 +55,7 @@ Development takes place elsewhere.
 
 ## Defines
 
-Define | Description
------- | -----------
-ALPHASKINS | Native AlphaSkins support
-BASENCODING | BaseNcoding support
-VCL_STYLES | VCL Styles support
+[TextEditor.Defines.inc](https://github.com/TextEditorPro/TTextEditor/blob/main/Source/TextEditor.Defines.inc)
 
 ## License
 

@@ -1,5 +1,7 @@
 ﻿unit TextEditor.CodeFolding.Hint.Form;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 uses

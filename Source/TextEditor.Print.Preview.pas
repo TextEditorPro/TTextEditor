@@ -1,5 +1,7 @@
 ﻿unit TextEditor.Print.Preview;
 
+{$I TextEditor.Defines.inc}
+
 {$M+}
 
 interface

@@ -826,7 +826,6 @@ begin
     if Assigned(LKeyList) and (LKeyList.TokenType = ttReservedWord) then
     begin
       LKeyList.Free;
-
       FKeyList.Delete(LIndex);
     end;
   end;

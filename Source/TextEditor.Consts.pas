@@ -29,6 +29,7 @@ type
   TCharacters = record
   const
     AnsiCharCount = 256;
+    Arrows = [37..40];
     CloseTagOpen = '</';
     CtrlBackspace = #127;
     Dot = '.';
@@ -54,6 +55,7 @@ type
 
   TControlCharacterKeys = record
   const
+    Backspace = 8;
     CarriageReturn = 13;
     Escape = 27;
     Linefeed = 10;

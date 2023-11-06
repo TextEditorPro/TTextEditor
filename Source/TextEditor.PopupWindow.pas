@@ -1,5 +1,7 @@
 ﻿unit TextEditor.PopupWindow;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 uses

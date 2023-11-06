@@ -54,6 +54,7 @@ type
     FTokenPosition: Integer;
     function GetLoad: TFileName;
     procedure AddAllAttributes(const ARange: TTextEditorRange);
+    procedure AddKeyWords(const AKeywords: TStringList);
     procedure FreeTemporaryTokens;
     procedure SetJSON(const AValue: TStrings);
     procedure SetLoad(const AFileName: TFileName);
@@ -80,7 +81,7 @@ type
     procedure GetToken(var AResult: string);
     procedure LoadFromFile(const AFileName: string);
     procedure LoadFromJSON;
-    procedure LoadFromStream(const AStream: TStream);
+    procedure LoadFromStream(const AStream: TStream; const AName: string = '');
     procedure Next;
     procedure NextToEndOfLine;
     procedure PrepareYAMLHighlighter;
@@ -222,9 +223,29 @@ begin
         FFoldCloseKeyChars := FFoldCloseKeyChars + [AChar];
         FFoldKeyChars := FFoldKeyChars + [AChar];
       end;
-    ctSkipOpen: FSkipOpenKeyChars := FSkipOpenKeyChars + [AChar];
-    ctSkipClose: FSkipCloseKeyChars := FSkipCloseKeyChars + [AChar];
+    ctSkipOpen:
+      FSkipOpenKeyChars := FSkipOpenKeyChars + [AChar];
+    ctSkipClose:
+      FSkipCloseKeyChars := FSkipCloseKeyChars + [AChar];
   end;
+end;
+
+procedure TTextEditorHighlighter.AddKeyWords(const AKeywords: TStringList);
+var
+  LIndex: Integer;
+  LKeyList: TTextEditorKeyList;
+begin
+  LKeyList := TTextEditorKeyList.Create;
+  LKeyList.TokenType := ttReservedWord;
+
+  for LIndex := 0 to AKeywords.Count - 1 do
+    LKeyList.KeyList.Add(Trim(AKeywords[LIndex]));
+
+  LKeyList.Attribute.Element := 'ReservedWord';
+  LKeyList.Attribute.ParentForeground := False;
+  LKeyList.Attribute.ParentBackground := True;
+
+  FMainRules.AddKeyList(LKeyList);
 end;
 
 procedure TTextEditorHighlighter.Assign(ASource: TPersistent);
@@ -277,6 +298,7 @@ begin
   FRunPosition := 0;
   FTokenPosition := 0;
   FEndOfLine := False;
+
   FBeginningOfLine := True;
   FPreviousEndOfLine := False;
   FRightToLeftToken := False;
@@ -676,6 +698,7 @@ begin
   begin
     { Parse keywords from text }
     MainRules.ClearReservedWords;
+
     LKeyList := TTextEditorKeyList.Create;
     try
       LKeyList.TokenType := ttReservedWord;
@@ -737,6 +760,8 @@ procedure TTextEditorHighlighter.LoadFromFile(const AFileName: string);
 var
   LFileStream: TFileStream;
 begin
+  FName := ChangeFileExt(ExtractFileName(AFileName), '');
+
   LFileStream := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyNone);
   try
     LoadFromStream(LFileStream);
@@ -761,14 +786,16 @@ begin
   end;
 end;
 
-procedure TTextEditorHighlighter.LoadFromStream(const AStream: TStream);
+procedure TTextEditorHighlighter.LoadFromStream(const AStream: TStream; const AName: string = '');
 var
   LEditor: TCustomTextEditor;
   LEditorIsEmpty: Boolean;
+  LKeywords: TStringList;
 begin
   LEditor := FEditor as TCustomTextEditor;
   LEditorIsEmpty := LEditor.Text.IsEmpty;
 
+  FName := AName;
   FLoading := True;
 
   AStream.Position := 0;
@@ -778,6 +805,19 @@ begin
     ImportFromStream(AStream);
   finally
     Free;
+  end;
+
+  if Assigned(LEditor.OnAdditionalKeywords) then
+  begin
+    LKeywords := TStringList.Create;
+    try
+      LEditor.OnAdditionalKeywords(LEditor, FName, LKeywords);
+
+      if Trim(LKeywords.Text) <> '' then
+        AddKeyWords(LKeywords);
+    finally
+      LKeywords.Free;
+    end;
   end;
 
   UpdateAttributes;

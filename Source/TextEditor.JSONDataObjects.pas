@@ -3317,7 +3317,7 @@ begin
     TJSONReader.InvalidStringCharacterError(Self);
 end;
 
-procedure TStringJSONReader.LexIdent(P: PChar{$IFDEF CPUARM}; EndP: PChar{$ENDIF});
+procedure TStringJSONReader.LexIdent(P: PChar);
 const
   NullStr1 = LongWord(Ord('n') or (Ord('u') shl 16));
   NullStr2 = LongWord(Ord('l') or (Ord('l') shl 16));

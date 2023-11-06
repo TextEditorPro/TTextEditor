@@ -2,6 +2,8 @@
 {$WARN IMPLICIT_STRING_CAST OFF}
 unit TextEditor.Utils;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 uses

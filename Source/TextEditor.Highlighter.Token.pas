@@ -1,5 +1,7 @@
 ﻿unit TextEditor.Highlighter.Token;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 uses

@@ -1,5 +1,7 @@
 ﻿unit TextEditor.CompletionProposal.Snippets;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 uses

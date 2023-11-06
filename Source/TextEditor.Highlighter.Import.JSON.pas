@@ -1097,9 +1097,10 @@ begin
   ImportCodeFolding(AJSONObject['CodeFolding'].ObjectValue);
   ImportMatchingPair(AJSONObject['MatchingPair'].ObjectValue);
   ImportCompletionProposal(AJSONObject['CompletionProposal'].ObjectValue);
-  ImportHighlightLine(AJSONObject['HighlightLine'].ObjectValue);
 
   AddElements;
+
+  ImportHighlightLine(AJSONObject['HighlightLine'].ObjectValue);
 end;
 
 procedure TTextEditorHighlighterImportJSON.ImportHighlightLine(const AHighlightLineObject: TJSONObject);
@@ -1112,11 +1113,13 @@ var
   LJSONDataValue: PJSONDataValue;
   LJSONObject: TJSONObject;
   LName: string;
+  LElement: string;
 begin
   if not Assigned(AHighlightLineObject) then
     Exit;
 
   LArray := AHighlightLineObject['Items'].ArrayValue;
+
   for LIndex := 0 to LArray.Count - 1 do
   begin
     LJSONDataValue := LArray.Items[LIndex];
@@ -1124,13 +1127,17 @@ begin
     if hoMultiHighlighter in FHighlighter.Options then
     begin
       LName := LJSONDataValue.ObjectValue['File'].Value;
-      if LName <> '' then
+
+      if not LName.IsEmpty then
       begin
         LEditor := FHighlighter.Editor as TCustomTextEditor;
+
         LFileStream := LEditor.CreateHighlighterStream(LName);
+
         if Assigned(LFileStream) then
         begin
           LJSONObject := TJSONObject.ParseFromStream(LFileStream) as TJSONObject;
+
           if Assigned(LJSONObject) then
           try
             if LJSONObject.Contains('HighlightLine') then
@@ -1147,10 +1154,33 @@ begin
     LEditor.HighlightLine.Active := True;
 
     LItem := LEditor.HighlightLine.Items.Add;
+
     LItem.Background := LJSONDataValue.ObjectValue['BackgroundColor'].ToColor;
     LItem.Foreground := LJSONDataValue.ObjectValue['ForegroundColor'].ToColor;
-    if not LJSONDataValue.ObjectValue.ValueBoolean['IgnoreCase'] then
-      LItem.Options := LItem.Options - [hlIgnoreCase];
+
+    { Currently only Method and MethodName elements supported for Makefile highlighter.
+      Add more element support, if needed. }
+    LElement := LJSONDataValue.ObjectValue['Element'].Value;
+
+    if not LElement.IsEmpty then
+      if LElement = TElement.Method then
+      begin
+        LItem.Background := LEditor.Colors.EditorMethodBackground;
+        LItem.Foreground := LEditor.Colors.EditorMethodForeground;
+      end
+      else
+      if LElement = TElement.NameOfMethod then
+      begin
+        LItem.Background := LEditor.Colors.EditorMethodNameBackground;
+        LItem.Foreground := LEditor.Colors.EditorMethodNameForeground;
+      end;
+
+    if LJSONDataValue.ObjectValue.ValueBoolean['IgnoreCase'] then
+      LItem.Options := LItem.Options + [hlIgnoreCase];
+
+    if LJSONDataValue.ObjectValue.ValueBoolean['Multiline'] then
+      LItem.Options := LItem.Options + [hlMultiline];
+
     LItem.Pattern := LJSONDataValue.ObjectValue['Pattern'].Value;
   end;
 end;

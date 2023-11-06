@@ -1,5 +1,7 @@
 ﻿unit TextEditor.Encoding;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 uses

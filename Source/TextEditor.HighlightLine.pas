@@ -1,5 +1,7 @@
 ﻿unit TextEditor.HighlightLine;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 uses

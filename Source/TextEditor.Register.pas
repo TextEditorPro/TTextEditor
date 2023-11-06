@@ -1,5 +1,7 @@
 unit TextEditor.Register;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 uses

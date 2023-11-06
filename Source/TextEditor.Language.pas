@@ -1,5 +1,7 @@
 ﻿unit TextEditor.Language;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 resourcestring

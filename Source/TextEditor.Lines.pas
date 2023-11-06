@@ -1,5 +1,7 @@
 ﻿unit TextEditor.Lines;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 uses

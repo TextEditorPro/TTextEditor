@@ -1,5 +1,7 @@
 ﻿unit TextEditor.Compare.ScrollBar;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 uses

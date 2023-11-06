@@ -1,5 +1,7 @@
 ﻿unit TextEditor.SpellCheck;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
@@ -8,6 +10,25 @@ uses
   Winapi.Windows, System.Classes, System.SysUtils, System.Types, System.UITypes, TextEditor.Types;
 
 type
+  TPAnsiCharArray = packed array[0..MaxLongint div SizeOf(PAnsiChar) -1] of PAnsiChar;
+  PPAnsiCharArray = ^TPAnsiCharArray;
+
+  TSpellCheckFreeList = procedure (AHandle: Pointer; var AList: PPAnsiCharArray; ACount: Integer); cdecl;
+  TSpellCheckGetDICEncoding = function(const AHandle: Pointer): PAnsiChar; cdecl;
+  TSpellCheckInitialize = function(const AAFFFilename: PAnsiChar; const ADicFilename: PAnsiChar): Pointer; cdecl;
+  TSpellCheckSpell = function(const AHandle: Pointer; const AWord: PAnsiChar): Integer; cdecl;
+  TSpellCheckSuggest = function (AHandle: Pointer; var AList: PPAnsiCharArray; const AWord: PAnsiChar): Integer; cdecl;
+  TSpellCheckUninitialize = procedure(const AHandle: Pointer); cdecl;
+
+  TSpellCheckProcs = record
+    FreeList: TSpellCheckFreeList;
+    GetDICEncoding: TSpellCheckGetDICEncoding;
+    Initialize: TSpellCheckInitialize;
+    Spell: TSpellCheckSpell;
+    Suggest: TSpellCheckSuggest;
+    Uninitialize: TSpellCheckUninitialize;
+  end;
+
   TIncompatCharBehaviour = (icUseDefault, icBestFit, icError);
 
   [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
@@ -17,7 +38,8 @@ type
     FFilename: string;
     FHandle: Pointer;
     FItems: TList;
-    FLibraryLoaded: Boolean;
+    FLibModule: THandle;
+    FProcs: TSpellCheckProcs;
     FUnderLine: TTextEditorUnderline;
     FUnderlineColor: TColor;
     function DLLToUnicodeString(const AValue: PAnsiChar): UnicodeString;
@@ -52,28 +74,19 @@ implementation
 uses
   System.AnsiStrings, TextEditor.Language;
 
-type
-  TPAnsiCharArray = packed array[0..MaxLongint div SizeOf(PAnsiChar) -1] of PAnsiChar;
-  PPAnsiCharArray = ^TPAnsiCharArray;
-
 const
   LIBRARY_DLL = 'Hunspell.dll';
-  LIBRARY_CREATE = 'Hunspell_create';
-  LIBRARY_DESTROY = 'Hunspell_destroy';
-  LIBRARY_SPELL = 'Hunspell_spell';
-  LIBRARY_GET_DIC_ENCODING = 'Hunspell_get_dic_encoding';
-  LIBRARY_SUGGEST = 'Hunspell_suggest';
-  LIBRARY_FREE_LIST = 'Hunspell_free_list';
 
-var
-  SpellCheckInitialize: function(const AAFFFilename: PAnsiChar; const ADicFilename: PAnsiChar): Pointer; cdecl;
-  SpellCheckUninitialize: procedure(const AHandle: Pointer); cdecl;
-  SpellCheckSpell: function(const AHandle: Pointer; const AWord: PAnsiChar): Integer; cdecl;
-  SpellCheckGetDICEncoding: function(const AHandle: Pointer): PAnsiChar; cdecl;
-  SpellCheckSuggest: function (AHandle: Pointer; var AList: PPAnsiCharArray; const AWord: PAnsiChar): Integer; cdecl;
-  SpellCheckFreeList: procedure (AHandle: Pointer; var AList: PPAnsiCharArray; ACount: Integer); cdecl;
-
-  SpellCheckDLLHandle: THandle;
+type
+  TSpellCheckProcName = record
+  const
+    Create = 'Hunspell_create';
+    Destroy = 'Hunspell_destroy';
+    Spell = 'Hunspell_spell';
+    GetDicEncoding = 'Hunspell_get_dic_encoding';
+    Suggest = 'Hunspell_suggest';
+    FreeList = 'Hunspell_free_list';
+  end;
 
 { TTextEditorSpellCheck }
 
@@ -81,7 +94,6 @@ constructor TTextEditorSpellCheck.Create(AOwner: TComponent);
 begin
   inherited Create(AOwner);
 
-  FLibraryLoaded := False;
   FUnderLine := ulWaveLine;
   FUnderlineColor := TColors.Red;
   FItems := TList.Create;
@@ -93,6 +105,12 @@ begin
   ClearItems;
   FItems.Free;
 
+  if FLibModule <> 0 then
+  begin
+    FreeLibrary(FLibModule);
+    FLibModule := 0;
+  end;
+
   inherited Destroy;
 end;
 
@@ -102,37 +120,36 @@ var
 begin
   for LIndex := FItems.Count - 1 downto 0 do
     Dispose(PTextEditorTextPosition(FItems[LIndex]));
+
   FItems.Clear;
 end;
 
 procedure TTextEditorSpellCheck.LoadSpellCheckLibrary;
 begin
-  SpellCheckDLLHandle := LoadLibrary(PChar(LIBRARY_DLL));
-  if SpellCheckDLLHandle = 0 then
+  FLibModule := LoadLibrary(PChar(LIBRARY_DLL));
+
+  if FLibModule = 0 then
     raise ETextEditorSpellCheckException.CreateRes(@STextEditorSpellCheckEngineCantLoadLibrary);
 
-  @SpellCheckInitialize := GetProcAddress(SpellCheckDLLHandle, LIBRARY_CREATE);
-  @SpellCheckUninitialize := GetProcAddress(SpellCheckDLLHandle, LIBRARY_DESTROY);
-  @SpellCheckSpell := GetProcAddress(SpellCheckDLLHandle, LIBRARY_SPELL);
-  @SpellCheckGetDICEncoding := GetProcAddress(SpellCheckDLLHandle, LIBRARY_GET_DIC_ENCODING);
-  @SpellCheckSuggest := GetProcAddress(SpellCheckDLLHandle, LIBRARY_SUGGEST);
-  @SpellCheckFreeList := GetProcAddress(SpellCheckDLLHandle, LIBRARY_FREE_LIST);
+  @FProcs.FreeList := GetProcAddress(FLibModule, TSpellCheckProcName.FreeList);
+  @FProcs.GetDICEncoding := GetProcAddress(FLibModule, TSpellCheckProcName.GetDicEncoding);
+  @FProcs.Initialize := GetProcAddress(FLibModule, TSpellCheckProcName.Create);
+  @FProcs.Spell := GetProcAddress(FLibModule, TSpellCheckProcName.Spell);
+  @FProcs.Suggest := GetProcAddress(FLibModule, TSpellCheckProcName.Suggest);
+  @FProcs.Uninitialize := GetProcAddress(FLibModule, TSpellCheckProcName.Destroy);
 
-  if not (Assigned(@SpellCheckinitialize) and Assigned(@SpellCheckuninitialize) and Assigned(@SpellCheckspell) and
-    Assigned(@SpellCheckGetDICEncoding) and Assigned(@SpellCheckSuggest) and Assigned(@SpellCheckFreeList)) then
+  if not (Assigned(FProcs.Initialize) and Assigned(FProcs.Uninitialize) and Assigned(FProcs.Spell) and
+    Assigned(FProcs.GetDICEncoding) and Assigned(FProcs.Suggest) and Assigned(FProcs.FreeList)) then
     raise ETextEditorSpellCheckException.CreateRes(@STextEditorSpellCheckEngineCantInitialize);
-
-  FLibraryLoaded := True;
 end;
 
 procedure TTextEditorSpellCheck.Close;
 begin
   if Assigned(FHandle) then
   begin
-    SpellCheckUninitialize(FHandle);
+    FProcs.Uninitialize(FHandle);
     FHandle := nil;
   end;
-  FLibraryLoaded := False;
 end;
 
 function TTextEditorSpellCheck.DLLToUnicodeString(const AValue: PAnsiChar): UnicodeString; //FI:W521 FixInsight bug
@@ -159,15 +176,17 @@ begin
   begin
     LAnsiLen := WideCharToMultiByte(FCodePage, Flags[AIncompatCharBehaviour], PWideChar(AValue),
       Length(AValue), LAnsiBuffer, Length(LAnsiBuffer), nil, @LUsedDefaultChar);
+
     if LUsedDefaultChar and (AIncompatCharBehaviour = icError) then
       raise ETextEditorSpellCheckException.CreateResFmt(@STextEditorContainsInvalidChars, [string(AValue)]);
   end;
+
   SetString(Result, LAnsiBuffer, LAnsiLen);
 end;
 
 function TTextEditorSpellCheck.IsCorrectlyWritten(const AWord: string): Boolean;
 begin
-  Result := SpellCheckSpell(FHandle, PAnsiChar(UnicodeToDLLString(AWord, icUseDefault))) <> 0;
+  Result := FProcs.Spell(FHandle, PAnsiChar(UnicodeToDLLString(AWord, icUseDefault))) <> 0;
 end;
 
 function ASCIILowerCase(const S: AnsiString): AnsiString;
@@ -194,20 +213,23 @@ var
   LSysCodePage: Word;
   LValue: Integer;
 begin
-  if not FLibraryLoaded then
+  if FLibModule = 0 then
     LoadSpellCheckLibrary;
 
-  FHandle := SpellCheckInitialize(PAnsiChar(AnsiString(FFilename + '.aff')), PAnsiChar(AnsiString(FFilename + '.dic')));
+  FHandle := FProcs.Initialize(PAnsiChar(AnsiString(FFilename + '.aff')), PAnsiChar(AnsiString(FFilename + '.dic')));
+
   if not Assigned(FHandle) then
     raise ETextEditorSpellCheckException.CreateRes(@STextEditorSpellCheckEngineCantInitialize);
 
   LSysCodePage := GetACP;
-  LCodePage := AnsiReplaceText(ASCIILowerCase(SpellCheckGetDICEncoding(FHandle)), '-', '');
+  LCodePage := AnsiReplaceText(ASCIILowerCase(FProcs.GetDICEncoding(FHandle)), '-', '');
+
   if LCodePage = 'utf8' then
     FCodePage := CP_UTF8
   else
   begin
     FCodePage := LSysCodePage;
+
     if ASCIIStartsStr('iso', LCodePage) then
     begin
       if LCodePage = 'iso88591' then
@@ -332,13 +354,16 @@ var
   LList: PPAnsiCharArray;
   LListCount, LIndex: Integer;
 begin
-  if not FLibraryLoaded then
+  if FLibModule = 0 then
     ETextEditorSpellCheckException.CreateRes(@STextEditorHunspellHandleNeeded);
-  LListCount := SpellCheckSuggest(FHandle, LList, PAnsiChar(UnicodeToDLLString(AWord, icBestFit)));
+
+  LListCount := FProcs.Suggest(FHandle, LList, PAnsiChar(UnicodeToDLLString(AWord, icBestFit)));
   SetLength(Result, LListCount);
+
   for LIndex := 0 to LListCount - 1 do
     Result[LIndex] := DLLToUnicodeString(LList[LIndex]);
-  SpellCheckFreeList(FHandle, LList, LListCount);
+
+  FProcs.FreeList(FHandle, LList, LListCount);
 end;
 
 function TTextEditorSpellCheck.GetNextErrorItemIndex(const ATextPosition: TTextEditorTextPosition): Integer;
@@ -406,14 +431,6 @@ begin
       LLow := LMiddle + 1
   end;
 end;
-
-initialization
-
-finalization
-
-  if SpellCheckDLLHandle <> 0 then
-    FreeLibrary(SpellCheckDLLHandle);
-
 {$ENDIF}
 
 end.

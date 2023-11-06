@@ -1,5 +1,7 @@
 ﻿unit TextEditor.Types;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 uses
@@ -237,7 +239,7 @@ type
   TTextEditorHighlighterOption = (hoExecuteBeforePrepare, hoMultiHighlighter);
   TTextEditorHighlighterOptions = set of TTextEditorHighlighterOption;
 
-  TTextEditorHighlightLineItemOption = (hlIgnoreCase, hlDeleteOnHighlighterLoad);
+  TTextEditorHighlightLineItemOption = (hlIgnoreCase, hlMultiline, hlDeleteOnHighlighterLoad);
   TTextEditorHighlightLineItemOptions = set of TTextEditorHighlightLineItemOption;
   { Special chars }
   TTextEditorSpecialCharsLineBreakStyle = (eolArrow, eolCRLF, eolEnter, eolPilcrow);
@@ -331,6 +333,7 @@ type
   { Events }
   TOnCompletionProposalExecute = procedure(const ASender: TObject; var AParams: TCompletionProposalParams) of object;
 
+  TTextEditorAdditionalKeywordsEvent = procedure(const ASender: TObject; const AHighlighterName: string; const AKeyword: TStrings) of object;
   TTextEditorBookmarkDeletedEvent = procedure(const ASender: TObject; const ABookmark: TTextEditorMark) of object;
   TTextEditorBookmarkPlacedEvent = procedure(const ASender: TObject; const AIndex: Integer; const AImageIndex: Integer; const ATextPosition: TTextEditorTextPosition) of object;
   TTextEditorCaretChangedEvent = procedure(const ASender: TObject; const X, Y: Integer; const AOffset: Integer) of object;

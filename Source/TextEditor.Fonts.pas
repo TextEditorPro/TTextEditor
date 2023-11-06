@@ -1,5 +1,7 @@
 ﻿unit TextEditor.Fonts;
 
+{$I TextEditor.Defines.inc}
+
 interface
 
 uses

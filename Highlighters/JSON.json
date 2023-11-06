@@ -117,7 +117,12 @@
               "Element": "Symbol"
             },
             "Properties": {
-              "CloseOnEndOfLine": true
+              "AlternativeClose": [
+                "[",
+                "{",
+                "}",
+                ","
+              ]
             },
             "TokenRange": {
               "Open": ":"
@@ -127,16 +132,14 @@
                 {
                   "Type": "String",
                   "Attributes": {
-                    "Element": "Symbol"
+                    "Element": "String"
                   },
                   "Properties": {
-                    "AlternativeClose": [
-                      "{"
-                    ]
+                    "CloseOnEndOfLine": true
                   },
                   "TokenRange": {
-                    "Open": "[",
-                    "Close": "]"
+                    "Open": "\"",
+                    "Close": "\""
                   },
                   "SubRules": {
                     "Range": [
@@ -146,52 +149,57 @@
                           "Element": "String"
                         },
                         "Properties": {
-                          "CloseOnEndOfLine": true
+                          "CloseOnEndOfLine": true,
+                          "CloseOnTerm": true
                         },
                         "TokenRange": {
-                          "Open": "\"",
+                          "Open": "\\\"",
                           "Close": "\""
+                        }
+                      },
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "String"
                         },
-                        "SubRules": {
-                          "Range": [
-                            {
-                              "Type": "String",
-                              "Attributes": {
-                                "Element": "String"
-                              },
-                              "Properties": {
-                                "CloseOnEndOfLine": true,
-                                "CloseOnTerm": true
-                              },
-                              "TokenRange": {
-                                "Open": "\\\"",
-                                "Close": "\""
-                              }
-                            },
-                            {
-                              "Type": "String",
-                              "Attributes": {
-                                "Element": "String"
-                              },
-                              "Properties": {
-                                "CloseOnEndOfLine": true,
-                                "CloseOnTerm": true
-                              },
-                              "TokenRange": {
-                                "Open": "\\\\",
-                                "Close": ""
-                              }
-                            }
-                          ]
+                        "Properties": {
+                          "CloseOnEndOfLine": true,
+                          "CloseOnTerm": true
+                        },
+                        "TokenRange": {
+                          "Open": "\\\\",
+                          "Close": ""
                         }
                       }
                     ]
                   }
-                },
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "Symbol"
+            },
+            "Properties": {
+              "AlternativeClose": [
+                "{"
+              ]
+            },
+            "TokenRange": {
+              "Open": "[",
+              "Close": "]"
+            },
+            "SubRules": {
+              "Range": [
                 {
                   "Type": "String",
                   "Attributes": {
                     "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
                   },
                   "TokenRange": {
                     "Open": "\"",

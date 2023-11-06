@@ -67,6 +67,7 @@ end;
 function TTextEditorSearchBase.GetResult(const AIndex: Integer): Integer;
 begin
   Result := 0;
+
   if (AIndex >= 0) and (AIndex < FResults.Count) then
     Result := FResults[AIndex];
 end;

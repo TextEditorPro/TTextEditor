@@ -1,4 +1,4 @@
-﻿package TextEditor.Delphi.Yukon.Designtime;
+﻿package TextEditor.Delphi.Athens.Designtime;
 
 {$R *.res}
 {$R *.dres}
@@ -35,7 +35,7 @@ requires
   designide,
   dbrtl,
   vcldb,
-  TextEditor.Delphi.Yukon.Runtime;
+  TextEditor.Delphi.Athens.Runtime;
 
 contains
   TextEditor.Register in '..\Source\TextEditor.Register.pas',

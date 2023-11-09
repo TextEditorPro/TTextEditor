@@ -1,4 +1,4 @@
-﻿package TextEditor.Delphi.Yukon.Runtime;
+﻿package TextEditor.Delphi.Athens.Runtime;
 
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
@@ -38,7 +38,7 @@ requires
   vclx,
   vclimg
 {$IFDEF ALPHASKINS}
-  , acntDX11Yukon_R
+  , acntDX11Athens_R
 {$ENDIF}
   ;
 

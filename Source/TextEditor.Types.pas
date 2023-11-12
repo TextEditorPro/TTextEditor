@@ -384,6 +384,31 @@ type
     procedure Restart;
   end;
 
+  { Highlighter color elements }
+  TElement = record
+  const
+    AssemblerComment = 'AssemblerComment';
+    AssemblerReservedWord = 'AssemblerReservedWord';
+    Attribute = 'Attribute';
+    Character = 'Character';
+    Comment = 'Comment';
+    Directive = 'Directive';
+    Editor = 'Editor';
+    HexNumber = 'HexNumber';
+    HighlightedBlock = 'HighlightedBlock';
+    HighlightedBlockSymbol = 'HighlightedBlockSymbol';
+    LogicalOperator = 'LogicalOperator';
+    Method = 'Method';
+    MethodItalic = 'MethodItalic';
+    NameOfMethod = 'MethodName';
+    Number = 'Number';
+    ReservedWord = 'ReservedWord';
+    StringOfCharacters = 'String';
+    Symbol = 'Symbol';
+    Value = 'Value';
+    WebLink = 'WebLink';
+  end;
+
   function SearchEngineAsText(const ASearchEngine: TTextEditorSearchEngine): string;
   function TextAsSearchEngine(const ASearchEngineName: string): TTextEditorSearchEngine;
   function CompletionProposalItemFound(const AItems: TTextEditorCompletionProposalItems; const AItem: TTextEditorCompletionProposalItem): Boolean;

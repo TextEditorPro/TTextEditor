@@ -15878,8 +15878,7 @@ var
         if FSearch.InSelection.Active and LIsSearchInSelectionBlock then
           LBackgroundColor := FColors.SearchInSelectionBackground;
 
-        if not FSyncEdit.Visible and LAnySelection and (soHighlightSimilarTerms in FSelection.Options) and
-          not FSearch.InSelection.Active and (FSearch.Items.Count = 0) then
+        if not FSyncEdit.Visible and LAnySelection and (soHighlightSimilarTerms in FSelection.Options) then
         begin
           LKeyword := '';
 

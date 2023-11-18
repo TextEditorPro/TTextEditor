@@ -1,0 +1,641 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "// Hello, World! in Solidity\r\n",
+      "\r\n",
+      "pragma solidity ^0.8.20;\r\n",
+      "\r\n",
+      "contract HelloWorld {\r\n",
+      "    string public greet = \"Hello, World!\";\r\n",
+      "}"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "//"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "TokenRange": {
+              "Open": "function",
+              "Close": "("
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "("
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "TokenRange": {
+              "Open": "contract",
+              "Close": "{"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "{"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abcdefABCDEF",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0x",
+              "OpenBreakType": "Any"
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "abi",
+              "add",
+              "address",
+              "and",
+              "anonymous",
+              "assembly",
+              "assert",
+              "auto",
+              "block",
+              "blockhash",
+              "bool",
+              "break",
+              "byte",
+              "bytes",
+              "bytes1",
+              "bytes2",
+              "bytes3",
+              "bytes4",
+              "bytes5",
+              "bytes6",
+              "bytes7",
+              "bytes8",
+              "bytes9",
+              "bytes10",
+              "bytes11",
+              "bytes12",
+              "bytes13",
+              "bytes14",
+              "bytes15",
+              "bytes16",
+              "bytes17",
+              "bytes18",
+              "bytes19",
+              "bytes20",
+              "bytes21",
+              "bytes22",
+              "bytes23",
+              "bytes24",
+              "bytes25",
+              "bytes26",
+              "bytes27",
+              "bytes28",
+              "bytes29",
+              "bytes30",
+              "bytes31",
+              "bytes32",
+              "call",
+              "callcode",
+              "calldata",
+              "calldatacopy",
+              "calldataload",
+              "calldatasize",
+              "caller",
+              "callvalue",
+              "case",
+              "catch",
+              "constant",
+              "constructor",
+              "continue",
+              "contract",
+              "copyof",
+              "create",
+              "create2",
+              "days",
+              "default",
+              "define",
+              "delegatecall",
+              "delete",
+              "div",
+              "do",
+              "else",
+              "emit",
+              "enum",
+              "eq",
+              "error",
+              "ether",
+              "event",
+              "exp",
+              "extcodecopy",
+              "extcodehash",
+              "extcodesize",
+              "external",
+              "fallback",
+              "false",
+              "final",
+              "for",
+              "from",
+              "function",
+              "gas",
+              "gt",
+              "hours",
+              "if",
+              "immutable",
+              "implements",
+              "import",
+              "in",
+              "indexed",
+              "inline",
+              "int",
+              "int8",
+              "int16",
+              "int24",
+              "int32",
+              "int40",
+              "int48",
+              "int56",
+              "int64",
+              "int72",
+              "int80",
+              "int88",
+              "int96",
+              "int104",
+              "int112",
+              "int120",
+              "int128",
+              "int136",
+              "int144",
+              "int152",
+              "int160",
+              "int168",
+              "int176",
+              "int184",
+              "int192",
+              "int200",
+              "int208",
+              "int216",
+              "int224",
+              "int232",
+              "int240",
+              "int248",
+              "int256",
+              "interface",
+              "internal",
+              "invalid",
+              "is",
+              "iszero",
+              "let",
+              "log0",
+              "log1",
+              "log2",
+              "log3",
+              "log4",
+              "lt",
+              "macro",
+              "mapping",
+              "match",
+              "memory",
+              "minutes",
+              "mload",
+              "mod",
+              "modifier",
+              "msg",
+              "msize",
+              "mstore",
+              "mstore8",
+              "mul",
+              "mulmod",
+              "mutable",
+              "not",
+              "null",
+              "of",
+              "or",
+              "override",
+              "partial",
+              "payable",
+              "pop",
+              "pragma",
+              "private",
+              "promise",
+              "public",
+              "pure",
+              "receive",
+              "reference",
+              "relocatable",
+              "require",
+              "return",
+              "returndatacopy",
+              "returndatasize",
+              "returns",
+              "revert",
+              "sar",
+              "sdiv",
+              "sealed",
+              "seconds",
+              "selfbalance",
+              "selfdestruct",
+              "sgt",
+              "shl",
+              "shr",
+              "signextend",
+              "sizeof",
+              "sload",
+              "slt",
+              "smod",
+              "solidity",
+              "sstore",
+              "static",
+              "staticcall",
+              "stop",
+              "storage",
+              "string",
+              "struct",
+              "sub",
+              "supports",
+              "switch",
+              "true",
+              "try",
+              "type",
+              "typedef",
+              "typeof",
+              "uint",
+              "uint8",
+              "uint16",
+              "uint24",
+              "uint32",
+              "uint40",
+              "uint48",
+              "uint56",
+              "uint64",
+              "uint72",
+              "uint80",
+              "uint88",
+              "uint96",
+              "uint104",
+              "uint112",
+              "uint120",
+              "uint128",
+              "uint136",
+              "uint144",
+              "uint152",
+              "uint160",
+              "uint168",
+              "uint176",
+              "uint184",
+              "uint192",
+              "uint200",
+              "uint208",
+              "uint216",
+              "uint224",
+              "uint232",
+              "uint240",
+              "uint248",
+              "uint256",
+              "unchecked",
+              "using",
+              "view",
+              "virtual",
+              "weeks",
+              "wei",
+              "while",
+              "xor",
+              "years"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "balance",
+              "basefee",
+              "addmod",
+              "chainid",
+              "code",
+              "codehash",
+              "coinbase",
+              "concat",
+              "creationcode",
+              "data",
+              "decode",
+              "difficulty",
+              "ecrecover",
+              "encode",
+              "encodecall",
+              "encodepacked",
+              "encodewithselector",
+              "encodewithsignature",
+              "gaslimit",
+              "gasprice",
+              "interfaceid",
+              "keccak256",
+              "max",
+              "min",
+              "name",
+              "number",
+              "origin",
+              "prevrandao",
+              "ripemd160",
+              "runtimecode",
+              "selfdestruct",
+              "send",
+              "sender",
+              "sha256",
+              "sig",
+              "super",
+              "this",
+              "timestamp",
+              "transfer"
+              ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "!",
+              "-",
+              "%",
+              "(",
+              ")",
+              "*",
+              ",",
+              ".",
+              "/",
+              ":",
+              ";",
+              "[",
+              "]",
+              "^",
+              "{",
+              "|",
+              "}",
+              "~",
+              "+",
+              "<",
+              "=",
+              ">"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "//",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "//",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

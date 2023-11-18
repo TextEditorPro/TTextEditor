@@ -258,11 +258,13 @@ begin
   Result := False;
 
   LStartPosition := ARun;
+
   if Assigned(HeadNode) then
   begin
     LCurrentTokenNode := HeadNode;
     LNextPosition := LStartPosition;
     LStartTokenNode := nil;
+
     repeat
       if Assigned(LStartTokenNode) then
       begin
@@ -277,10 +279,12 @@ begin
         LFindTokenNode := nil;
 
       LPreviousPosition := ARun;
+
       while (LCurrentTokenNode.NextNodes.Count > 0) and (APLine[ARun] <> TControlCharacters.Null) do
       begin
         Inc(ARun);
         LCurrentTokenNode := LCurrentTokenNode.NextNodes.FindNode(ACurrentRange.CaseFunct(APLine[ARun]));
+
         if not Assigned(LCurrentTokenNode) then
         begin
           Dec(ARun);
@@ -311,7 +315,7 @@ begin
       if APLine[ARun] <> TControlCharacters.Null then
         Inc(ARun);
 
-      if not (LFindTokenNode.Char in TCharacterSets.Numbers) and ((LFindTokenNode.BreakType = btAny) or (APLine[ARun] in ACurrentRange.Delimiters)) then
+      if (LFindTokenNode.Char <> '0') and ((LFindTokenNode.BreakType = btAny) or (APLine[ARun] in ACurrentRange.Delimiters)) then
       begin
         AToken := LFindTokenNode.Token;
         Exit(True);
@@ -320,6 +324,7 @@ begin
   end;
 
   LAllowedDelimiters := ACurrentRange.Delimiters;
+
   for LIndex := 0 to Sets.Count - 1 do
     LAllowedDelimiters := LAllowedDelimiters - TTextEditorSet(Sets.List[LIndex]).CharSet;
 
@@ -327,6 +332,7 @@ begin
   begin
     ARun := LStartPosition;
     LSet := TTextEditorSet(Sets.List[LIndex]);
+
     repeat
       Inc(ARun);
       LChar := APLine[ARun];

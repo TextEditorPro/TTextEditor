@@ -68,6 +68,7 @@ begin
     FInternalGlyph.Free;
     FInternalGlyph := nil;
   end;
+
   FBitmap.Free;
 
   inherited Destroy;
@@ -78,8 +79,10 @@ var
   LNumerator: Integer;
 begin
   LNumerator := (AMultiplier div ADivider) * ADivider;
+
   if Assigned(FInternalGlyph) then
     ResizeBitmap(FInternalGlyph, MulDiv(FInternalGlyph.Width, LNumerator, ADivider), MulDiv(FInternalGlyph.Height, LNumerator, ADivider));
+
   ResizeBitmap(FBitmap, MulDiv(FBitmap.Width, LNumerator, ADivider), MulDiv(FBitmap.Height, LNumerator, ADivider));
 end;
 
@@ -90,11 +93,13 @@ begin
   begin
     if Assigned(FInternalGlyph) then
       Self.FInternalGlyph.Assign(FInternalGlyph);
+
     Self.FInternalMaskColor := FInternalMaskColor;
     Self.FVisible := FVisible;
     Self.FBitmap.Assign(FBitmap);
     Self.FMaskColor := FMaskColor;
     Self.FLeft := FLeft;
+
     if Assigned(Self.FOnChange) then
       Self.FOnChange(Self);
   end
@@ -123,6 +128,7 @@ begin
     Exit;
 
   LY := Y;
+
   if ALineHeight <> 0 then
     Inc(LY, Abs(LGlyphBitmap.Height - ALineHeight) div 2);
 
@@ -142,6 +148,7 @@ begin
   if FMaskColor <> AValue then
   begin
     FMaskColor := AValue;
+
     if Assigned(FOnChange) then
       FOnChange(Self);
   end;
@@ -152,6 +159,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     if Assigned(FOnChange) then
       FOnChange(Self);
   end;
@@ -162,6 +170,7 @@ begin
   if FLeft <> AValue then
   begin
     FLeft := AValue;
+
     if Assigned(FOnChange) then
       FOnChange(Self);
   end;

@@ -2194,6 +2194,7 @@ begin
         if FWordWrap.Active then
         begin
           Dec(LPivot);
+
           while FLineNumbers.Cache[LPivot] = AViewLineNumber do
           begin
             Result := LPivot;
@@ -4056,6 +4057,7 @@ begin
     Exit;
 
   LLineText := FLines[FPosition.SelectionBegin.Line];
+
   if LLineText = '' then
     Exit;
 
@@ -4311,12 +4313,15 @@ var
 begin
   LViewPosition := PixelsToViewPosition(X, Y);
   LViewPosition.Row := EnsureRange(LViewPosition.Row, 1, Max(FLineNumbers.Count, 1));
+
   if FWordWrap.Active then
   begin
     LWordWrapLineLength := FWordWrapLine.ViewLength[LViewPosition.Row];
+
     if LWordWrapLineLength <> 0 then
       LViewPosition.Column := EnsureRange(LViewPosition.Column, 1, LWordWrapLineLength + 1);
   end;
+
   Result := ViewToTextPosition(LViewPosition);
 end;
 
@@ -4453,6 +4458,7 @@ begin
 
   LLineCount := Min(FLines.Count, ATextPosition.Line);
   LIndex := 0;
+
   while LIndex < LLineCount do
   begin
     LItem := FLines.Items^[LIndex];
@@ -5315,6 +5321,7 @@ begin
         if FWordWrap.Active then
         begin
           LWidth := GetTokenWidth(LHelper, 1, 0);
+
           FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] - 1;
           FWordWrapLine.ViewLength[FViewPosition.Row] := FWordWrapLine.ViewLength[FViewPosition.Row] -
             GetTokenCharCount(LChar, FViewPosition.Row);
@@ -12275,6 +12282,8 @@ begin
       Exit;
     end;
 
+  SetFocus;
+
   if X + 4 > FLeftMarginWidth then
   begin
     if (AButton = mbLeft) or (AButton = mbRight) then
@@ -12406,8 +12415,6 @@ begin
 
   if FMatchingPairs.Active then
     ScanMatchingPair;
-
-  SetFocus;
 end;
 
 function TCustomTextEditor.ShortCutPressed: Boolean;
@@ -18742,12 +18749,14 @@ begin
     Exit;
 
   LTrimTrailingSpaces := eoTrimTrailingSpaces in FOptions;
+
   if LTrimTrailingSpaces then
     FOptions := FOptions - [eoTrimTrailingSpaces];
 
   LStringList := TStringList.Create;
   try
     LStringList.Text := SelectedText;
+
     for LIndex := 0 to LStringList.Count - 1 do
     if Length(LStringList[LIndex]) < LLength then
       LStringList[LIndex] := LStringList[LIndex] + StringOfChar(' ', LLength - Length(LStringList[LIndex]));
@@ -19011,6 +19020,7 @@ begin
   for LIndex := LFromLine to LToLine do
   begin
     LCodeFoldingRange := FCodeFoldings.RangeFromLine[LIndex];
+
     if Assigned(LCodeFoldingRange) then
       if not LCodeFoldingRange.Collapsed and LCodeFoldingRange.Collapsable then
       with LCodeFoldingRange do
@@ -19086,14 +19096,18 @@ begin
   LEndPosition.Line := FLines.Count - 1;
   LText := FLines.Text;
   LSelectionAvailable := GetSelectionAvailable;
+
   if LSelectionAvailable then
   begin
     LBeginPosition.Line := GetSelectionBeginPosition.Line;
     LEndPosition := GetSelectionEndPosition;
+
     if LEndPosition.Char = 1 then
       Dec(LEndPosition.Line);
+
     LText := SelectedText;
   end;
+
   LBeginPosition.Char := 1;
   LEndPosition.Char := FLines.StringLength(LEndPosition.Line) + 1;
 
@@ -19186,6 +19200,7 @@ begin
   for LIndex := LFromLine to LToLine do
   begin
     LCodeFoldingRange := FCodeFoldings.RangeFromLine[LIndex];
+
     if Assigned(LCodeFoldingRange) then
       if LCodeFoldingRange.Collapsed and LCodeFoldingRange.Collapsable then
       with LCodeFoldingRange do
@@ -19605,6 +19620,7 @@ begin
           SetEndPosition(FCodeFoldings.RangeFromLine[LSelectionBeginPosition.Line + 1])
         else
           SetEndPosition(FCodeFoldings.RangeFromLine[LSelectionEndPosition.Line + 1]);
+
         LSelectionEndPosition := FPosition.SelectionEnd;
       end;
 
@@ -20099,9 +20115,11 @@ begin
 
   LTextPosition := TextPosition;
   LTextPosition.Line := LTextPosition.Line - 1;
+
   while (LTextPosition.Line < FLines.Count) and Assigned(FCodeFoldings.RangeFromLine) and
     not Assigned(FCodeFoldings.RangeFromLine[LTextPosition.Line + 1]) do
     LTextPosition.Line := LTextPosition.Line - 1;
+
   TextPosition := LTextPosition;
 
   Invalidate;
@@ -20559,6 +20577,7 @@ begin
     Exit;
 
   LChangeTrim := eoTrimTrailingSpaces in Options;
+
   if LChangeTrim then
     Exclude(FOptions, eoTrimTrailingSpaces);
 
@@ -20573,6 +20592,7 @@ begin
     LPasteAction := LLastChangeReason = crPaste;
 
     LRedoItem := FRedoList.PeekItem;
+
     if Assigned(LRedoItem) then
     begin
       repeat
@@ -20586,6 +20606,7 @@ begin
             LKeepGoing := LPasteAction and (FRedoList.LastChangeString = LLastChangeString) or
               (LLastChangeReason = LRedoItem.ChangeReason) and (LRedoItem.ChangeBlockNumber = LLastChangeBlockNumber) or
               (LRedoItem.ChangeBlockNumber <> 0) and (LRedoItem.ChangeBlockNumber = LLastChangeBlockNumber);
+
           LLastChangeReason := LRedoItem.ChangeReason;
           LPasteAction := LLastChangeReason = crPaste;
         end;
@@ -20664,8 +20685,8 @@ var
   LLineBreak: string;
 begin
   LTextPosition := GetPosition(1, ALineNumber - 1);
-
   LLineBreak := '';
+
   if sfEmptyLine in AFlags then
     LLineBreak := FLines.DefaultLineBreak;
 
@@ -20768,6 +20789,7 @@ begin
   SetModified(False);
 
   UndoList.Changed := False;
+
   if not (uoUndoAfterSave in FUndo.Options) then
     UndoList.Clear;
 
@@ -21110,6 +21132,7 @@ var
   LOldWrap: Boolean;
 begin
   Assert(not Assigned(FChainedEditor));
+
   if FLines = FOriginal.Lines then
     Exit;
 
@@ -21222,6 +21245,7 @@ begin
     Exit;
 
   LIndex := FindHookedCommandEvent(AHookedCommandEvent);
+
   if LIndex > -1 then
     FHookedCommandHandlers.Delete(LIndex)
 end;
@@ -21252,6 +21276,7 @@ begin
       if FWordWrapLine.ViewLength[LViewPosition.Row] = 0 then
       begin
         LVisibleChars := GetVisibleChars(LViewPosition.Row);
+
         if LViewPosition.Column > LVisibleChars + 1 then
           LViewPosition.Column := LVisibleChars + 1;
       end

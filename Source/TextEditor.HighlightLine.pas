@@ -19,6 +19,7 @@ type
   public
     constructor Create(ACollection: TCollection); override;
     procedure Assign(ASource: TPersistent); override;
+    procedure SetOption(const AOption: TTextEditorHighlightLineItemOption; const AEnabled: Boolean);
   published
     property Background: TColor read FBackground write FBackground default TColors.SysNone;
     property Foreground: TColor read FForeground write FForeground default TColors.SysNone;
@@ -86,6 +87,14 @@ begin
   end
   else
     inherited Assign(ASource);
+end;
+
+procedure TTextEditorHighlightLineItem.SetOption(const AOption: TTextEditorHighlightLineItemOption; const AEnabled: Boolean);
+begin
+  if AEnabled then
+    Include(FOptions, AOption)
+  else
+    Exclude(FOptions, AOption);
 end;
 
 function TTextEditorHighlightLineItem.GetDisplayName: string;

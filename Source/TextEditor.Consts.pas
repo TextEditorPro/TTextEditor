@@ -11,6 +11,8 @@ type
   TCharacterSets = record
   const
     AbsoluteDelimiters: TTextEditorCharSet = [#0, #9, #10, #13, #32, #26];
+    AnsiUnicodeCharacters = ['™', '€', 'ƒ', '„', '†', '‡', 'ˆ', '‰', 'Š', '‹', 'Œ', 'Ž', '‘', '’', '“', '”', '•', '–',
+      '—', '˜', 'š', '›', 'œ', 'ž', 'Ÿ'];
     LowerCharacters = ['a'..'z'];
     UpperCharacters = ['A'..'Z'];
     Characters = LowerCharacters + UpperCharacters;

@@ -384,7 +384,7 @@ begin
   begin
     Element := AElementPrefix + AAttributesObject['Element'].Value;
     ParentForeground := StrToBoolDef(AAttributesObject['ParentForeground'].Value, False);
-    ParentBackground := StrToBoolDef(AAttributesObject['ParentBackground'].Value, True);
+    ParentBackground := StrToBoolDef(AAttributesObject['ParentBackground'].Value, False);
 
     if AAttributesObject.Contains('EscapeChar') then
       EscapeChar := AAttributesObject['EscapeChar'].Value[1];

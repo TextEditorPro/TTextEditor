@@ -229,10 +229,12 @@ type
     TTextEditorScrollHelper = record
       Delta: TPoint;
       HorizontalPosition: Integer;
+      HorizontalVisible: Boolean;
       IsScrolling: Boolean;
       PageWidth: Integer;
       Shadow: TTextEditorScrollShadowHelper;
       Timer: TTextEditorTimer;
+      VerticalVisible: Boolean;
 {$IFDEF ALPHASKINS}
       Wnd: TacScrollWnd;
 {$ENDIF}
@@ -1961,7 +1963,7 @@ var
 begin
   LTemp := FLineNumbers.Count - FMinimap.VisibleLineCount;
   LTemp2 := Max(AY div FMinimap.CharHeight - FMinimapHelper.ClickOffsetY, 0);
-  FMinimap.TopLine := Max(1, Trunc((LTemp / Max(FMinimap.VisibleLineCount - VisibleLineCount, 1)) * LTemp2));
+  FMinimap.TopLine := Max(1, Trunc((LTemp / Max(FMinimap.VisibleLineCount - FLineNumbers.VisibleCount, 1)) * LTemp2));
 
   if (LTemp > 0) and (FMinimap.TopLine > LTemp) then
     FMinimap.TopLine := LTemp;
@@ -1971,8 +1973,8 @@ begin
   if TopLine <> LTopLine then
   begin
     TopLine := LTopLine;
-    FMinimap.TopLine := Max(FLineNumbers.TopLine - Abs(Trunc((FMinimap.VisibleLineCount - VisibleLineCount) *
-      (FLineNumbers.TopLine / Max(Max(FLineNumbers.Count, 1) - VisibleLineCount, 1)))), 1);
+    FMinimap.TopLine := Max(FLineNumbers.TopLine - Abs(Trunc((FMinimap.VisibleLineCount - FLineNumbers.VisibleCount) *
+      (FLineNumbers.TopLine / Max(Max(FLineNumbers.Count, 1) - FLineNumbers.VisibleCount, 1)))), 1);
 
     Repaint;
   end;
@@ -1994,7 +1996,7 @@ begin
       LMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex])^;
 
       if (LMultiCaretRecord.ViewPosition.Row >= FLineNumbers.TopLine) and
-        (LMultiCaretRecord.ViewPosition.Row <= FLineNumbers.TopLine + VisibleLineCount) then
+        (LMultiCaretRecord.ViewPosition.Row <= FLineNumbers.TopLine + FLineNumbers.VisibleCount) then
         PaintCaretBlock(LMultiCaretRecord.ViewPosition);
 
       Inc(LIndex);
@@ -3495,6 +3497,7 @@ begin
     LPixel := ABitmap.Scanline[LRow];
 
     LColumn := 0;
+
     while LColumn < ABitmap.Width do
     begin
       LAlpha := AShadowAlphaArray[LColumn];
@@ -4732,7 +4735,7 @@ begin
     LScrollBoundsLeft := FLeftMarginWidth;
     LScrollBoundsRight := LScrollBoundsLeft + FScrollHelper.PageWidth + 4;
 
-    LScrollBounds := Bounds(LScrollBoundsLeft, 0, LScrollBoundsRight, VisibleLineCount * GetLineHeight);
+    LScrollBounds := Bounds(LScrollBoundsLeft, 0, LScrollBoundsRight, FLineNumbers.VisibleCount * GetLineHeight);
 
     DeflateMinimapAndSearchMapRect(LScrollBounds);
 
@@ -6419,7 +6422,7 @@ begin
   LLineCount := 0;
 
   if ACommand in [TKeyCommands.PageBottom, TKeyCommands.SelectionPageBottom] then
-    LLineCount := VisibleLineCount - 1;
+    LLineCount := FLineNumbers.VisibleCount - 1;
 
   LCaretNewPosition := ViewToTextPosition(GetViewPosition(FViewPosition.Column, TopLine + LLineCount));
   MoveCaretAndSelection(LTextPosition, LCaretNewPosition, ACommand in [TKeyCommands.SelectionPageTop, TKeyCommands.SelectionPageBottom]);
@@ -6429,7 +6432,7 @@ procedure TCustomTextEditor.DoPageUpOrDown(const ACommand: TTextEditorCommand);
 var
   LLineCount: Integer;
 begin
-  LLineCount := VisibleLineCount shr Ord(soHalfPage in FScroll.Options);
+  LLineCount := FLineNumbers.VisibleCount shr Ord(soHalfPage in FScroll.Options);
 
   if ACommand in [TKeyCommands.PageUp, TKeyCommands.SelectionPageUp] then
     LLineCount := -LLineCount;
@@ -6534,19 +6537,22 @@ var
   LCaretRow: Integer;
 begin
   LCaretRow := FViewPosition.Row;
-  if (LCaretRow < TopLine) or (LCaretRow >= TopLine + VisibleLineCount) then
+
+  if (LCaretRow < TopLine) or (LCaretRow >= TopLine + FLineNumbers.VisibleCount) then
     EnsureCursorPositionVisible
   else
   begin
     if ACommand = TKeyCommands.ScrollUp then
     begin
       TopLine := TopLine - 1;
-      if LCaretRow > TopLine + VisibleLineCount - 1 then
-        MoveCaretVertically((TopLine + VisibleLineCount - 1) - LCaretRow, False);
+
+      if LCaretRow > TopLine + FLineNumbers.VisibleCount - 1 then
+        MoveCaretVertically((TopLine + FLineNumbers.VisibleCount - 1) - LCaretRow, False);
     end
     else
     begin
       TopLine := TopLine + 1;
+
       if LCaretRow < TopLine then
         MoveCaretVertically(TopLine - LCaretRow, False);
     end;
@@ -7596,7 +7602,7 @@ begin
     if FScrollHelper.Delta.Y <> 0 then
     begin
       if GetKeyState(vkShift) < 0 then
-        TopLine := TopLine + FScrollHelper.Delta.Y * VisibleLineCount
+        TopLine := TopLine + FScrollHelper.Delta.Y * FLineNumbers.VisibleCount
       else
         TopLine := TopLine + FScrollHelper.Delta.Y;
     end;
@@ -8979,14 +8985,14 @@ begin
     if FScrollHelper.Delta.Y <> 0 then
     begin
       if GetKeyState(vkShift) < 0 then
-        TopLine := TopLine + FScrollHelper.Delta.Y * VisibleLineCount
+        TopLine := TopLine + FScrollHelper.Delta.Y * FLineNumbers.VisibleCount
       else
         TopLine := TopLine + FScrollHelper.Delta.Y;
 
       LLine := TopLine;
 
       if FScrollHelper.Delta.Y > 0 then
-        Inc(LLine, VisibleLineCount - 1);
+        Inc(LLine, FLineNumbers.VisibleCount - 1);
 
       LViewPosition.Row := EnsureRange(LLine, 1, Max(FLineNumbers.Count, 1));
     end;
@@ -9490,16 +9496,17 @@ begin
     (not LInSelection or LInSelection and (LValue = FLineNumbers.TopLine)) then
     LValue := Min(LValue, LViewLineCount)
   else
-    LValue := Min(LValue, LViewLineCount - VisibleLineCount + 1);
+    LValue := Min(LValue, LViewLineCount - FLineNumbers.VisibleCount + 1);
 
   LValue := Max(LValue, 1);
+
   if FLineNumbers.TopLine <> LValue then
   begin
     FLineNumbers.TopLine := LValue;
 
     if FMinimap.Visible and not FMinimap.Dragging then
-      FMinimap.TopLine := Max(FLineNumbers.TopLine - Abs(Trunc((FMinimap.VisibleLineCount - VisibleLineCount) *
-        (FLineNumbers.TopLine / Max(LViewLineCount - VisibleLineCount, 1)))), 1);
+      FMinimap.TopLine := Max(FLineNumbers.TopLine - Abs(Trunc((FMinimap.VisibleLineCount - FLineNumbers.VisibleCount) *
+        (FLineNumbers.TopLine / Max(LViewLineCount - FLineNumbers.VisibleCount, 1)))), 1);
 
     UpdateScrollBars;
   end;
@@ -9614,12 +9621,13 @@ begin
 
     LWidthChanged := LScrollPageWidth <> FScrollHelper.PageWidth;
 
-    if not FHighlighter.Changed and not LWidthChanged and (LVisibleLineCount = VisibleLineCount) then
+    if not FHighlighter.Changed and not LWidthChanged and (LVisibleLineCount = FLineNumbers.VisibleCount) then
       Exit;
 
     GetMinimapLeftRight(FMinimapHelper.Left, FMinimapHelper.Right);
     FillChar(FItalic.OffsetCache, SizeOf(FItalic.OffsetCache), 0);
     FScrollHelper.PageWidth := LScrollPageWidth;
+
     FLineNumbers.VisibleCount := LVisibleLineCount;
 
     if FMinimap.Visible then
@@ -9628,8 +9636,8 @@ begin
 
       FMinimap.CharHeight := FPaintHelper.CharHeight - 1;
       FMinimap.VisibleLineCount := ClientHeight div FMinimap.CharHeight;
-      FMinimap.TopLine := Max(FLineNumbers.TopLine - Abs(Trunc((FMinimap.VisibleLineCount - VisibleLineCount) *
-        (FLineNumbers.TopLine / Max(FLineNumbers.Count - VisibleLineCount, 1)))), 1);
+      FMinimap.TopLine := Max(FLineNumbers.TopLine - Abs(Trunc((FMinimap.VisibleLineCount - FLineNumbers.VisibleCount) *
+        (FLineNumbers.TopLine / Max(FLineNumbers.Count - FLineNumbers.VisibleCount, 1)))), 1);
 
       FPaintHelper.SetBaseFont(FFonts.Text);
     end;
@@ -9840,7 +9848,6 @@ var
   LScrollInfo: TScrollInfo;
   LVerticalMaxScroll: Integer;
   LHorizontalScrollMax: Integer;
-  LShowScrollBar: Boolean;
 begin
   if not HandleAllocated or PaintLocked or FLines.Streaming or FHighlighter.Loading then
     Exit;
@@ -9855,6 +9862,7 @@ begin
       LHorizontalScrollMax := Max(GetHorizontalScrollMax - 1, 0);
 
       LScrollInfo.nMin := 0;
+
       if LHorizontalScrollMax <= TMaxValues.ScrollRange then
       begin
         LScrollInfo.nMax := LHorizontalScrollMax;
@@ -9868,9 +9876,9 @@ begin
         LScrollInfo.nPos := MulDiv(TMaxValues.ScrollRange, FScrollHelper.HorizontalPosition, LHorizontalScrollMax);
       end;
 
-      LShowScrollBar := LHorizontalScrollMax > FScrollHelper.PageWidth;
+      FScrollHelper.HorizontalVisible := LHorizontalScrollMax > FScrollHelper.PageWidth;
 
-      if LShowScrollBar then
+      if FScrollHelper.HorizontalVisible then
         LScrollInfo.fMask := SIF_ALL
       else
       begin
@@ -9879,7 +9887,7 @@ begin
       end;
 
       if not FMinimap.Dragging then
-        ShowScrollBar(Handle, SB_HORZ, LShowScrollBar);
+        ShowScrollBar(Handle, SB_HORZ, FScrollHelper.HorizontalVisible);
 
       SetScrollInfo(Handle, SB_HORZ, LScrollInfo, True);
 
@@ -9897,26 +9905,26 @@ begin
       LVerticalMaxScroll := FLineNumbers.Count;
 
       if soPastEndOfFileMarker in FScroll.Options then
-        Inc(LVerticalMaxScroll, VisibleLineCount - 1);
+        Inc(LVerticalMaxScroll, FLineNumbers.VisibleCount - 1);
 
       LScrollInfo.nMin := 0;
 
       if LVerticalMaxScroll <= TMaxValues.ScrollRange then
       begin
         LScrollInfo.nMax := Max(0, LVerticalMaxScroll);
-        LScrollInfo.nPage := VisibleLineCount;
+        LScrollInfo.nPage := FLineNumbers.VisibleCount;
         LScrollInfo.nPos := TopLine - 1;
       end
       else
       begin
         LScrollInfo.nMax := TMaxValues.ScrollRange;
-        LScrollInfo.nPage := MulDiv(TMaxValues.ScrollRange, VisibleLineCount, LVerticalMaxScroll);
+        LScrollInfo.nPage := MulDiv(TMaxValues.ScrollRange, FLineNumbers.VisibleCount, LVerticalMaxScroll);
         LScrollInfo.nPos := MulDiv(TMaxValues.ScrollRange, TopLine, LVerticalMaxScroll);
       end;
 
-      LShowScrollBar := LScrollInfo.nMax > VisibleLineCount;
+      FScrollHelper.VerticalVisible := LScrollInfo.nMax > FLineNumbers.VisibleCount;
 
-      if LShowScrollBar then
+      if FScrollHelper.VerticalVisible then
         LScrollInfo.fMask := SIF_ALL
       else
       begin
@@ -9925,7 +9933,7 @@ begin
       end;
 
       if not FMinimap.Dragging then
-        ShowScrollBar(Handle, SB_VERT, LShowScrollBar);
+        ShowScrollBar(Handle, SB_VERT, FScrollHelper.VerticalVisible);
 
       SetScrollInfo(Handle, SB_VERT, LScrollInfo, True);
 
@@ -10094,6 +10102,7 @@ begin
       try
         FScrollHelper.IsScrolling := True;
         LHorizontalScrollMax := GetHorizontalScrollMax;
+
         if LHorizontalScrollMax > TMaxValues.ScrollRange then
           SetHorizontalScrollPosition(MulDiv(LHorizontalScrollMax, AMessage.Pos, TMaxValues.ScrollRange))
         else
@@ -10302,9 +10311,9 @@ begin
     SB_LINEUP:
       TopLine := TopLine - 1;
     SB_PAGEDOWN:
-      TopLine := TopLine + VisibleLineCount;
+      TopLine := TopLine + FLineNumbers.VisibleCount;
     SB_PAGEUP:
-      TopLine := TopLine - VisibleLineCount;
+      TopLine := TopLine - FLineNumbers.VisibleCount;
     SB_THUMBPOSITION, SB_THUMBTRACK:
       begin
         try
@@ -10313,7 +10322,7 @@ begin
           LVerticalMaxScroll := FLineNumbers.Count;
 
           if soPastEndOfFileMarker in FScroll.Options then
-            Inc(LVerticalMaxScroll, VisibleLineCount - 1);
+            Inc(LVerticalMaxScroll, FLineNumbers.VisibleCount - 1);
 
           if LVerticalMaxScroll <= TMaxValues.ScrollRange then
             TopLine := AMessage.Pos
@@ -10327,7 +10336,7 @@ begin
               LScrollHint := Format(STextEditorScrollInfoTopLine, [TopLine])
             else
               LScrollHint := Format(STextEditorScrollInfo,
-                [TopLine, TopLine + Min(VisibleLineCount, FLineNumbers.Count - TopLine)]);
+                [TopLine, TopLine + Min(FLineNumbers.VisibleCount, FLineNumbers.Count - TopLine)]);
 
             LScrollHintRect := LScrollHintWindow.CalcHintRect(200, LScrollHint, nil);
 
@@ -10420,14 +10429,14 @@ begin
     Exit;
 
   if (ssCtrl in AShift) and not (ssAlt in AShift)  then
-    LLinesToScroll := VisibleLineCount shr Ord(soHalfPage in FScroll.Options)
+    LLinesToScroll := FLineNumbers.VisibleCount shr Ord(soHalfPage in FScroll.Options)
   else
   if not SystemParametersInfo(SPI_GETWHEELSCROLLLINES, 0, @LLinesToScroll, 0) then
     LLinesToScroll := 3;
 
   { Roll the mouse wheel to scroll: One screen at a time }
   if LLinesToScroll = -1 then
-    LLinesToScroll := VisibleLineCount;
+    LLinesToScroll := FLineNumbers.VisibleCount;
 
   Inc(FMouse.WheelAccumulator, AWheelDelta);
   LWheelClicks := FMouse.WheelAccumulator div TMouseWheel.Divisor;
@@ -11356,16 +11365,18 @@ begin
   LPreviousLine := -1;
   LNewLine := Max(1, FMinimap.TopLine + Y div FMinimap.CharHeight);
 
-  if (LNewLine >= TopLine) and (LNewLine <= TopLine + VisibleLineCount) then
+  if (LNewLine >= TopLine) and (LNewLine <= TopLine + FLineNumbers.VisibleCount) then
     FViewPosition.Row := LNewLine
   else
   begin
-    LNewLine := LNewLine - VisibleLineCount div 2;
+    LNewLine := LNewLine - FLineNumbers.VisibleCount div 2;
     LStep := Abs(LNewLine - TopLine) div 5;
+
     if LNewLine < TopLine then
     while LNewLine < TopLine - LStep do
     begin
       TopLine := TopLine - LStep;
+
       if TopLine = LPreviousLine then
         Break
       else
@@ -11377,6 +11388,7 @@ begin
     while LNewLine > TopLine + LStep do
     begin
       TopLine := TopLine + LStep;
+
       if TopLine = LPreviousLine then
         Break
       else
@@ -11386,6 +11398,7 @@ begin
     end;
     TopLine := LNewLine;
   end;
+
   FMinimapHelper.ClickOffsetY := LNewLine - TopLine;
 end;
 
@@ -12809,8 +12822,8 @@ end;
 
 procedure TCustomTextEditor.Paint;
 var
-  LClipRect, LDrawRect: TRect;
-  LLine1, LLine2, LLine3, LTemp, LLineHeight: Integer;
+  LDrawRect: TRect;
+  LLine1, LLine2, LLine3: Integer;
   LSelectionAvailable: Boolean;
 begin
   if FLines.ShowProgress then
@@ -12824,12 +12837,9 @@ begin
     Exit;
   end;
 
-  LClipRect := ClientRect;
-  LLineHeight := GetLineHeight;
   LLine1 := FLineNumbers.TopLine;
-  LTemp := (LClipRect.Bottom + LLineHeight - 1) div LLineHeight;
-  LLine2 := EnsureRange(FLineNumbers.TopLine + LTemp - 1, 1, Max(FLineNumbers.Count, 1));
-  LLine3 := FLineNumbers.TopLine + LTemp;
+  LLine2 := EnsureRange(FLineNumbers.TopLine + FLineNumbers.VisibleCount, 1, Max(FLineNumbers.Count, 1));
+  LLine3 := FLineNumbers.TopLine + FLineNumbers.VisibleCount;
 
   if FCaret.NonBlinking.Active then
     HideCaret;
@@ -12845,17 +12855,19 @@ begin
 
     { Text lines }
     LDrawRect.Top := 0;
+
     if FRuler.Visible then
       Inc(LDrawRect.Top, FRuler.Height);
+
     LDrawRect.Left := FLeftMarginWidth - FScrollHelper.HorizontalPosition;
     LDrawRect.Right := Width;
-    LDrawRect.Bottom := LClipRect.Height;
+    LDrawRect.Bottom := ClientRect.Height;
 
     PaintTextLines(LDrawRect, LLine1, LLine2, False);
     PaintRightMargin(LDrawRect);
 
     if FCodeFolding.Visible and not FCodeFolding.TextFolding.Active and CodeFolding.GuideLines.Visible then
-      PaintGuides(FLineNumbers.TopLine, Min(FLineNumbers.TopLine + VisibleLineCount, FLineNumbers.Count));
+      PaintGuides(FLineNumbers.TopLine, Min(FLineNumbers.TopLine + FLineNumbers.VisibleCount, FLineNumbers.Count));
 
     if not (csDesigning in ComponentState) then
     begin
@@ -12885,7 +12897,7 @@ begin
     end;
 
     { Left margin and code folding }
-    LDrawRect := LClipRect;
+    LDrawRect := ClientRect;
 
     if FRuler.Visible then
       Inc(LDrawRect.Top, FRuler.Height);
@@ -12916,7 +12928,7 @@ begin
     { Minimap }
     if FMinimap.Visible then
     begin
-      LDrawRect := LClipRect;
+      LDrawRect := ClientRect;
 
       if FMinimap.Align = maRight then
       begin
@@ -12945,10 +12957,10 @@ begin
       if not FMinimap.Dragging and (LDrawRect.Height = FMinimapHelper.BufferBitmap.Height) and (FLast.TopLine = FLineNumbers.TopLine) and
         (FLast.LineNumberCount = FLineNumbers.Count) and
         (not LSelectionAvailable or LSelectionAvailable and (FPosition.SelectionBegin.Line >= FLineNumbers.TopLine) and
-        (FPosition.SelectionEnd.Line <= FLineNumbers.TopLine + VisibleLineCount)) then
+        (FPosition.SelectionEnd.Line <= FLineNumbers.TopLine + FLineNumbers.VisibleCount)) then
       begin
         LLine1 := FLineNumbers.TopLine;
-        LLine2 := Min(FLineNumbers.Count, FLineNumbers.TopLine + VisibleLineCount);
+        LLine2 := Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount);
         BitBlt(Canvas.Handle, LDrawRect.Left, LDrawRect.Top, LDrawRect.Width, LDrawRect.Height,
           FMinimapHelper.BufferBitmap.Canvas.Handle, 0, 0, SRCCOPY);
         LDrawRect.Top := (FLineNumbers.TopLine - FMinimap.TopLine) * FMinimap.CharHeight;
@@ -12959,7 +12971,7 @@ begin
       else
       begin
         LLine1 := Max(FMinimap.TopLine, 1);
-        LLine2 := Min(FLineNumbers.Count, LLine1 + LClipRect.Height div Max(FMinimap.CharHeight - 1, 1));
+        LLine2 := Min(FLineNumbers.Count, LLine1 + ClientRect.Height div Max(FMinimap.CharHeight - 1, 1));
       end;
 
       PaintTextLines(LDrawRect, LLine1, LLine2, True);
@@ -12978,7 +12990,8 @@ begin
     { Search map }
     if FSearch.Map.Visible then
     begin
-      LDrawRect := LClipRect;
+      LDrawRect := ClientRect;
+
       if FSearch.Map.Align = saRight then
         LDrawRect.Left := LDrawRect.Width - FSearch.Map.GetWidth
       else
@@ -12993,7 +13006,8 @@ begin
     if FMinimap.Visible then
       if FMinimap.Shadow.Visible then
       begin
-        LDrawRect := LClipRect;
+        LDrawRect := ClientRect;
+
         LDrawRect.Left := FLeftMarginWidth - FLeftMargin.GetWidth - FCodeFolding.GetWidth;
         LDrawRect.Right := Width - FMinimap.GetWidth - FSearch.Map.GetWidth - 2;
 
@@ -13002,9 +13016,11 @@ begin
 
     if FScroll.Shadow.Visible and (FScrollHelper.HorizontalPosition <> 0) then
     begin
-      LDrawRect := LClipRect;
+      LDrawRect := ClientRect;
+
       if FRuler.Visible then
         Inc(LDrawRect.Top, FRuler.Height);
+
       LDrawRect.Left := FLeftMarginWidth;
       LDrawRect.Right := LDrawRect.Left + FScrollHelper.PageWidth;
 
@@ -14147,7 +14163,7 @@ begin
     Height := 0;
     Canvas.Brush.Color := FColors.MinimapVisibleRows;
     Width := AClipRect.Width;
-    Height := VisibleLineCount * FMinimap.CharHeight;
+    Height := FLineNumbers.VisibleCount * FMinimap.CharHeight;
   end;
 
   FMinimapHelper.Indicator.BlendFunction.SourceConstantAlpha := FMinimap.Indicator.AlphaBlending;
@@ -14416,7 +14432,7 @@ begin
   { Lines in window }
   LHeight := ClientHeight / Max(FLines.Count, 1);
   LRect.Top := Round((TopLine - 1) * LHeight);
-  LRect.Bottom := Max(Round((TopLine - 1 + VisibleLineCount) * LHeight), LRect.Top + 1);
+  LRect.Bottom := Max(Round((TopLine - 1 + FLineNumbers.VisibleCount) * LHeight), LRect.Top + 1);
   Canvas.Brush.Color := FColors.EditorBackground;
   FillRect(LRect);
   { Draw lines }
@@ -14644,7 +14660,7 @@ begin
   begin
     LTextPosition := PTextEditorTextPosition(FSyncEdit.SyncItems.Items[LIndex])^;
 
-    if LTextPosition.Line + 1 > TopLine + VisibleLineCount then
+    if LTextPosition.Line + 1 > TopLine + FLineNumbers.VisibleCount then
       Exit
     else
     if LTextPosition.Line + 1 >= TopLine then
@@ -14734,6 +14750,7 @@ var
       Result := FColors.EditorBackground;
 
       LHighlighterAttribute := FHighlighter.RangeAttribute;
+
       if Assigned(LHighlighterAttribute) and (LHighlighterAttribute.Background <> TColors.SysNone) then
         Result := LHighlighterAttribute.Background;
     end;
@@ -15384,7 +15401,7 @@ var
     FPaintHelper.SetStyle(LTokenHelper.FontStyle);
 
     if AMinimap and not (ioUseBlending in FMinimap.Indicator.Options) then
-      if (LViewLine >= TopLine) and (LViewLine < TopLine + VisibleLineCount) then
+      if (LViewLine >= TopLine) and (LViewLine < TopLine + FLineNumbers.VisibleCount) then
         if (LBackgroundColor <> FColors.SearchHighlighterBackground) and (LBackgroundColor <> clRed) then
           LBackgroundColor := FColors.MinimapVisibleRows;
 
@@ -15540,7 +15557,7 @@ var
       LBackgroundColor := GetBackgroundColor;
 
       if AMinimap and not (ioUseBlending in FMinimap.Indicator.Options) then
-        if (LViewLine >= TopLine) and (LViewLine < TopLine + VisibleLineCount) then
+        if (LViewLine >= TopLine) and (LViewLine < TopLine + FLineNumbers.VisibleCount) then
           LBackgroundColor := FColors.MinimapVisibleRows;
 
       if LCustomLineColors and (LCustomForegroundColor <> TColors.SysNone) then
@@ -15612,24 +15629,14 @@ var
     LPToken: PChar;
     LAppendAnsiChars, LAppendTabs, LAppendEmptySpace: Boolean;
     LForeground, LBackground: TColor;
-
-    function IsAnsiUnicodeChar(const AChar: Char): Boolean;
-    begin
-      case AChar of
-        '™', '€', 'ƒ', '„', '†', '‡', 'ˆ', '‰', 'Š', '‹', 'Œ', 'Ž', '‘', '’', '“', '”', '•', '–', '—', '˜', 'š', '›',
-        'œ', 'ž', 'Ÿ':
-          Result := True
-      else
-        Result := False;
-      end;
-    end;
-
   begin
     LForeground := AForeground;
     LBackground := ABackground;
+
     if (LBackground = TColors.SysNone) or
       ((FColors.ActiveLineBackground <> TColors.SysNone) and LIsCurrentLine and not ACustomBackgroundColor) then
       LBackground := GetBackgroundColor;
+
     if AForeground = TColors.SysNone then
       LForeground := FColors.EditorForeground;
 
@@ -15694,7 +15701,6 @@ var
           (Ord(LPToken^) < TCharacters.AnsiCharCount);
         LAppendTabs := not FLines.Columns or FLines.Columns and (LEmptySpace <> esTab);
         LAppendEmptySpace := (LEmptySpace = LTokenHelper.EmptySpace) and (LEmptySpace <> esControlCharacter);
-
         LCanAppend := LCanAppend and
           ((LTokenHelper.FontStyle = AFontStyle) or ((LEmptySpace <> esNone) and not (fsUnderline in AFontStyle) and
           not (fsUnderline in LTokenHelper.FontStyle))) and
@@ -15714,8 +15720,10 @@ var
     while LPToken^ <> TControlCharacters.Null do
     begin
       LAnsiEncoding := FLines.Encoding = System.SysUtils.TEncoding.ANSI;
+
       if (not LAnsiEncoding or LAnsiEncoding and not IsAnsiUnicodeChar(LPToken^)) and (Ord(LPToken^) > FLines.UnknownCharHigh) then
         LPToken^ := Char(FUnknownChars.ReplaceChar);
+
       Inc(LPToken);
     end;
 
@@ -16339,7 +16347,7 @@ var
         Inc(LViewLine);
         LCurrentRow := GetViewTextLineNumber(LViewLine);
 
-        if LWrappedRowCount > VisibleLineCount then
+        if LWrappedRowCount > FLineNumbers.VisibleCount then
           Break;
       end;
     end;
@@ -16353,9 +16361,11 @@ begin
   if Assigned(FSearch.Items) and (FSearch.Items.Count > 0) then
   begin
     LCurrentSearchIndex := 0;
+
     while LCurrentSearchIndex < FSearch.Items.Count do
     begin
       LTextPosition := PTextEditorSearchItem(FSearch.Items.Items[LCurrentSearchIndex])^.EndTextPosition;
+
       if LTextPosition.Line + 1 >= TopLine then
         Break
       else
@@ -16368,12 +16378,15 @@ begin
 
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
   LCurrentSpellCheckIndex := -1;
+
   if Assigned(FSpellCheck) and Assigned(FSpellCheck.Items) and (FSpellCheck.Items.Count > 0) then
   begin
     LCurrentSpellCheckIndex := 0;
+
     while LCurrentSpellCheckIndex < FSpellCheck.Items.Count do
     begin
       LSpellCheckTextPosition := PTextEditorTextPosition(FSpellCheck.Items.Items[LCurrentSpellCheckIndex])^;
+
       if LSpellCheckTextPosition.Line + 1 >= TopLine then
         Break
       else
@@ -16392,6 +16405,7 @@ begin
 
   { Fill below the last line }
   LTokenRect := AClipRect;
+
   if AMinimap then
     LTokenRect.Top := Min(FMinimap.VisibleLineCount, FLineNumbers.Count) * FMinimap.CharHeight
   else
@@ -19840,21 +19854,13 @@ begin
     LLeftMarginWidth := GetLeftMarginWidth;
     FScrollHelper.PageWidth := GetScrollPageWidth;
 
-    if (LPoint.X < LLeftMarginWidth) or (LPoint.X >= LLeftMarginWidth + FScrollHelper.PageWidth) then
-      SetHorizontalScrollPosition(LPoint.X + FScrollHelper.HorizontalPosition - FLeftMarginWidth - FScrollHelper.PageWidth div 2)
-    else
-    if LPoint.X = LLeftMarginWidth then
-      SetHorizontalScrollPosition(0)
-    else
-      SetHorizontalScrollPosition(FScrollHelper.HorizontalPosition);
-
     LCaretRow := FViewPosition.Row;
 
     if AForceToMiddle then
     begin
       if LCaretRow < TopLine - 1 then
       begin
-        LMiddle := VisibleLineCount div 2;
+        LMiddle := FLineNumbers.VisibleCount div 2;
 
         if LCaretRow - LMiddle < 0 then
           TopLine := 1
@@ -19862,15 +19868,15 @@ begin
           TopLine := LCaretRow - LMiddle + 1;
       end
       else
-      if LCaretRow > TopLine + VisibleLineCount - 2 then
+      if LCaretRow > TopLine + FLineNumbers.VisibleCount - 2 then
       begin
-        LMiddle := VisibleLineCount div 2;
-        TopLine := LCaretRow - VisibleLineCount - 1 + LMiddle;
+        LMiddle := FLineNumbers.VisibleCount div 2;
+        TopLine := LCaretRow - FLineNumbers.VisibleCount - 1 + LMiddle;
       end
       else
       if AEvenIfVisible then
       begin
-        LMiddle := VisibleLineCount div 2;
+        LMiddle := FLineNumbers.VisibleCount div 2;
         TopLine := LCaretRow - LMiddle + 1;
       end;
     end
@@ -19878,8 +19884,16 @@ begin
     if LCaretRow < TopLine then
       TopLine := LCaretRow
     else
-    if LCaretRow > TopLine + Max(1, VisibleLineCount) - 1 then
-      TopLine := LCaretRow - (VisibleLineCount - 1);
+    if LCaretRow > TopLine + Max(1, FLineNumbers.VisibleCount) - 1 then
+      TopLine := LCaretRow - (FLineNumbers.VisibleCount - 1);
+
+    if (LPoint.X < LLeftMarginWidth) or (LPoint.X >= LLeftMarginWidth + FScrollHelper.PageWidth) then
+      SetHorizontalScrollPosition(LPoint.X + FScrollHelper.HorizontalPosition - FLeftMarginWidth - FScrollHelper.PageWidth div 2)
+    else
+    if LPoint.X = LLeftMarginWidth then
+      SetHorizontalScrollPosition(0)
+    else
+      SetHorizontalScrollPosition(FScrollHelper.HorizontalPosition);
   finally
     DecPaintLock;
   end;
@@ -19887,161 +19901,157 @@ end;
 
 procedure TCustomTextEditor.ExecuteCommand(const ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer);
 begin
-  IncPaintLock;
-  try
-    FState.ExecutingSelectionCommand := ACommand in [TKeyCommands.Selection..TKeyCommands.SelectAll];
-    case ACommand of
-      TKeyCommands.Left, TKeyCommands.SelectionLeft:
-        if not FSyncEdit.Visible or FSyncEdit.Visible and (TextPosition.Char > FSyncEdit.EditBeginPosition.Char) then
-          MoveCaretHorizontally(-1, ACommand = TKeyCommands.SelectionLeft);
-      TKeyCommands.Right, TKeyCommands.SelectionRight:
-        if not FSyncEdit.Visible or FSyncEdit.Visible and (TextPosition.Char < FSyncEdit.EditEndPosition.Char) then
-          MoveCaretHorizontally(1, ACommand = TKeyCommands.SelectionRight);
-      TKeyCommands.PageLeft, TKeyCommands.SelectionPageLeft:
-        DoPageLeftOrRight(ACommand);
-      TKeyCommands.LineBegin, TKeyCommands.SelectionLineBegin:
-        DoHomeKey(ACommand = TKeyCommands.SelectionLineBegin);
-      TKeyCommands.LineEnd, TKeyCommands.SelectionLineEnd:
-        DoEndKey(ACommand = TKeyCommands.SelectionLineEnd);
-      TKeyCommands.Up, TKeyCommands.SelectionUp:
-        MoveCaretVertically(-1, ACommand = TKeyCommands.SelectionUp);
-      TKeyCommands.Down, TKeyCommands.SelectionDown:
-        MoveCaretVertically(1, ACommand = TKeyCommands.SelectionDown);
-      TKeyCommands.PageUp, TKeyCommands.SelectionPageUp, TKeyCommands.PageDown, TKeyCommands.SelectionPageDown:
-        DoPageUpOrDown(ACommand);
-      TKeyCommands.PageTop, TKeyCommands.SelectionPageTop, TKeyCommands.PageBottom, TKeyCommands.SelectionPageBottom:
-        DoPageTopOrBottom(ACommand);
-      TKeyCommands.EditorTop, TKeyCommands.SelectionEditorTop:
-        DoEditorTop(ACommand);
-      TKeyCommands.EditorBottom, TKeyCommands.SelectionEditorBottom:
-        DoEditorBottom(ACommand);
-      TKeyCommands.GoToXY, TKeyCommands.SelectionGoToXY:
-        if Assigned(AData) then
-          MoveCaretAndSelection(TextPosition, TTextEditorTextPosition(AData^), ACommand = TKeyCommands.SelectionGoToXY);
-      TKeyCommands.ToggleBookmark:
-        DoToggleBookmark;
-      TKeyCommands.GoToNextBookmark:
-        GoToNextBookmark;
-      TKeyCommands.GoToPreviousBookmark:
-        GoToPreviousBookmark;
-      TKeyCommands.GoToBookmark1 .. TKeyCommands.GoToBookmark9:
-        if FLeftMargin.Bookmarks.ShortCuts then
-          GoToBookmark(ACommand - TKeyCommands.GoToBookmark1);
-      TKeyCommands.SetBookmark1 .. TKeyCommands.SetBookmark9:
-        if FLeftMargin.Bookmarks.ShortCuts then
-          DoSetBookmark(ACommand, AData);
-      TKeyCommands.WordLeft, TKeyCommands.SelectionWordLeft:
-        DoWordLeft(ACommand);
-      TKeyCommands.WordRight, TKeyCommands.SelectionWordRight:
-        DoWordRight(ACommand);
-      TKeyCommands.SelectionWord:
-        SetSelectedWord;
-      TKeyCommands.SelectAll:
-        SelectAll;
-      TKeyCommands.Backspace:
-        if not ReadOnly then
-          DoBackspace;
-      TKeyCommands.DeleteChar:
-        if not ReadOnly then
-          DeleteChar;
-      TKeyCommands.DeleteWord, TKeyCommands.DeleteWhitespaceBackward, TKeyCommands.DeleteWhitespaceForward,
-        TKeyCommands.DeleteWordBackward, TKeyCommands.DeleteWordForward, TKeyCommands.DeleteBeginningOfLine,
-        TKeyCommands.DeleteEndOfLine:
-        if not ReadOnly then
-          DeleteText(ACommand);
-      TKeyCommands.DeleteLine:
-        if not ReadOnly and (FLines.Count > 0) then
-          DeleteLine;
-      TKeyCommands.MoveLineUp:
-        MoveLineUp;
-      TKeyCommands.MoveLineDown:
-        MoveLineDown;
-      TKeyCommands.SearchNext:
-        FindNext;
-      TKeyCommands.SearchPrevious:
-        FindPrevious;
-      TKeyCommands.Clear:
-        if not ReadOnly then
-          Clear;
-      TKeyCommands.InsertLine:
-        if not ReadOnly then
-          InsertLine;
-      TKeyCommands.LineBreak:
-        if not ReadOnly then
-          DoLineBreak;
-      TKeyCommands.Tab:
-        if not ReadOnly then
-          DoTabKey;
-      TKeyCommands.ShiftTab:
-        if not ReadOnly then
-          DoShiftTabKey;
-      TKeyCommands.Char:
-        if not ReadOnly and (AChar >= TCharacters.Space) and (AChar <> TCharacters.CtrlBackspace) then
-          DoChar(AChar);
-      TKeyCommands.UpperCase, TKeyCommands.LowerCase, TKeyCommands.AlternatingCase, TKeyCommands.SentenceCase,
-        TKeyCommands.TitleCase, TKeyCommands.UpperCaseBlock, TKeyCommands.LowerCaseBlock, TKeyCommands.AlternatingCaseBlock,
-        TKeyCommands.KeywordsUpperCase, TKeyCommands.KeywordsLowerCase, TKeyCommands.KeywordsTitleCase:
-        if not ReadOnly then
-          DoToggleSelectedCase(ACommand);
-      TKeyCommands.Undo:
-        if not ReadOnly then
-          DoUndo;
-      TKeyCommands.Redo:
-        if not ReadOnly then
-          DoRedo;
-      TKeyCommands.Cut:
-        DoCutToClipboard;
-      TKeyCommands.Copy:
-        CopyToClipboard;
-      TKeyCommands.Paste:
-        DoPasteFromClipboard;
-      TKeyCommands.ScrollUp, TKeyCommands.ScrollDown:
-        DoScroll(ACommand);
-      TKeyCommands.ScrollLeft:
-        begin
-          SetHorizontalScrollPosition(FScrollHelper.HorizontalPosition - 1);
-          Update;
-        end;
-      TKeyCommands.ScrollRight:
-        begin
-          SetHorizontalScrollPosition(FScrollHelper.HorizontalPosition + 1);
-          Update;
-        end;
-      TKeyCommands.InsertMode:
+  FState.ExecutingSelectionCommand := ACommand in [TKeyCommands.Selection..TKeyCommands.SelectAll];
+
+  case ACommand of
+    TKeyCommands.Left, TKeyCommands.SelectionLeft:
+      if not FSyncEdit.Visible or FSyncEdit.Visible and (TextPosition.Char > FSyncEdit.EditBeginPosition.Char) then
+        MoveCaretHorizontally(-1, ACommand = TKeyCommands.SelectionLeft);
+    TKeyCommands.Right, TKeyCommands.SelectionRight:
+      if not FSyncEdit.Visible or FSyncEdit.Visible and (TextPosition.Char < FSyncEdit.EditEndPosition.Char) then
+        MoveCaretHorizontally(1, ACommand = TKeyCommands.SelectionRight);
+    TKeyCommands.PageLeft, TKeyCommands.SelectionPageLeft:
+      DoPageLeftOrRight(ACommand);
+    TKeyCommands.LineBegin, TKeyCommands.SelectionLineBegin:
+      DoHomeKey(ACommand = TKeyCommands.SelectionLineBegin);
+    TKeyCommands.LineEnd, TKeyCommands.SelectionLineEnd:
+      DoEndKey(ACommand = TKeyCommands.SelectionLineEnd);
+    TKeyCommands.Up, TKeyCommands.SelectionUp:
+      MoveCaretVertically(-1, ACommand = TKeyCommands.SelectionUp);
+    TKeyCommands.Down, TKeyCommands.SelectionDown:
+      MoveCaretVertically(1, ACommand = TKeyCommands.SelectionDown);
+    TKeyCommands.PageUp, TKeyCommands.SelectionPageUp, TKeyCommands.PageDown, TKeyCommands.SelectionPageDown:
+      DoPageUpOrDown(ACommand);
+    TKeyCommands.PageTop, TKeyCommands.SelectionPageTop, TKeyCommands.PageBottom, TKeyCommands.SelectionPageBottom:
+      DoPageTopOrBottom(ACommand);
+    TKeyCommands.EditorTop, TKeyCommands.SelectionEditorTop:
+      DoEditorTop(ACommand);
+    TKeyCommands.EditorBottom, TKeyCommands.SelectionEditorBottom:
+      DoEditorBottom(ACommand);
+    TKeyCommands.GoToXY, TKeyCommands.SelectionGoToXY:
+      if Assigned(AData) then
+        MoveCaretAndSelection(TextPosition, TTextEditorTextPosition(AData^), ACommand = TKeyCommands.SelectionGoToXY);
+    TKeyCommands.ToggleBookmark:
+      DoToggleBookmark;
+    TKeyCommands.GoToNextBookmark:
+      GoToNextBookmark;
+    TKeyCommands.GoToPreviousBookmark:
+      GoToPreviousBookmark;
+    TKeyCommands.GoToBookmark1 .. TKeyCommands.GoToBookmark9:
+      if FLeftMargin.Bookmarks.ShortCuts then
+        GoToBookmark(ACommand - TKeyCommands.GoToBookmark1);
+    TKeyCommands.SetBookmark1 .. TKeyCommands.SetBookmark9:
+      if FLeftMargin.Bookmarks.ShortCuts then
+        DoSetBookmark(ACommand, AData);
+    TKeyCommands.WordLeft, TKeyCommands.SelectionWordLeft:
+      DoWordLeft(ACommand);
+    TKeyCommands.WordRight, TKeyCommands.SelectionWordRight:
+      DoWordRight(ACommand);
+    TKeyCommands.SelectionWord:
+      SetSelectedWord;
+    TKeyCommands.SelectAll:
+      SelectAll;
+    TKeyCommands.Backspace:
+      if not ReadOnly then
+        DoBackspace;
+    TKeyCommands.DeleteChar:
+      if not ReadOnly then
+        DeleteChar;
+    TKeyCommands.DeleteWord, TKeyCommands.DeleteWhitespaceBackward, TKeyCommands.DeleteWhitespaceForward,
+      TKeyCommands.DeleteWordBackward, TKeyCommands.DeleteWordForward, TKeyCommands.DeleteBeginningOfLine,
+      TKeyCommands.DeleteEndOfLine:
+      if not ReadOnly then
+        DeleteText(ACommand);
+    TKeyCommands.DeleteLine:
+      if not ReadOnly and (FLines.Count > 0) then
+        DeleteLine;
+    TKeyCommands.MoveLineUp:
+      MoveLineUp;
+    TKeyCommands.MoveLineDown:
+      MoveLineDown;
+    TKeyCommands.SearchNext:
+      FindNext;
+    TKeyCommands.SearchPrevious:
+      FindPrevious;
+    TKeyCommands.Clear:
+      if not ReadOnly then
+        Clear;
+    TKeyCommands.InsertLine:
+      if not ReadOnly then
+        InsertLine;
+    TKeyCommands.LineBreak:
+      if not ReadOnly then
+        DoLineBreak;
+    TKeyCommands.Tab:
+      if not ReadOnly then
+        DoTabKey;
+    TKeyCommands.ShiftTab:
+      if not ReadOnly then
+        DoShiftTabKey;
+    TKeyCommands.Char:
+      if not ReadOnly and (AChar >= TCharacters.Space) and (AChar <> TCharacters.CtrlBackspace) then
+        DoChar(AChar);
+    TKeyCommands.UpperCase, TKeyCommands.LowerCase, TKeyCommands.AlternatingCase, TKeyCommands.SentenceCase,
+      TKeyCommands.TitleCase, TKeyCommands.UpperCaseBlock, TKeyCommands.LowerCaseBlock, TKeyCommands.AlternatingCaseBlock,
+      TKeyCommands.KeywordsUpperCase, TKeyCommands.KeywordsLowerCase, TKeyCommands.KeywordsTitleCase:
+      if not ReadOnly then
+        DoToggleSelectedCase(ACommand);
+    TKeyCommands.Undo:
+      if not ReadOnly then
+        DoUndo;
+    TKeyCommands.Redo:
+      if not ReadOnly then
+        DoRedo;
+    TKeyCommands.Cut:
+      DoCutToClipboard;
+    TKeyCommands.Copy:
+      CopyToClipboard;
+    TKeyCommands.Paste:
+      DoPasteFromClipboard;
+    TKeyCommands.ScrollUp, TKeyCommands.ScrollDown:
+      DoScroll(ACommand);
+    TKeyCommands.ScrollLeft:
+      begin
+        SetHorizontalScrollPosition(FScrollHelper.HorizontalPosition - 1);
+        Update;
+      end;
+    TKeyCommands.ScrollRight:
+      begin
+        SetHorizontalScrollPosition(FScrollHelper.HorizontalPosition + 1);
+        Update;
+      end;
+    TKeyCommands.InsertMode:
+      OvertypeMode := omInsert;
+    TKeyCommands.OverwriteMode:
+      OvertypeMode := omOverwrite;
+    TKeyCommands.ToggleMode:
+      if FOvertypeMode = omInsert then
+        OvertypeMode := omOverwrite
+      else
         OvertypeMode := omInsert;
-      TKeyCommands.OverwriteMode:
-        OvertypeMode := omOverwrite;
-      TKeyCommands.ToggleMode:
-        if FOvertypeMode = omInsert then
-          OvertypeMode := omOverwrite
-        else
-          OvertypeMode := omInsert;
-      TKeyCommands.BlockIndent:
-        if not ReadOnly then
-          DoBlockIndent;
-      TKeyCommands.BlockUnindent:
-        if not ReadOnly then
-          DoBlockUnindent;
-      TKeyCommands.BlockComment:
-        if not ReadOnly then
-          DoBlockComment;
-      TKeyCommands.LineComment:
-        if not ReadOnly then
-          DoLineComment;
-      TKeyCommands.ImeStr:
-        if not ReadOnly then
-          DoImeStr(AData);
-      TKeyCommands.FoldingCollapseLine:
-        FoldingCollapseLine;
-      TKeyCommands.FoldingExpandLine:
-        FoldingExpandLine;
-      TKeyCommands.FoldingGoToNext:
-        FoldingGoToNext;
-      TKeyCommands.FoldingGoToPrevious:
-        FoldingGoToPrevious;
-    end;
-  finally
-    DecPaintLock;
+    TKeyCommands.BlockIndent:
+      if not ReadOnly then
+        DoBlockIndent;
+    TKeyCommands.BlockUnindent:
+      if not ReadOnly then
+        DoBlockUnindent;
+    TKeyCommands.BlockComment:
+      if not ReadOnly then
+        DoBlockComment;
+    TKeyCommands.LineComment:
+      if not ReadOnly then
+        DoLineComment;
+    TKeyCommands.ImeStr:
+      if not ReadOnly then
+        DoImeStr(AData);
+    TKeyCommands.FoldingCollapseLine:
+      FoldingCollapseLine;
+    TKeyCommands.FoldingExpandLine:
+      FoldingExpandLine;
+    TKeyCommands.FoldingGoToNext:
+      FoldingGoToNext;
+    TKeyCommands.FoldingGoToPrevious:
+      FoldingGoToPrevious;
   end;
 end;
 
@@ -20213,16 +20223,21 @@ begin
 
   LViewPosition := TextToViewPosition(LTextPosition);
 
-  if VisibleLineCount = 0 then
+  if FLineNumbers.VisibleCount = 0 then
+  begin
     FLineNumbers.VisibleCount := ClientHeight div GetLineHeight;
+
+    if FRuler.Visible then
+      Dec(FLineNumbers.VisibleCount);
+  end;
 
   case AResultPosition of
     rpTop:
       TopLine := LViewPosition.Row;
     rpMiddle:
-      TopLine := Max(LViewPosition.Row - VisibleLineCount div 2 + 1, 1);
+      TopLine := Max(LViewPosition.Row - FLineNumbers.VisibleCount div 2 + 1, 1);
     rpBottom:
-      TopLine := Max(LViewPosition.Row - VisibleLineCount + 1, 1);
+      TopLine := Max(LViewPosition.Row - FLineNumbers.VisibleCount + 1, 1);
   end;
 
   FPosition.SelectionBegin := LTextPosition;

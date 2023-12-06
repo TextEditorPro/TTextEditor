@@ -24,6 +24,7 @@ function GetPosition(const AChar, ALine: Integer): TTextEditorTextPosition; inli
 function GetViewPosition(const AColumn: Integer; const ARow: Integer): TTextEditorViewPosition; inline;
 function HexToColor(const AColor: string): TColor;
 function IntToRoman(const AValue: Integer): string;
+function IsAnsiUnicodeChar(const AChar: Char): Boolean; inline;
 function IsCombiningCharacter(const AChar: PChar): Boolean; inline;
 function IsRightToLeftCharacter(const AChar: Char; const AAllowEmptySpace: Boolean = True): Boolean; inline;
 function IsSamePosition(const APosition1, APosition2: TTextEditorTextPosition): Boolean; inline;
@@ -323,6 +324,11 @@ begin
 
     Inc(LPosition, LCount);
   end;
+end;
+
+function IsAnsiUnicodeChar(const AChar: Char): Boolean;
+begin
+  Result := AChar in TCharacterSets.AnsiUnicodeCharacters;
 end;
 
 function IsCombiningCharacter(const AChar: PChar): Boolean;

@@ -1,0 +1,904 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "; Hello, World! in Racket\r\n",
+      "\r\n",
+      "#lang racket\r\n",
+      "\"Hello, World!\"\r\n"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "#|",
+              "Close": "|#"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "BlockComment",
+                  "Attributes": {
+                    "Element": "Comment"
+                  },
+                  "TokenRange": {
+                    "Open": "#|",
+                    "Close": "|#"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": ";"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#;"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Delimiters": "*+=\\|&)[]{}`~!@,$%^;\"><#_",
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "'"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "-",
+                    "("
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#lang"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#\\"
+            }
+          },
+          {
+            "Type": "Value",
+            "Attributes": {
+              "Element": "Value"
+            },
+            "Delimiters": "*+=\\|&()[]{}`~!@,$%^:;\"><#_",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#:"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abcdefABCDEF",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#x",
+              "OpenBreakType": "Any"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#o",
+              "OpenBreakType": "Any"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "01",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#b",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "/c",
+              "->",
+              "->d",
+              "abort-current-continuation",
+              "acos",
+              "add1",
+              "alarm-evt",
+              "all-defined-out",
+              "all-from-out",
+              "and",
+              "any",
+              "append",
+              "apply",
+              "argmax",
+              "argmin",
+              "args",
+              "arithmetic-shift",
+              "arity-includes",
+              "asin",
+              "assf",
+              "assoc",
+              "assq",
+              "assv",
+              "async-channel-get",
+              "async-channel-put",
+              "atan",
+              "begin",
+              "begin-for-syntax",
+              "bitwise-and",
+              "bitwise-ior",
+              "bitwise-not",
+              "bitwise-xor",
+              "black-and-white",
+              "boolean",
+              "box",
+              "break",
+              "build-chaperone-contract-property",
+              "build-list",
+              "build-string",
+              "build-vector",
+              "bytes",
+              "bytes-copy",
+              "bytes-fill",
+              "bytes-length",
+              "bytes-lines",
+              "bytes-ref",
+              "bytes-set",
+              "caaaar",
+              "caaadr",
+              "caaar",
+              "caadar",
+              "caaddr",
+              "caadr",
+              "caar",
+              "cadaar",
+              "cadadr",
+              "cadar",
+              "cadddr",
+              "caddr",
+              "cadr",
+              "call-with-composable-continuation",
+              "call-with-continuation-prompt",
+              "call-with-input-bytes",
+              "call-with-input-file",
+              "call-with-input-string",
+              "call-with-output-bytes",
+              "call-with-output-file",
+              "call-with-output-string",
+              "call-with-transaction",
+              "call-with-values",
+              "car",
+              "cdaaar",
+              "cdaadr",
+              "cdaar",
+              "cdadar",
+              "cdaddr",
+              "cdadr",
+              "cdar",
+              "cddaar",
+              "cddar",
+              "cdddar",
+              "cddddr",
+              "cdddr",
+              "cddr",
+              "cdr",
+              "ceiling",
+              "cellophane",
+              "cfg-parser",
+              "channel-get",
+              "channel-put",
+              "chaperone-contract",
+              "char",
+              "char-aplhabetic",
+              "check-exn",
+              "choice-evt",
+              "class",
+              "clip",
+              "close-input-port",
+              "close-output-port",
+              "code",
+              "coerce-contract",
+              "colorize",
+              "combine-out",
+              "command-line",
+              "commit-transaction",
+              "complex",
+              "compoase1",
+              "compose",
+              "cond",
+              "cons",
+              "continuation-marks",
+              "continuation-mark-set",
+              "contract-custom-write-property-proc",
+              "contract-out",
+              "cos",
+              "count",
+              "current-custodian",
+              "current-inexact-milliseconds",
+              "current-seconds",
+              "curry",
+              "custodian-shutdown-all",
+              "custom-write",
+              "date",
+              "date-display-format",
+              "datum",
+              "decimal-string",
+              "define",
+              "define-runtime-path",
+              "define-simple-macro",
+              "define-struct",
+              "define-syntax",
+              "define-syntax-class",
+              "define-syntax-parameter",
+              "define-syntax-rule",
+              "define-values",
+              "delay",
+              "display",
+              "display-lines",
+              "displayln",
+              "double-flonum",
+              "drop",
+              "dynamic-place place",
+              "dynamic-wind",
+              "else",
+              "empty",
+              "empty-stream",
+              "eq?",
+              "equal",
+              "eqv?",
+              "error",
+              "even",
+              "exact",
+              "exact-integer",
+              "exact-nonnegative-integer",
+              "exact-positive-integer",
+              "except-in",
+              "except-out",
+              "exit",
+              "exn",
+              "exp",
+              "expt",
+              "fail",
+              "false",
+              "ffi-lib",
+              "file-position",
+              "filter",
+              "findf",
+              "fixnum",
+              "flat-contract",
+              "flip-x",
+              "flip-y",
+              "floating-point-bytes",
+              "flonum",
+              "floor",
+              "flush-output",
+              "fold",
+              "foldr",
+              "for",
+              "force",
+              "for-label",
+              "format",
+              "format-id",
+              "for-meta",
+              "for-space",
+              "for-syntax",
+              "for-template",
+              "fprintf",
+              "free",
+              "freeze",
+              "fsemaphore",
+              "fsemaphore-count",
+              "fsemaphore-post",
+              "fsemaphore-try-wait",
+              "fsemaphore-wait",
+              "future",
+              "gen",
+              "generate-temporaries",
+              "generator",
+              "gensym",
+              "get-field",
+              "ghost",
+              "handle-evt",
+              "hash",
+              "hash-count",
+              "hasheq",
+              "hash-has-key",
+              "hash-ref",
+              "hash-remove",
+              "hash-set",
+              "hash-update",
+              "hc-append",
+              "http-conn",
+              "http-conn-open",
+              "http-conn-recv",
+              "http-conn-send",
+              "http-conn-sendrecv",
+              "http-sendrecv",
+              "identity",
+              "if",
+              "imap-connect",
+              "imap-disconnect",
+              "imap-examine",
+              "imap-force-disconnect",
+              "imap-noop",
+              "imap-port-number",
+              "imap-reselect",
+              "implementation",
+              "in-bytes",
+              "in-cycle",
+              "in-directory",
+              "inexact",
+              "inexact-real",
+              "in-generator",
+              "in-hash",
+              "in-hash-keys",
+              "in-hash-values",
+              "init",
+              "in-lines",
+              "in-list",
+              "in-naturals",
+              "in-port",
+              "in-range",
+              "inset/clip",
+              "instanceof",
+              "instantiate",
+              "in-stream",
+              "in-string",
+              "integer",
+              "integer-bytes",
+              "integer-in",
+              "integer-length",
+              "interface",
+              "in-transaction",
+              "in-vector",
+              "is-a",
+              "keyword",
+              "keyword-apply",
+              "kill-thread",
+              "lambda",
+              "length",
+              "let",
+              "let/cc",
+              "let/ec",
+              "letrec",
+              "let-values",
+              "lexer",
+              "lines",
+              "linestyle",
+              "linewidth",
+              "list",
+              "listof",
+              "list-ref",
+              "local-expand",
+              "log",
+              "make-bytes",
+              "make-hash",
+              "make-hasheq",
+              "make-pipe",
+              "make-string",
+              "make-vector",
+              "malloc",
+              "map",
+              "match",
+              "match-define",
+              "max",
+              "member",
+              "memf",
+              "memq",
+              "memw",
+              "min",
+              "mixin",
+              "module",
+              "modulo",
+              "mysql-connect",
+              "natural-number",
+              "needs-rollback",
+              "negative",
+              "new",
+              "newline",
+              "not",
+              "null",
+              "number",
+              "odd",
+              "only-in",
+              "or",
+              "pair",
+              "parameterize",
+              "parser",
+              "partition",
+              "pattern",
+              "peek-byte",
+              "place-channel",
+              "place-channel-get",
+              "place-channel-put",
+              "place-channel-put/get",
+              "place-location",
+              "place-message-allowed",
+              "place-wait",
+              "port",
+              "positive",
+              "postgresql-connect",
+              "prefix-in",
+              "prefix-out",
+              "prepare",
+              "pretty-format",
+              "pretty-print",
+              "printf",
+              "procedure",
+              "procedure-arity",
+              "procedure-rename",
+              "processor-count",
+              "product",
+              "promise",
+              "prop",
+              "protect-out",
+              "provide",
+              "quasiquote",
+              "query-exec",
+              "query-rows",
+              "quote",
+              "quote-syntax/prune",
+              "quotient",
+              "raise",
+              "raise-blame-error",
+              "random",
+              "rational",
+              "read",
+              "read-bytes",
+              "read-json",
+              "read-xml",
+              "real",
+              "recontract-out",
+              "regexp-match",
+              "regexp-quote",
+              "regexp-replace",
+              "regexp-split",
+              "remainder",
+              "remove",
+              "remove-duplicates",
+              "remq",
+              "remv",
+              "remw",
+              "rename-in",
+              "rename-out",
+              "require",
+              "reverse",
+              "rollback-transaction",
+              "rotate",
+              "round",
+              "run-tests",
+              "scale",
+              "scale/improve-new-text",
+              "scale-to-fit",
+              "semaphore-post",
+              "semaphore-wait",
+              "send",
+              "set!",
+              "set-add",
+              "set-box",
+              "set-field",
+              "set-member",
+              "set-remove",
+              "shear",
+              "sin",
+              "single-flonum",
+              "single-flonum-available",
+              "slide",
+              "smtp-send-message",
+              "sort",
+              "split-at",
+              "sqlite3-connect",
+              "sqrt",
+              "standard-fish",
+              "start-transaction",
+              "stop-after",
+              "stop-before",
+              "stream",
+              "stream-empty",
+              "stream-first",
+              "stream-rest",
+              "string",
+              "string-append",
+              "string-downcase",
+              "string-join",
+              "string-length",
+              "string-ref",
+              "string-split",
+              "string-trim",
+              "string-upcase",
+              "struct",
+              "struct-copy",
+              "struct-out",
+              "sub1",
+              "subbytes",
+              "subclass",
+              "subprocess",
+              "substring",
+              "suffle",
+              "sum",
+              "super-new",
+              "swap!",
+              "symbol",
+              "sync",
+              "syntax",
+              "syntax/loc",
+              "syntax-case",
+              "syntax-column",
+              "syntax-e",
+              "syntax-id-rules",
+              "syntax-line",
+              "syntax-local-context",
+              "syntax-local-get-shadower	",
+              "syntax-local-lift-context",
+              "syntax-local-lift-expression",
+              "syntax-local-lift-module",
+              "syntax-local-lift-module-end-declaration",
+              "syntax-local-lift-provide",
+              "syntax-local-lift-require	",
+              "syntax-local-module-exports",
+              "syntax-local-module-interned-scope-symbols",
+              "syntax-local-name",
+              "syntax-local-phase-level",
+              "syntax-local-submodules",
+              "syntax-local-value",
+              "syntax-original",
+              "syntax-parameterize",
+              "syntax-parameter-value",
+              "syntax-parse",
+              "syntax-pattern-variable",
+              "syntax-position",
+              "syntax-rules",
+              "syntax-source",
+              "syntax-source-module",
+              "syntax-span",
+              "system",
+              "take",
+              "tan",
+              "tcp-accept",
+              "tcp-close",
+              "tcp-connect",
+              "tcp-listen",
+              "test-case",
+              "test-equal",
+              "test-false",
+              "test-suite",
+              "test-true",
+              "thread",
+              "thread-wait",
+              "touch",
+              "train-rename",
+              "trait",
+              "trait-alias",
+              "trait-exclude",
+              "trait-exclude-field",
+              "trait-rename-field",
+              "trait-sum",
+              "translate",
+              "unbox",
+              "undefined",
+              "unless",
+              "unquote",
+              "unsyntax",
+              "unsytax-splicing",
+              "url",
+              "url-query",
+              "utf-8",
+              "values",
+              "vc-append",
+              "vector",
+              "vector-copy",
+              "vector-fill",
+              "vector-length",
+              "vector-map",
+              "vector-ref",
+              "vector-set",
+              "void",
+              "when",
+              "with-continuation-mark",
+              "with-contract",
+              "with-handlers",
+              "with-input-from-bytes",
+              "with-input-from-file",
+              "with-input-from-string",
+              "with-output-to-bytes",
+              "with-output-to-file",
+              "with-output-to-string",
+              "with-syntax",
+              "wrap-evt",
+              "write",
+              "write-bytes",
+              "write-json",
+              "write-xexpr",
+              "write-xml",
+              "yield",
+              "zero"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Editor",
+            "Words": [
+              "dictionary-eq",
+              "eq/c",
+              "get-count",
+              "id-equal",
+              "is-empty",
+              "is-even",
+              "is-odd",
+              "not-active",
+              "not-empty",
+              "not-has",
+              "out-port",
+              "pict+code",
+              "procedure-arity-includes",
+              "queue-list",
+              "stack-list",
+              "value-for"
+            ],
+            "Attributes": {
+              "Element": "Editor"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "!",
+              "-",
+              "(",
+              ")",
+              "*",
+              ",",
+              ".",
+              "/",
+              ":",
+              "?",
+              "[",
+              "]",
+              "{",
+              "|",
+              "}",
+              "+",
+              "<",
+              "=",
+              ">"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789ei",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": ";",
+            "RegionType": "SingleLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "//",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

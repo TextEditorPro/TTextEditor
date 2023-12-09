@@ -15784,6 +15784,7 @@ var
     LTokenText, LNextTokenText: string;
     LUnderline: TTextEditorUnderline;
     LUnderlineColor: TColor;
+    LWordWrapViewLength: Integer;
 
     procedure GetWordAtSelection;
     var
@@ -16060,6 +16061,7 @@ var
 
     LViewLine := AFirstLine;
     LBookmarkOnCurrentLine := False;
+    LWordWrapViewLength := Length(FWordWrapLine.ViewLength);
 
     while LViewLine <= ALastLine do
     begin
@@ -16090,7 +16092,7 @@ var
       LFirstColumn := 1;
       LWrappedRowCount := 0;
 
-      if FWordWrap.Active and (LViewLine < Length(FWordWrapLine.ViewLength)) then
+      if FWordWrap.Active and (LViewLine < LWordWrapViewLength) then
       begin
         LLastColumn := LCurrentLineLength;
         LLine := LViewLine - 1;
@@ -16257,7 +16259,7 @@ var
         LAddWrappedCount := False;
         LLinePosition := 0;
 
-        if FWordWrap.Active then
+        if FWordWrap.Active and (LViewLine < LWordWrapViewLength) then
           LLastColumn := FWordWrapLine.Length[LViewLine];
 
         while not FHighlighter.EndOfLine do

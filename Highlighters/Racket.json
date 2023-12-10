@@ -820,40 +820,6 @@
       }
     }
   },
-  "CodeFolding": {
-    "Ranges": [
-      {
-        "Options": {
-          "StringEscapeChar": "\\"
-        },
-        "SkipRegion": [
-          {
-            "OpenToken": "'",
-            "CloseToken": "'",
-            "RegionType": "SingleLineString"
-          },
-          {
-            "OpenToken": "\"",
-            "CloseToken": "\"",
-            "RegionType": "SingleLineString"
-          },
-          {
-            "OpenToken": ";",
-            "RegionType": "SingleLine"
-          }
-        ],
-        "FoldRegion": [
-          {
-            "OpenToken": "{",
-            "CloseToken": "}",
-            "Properties": {
-              "BreakCharFollows": false
-            }
-          }
-        ]
-      }
-    ]
-  },
   "MatchingPair": {
     "Pairs": [
       {
@@ -881,11 +847,6 @@
   "CompletionProposal": {
     "SkipRegion": [
       {
-        "OpenToken": "'",
-        "CloseToken": "'",
-        "RegionType": "SingleLineString"
-      },
-      {
         "OpenToken": "\"",
         "CloseToken": "\"",
         "RegionType": "SingleLineString"
@@ -895,8 +856,8 @@
         "RegionType": "SingleLine"
       },
       {
-        "OpenToken": "/*",
-        "CloseToken": "*/",
+        "OpenToken": "#|",
+        "CloseToken": "|#",
         "RegionType": "MultiLine"
       }
     ]

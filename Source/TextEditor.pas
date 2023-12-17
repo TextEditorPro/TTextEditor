@@ -14702,7 +14702,7 @@ var
   LTextPosition: TTextEditorTextPosition;
   LTokenHelper: TTextEditorTokenHelper;
   LViewLine, LCurrentLine: Integer;
-  LWrappedRowCount: Integer;
+  LWrappedRowCount, LWrappedUnvisibleLength: Integer;
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
   LCurrentSpellCheckIndex: Integer;
   LSpellCheckTextPosition: TTextEditorTextPosition;
@@ -16038,6 +16038,12 @@ var
             LIsSelectionInsideLine := True;
           end;
         end;
+
+        if FWordWrap.Active and (LWrappedUnvisibleLength > 0) then
+        begin
+          Dec(LLineSelectionStart, LWrappedUnvisibleLength);
+          Dec(LLineSelectionEnd, LWrappedUnvisibleLength);
+        end;
       end;
 
       LIsLineSelected := not LIsSelectionInsideLine and (LLineSelectionStart > 0);
@@ -16091,6 +16097,7 @@ var
 
       LFirstColumn := 1;
       LWrappedRowCount := 0;
+      LWrappedUnvisibleLength := 0;
 
       if FWordWrap.Active and (LViewLine < LWordWrapViewLength) then
       begin
@@ -16108,6 +16115,7 @@ var
         if LFirstColumn > 1 then
         begin
           LCurrentLineText := Copy(LCurrentLineText, LFirstColumn, LCurrentLineLength);
+          LWrappedUnvisibleLength := LFirstColumn - 1;
           LFirstColumn := 1;
         end;
       end
@@ -16134,6 +16142,7 @@ var
             LFromLineText := FLines.Items^[LFoldRange.FromLine - 1].TextLine;
             LToLineText := FLines.Items^[LFoldRange.ToLine - 1].TextLine;
             LOpenTokenEndPos := 0;
+
             if Assigned(LFoldRange.RegionItem) then
               LOpenTokenEndPos := Pos(LFoldRange.RegionItem.OpenTokenEnd, AnsiUpperCase(LFromLineText));
 
@@ -16283,14 +16292,17 @@ var
           if (LTokenPosition + LTokenLength >= LFirstColumn) or (LTokenLength = 0) then
           begin
             LIsSyncEditBlock := False;
+
             if FSyncEdit.BlockSelected then
             begin
               LTextPosition := GetPosition(LTokenPosition + 1, LCurrentLine);
+
               if FSyncEdit.IsTextPositionInBlock(LTextPosition) then
                 LIsSyncEditBlock := True;
             end;
 
             LIsSearchInSelectionBlock := False;
+
             if FSearch.InSelection.Active then
             begin
               LTextPosition := GetPosition(LTokenPosition + 1, LCurrentLine);

@@ -787,7 +787,7 @@ type
     procedure BeginUndoBlock;
     procedure BeginUpdate;
     procedure ChainEditor(const AEditor: TCustomTextEditor);
-    procedure ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer);
+    procedure ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer; const AIsDpiChange: Boolean);
     procedure Clear;
     procedure ClearBookmarks;
     procedure ClearHighlightLine;
@@ -10586,13 +10586,13 @@ begin
   LUndoList.OnAddedUndo(ASender);
 end;
 
-procedure TCustomTextEditor.ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer);
+procedure TCustomTextEditor.ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer; const AIsDpiChange: Boolean);
 begin
   if AMultiplier = ADivider then
     Exit;
 
   if Assigned(FFonts) then
-    FFonts.ChangeScale(AMultiplier, ADivider);
+    FFonts.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
 
   if Assigned(FLeftMargin) then
     FLeftMargin.ChangeScale(AMultiplier, ADivider);
@@ -10633,7 +10633,7 @@ begin
     Exit;
 
   if AIsDpiChange or (AMultiplier <> ADivider) then
-    ChangeObjectScale(AMultiplier, ADivider);
+    ChangeObjectScale(AMultiplier, ADivider, AIsDpiChange);
 
   inherited ChangeScale(AMultiplier, ADivider, AIsDpiChange);
 end;
@@ -20067,6 +20067,8 @@ begin
     TKeyCommands.FoldingGoToPrevious:
       FoldingGoToPrevious;
   end;
+
+  Invalidate;
 end;
 
 procedure TCustomTextEditor.FoldingCollapseLine;
@@ -21494,8 +21496,8 @@ begin
 
     LMultiplier := Round((FZoomPercentage / 100) * LPixelsPerInch);
 
-    ChangeObjectScale(LPixelsPerInch, FZoomDivider);
-    ChangeObjectScale(LMultiplier, LPixelsPerInch);
+    ChangeObjectScale(LPixelsPerInch, FZoomDivider, True);
+    ChangeObjectScale(LMultiplier, LPixelsPerInch, True);
 
     FZoomDivider := LMultiplier;
   finally

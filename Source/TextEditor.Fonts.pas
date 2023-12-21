@@ -34,7 +34,7 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Assign(ASource: TPersistent); override;
-    procedure ChangeScale(const AMultiplier: Integer; const ADivider: Integer);
+    procedure ChangeScale(const AMultiplier: Integer; const ADivider: Integer; const AIsDpiChange: Boolean);
     procedure SetDefaults;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
@@ -206,24 +206,14 @@ begin
     FOnChange(Self);
 end;
 
-procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivider: Integer);
-
-  procedure Scale(const AFont: TFont);
-  begin
-    if AFont.PixelsPerInch <> AMultiplier then
-    begin
-      AFont.Height := MulDiv(AFont.Height, AMultiplier, ADivider);
-      AFont.PixelsPerInch := AMultiplier;
-    end;
-  end;
-
+procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivider: Integer; const AIsDpiChange: Boolean);
 begin
-  Scale(FCodeFoldingHint);
-  Scale(FCompletionProposal);
-  Scale(FLineNumbers);
-  Scale(FMinimap);
-  Scale(FRuler);
-  Scale(FText);
+  FCodeFoldingHint.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
+  FCompletionProposal.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
+  FLineNumbers.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
+  FMinimap.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
+  FRuler.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
+  FText.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
 end;
 
 procedure TTextEditorFonts.SetCodeFoldingHint(const AValue: TFont);

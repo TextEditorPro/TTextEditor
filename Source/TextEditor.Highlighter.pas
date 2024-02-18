@@ -54,7 +54,7 @@ type
     FTokenPosition: Integer;
     function GetLoad: TFileName;
     procedure AddAllAttributes(const ARange: TTextEditorRange);
-    procedure AddKeyWords(const AKeywords: TStringList);
+    procedure AddKeywords(const AKeywords: TStringList);
     procedure FreeTemporaryTokens;
     procedure SetJSON(const AValue: TStrings);
     procedure SetLoad(const AFileName: TFileName);
@@ -230,7 +230,7 @@ begin
   end;
 end;
 
-procedure TTextEditorHighlighter.AddKeyWords(const AKeywords: TStringList);
+procedure TTextEditorHighlighter.AddKeywords(const AKeywords: TStringList);
 var
   LIndex: Integer;
   LKeyList: TTextEditorKeyList;
@@ -814,7 +814,7 @@ begin
       LEditor.OnAdditionalKeywords(LEditor, FName, LKeywords);
 
       if Trim(LKeywords.Text) <> '' then
-        AddKeyWords(LKeywords);
+        AddKeywords(LKeywords);
     finally
       LKeywords.Free;
     end;

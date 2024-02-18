@@ -129,6 +129,7 @@
             "Attributes": {
               "Element": "MethodName"
             },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,%^?:;'\".><#_ ",
             "Properties": {
               "CloseOnEndOfLine": true,
               "CloseOnTerm": true,

@@ -6538,6 +6538,7 @@ begin
   if FSyncEdit.Visible then
     DoSyncEdit;
 
+  RescanHighlighterRanges;
   EnsureCursorPositionVisible;
 
   Invalidate;

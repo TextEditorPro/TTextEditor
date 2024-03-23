@@ -33,49 +33,17 @@
               "Open": "//"
             }
           },
-          {
+					{
             "Type": "String",
             "Attributes": {
               "Element": "String"
             },
             "Properties": {
-              "CloseOnEndOfLine": true
+              "OpenEndOfLine": true
             },
             "TokenRange": {
-              "Open": "'",
-              "Close": "'"
-            },
-            "SubRules": {
-              "Range": [
-                {
-                  "Type": "String",
-                  "Attributes": {
-                    "Element": "String"
-                  },
-                  "Properties": {
-                    "CloseOnEndOfLine": true,
-                    "CloseOnTerm": true
-                  },
-                  "TokenRange": {
-                    "Open": "\\'",
-                    "Close": ""
-                  }
-                },
-                {
-                  "Type": "String",
-                  "Attributes": {
-                    "Element": "String"
-                  },
-                  "Properties": {
-                    "CloseOnEndOfLine": true,
-                    "CloseOnTerm": true
-                  },
-                  "TokenRange": {
-                    "Open": "\\\\",
-                    "Close": ""
-                  }
-                }
-              ]
+              "Open": "\"\"\"",
+              "Close": "\"\"\""
             }
           },
           {
@@ -288,11 +256,6 @@
         },
         "SkipRegion": [
           {
-            "OpenToken": "'",
-            "CloseToken": "'",
-            "RegionType": "SingleLineString"
-          },
-          {
             "OpenToken": "\"",
             "CloseToken": "\"",
             "RegionType": "SingleLineString"
@@ -322,10 +285,6 @@
   "MatchingPair": {
     "Pairs": [
       {
-        "OpenToken": "'",
-        "CloseToken": "'"
-      },
-      {
         "OpenToken": "\"",
         "CloseToken": "\""
       },
@@ -345,11 +304,6 @@
   },
   "CompletionProposal": {
     "SkipRegion": [
-      {
-        "OpenToken": "'",
-        "CloseToken": "'",
-        "RegionType": "SingleLineString"
-      },
       {
         "OpenToken": "\"",
         "CloseToken": "\"",

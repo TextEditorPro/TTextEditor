@@ -94,6 +94,7 @@ type
     FAlternativeCloseArrayCount: Integer;
     FCaseFunct: TTextEditorCaseFunction;
     FCaseSensitive: Boolean;
+    FCloseOnAnyTerm: Boolean;
     FCloseOnEndOfLine: Boolean;
     FCloseOnTerm: Boolean;
     FCloseParent: Boolean;
@@ -146,6 +147,7 @@ type
     property AlternativeCloseArrayCount: Integer read FAlternativeCloseArrayCount write SetAlternativeCloseArrayCount;
     property CaseFunct: TTextEditorCaseFunction read FCaseFunct;
     property CaseSensitive: Boolean read FCaseSensitive write SetCaseSensitive;
+    property CloseOnAnyTerm: Boolean read FCloseOnAnyTerm write FCloseOnAnyTerm;
     property CloseOnEndOfLine: Boolean read FCloseOnEndOfLine write FCloseOnEndOfLine;
     property CloseOnTerm: Boolean read FCloseOnTerm write FCloseOnTerm;
     property CloseParent: Boolean read FCloseParent write FCloseParent;
@@ -576,6 +578,7 @@ var
   LIndex: Integer;
 begin
   Delimiters := ADelimiters;
+
   for LIndex := 0 to RangeCount - 1 do
     Ranges[LIndex].SetDelimiters(ADelimiters);
 end;
@@ -614,12 +617,14 @@ var
     const AAttribute: TTextEditorHighlighterAttribute): TTextEditorToken;
   begin
     Result := ARules.FindToken(AToken.Symbol);
+
     if Assigned(Result) then
       AToken.Free
     else
       Result := AToken;
 
     ARules.AddToken(Result);
+
     if not Assigned(Result.Attribute) then
       Result.Attribute := AAttribute;
   end;
@@ -629,6 +634,7 @@ var
     LToken: TTextEditorToken;
   begin
     LToken := ARules.FindToken(AToken.Symbol);
+
     if Assigned(LToken) then
     begin
       LToken.Attribute := AToken.Attribute;
@@ -711,9 +717,11 @@ begin
       LBreakType := btTerm;
 
     LChar := CaseFunct(LFirstChar);
+
     if Ord(LChar) < TCharacters.AnsiCharCount then
     begin
       LAnsiChar := AnsiChar(LChar);
+
       if not Assigned(SymbolList[LAnsiChar]) then
       begin
         if LLength = 1 then
@@ -735,6 +743,7 @@ begin
   for LIndex := 0 to 255 do
   begin
     LAnsiChar := AnsiChar(CaseFunct(Char(LIndex)));
+
     for LIndex2 := 0 to FSets.Count - 1 do
     begin
       LSet := TTextEditorSet(FSets.List[LIndex2]);
@@ -800,6 +809,7 @@ begin
   OpenToken.Clear;
   CloseToken.Clear;
 
+  FCloseOnAnyTerm := False;
   FCloseOnTerm := False;
   FCloseOnEndOfLine := False;
   FCloseParent := False;

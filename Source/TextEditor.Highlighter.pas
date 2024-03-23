@@ -382,7 +382,8 @@ begin
     LCloseParent := FRange.CloseParent;
 
     if not FSkipWhitespace and FRange.CloseOnTerm and (FLine[FRunPosition] in FRange.Delimiters) and
-      not (FRange.SkipWhitespace and (FLine[FRunPosition] in TCharacterSets.AbsoluteDelimiters)) then
+      not (FRange.SkipWhitespace and (FLine[FRunPosition] in TCharacterSets.AbsoluteDelimiters)) or
+      FRange.CloseOnAnyTerm then
     begin
       FRange := FRange.Parent;
 

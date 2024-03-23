@@ -46,6 +46,19 @@
               "Open": "//"
             }
           },
+					{
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnAnyTerm": true
+            },
+            "TokenRange": {
+              "Open": "''''",
+              "Close": ""
+            }
+          },
           {
             "Type": "String",
             "Attributes": {

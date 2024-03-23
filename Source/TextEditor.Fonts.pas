@@ -208,12 +208,14 @@ end;
 
 procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivider: Integer; const AIsDpiChange: Boolean);
 {$IF CompilerVersion <= 35.0}
-  procedure Scale(const AFont: TFont);
+  procedure ChangeScale(const AFont: TFont);
   begin
     if AFont.PixelsPerInch <> AMultiplier then
     begin
       AFont.Height := MulDiv(AFont.Height, AMultiplier, ADivider);
-      AFont.PixelsPerInch := AMultiplier;
+
+      if AIsDpiChange then
+        AFont.PixelsPerInch := AMultiplier;
     end;
   end;
 {$ENDIF}
@@ -226,12 +228,12 @@ begin
   FRuler.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
   FText.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
 {$ELSE}
-  Scale(FCodeFoldingHint);
-  Scale(FCompletionProposal);
-  Scale(FLineNumbers);
-  Scale(FMinimap);
-  Scale(FRuler);
-  Scale(FText);
+  ChangeScale(FCodeFoldingHint);
+  ChangeScale(FCompletionProposal);
+  ChangeScale(FLineNumbers);
+  ChangeScale(FMinimap);
+  ChangeScale(FRuler);
+  ChangeScale(FText);
 {$ENDIF}
 end;
 

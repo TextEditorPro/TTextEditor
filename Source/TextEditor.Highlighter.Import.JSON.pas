@@ -117,6 +117,7 @@ begin
 
     LSampleArray := AHighlighterObject.ValueArray['Sample'];
     LHighlighter.Sample := '';
+
     for LIndex := 0 to LSampleArray.Count - 1 do
       LHighlighter.Sample := LHighlighter.Sample + LSampleArray.ValueString[LIndex];
   end;
@@ -130,6 +131,7 @@ begin
   begin
     LEditor := FHighlighter.Editor as TCustomTextEditor;
     LEditor.URIOpener := StrToBoolDef(AEditorObject['URIOpener'].Value, False);
+
     with LEditor.CodeFolding do
     begin
       Outlining := StrToBoolDef(AEditorObject['Outlining'].Value, False);
@@ -271,6 +273,7 @@ begin
     if (csDesigning in LEditor.ComponentState) or (eoLoadFontNames in LEditor.Options) then
     begin
       LFontsObject := AThemeObject['Fonts'].ObjectValue;
+
       if Assigned(LFontsObject) then
       with LEditor.Fonts do
       begin
@@ -286,6 +289,7 @@ begin
     if (csDesigning in LEditor.ComponentState) or (eoLoadFontSizes in LEditor.Options) then
     begin
       LFontSizesObject := AThemeObject['FontSizes'].ObjectValue;
+
       if Assigned(LFontSizesObject) then
       with LEditor.Fonts do
       begin
@@ -443,9 +447,11 @@ begin
       LElementPrefix := ARangeObject['ElementPrefix'].Value;
       LEditor := FHighlighter.Editor as TCustomTextEditor;
       LFileStream := LEditor.CreateHighlighterStream(LName);
+
       if Assigned(LFileStream) then
       begin
         LJSONObject := TJSONObject.ParseFromStream(LFileStream) as TJSONObject;
+
         if Assigned(LJSONObject) then
         try
           LTokenRangeObject := LJSONObject['Highlighter']['MainRules'].ObjectValue;
@@ -456,15 +462,18 @@ begin
           { or SubRules... }
           begin
             LSubRulesObject := LTokenRangeObject['SubRules'].ObjectValue;
+
             if Assigned(LSubRulesObject) then
             for LIndex := 0 to LSubRulesObject.Count - 1 do
             begin
               if LSubRulesObject.Names[LIndex] = 'Range' then
               begin
                 LArrayValue := LSubRulesObject.Items[LIndex].ArrayValue;
+
                 for LIndex2 := 0 to LArrayValue.Count - 1 do
                 begin
                   LJSONSubRulesObject := LArrayValue.ValueObject[LIndex2];
+
                   if LJSONSubRulesObject.ValueString['Name'] = ARangeObject['IncludeRange'].Value then
                   begin
                     ImportRange(ARange, LJSONSubRulesObject, nil, False, LElementPrefix);
@@ -504,6 +513,7 @@ begin
           begin
             CloseOnEndOfLine := LPropertiesObject.ValueBoolean['CloseOnEndOfLine'];
             CloseOnTerm := LPropertiesObject.ValueBoolean['CloseOnTerm'];
+            CloseOnAnyTerm := LPropertiesObject.ValueBoolean['CloseOnAnyTerm'];
             SkipWhitespace := LPropertiesObject.ValueBoolean['SkipWhitespace'];
             SkipWhitespaceOnce := LPropertiesObject.ValueBoolean['SkipWhitespaceOnce'];
             CloseParent := LPropertiesObject.ValueBoolean['CloseParent'];
@@ -783,13 +793,16 @@ begin
       if hoMultiHighlighter in FHighlighter.Options then
       begin
         LName := LJSONDataValue.ObjectValue['File'].Value;
+
         if LName <> '' then
         begin
           LEditor := FHighlighter.Editor as TCustomTextEditor;
           LFileStream := LEditor.CreateHighlighterStream(LName);
+
           if Assigned(LFileStream) then
           begin
             LJSONObject := TJSONObject.ParseFromStream(LFileStream) as TJSONObject;
+
             if Assigned(LJSONObject) then
             try
               if LJSONObject.Contains('CodeFolding') then
@@ -806,8 +819,8 @@ begin
       end;
 
       LRegionItem := ACodeFoldingRegion.Add(LOpenToken, LCloseToken);
-
       LMemberObject := LJSONDataValue.ObjectValue['Properties'].ObjectValue;
+
       if Assigned(LMemberObject) then
       with LRegionItem do
       begin
@@ -950,6 +963,7 @@ begin
     Exit;
 
   LArray := AMatchingPairObject['Pairs'].ArrayValue;
+
   for LIndex := 0 to LArray.Count - 1 do
   begin
     LJSONDataValue := LArray.Items[LIndex];
@@ -957,13 +971,16 @@ begin
     if hoMultiHighlighter in FHighlighter.Options then
     begin
       LName := LJSONDataValue.ObjectValue['File'].Value;
+
       if LName <> '' then
       begin
         LEditor := FHighlighter.Editor as TCustomTextEditor;
         LFileStream := LEditor.CreateHighlighterStream(LName);
+
         if Assigned(LFileStream) then
         begin
           LJSONObject := TJSONObject.ParseFromStream(LFileStream) as TJSONObject;
+
           if Assigned(LJSONObject) then
           try
             if LJSONObject.Contains('MatchingPair') then
@@ -1099,6 +1116,7 @@ var
 begin
   try
     LJSONObject := TJSONObject.ParseFromStream(AStream) as TJSONObject;
+
     if Assigned(LJSONObject) then
     try
       ImportHighlighter(LJSONObject);
@@ -1119,6 +1137,7 @@ var
 begin
   try
     LJSONObject := TJSONObject.ParseFromStream(AStream) as TJSONObject;
+
     if Assigned(LJSONObject) then
     try
       ImportColorTheme(LJSONObject['Theme']);

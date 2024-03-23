@@ -65,7 +65,7 @@ begin
   FEnabled := True;
   FEngine := seNormal;
   FInSelection := TTextEditorSearchInSelection.Create;
-  FItemIndex := -1;
+  FItemIndex := 0;
   FItems := TList.Create;
   FMap := TTextEditorSearchMap.Create;
   FNearOperator := TTextEditorSearchNearOperator.Create;

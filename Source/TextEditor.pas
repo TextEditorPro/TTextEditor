@@ -3725,7 +3725,7 @@ begin
         Dec(LTextPosition.Char);
 
       if soExpandRealNumbers in FSelection.Options then
-      while (LTextPosition.Char > 0) and (LTextLine[LTextPosition.Char - 1] in TCharacterSets.RealNumbers) do
+      while (LTextPosition.Char > 0) and (LTextLine[LTextPosition.Char] in TCharacterSets.RealNumbers) do
         Dec(LTextPosition.Char);
 
       if soExpandPrefix in FSelection.Options then
@@ -13458,7 +13458,9 @@ var
     LTempLine: Integer;
   begin
     Result := 0;
+
     LTempLine := LCurrentLine;
+
     if LTempLine < Length(FCodeFoldings.RangeFromLine) then
     begin
       while LTempLine > 0 do
@@ -13575,9 +13577,9 @@ var
   LX, LX1, LY, LZ: Integer;
   LOldColor: TColor;
   LDeepestLevel: Integer;
-  LLineHeight: Integer;
+  LLineHeight, LBltLineHeight: Integer;
   LHighlightIndentGuides, LHideAtFirstColumn, LHideOverText, LHideInActiveRow: Boolean;
-  LColor: TColor;
+  LColor, LPixelColor: TColor;
   LSkip: Boolean;
   LHeight: Integer;
   LBitmap, LBitmapGuide, LBitmapHighlightGuide: Vcl.Graphics.TBitmap;
@@ -13619,6 +13621,7 @@ begin
       for LIndex := 0 to LRangeIndex - 1 do
       begin
         LCodeFoldingRange := LCodeFoldingRanges[LIndex];
+
         LHeight := LY + LLineHeight;
 
         if Assigned(LCodeFoldingRange) and not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
@@ -13637,12 +13640,17 @@ begin
           begin
             LX1 := LX + 1;
             LColor := Canvas.Pixels[LX1, LY];
-
             LZ := LY;
             LSkip := False;
+
             while LZ < LHeight do
             begin
-              if Canvas.Pixels[LX1, LZ] <> LColor then
+              LPixelColor := Canvas.Pixels[LX1, LZ];
+
+              if LPixelColor = -1 then
+                Break;
+
+              if LPixelColor <> LColor then
               begin
                 LSkip := True;
                 Break;
@@ -13685,8 +13693,13 @@ begin
             else
             if Assigned(LBitmap) then
             begin
-              TransparentBlt(Canvas.Handle, LX, LY, 1, LLineHeight + 1, LBitmap.Canvas.Handle, 0,
-                LCodeFoldingRange.GuideLineOffset, 1, LLineHeight + 1, TColors.Fuchsia);
+              LBltLineHeight := LLineHeight + 1;
+
+              if LCodeFoldingRange.GuideLineOffset + LBltLineHeight > Height then
+                LBltLineHeight := Height - LCodeFoldingRange.GuideLineOffset;
+
+              TransparentBlt(Canvas.Handle, LX, LY, 1, LBltLineHeight, LBitmap.Canvas.Handle, 0,
+                LCodeFoldingRange.GuideLineOffset, 1, LBltLineHeight, TColors.Fuchsia);
 
               LCodeFoldingRange.GuideLineOffset := LCodeFoldingRange.GuideLineOffset + LLineHeight;
             end;

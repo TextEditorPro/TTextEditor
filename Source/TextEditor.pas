@@ -6217,8 +6217,11 @@ begin
     begin
       with FLines.Items^[LTextPosition.Line] do
       begin
-        Exclude(Flags, sfLineBreakCR);
-        Exclude(Flags, sfLineBreakLF);
+        if FLines.LineBreak in [lbCRLF, lbCR] then
+          Include(Flags, sfLineBreakCR);
+
+        if FLines.LineBreak in [lbCRLF, lbLF] then
+          Include(Flags, sfLineBreakLF);
       end;
 
       if LLength >= LTextPosition.Char then
@@ -6228,6 +6231,7 @@ begin
           { A line break after the first char and before the end of the line. }
           LSpaceCount1 := LeftSpaceCount(LLineText, True);
           LSpaceBuffer := '';
+
           if AAddSpaceBuffer then
             LSpaceBuffer := GetSpaceBuffer(LSpaceCount1);
 
@@ -6273,10 +6277,12 @@ begin
       begin
         { A line break after the end of the line. }
         LSpaceCount1 := 0;
+
         if eoAutoIndent in FOptions then
           LSpaceCount1 := LeftSpaceCount(LLineText, True);
 
         LSpaceBuffer := '';
+
         if AAddSpaceBuffer then
           LSpaceBuffer := GetSpaceBuffer(LSpaceCount1);
 
@@ -6307,7 +6313,6 @@ begin
         FLines.Add('');
 
       FLines.Insert(LTextPosition.Line, '');
-
       FLines.LineState[LTextPosition.Line] := lsModified;
 
       LTextPosition.Line := Min(LTextPosition.Line + 1, FLines.Count);

@@ -59,6 +59,7 @@ type
     function GetPartialTextLength(const AStart, AEnd: Integer): Integer;
     function GetPartialTextStr(const AStart, AEnd: Integer): string;
     function GetRanges(const AIndex: Integer): TTextEditorLinesRange;
+    function IsValidIndex(const AIndex: Integer): Boolean; inline;
     procedure ExchangeItems(const AIndex1, AIndex2: Integer);
     procedure Grow;
     procedure QuickSort(const ALeft, ARight: Integer; const ACompare: TTextEditorStringListSortCompare);
@@ -273,6 +274,7 @@ begin
   LFlags := [];
 
   LPStringRecord := @FItems^[AIndex];
+
   if Assigned(LPStringRecord) then
     LFlags := LPStringRecord^.Flags;
 
@@ -404,9 +406,14 @@ begin
   end;
 end;
 
+function TTextEditorLines.IsValidIndex(const AIndex: Integer): Boolean;
+begin
+  Result := (AIndex >= 0) and (AIndex < FCount);
+end;
+
 function TTextEditorLines.Get(AIndex: Integer): string;
 begin
-  if (AIndex >= 0) and (AIndex < FCount) then
+  if IsValidIndex(AIndex) then
     Result := FItems^[AIndex].TextLine
   else
     Result := '';
@@ -426,7 +433,7 @@ function TTextEditorLines.GetExpandedString(const AIndex: Integer): string;
 begin
   Result := '';
 
-  if (AIndex >= 0) and (AIndex < FCount) then
+  if IsValidIndex(AIndex) then
   begin
     if sfHasNoTabs in FItems^[AIndex].Flags then
       Result := Get(AIndex)
@@ -437,7 +444,7 @@ end;
 
 function TTextEditorLines.GetExpandedStringLength(const AIndex: Integer): Integer;
 begin
-  if (AIndex >= 0) and (AIndex < FCount) then
+  if IsValidIndex(AIndex) then
   begin
     if sfExpandedLengthUnknown in FItems^[AIndex].Flags then
       Result := Length(ExpandedStrings[AIndex])
@@ -454,7 +461,7 @@ var
 begin
   Result := lsNone;
 
-  if (AIndex >= 0) and (AIndex < FCount) then
+  if IsValidIndex(AIndex) then
   begin
     LFlags := FItems^[AIndex].Flags;
 
@@ -468,23 +475,24 @@ end;
 
 procedure TTextEditorLines.ExcludeFlag(const AIndex: Integer; const AFlag: TTextEditorStringFlag);
 begin
-  if (AIndex >= 0) and (AIndex < FCount) then
+  if IsValidIndex(AIndex) then
     Exclude(FItems^[AIndex].Flags, AFlag);
 end;
 
 procedure TTextEditorLines.IncludeFlag(const AIndex: Integer; const AFlag: TTextEditorStringFlag);
 begin
-  if (AIndex >= 0) and (AIndex < FCount) then
+  if IsValidIndex(AIndex) then
     Include(FItems^[AIndex].Flags, AFlag);
 end;
 
 procedure TTextEditorLines.SetLineState(const AIndex: Integer; const AValue: TTextEditorLineState);
 begin
-  if (AIndex >= 0) and (AIndex < FCount) then
+  if IsValidIndex(AIndex) then
   with FItems^[AIndex] do
   begin
     Exclude(Flags, sfLineStateNormal);
     Exclude(Flags, sfLineStateModified);
+
     if AValue = lsNormal then
       Include(Flags, sfLineStateNormal)
     else
@@ -495,7 +503,7 @@ end;
 
 function TTextEditorLines.GetRanges(const AIndex: Integer): TTextEditorLinesRange;
 begin
-  if (AIndex >= 0) and (AIndex < FCount) then
+  if IsValidIndex(AIndex) then
     Result := FItems^[AIndex].Range
   else
     Result := nil;
@@ -618,9 +626,9 @@ begin
   else
     LSize := FTextLength;
 
-  FTextLength := 0;
-
   SetString(Result, nil, LSize);
+
+  FTextLength := 0;
   LPValue := Pointer(Result);
 
   for LIndex := AStart to AEnd - 1 do
@@ -1345,7 +1353,7 @@ end;
 procedure TTextEditorLines.DoTrimTrailingSpaces(const AIndex: Integer);
 begin
 {$IFDEF TEXT_EDITOR_RANGE_CHECKS}
-  if (AIndex >= 0) and (AIndex < FCount) then
+  if IsValidIndex(AIndex) then
 {$ENDIF}
   with FItems^[AIndex] do
   TextLine := TextEditor.Utils.TrimRight(TextLine);

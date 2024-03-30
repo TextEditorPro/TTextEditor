@@ -1,0 +1,1716 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "{\\*\\examplecomment\r\n",
+      "  Hello, World! in Rich Text Format\r\n",
+      "}\r\n",
+      "{\\rtf1\\ansi\\deff0 {\\fonttbl {\\f0 Times New Roman;}}\r\n",
+      "\\f0\\fs60 Hello, World!\r\n",
+      "}"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "TokenRange": {
+              "Open": "\\objdata",
+              "Close": "}"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "}"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "TokenRange": {
+              "Open": "\\blipuid",
+              "Close": "}"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "}"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Name": "Control Words Introduced by Other Microsoft Products",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\htmlbase",
+              "\\htmlrtf",
+              "\\htmltag",
+              "\\mhtmltag",
+              "\\pwd",
+              "\\urtf"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Associated Character Properties",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\ab",
+              "\\acaps",
+              "\\acf",
+              "\\adn",
+              "\\aexpnd",
+              "\\af",
+              "\\afs",
+              "\\ai",
+              "\\alang",
+              "\\aoutl",
+              "\\ascaps",
+              "\\ashad",
+              "\\astrike",
+              "\\aul",
+              "\\auld",
+              "\\auldb",
+              "\\aulnone",
+              "\\aulw",
+              "\\aup",
+              "\\dbch",
+              "\\hich",
+              "\\loch"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Bookmarks",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\bkmkcolf",
+              "\\bkmkcoll",
+              "\\bkmkend",
+              "\\bkmkstart"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Bullets and umbering",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\pgnchosung",
+              "\\pgncnum",
+              "\\pgndbnumk",
+              "\\pgndbnumt",
+              "\\pgnganada",
+              "\\pgngbnum",
+              "\\pgngbnumd",
+              "\\pgngbnumk",
+              "\\pgngbnuml",
+              "\\pgnzodiac",
+              "\\pgnzodiacd",
+              "\\pgnzodiacl",
+              "\\pn",
+              "\\pnacross",
+              "\\pnaiu",
+              "\\pnaiud",
+              "\\pnaiueo",
+              "\\pnaiueod",
+              "\\pnb",
+              "\\pnbidia",
+              "\\pnbidib",
+              "\\pncaps",
+              "\\pncard",
+              "\\pncf",
+              "\\pnchosung",
+              "\\pncnum",
+              "\\pndbnum",
+              "\\pndbnumd",
+              "\\pndbnumk",
+              "\\pndbnuml",
+              "\\pndbnumt",
+              "\\pndec",
+              "\\pndecd",
+              "\\pnf",
+              "\\pnfs",
+              "\\pnganada",
+              "\\pnganada",
+              "\\pngbnum",
+              "\\pngbnumd",
+              "\\pngbnumk",
+              "\\pngbnuml",
+              "\\pnhang",
+              "\\pni",
+              "\\pnindent",
+              "\\pniroha",
+              "\\pnirohad",
+              "\\pnlcltr",
+              "\\pnlcrm",
+              "\\pnlvl",
+              "\\pnlvlblt",
+              "\\pnlvlbody",
+              "\\pnlvlcont",
+              "\\pnnumonce",
+              "\\pnord",
+              "\\pnordt",
+              "\\pnprev",
+              "\\pnqc",
+              "\\pnql",
+              "\\pnqr",
+              "\\pnrestart",
+              "\\pnscaps",
+              "\\pnseclvl",
+              "\\pnsp",
+              "\\pnstart",
+              "\\pnstrike",
+              "\\pntext",
+              "\\pntxta",
+              "\\pntxtb",
+              "\\pnucltr",
+              "\\pnucrm",
+              "\\pnul",
+              "\\pnuld",
+              "\\pnuldash",
+              "\\pnuldashd",
+              "\\pnuldashdd",
+              "\\pnuldb",
+              "\\pnulhair",
+              "\\pnulnone",
+              "\\pnulth",
+              "\\pnulw",
+              "\\pnulwave",
+              "\\pnzodiac",
+              "\\pnzodiacd",
+              "\\pnzodiacl"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Character Set",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\ansi",
+              "\\mac",
+              "\\pc",
+              "\\pca"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Character Text",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\charscalex",
+              "\\chbgbdiag",
+              "\\chbgcross",
+              "\\chbgdcross",
+              "\\chbgdkbdiag",
+              "\\chbgdkcross",
+              "\\chbgdkdcross",
+              "\\chbgdkfdiag",
+              "\\chbgdkhoriz",
+              "\\chbgdkvert",
+              "\\chbgfdiag",
+              "\\chbghoriz",
+              "\\chbgvert",
+              "\\chbrdr",
+              "\\chcbpat",
+              "\\chcfpat",
+              "\\chshdng",
+              "\\crauth",
+              "\\crdate",
+              "\\embo",
+              "\\impr",
+              "\\revauthdel",
+              "\\revdttmdel",
+              "\\striked1",
+              "\\ulth"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Code Page Support",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\cpg"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Color Table",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\blue",
+              "\\colortbl",
+              "\\green",
+              "\\red"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Comments (Annotations)",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\annotation",
+              "\\atnauthor",
+              "\\atnicn",
+              "\\atnid",
+              "\\atnref",
+              "\\atntime",
+              "\\atrfend",
+              "\\atrfstart"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Document formatting properties",
+            "Type": "Method",
+            "Words": [
+              "\\aenddoc",
+              "\\aendnotes",
+              "\\aftnbj",
+              "\\aftncn",
+              "\\aftnnalc",
+              "\\aftnnar",
+              "\\aftnnauc",
+              "\\aftnnchi",
+              "\\aftnnchosung",
+              "\\aftnncnum",
+              "\\aftnndbar",
+              "\\aftnndbnum",
+              "\\aftnndbnumd",
+              "\\aftnndbnumk",
+              "\\aftnndbnumt",
+              "\\aftnnganada",
+              "\\aftnngbnum",
+              "\\aftnngbnumd",
+              "\\aftnngbnumk",
+              "\\aftnngbnuml",
+              "\\aftnnrlc",
+              "\\aftnnruc",
+              "\\aftnnzodiac",
+              "\\aftnnzodiacd",
+              "\\aftnnzodiacl",
+              "\\aftnrestart",
+              "\\aftnrstcont",
+              "\\aftnsep",
+              "\\aftnsepc",
+              "\\aftnstart",
+              "\\aftntj",
+              "\\allprot",
+              "\\alntblind",
+              "\\annotprot",
+              "\\bdbfhdr",
+              "\\bdrrlswsix",
+              "\\brdrart",
+              "\\brkfrm",
+              "\\cts",
+              "\\cvmme",
+              "\\defformat",
+              "\\deflang",
+              "\\deflangfe",
+              "\\deftab",
+              "\\dghorigin",
+              "\\dghshow",
+              "\\dghspace",
+              "\\dgmargin",
+              "\\dgsnap",
+              "\\dgvorigin",
+              "\\dgvshow",
+              "\\dgvspace",
+              "\\dntblnsbdb",
+              "\\doctemp",
+              "\\doctype",
+              "\\enddoc",
+              "\\endnotes",
+              "\\expshrtn",
+              "\\facingp",
+              "\\fchars",
+              "\\fet",
+              "\\fldalt",
+              "\\formdisp",
+              "\\formprot",
+              "\\formshade",
+              "\\fracwidth",
+              "\\fromhtml",
+              "\\fromtext",
+              "\\ftnalt",
+              "\\ftnbj",
+              "\\ftncn",
+              "\\ftnlytwnine",
+              "\\ftnnalc",
+              "\\ftnnar",
+              "\\ftnnauc",
+              "\\ftnnchi",
+              "\\ftnnchosung",
+              "\\ftnncnum",
+              "\\ftnndbar",
+              "\\ftnndbnum",
+              "\\ftnndbnumd",
+              "\\ftnndbnumk",
+              "\\ftnndbnumt",
+              "\\ftnnganada",
+              "\\ftnngbnum",
+              "\\ftnngbnumd",
+              "\\ftnngbnumk",
+              "\\ftnngbnuml",
+              "\\ftnnrlc",
+              "\\ftnnruc",
+              "\\ftnnzodiac",
+              "\\ftnnzodiacd",
+              "\\ftnnzodiacl",
+              "\\ftnrestart",
+              "\\ftnrstcont",
+              "\\ftnrstpg",
+              "\\ftnsep",
+              "\\ftnsepc",
+              "\\ftnstart",
+              "\\ftntj",
+              "\\gutter",
+              "\\gutterprl",
+              "\\horzdoc",
+              "\\htmautsp",
+              "\\hyphauto",
+              "\\hyphcaps",
+              "\\hyphconsec",
+              "\\hyphhotz",
+              "\\jcompress",
+              "\\jexpand",
+              "\\jsksu",
+              "\\ksulang",
+              "\\landscape",
+              "\\lchars",
+              "\\linestart",
+              "\\linkstyles",
+              "\\lnbrkrule",
+              "\\lnongrid",
+              "\\ltrdoc",
+              "\\lytcalctblwd",
+              "\\lytexcttp",
+              "\\lytprtmet",
+              "\\lyttblrtgr",
+              "\\makebackup",
+              "\\margb",
+              "\\margl",
+              "\\margmirror",
+              "\\margr",
+              "\\margt",
+              "\\msmcap",
+              "\\nextfile",
+              "\\nocolbal",
+              "\\noextrasprl",
+              "\\nolead",
+              "\\nolnhtadjtbl",
+              "\\nospaceforul",
+              "\\notabind",
+              "\\noultrlspc",
+              "\\noxlattoyen",
+              "\\oldas",
+              "\\oldlinewrap",
+              "\\otblrul",
+              "\\paperh",
+              "\\paperw",
+              "\\pgbrdrb",
+              "\\pgbrdrfoot",
+              "\\pgbrdrhead",
+              "\\pgbrdrl",
+              "\\pgbrdropt",
+              "\\pgbrdrr",
+              "\\pgbrdrsnap",
+              "\\pgbrdrt",
+              "\\pgnstart",
+              "\\prcolbl",
+              "\\printdata",
+              "\\private",
+              "\\psover",
+              "\\psz",
+              "\\revbar",
+              "\\revisions",
+              "\\revprop",
+              "\\revprot",
+              "\\rtldoc",
+              "\\rtlgutter",
+              "\\splytwnine",
+              "\\sprsbsp",
+              "\\sprslnsp",
+              "\\sprsspbf",
+              "\\sprstsm",
+              "\\sprstsp",
+              "\\subfontbysize",
+              "\\swpbdr",
+              "\\template",
+              "\\transmf",
+              "\\truncatefontheight",
+              "\\twoonone",
+              "\\useltbaln",
+              "\\vertdoc",
+              "\\viewkind",
+              "\\viewscale",
+              "\\viewzk",
+              "\\widowctrl",
+              "\\windowcaption",
+              "\\wpjst",
+              "\\wpsp",
+              "\\wraptrsp"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Name": "Document Variables",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\docvar"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Drawing Objects",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\do",
+              "\\dobxcolumn",
+              "\\dobxmargin",
+              "\\dobxpage",
+              "\\dobymargin",
+              "\\dobypage",
+              "\\dobypara",
+              "\\dodhgt",
+              "\\dolock",
+              "\\dpaendhol",
+              "\\dpaendl",
+              "\\dpaendsol",
+              "\\dpaendw",
+              "\\dparc",
+              "\\dparcflipx",
+              "\\dparcflipy",
+              "\\dpastarthol",
+              "\\dpastartl",
+              "\\dpastartsol",
+              "\\dpastartw",
+              "\\dpcallout",
+              "\\dpcoa",
+              "\\dpcoaccent",
+              "\\dpcobestfit",
+              "\\dpcoborder",
+              "\\dpcodabs",
+              "\\dpcodbottom",
+              "\\dpcodcenter",
+              "\\dpcodescent",
+              "\\dpcodtop",
+              "\\dpcolength",
+              "\\dpcominusx",
+              "\\dpcominusy",
+              "\\dpcooffset",
+              "\\dpcosmarta",
+              "\\dpcotdouble",
+              "\\dpcotright",
+              "\\dpcotsingle",
+              "\\dpcottriple",
+              "\\dpcount",
+              "\\dpellipse",
+              "\\dpendgroup",
+              "\\dpfillbgcb",
+              "\\dpfillbgcg",
+              "\\dpfillbgcr",
+              "\\dpfillbggray",
+              "\\dpfillbgpal",
+              "\\dpfillfgcb",
+              "\\dpfillfgcg",
+              "\\dpfillfgcr",
+              "\\dpfillfggray",
+              "\\dpfillfgpal",
+              "\\dpfillpat",
+              "\\dpgroup",
+              "\\dpline",
+              "\\dplinecob",
+              "\\dplinecog",
+              "\\dplinecor",
+              "\\dplinedado",
+              "\\dplinedadodo",
+              "\\dplinedash",
+              "\\dplinedot",
+              "\\dplinegray",
+              "\\dplinehollow",
+              "\\dplinepal",
+              "\\dplinesolid",
+              "\\dplinew",
+              "\\dppolycount",
+              "\\dppolygon",
+              "\\dppolyline",
+              "\\dpptx",
+              "\\dppty",
+              "\\dprect",
+              "\\dproundr",
+              "\\dpshadow",
+              "\\dpshadx",
+              "\\dpshady",
+              "\\dptxbtlr",
+              "\\dptxbx",
+              "\\dptxbxmar",
+              "\\dptxbxtext",
+              "\\dptxlrtb",
+              "\\dptxlrtbv",
+              "\\dptxtbrl",
+              "\\dptxtbrlv",
+              "\\dpx",
+              "\\dpxsize",
+              "\\dpy",
+              "\\dpysize"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Fields",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\datafield",
+              "\\date",
+              "\\field",
+              "\\flddirty",
+              "\\fldedit",
+              "\\fldinst",
+              "\\fldlock",
+              "\\fldpriv",
+              "\\fldrslt",
+              "\\fldtype",
+              "\\time",
+              "\\wpeqn"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "File Table",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\fid",
+              "\\file",
+              "\\filetbl",
+              "\\fnetwork",
+              "\\fnil",
+              "\\fosnum",
+              "\\frelative",
+              "\\fvaliddos",
+              "\\fvalidhpfs",
+              "\\fvalidmac",
+              "\\fvalidntfs"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Font (Character) Formatting Properties",
+            "Type": "Method",
+            "Words": [
+              "\\acccomma",
+              "\\accdot",
+              "\\accnone",
+              "\\animtext",
+              "\\b",
+              "\\caps",
+              "\\cb",
+              "\\cchs",
+              "\\cf",
+              "\\cgrid",
+              "\\charscalex",
+              "\\cs",
+              "\\deleted",
+              "\\dn",
+              "\\expnd",
+              "\\expndtw",
+              "\\f",
+              "\\fittext",
+              "\\fs",
+              "\\g",
+              "\\gcw",
+              "\\gridtbl",
+              "\\i",
+              "\\kerning",
+              "\\lang",
+              "\\langfe",
+              "\\langfenp",
+              "\\langnp",
+              "\\ltrch",
+              "\\noproof",
+              "\\nosectexpand",
+              "\\nosupersub",
+              "\\outl",
+              "\\plain",
+              "\\revauth",
+              "\\revdttm",
+              "\\revised",
+              "\\rtlch",
+              "\\scaps",
+              "\\shad",
+              "\\strike",
+              "\\sub",
+              "\\super",
+              "\\ul",
+              "\\ulc",
+              "\\uld",
+              "\\uldash",
+              "\\uldashd",
+              "\\uldashdd",
+              "\\uldb",
+              "\\ulhair",
+              "\\ulhwave",
+              "\\ulldash",
+              "\\ulnone",
+              "\\ulth",
+              "\\ulthd",
+              "\\ulthdash",
+              "\\ulthdashd",
+              "\\ulthdashdd",
+              "\\ulthldash",
+              "\\ululdbwave",
+              "\\ulw",
+              "\\ulwave",
+              "\\up",
+              "\\v",
+              "\\webhidden"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Name": "Font Table",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\deff",
+              "\\falt",
+              "\\fbias",
+              "\\fbidi",
+              "\\fcharset",
+              "\\fdecor",
+              "\\fetch",
+              "\\fmodern",
+              "\\fname",
+              "\\fontemb",
+              "\\fontfile",
+              "\\fonttbl",
+              "\\fprq",
+              "\\froman",
+              "\\fscript",
+              "\\fswiss",
+              "\\ftnil",
+              "\\fttruetype",
+              "\\panose"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Footnotes",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\footnote"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Form Fields",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\ffdefres",
+              "\\ffdeftext",
+              "\\ffentrymcr",
+              "\\ffexitmcr",
+              "\\ffformat",
+              "\\ffhaslistbox",
+              "\\ffhelptext",
+              "\\ffhps",
+              "\\ffl",
+              "\\ffmaxlen",
+              "\\ffname",
+              "\\ffownhelp",
+              "\\ffownstat",
+              "\\ffprot",
+              "\\ffrecalc",
+              "\\ffres",
+              "\\ffsize",
+              "\\ffstattext",
+              "\\fftype",
+              "\\fftypetxt",
+              "\\formfield"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Headers and Footers",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\footer",
+              "\\footerf",
+              "\\footerl",
+              "\\header",
+              "\\headerf",
+              "\\headerl"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Highlighting",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\highlight"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Index Entries",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\bxe",
+              "\\ixe",
+              "\\pxe",
+              "\\rxe",
+              "\\txe",
+              "\\xe",
+              "\\xef",
+              "\\yxe"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Information Group",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\author",
+              "\\buptim",
+              "\\category",
+              "\\comment",
+              "\\company",
+              "\\creatim",
+              "\\doccomm",
+              "\\dy",
+              "\\edmins",
+              "\\hlinkbase",
+              "\\hr",
+              "\\id",
+              "\\info",
+              "\\keywords",
+              "\\linkval",
+              "\\manager",
+              "\\min",
+              "\\mo",
+              "\\nofchars",
+              "\\nofcharsws",
+              "\\nofpages",
+              "\\nofwords",
+              "\\operator",
+              "\\printim",
+              "\\propname",
+              "\\proptype",
+              "\\revtim",
+              "\\sec",
+              "\\staticval",
+              "\\subject",
+              "\\title",
+              "\\userprops",
+              "\\vern",
+              "\\version",
+              "\\yr"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "List Table",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\levelfollow",
+              "\\levelindent",
+              "\\leveljc",
+              "\\leveljcn",
+              "\\levellegal",
+              "\\levelnfc",
+              "\\levelnfcn",
+              "\\levelnorestart",
+              "\\levelnumbers",
+              "\\levelold",
+              "\\levelprev",
+              "\\levelprevspace",
+              "\\levelspace",
+              "\\levelstartat",
+              "\\leveltemplateid",
+              "\\leveltext",
+              "\\listhybrid",
+              "\\listid",
+              "\\listname",
+              "\\listoverridecount",
+              "\\listoverrideformat",
+              "\\listoverridestart",
+              "\\listrestarthdn",
+              "\\listsimple",
+              "\\listtemplateid",
+              "\\list",
+              "\\listlevel",
+              "\\listoverridetable"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Macintosh Edition Manager Publisher Objects",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\ls",
+              "\\bkmkpub",
+              "\\pubauto"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Objects",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\linkself",
+              "\\objalias",
+              "\\objalign",
+              "\\objattph",
+              "\\objautlink",
+              "\\objclass",
+              "\\objcropb",
+              "\\objcropl",
+              "\\objcropr",
+              "\\objcropt",
+              "\\objdata",
+              "\\object",
+              "\\objemb",
+              "\\objh",
+              "\\objhtml",
+              "\\objicemb",
+              "\\objlink",
+              "\\objlock",
+              "\\objname",
+              "\\objocx",
+              "\\objpub",
+              "\\objscalex",
+              "\\objscaley",
+              "\\objsect",
+              "\\objsetsize",
+              "\\objsub",
+              "\\objtime",
+              "\\objtransy",
+              "\\objupdate",
+              "\\objw",
+              "\\result",
+              "\\rsltbmp",
+              "\\rslthtml",
+              "\\rsltmerge",
+              "\\rsltpict",
+              "\\rsltrtf",
+              "\\rslttxt"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Paragraph Borders",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\box",
+              "\\brdrb",
+              "\\brdrbar",
+              "\\brdrbtw",
+              "\\brdrcf",
+              "\\brdrdash",
+              "\\brdrdb",
+              "\\brdrdot",
+              "\\brdrframe",
+              "\\brdrhair",
+              "\\brdrl",
+              "\\brdrr",
+              "\\brdrs",
+              "\\brdrsh",
+              "\\brdrt",
+              "\\brdrth",
+              "\\brdrw",
+              "\\brsp"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Paragraph Formatting Properties",
+            "Type": "Method",
+            "Words": [
+              "\\affixed",
+              "\\aspalpha",
+              "\\aspnum",
+              "\\collapsed",
+              "\\cufi",
+              "\\culi",
+              "\\curi",
+              "\\faauto",
+              "\\facenter",
+              "\\fahang",
+              "\\faroman",
+              "\\favar",
+              "\\fi",
+              "\\hyphpar",
+              "\\intbl",
+              "\\itap",
+              "\\keep",
+              "\\keepn",
+              "\\level",
+              "\\li",
+              "\\lin",
+              "\\lisa",
+              "\\lisb",
+              "\\ltrpar",
+              "\\nocwrap",
+              "\\noline",
+              "\\nooverflow",
+              "\\nosnaplinegrid",
+              "\\nowidctlpar",
+              "\\nowwrap",
+              "\\pagebb",
+              "\\pard",
+              "\\qc",
+              "\\qd",
+              "\\qj",
+              "\\ql",
+              "\\qr",
+              "\\ri",
+              "\\rin",
+              "\\rtlpar",
+              "\\s",
+              "\\sa",
+              "\\saauto",
+              "\\sb",
+              "\\sbauto",
+              "\\sbys",
+              "\\sl",
+              "\\slmult",
+              "\\subdocument",
+              "\\sn",
+              "\\sp",
+              "\\sv",
+              "\\widctlpar"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Name": "Paragraph Shading",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\bgbdiag",
+              "\\bgcross",
+              "\\bgdcross",
+              "\\bgdkbdiag",
+              "\\bgdkcross",
+              "\\bgdkdcross",
+              "\\bgdkfdiag",
+              "\\bgdkhoriz",
+              "\\bgdkvert",
+              "\\bgfdiag",
+              "\\bghoriz",
+              "\\bgvert",
+              "\\cbpat",
+              "\\cfpat",
+              "\\shading"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Paragraph Text",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\brdrdashd",
+              "\\brdrdashdd",
+              "\\brdrdashdotstr",
+              "\\brdrdashsm",
+              "\\brdremboss",
+              "\\brdrengrave",
+              "\\brdrinset",
+              "\\brdroutset",
+              "\\brdrthtnlg",
+              "\\brdrthtnmg",
+              "\\brdrthtnsg",
+              "\\brdrtnthlg",
+              "\\brdrtnthmg",
+              "\\brdrtnthsg",
+              "\\brdrtnthtnlg",
+              "\\brdrtnthtnmg",
+              "\\brdrtnthtnsg",
+              "\\brdrtriple",
+              "\\brdrwavy",
+              "\\brdrwavydb",
+              "\\dfrauth",
+              "\\dfrdate",
+              "\\dfrstart",
+              "\\dfrstop",
+              "\\dfrxst",
+              "\\ilvl",
+              "\\listtext",
+              "\\outlinelevel",
+              "\\overlay",
+              "\\pnrauth",
+              "\\pnrdate",
+              "\\pnrnfc",
+              "\\pnrnot",
+              "\\pnrpnbr",
+              "\\pnrrgb",
+              "\\pnrstart",
+              "\\pnrstop",
+              "\\pnrxst",
+              "\\posyin",
+              "\\posyout"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Pictures",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\bin",
+              "\\bliptag",
+              "\\blipuid",
+              "\\blipupi",
+              "\\defshp",
+              "\\dibitmap",
+              "\\emfblip",
+              "\\jpegblip",
+              "\\macpict",
+              "\\nonshppict",
+              "\\picbmp",
+              "\\picbpp",
+              "\\piccropb",
+              "\\piccropl",
+              "\\piccropr",
+              "\\piccropt",
+              "\\pich",
+              "\\pichgoal",
+              "\\picprop",
+              "\\picscaled",
+              "\\picscalex",
+              "\\picscaley",
+              "\\pict",
+              "\\picw",
+              "\\picwgoal",
+              "\\pmmetafile",
+              "\\pngblip",
+              "\\shppict",
+              "\\wbitmap",
+              "\\wbmbitspixel",
+              "\\wbmplanes",
+              "\\wbmwidthbytes",
+              "\\wmetafile"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Positioned Objects and Frames",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\absh",
+              "\\abslock",
+              "\\absnoovrlp",
+              "\\absw",
+              "\\dfrmtxtx",
+              "\\dfrmtxty",
+              "\\dropcapli",
+              "\\dropcapt",
+              "\\dxfrtext",
+              "\\frmtxbtlr",
+              "\\frmtxlrtb",
+              "\\frmtxlrtbv",
+              "\\frmtxtbrl",
+              "\\frmtxtbrlv",
+              "\\nowrap",
+              "\\phcol",
+              "\\phmrg",
+              "\\phpg",
+              "\\posnegx",
+              "\\posnegy",
+              "\\posx",
+              "\\posxc",
+              "\\posxi",
+              "\\posxl",
+              "\\posxo",
+              "\\posxr",
+              "\\posy",
+              "\\posyb",
+              "\\posyc",
+              "\\posyil",
+              "\\posyt",
+              "\\pvmrg",
+              "\\pvpara",
+              "\\pvpg"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "RTF Version",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\rtf"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Section Formatting Properties",
+            "Type": "Method",
+            "Words": [
+              "\\adjustright",
+              "\\binfsxn",
+              "\\binsxn",
+              "\\colno",
+              "\\cols",
+              "\\colsr",
+              "\\colsx",
+              "\\colw",
+              "\\ds",
+              "\\endnhere",
+              "\\footery",
+              "\\guttersxn",
+              "\\headery",
+              "\\horzsect",
+              "\\linebetcol",
+              "\\linecont",
+              "\\linemod",
+              "\\lineppage",
+              "\\linerestart",
+              "\\linestarts",
+              "\\linex",
+              "\\lndscpsxn",
+              "\\ltrsect",
+              "\\margbsxn",
+              "\\marglsxn",
+              "\\margrsxn",
+              "\\margtsxn",
+              "\\pghsxn",
+              "\\pgnbidia",
+              "\\pgnbidib",
+              "\\pgncont",
+              "\\pgndbnum",
+              "\\pgndbnumd",
+              "\\pgndec",
+              "\\pgndecd",
+              "\\pgnhn",
+              "\\pgnhnsc",
+              "\\pgnhnsh",
+              "\\pgnhnsm",
+              "\\pgnhnsn",
+              "\\pgnhnsp",
+              "\\pgnlcltr",
+              "\\pgnlcrm",
+              "\\pgnrestart",
+              "\\pgnstarts",
+              "\\pgnucltr",
+              "\\pgnucrm",
+              "\\pgnx",
+              "\\pgny",
+              "\\pgwsxn",
+              "\\rtlsect",
+              "\\sbkcol",
+              "\\sbkeven",
+              "\\sbknone",
+              "\\sbkodd",
+              "\\sbkpage",
+              "\\sectd",
+              "\\sectdefaultcl",
+              "\\sectexpand",
+              "\\sectlinegrid",
+              "\\sectspecifycl",
+              "\\sectspecifygen",
+              "\\sectspecifyl",
+              "\\sectunlocked",
+              "\\titlepg",
+              "\\vertalb",
+              "\\vertalc",
+              "\\vertalj",
+              "\\vertalt",
+              "\\vertsect"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Name": "Section Text",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\stextflow"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Special Characters",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\bullet",
+              "\\cell",
+              "\\chatn",
+              "\\chdate",
+              "\\chdpa",
+              "\\chdpl",
+              "\\chftn",
+              "\\chftnsep",
+              "\\chftnsepc",
+              "\\chpgn",
+              "\\chtime",
+              "\\column",
+              "\\emdash",
+              "\\emspace",
+              "\\endash",
+              "\\enspace",
+              "\\lbr",
+              "\\ldblquote",
+              "\\line",
+              "\\lquote",
+              "\\ltrmark",
+              "\\page",
+              "\\par",
+              "\\qmspace",
+              "\\rdblquote",
+              "\\row",
+              "\\rquote",
+              "\\rtlmark",
+              "\\sect",
+              "\\sectnum",
+              "\\softcol",
+              "\\softlheight",
+              "\\softline",
+              "\\softpage",
+              "\\tab",
+              "\\zwbo",
+              "\\zwj",
+              "\\zwnbo",
+              "\\zwnj"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Style Sheet",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\additive",
+              "\\alt",
+              "\\ctrl",
+              "\\fn",
+              "\\keycode",
+              "\\sautoupd",
+              "\\sbasedon",
+              "\\scompose",
+              "\\shidden",
+              "\\shift",
+              "\\snext",
+              "\\spersonal",
+              "\\sreply",
+              "\\stylesheet"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Table Definitions",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\cellx",
+              "\\clbgbdiag",
+              "\\clbgcross",
+              "\\clbgdcross",
+              "\\clbgdkbdiag",
+              "\\clbgdkcross",
+              "\\clbgdkdcross",
+              "\\clbgdkfdiag",
+              "\\clbgdkhor",
+              "\\clbgdkvert",
+              "\\clbgfdiag",
+              "\\clbghoriz",
+              "\\clbgvert",
+              "\\clbrdrb",
+              "\\clbrdrl",
+              "\\clbrdrr",
+              "\\clbrdrt",
+              "\\clcbpat",
+              "\\clcfpat",
+              "\\cldgll",
+              "\\cldglu",
+              "\\clFitText",
+              "\\clftsWidth",
+              "\\clmgf",
+              "\\clmrg",
+              "\\cloWrap",
+              "\\clpadb",
+              "\\clpadfb",
+              "\\clpadfl",
+              "\\clpadfr",
+              "\\clpadft",
+              "\\clpadl",
+              "\\clpadr",
+              "\\clpadt",
+              "\\clshdng",
+              "\\cltxbtlr",
+              "\\cltxlrtb",
+              "\\cltxlrtb",
+              "\\cltxlrtbv",
+              "\\cltxtbrl",
+              "\\cltxtbrl",
+              "\\cltxtbrlv",
+              "\\clvertalb",
+              "\\clvertalc",
+              "\\clvertalt",
+              "\\clvmgf",
+              "\\clvmrg",
+              "\\clwWidth",
+              "\\ltrrow",
+              "\\nestcell",
+              "\\nestrow",
+              "\\nesttableprops",
+              "\\nonesttables",
+              "\\rtlrow",
+              "\\tabsnoovrlp",
+              "\\taprtl",
+              "\\tcelld",
+              "\\tdfrmtxtBottom",
+              "\\tdfrmtxtLeft",
+              "\\tdfrmtxtRight",
+              "\\tdfrmtxtTop",
+              "\\tphcol",
+              "\\tphmrg",
+              "\\tphpg",
+              "\\tposnegx",
+              "\\tposnegy",
+              "\\tposxc",
+              "\\tposxi",
+              "\\tposxl",
+              "\\tposx",
+              "\\tposxo",
+              "\\tposxr",
+              "\\tposy",
+              "\\tposyb",
+              "\\tposyc",
+              "\\tposyil",
+              "\\tposyin",
+              "\\tposyoutv",
+              "\\tposyt",
+              "\\tpvmrg",
+              "\\tpvpara",
+              "\\tpvpg",
+              "\\trautofit",
+              "\\trbrdrb",
+              "\\trbrdrh",
+              "\\trbrdrl",
+              "\\trbrdrr",
+              "\\trbrdrt",
+              "\\trbrdrv",
+              "\\trftsWidthA",
+              "\\trftsWidthB",
+              "\\trftsWidth",
+              "\\trgaph",
+              "\\trhdr",
+              "\\trkeep",
+              "\\trleft",
+              "\\trowd",
+              "\\trpaddb",
+              "\\trpaddfb",
+              "\\trpaddfl",
+              "\\trpaddfr",
+              "\\trpaddft",
+              "\\trpaddl",
+              "\\trpaddr",
+              "\\trpaddt",
+              "\\trqc",
+              "\\trql",
+              "\\trqr",
+              "\\trrh",
+              "\\trspdb",
+              "\\trspdfb",
+              "\\trspdfl",
+              "\\trspdfr",
+              "\\trspdft",
+              "\\trspdl",
+              "\\trspdr",
+              "\\trspdt",
+              "\\trwWidthA",
+              "\\trwWidthB",
+              "\\trwWidth"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Table of Contents Entries",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\tc",
+              "\\tcf",
+              "\\tcl",
+              "\\tcn"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Tabs",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\tb",
+              "\\tldot",
+              "\\tleq",
+              "\\tlhyph",
+              "\\tlmdot",
+              "\\tlth",
+              "\\tlul",
+              "\\tqc",
+              "\\tqdec",
+              "\\tqr",
+              "\\tx"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Track Changes (Revision Marks)",
+            "Type": "ReservedWord",
+            "Words": [
+              "\revtbl"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Unicode RTF",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\ansicpg",
+              "\\uc",
+              "\\ud",
+              "\\u",
+              "\\upr"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Name": "Word 97-2000 RTF for Drawing Objects (Shapes)",
+            "Type": "ReservedWord",
+            "Words": [
+              "\\background",
+              "\\hlfr",
+              "\\hlloc",
+              "\\hlsrc",
+              "\\shpbottom",
+              "\\shpbxcolumn",
+              "\\shpbxignore",
+              "\\shpbxmargin",
+              "\\shpbxpage",
+              "\\shpbyignore",
+              "\\shpbymargin",
+              "\\shpbypage",
+              "\\shpbypara",
+              "\\shpfblwtxt",
+              "\\shpfhdr",
+              "\\shpgrp",
+              "\\shpleft",
+              "\\shplid",
+              "\\shplockanchor",
+              "\\shpright",
+              "\\shprslt",
+              "\\shptop",
+              "\\shptxt",
+              "\\shpwrk",
+              "\\shpwr",
+              "\\shpz"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "'",
+              "!",
+              "-",
+              "*",
+              ",",
+              ".",
+              ":",
+              ";",
+              "\\",
+              "_",
+              "{",
+              "|",
+              "}",
+              "~"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\"
+        },
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  }
+}

@@ -4635,8 +4635,9 @@ end;
 
 procedure TCustomTextEditor.CodeFoldingResetCaches;
 var
-  LIndex, LIndexRange, LLength: Integer;
+  LIndex, {LIndexRange,} LLength: Integer;
   LCodeFoldingRange: TTextEditorCodeFoldingRange;
+  LShowTreeLine: Boolean;
 begin
   if not FCodeFolding.Visible then
     Exit;
@@ -4644,7 +4645,12 @@ begin
   FCodeFoldings.Exists := False;
   LLength := FLines.Count + 1;
   SetLength(FCodeFoldings.TreeLine, 0);
-  SetLength(FCodeFoldings.TreeLine, LLength);
+
+  LShowTreeLine := cfoShowTreeLine in FCodeFolding.Options;
+
+  if LShowTreeLine then
+    SetLength(FCodeFoldings.TreeLine, LLength);
+
   SetLength(FCodeFoldings.RangeFromLine, 0);
   SetLength(FCodeFoldings.RangeFromLine, LLength);
   SetLength(FCodeFoldings.RangeToLine, 0);
@@ -4657,24 +4663,43 @@ begin
     LCodeFoldingRange := FCodeFoldings.AllRanges[LIndex];
 
     if Assigned(LCodeFoldingRange) then
-      if (not LCodeFoldingRange.ParentCollapsed) and ((LCodeFoldingRange.FromLine <> LCodeFoldingRange.ToLine) or
+    begin
+      if not LCodeFoldingRange.ParentCollapsed and
+        ((LCodeFoldingRange.FromLine <> LCodeFoldingRange.ToLine) or
         Assigned(LCodeFoldingRange.RegionItem) and LCodeFoldingRange.RegionItem.TokenEndIsPreviousLine and
         (LCodeFoldingRange.FromLine = LCodeFoldingRange.ToLine)) then
+      begin
         if (LCodeFoldingRange.FromLine > 0) and (LCodeFoldingRange.FromLine <= LLength) then
         begin
           FCodeFoldings.RangeFromLine[LCodeFoldingRange.FromLine] := LCodeFoldingRange;
           FCodeFoldings.Exists := True;
 
           if LCodeFoldingRange.Collapsable then
-          begin
-            for LIndexRange := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine - 1 do
-              FCodeFoldings.TreeLine[LIndexRange] := True;
-
             FCodeFoldings.RangeToLine[LCodeFoldingRange.ToLine] := LCodeFoldingRange;
-          end;
         end;
+      end;
+    end;
 
     Dec(LIndex);
+  end;
+
+  if LShowTreeLine then
+  begin
+    LIndex := 1;
+
+    while LIndex <= LLength do
+    begin
+      LCodeFoldingRange := FCodeFoldings.RangeFromLine[LIndex];
+
+      Inc(LIndex);
+
+      if Assigned(LCodeFoldingRange) then
+      while (LIndex <= LLength) and (FCodeFoldings.RangeToLine[LIndex] <> LCodeFoldingRange) do
+      begin
+        FCodeFoldings.TreeLine[LIndex] := True;
+        Inc(LIndex);
+      end;
+    end;
   end;
 end;
 
@@ -7902,6 +7927,7 @@ end;
 procedure TCustomTextEditor.OnCodeFoldingDelayTimer(ASender: TObject); //FI:O804 Method parameter is declared but never used
 begin
   FCodeFoldings.DelayTimer.Enabled := False;
+
   if FCodeFoldings.Rescan then
     RescanCodeFoldingRanges;
 end;
@@ -8180,7 +8206,7 @@ var
             if not LCodeFoldingRange.RegionItem.BreakCharFollows or
               LCodeFoldingRange.RegionItem.BreakCharFollows and IsWholeWord(LPBookmarkText - 1, LPText) then
             begin
-              LOpenTokenFoldRangeList.Remove(LCodeFoldingRange);
+              LOpenTokenFoldRangeList.RemoveItem(LCodeFoldingRange, TList.TDirection.FromEnd);
               Dec(LFoldCount);
 
               if not LCodeFoldingRange.IsExtraTokenFound and
@@ -8193,30 +8219,31 @@ var
               SetCodeFoldingRangeToLine(LCodeFoldingRange);
 
               { Check if the code folding ranges have shared close }
-              if LOpenTokenFoldRangeList.Count > 0 then
-                for LItemIndex := LOpenTokenFoldRangeList.Count - 1 downto 0 do
+              if FHighlighter.IsSharedCloseFound and (LOpenTokenFoldRangeList.Count > 0) then
+              for LItemIndex := LOpenTokenFoldRangeList.Count - 1 downto 0 do
+              begin
+                LCodeFoldingRangeLast := LOpenTokenFoldRangeList.Items[LItemIndex];
+
+                if Assigned(LCodeFoldingRangeLast.RegionItem) and LCodeFoldingRangeLast.RegionItem.SharedClose then
                 begin
-                  LCodeFoldingRangeLast := LOpenTokenFoldRangeList.Items[LItemIndex];
-                  if Assigned(LCodeFoldingRangeLast.RegionItem) and LCodeFoldingRangeLast.RegionItem.SharedClose then
+                  LPKeyWord := PChar(LCodeFoldingRangeLast.RegionItem.CloseToken);
+                  LPText := LPBookmarkText;
+
+                  while (LPText^ <> TControlCharacters.Null) and (LPKeyWord^ <> TControlCharacters.Null) and
+                    (CaseUpper(LPText^) = LPKeyWord^) do
                   begin
-                    LPKeyWord := PChar(LCodeFoldingRangeLast.RegionItem.CloseToken);
-                    LPText := LPBookmarkText;
+                    Inc(LPText);
+                    Inc(LPKeyWord);
+                  end;
 
-                    while (LPText^ <> TControlCharacters.Null) and (LPKeyWord^ <> TControlCharacters.Null) and
-                      (CaseUpper(LPText^) = LPKeyWord^) do
-                    begin
-                      Inc(LPText);
-                      Inc(LPKeyWord);
-                    end;
-
-                    if LPKeyWord^ = TControlCharacters.Null then
-                    begin
-                      SetCodeFoldingRangeToLine(LCodeFoldingRangeLast);
-                      LOpenTokenFoldRangeList.Remove(LCodeFoldingRangeLast);
-                      Dec(LFoldCount);
-                    end;
+                  if LPKeyWord^ = TControlCharacters.Null then
+                  begin
+                    SetCodeFoldingRangeToLine(LCodeFoldingRangeLast);
+                    LOpenTokenFoldRangeList.RemoveItem(LCodeFoldingRangeLast, TList.TDirection.FromEnd);
+                    Dec(LFoldCount);
                   end;
                 end;
+              end;
 
               if not LCodeFoldingRange.RegionItem.NoDuplicateClose then
                 LPText := LPBookmarkText; { Go back where we were }
@@ -8396,7 +8423,7 @@ var
                 if Assigned(LCodeFoldingRange) and (LCodeFoldingRange.RegionItem.BreakIfNotFoundBeforeNextRegion <> '')
                   and not LCodeFoldingRange.IsExtraTokenFound and not LRegionItem.RemoveRange then
                 begin
-                  LOpenTokenFoldRangeList.Remove(LCodeFoldingRange);
+                  LOpenTokenFoldRangeList.RemoveItem(LCodeFoldingRange, TList.TDirection.FromEnd);
                   Dec(LFoldCount);
                 end;
 
@@ -8415,7 +8442,7 @@ var
 
                 if LRegionItem.OpenTokenBreaksLine and LRegionItem.RemoveRange then
                 begin
-                  LOpenTokenFoldRangeList.Remove(LCodeFoldingRange);
+                  LOpenTokenFoldRangeList.RemoveItem(LCodeFoldingRange, TList.TDirection.FromEnd);
                   Dec(LFoldCount);
                 end;
 
@@ -8744,7 +8771,7 @@ var
             if LLastFoldRange.RegionItem.OpenIsClose then
               LLastFoldRange.ToLine := LLine;
 
-            LOpenTokenFoldRangeList.Remove(LLastFoldRange);
+            LOpenTokenFoldRangeList.RemoveItem(LLastFoldRange, TList.TDirection.FromEnd);
             Dec(LFoldCount);
             RegionItemsClose;
           end;
@@ -8895,7 +8922,7 @@ var
           while LFoldRangeList.Count > 0 do
           begin
             LLastFoldRange.ToLine := LLine - 1;
-            LFoldRangeList.Remove(LLastFoldRange);
+            LFoldRangeList.RemoveItem(LLastFoldRange, TList.TDirection.FromEnd);
 
             if LFoldRangeList.Count > 0 then
               LLastFoldRange := TTextEditorCodeFoldingRange(LFoldRangeList.Last);
@@ -8909,7 +8936,7 @@ var
             while (LFoldRangeList.Count > 0) and (LLastFoldRange.FoldRangeLevel > LCharCount) do
             begin
               LLastFoldRange.ToLine := LLine - 1;
-              LFoldRangeList.Remove(LLastFoldRange);
+              LFoldRangeList.RemoveItem(LLastFoldRange, TList.TDirection.FromEnd);
 
               if LFoldRangeList.Count > 0 then
                 LLastFoldRange := TTextEditorCodeFoldingRange(LFoldRangeList.Last);
@@ -8959,7 +8986,7 @@ var
           Inc(LLine);
           LLine := Min(LLine, FLines.Count);
           LFoldRange.ToLine := LLine;
-          LFoldRangeList.Remove(LFoldRange);
+          LFoldRangeList.RemoveItem(LFoldRange, TList.TDirection.FromEnd);
         end;
       end;
     finally

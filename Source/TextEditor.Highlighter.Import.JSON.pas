@@ -784,6 +784,8 @@ begin
   begin
     LFoldRegionArray := ACodeFoldingObject['FoldRegion'].ArrayValue;
 
+    FHighlighter.IsSharedCloseFound := False;
+
     for LIndex := 0 to LFoldRegionArray.Count - 1 do
     begin
       LJSONDataValue := LFoldRegionArray.Items[LIndex];
@@ -828,6 +830,10 @@ begin
         OpenTokenBeginningOfLine := LMemberObject.ValueBoolean['OpenTokenBeginningOfLine'];
         CloseTokenBeginningOfLine := LMemberObject.ValueBoolean['CloseTokenBeginningOfLine'];
         SharedClose := LMemberObject.ValueBoolean['SharedClose'];
+
+        if SharedClose then
+          FHighlighter.IsSharedCloseFound := True;
+
         OpenIsClose := LMemberObject.ValueBoolean['OpenIsClose'];
         OpenTokenCanBeFollowedBy := LMemberObject['OpenTokenCanBeFollowedBy'].Value;
         TokenEndIsPreviousLine := LMemberObject.ValueBoolean['TokenEndIsPreviousLine'];

@@ -280,6 +280,7 @@ begin
   for LIndex := 0 to FSubCodeFoldingRanges.Count - 1 do
   begin
     LCodeFoldingRange := FSubCodeFoldingRanges[LIndex];
+
     if Assigned(LCodeFoldingRange) then
     begin
       LCodeFoldingRange.MoveChildren(ABy);

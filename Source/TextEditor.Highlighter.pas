@@ -30,6 +30,7 @@ type
     FFoldKeyChars: TTextEditorCharSet;
     FFoldOpenKeyChars: TTextEditorCharSet;
     FFoldTags: Boolean;
+    FIsSharedCloseFound: Boolean;
     FJSON: TStrings;
     FLine: PChar;
     FLines: TTextEditorLines;
@@ -107,6 +108,7 @@ type
     property FoldKeyChars: TTextEditorCharSet read FFoldKeyChars write FFoldKeyChars;
     property FoldOpenKeyChars: TTextEditorCharSet read FFoldOpenKeyChars write FFoldOpenKeyChars;
     property FoldTags: Boolean read FFoldTags write FFoldTags default False;
+    property IsSharedCloseFound: Boolean read FIsSharedCloseFound write FIsSharedCloseFound;
     property Lines: TTextEditorLines read FLines write FLines;
     property Loaded: Boolean read FLoaded write FLoaded;
     property Loading: Boolean read FLoading write FLoading;

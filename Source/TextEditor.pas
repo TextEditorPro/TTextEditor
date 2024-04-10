@@ -11357,7 +11357,7 @@ var
           LMenuItem.Caption := ' ';
         LMenuItem.Tag := LIndex;
         LMenuItem.OnClick := DoOnBookmarkPopup;
-        LMenuItem.ImageIndex := LPopupMenu.Images.AddImage(LeftMargin.Bookmarks.Images, LIndex);
+        LMenuItem.ImageIndex := LPopupMenu.Images.AddImage(LeftMargin.Bookmarks.Images, LIndex) - 1;
         LPopupMenu.Items.Add(LMenuItem);
       end;
     end

@@ -11342,34 +11342,56 @@ var
 
     LPopupMenu := TPopupMenu.Create(Self);
     LPopupMenu.Images := TImageList.Create(LPopupMenu);
-    with LPopupMenu.Images do
-    begin
-      ColorDepth := cd8Bit;
-      Height := FImagesBookmark.Height;
-      Width := FImagesBookmark.Width;
-    end;
 
-    for LIndex := 9 to 13 do
+    if Assigned(LeftMargin.Bookmarks.Images) then
     begin
-      LBitmap := FImagesBookmark.GetBitmap(LIndex, FColors.LeftMarginBackground);
-      try
-        LPopupMenu.Images.Add(LBitmap, nil);
-      finally
-        FreeAndNil(LBitmap);
+      LPopupMenu.Images.ColorDepth := LeftMargin.Bookmarks.Images.ColorDepth;
+      // All that exceeds first 9 bookmarks is "colored"
+      for LIndex := 9 to LeftMargin.Bookmarks.Images.Count - 1 do
+      begin
+        LMenuItem := TMenuItem.Create(LPopupMenu);
+        // Use names, if image list supports it
+        if LeftMargin.Bookmarks.Images.IsImageNameAvailable then
+          LMenuItem.Caption := LeftMargin.Bookmarks.Images.GetNameByIndex(LIndex)
+        else
+          LMenuItem.Caption := ' ';
+        LMenuItem.Tag := LIndex;
+        LMenuItem.OnClick := DoOnBookmarkPopup;
+        LMenuItem.ImageIndex := LPopupMenu.Images.AddImage(LeftMargin.Bookmarks.Images, LIndex);
+        LPopupMenu.Items.Add(LMenuItem);
       end;
-    end;
-
-    LBookmarkColors := [STextEditorBookmarkYellow, STextEditorBookmarkRed, STextEditorBookmarkGreen,
-      STextEditorBookmarkBlue, STextEditorBookmarkPurple];
-
-    for LIndex := 0 to Length(LBookmarkColors) - 1 do
+    end
+    else
     begin
-      LMenuItem := TMenuItem.Create(LPopupMenu);
-      LMenuItem.Caption := LBookmarkColors[LIndex];
-      LMenuItem.ImageIndex := LIndex;
-      LMenuItem.Tag := 9 + LIndex;
-      LMenuItem.OnClick := DoOnBookmarkPopup;
-      LPopupMenu.Items.Add(LMenuItem);
+      with LPopupMenu.Images do
+      begin
+        ColorDepth := cd8Bit;
+        Height := FImagesBookmark.Height;
+        Width := FImagesBookmark.Width;
+      end;
+
+      for LIndex := 9 to 13 do
+      begin
+        LBitmap := FImagesBookmark.GetBitmap(LIndex, FColors.LeftMarginBackground);
+        try
+          LPopupMenu.Images.Add(LBitmap, nil);
+        finally
+          FreeAndNil(LBitmap);
+        end;
+      end;
+
+      LBookmarkColors := [STextEditorBookmarkYellow, STextEditorBookmarkRed, STextEditorBookmarkGreen,
+        STextEditorBookmarkBlue, STextEditorBookmarkPurple];
+
+      for LIndex := 0 to Length(LBookmarkColors) - 1 do
+      begin
+        LMenuItem := TMenuItem.Create(LPopupMenu);
+        LMenuItem.Caption := LBookmarkColors[LIndex];
+        LMenuItem.ImageIndex := LIndex;
+        LMenuItem.Tag := 9 + LIndex;
+        LMenuItem.OnClick := DoOnBookmarkPopup;
+        LPopupMenu.Items.Add(LMenuItem);
+      end;
     end;
 {$IFDEF ALPHASKINS}
     if Assigned(SkinData.SkinManager) then
@@ -13776,22 +13798,28 @@ var
     LY: Integer;
     LRow: Integer;
   begin
-    CreateBookmarkImages;
+    if ABookmark.ImageIndex >= 0 then
+    begin
+      CreateBookmarkImages;
 
-    LRow := AMarkRow;
+      LRow := AMarkRow;
 
-    if FWordWrap.Active then
-      LRow := GetViewLineNumber(LRow);
+      if FWordWrap.Active then
+        LRow := GetViewLineNumber(LRow);
 
-    LY := (LRow - TopLine) * LLineHeight;
+      LY := (LRow - TopLine) * LLineHeight;
 
-    if FRuler.Visible then
-      Inc(LY, FRuler.Height);
+      if FRuler.Visible then
+        Inc(LY, FRuler.Height);
 
-    FImagesBookmark.Draw(Canvas, ABookmark.ImageIndex, AClipRect.Left + FLeftMargin.Bookmarks.LeftMargin,
-      LY, LLineHeight, clFuchsia);
+      if Assigned(LeftMargin.Bookmarks.Images) and (ABookmark.ImageIndex < LeftMargin.Bookmarks.Images.Count) then
+        LeftMargin.Bookmarks.Images.Draw(Canvas, AClipRect.Left + FLeftMargin.Bookmarks.LeftMargin, LY, ABookmark.ImageIndex)
+      else
+        FImagesBookmark.Draw(Canvas, ABookmark.ImageIndex, AClipRect.Left + FLeftMargin.Bookmarks.LeftMargin,
+          LY, LLineHeight, clFuchsia);
 
-    Inc(AOverlappingOffset, FLeftMargin.Marks.OverlappingOffset);
+      Inc(AOverlappingOffset, FLeftMargin.Marks.OverlappingOffset);
+    end;
   end;
 
   procedure DrawMark(const AMark: TTextEditorMark; const AOverlappingOffset: Integer; const AMarkRow: Integer);

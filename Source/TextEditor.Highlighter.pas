@@ -154,43 +154,38 @@ constructor TTextEditorHighlighter.Create(AOwner: TWinControl);
 begin
   inherited Create;
 
-  FEditor := AOwner;
+  FAllDelimiters := TCharacterSets.DefaultDelimiters + TCharacterSets.AbsoluteDelimiters;
+  FBeginningOfLine := True;
   FChanged := False;
+  FCodeFoldingRangeCount := 0;
+  FEditor := AOwner;
+  FEndOfLine := False;
+  FExludedWordBreakCharacters := [];
+  FLoaded := False;
+  FLoading := False;
+  FMaxLengthOfContinuousString := 500;
+  FPreviousEndOfLine := False;
+  FRange := MainRules;
   FRightToLeftToken := False;
-
-  FJSON := TStringList.Create;
-  FJSON.TrailingLineBreak := False;
 
   FAttributes := TStringList.Create;
   FAttributes.Duplicates := dupIgnore;
   FAttributes.Sorted := False;
 
-  FCodeFoldingRangeCount := 0;
-  FMaxLengthOfContinuousString := 500;
+  FColors := TTextEditorHighlighterColors.Create(Self);
 
   FComments := TTextEditorHighlighterComments.Create;
 
   FCompletionProposalSkipRegions := TTextEditorSkipRegions.Create(TTextEditorSkipRegionItem);
 
+  FJSON := TStringList.Create;
+  FJSON.TrailingLineBreak := False;
+
   FMainRules := TTextEditorRange.Create;
   FMainRules.Parent := FMainRules;
 
-  FEndOfLine := False;
-  FBeginningOfLine := True;
-  FPreviousEndOfLine := False;
-  FRange := MainRules;
-
-  FColors := TTextEditorHighlighterColors.Create(Self);
   FMatchingPairs := TList.Create;
-
   FTemporaryTokens := TList.Create;
-
-  FAllDelimiters := TCharacterSets.DefaultDelimiters + TCharacterSets.AbsoluteDelimiters;
-
-  FLoading := False;
-  FLoaded := False;
-
-  FExludedWordBreakCharacters := [];
 end;
 
 destructor TTextEditorHighlighter.Destroy;
@@ -300,11 +295,11 @@ begin
   FRunPosition := 0;
   FTokenPosition := 0;
   FEndOfLine := False;
-
   FBeginningOfLine := True;
   FPreviousEndOfLine := False;
   FRightToLeftToken := False;
   FToken := nil;
+
   Next;
 end;
 
@@ -712,10 +707,12 @@ begin
       for LLine := FLines.Count - 1 downto 0 do
       begin
         LTextLine := FLines[LLine];
+
         LPText := PChar(LTextLine);
         LPStart := LPText;
         Inc(LPText, Length(LTextLine));
         LInside := False;
+
         while LPText > LPStart do
         begin
           if (LPText^ = '"') or (LPText^ = '`') and ((LPText - 1)^ = '`') then

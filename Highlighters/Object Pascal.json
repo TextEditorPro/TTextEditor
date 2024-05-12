@@ -46,7 +46,7 @@
               "Open": "//"
             }
           },
-					{
+          {
             "Type": "String",
             "Attributes": {
               "Element": "String"
@@ -494,6 +494,15 @@
                   ],
                   "Attributes": {
                     "Element": "ReservedWord"
+                  }
+                }
+              ],
+              "Set": [
+                {
+                  "Type": "Numbers",
+                  "Symbols": ".0123456789E",
+                  "Attributes": {
+                    "Element": "Number"
                   }
                 }
               ]

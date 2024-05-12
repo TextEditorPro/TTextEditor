@@ -5,7 +5,7 @@
 interface
 
 uses
-  Winapi.Messages, System.Classes, System.Types, Vcl.Controls, TextEditor
+  Winapi.Messages, System.Classes, System.Types, Vcl.Controls, Vcl.Forms, TextEditor
 {$IFDEF ALPHASKINS}
   , acSBUtils, sCommonData
 {$ENDIF};
@@ -14,9 +14,7 @@ type
   [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
   TTextEditorCompareScrollBar = class(TCustomControl)
   strict private
-{$IFDEF ALPHASKINS}
-    FSkinData: TsScrollWndData;
-{$ENDIF}
+    FBorderStyle: TBorderStyle;
     FEditorLeft: TTextEditor;
     FEditorRight: TTextEditor;
     FMouseDownY: Integer;
@@ -26,6 +24,7 @@ type
     FScrollBarTopLine: Integer;
 {$IFDEF ALPHASKINS}
     FScrollWnd: TacScrollWnd;
+    FSkinData: TsScrollWndData;
 {$ENDIF}
     FScrollBarVisible: Boolean;
     FSystemMetricsCYDRAG: Integer;
@@ -34,6 +33,7 @@ type
     procedure DoOnScrollBarClick(const Y: Integer);
     procedure DragMinimap(const AY: Integer);
     procedure FillRect(const ARect: TRect);
+    procedure SetBorderStyle(const AValue: TBorderStyle);
     procedure SetEditorLeft(const AEditor: TTextEditor);
     procedure SetTopLine(const AValue: Integer);
     procedure WMEraseBkgnd(var AMessage: TWMEraseBkgnd); message WM_ERASEBKGND;
@@ -60,6 +60,8 @@ type
     property TopLine: Integer read FTopLine write SetTopLine;
   published
     property Align;
+    property BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default bsSingle;
+    property BorderWidth;
     property EditorLeft: TTextEditor read FEditorLeft write SetEditorLeft;
     property EditorRight: TTextEditor read FEditorRight write FEditorRight;
     property ScrollBarVisible: Boolean read FScrollBarVisible write FScrollBarVisible default False;
@@ -70,7 +72,7 @@ implementation
 uses
   Winapi.Windows, System.Math, System.SysUtils, System.UITypes, Vcl.Graphics, TextEditor.Consts, TextEditor.Types
 {$IFDEF ALPHASKINS}
-  , Winapi.CommCtrl, Vcl.Forms, sConst, sMessages, sStyleSimply, sVCLUtils
+  , Winapi.CommCtrl, sConst, sMessages, sStyleSimply, sVCLUtils
 {$ENDIF};
 
 constructor TTextEditorCompareScrollBar.Create(AOwner: TComponent);
@@ -82,6 +84,7 @@ begin
 
   inherited Create(AOwner);
 
+  FBorderStyle := bsSingle;
   FScrollBarVisible := False;
   Color := TColors.SysWindow;
   DoubleBuffered := False;
@@ -91,7 +94,8 @@ end;
 
 procedure TTextEditorCompareScrollBar.CreateParams(var AParams: TCreateParams);
 const
-  LClassStylesOff = CS_VREDRAW or CS_HREDRAW;
+  ClassStylesOff = CS_VREDRAW or CS_HREDRAW;
+  BorderStyles: array[TBorderStyle] of DWORD = (0, WS_BORDER);
 begin
   StrDispose(WindowText);
   WindowText := nil;
@@ -100,10 +104,10 @@ begin
 
   with AParams do
   begin
-    WindowClass.Style := WindowClass.Style and not LClassStylesOff;
-    Style := Style or WS_BORDER or WS_CLIPCHILDREN;
+    WindowClass.Style := WindowClass.Style and not ClassStylesOff;
+    Style := Style or BorderStyles[FBorderStyle];
 
-    if NewStyleControls and Ctl3D then
+    if NewStyleControls and Ctl3D and (FBorderStyle = bsSingle) then
     begin
       Style := Style and not WS_BORDER;
       ExStyle := ExStyle or WS_EX_CLIENTEDGE;
@@ -274,6 +278,16 @@ end;
 procedure TTextEditorCompareScrollBar.WMSize(var AMessage: TWMSize);
 begin
   Invalidate;
+end;
+
+procedure TTextEditorCompareScrollBar.SetBorderStyle(const AValue: TBorderStyle);
+begin
+  if FBorderStyle <> AValue then
+  begin
+    FBorderStyle := AValue;
+
+    RecreateWnd;
+  end;
 end;
 
 procedure TTextEditorCompareScrollBar.SetEditorLeft(const AEditor: TTextEditor);

@@ -285,6 +285,7 @@ begin
       while (LCurrentTokenNode.NextNodes.Count > 0) and (APLine[ARun] <> TControlCharacters.Null) do
       begin
         Inc(ARun);
+
         LCurrentTokenNode := LCurrentTokenNode.NextNodes.FindNode(ACurrentRange.CaseFunct(APLine[ARun]));
 
         if not Assigned(LCurrentTokenNode) then
@@ -317,7 +318,7 @@ begin
       if APLine[ARun] <> TControlCharacters.Null then
         Inc(ARun);
 
-      if (LFindTokenNode.Char <> '0') and ((LFindTokenNode.BreakType = btAny) or (APLine[ARun] in ACurrentRange.Delimiters)) then
+      if (LFindTokenNode.BreakType = btAny) or (APLine[ARun] in ACurrentRange.Delimiters) then
       begin
         AToken := LFindTokenNode.Token;
         Exit(True);
@@ -470,6 +471,7 @@ begin
   begin
     LMiddle := LLow + (LHigh - LLow) shr 1;
     LToken := TTextEditorToken(FTokens.Items[LMiddle]);
+
     LCompare := CompareStr(LToken.Symbol, AToken.Symbol);
 
     if LCompare < 0 then
@@ -497,8 +499,8 @@ begin
   while LLow <= LHigh do
   begin
     LMiddle := LLow + (LHigh - LLow) shr 1;
-
     LToken := TTextEditorToken(FTokens.Items[LMiddle]);
+
     LCompare := CompareStr(LToken.Symbol, AString);
 
     if LCompare = 0 then
@@ -675,12 +677,15 @@ begin
     for LIndex2 := 0 to LRange.FOpenToken.SymbolCount - 1 do
     begin
       LTempToken := TTextEditorToken.Create(LRange.OpenToken, LIndex2);
+
       LToken := InsertTokenDefault(LTempToken, Self, LRange.Attribute);
       LToken.OpenRule := LRange;
 
       LTempToken := TTextEditorToken.Create(LRange.CloseToken, LIndex2);
+
       LToken.ClosingToken := InsertTokenDefault(LTempToken, LRange, LRange.Attribute);
     end;
+
     LRange.Prepare;
   end;
 
@@ -693,6 +698,7 @@ begin
     begin
       LTempToken := TTextEditorToken.Create(LKeyList.Attribute);
       LTempToken.Symbol := LKeyList.KeyList[LIndex2];
+
       InsertToken(LTempToken, Self);
     end;
   end;
@@ -702,6 +708,7 @@ begin
   begin
     LTempToken := TTextEditorToken(FTokens[LIndex]);
     LLength := Length(LTempToken.Symbol);
+
     if LLength < 1 then
       Continue;
 
@@ -725,9 +732,11 @@ begin
       if not Assigned(SymbolList[LAnsiChar]) then
       begin
         if LLength = 1 then
-          FSymbolList[LAnsiChar] := TTextEditorParser.Create(LFirstChar, LTempToken, LBreakType)
+          LToken := LTempToken
         else
-          FSymbolList[LAnsiChar] := TTextEditorParser.Create(LFirstChar, FDefaultToken, LBreakType);
+          LToken := FDefaultToken;
+
+        FSymbolList[LAnsiChar] := TTextEditorParser.Create(LFirstChar, LToken, LBreakType);
       end;
 
       if LSymbol[LLength] in FDelimiters then
@@ -749,10 +758,10 @@ begin
       LSet := TTextEditorSet(FSets.List[LIndex2]);
 
       if LAnsiChar in LSet.CharSet then
-        if not Assigned(SymbolList[LAnsiChar]) then
-          FSymbolList[LAnsiChar] := TTextEditorParser.Create(LSet)
+        if Assigned(SymbolList[LAnsiChar]) then
+          TTextEditorParser(SymbolList[LAnsiChar]).AddSet(LSet)
         else
-          TTextEditorParser(SymbolList[LAnsiChar]).AddSet(LSet);
+          FSymbolList[LAnsiChar] := TTextEditorParser.Create(LSet);
     end;
   end;
 

@@ -4430,6 +4430,7 @@ begin
     LProgressInc := FLines.Count div 100;
   end;
 
+  if FLines.Count > 0 then
   repeat
     with FLines.Items^[Result] do
     begin
@@ -4756,6 +4757,7 @@ begin
     end;
 
     LCursorIndex := GetMouseScrollCursorIndex;
+
     case LCursorIndex of
       TMouseWheelScrollCursors.NorthWest, TMouseWheelScrollCursors.West, TMouseWheelScrollCursors.SouthWest:
         FScrollHelper.Delta.X := (APoint.X - FMouse.ScrollingPoint.X) div FPaintHelper.CharWidth - 1;
@@ -10519,6 +10521,7 @@ begin
   end;
 
   Result := inherited DoMouseWheel(AShift, AWheelDelta, AMousePos);
+
   if Result then
     Exit;
 
@@ -11247,6 +11250,11 @@ var
     LFoldingRange: TTextEditorCodeFoldingRange;
     LRegionItem: TTextEditorCodeFoldingRegionItem;
   begin
+    Result := False;
+
+    if Length(FCodeFoldings.RangeToLine) = 0 then
+      Exit;
+
     LIndex := ALine;
 
     while (LIndex > 0) and not Assigned(FCodeFoldings.RangeToLine[LIndex]) do
@@ -13789,7 +13797,7 @@ end;
 
 procedure TCustomTextEditor.PaintLeftMargin(const AClipRect: TRect; const AFirstLine, ALastTextLine, ALastLine: Integer);
 var
-  LLine, LPreviousLine: Integer;
+  LLine, LPreviousLine, LCompareLine: Integer;
   LLineRect: TRect;
   LLineHeight: Integer;
 
@@ -13985,7 +13993,14 @@ var
           LLineNumber := ''
         else
         if LCompareMode then
-          LLineNumber := FLeftMargin.FormatLineNumber(LLine - FCompareLineNumberOffsetCache[LIndex]);
+        begin
+          if LIndex < Length(FCompareLineNumberOffsetCache) then
+            LCompareLine := FCompareLineNumberOffsetCache[LIndex]
+          else
+            LCompareLine := 0;
+
+          LLineNumber := FLeftMargin.FormatLineNumber(LLine - LCompareLine);
+        end;
 
         LLength := Length(LLineNumber);
         LPLineNumber := PChar(LLineNumber);

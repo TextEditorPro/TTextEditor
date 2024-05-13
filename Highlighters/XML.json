@@ -47,7 +47,6 @@
             },
             "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?;'\".><# ",
             "Properties": {
-              "CloseOnEndOfLine": true,
               "UseDelimitersForText": true
             },
             "TokenRange": {

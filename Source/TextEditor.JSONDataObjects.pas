@@ -338,8 +338,8 @@ type
     FNames: PJSONStringArray;
     function AddItem(const AName: string): PJSONDataValue;
     function FindItem(const AName: string; var Item: PJSONDataValue): Boolean;
-    function GetItem(const Index: Integer): PJSONDataValue;
-    function GetName(const Index: Integer): string;
+    function GetItem(const AIndex: Integer): PJSONDataValue;
+    function GetName(const AIndex: Integer): string;
     function GetPath(const ANamePath: string): TJSONDataValueHelper;
     function GetType(const AName: string): TJSONDataType;
     function GetValue(const AName: string): TJSONDataValueHelper;
@@ -379,7 +379,7 @@ type
     function IndexOf(const AName: string): Integer;
     procedure Assign(const ASource: TJSONObject);
     procedure Clear;
-    procedure Delete(const Index: Integer);
+    procedure Delete(const AIndex: Integer);
     procedure Remove(const AName: string);
     property Capacity: Integer read FCapacity write SetCapacity;
     property Count: Integer read FCount;
@@ -475,7 +475,7 @@ type
 
   TJSONToken = record
     Kind: TJSONTokenKind;
-    S: string;
+    Value: string;
   end;
 
   TJSONReader = class(TObject)
@@ -507,7 +507,7 @@ type
     procedure Parse(Data: TJSONBaseObject);
   end;
 
-  TUTF8JSONReader = class sealed(TJSONReader)
+  TJSONUTF8Reader = class sealed(TJSONReader)
   private
     FText: PByte;
     FTextEnd: PByte;
@@ -520,7 +520,7 @@ type
     constructor Create(S: PByte; Len: NativeInt);
   end;
 
-  TStringJSONReader = class sealed(TJSONReader)
+  TJSONStringReader = class sealed(TJSONReader)
   private
     FText: PChar;
     FTextEnd: PChar;
@@ -545,6 +545,7 @@ begin
   FLineNum := ALineNum;
   FColumn := AColumn;
   FPosition := APosition;
+
   if FLineNum > 0 then
     Message := Format('%s (%d, %d)', [Message, FLineNum, FColumn]);
 end;
@@ -556,6 +557,7 @@ begin
   FLineNum := ALineNum;
   FColumn := AColumn;
   FPosition := APosition;
+
   if FLineNum > 0 then
     Message := Format('%s (%d, %d)', [Message, FLineNum, FColumn]);
 end;
@@ -567,19 +569,22 @@ end;
 
 procedure SetValueStringUtf8(var S: string; P: PByte; Len: Integer);
 var
-  L: Integer;
+  LLength: Integer;
 begin
   if S <> '' then
     S := '';
+
   if (P = nil) or (Len = 0) then
     Exit;
+
   SetLength(S, Len);
 
-  L := Utf8ToUnicode(PWideChar(Pointer(S)), Len + 1, PAnsiChar(P), Len);
-  if L > 0 then
+  LLength := Utf8ToUnicode(PWideChar(Pointer(S)), Len + 1, PAnsiChar(P), Len);
+
+  if LLength > 0 then
   begin
-    if L - 1 <> Len then
-      SetLength(S, L - 1);
+    if LLength - 1 <> Len then
+      SetLength(S, LLength - 1);
   end
   else
     S := '';
@@ -591,10 +596,12 @@ var
 begin
   if (P = nil) or (Len = 0) then
     Exit;
+
   OldLen := Length(S);
   SetLength(S, OldLen + Len);
 
   L := Utf8ToUnicode(PWideChar(Pointer(S)) + OldLen, Len + 1, PAnsiChar(P), Len);
+
   if L > 0 then
   begin
     if L - 1 <> Len then
@@ -647,22 +654,26 @@ end;
 
 function GetHexDigits(P: PChar; Count: Integer; const Reader: TJSONReader): LongWord;
 var
-  Ch: Char;
+  LChar: Char;
 begin
   Result := 0;
+
   while Count > 0 do
   begin
-    Ch := P^;
+    LChar := P^;
+
     case P^ of
-      '0'..'9': Result := (Result shl 4) or LongWord(Ord(Ch) - Ord('0'));
-      'A'..'F': Result := (Result shl 4) or LongWord(Ord(Ch) - (Ord('A') - 10));
-      'a'..'f': Result := (Result shl 4) or LongWord(Ord(Ch) - (Ord('a') - 10));
+      '0'..'9': Result := (Result shl 4) or LongWord(Ord(LChar) - Ord('0'));
+      'A'..'F': Result := (Result shl 4) or LongWord(Ord(LChar) - (Ord('A') - 10));
+      'a'..'f': Result := (Result shl 4) or LongWord(Ord(LChar) - (Ord('a') - 10));
     else
       Break;
     end;
+
     Inc(P);
     Dec(Count);
   end;
+
   if Count > 0 then
     raise EJSONParserException.CreateResFmt(@RsInvalidHexNumber, [P^], Reader.FLineNum, Reader.GetLineColumn,
       Reader.GetPosition);
@@ -670,13 +681,14 @@ end;
 
 procedure AppendString(var S: string; P: PChar; Len: Integer);
 var
-  OldLen: Integer;
+  LLength: Integer;
 begin
   if (P = nil) or (Len = 0) then
     Exit;
-  OldLen := Length(S);
-  SetLength(S, OldLen + Len);
-  Move(P^, PChar(Pointer(S))[OldLen], Len * SizeOf(Char));
+
+  LLength := Length(S);
+  SetLength(S, LLength + Len);
+  Move(P^, PChar(Pointer(S))[LLength], Len * SizeOf(Char));
 end;
 
 class procedure TJSONReader.JSONStrToStr(P, EndP: PChar; FirstEscapeIndex: Integer; var S: string;
@@ -860,6 +872,7 @@ begin
         BufPos := 0;
       end;
     end;
+
     // append remaining buffer
     if BufPos > 0 then
     begin
@@ -870,10 +883,13 @@ begin
 
     // fast forward
     F := P;
+
     while (P < EndP) and (P^ <> Byte(Ord('\'))) do
       Inc(P);
+
     if P > F then
       AppendStringUtf8(S, F, P - F);
+
     if P >= EndP then
       Break;
   end;
@@ -889,7 +905,8 @@ begin
     ParseObjectBody(TJSONObject(Data));
     Accept(jtkRBrace);
   end
-  else if Data is TJSONArray then
+  else
+  if Data is TJSONArray then
   begin
     TJSONArray(Data).Clear;
     Next; // initialize Lexer
@@ -920,8 +937,8 @@ begin
   if FLook.Kind >= jtkIdent then
   begin
     FPropName := '';
-    Pointer(FPropName) := Pointer(FLook.S);
-    Pointer(FLook.S) := nil;
+    Pointer(FPropName) := Pointer(FLook.Value);
+    Pointer(FLook.Value) := nil;
     Next;
   end
   else
@@ -940,32 +957,27 @@ begin
         ParseObjectBody(Data.InternAddObject(FPropName));
         Accept(jtkRBrace);
       end;
-
     jtkLBracket:
       begin
         Accept(jtkLBracket);
         ParseArrayBody(Data.InternAddArray(FPropName));
         Accept(jtkRBracket);
       end;
-
     jtkNull:
       begin
         Data.InternAdd(FPropName, TJSONObject(nil));
         Next;
       end;
-
     jtkIdent, jtkString:
       begin
-        Data.InternAddItem(FPropName).InternSetValueTransfer(FLook.S);
+        Data.InternAddItem(FPropName).InternSetValueTransfer(FLook.Value);
         Next;
       end;
-
     jtkTrue:
       begin
         Data.InternAdd(FPropName, True);
         Next;
       end;
-
     jtkFalse:
       begin
         Data.InternAdd(FPropName, False);
@@ -997,32 +1009,27 @@ begin
         ParseObjectBody(Data.AddObject);
         Accept(jtkRBrace);
       end;
-
     jtkLBracket:
       begin
         Accept(jtkLBracket);
         ParseArrayBody(Data.AddArray);
         Accept(jtkRBracket);
       end;
-
     jtkNull:
       begin
         Data.Add(TJSONObject(nil));
         Next;
       end;
-
     jtkIdent, jtkString:
       begin
-        Data.Add(FLook.S);
+        Data.Add(FLook.Value);
         Next;
       end;
-
     jtkTrue:
       begin
         Data.Add(True);
         Next;
       end;
-
     jtkFalse:
       begin
         Data.Add(False);
@@ -1066,6 +1073,7 @@ begin
         TJSONBaseObject(FValue.ValueObject) := nil;
       end;
   end;
+
   FDataType := jdtNone;
 end;
 
@@ -1085,13 +1093,15 @@ end;
 
 procedure TJSONDataValue.SetValueArrayValue(const AValue: TJSONArray);
 var
-  LTyp: TJSONDataType;
+  LDataType: TJSONDataType;
 begin
-  LTyp := FDataType;
-  if (LTyp <> jdtArray) or (AValue <> FValue.ValueArray) then
+  LDataType := FDataType;
+
+  if (LDataType <> jdtArray) or (AValue <> FValue.ValueArray) then
   begin
-    if LTyp <> jdtNone then
+    if LDataType <> jdtNone then
       Clear;
+
     FDataType := jdtArray;
     TJSONArray(FValue.ValueArray) := AValue;
   end;
@@ -1113,13 +1123,15 @@ end;
 
 procedure TJSONDataValue.SetValueObjectValue(const AValue: TJSONObject);
 var
-  LTyp: TJSONDataType;
+  LDataType: TJSONDataType;
 begin
-  LTyp := FDataType;
-  if (LTyp <> jdtObject) or (AValue <> FValue.ValueObject) then
+  LDataType := FDataType;
+
+  if (LDataType <> jdtObject) or (AValue <> FValue.ValueObject) then
   begin
-    if LTyp <> jdtNone then
+    if LDataType <> jdtNone then
       Clear;
+
     FDataType := jdtObject;
     TJSONObject(FValue.ValueObject) := AValue;
   end;
@@ -1157,13 +1169,15 @@ end;
 
 procedure TJSONDataValue.SetValue(const AValue: string);
 var
-  LTyp: TJSONDataType;
+  LDataType: TJSONDataType;
 begin
-  LTyp := FDataType;
-  if (LTyp <> jdtString) or (AValue <> string(FValue.ValueString)) then
+  LDataType := FDataType;
+
+  if (LDataType <> jdtString) or (AValue <> string(FValue.ValueString)) then
   begin
-    if LTyp <> jdtNone then
+    if LDataType <> jdtNone then
       Clear;
+
     FDataType := jdtString;
     string(FValue.ValueString) := AValue;
   end;
@@ -1193,13 +1207,15 @@ end;
 
 procedure TJSONDataValue.SetValueBooleanValue(const AValue: Boolean);
 var
-  LTyp: TJSONDataType;
+  LDataType: TJSONDataType;
 begin
-  LTyp := FDataType;
-  if (LTyp <> jdtBool) or (AValue <> FValue.ValueBoolean) then
+  LDataType := FDataType;
+
+  if (LDataType <> jdtBool) or (AValue <> FValue.ValueBoolean) then
   begin
-    if LTyp <> jdtNone then
+    if LDataType <> jdtNone then
       Clear;
+
     FDataType := jdtBool;
     FValue.ValueBoolean := AValue;
   end;
@@ -1263,37 +1279,37 @@ class procedure TJSONBaseObject.EscapeStrToJSONStr(F, P, EndP: PChar; const Appe
 const
   HexChars: array [0 .. 15] of Char = '0123456789abcdef';
 var
-  Buf: TJSONOutputWriter.TJSONStringBuilder;
-  Ch: Char;
+  LStringBuilder: TJSONOutputWriter.TJSONStringBuilder;
+  LChar: Char;
 begin
-  Buf.Init;
+  LStringBuilder.Init;
   try
     repeat
       if P <> F then
-        Buf.Append(F, P - F);
+        LStringBuilder.Append(F, P - F);
       if P < EndP then
       begin
-        Ch := P^;
-        case Ch of
+        LChar := P^;
+        case LChar of
           #0 .. #7, #11, #14 .. #31:
             begin
-              Buf.Append('\u00', 4);
-              Buf.Append2(HexChars[Word(Ch) shr 4], HexChars[Word(Ch) and $F]);
+              LStringBuilder.Append('\u00', 4);
+              LStringBuilder.Append2(HexChars[Word(LChar) shr 4], HexChars[Word(LChar) and $F]);
             end;
           #8:
-            Buf.Append('\b', 2);
+            LStringBuilder.Append('\b', 2);
           #9:
-            Buf.Append('\t', 2);
+            LStringBuilder.Append('\t', 2);
           #10:
-            Buf.Append('\n', 2);
+            LStringBuilder.Append('\n', 2);
           #12:
-            Buf.Append('\f', 2);
+            LStringBuilder.Append('\f', 2);
           #13:
-            Buf.Append('\r', 2);
+            LStringBuilder.Append('\r', 2);
           '\':
-            Buf.Append('\\', 2);
+            LStringBuilder.Append('\\', 2);
           '"':
-            Buf.Append('\"', 2);
+            LStringBuilder.Append('\"', 2);
         end;
         Inc(P);
         F := P;
@@ -1308,15 +1324,17 @@ begin
       else
         Break;
     until False;
-    AppendMethod(Buf.Data, Buf.DataLength);
+
+    AppendMethod(LStringBuilder.Data, LStringBuilder.DataLength);
   finally
-    Buf.Done;
+    LStringBuilder.Done;
   end;
 end;
+
 class function TJSONBaseObject.ParseUtf8Bytes(const S: PByte; Len: Integer): TJSONBaseObject;
 var
   P: PByte;
-  L: Integer;
+  LLength: Integer;
 begin
   if (S = nil) or (Len = 0) then
     Result := nil
@@ -1324,18 +1342,21 @@ begin
   begin
     if Len < 0 then
       Len := System.AnsiStrings.StrLen(PAnsiChar(S));
+
     P := S;
-    L := Len;
-    while (L > 0) and (P^ <= 32) do
+    LLength := Len;
+
+    while (LLength > 0) and (P^ <= 32) do
     begin
       Inc(P);
-      Dec(L);
+      Dec(LLength);
     end;
-    if L = 0 then
+
+    if LLength = 0 then
       Result := nil
     else
     begin
-      if (L > 0) and (P^ = Byte(Ord('['))) then
+      if (LLength > 0) and (P^ = Byte(Ord('['))) then
         Result := TJSONArray.Create
       else
         Result := TJSONObject.Create;
@@ -1352,13 +1373,14 @@ end;
 
 class function TJSONBaseObject.Parse(const Bytes: TBytes; const ByteIndex: Integer; ByteCount: Integer): TJSONBaseObject;
 var
-  L: Integer;
+  LLength: Integer;
 begin
-  L := Length(Bytes);
-  if ByteCount = -1 then
-    ByteCount := L - ByteIndex;
+  LLength := Length(Bytes);
 
-  if (ByteCount <= 0) or (ByteIndex + ByteCount > L) then
+  if ByteCount = -1 then
+    ByteCount := LLength - ByteIndex;
+
+  if (ByteCount <= 0) or (ByteIndex + ByteCount > LLength) then
     Result := nil
   else
     Result := ParseUtf8Bytes(PByte(@Bytes[ByteIndex]), ByteCount)
@@ -1372,7 +1394,7 @@ end;
 class function TJSONBaseObject.Parse(S: PWideChar; Len: Integer): TJSONBaseObject;
 var
   P: PWideChar;
-  L: Integer;
+  LLength: Integer;
 begin
   if (S = nil) or (Len = 0) then
     Result := nil
@@ -1380,18 +1402,21 @@ begin
   begin
     if Len < 0 then
       Len := StrLen(S);
+
     P := S;
-    L := Len;
-    while (L > 0) and (P^ <= #32) do
+    LLength := Len;
+
+    while (LLength > 0) and (P^ <= #32) do
     begin
       Inc(P);
-      Dec(L);
+      Dec(LLength);
     end;
-    if L = 0 then
+
+    if LLength = 0 then
       Result := nil
     else
     begin
-      if (L > 0) and (P^ = '[') then
+      if (LLength > 0) and (P^ = '[') then
         Result := TJSONArray.Create
       else
         Result := TJSONObject.Create;
@@ -1413,78 +1438,79 @@ end;
 
 procedure TJSONBaseObject.FromJSON(S: PWideChar; Len: Integer);
 var
-  Reader: TJSONReader;
+  LReader: TJSONReader;
 begin
   if Len < 0 then
     Len := StrLen(S);
 
-  Reader := TStringJSONReader.Create(S, Len);
+  LReader := TJSONStringReader.Create(S, Len);
   try
-    Reader.Parse(Self);
+    LReader.Parse(Self);
   finally
-    Reader.Free;
+    LReader.Free;
   end;
 end;
 
 class function TJSONBaseObject.ParseFromStream(const Stream: TStream): TJSONBaseObject;
 var
-  StreamInfo: TStreamInfo;
+  LStreamInfo: TStreamInfo;
   LEncoding: TEncoding;
 begin
   LEncoding := nil;
-  GetStreamBytes(Stream, LEncoding, True, StreamInfo);
+  GetStreamBytes(Stream, LEncoding, True, LStreamInfo);
   try
-    Result := ParseUtf8Bytes(StreamInfo.Buffer, StreamInfo.Size)
+    Result := ParseUtf8Bytes(LStreamInfo.Buffer, LStreamInfo.Size)
   finally
-    FreeMem(StreamInfo.AllocationBase);
+    FreeMem(LStreamInfo.AllocationBase);
   end;
 end;
 
 procedure TJSONBaseObject.FromUtf8JSON(const S: PByte; Len: Integer);
 var
-  Reader: TJSONReader;
+  LReader: TJSONReader;
 begin
   if Len < 0 then
     Len := System.AnsiStrings.StrLen(PAnsiChar(S));
 
-  Reader := TUTF8JSONReader.Create(S, Len);
+  LReader := TJSONUTF8Reader.Create(S, Len);
   try
-    Reader.Parse(Self);
+    LReader.Parse(Self);
   finally
-    Reader.Free;
+    LReader.Free;
   end;
 end;
 
 class procedure TJSONBaseObject.GetStreamBytes(const Stream: TStream; var Encoding: TEncoding; const Utf8WithoutBOM: Boolean;
   var StreamInfo: TStreamInfo);
 var
-  Position: Int64;
-  Size: NativeInt;
-  Bytes: PByte;
-  BufStart: Integer;
+  LPosition: Int64;
+  LSize: NativeInt;
+  LBytes: PByte;
+  LBufStart: Integer;
 begin
-  BufStart := 0;
-  Position := Stream.Position;
-  Size := Stream.Size - Position;
+  LBufStart := 0;
+  LPosition := Stream.Position;
+  LSize := Stream.Size - LPosition;
 
   StreamInfo.Buffer := nil;
   StreamInfo.Size := 0;
   StreamInfo.AllocationBase := nil;
   try
-    Bytes := nil;
-    if Size > 0 then
+    LBytes := nil;
+
+    if LSize > 0 then
     begin
       if Stream is TCustomMemoryStream then
       begin
-        Bytes := TCustomMemoryStream(Stream).Memory;
-        TCustomMemoryStream(Stream).Position := Position + Size;
-        Inc(Bytes, Position);
+        LBytes := TCustomMemoryStream(Stream).Memory;
+        TCustomMemoryStream(Stream).Position := LPosition + LSize;
+        Inc(LBytes, LPosition);
       end
       else
       begin
-        GetMem(StreamInfo.AllocationBase, Size);
-        Bytes := StreamInfo.AllocationBase;
-        Stream.ReadBuffer(StreamInfo.AllocationBase^, Size);
+        GetMem(StreamInfo.AllocationBase, LSize);
+        LBytes := StreamInfo.AllocationBase;
+        Stream.ReadBuffer(StreamInfo.AllocationBase^, LSize);
       end;
     end;
 
@@ -1495,44 +1521,45 @@ begin
       else
         Encoding := TEncoding.Default;
 
-      if Size >= 2 then
+      if LSize >= 2 then
       begin
-        if (Bytes[0] = $EF) and (Bytes[1] = $BB) then
+        if (LBytes[0] = $EF) and (LBytes[1] = $BB) then
         begin
-          if Bytes[2] = $BF then
+          if LBytes[2] = $BF then
           begin
             Encoding := TEncoding.UTF8;
-            BufStart := 3;
+            LBufStart := 3;
           end;
         end
         else
-        if (Bytes[0] = $FF) and (Bytes[1] = $FE) then
+        if (LBytes[0] = $FF) and (LBytes[1] = $FE) then
         begin
-          if (Bytes[2] = 0) and (Bytes[3] = 0) then
+          if (LBytes[2] = 0) and (LBytes[3] = 0) then
             raise EJSONException.CreateRes(@STextEditorUnsupportedFileEncoding)
           else
           begin
             Encoding := TEncoding.Unicode;
-            BufStart := 2;
+            LBufStart := 2;
           end;
         end
         else
-        if (Bytes[0] = $FE) and (Bytes[1] = $FF) then
+        if (LBytes[0] = $FE) and (LBytes[1] = $FF) then
         begin
           Encoding := TEncoding.BigEndianUnicode;
-          BufStart := 2;
+          LBufStart := 2;
         end
         else
-        if (Bytes[0] = 0) and (Bytes[1] = 0) and (Size >= 4) then
+        if (LBytes[0] = 0) and (LBytes[1] = 0) and (LSize >= 4) then
         begin
-          if (Bytes[2] = $FE) and (Bytes[3] = $FF) then
+          if (LBytes[2] = $FE) and (LBytes[3] = $FF) then
             raise EJSONException.CreateRes(@STextEditorUnsupportedFileEncoding);
         end;
       end;
     end;
-    Inc(Bytes, BufStart);
-    StreamInfo.Buffer := Bytes;
-    StreamInfo.Size := Size - BufStart;
+
+    Inc(LBytes, LBufStart);
+    StreamInfo.Buffer := LBytes;
+    StreamInfo.Size := LSize - LBufStart;
   except
     FreeMem(StreamInfo.AllocationBase);
     raise;
@@ -1573,6 +1600,7 @@ end;
 class procedure TJSONBaseObject.InternInitAndAssignItem(const Dest, Source: PJSONDatAValue);
 begin
   Dest.FDataType := Source.FDataType;
+
   case Source.DataType of
     jdtString:
       begin
@@ -1582,25 +1610,21 @@ begin
     jdtBool:
       Dest.FValue.ValueBoolean := Source.FValue.ValueBoolean;
     jdtArray:
+      if Source.FValue.ValueArray <> nil then
       begin
-        if Source.FValue.ValueArray <> nil then
-        begin
-          TJSONArray(Dest.FValue.ValueArray) := TJSONArray.Create;
-          TJSONArray(Dest.FValue.ValueArray).Assign(TJSONArray(Source.FValue.ValueArray));
-        end
-        else
-          Dest.FValue.ValueArray := nil;
-      end;
+        TJSONArray(Dest.FValue.ValueArray) := TJSONArray.Create;
+        TJSONArray(Dest.FValue.ValueArray).Assign(TJSONArray(Source.FValue.ValueArray));
+      end
+      else
+        Dest.FValue.ValueArray := nil;
     jdtObject:
+      if Source.FValue.ValueObject <> nil then
       begin
-        if Source.FValue.ValueObject <> nil then
-        begin
-          TJSONObject(Dest.FValue.ValueObject) := TJSONObject.Create;
-          TJSONObject(Dest.FValue.ValueObject).Assign(TJSONObject(Source.FValue.ValueObject));
-        end
-        else
-          Dest.FValue.ValueObject := nil;
-      end;
+        TJSONObject(Dest.FValue.ValueObject) := TJSONObject.Create;
+        TJSONObject(Dest.FValue.ValueObject).Assign(TJSONObject(Source.FValue.ValueObject));
+      end
+      else
+        Dest.FValue.ValueObject := nil;
   end;
 end;
 
@@ -1615,6 +1639,7 @@ end;
 constructor TJSONArrayEnumerator.Create(const AArray: TJSONArray);
 begin
   inherited Create;
+
   FIndex := -1;
   FArray := AArray;
 end;
@@ -1627,6 +1652,7 @@ end;
 function TJSONArrayEnumerator.MoveNext: Boolean;
 begin
   Result := FIndex < FArray.Count - 1;
+
   if Result then
     Inc(FIndex);
 end;
@@ -1647,6 +1673,7 @@ var
 begin
   for LIndex := 0 to FCount - 1 do
     FItems[LIndex].Clear;
+
   FCount := 0;
 end;
 
@@ -1654,8 +1681,10 @@ procedure TJSONArray.Delete(const AIndex: Integer);
 begin
   if (AIndex < 0) or (AIndex >= FCount) then
     ListError(@SListIndexError, AIndex);
+
   FItems[AIndex].Clear;
   Dec(FCount);
+
   if AIndex < FCount then
     Move(FItems[AIndex + 1], FItems[AIndex], (FCount - AIndex) * SizeOf(TJSONDataValue));
 end;
@@ -1664,9 +1693,11 @@ function TJSONArray.AddItem: PJSONDataValue;
 begin
   if FCount = FCapacity then
     Grow;
+
   Result := @FItems[FCount];
   Result.FDataType := jdtNone;
   Result.FValue.ValuePChar := nil;
+
   Inc(FCount);
 end;
 
@@ -1677,11 +1708,15 @@ begin
 
   if FCount = FCapacity then
     Grow;
+
   Result := @FItems[AIndex];
+
   if AIndex < FCount then
     Move(Result^, FItems[AIndex + 1], (FCount - AIndex) * SizeOf(TJSONDataValue));
+
   Result.FDataType := jdtNone;
   Result.FValue.ValuePChar := nil;
+
   Inc(FCount);
 end;
 
@@ -1690,6 +1725,7 @@ var
   LCapacity, LDelta: Integer;
 begin
   LCapacity := FCapacity;
+
   if LCapacity > 64 then
     LDelta := LCapacity div 4
   else
@@ -1697,7 +1733,9 @@ begin
     LDelta := 16
   else
     LDelta := 4;
+
   FCapacity := LCapacity + LDelta;
+
   InternApplyCapacity;
 end;
 
@@ -1716,9 +1754,12 @@ begin
     begin
       for LIndex := FCapacity to FCount - 1 do
         FItems[LIndex].Clear;
+
       FCount := FCapacity;
     end;
+
     FCapacity := AValue;
+
     InternApplyCapacity;
   end;
 end;
@@ -1899,7 +1940,7 @@ end;
 
 procedure TJSONArray.InternToJSON(var Writer: TJSONOutputWriter);
 var
-  I: Integer;
+  LIndex: Integer;
 begin
   if FCount = 0 then
     Writer.AppendValue('[]')
@@ -1907,11 +1948,13 @@ begin
   begin
     Writer.Indent('[');
     FItems[0].InternToJSON(Writer);
-    for I := 1 to FCount - 1 do
+
+    for LIndex := 1 to FCount - 1 do
     begin
       Writer.AppendSeparator(',');
-      FItems[I].InternToJSON(Writer);
+      FItems[LIndex].InternToJSON(Writer);
     end;
+
     Writer.Unindent(']');
   end;
 end;
@@ -1921,6 +1964,7 @@ var
   LIndex: Integer;
 begin
   Clear;
+
   if ASource <> nil then
   begin
     if FCapacity < ASource.Count then
@@ -1928,7 +1972,9 @@ begin
       FCapacity := ASource.Count;
       ReallocMem(FItems, ASource.Count * SizeOf(TJSONDataValue));
     end;
+
     FCount := ASource.Count;
+
     for LIndex := 0 to ASource.Count - 1 do
       InternInitAndAssignItem(@FItems[LIndex], @ASource.FItems[LIndex]);
   end
@@ -1951,11 +1997,13 @@ begin
   if AValue <> FCount then
   begin
     SetCapacity(AValue);
+
     for LIndex := FCount to AValue - 1 do
     begin
       FItems[LIndex].FDataType := jdtObject;
       FItems[LIndex].FValue.ValuePChar := nil;
     end;
+
     FCount := AValue;
   end;
 end;
@@ -1973,6 +2021,7 @@ end;
 function TJSONObjectEnumerator.MoveNext: Boolean;
 begin
   Result := FIndex < FObject.Count - 1;
+
   if Result then
     Inc(FIndex);
 end;
@@ -2000,6 +2049,7 @@ var
   LCapacity, LDelta: Integer;
 begin
   LCapacity := FCapacity;
+
   if LCapacity > 64 then
     LDelta := LCapacity div 4
   else
@@ -2007,7 +2057,9 @@ begin
     LDelta := 16
   else
     LDelta := 4;
+
   FCapacity := LCapacity + LDelta;
+
   InternApplyCapacity;
 end;
 
@@ -2030,8 +2082,10 @@ begin
         FNames[LIndex] := '';
         FItems[LIndex].Clear;
       end;
+
       FCount := FCapacity;
     end;
+
     FCapacity := AValue;
     InternApplyCapacity;
   end;
@@ -2046,6 +2100,7 @@ begin
     FNames[LIndex] := '';
     FItems[LIndex].Clear;
   end;
+
   FCount := 0;
 end;
 
@@ -2054,6 +2109,7 @@ var
   LIndex: Integer;
 begin
   LIndex := IndexOf(AName);
+
   if LIndex <> -1 then
     Delete(LIndex);
 end;
@@ -2063,6 +2119,7 @@ var
   LIndex: Integer;
 begin
   LIndex := IndexOf(AName);
+
   if LIndex = -1 then
     Result := nil
   else
@@ -2074,6 +2131,7 @@ begin
     end
     else
       Result := nil;
+
     Delete(LIndex);
   end
 end;
@@ -2116,9 +2174,12 @@ var
 begin
   if FCount = FCapacity then
     Grow;
+
   Result := @FItems[FCount];
   LPName := @FNames[FCount];
+
   Inc(FCount);
+
   Pointer(LPName^) := Pointer(AName);
   Pointer(AName) := nil;
 
@@ -2212,6 +2273,7 @@ var
   LPArray: PJSONStringArray;
 begin
   LPArray := FNames;
+
   if Len = 0 then
   begin
     for Result := 0 to FCount - 1 do
@@ -2222,6 +2284,7 @@ begin
   for Result := 0 to FCount - 1 do
   if (Length(LPArray[Result]) = Len) and CompareMem(S, Pointer(LPArray[Result]), Len * SizeOf(Char)) then
     Exit;
+
   Result := -1;
 end;
 
@@ -2230,9 +2293,11 @@ var
   LPArray: PJSONStringArray;
 begin
   LPArray := FNames;
+
   for Result := 0 to FCount - 1 do
   if AName = LPArray[Result] then
     Exit;
+
   Result := -1;
 end;
 
@@ -2241,7 +2306,9 @@ var
   LIndex: Integer;
 begin
   LIndex := IndexOf(AName);
+
   Result := LIndex <> -1;
+
   if Result then
     Item := @FItems[LIndex]
   else
@@ -2256,7 +2323,7 @@ end;
 
 procedure TJSONObject.InternToJSON(var Writer: TJSONOutputWriter);
 var
-  I: Integer;
+  LIndex: Integer;
 begin
   if Count = 0 then
     Writer.AppendValue('{}')
@@ -2265,38 +2332,41 @@ begin
     Writer.Indent('{');
     TJSONBaseObject.StrToJSONStr(Writer.AppendIntro, FNames[0]);
     FItems[0].InternToJSON(Writer);
-    for I := 1 to FCount - 1 do
+
+    for LIndex := 1 to FCount - 1 do
     begin
       Writer.AppendSeparator(',');
-      TJSONBaseObject.StrToJSONStr(Writer.AppendIntro, FNames[I]);
-      FItems[I].InternToJSON(Writer);
+      TJSONBaseObject.StrToJSONStr(Writer.AppendIntro, FNames[LIndex]);
+      FItems[LIndex].InternToJSON(Writer);
     end;
+
     Writer.Unindent('}');
   end;
 end;
 
-function TJSONObject.GetName(const Index: Integer): string;
+function TJSONObject.GetName(const AIndex: Integer): string;
 begin
-  Result := FNames[Index];
+  Result := FNames[AIndex];
 end;
 
-function TJSONObject.GetItem(const Index: Integer): PJSONDataValue;
+function TJSONObject.GetItem(const AIndex: Integer): PJSONDataValue;
 begin
-  Result := @FItems[Index];
+  Result := @FItems[AIndex];
 end;
 
-procedure TJSONObject.Delete(const Index: Integer);
+procedure TJSONObject.Delete(const AIndex: Integer);
 begin
-  if (Index < 0) or (Index >= FCount) then
-    ListError(@SListIndexError, Index);
+  if (AIndex < 0) or (AIndex >= FCount) then
+    ListError(@SListIndexError, AIndex);
 
-  FNames[Index] := '';
-  FItems[Index].Clear;
+  FNames[AIndex] := '';
+  FItems[AIndex].Clear;
   Dec(FCount);
-  if Index < FCount then
+
+  if AIndex < FCount then
   begin
-    Move(FItems[Index + 1], FItems[Index], (FCount - Index) * SizeOf(FItems[0]));
-    Move(FNames[Index + 1], FNames[Index], (FCount - Index) * SizeOf(FNames[0]));
+    Move(FItems[AIndex + 1], FItems[AIndex], (FCount - AIndex) * SizeOf(FItems[0]));
+    Move(FNames[AIndex + 1], FNames[AIndex], (FCount - AIndex) * SizeOf(FNames[0]));
   end;
 end;
 
@@ -2308,6 +2378,7 @@ begin
     Result.FData.FNameResolver := Self;
     Result.FData.FName := AName;
   end;
+
   Result.FData.FDataType := jdtNone;
 end;
 
@@ -2360,12 +2431,15 @@ var
   LIndex: Integer;
 begin
   Clear;
+
   if ASource <> nil then
   begin
     FCapacity := ASource.Count;
+
     InternApplyCapacity;
 
     FCount := ASource.Count;
+
     for LIndex := 0 to ASource.Count - 1 do
     begin
       Pointer(FNames[LIndex]) := nil;
@@ -2377,6 +2451,7 @@ begin
   begin
     FreeMem(FItems);
     FreeMem(FNames);
+
     FCapacity := 0;
   end;
 end;
@@ -2407,16 +2482,17 @@ end;
 
 function TJSONObject.GetPath(const ANamePath: string): TJSONDataValueHelper;
 var
-  F, P, EndF, LastEndF: PChar;
-  Ch: Char;
-  Idx: Integer;
-  Obj: TJSONObject;
-  Arr: TJSONArray;
-  Item: PJSONDataValue;
-  S: string;
+  LPFirstChar, LPChar, LPEndChar, LPLastEndChar: PChar;
+  LChar: Char;
+  LIndex: Integer;
+  LObject: TJSONObject;
+  LArray: TJSONArray;
+  LDataValue: PJSONDataValue;
+  LString: string;
 begin
-  P := PChar(ANamePath);
-  if P^ = #0 then
+  LPChar := PChar(ANamePath);
+
+  if LPChar^ = #0 then
   begin
     Result := Self;
     Exit;
@@ -2425,124 +2501,136 @@ begin
   Result.FData.FIntern := nil;
   Result.FData.FDataType := jdtNone;
 
-  Obj := Self;
-  Item := nil;
-  LastEndF := nil;
+  LObject := Self;
+  LDataValue := nil;
+  LPLastEndChar := nil;
+
   while True do
   begin
-    F := P;
+    LPFirstChar := LPChar;
 
-    Ch := P^;
+    LChar := LPChar^;
+
     while True do
-      case Ch of
-        #0, '[', '.':
-          Break;
-      else
-        Inc(P);
-        Ch := P^;
-      end;
+    case LChar of
+      #0, '[', '.':
+        Break;
+    else
+      Inc(LPChar);
+      LChar := LPChar^;
+    end;
 
-    EndF := P;
-    if F = EndF then
-      PathError(PChar(Pointer(ANamePath)), P + 1);
+    LPEndChar := LPChar;
 
-    Inc(P);
-    case Ch of
+    if LPFirstChar = LPEndChar then
+      PathError(PChar(Pointer(ANamePath)), LPChar + 1);
+
+    Inc(LPChar);
+
+    case LChar of
       #0:
         begin
-          if Obj <> nil then
+          if LObject <> nil then
           begin
-            Idx := Obj.IndexOfPChar(F, EndF - F);
-            if Idx <> -1 then
-              Result.FData.FIntern := @Obj.FItems[Idx]
+            LIndex := LObject.IndexOfPChar(LPFirstChar, LPEndChar - LPFirstChar);
+
+            if LIndex <> -1 then
+              Result.FData.FIntern := @LObject.FItems[LIndex]
             else
             begin
-              Result.FData.FNameResolver := Obj;
-              System.SetString(Result.FData.FName, F, EndF - F);
+              Result.FData.FNameResolver := LObject;
+              System.SetString(Result.FData.FName, LPFirstChar, LPEndChar - LPFirstChar);
             end;
           end
           else
-            Result.FData.FIntern := Item;
+            Result.FData.FIntern := LDataValue;
+
           Break;
         end;
-
       '.':
         begin
-          if Obj = nil then
-            PathNullError(PChar(Pointer(ANamePath)), LastEndF);
+          if LObject = nil then
+            PathNullError(PChar(Pointer(ANamePath)), LPLastEndChar);
 
-          Idx := Obj.IndexOfPChar(F, EndF - F);
-          if Idx <> -1 then
-            Obj := Obj.FItems[Idx].ObjectValue
+          LIndex := LObject.IndexOfPChar(LPFirstChar, LPEndChar - LPFirstChar);
+
+          if LIndex <> -1 then
+            LObject := LObject.FItems[LIndex].ObjectValue
           else
           begin
-            System.SetString(S, F, EndF - F);
-            Obj := Obj.InternAddObject(S);
+            System.SetString(LString, LPFirstChar, LPEndChar - LPFirstChar);
+            LObject := LObject.InternAddObject(LString);
           end;
         end;
-
       '[':
         begin
-          if Obj = nil then
-            PathNullError(PChar(Pointer(ANamePath)), LastEndF);
+          if LObject = nil then
+            PathNullError(PChar(Pointer(ANamePath)), LPLastEndChar);
 
-          Idx := Obj.IndexOfPChar(F, EndF - F);
-          if Idx <> -1 then
+          LIndex := LObject.IndexOfPChar(LPFirstChar, LPEndChar - LPFirstChar);
+
+          if LIndex <> -1 then
           begin
-            Arr := Obj.FItems[Idx].ArrayValue;
-            if Arr = nil then
+            LArray := LObject.FItems[LIndex].ArrayValue;
+
+            if LArray = nil then
             begin
-              Arr := TJSONArray.Create;
-              Obj.FItems[Idx].ArrayValue := Arr;
+              LArray := TJSONArray.Create;
+              LObject.FItems[LIndex].ArrayValue := LArray;
             end;
           end
           else
           begin
-            System.SetString(S, F, EndF - F);
-            Arr := Obj.InternAddArray(S);
-          end;
-          Ch := P^;
-          Idx := 0;
-          while Ch in ['0' .. '9'] do
-          begin
-            Idx := Idx * 10 + (Word(Ch) - Ord('0'));
-            Inc(P);
-            Ch := P^;
+            System.SetString(LString, LPFirstChar, LPEndChar - LPFirstChar);
+            LArray := LObject.InternAddArray(LString);
           end;
 
-          if P^ <> ']' then
-            PathError(PChar(Pointer(ANamePath)), P + 1);
-          Inc(P);
+          LChar := LPChar^;
+          LIndex := 0;
 
-          if Idx >= Arr.Count then
-            PathIndexError(PChar(Pointer(ANamePath)), P, Arr.Count);
-          Item := @Arr.FItems[Idx];
-
-          if P^ = '.' then
+          while LChar in ['0' .. '9'] do
           begin
-            Inc(P);
-            Obj := Item.ObjectValue;
-            Item := nil;
+            LIndex := LIndex * 10 + (Word(LChar) - Ord('0'));
+            Inc(LPChar);
+            LChar := LPChar^;
+          end;
+
+          if LPChar^ <> ']' then
+            PathError(PChar(Pointer(ANamePath)), LPChar + 1);
+
+          Inc(LPChar);
+
+          if LIndex >= LArray.Count then
+            PathIndexError(PChar(Pointer(ANamePath)), LPChar, LArray.Count);
+
+          LDataValue := @LArray.FItems[LIndex];
+
+          if LPChar^ = '.' then
+          begin
+            Inc(LPChar);
+            LObject := LDataValue.ObjectValue;
+            LDataValue := nil;
           end
           else
-          if P^ = #0 then
+          if LPChar^ = #0 then
           begin
-            Result.FData.FIntern := Item;
+            Result.FData.FIntern := LDataValue;
             Break;
           end;
         end;
     end;
-    LastEndF := EndF;
+
+    LPLastEndChar := LPEndChar;
   end;
 end;
 
 procedure TJSONObject.SetPath(const ANamePath: string; const AValue: TJSONDataValueHelper);
 var
-  PathValue: TJSONDataValueHelper;
+  LPathValue: TJSONDataValueHelper;
 begin
-  PathValue := Path[ANamePath];
-  PathValue.ResolveName;
-  TJSONDataValueHelper.SetInternValue(PathValue.FData.FIntern, AValue);
+  LPathValue := Path[ANamePath];
+  LPathValue.ResolveName;
+  TJSONDataValueHelper.SetInternValue(LPathValue.FData.FIntern, AValue);
 end;
 
 { TStringIntern }
@@ -2558,40 +2646,45 @@ end;
 
 procedure TStringIntern.Done;
 var
-  I: Integer;
+  LIndex: Integer;
 begin
-  for I := 0 to FCount - 1 do
-    FStrings[I].Name := '';
+  for LIndex := 0 to FCount - 1 do
+    FStrings[LIndex].Name := '';
+
   FreeMem(FStrings);
   FreeMem(FBuckets);
 end;
 
 procedure TStringIntern.Intern(var S: string; var PropName: string);
 var
-  Index: Integer;
-  Hash: Integer;
-  Source: Pointer;
+  LIndex: Integer;
+  LHash: Integer;
+  LSource: Pointer;
 begin
   if PropName <> '' then
     PropName := '';
+
   if S <> '' then
   begin
-    Hash := GetHash(S);
-    Index := Find(Hash, S);
-    if Index = -1 then
+    LHash := GetHash(S);
+    LIndex := Find(LHash, S);
+
+    if LIndex = -1 then
      begin
       Pointer(PropName) := Pointer(S);
       Pointer(S) := nil;
-      InternAdd(Hash, PropName);
+      InternAdd(LHash, PropName);
     end
     else
     begin
-      Source := Pointer(FStrings[Index].Name);
-      if Source <> nil then
+      LSource := Pointer(FStrings[LIndex].Name);
+
+      if LSource <> nil then
       begin
-        Pointer(PropName) := Source;
-        Inc(PInteger(@PByte(Source)[-8])^);
+        Pointer(PropName) := LSource;
+        Inc(PInteger(@PByte(LSource)[-8])^);
       end;
+
       S := '';
     end
   end;
@@ -2599,70 +2692,85 @@ end;
 
 class function TStringIntern.GetHash(const AName: string): Integer;
 var
-  P: PChar;
-  Ch: Word;
+  LPChar: PChar;
+  LChar: Word;
 begin
   Result := 0;
-  P := PChar(Pointer(AName));
-  if P <> nil then
+
+  LPChar := PChar(Pointer(AName));
+
+  if LPChar <> nil then
   begin
     Result := PInteger(@PByte(AName)[-4])^;
+
     while True do
     begin
-      Ch := Word(P[0]);
-      if Ch = 0 then
-        Break;
-      Result := Result + Ch;
+      LChar := Word(LPChar[0]);
 
-      Ch := Word(P[1]);
-      if Ch = 0 then
+      if LChar = 0 then
         Break;
-      Result := Result + Ch;
 
-      Ch := Word(P[2]);
-      if Ch = 0 then
+      Result := Result + LChar;
+
+      LChar := Word(LPChar[1]);
+
+      if LChar = 0 then
         Break;
-      Result := Result + Ch;
 
-      Ch := Word(P[3]);
-      if Ch = 0 then
+      Result := Result + LChar;
+
+      LChar := Word(LPChar[2]);
+
+      if LChar = 0 then
         Break;
-      Result := Result + Ch;
 
+      Result := Result + LChar;
+
+      LChar := Word(LPChar[3]);
+
+      if LChar = 0 then
+        Break;
+
+      Result := Result + LChar;
       Result := (Result shl 6) or ((Result shr 26) and $3F);
-      Inc(P, 4);
+
+      Inc(LPChar, 4);
     end;
   end;
 end;
 
 procedure TStringIntern.InternAdd(const AHash: Integer; const S: string);
 var
-  Index: Integer;
-  Bucket: PInteger;
+  LIndex: Integer;
+  LPBucket: PInteger;
 begin
   if FCount = FCapacity then
     Grow;
-  Index := FCount;
+
+  LIndex := FCount;
   Inc(FCount);
 
-  Bucket := @FBuckets[(AHash and $7FFFFFFF) mod FCapacity];
-  with FStrings[Index] do
+  LPBucket := @FBuckets[(AHash and $7FFFFFFF) mod FCapacity];
+
+  with FStrings[LIndex] do
   begin
-    Next := Bucket^;
+    Next := LPBucket^;
     Hash := AHash;
     Pointer(Name) := Pointer(S);
     Inc(PInteger(@PByte(Name)[-8])^);
   end;
-  Bucket^ := Index;
+
+  LPBucket^ := LIndex;
 end;
 
 procedure TStringIntern.Grow;
 var
-  I: Integer;
-  Index: Integer;
+  LStringIndex: Integer;
+  LIndex: Integer;
   Len: Integer;
 begin
   Len := FCapacity;
+
   case Len of
     17:
       Len := 37;
@@ -2683,36 +2791,42 @@ begin
   else
     Len := Len * 2 + 1;
   end;
+
   FCapacity := Len;
 
   ReallocMem(FStrings, Len * SizeOf(FStrings[0]));
   ReallocMem(FBuckets, Len * SizeOf(FBuckets[0]));
   FillChar(FBuckets[0], Len * SizeOf(FBuckets[0]), $FF);
 
-  for I := 0 to FCount - 1 do
+  for LStringIndex := 0 to FCount - 1 do
   begin
-    Index := (FStrings[I].Hash and $7FFFFFFF) mod Len;
-    FStrings[I].Next := FBuckets[Index];
-    FBuckets[Index] := I;
+    LIndex := (FStrings[LStringIndex].Hash and $7FFFFFFF) mod Len;
+    FStrings[LStringIndex].Next := FBuckets[LIndex];
+    FBuckets[LIndex] := LStringIndex;
   end;
 end;
 
 function TStringIntern.Find(const Hash: Integer; const S: string): Integer;
 var
-  Strs: PJSONStringEntryArray;
+  LStrings: PJSONStringEntryArray;
 begin
   Result := -1;
+
   if FCount <> 0 then
   begin
     Result := FBuckets[(Hash and $7FFFFFFF) mod FCapacity];
+
     if Result <> -1 then
     begin
-      Strs := FStrings;
+      LStrings := FStrings;
+
       while True do
       begin
-        if (Strs[Result].Hash = Hash) and (Strs[Result].Name = S) then
+        if (LStrings[Result].Hash = Hash) and (LStrings[Result].Name = S) then
           Break;
-        Result := Strs[Result].Next;
+
+        Result := LStrings[Result].Next;
+
         if Result = -1 then
           Break;
       end;
@@ -2759,10 +2873,11 @@ end;
 
 procedure TJSONOutputWriter.FreeIndents;
 var
-  I: Integer;
+  LIndex: Integer;
 begin
-  for I := 0 to FIndentsLen - 1 do
-    FIndents[I] := '';
+  for LIndex := 0 to FIndentsLen - 1 do
+    FIndents[LIndex] := '';
+
   FreeMem(FIndents);
 end;
 
@@ -2783,7 +2898,7 @@ end;
 
 procedure TJSONOutputWriter.FlushLastLine;
 var
-  S: Pointer;
+  LString: Pointer;
 begin
   if FLastLine.DataLength > 0 then
   begin
@@ -2794,12 +2909,12 @@ begin
     end
     else
     begin
-      S := nil;
+      LString := nil;
       try
-        FLastLine.FlushToString(string(S));
-        FLines.Add(string(S));
+        FLastLine.FlushToString(string(LString));
+        FLines.Add(string(LString));
       finally
-        string(S) := '';
+        string(LString) := '';
       end;
     end
   end;
@@ -2807,7 +2922,7 @@ end;
 
 procedure TJSONOutputWriter.StreamFlush;
 var
-  Size: NativeInt;
+  LSize: NativeInt;
 begin
   if FStringBuffer.DataLength > 0 then
   begin
@@ -2821,9 +2936,10 @@ begin
       FStringBuffer.FlushToMemoryStream(TMemoryStream(FStream), FEncoding)
     else
     begin
-      Size := FStringBuffer.FlushToBytes(FStreamEncodingBuffer, FStreamEncodingBufferLen, FEncoding);
-      if Size > 0 then
-        FStream.Write(FStreamEncodingBuffer[0], Size);
+      LSize := FStringBuffer.FlushToBytes(FStreamEncodingBuffer, FStreamEncodingBufferLen, FEncoding);
+
+      if LSize > 0 then
+        FStream.Write(FStreamEncodingBuffer[0], LSize);
     end;
   end;
 end;
@@ -2858,39 +2974,45 @@ end;
 
 procedure TJSONOutputWriter.Indent(const S: string);
 var
-  This: ^TJSONOutputWriter;
+  LSelf: ^TJSONOutputWriter;
 begin
-  This := @Self;
-  if This.FCompact then
+  LSelf := @Self;
+
+  if LSelf.FCompact then
   begin
-    This.FStringBuffer.Append(S);
-    This.StreamFlushPossible;
+    LSelf.FStringBuffer.Append(S);
+    LSelf.StreamFlushPossible;
   end
   else
   begin
-    This.AppendLine(ltIntro, S);
-    Inc(This.FIndent);
-    if This.FIndent >= This.FIndentsLen then
+    LSelf.AppendLine(ltIntro, S);
+
+    Inc(LSelf.FIndent);
+
+    if LSelf.FIndent >= LSelf.FIndentsLen then
       ExpandIndents;
-    This.FLastType := ltIndent;
+
+    LSelf.FLastType := ltIndent;
   end;
 end;
 
 procedure TJSONOutputWriter.Unindent(const S: string);
 var
-  This: ^TJSONOutputWriter;
+  LSelf: ^TJSONOutputWriter;
 begin
-  This := @Self;
-  if This.FCompact then
+  LSelf := @Self;
+
+  if LSelf.FCompact then
   begin
-    This.FStringBuffer.Append(S);
-    This.StreamFlushPossible;
+    LSelf.FStringBuffer.Append(S);
+    LSelf.StreamFlushPossible;
   end
   else
   begin
-    Dec(This.FIndent);
-    This.AppendLine(ltIndent, S);
-    This.FLastType := ltUnindent;
+    Dec(LSelf.FIndent);
+
+    LSelf.AppendLine(ltIndent, S);
+    LSelf.FLastType := ltUnindent;
   end;
 end;
 
@@ -2901,6 +3023,7 @@ var
   LOutputWriter: ^TJSONOutputWriter;
 begin
   LOutputWriter := @Self;
+
   if LOutputWriter.FCompact then
   begin
     LOutputWriter.FStringBuffer.Append2(sQuoteChar, P, Len).Append(sQuoteCharColon, 2);
@@ -2920,6 +3043,7 @@ var
   LOutputWriter: ^TJSONOutputWriter;
 begin
   LOutputWriter := @Self;
+
   if LOutputWriter.FCompact then
   begin
     LOutputWriter.FStringBuffer.Append(S);
@@ -2937,6 +3061,7 @@ var
   LOutputWriter: ^TJSONOutputWriter;
 begin
   LOutputWriter := @Self;
+
   if LOutputWriter.FCompact then
   begin
     LOutputWriter.FStringBuffer.Append3(sQuoteChar, P, Len, sQuoteChar);
@@ -2952,6 +3077,7 @@ begin
       LOutputWriter.StreamFlushPossible;
       LOutputWriter.FLastLine.Append(LOutputWriter.FIndents[LOutputWriter.FIndent]).Append3(sQuoteChar, P, Len, sQuoteChar);
     end;
+
     LOutputWriter.FLastType := ltValue;
   end;
 end;
@@ -2961,6 +3087,7 @@ var
   LOutputWriter: ^TJSONOutputWriter;
 begin
   LOutputWriter := @Self;
+
   if LOutputWriter.FCompact then
   begin
     LOutputWriter.FStringBuffer.Append(S);
@@ -2976,209 +3103,233 @@ begin
       LOutputWriter.StreamFlushPossible;
       LOutputWriter.FLastLine.Append2(LOutputWriter.FIndents[LOutputWriter.FIndent], PChar(Pointer(S)), Length(S));
     end;
+
     LOutputWriter.FLastType := ltSeparator;
   end;
 end;
 
-{ TUTF8JSONReader }
+{ TJSONUTF8Reader }
 
-constructor TUTF8JSONReader.Create(S: PByte; Len: NativeInt);
+constructor TJSONUTF8Reader.Create(S: PByte; Len: NativeInt);
 begin
   inherited Create(S);
+
   FText := S;
   FTextEnd := S + Len;
 end;
 
-function TUTF8JSONReader.GetCharOffset(const StartPos: Pointer): NativeInt;
+function TJSONUTF8Reader.GetCharOffset(const StartPos: Pointer): NativeInt;
 begin
   Result := FText - PByte(StartPos);
 end;
 
-function TUTF8JSONReader.Next: Boolean;
+function TJSONUTF8Reader.Next: Boolean;
 label
   EndReached;
 var
-  P, EndP: PByte;
-  Ch: Byte;
+  LPChar, LPEndChar: PByte;
+  LChar: Byte;
 begin
-  P := FText;
-  EndP := FTextEnd;
+  LPChar := FText;
+  LPEndChar := FTextEnd;
 
   while True do
   begin
     while True do
     begin
-      if P = EndP then
+      if LPChar = LPEndChar then
         goto EndReached;
-      Ch := P^;
-      if Ch > 32 then
+
+      LChar := LPChar^;
+
+      if LChar > 32 then
         Break;
-      if not (Ch in [9, 32]) then
+
+      if not (LChar in [9, 32]) then
         Break;
-      Inc(P);
+
+      Inc(LPChar);
     end;
 
-    case Ch of
+    case LChar of
       10:
         begin
-          FLineStart := P + 1;
+          FLineStart := LPChar + 1;
           Inc(FLineNum);
         end;
       13:
         begin
           Inc(FLineNum);
-          if (P + 1 < EndP) and (P[1] = 10) then
-            Inc(P);
-          FLineStart := P + 1;
+
+          if (LPChar + 1 < LPEndChar) and (LPChar[1] = 10) then
+            Inc(LPChar);
+
+          FLineStart := LPChar + 1;
         end;
     else
       Break;
     end;
-    Inc(P);
+
+    Inc(LPChar);
   end;
 
 EndReached:
-  if P < EndP then
+  if LPChar < LPEndChar then
   begin
-    case P^ of
+    case LPChar^ of
       Ord('{'):
         begin
           FLook.Kind := jtkLBrace;
-          FText := P + 1;
+          FText := LPChar + 1;
         end;
       Ord('}'):
         begin
           FLook.Kind := jtkRBrace;
-          FText := P + 1;
+          FText := LPChar + 1;
         end;
       Ord('['):
         begin
           FLook.Kind := jtkLBracket;
-          FText := P + 1;
+          FText := LPChar + 1;
         end;
       Ord(']'):
         begin
           FLook.Kind := jtkRBracket;
-          FText := P + 1;
+          FText := LPChar + 1;
         end;
       Ord(':'):
         begin
           FLook.Kind := jtkColon;
-          FText := P + 1;
+          FText := LPChar + 1;
         end;
       Ord(','):
         begin
           FLook.Kind := jtkComma;
-          FText := P + 1;
+          FText := LPChar + 1;
         end;
       Ord('"'): // String
-        LexString(P);
+        LexString(LPChar);
     else
-      LexIdent(P);
+      LexIdent(LPChar);
     end;
+
     Result := True;
   end
   else
   begin
-    FText := EndP;
+    FText := LPEndChar;
     FLook.Kind := jtkEof;
     Result := False;
   end;
 end;
 
-procedure TUTF8JSONReader.LexString(P: PByte);
+procedure TJSONUTF8Reader.LexString(P: PByte);
 var
-  EndP: PByte;
-  EscapeSequences: PByte;
-  Ch: Byte;
-  Idx: Integer;
+  LPEndChar: PByte;
+  LEscapeSequences: PByte;
+  LChar: Byte;
+  LIndex: Integer;
 begin
   Inc(P);
-  EndP := FTextEnd;
-  EscapeSequences := nil;
-  Ch := 0;
-  Idx := P - EndP;
+  LPEndChar := FTextEnd;
+  LEscapeSequences := nil;
+  LChar := 0;
+  LIndex := P - LPEndChar;
 
   repeat
-    if Idx = 0 then
+    if LIndex = 0 then
       Break;
-    Ch := EndP[Idx];
-    if (Ch = Byte(Ord('"'))) or (Ch = 10) or (Ch = 13) then
+
+    LChar := LPEndChar[LIndex];
+
+    if (LChar = Byte(Ord('"'))) or (LChar = 10) or (LChar = 13) then
       Break;
-    Inc(Idx);
-    if Ch <> Byte(Ord('\')) then
+
+    Inc(LIndex);
+
+    if LChar <> Byte(Ord('\')) then
       Continue;
-    if Idx = 0 then
+
+    if LIndex = 0 then
       Break;
-    if EscapeSequences = nil then
-      EscapeSequences := @EndP[Idx];
-    Inc(Idx);
+
+    if LEscapeSequences = nil then
+      LEscapeSequences := @LPEndChar[LIndex];
+
+    Inc(LIndex);
   until False;
 
-  if Idx = 0 then
+  if LIndex = 0 then
   begin
     FText := P - 1;
     TJSONReader.StringNotClosedError(Self);
   end;
 
-  EndP := @EndP[Idx];
-  if EscapeSequences = nil then
-    SetStringUtf8(FLook.S, P, EndP - P)
+  LPEndChar := @LPEndChar[LIndex];
+
+  if LEscapeSequences = nil then
+    SetStringUtf8(FLook.Value, P, LPEndChar - P)
   else
-    TUTF8JSONReader.JSONUtf8StrToStr(P, EndP, EscapeSequences - P, FLook.S, Self);
+    TJSONUTF8Reader.JSONUtf8StrToStr(P, LPEndChar, LEscapeSequences - P, FLook.Value, Self);
 
-  if Ch = Byte(Ord('"')) then
-    Inc(EndP);
+  if LChar = Byte(Ord('"')) then
+    Inc(LPEndChar);
+
   FLook.Kind := jtkString;
-  FText := EndP;
+  FText := LPEndChar;
 
-  if Ch in [10, 13] then
+  if LChar in [10, 13] then
     TJSONReader.InvalidStringCharacterError(Self);
 end;
 
-procedure TUTF8JSONReader.LexIdent(P: PByte);
+procedure TJSONUTF8Reader.LexIdent(P: PByte);
 const
   NullStr = LongWord(Ord('n') or (Ord('u') shl 8) or (Ord('l') shl 16) or (Ord('l') shl 24));
   TrueStr = LongWord(Ord('t') or (Ord('r') shl 8) or (Ord('u') shl 16) or (Ord('e') shl 24));
   FalseStr = LongWord(Ord('a') or (Ord('l') shl 8) or (Ord('s') shl 16) or (Ord('e') shl 24));
 var
-  F: PByte;
-  EndP: PByte;
-  L: LongWord;
+  LPChar: PByte;
+  LPEndChar: PByte;
+  LLength: LongWord;
 begin
-  F := P;
-  EndP := FTextEnd;
+  LPChar := P;
+  LPEndChar := FTextEnd;
+
   case P^ of
     Ord('A')..Ord('Z'), Ord('a')..Ord('z'), Ord('_'), Ord('$'):
       begin
         Inc(P);
 
-        while P < EndP do
-          case P^ of
-            Ord('A')..Ord('Z'), Ord('a')..Ord('z'), Ord('_'), Ord('0')..Ord('9'): Inc(P);
-          else
-            Break;
-          end;
+        while P < LPEndChar do
+        case P^ of
+          Ord('A')..Ord('Z'), Ord('a')..Ord('z'), Ord('_'), Ord('0')..Ord('9'): Inc(P);
+        else
+          Break;
+        end;
 
-        L := P - F;
-        if L = 4 then
+        LLength := P - LPChar;
+
+        if LLength = 4 then
         begin
-          L := PLongWord(F)^;
-          if L = NullStr then
+          LLength := PLongWord(LPChar)^;
+
+          if LLength = NullStr then
             FLook.Kind := jtkNull
-          else if L = TrueStr then
+          else
+          if LLength = TrueStr then
             FLook.Kind := jtkTrue
           else
           begin
-            SetStringUtf8(FLook.S, F, P - F);
+            SetStringUtf8(FLook.Value, LPChar, P - LPChar);
             FLook.Kind := jtkIdent;
           end;
         end
-        else if (L = 5) and (F^ = Ord('f')) and (PLongWord(F + 1)^ = FalseStr) then
+        else
+        if (LLength = 5) and (LPChar^ = Ord('f')) and (PLongWord(LPChar + 1)^ = FalseStr) then
           FLook.Kind := jtkFalse
         else
         begin
-          SetStringUtf8(FLook.S, F, P - F);
+          SetStringUtf8(FLook.Value, LPChar, P - LPChar);
           FLook.Kind := jtkIdent;
         end;
       end;
@@ -3186,12 +3337,13 @@ begin
     FLook.Kind := jtkInvalidSymbol;
     Inc(P);
   end;
+
   FText := P;
 end;
 
-{ TStringJSONReader }
+{ TJSONStringReader }
 
-constructor TStringJSONReader.Create(S: PChar; Len: Integer);
+constructor TJSONStringReader.Create(S: PChar; Len: Integer);
 begin
   inherited Create(S);
 
@@ -3199,125 +3351,130 @@ begin
   FTextEnd := S + Len;
 end;
 
-function TStringJSONReader.GetCharOffset(const StartPos: Pointer): NativeInt;
+function TJSONStringReader.GetCharOffset(const StartPos: Pointer): NativeInt;
 begin
   Result := FText - PChar(StartPos);
 end;
 
-function TStringJSONReader.Next: Boolean;
+function TJSONStringReader.Next: Boolean;
 var
-  P, EndP: PChar;
+  LPChar, LPEndChar: PChar;
 begin
-  P := FText;
-  EndP := FTextEnd;
-  while (P < EndP) and (P^ <= #32) do
-    Inc(P);
+  LPChar := FText;
+  LPEndChar := FTextEnd;
 
-  if P < EndP then
+  while (LPChar < LPEndChar) and (LPChar^ <= #32) do
+    Inc(LPChar);
+
+  if LPChar < LPEndChar then
   begin
-    case P^ of
+    case LPChar^ of
       '{':
         begin
           FLook.Kind := jtkLBrace;
-          FText := P + 1;
+          FText := LPChar + 1;
         end;
       '}':
         begin
           FLook.Kind := jtkRBrace;
-          FText := P + 1;
+          FText := LPChar + 1;
         end;
       '[':
         begin
           FLook.Kind := jtkLBracket;
-          FText := P + 1;
+          FText := LPChar + 1;
         end;
       ']':
         begin
           FLook.Kind := jtkRBracket;
-          FText := P + 1;
+          FText := LPChar + 1;
         end;
       ':':
         begin
           FLook.Kind := jtkColon;
-          FText := P + 1;
+          FText := LPChar + 1;
         end;
       ',':
         begin
           FLook.Kind := jtkComma;
-          FText := P + 1;
+          FText := LPChar + 1;
         end;
       '"':
-        LexString(P);
+        LexString(LPChar);
     else
-      LexIdent(P);
+      LexIdent(LPChar);
     end;
+
     Result := True;
   end
   else
   begin
-    FText := EndP;
+    FText := LPEndChar;
     FLook.Kind := jtkEof;
     Result := False;
   end;
 end;
 
-procedure TStringJSONReader.LexString(P: PChar);
+procedure TJSONStringReader.LexString(P: PChar);
 var
-  EndP: PChar;
-  EscapeSequences: PChar;
-  Ch: Char;
-  Idx: Integer;
+  LPEndChar: PChar;
+  LEscapeSequences: PChar;
+  LChar: Char;
+  LIndex: Integer;
 begin
   Inc(P);
-  EndP := FTextEnd;
-  EscapeSequences := nil;
-  Ch := #0;
-  Idx := P - EndP;
+  LPEndChar := FTextEnd;
+  LEscapeSequences := nil;
+  LChar := #0;
+  LIndex := P - LPEndChar;
 
   repeat
-    if Idx = 0 then
+    if LIndex = 0 then
       Break;
 
-    Ch := EndP[Idx];
+    LChar := LPEndChar[LIndex];
 
-    if (Ch = '"') or (Ch = #10) or (Ch = #13) then
+    if (LChar = '"') or (LChar = #10) or (LChar = #13) then
       Break;
-    Inc(Idx);
 
-    if Ch <> '\' then
+    Inc(LIndex);
+
+    if LChar <> '\' then
       Continue;
 
-    if Idx = 0 then
+    if LIndex = 0 then
       Break;
 
-    if EscapeSequences = nil then
-      EscapeSequences := @EndP[Idx];
+    if LEscapeSequences = nil then
+      LEscapeSequences := @LPEndChar[LIndex];
 
-    Inc(Idx);
+    Inc(LIndex);
   until False;
 
-  if Idx = 0 then
+  if LIndex = 0 then
   begin
     FText := P - 1;
     TJSONReader.StringNotClosedError(Self);
   end;
 
-  EndP := @EndP[Idx];
-  if EscapeSequences = nil then
-    SetString(FLook.S, P, EndP - P)
+  LPEndChar := @LPEndChar[LIndex];
+
+  if LEscapeSequences = nil then
+    SetString(FLook.Value, P, LPEndChar - P)
   else
-    TJSONReader.JSONStrToStr(P, EndP, EscapeSequences - P, FLook.S, Self);
+    TJSONReader.JSONStrToStr(P, LPEndChar, LEscapeSequences - P, FLook.Value, Self);
 
-  if Ch = '"' then
-    Inc(EndP);
+  if LChar = '"' then
+    Inc(LPEndChar);
+
   FLook.Kind := jtkString;
-  FText := EndP;
+  FText := LPEndChar;
 
-  if Ch in [#10, #13] then
+  if LChar in [#10, #13] then
     TJSONReader.InvalidStringCharacterError(Self);
 end;
 
-procedure TStringJSONReader.LexIdent(P: PChar);
+procedure TJSONStringReader.LexIdent(P: PChar);
 const
   NullStr1 = LongWord(Ord('n') or (Ord('u') shl 16));
   NullStr2 = LongWord(Ord('l') or (Ord('l') shl 16));
@@ -3326,43 +3483,48 @@ const
   FalseStr1 = LongWord(Ord('a') or (Ord('l') shl 16));
   FalseStr2 = LongWord(Ord('s') or (Ord('e') shl 16));
 var
-  F: PChar;
-  EndP: PChar;
-  L: LongWord;
+  LPChar: PChar;
+  LPEndChar: PChar;
+  LLength: LongWord;
 begin
-  F := P;
-  EndP := FTextEnd;
+  LPChar := P;
+  LPEndChar := FTextEnd;
+
   case P^ of
     'A'..'Z', 'a'..'z', '_', '$':
       begin
         Inc(P);
 
-        while P < EndP do
+        while P < LPEndChar do
           case P^ of
             'A'..'Z', 'a'..'z', '_', '0'..'9': Inc(P);
           else
             Break;
           end;
 
-        L := P - F;
-        if L = 4 then
+        LLength := P - LPChar;
+
+        if LLength = 4 then
         begin
-          L := PLongWord(F)^;
-          if (L = NullStr1) and (PLongWord(F + 2)^ = NullStr2) then
+          LLength := PLongWord(LPChar)^;
+
+          if (LLength = NullStr1) and (PLongWord(LPChar + 2)^ = NullStr2) then
             FLook.Kind := jtkNull
-          else if (L = TrueStr1) and (PLongWord(F + 2)^ = TrueStr2) then
+          else
+          if (LLength = TrueStr1) and (PLongWord(LPChar + 2)^ = TrueStr2) then
             FLook.Kind := jtkTrue
           else
           begin
-            SetString(FLook.S, F, P - F);
+            SetString(FLook.Value, LPChar, P - LPChar);
             FLook.Kind := jtkIdent;
           end;
         end
-        else if (L = 5) and (F^ = 'f') and (PLongWord(F + 1)^ = FalseStr1) and (PLongWord(F + 3)^ = FalseStr2) then
+        else
+        if (LLength = 5) and (LPChar^ = 'f') and (PLongWord(LPChar + 1)^ = FalseStr1) and (PLongWord(LPChar + 3)^ = FalseStr2) then
           FLook.Kind := jtkFalse
         else
         begin
-          SetString(FLook.S, F, P - F);
+          SetString(FLook.Value, LPChar, P - LPChar);
           FLook.Kind := jtkIdent;
         end;
       end;
@@ -3438,10 +3600,12 @@ end;
 class operator TJSONDataValueHelper.Implicit(const AValue: TJSONDataValueHelper): TJSONArray;
 begin
   AValue.ResolveName;
+
   if AValue.FData.FIntern <> nil then
   begin
     if AValue.FData.FIntern.FDataType = jdtNone then
       AValue.FData.FIntern.ArrayValue := TJSONArray.Create;
+
     Result := AValue.FData.FIntern.ArrayValue;
   end
   else
@@ -3463,10 +3627,12 @@ end;
 class operator TJSONDataValueHelper.Implicit(const AValue: TJSONDataValueHelper): TJSONObject;
 begin
   AValue.ResolveName;
+
   if AValue.FData.FIntern <> nil then
   begin
     if AValue.FData.FIntern.FDataType = jdtNone then
       AValue.FData.FIntern.ObjectValue := TJSONObject.Create;
+
     Result := AValue.FData.FIntern.ObjectValue;
   end
   else
@@ -3484,6 +3650,7 @@ end;
 procedure TJSONDataValueHelper.SetValue(const AValue: string);
 begin
   ResolveName;
+
   if FData.FIntern <> nil then
     FData.FIntern.Value := AValue
   else
@@ -3498,6 +3665,7 @@ end;
 procedure TJSONDataValueHelper.SetValueBooleanValue(const AValue: Boolean);
 begin
   ResolveName;
+
   if FData.FIntern <> nil then
     FData.FIntern.BoolValue := AValue
   else
@@ -3512,6 +3680,7 @@ end;
 procedure TJSONDataValueHelper.SetValueArrayValue(const AValue: TJSONArray);
 begin
   ResolveName;
+
   if FData.FIntern <> nil then
     FData.FIntern.ArrayValue := AValue
   else
@@ -3526,6 +3695,7 @@ end;
 procedure TJSONDataValueHelper.SetValueObjectValue(const AValue: TJSONObject);
 begin
   ResolveName;
+
   if FData.FIntern <> nil then
     FData.FIntern.ObjectValue := AValue
   else
@@ -3579,6 +3749,7 @@ end;
 class procedure TJSONDataValueHelper.SetInternValue(const AItem: PJSONDataValue; const AValue: TJSONDataValueHelper);
 begin
   AValue.ResolveName;
+
   if AValue.FData.FIntern <> nil then
   begin
     AItem.Clear;
@@ -3702,30 +3873,33 @@ end;
 
 procedure TJSONOutputWriter.TJSONStringBuilder.Done;
 var
-  P: PStrRec;
+  LPStrRec: PStrRec;
 begin
   if FData <> nil then
   begin
-    P := PStrRec(PByte(FData) - SizeOf(TStrRec));
-    FreeMem(P);
+    LPStrRec := PStrRec(PByte(FData) - SizeOf(TStrRec));
+    FreeMem(LPStrRec);
   end;
 end;
 
 procedure TJSONOutputWriter.TJSONStringBuilder.DoneConvertToString(var S: string);
 var
-  StrP: PStrRec;
-  P: PChar;
+  LPStrRec: PStrRec;
+  LPChar: PChar;
 begin
   S := '';
+
   if FData <> nil then
   begin
-    StrP := PStrRec(PByte(FData) - SizeOf(TStrRec));
+    LPStrRec := PStrRec(PByte(FData) - SizeOf(TStrRec));
+
     if DataLength <> FCapacity then
-      ReallocMem(Pointer(StrP), SizeOf(TStrRec) + (FDataLength + 1) * SizeOf(Char));
-    StrP.Length := DataLength;
-    P := PChar(PByte(StrP) + SizeOf(TStrRec));
-    P[DataLength] := #0;
-    Pointer(S) := P;
+      ReallocMem(Pointer(LPStrRec), SizeOf(TStrRec) + (FDataLength + 1) * SizeOf(Char));
+
+    LPStrRec.Length := DataLength;
+    LPChar := PChar(PByte(LPStrRec) + SizeOf(TStrRec));
+    LPChar[DataLength] := #0;
+    Pointer(S) := LPChar;
   end;
 end;
 
@@ -3734,6 +3908,7 @@ begin
   if FDataLength > 0 then
   begin
     Result := TEncodingStrictAccess(Encoding).GetByteCountEx(FData, FDataLength);
+
     if Result > 0 then
     begin
       if Result > Size then
@@ -3741,8 +3916,10 @@ begin
         Size := (Result + 4095) and not 4095;
         ReallocMem(Bytes, Size);
       end;
+
       TEncodingStrictAccess(Encoding).GetBytesEx(FData, FDataLength, Bytes, Result);
     end;
+
     FDataLength := 0;
   end
   else
@@ -3751,63 +3928,72 @@ end;
 
 procedure TJSONOutputWriter.TJSONStringBuilder.FlushToMemoryStream(const Stream: TMemoryStream; const Encoding: TEncoding);
 var
-  L: Integer;
-  Idx, NewSize: NativeInt;
+  LByteCount: Integer;
+  LIndex, LNewSize: NativeInt;
 begin
   if FDataLength > 0 then
   begin
-    L := TEncodingStrictAccess(Encoding).GetByteCountEx(FData, FDataLength);
-    if L > 0 then
-    begin
-      Idx := Stream.Position;
-      NewSize := Idx + L;
-      if NewSize > TMemoryStreamAccess(Stream).Capacity then
-        TMemoryStreamAccess(Stream).Capacity := NewSize;
+    LByteCount := TEncodingStrictAccess(Encoding).GetByteCountEx(FData, FDataLength);
 
-      TEncodingStrictAccess(Encoding).GetBytesEx(FData, FDataLength, @PByte(Stream.Memory)[Idx], L);
-      TMemoryStreamAccess(Stream).SetPointer(Stream.Memory, NewSize);
-      Stream.Position := NewSize;
+    if LByteCount > 0 then
+    begin
+      LIndex := Stream.Position;
+      LNewSize := LIndex + LByteCount;
+
+      if LNewSize > TMemoryStreamAccess(Stream).Capacity then
+        TMemoryStreamAccess(Stream).Capacity := LNewSize;
+
+      TEncodingStrictAccess(Encoding).GetBytesEx(FData, FDataLength, @PByte(Stream.Memory)[LIndex], LByteCount);
+      TMemoryStreamAccess(Stream).SetPointer(Stream.Memory, LNewSize);
+      Stream.Position := LNewSize;
     end;
   end;
+
   FDataLength := 0;
 end;
 
 procedure TJSONOutputWriter.TJSONStringBuilder.Grow(MinLen: Integer);
 var
-  C: Integer;
-  StrP: PStrRec;
+  LCapacity: Integer;
+  LPStrRec: PStrRec;
 begin
-  C := FCapacity;
-  C := C * 2;
+  LCapacity := FCapacity;
+  LCapacity := LCapacity * 2;
+
   if MinLen < 256 then
     MinLen := 256;
+
 {$IFNDEF CPUX64}
-  if C > 256 * 1024 * 1024 then
+  if LCapacity > 256 * 1024 * 1024 then
   begin
-    C := FCapacity;
-    C := C + (C div 3);
-    if C < MinLen then
-      C := MinLen;
+    LCapacity := FCapacity;
+    LCapacity := LCapacity + (LCapacity div 3);
+
+    if LCapacity < MinLen then
+      LCapacity := MinLen;
   end
   else
 {$ENDIF ~CPUX64}
-  if C < MinLen then
-    C := MinLen;
-  FCapacity := C;
+  if LCapacity < MinLen then
+    LCapacity := MinLen;
+
+  FCapacity := LCapacity;
+
   if Assigned(FData) then
   begin
-    StrP := Pointer(PByte(FData) - SizeOf(TStrRec));
-    ReallocMem(StrP, SizeOf(TStrRec) + (C + 1) * SizeOf(Char));
+    LPStrRec := Pointer(PByte(FData) - SizeOf(TStrRec));
+    ReallocMem(LPStrRec, SizeOf(TStrRec) + (LCapacity + 1) * SizeOf(Char));
   end
   else
   begin
-    GetMem(Pointer(StrP), SizeOf(TStrRec) + (C + 1) * SizeOf(Char));
-    StrP.CodePage := Word(DefaultUnicodeCodePage);
-    StrP.ElemSize := SizeOf(Char);
-    StrP.RefCnt := 1;
-    StrP.Length := 0;
+    GetMem(Pointer(LPStrRec), SizeOf(TStrRec) + (LCapacity + 1) * SizeOf(Char));
+    LPStrRec.CodePage := Word(DefaultUnicodeCodePage);
+    LPStrRec.ElemSize := SizeOf(Char);
+    LPStrRec.RefCnt := 1;
+    LPStrRec.Length := 0;
   end;
-  FData := PChar(PByte(StrP) + SizeOf(TStrRec));
+
+  FData := PChar(PByte(LPStrRec) + SizeOf(TStrRec));
 end;
 
 function TJSONOutputWriter.TJSONStringBuilder.Append(const AValue: string): PJSONStringBuilder;
@@ -3816,10 +4002,12 @@ var
 begin
   LDataLength := FDataLength;
   LValueLength := Length(AValue);
+
   if LValueLength > 0 then
   begin
     if LDataLength + LValueLength >= FCapacity then
       Grow(LDataLength + LValueLength);
+
     case LValueLength of
       1:
         FData[LDataLength] := PChar(Pointer(AValue))^;
@@ -3828,8 +4016,10 @@ begin
     else
       Move(PChar(Pointer(AValue))[0], FData[LDataLength], LValueLength * SizeOf(Char));
     end;
+
     FDataLength := LDataLength + LValueLength;
   end;
+
   Result := @Self;
 end;
 
@@ -3838,10 +4028,12 @@ var
   LLength: Integer;
 begin
   LLength := FDataLength;
+
   if Len> 0 then
   begin
     if LLength + Len >= FCapacity then
       Grow(LLength + Len);
+
     case Len of
       1:
         FData[LLength] := P^;
@@ -3850,121 +4042,133 @@ begin
     else
       Move(P[0], FData[LLength], Len * SizeOf(Char));
     end;
+
     FDataLength := LLength + Len;
   end;
 end;
 
 function TJSONOutputWriter.TJSONStringBuilder.Append2(const S1: string; S2: PChar; S2Len: Integer): PJSONStringBuilder;
 var
-  L, S1Len, LLen: Integer;
+  LLength, LString1Length, LDataLength: Integer;
 begin
-  LLen := FDataLength;
-  S1Len := Length(S1);
-  L := S1Len + S2Len;
-  if LLen + L >= FCapacity then
-    Grow(LLen + L);
+  LDataLength := FDataLength;
+  LString1Length := Length(S1);
+  LLength := LString1Length + S2Len;
 
-  case S1Len of
+  if LDataLength + LLength >= FCapacity then
+    Grow(LDataLength + LLength);
+
+  case LString1Length of
     0:
       ;
     1:
-      FData[LLen] := PChar(Pointer(S1))^;
+      FData[LDataLength] := PChar(Pointer(S1))^;
     2:
-      PLongWord(@FData[LLen])^ := PLongWord(Pointer(S1))^;
+      PLongWord(@FData[LDataLength])^ := PLongWord(Pointer(S1))^;
   else
-    Move(PChar(Pointer(S1))[0], FData[LLen], S1Len * SizeOf(Char));
+    Move(PChar(Pointer(S1))[0], FData[LDataLength], LString1Length * SizeOf(Char));
   end;
-  Inc(LLen, S1Len);
+
+  Inc(LDataLength, LString1Length);
 
   case S2Len of
     0:
       ;
     1:
-      FData[LLen] := S2^;
+      FData[LDataLength] := S2^;
     2:
-      PLongWord(@FData[LLen])^ := PLongWord(Pointer(S2))^;
+      PLongWord(@FData[LDataLength])^ := PLongWord(Pointer(S2))^;
   else
-    Move(S2[0], FData[LLen], S2Len * SizeOf(Char));
+    Move(S2[0], FData[LDataLength], S2Len * SizeOf(Char));
   end;
-  FDataLength := LLen + S2Len;
+
+  FDataLength := LDataLength + S2Len;
+
   Result := @Self;
 end;
 
 procedure TJSONOutputWriter.TJSONStringBuilder.Append2(const Ch1: Char; const Ch2: Char);
 var
-  LLen: Integer;
+  LDataLength: Integer;
 begin
-  LLen := FDataLength;
-  if LLen + 2 >= FCapacity then
+  LDataLength := FDataLength;
+
+  if LDataLength + 2 >= FCapacity then
     Grow(2);
-  FData[LLen] := Ch1;
-  FData[LLen + 1] := Ch2;
-  FDataLength := LLen + 2;
+
+  FData[LDataLength] := Ch1;
+  FData[LDataLength + 1] := Ch2;
+  FDataLength := LDataLength + 2;
 end;
 
 procedure TJSONOutputWriter.TJSONStringBuilder.Append3(const Ch1: Char; const S2, S3: string);
 var
-  L, S2Len, S3Len, LLen: Integer;
+  LLength, LString2Length, LString3Length, LDataLength: Integer;
 begin
-  LLen := FDataLength;
-  S2Len := Length(S2);
-  S3Len := Length(S3);
-  L := 1 + S2Len + S3Len;
-  if LLen + L >= FCapacity then
-    Grow(LLen + L);
+  LDataLength := FDataLength;
+  LString2Length := Length(S2);
+  LString3Length := Length(S3);
+  LLength := 1 + LString2Length + LString3Length;
 
-  FData[LLen] := Ch1;
-  Inc(LLen);
+  if LDataLength + LLength >= FCapacity then
+    Grow(LDataLength + LLength);
 
-  case S2Len of
+  FData[LDataLength] := Ch1;
+  Inc(LDataLength);
+
+  case LString2Length of
     0:
       ;
     1:
-      FData[LLen] := PChar(Pointer(S2))^;
+      FData[LDataLength] := PChar(Pointer(S2))^;
     2:
-      PLongWord(@FData[LLen])^ := PLongWord(Pointer(S2))^;
+      PLongWord(@FData[LDataLength])^ := PLongWord(Pointer(S2))^;
   else
-    Move(PChar(Pointer(S2))[0], FData[LLen], S2Len * SizeOf(Char));
+    Move(PChar(Pointer(S2))[0], FData[LDataLength], LString2Length * SizeOf(Char));
   end;
-  Inc(LLen, S2Len);
 
-  case S3Len of
+  Inc(LDataLength, LString2Length);
+
+  case LString3Length of
     1:
-      FData[LLen] := PChar(Pointer(S3))^;
+      FData[LDataLength] := PChar(Pointer(S3))^;
     2:
-      PLongWord(@FData[LLen])^ := PLongWord(Pointer(S3))^;
+      PLongWord(@FData[LDataLength])^ := PLongWord(Pointer(S3))^;
   else
-    Move(PChar(Pointer(S3))[0], FData[LLen], S3Len * SizeOf(Char));
+    Move(PChar(Pointer(S3))[0], FData[LDataLength], LString3Length * SizeOf(Char));
   end;
-  FDataLength := LLen + S3Len;
+
+  FDataLength := LDataLength + LString3Length;
 end;
 
 procedure TJSONOutputWriter.TJSONStringBuilder.Append3(const Ch1: Char; const P2: PChar; P2Len: Integer; const Ch3: Char);
 var
-  L, LLen: Integer;
+  LLength, LDataLength: Integer;
 begin
-  LLen := FDataLength;
-  L := 2 + P2Len;
-  if LLen + L >= FCapacity then
-    Grow(LLen + L);
+  LDataLength := FDataLength;
+  LLength := 2 + P2Len;
 
-  FData[LLen] := Ch1;
-  Inc(LLen);
+  if LDataLength + LLength >= FCapacity then
+    Grow(LDataLength + LLength);
+
+  FData[LDataLength] := Ch1;
+  Inc(LDataLength);
 
   case P2Len of
     0:
       ;
     1:
-      FData[LLen] := P2^;
+      FData[LDataLength] := P2^;
     2:
-      PLongWord(@FData[LLen])^ := PLongWord(P2)^;
+      PLongWord(@FData[LDataLength])^ := PLongWord(P2)^;
   else
-    Move(P2[0], FData[LLen], P2Len * SizeOf(Char));
+    Move(P2[0], FData[LDataLength], P2Len * SizeOf(Char));
   end;
-  Inc(LLen, P2Len);
 
-  FData[LLen] := Ch1;
-  FDataLength := LLen + 1;
+  Inc(LDataLength, P2Len);
+
+  FData[LDataLength] := Ch1;
+  FDataLength := LDataLength + 1;
 end;
 
 procedure TJSONOutputWriter.TJSONStringBuilder.Append3(const Ch1: Char; const S2: string; const Ch3: Char);

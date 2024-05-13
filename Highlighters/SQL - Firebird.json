@@ -45,6 +45,19 @@
             }
           },
           {
+            "Type": "MethodItalic",
+            "Attributes": {
+              "Element": "MethodItalic"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"boolean",
+              "Close": "\""
+            }
+          },
+          {
             "Type": "String",
             "Attributes": {
               "Element": "String"
@@ -767,6 +780,7 @@
               "binary",
               "bind",
               "bit_length",
+              "blob_append",
               "block",
               "body",
               "both",
@@ -795,6 +809,7 @@
               "corr",
               "count",
               "counter",
+              "corr",
               "covar_pop",
               "covar_samp",
               "create",
@@ -810,6 +825,7 @@
               "database",
               "day",
               "ddl",
+              "debug",
               "dec",
               "decfloat",
               "declare",
@@ -910,6 +926,7 @@
               "localtime",
               "localtimestamp",
               "lock",
+              "locked",
               "long",
               "lparam",
               "make_dbkey",
@@ -960,12 +977,13 @@
               "package",
               "pad",
               "page",
-              "pages",
               "page_size",
+              "pages",
               "parameter",
               "partition",
               "password",
               "percent_rank",
+              "pkcs_1_5",
               "placing",
               "plan",
               "plugin",
@@ -1073,6 +1091,7 @@
               "system",
               "table",
               "tags",
+              "target",
               "temporary",
               "term",
               "then",
@@ -1080,6 +1099,7 @@
               "timeout",
               "timezone_hour",
               "timezone_minute",
+              "timezone_name",
               "to",
               "totalorder",
               "trailing",
@@ -1089,9 +1109,12 @@
               "true",
               "trusted",
               "two_phase",
+              "type",
               "unbounded",
               "uncommitted",
               "undo",
+              "unicode_char",
+              "unicode_val",
               "union",
               "unknown",
               "update",

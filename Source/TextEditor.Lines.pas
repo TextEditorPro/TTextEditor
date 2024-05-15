@@ -147,7 +147,7 @@ type
 implementation
 
 uses
-  System.Math, TextEditor.Encoding, TextEditor.Language;
+  System.Math, TextEditor.Encoding, TextEditor.Language, TextEditor;
 
 { TTextEditorLines }
 
@@ -1092,6 +1092,8 @@ begin
     LProgressInc := FileSize div 100;
   end;
 
+  if Owner is TCustomTextEditor then
+    TCustomTextEditor(Owner).BeginLines;
   BeginUpdate;
   Clear;
   try
@@ -1241,6 +1243,8 @@ begin
     end;
   finally
     EndUpdate;
+    if Owner is TCustomTextEditor then
+      TCustomTextEditor(Owner).EndLines;
   end;
 
   { Scan highlighter ranges }
@@ -1417,6 +1421,8 @@ begin
   if Assigned(FOnBeforeSetText) then
     FOnBeforeSetText(Self);
 
+  if Owner is TCustomTextEditor then
+    TCustomTextEditor(Owner).BeginLines;
   BeginUpdate;
   try
     Clear;
@@ -1471,6 +1477,8 @@ begin
     end;
   finally
     EndUpdate;
+    if Owner is TCustomTextEditor then
+      TCustomTextEditor(Owner).EndLines;
   end;
 
   if Assigned(FOnInserted) then
@@ -1491,8 +1499,10 @@ begin
       FOnChanging(Self);
   end
   else
-  if Assigned(FOnChange) then
-    FOnChange(Self);
+  begin
+    if Assigned(FOnChange) then
+      FOnChange(Self);
+  end;
 end;
 
 end.

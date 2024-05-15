@@ -2,6 +2,7 @@
 unit TextEditor;
 
 {$I TextEditor.Defines.inc}
+{.$R-}
 
 interface
 
@@ -372,6 +373,7 @@ type
     FUndo: TTextEditorUndo;
     FUndoList: TTextEditorUndoList;
     FUnknownChars: TTextEditorUnknownChars;
+    FLinesUpdateCount: Integer;
     FViewPosition: TTextEditorViewPosition;
     FWordWrap: TTextEditorWordWrap;
     FWordWrapLine: TTextEditorWordWrapLine;
@@ -731,6 +733,8 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    procedure BeginLines;
+    procedure EndLines;
     function CanFocus: Boolean; override;
     function CaretInView: Boolean;
     function CharacterCount(const ASelected: Boolean = False): Integer;
@@ -20688,6 +20692,31 @@ begin
     LoadFromStream(LFileStream, AEncoding);
   finally
     LFileStream.Free;
+  end;
+end;
+
+procedure TCustomTextEditor.BeginLines;
+begin
+  if FLinesUpdateCount = 0 then
+  begin
+{    ResetCharacterCount;
+
+    if Assigned(Parent) then
+    begin
+      ClearMatchingPair;
+      ClearCodeFolding;
+      ClearBookmarks;
+    end;}
+  end;
+  Inc(FLinesUpdateCount);
+end;
+
+procedure TCustomTextEditor.EndLines;
+begin
+  Dec(FLinesUpdateCount);
+  if FLinesUpdateCount = 0 then
+  begin
+    FCodeFoldings.Rescan := FCodeFolding.Visible;
   end;
 end;
 

@@ -65,8 +65,8 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.Generics.Defaults, System.Math, System.SysUtils, System.UITypes, TextEditor,
-  TextEditor.CompletionProposal.Snippets, TextEditor.Consts, TextEditor.Highlighter, TextEditor.KeyCommands,
+  Winapi.Windows, System.Generics.Defaults, System.Math, System.SysUtils, System.Generics.Collections, System.UITypes,
+  TextEditor, TextEditor.CompletionProposal.Snippets, TextEditor.Consts, TextEditor.Highlighter, TextEditor.KeyCommands,
   TextEditor.PaintHelper;
 
 constructor TTextEditorCompletionProposalPopupWindow.Create(AOwner: TComponent);
@@ -583,27 +583,19 @@ var
 var
   LIndex, LCount: Integer;
 begin
-  if AOptions.SortByDescription then
-    FItems.Sort(TComparer<TTextEditorCompletionProposalItem>.Construct(
-      function(const ALeft, ARight: TTextEditorCompletionProposalItem): Integer
-      begin
-        Result := CompareStr(ALeft.Description, ARight.Description);
-        if Result = 0 then
-          Result := CompareStr(ALeft.Keyword, ARight.Keyword);
-      end))
-  else
-  if AOptions.SortByKeyword then
-    FItems.Sort(TComparer<TTextEditorCompletionProposalItem>.Construct(
-      function(const ALeft, ARight: TTextEditorCompletionProposalItem): Integer
-      begin
-        Result := CompareStr(ALeft.Keyword, ARight.Keyword);
-      end));
-
   LCount := FItems.Count;
-  SetLength(FItemIndexArray, 0);
   SetLength(FItemIndexArray, LCount);
   for LIndex := 0 to LCount - 1 do
     FItemIndexArray[LIndex] := LIndex;
+
+  if AOptions.SortByDescription then
+    TArray.Sort<Integer>(FItemIndexArray, TComparer<Integer>.Construct(
+      function(const ALeft, ARight: Integer): Integer
+      begin
+        Result := CompareStr(FItems[FItemIndexArray[ALeft]].Description, FItems[FItemIndexArray[ARight]].Description);
+        if Result = 0 then
+          Result := CompareStr(FItems[FItemIndexArray[ALeft]].Keyword, FItems[FItemIndexArray[ARight]].Keyword);
+      end));
 
   if Length(FItemIndexArray) > 0 then
   begin

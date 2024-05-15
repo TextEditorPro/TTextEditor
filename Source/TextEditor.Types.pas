@@ -138,7 +138,15 @@ type
     Description: string;
     SnippetIndex: Integer;
   end;
-  TTextEditorCompletionProposalItems = TList<TTextEditorCompletionProposalItem>;
+
+  TTextEditorCompletionProposalItems = class(TList<TTextEditorCompletionProposalItem>)
+  protected
+    function  InternalFind(const Key: string; var Index: Integer): Boolean;
+  public
+    function  Add(const Keyword: string; const Description: string = ''; SnippetIndex: Integer = -1): TTextEditorCompletionProposalItem;
+    function  Find(const Keyword: string; var Index: Integer): Boolean; inline;
+  end;
+
 
   { Editor options }
   TTextEditorOption = (eoAddHTMLCodeToClipboard, eoAutoIndent, eoDragDropEditing, eoDropFiles,
@@ -411,7 +419,6 @@ type
 
   function SearchEngineAsText(const ASearchEngine: TTextEditorSearchEngine): string;
   function TextAsSearchEngine(const ASearchEngineName: string): TTextEditorSearchEngine;
-  function CompletionProposalItemFound(const AItems: TTextEditorCompletionProposalItems; const AItem: TTextEditorCompletionProposalItem): Boolean;
 
 implementation
 
@@ -443,24 +450,6 @@ begin
     Result := seNormal
 end;
 
-function CompletionProposalItemFound(const AItems: TTextEditorCompletionProposalItems; const AItem: TTextEditorCompletionProposalItem): Boolean;
-var
-  LIndex: Integer;
-  LItem: TTextEditorCompletionProposalItem;
-begin
-  Result := True;
-
-  for LIndex := 0 to AItems.Count - 1 do
-  begin
-    LItem := AItems[LIndex];
-    if LItem.Keyword.Trim = AItem.Keyword.Trim then
-      if LItem.Description.Trim = AItem.Description.Trim then
-        Exit;
-  end;
-
-  Result := False;
-end;
-
 { TTextEditorCodeFoldingHintIndicatorPadding }
 
 class procedure TTextEditorCodeFoldingHintIndicatorPadding.InitDefaults(Margins: TMargins);
@@ -480,6 +469,63 @@ procedure TTextEditorTimer.Restart;
 begin
   Enabled := False;
   Enabled := True;
+end;
+
+{ TTextEditorCompletionProposalItems }
+
+function TTextEditorCompletionProposalItems.Add(const Keyword, Description: string; SnippetIndex: Integer): TTextEditorCompletionProposalItem;
+var
+  LIndex: Integer;
+begin
+  var LKey := Keyword.Trim.ToLower;
+  if InternalFind(LKey, LIndex) then
+  begin
+    repeat
+      Result := List[LIndex];
+      if Result.Description.Trim.ToLower = Description.Trim.ToLower then
+        Exit;
+
+      Inc(LIndex);
+    until (LIndex >= Count) or (LKey <> Result.Keyword.Trim.ToLower);
+  end;
+
+  Result.Keyword := Keyword;
+  Result.Description := Description;
+  Result.SnippetIndex := SnippetIndex;
+
+  inherited Insert(LIndex, Result);
+end;
+
+function TTextEditorCompletionProposalItems.InternalFind(const Key: string; var Index: Integer): Boolean;
+var
+  L, H, I, C: Integer;
+begin
+  Result := False;
+  L := 0;
+  H := Count - 1;
+  while L <= H do
+  begin
+    I := (L + H) shr 1;
+    C := AnsiCompareStr(List[I].Keyword.Trim.ToLower, Key);
+    if C < 0 then
+    begin
+      L := I + 1;
+    end
+    else
+    begin
+      H := I - 1;
+      if C = 0 then
+      begin
+        Result := True;
+      end;
+    end;
+  end;
+  Index := L;
+end;
+
+function TTextEditorCompletionProposalItems.Find(const Keyword: string; var Index: Integer): Boolean;
+begin
+  Result := InternalFind(Keyword.Trim.ToLower, Index);
 end;
 
 end.

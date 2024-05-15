@@ -18423,20 +18423,11 @@ var
   end;
 
   procedure AddKeyword(const AKeyword: string);
-  var
-    LItem: TTextEditorCompletionProposalItem;
   begin
-    LItem.Keyword := AKeyword;
-
     if AAddDescription then
-      LItem.Description := STextEditorText
+      AItems.Add(AKeyword, STextEditorText)
     else
-      LItem.Description := '';
-
-    LItem.SnippetIndex := -1;
-
-    if not CompletionProposalItemFound(AItems, LItem) then
-      AItems.Add(LItem);
+      AItems.Add(AKeyword);
   end;
 
 begin
@@ -18568,12 +18559,7 @@ begin
               LKeyword := AnsiUpperCase(LKeyword[1]) + AnsiLowerCase(Copy(LKeyword, 2));
           end;
 
-          LItem.Keyword := LKeyword;
-          LItem.Description := LDescription;
-          LItem.SnippetIndex := -1;
-
-          if not CompletionProposalItemFound(AItems, LItem) then
-            AItems.Add(LItem);
+          AItems.Add(LKeyword, LDescription);
         end;
       end;
     end;
@@ -18586,27 +18572,20 @@ procedure TCustomTextEditor.AddSnippets(const AItems: TTextEditorCompletionPropo
 var
   LIndex: Integer;
   LSnippetItem: TTextEditorCompletionProposalSnippetItem;
-  LItem: TTextEditorCompletionProposalItem;
 begin
   for LIndex := 0 to FCompletionProposal.Snippets.Items.Count - 1 do
   begin
     LSnippetItem := FCompletionProposal.Snippets.Item[LIndex];
-    LItem.Keyword := LSnippetItem.Keyword;
 
     if AAddDescription then
     begin
       if LSnippetItem.Description = '' then
-        LItem.Description := STextEditorSnippet
+        AItems.Add(LSnippetItem.Keyword, STextEditorSnippet, LIndex)
       else
-        LItem.Description := LSnippetItem.Description;
+        AItems.Add(LSnippetItem.Keyword, LSnippetItem.Description, LIndex);
     end
     else
-      LItem.Description := '';
-
-    LItem.SnippetIndex := LIndex;
-
-    if not CompletionProposalItemFound(AItems, LItem) then
-      AItems.Add(LItem);
+      AItems.Add(LSnippetItem.Keyword, LSnippetItem.Description, LIndex);
   end;
 end;
 

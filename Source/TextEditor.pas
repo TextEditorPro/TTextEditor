@@ -391,8 +391,6 @@ type
       const AChangeText: string; SelectionMode: TTextEditorSelectionMode; AChangeBlockNumber: Integer = 0);
     function AllWhiteUpToTextPosition(const ATextPosition: TTextEditorTextPosition; const ALine: string; const ALength: Integer): Boolean;
     function AreTextPositionsEqual(const ATextPosition1: TTextEditorTextPosition; const ATextPosition2: TTextEditorTextPosition): Boolean; inline;
-    function CharIndexToTextPosition(const ACharIndex: Integer): TTextEditorTextPosition; overload;
-    function CharIndexToTextPosition(const ACharIndex: Integer; const ATextBeginPosition: TTextEditorTextPosition; const ACountLineBreak: Boolean = True): TTextEditorTextPosition; overload;
     function CodeFoldingCollapsableFoldRangeForLine(const ALine: Integer): TTextEditorCodeFoldingRange;
     function CodeFoldingFoldRangeForLineTo(const ALine: Integer): TTextEditorCodeFoldingRange;
     function CodeFoldingLineInsideRange(const ALine: Integer): TTextEditorCodeFoldingRange;
@@ -654,6 +652,8 @@ type
     procedure ChainLinesPutted(ASender: TObject; const AIndex: Integer; const ACount: Integer);
     procedure ChainUndoRedoAdded(ASender: TObject);
     procedure ChangeScale(AMultiplier, ADivider: Integer; AIsDpiChange: Boolean); override;
+    function CharIndexToTextPosition(const ACharIndex: Integer): TTextEditorTextPosition; overload;
+    function CharIndexToTextPosition(const ACharIndex: Integer; const ATextBeginPosition: TTextEditorTextPosition; const ACountLineBreak: Boolean = True): TTextEditorTextPosition; overload;
     procedure CodeFoldingExpand(const AFoldRange: TTextEditorCodeFoldingRange);
     procedure CreateParams(var AParams: TCreateParams); override;
     procedure CreateWnd; override;
@@ -975,6 +975,7 @@ type
     property OnLinesDeleted: TStringListChangeEvent read FEvents.OnLinesDeleted write FEvents.OnLinesDeleted;
     property OnLinesInserted: TStringListChangeEvent read FEvents.OnLinesInserted write FEvents.OnLinesInserted;
     property OnLinesPutted: TStringListChangeEvent read FEvents.OnLinesPutted write FEvents.OnLinesPutted;
+    property OnLinkClick: TTextEditorLinkClickEvent read FEvents.OnLinkClick write FEvents.OnLinkClick;
     property OnLoadingProgress: TNotifyEvent read FEvents.OnLoadingProgress write FEvents.OnLoadingProgress;
     property OnMarkPanelLinePaint: TTextEditorMarkPanelLinePaintEvent read FEvents.OnMarkPanelLinePaint write FEvents.OnMarkPanelLinePaint;
     property OnModified: TNotifyEvent read FEvents.OnModified write FEvents.OnModified;
@@ -18533,7 +18534,6 @@ var
   LKeyword: string;
   LChar: Char;
   LDescription: string;
-  LItem: TTextEditorCompletionProposalItem;
 begin
   LKeywordStringList := TStringList.Create;
   try
@@ -20717,6 +20717,7 @@ begin
   if FLinesUpdateCount = 0 then
   begin
     FCodeFoldings.Rescan := FCodeFolding.Visible;
+    DoChange;
   end;
 end;
 

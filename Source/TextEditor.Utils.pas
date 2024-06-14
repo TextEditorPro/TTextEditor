@@ -184,15 +184,15 @@ var
 begin
   LIndex := AText.Length - 1;
 
-  if (LIndex >= 0) and (AText[LIndex] > ' ') then
+  if (LIndex >= 0) and (AText.Chars[LIndex] > ' ') then
     Result := AText
   else
   begin
     while (LIndex >= 0) and (AText.Chars[LIndex] <= ' ') do
-    if AText.Chars[LIndex] = TControlCharacters.Substitute then
-      Break
-    else
-      Dec(LIndex);
+      if AText.Chars[LIndex] = TControlCharacters.Substitute then
+        Break
+      else
+        Dec(LIndex);
 
     Result := AText.SubString(0, LIndex + 1);
   end;

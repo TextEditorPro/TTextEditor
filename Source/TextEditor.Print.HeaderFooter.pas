@@ -467,7 +467,7 @@ begin
   Result := TTextEditorSectionItem(Item1).LineNumber - TTextEditorSectionItem(Item2).LineNumber;
 
   if Result = 0 then
-    Result := Integer(Item1) - Integer(Item2);
+    Result := NativeInt(Item1) - NativeInt(Item2);
 end;
 
 procedure TTextEditorSection.SetPixelsPerInch(const AValue: Integer);

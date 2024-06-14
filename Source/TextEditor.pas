@@ -21898,7 +21898,7 @@ end;
 
 procedure TCustomDBTextEditor.CMGetDataLink(var AMessage: TMessage);
 begin
-  AMessage.Result := Integer(FDataLink);
+  AMessage.Result := LRESULT(FDataLink);
 end;
 
 procedure TCustomDBTextEditor.DataChange(Sender: TObject);

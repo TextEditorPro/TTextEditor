@@ -1,5 +1,7 @@
 ﻿unit TextEditor.Consts;
 
+{$WARN CVT_WCHAR_TO_ACHAR OFF}
+
 interface
 
 uses

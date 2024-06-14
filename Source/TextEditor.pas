@@ -4692,14 +4692,14 @@ begin
   begin
     LIndex := 1;
 
-    while LIndex <= LLength do
+    while LIndex < LLength do
     begin
       LCodeFoldingRange := FCodeFoldings.RangeFromLine[LIndex];
 
       Inc(LIndex);
 
       if Assigned(LCodeFoldingRange) then
-      while (LIndex <= LLength) and (FCodeFoldings.RangeToLine[LIndex] <> LCodeFoldingRange) do
+      while (LIndex < LLength) and (FCodeFoldings.RangeToLine[LIndex] <> LCodeFoldingRange) do
       begin
         FCodeFoldings.TreeLine[LIndex] := True;
         Inc(LIndex);

@@ -60,6 +60,7 @@ type
   published
     property Description: string read FDescription write FDescription;
     property ExecuteWith: TTextEditorSnippetExecuteWith read FExecuteWith write FExecuteWith default seListOnly;
+    property GroupName: string read FGroupName write FGroupName;
     property Keyword: string read FKeyword write FKeyword;
     property Position: TTextEditorCompletionProposalSnippetItemPosition read FPosition write FPosition;
     property Selection: TTextEditorCompletionProposalSnippetItemSelection read FSelection write FSelection;

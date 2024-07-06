@@ -328,7 +328,7 @@ end;
 
 function IsAnsiUnicodeChar(const AChar: Char): Boolean;
 begin
-  Result := AChar in TCharacterSets.AnsiUnicodeCharacters;
+  Result := AChar.IsInArray(TCharacterSets.AnsiUnicodeCharacters);
 end;
 
 function IsCombiningCharacter(const AChar: PChar): Boolean;

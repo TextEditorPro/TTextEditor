@@ -3185,7 +3185,7 @@ begin
 
   LChar := AToken[1];
 
-  LIsFixedSizeFont := FPaintHelper.FixedSizeFont and (Ord(LChar) <= 255);
+  LIsFixedSizeFont := FPaintHelper.FixedSizeFont{ and (Ord(LChar) <= 255)};
 
   LFlags := DT_LEFT or DT_CALCRECT or DT_NOCLIP or DT_NOPREFIX or DT_SINGLELINE;
 

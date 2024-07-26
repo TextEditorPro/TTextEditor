@@ -22,7 +22,7 @@ type
     property Char: Integer read FChar write FChar;
     property Data: Pointer read FData write FData;
     property ImageIndex: Integer read FImageIndex write FImageIndex;
-    property Index: Integer read FIndex write FIndex;
+    property &Index: Integer read FIndex write FIndex;
     property Line: Integer read FLine write FLine;
     property Visible: Boolean read FVisible write FVisible;
   end;
@@ -70,6 +70,7 @@ end;
 procedure TTextEditorMarkList.Notify(Ptr: Pointer; Action: TListNotification);
 begin
   inherited;
+
   if Assigned(FOnChange) then
     FOnChange(Self);
 end;
@@ -96,9 +97,11 @@ var
   LMark: TTextEditorMark;
 begin
   Result := nil;
+
   for LIndex := Count - 1 downto 0 do
   begin
     LMark := Items[LIndex];
+
     if LMark.Index = AIndex then
       Exit(LMark);
   end;
@@ -135,15 +138,18 @@ var
 begin
   SetLength(AMarks, Count);
   LIndex2 := 0;
+
   for LIndex := 0 to Count - 1 do
   begin
     LMark := Items[LIndex];
+
     if LMark.Line = ALine then
     begin
       AMarks[LIndex2] := LMark;
       Inc(LIndex2);
     end;
   end;
+
   SetLength(AMarks, LIndex2);
 end;
 
@@ -152,13 +158,17 @@ var
   LEditor: TCustomTextEditor;
 begin
   LEditor := nil;
+
   if Assigned(FEditor) and (FEditor is TCustomTextEditor) then
     LEditor := FEditor as TCustomTextEditor;
+
   if Assigned(LEditor) then
     if Assigned(LEditor.OnBeforeMarkPlaced) then
       LEditor.OnBeforeMarkPlaced(FEditor, AMark);
+
   if Assigned(AMark) then
     Add(AMark);
+
   if Assigned(LEditor) then
     if Assigned(LEditor.OnAfterMarkPlaced) then
       LEditor.OnAfterMarkPlaced(FEditor);

@@ -142,6 +142,7 @@ var
   LPanelWidth: Integer;
 begin
   LPanelWidth := FMarksPanel.Width;
+
   if not FMarksPanel.Visible and not FBookmarks.Visible and not FMarks.Visible then
     LPanelWidth := 0;
 
@@ -176,6 +177,7 @@ var
   LValue: Integer;
 begin
   LValue := Max(0, AValue);
+
   if FWidth <> LValue then
   begin
     FWidth := LValue;
@@ -210,6 +212,7 @@ begin
   if FLineNumbers.Visible and FAutosize then
   begin
     LLinesCount := ALinesCount;
+
     if FLineNumbers.StartFrom = 0 then
       Dec(LLinesCount)
     else
@@ -217,6 +220,7 @@ begin
       Inc(LLinesCount, FLineNumbers.StartFrom - 1);
 
     LNumberOfDigits := Max(Length(LLinesCount.ToString), FLineNumbers.DigitCount);
+
     if FLineNumbers.AutosizeDigitCount <> LNumberOfDigits then
     begin
       FLineNumbers.AutosizeDigitCount := LNumberOfDigits;
@@ -234,6 +238,7 @@ var
   LLine: Integer;
 begin
   LLine := ALine;
+
   if FLineNumbers.StartFrom = 0 then
     Dec(LLine)
   else
@@ -247,6 +252,7 @@ begin
   begin
     if Result[LIndex] <> ' ' then
       Break;
+
     Result[LIndex] := '0';
   end;
 end;

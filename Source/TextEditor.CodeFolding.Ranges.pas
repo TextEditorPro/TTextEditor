@@ -175,6 +175,7 @@ begin
   for LIndex := 0 to AllCount - 1 do
   begin
     LFoldRange := GetItem(LIndex);
+
     if Assigned(LFoldRange) then
       LFoldRange.ParentCollapsed := False;
   end;
@@ -182,6 +183,7 @@ begin
   for LIndex := 0 to AllCount - 1 do
   begin
     LFoldRange := GetItem(LIndex);
+
     if Assigned(LFoldRange) and not LFoldRange.ParentCollapsed then
       SetParentCollapsedOfSubCodeFoldingRanges(LFoldRange);
   end;
@@ -210,6 +212,7 @@ function TTextEditorCodeFoldingRanges.Add(const AAllCodeFoldingRanges: TTextEdit
   const ARegionItem: TTextEditorCodeFoldingRegionItem; const AToLine: Integer): TTextEditorCodeFoldingRange;
 begin
   Result := TTextEditorCodeFoldingRange.Create;
+
   with Result do
   begin
     FromLine := AFromLine;
@@ -219,6 +222,7 @@ begin
     AllCodeFoldingRanges := AAllCodeFoldingRanges;
     RegionItem := ARegionItem;
   end;
+
   FList.Add(Result);
   AAllCodeFoldingRanges.List.Add(Result);
 end;

@@ -235,6 +235,7 @@ begin
   LHigh := FItems.Count - 1;
 
   LSearchItem := PTextEditorSearchItem(FItems[0]);
+
   if IsSearchItemGreaterThanTextPosition then
     if soWrapAround in Options then
       Exit(LHigh)
@@ -303,12 +304,13 @@ begin
     Exit;
 
   LSearchItem := PTextEditorSearchItem(FItems[0]);
+
   if IsSearchItemGreaterThanTextPosition then
     Exit(0);
 
   LHigh := FItems.Count - 1;
-
   LSearchItem := PTextEditorSearchItem(FItems[LHigh]);
+
   if IsSearchItemLowerThanTextPosition then
     if soWrapAround in Options then
       Exit(0)

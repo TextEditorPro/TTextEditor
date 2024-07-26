@@ -87,12 +87,14 @@ begin
   with ASource as TTextEditorUndoList do
   begin
     Self.Clear;
+
     for LIndex := 0 to (ASource as TTextEditorUndoList).FItems.Count - 1 do
     begin
       LUndoItem := TTextEditorUndoItem.Create;
       LUndoItem.Assign(FItems[LIndex]);
       Self.FItems.Add(LUndoItem);
     end;
+
     Self.FInsideUndoBlock := FInsideUndoBlock;
     Self.FBlockCount := FBlockCount;
     Self.FChangeBlockNumber := FChangeBlockNumber;
@@ -135,6 +137,7 @@ begin
       ChangeEndPosition := ASelectionEndPosition;
       ChangeString := AChangeText;
     end;
+
     PushItem(LNewItem);
   end;
 end;
@@ -163,8 +166,10 @@ var
   LIndex: Integer;
 begin
   FBlockCount := 0;
+
   for LIndex := 0 to FItems.Count - 1 do
     TTextEditorUndoItem(FItems[LIndex]).Free;
+
   FItems.Clear;
   FChangeCount := 0;
 end;
@@ -201,6 +206,7 @@ begin
   Result := nil;
 
   LIndex := FItems.Count - 1;
+
   if LIndex >= 0 then
     Result := FItems[LIndex];
 end;
@@ -212,11 +218,13 @@ begin
   Result := nil;
 
   LIndex := FItems.Count - 1;
+
   if LIndex >= 0 then
   begin
     Result := FItems[LIndex];
     FItems.Delete(LIndex);
     FChanged := Result.ChangeReason in TEXTEDITOR_MODIFYING_CHANGE_REASONS;
+
     if FChanged then
       Dec(FChangeCount);
   end;

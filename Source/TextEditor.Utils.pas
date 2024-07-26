@@ -328,7 +328,13 @@ end;
 
 function IsAnsiUnicodeChar(const AChar: Char): Boolean;
 begin
-  Result := AChar in TCharacterSets.AnsiUnicodeCharacters;
+  case AChar of
+    '™', '€', 'ƒ', '„', '†', '‡', 'ˆ', '‰', 'Š', '‹', 'Œ', 'Ž', '‘', '’', '“', '”', '•', '–', '—', '˜', 'š', '›', 'œ',
+    'ž', 'Ÿ':
+    Result := True;
+  else
+    Result := False;
+  end;
 end;
 
 function IsCombiningCharacter(const AChar: PChar): Boolean;
@@ -492,6 +498,7 @@ var
   function CountOfTrailingBytes: Integer;
   begin
     Result := 0;
+
     Inc(LIndex);
 
     while (LIndex < LBufferSize) and (Result < 4) do
@@ -532,7 +539,8 @@ begin
     while LIndex < LBufferSize do
     begin
       case ABuffer[LIndex] of
-        $00 .. $7F: { skip US-ASCII characters as they could belong to various charsets }
+        { skip US-ASCII characters as they could belong to various charsets }
+        $00 .. $7F:
           ;
         $C2 .. $DF:
           if CountOfTrailingBytes = 1 then
@@ -542,6 +550,7 @@ begin
         $E0:
           begin
             Inc(LIndex);
+
             if (CountOfTrailingBytes = 1) and (LIndex < LBufferSize) and (ABuffer[LIndex] in [$A0 .. $BF]) then
               Inc(LFoundUTF8Strings)
             else
@@ -555,6 +564,7 @@ begin
         $ED:
           begin
             Inc(LIndex);
+
             if (CountOfTrailingBytes = 1) and (LIndex < LBufferSize) and (ABuffer[LIndex] in [$80 .. $9F]) then
               Inc(LFoundUTF8Strings)
             else
@@ -563,6 +573,7 @@ begin
         $F0:
           begin
             Inc(LIndex);
+
             if (CountOfTrailingBytes = 2) and (LIndex < LBufferSize) and (ABuffer[LIndex] in [$90 .. $BF]) then
               Inc(LFoundUTF8Strings)
             else
@@ -576,15 +587,17 @@ begin
         $F4:
           begin
             Inc(LIndex);
+
             if (CountOfTrailingBytes = 2) and (LIndex < LBufferSize) and (ABuffer[LIndex] in [$80 .. $8F]) then
               Inc(LFoundUTF8Strings)
             else
               Break;
           end;
-        $C0, $C1, $F5 .. $FF: { invalid UTF-8 bytes }
+        { invalid UTF-8 bytes }
+        $C0, $C1, $F5 .. $FF:
           Break;
-        $80 .. $BF: { trailing bytes are consumed when handling leading bytes, any occurence of "orphaned" trailing
-                      bytes is invalid UTF-8 }
+        { trailing bytes are consumed when handling leading bytes, any occurence of "orphaned" trailing bytes is invalid UTF-8 }
+        $80 .. $BF:
           Break;
       end;
 
@@ -760,6 +773,7 @@ begin
     if Win32Platform <> VER_PLATFORM_WIN32_NT then
     begin
       LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, LLength + 1);
+
       if LGlobalMem <> 0 then
       begin
         LPGlobalLock := GlobalLock(LGlobalMem);
@@ -797,6 +811,7 @@ begin
       LLength := Length(LHTML);
 
       LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, LLength);
+
       if LGlobalMem <> 0 then
       begin
         LPGlobalLock := GlobalLock(LGlobalMem);
@@ -844,12 +859,15 @@ begin
   end;
 
   Result := False;
+
   LPosition := 1;
   LPreviousPosition := 0;
   LWrapPosition := TTextEditorWrapPosition.Create;
+
   while LPosition <= Length(ALine) do
   begin
     LFound := (LPosition - LPreviousPosition > AMaxColumn) and (LWrapPosition.Index <> 0);
+
     if not LFound and (ALine[LPosition] <= High(Char)) and (Char(ALine[LPosition]) in ABreakChars) then
       LWrapPosition.Index := LPosition;
 

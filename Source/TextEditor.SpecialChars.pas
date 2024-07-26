@@ -138,12 +138,15 @@ var
   LValue: TTextEditorSpecialCharsOptions;
 begin
   LValue := AValue;
+
   if FOptions <> LValue then
   begin
     if scoTextColor in LValue then
       Exclude(LValue, scoMiddleColor);
+
     if scoMiddleColor in LValue then
       Exclude(LValue, scoTextColor);
+
     FOptions := LValue;
     DoChange;
   end;

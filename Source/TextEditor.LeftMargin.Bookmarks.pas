@@ -53,6 +53,7 @@ begin
     Self.FLeftMargin := FLeftMargin;
     Self.FShortCuts := FShortCuts;
     Self.FVisible := FVisible;
+
     if Assigned(Self.FOnChange) then
       Self.FOnChange(Self);
   end
@@ -79,8 +80,10 @@ begin
   if FImages <> AValue then
   begin
     FImages := AValue;
+
     if Assigned(FImages) then
       FImages.FreeNotification(FOwner);
+
     DoChange;
   end;
 end;

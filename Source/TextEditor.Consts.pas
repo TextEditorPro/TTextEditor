@@ -1,4 +1,5 @@
-﻿unit TextEditor.Consts;
+﻿{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
+unit TextEditor.Consts;
 
 interface
 
@@ -11,8 +12,6 @@ type
   TCharacterSets = record
   const
     AbsoluteDelimiters: TTextEditorCharSet = [#0, #9, #10, #13, #32, #26];
-    AnsiUnicodeCharacters = ['™', '€', 'ƒ', '„', '†', '‡', 'ˆ', '‰', 'Š', '‹', 'Œ', 'Ž', '‘', '’', '“', '”', '•', '–',
-      '—', '˜', 'š', '›', 'œ', 'ž', 'Ÿ'];
     LowerCharacters = ['a'..'z'];
     UpperCharacters = ['A'..'Z'];
     Characters = LowerCharacters + UpperCharacters;
@@ -39,6 +38,7 @@ type
     LineSeparator = Char($2028);
     LowLine = #95;
     NonBreakingSpace = #160;
+    ParagraphSeparator = Char($2029);
     Pilcrow = Char($00B6);
     Slash = '/';
     Space = #32;
@@ -60,7 +60,6 @@ type
     Backspace = 8;
     CarriageReturn = 13;
     Escape = 27;
-    Linefeed = 10;
   end;
 
   TControlCharacterNames = record
@@ -85,8 +84,11 @@ type
     FormFeed = 'FF';
     GroupSeparator = 'GS';
     LineFeed = 'LF';
+    LineSeparator = 'LS';
     NegativeAcknowledge = 'NAK';
+    NextLine = 'NEL';
     Null = 'NUL';
+    ParagraphSeparator = 'PS';
     RecordSeparator = 'RS';
     ShiftIn = 'SI';
     ShiftOut = 'SO';
@@ -122,6 +124,7 @@ type
     GroupSeparator = #29;
     Linefeed = #10;
     NegativeAcknowledge = #21;
+    NextLine = #133;
     Null = #0;
     RecordSeparator = #30;
     ShiftIn = #15;
@@ -163,11 +166,15 @@ type
     ElementString = 'String';
   end;
 
+  TMinValues = record
+  const
+    FileReadBufferSize = 1024;
+    FileShowProgressSize = 1024;
+  end;
+
   TMaxValues = record
   const
-    BufferSize = 10485760; // = 1024 * 1024 * 10;
     ScrollRange = High(Smallint);
-    ShowProgressSize = BufferSize * 4;
     TextLength = (MaxInt div SizeOf(WideChar)) div 4;
     TokenLength = 128;
   end;
@@ -235,7 +242,8 @@ type
     Text = '{Text}';
   end;
 
-function ControlCharacterToName(const AChar: Char): string;
+function ControlCharacterToName(const AChar: Char): string; inline;
+function IsLineTerminatorCharacter(const AChar: Char): Boolean; inline;
 
 implementation
 
@@ -282,8 +290,14 @@ begin
       Result := TControlCharacterNames.GroupSeparator;
     TControlCharacters.LineFeed:
       Result := TControlCharacterNames.LineFeed;
+    TCharacters.LineSeparator:
+      Result := TControlCharacterNames.LineSeparator;
     TControlCharacters.NegativeAcknowledge:
       Result := TControlCharacterNames.NegativeAcknowledge;
+    TControlCharacters.NextLine:
+      Result := TControlCharacterNames.NextLine;
+    TCharacters.ParagraphSeparator:
+      Result := TControlCharacterNames.ParagraphSeparator;
     TControlCharacters.Substitute:
       Result := TControlCharacterNames.Null;
     TControlCharacters.RecordSeparator:
@@ -307,6 +321,24 @@ begin
   else
     Result := '';
   end;
+end;
+
+{ "The Unicode standard defines a number of characters that conforming applications should recognize as line terminators:
+
+  LF:    Line Feed, U+000A
+  VT:    Vertical Tab, U+000B
+  FF:    Form Feed, U+000C
+  CR:    Carriage Return, U+000D
+  CR+LF: CR (U+000D) followed by LF (U+000A)
+  NEL:   Next Line, U+0085
+  LS:    Line Separator, U+2028
+  PS:    Paragraph Separator, U+2029
+
+  Recognizing and using the newline codes greater than 0x7F (NEL, LS and PS) is not often done.",
+  https://en.wikipedia.org/wiki/Newline }
+function IsLineTerminatorCharacter(const AChar: Char): Boolean;
+begin
+  Result := AChar in [TControlCharacters.CarriageReturn, TControlCharacters.Linefeed];
 end;
 
 end.

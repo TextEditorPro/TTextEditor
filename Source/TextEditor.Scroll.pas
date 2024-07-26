@@ -14,7 +14,6 @@ type
     FBars: System.UITypes.TScrollStyle;
     FHint: TTextEditorScrollHint;
     FIndicator: TTextEditorGlyph;
-    FMaxWidth: Integer;
     FOnChange: TNotifyEvent;
     FOptions: TTextEditorScrollOptions;
     FShadow: TTextEditorScrollShadow;
@@ -48,7 +47,6 @@ begin
   inherited;
 
   FOptions := TEXTEDITOR_DEFAULT_SCROLL_OPTIONS;
-  FMaxWidth := 1024;
   FBars := System.UITypes.TScrollStyle.ssBoth;
   FHint := TTextEditorScrollHint.Create;
   FIndicator := TTextEditorGlyph.Create(HInstance, TResourceBitmap.MouseMoveScroll, TColors.Fuchsia);
@@ -95,7 +93,6 @@ begin
     Self.FIndicator.Assign(FIndicator);
     Self.FShadow.Assign(FShadow);
     Self.FOptions := FOptions;
-    Self.FMaxWidth := FMaxWidth;
     Self.DoChange;
   end
   else

@@ -5,6 +5,10 @@ unit TextEditor;
 
 interface
 
+{$IF CompilerVersion < 23}
+  {$MESSAGE FATAL 'Only RAD Studio XE2 and later supported.'}
+{$IFEND}
+
 uses
   Winapi.Messages, Winapi.Windows, System.Classes, System.Contnrs, System.Math, System.SysUtils, System.UITypes,
   Vcl.Controls, Vcl.DBCtrls, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Forms, Vcl.Graphics, Vcl.StdCtrls, Data.DB,
@@ -28,11 +32,28 @@ uses
 type
   TTextEditorDefaults = record
   const
+    BorderStyle = bsSingle;
+    CanChangeSize = True;
+    Cursor = crIBeam;
+    FileMaxReadBufferSize = 524288;
+    FileMinShowProgressSize = 4194304;
+    Height = 150;
+    LineSpacing = 0;
+    MaxLength = 0;
     Options = [eoAutoIndent, eoDragDropEditing, eoLoadColors, eoLoadFontNames, eoLoadFontSizes, eoLoadFontStyles,
       eoShowNullCharacters, eoShowControlCharacters];
+    OvertypeMode = omInsert;
+    ParentColor = False;
+    ParentFont = False;
+    ReadOnly = False;
+    TabStop = True;
+    WantReturns = True;
+    Width = 200;
+    ZoomDivider = 0;
+    ZoomPercentage = 100;
   end;
 
-  TCustomTextEditor = class(TCustomControl)
+  TCustomTextEditor = class abstract(TCustomControl)
   private type
     TTextEditorCaretHelper = record
       ShowAlways: Boolean;
@@ -113,6 +134,8 @@ type
       FullName: string;
       HotName: string;
       Loaded: Boolean;
+      MaxReadBufferSize: Integer;
+      MinShowProgressSize: Int64;
       Name: string;
       Path: string;
       Saved: Boolean;
@@ -283,6 +306,11 @@ type
       UnderlineColor: TColor;
     end;
 
+    TTextEditorZoom = record
+      Divider: Integer;
+      Percentage: Integer;
+    end;
+
     TTextEditorWordWrapLine = record
       ViewLength: array of Integer;
       Length: array of Integer;
@@ -375,8 +403,7 @@ type
     FViewPosition: TTextEditorViewPosition;
     FWordWrap: TTextEditorWordWrap;
     FWordWrapLine: TTextEditorWordWrapLine;
-    FZoomDivider: Integer;
-    FZoomPercentage: Integer;
+    FZoom: TTextEditorZoom;
     function AddSnippet(const AExecuteWith: TTextEditorSnippetExecuteWith; const ATextPosition: TTextEditorTextPosition): Boolean;
     procedure AddUndoDelete(const ACaretPosition: TTextEditorTextPosition;
       const ASelectionBeginPosition, ASelectionEndPosition: TTextEditorTextPosition;
@@ -559,6 +586,8 @@ type
     procedure SetCodeFolding(const AValue: TTextEditorCodeFolding);
     procedure SetCompletionProposalPopupWindowLocation;
     procedure SetDefaultKeyCommands;
+    procedure SetFileMaxReadBufferSize(const AValue: Integer);
+    procedure SetFileMinShowProgressSize(const AValue: Int64);
     procedure SetFullFilename(const AName: string);
     procedure SetHighlightLine(const AValue: TTextEditorHighlightLine);
     procedure SetHorizontalScrollPosition(const AValue: Integer);
@@ -899,11 +928,11 @@ type
     property AllCodeFoldingRanges: TTextEditorAllCodeFoldingRanges read FCodeFoldings.AllRanges;
     property AlwaysShowCaret: Boolean read FCaretHelper.ShowAlways write SetAlwaysShowCaret;
     property Bookmarks: TTextEditorMarkList read FBookmarkList;
-    property BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default bsSingle;
+    property BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default TTextEditorDefaults.BorderStyle;
 {$IFDEF ALPHASKINS}
     property BoundLabel: TsBoundLabel read FBoundLabel write FBoundLabel;
 {$ENDIF}
-    property CanChangeSize: Boolean read FState.CanChangeSize write FState.CanChangeSize default True;
+    property CanChangeSize: Boolean read FState.CanChangeSize write FState.CanChangeSize default TTextEditorDefaults.CanChangeSize;
     property CanPaste: Boolean read GetCanPaste;
     property CanRedo: Boolean read GetCanRedo;
     property CanUndo: Boolean read GetCanUndo;
@@ -915,9 +944,11 @@ type
     property CodeFolding: TTextEditorCodeFolding read FCodeFolding write SetCodeFolding;
     property Colors: TTextEditorColors read FColors write FColors;
     property CompletionProposal: TTextEditorCompletionProposal read FCompletionProposal write FCompletionProposal;
-    property Cursor default crIBeam;
+    property Cursor default TTextEditorDefaults.Cursor;
     property FileDateTime: TDateTime read FFile.DateTime write FFile.DateTime;
     property FilePath: string read FFile.Path write FFile.Path;
+    property FileMaxReadBufferSize: Integer Read FFile.MaxReadBufferSize write SetFileMaxReadBufferSize default TTextEditorDefaults.FileMaxReadBufferSize;
+    property FileMinShowProgressSize: Int64 read FFile.MinShowProgressSize write SetFileMinShowProgressSize default TTextEditorDefaults.FileMinShowProgressSize;
     property Filename: string read FFile.Name write FFile.Name;
     property FoldingExists: Boolean read FCodeFoldings.Exists;
     property FoldingOnCurrentLine: Boolean read GetFoldingOnCurrentLine;
@@ -933,12 +964,12 @@ type
     property LeftMargin: TTextEditorLeftMargin read FLeftMargin write SetLeftMargin;
     property LineHeight: Integer read GetLineHeight;
     property LineNumbersCount: Integer read FLineNumbers.Count;
-    property LineSpacing: Integer read FLineSpacing write FLineSpacing default 0;
+    property LineSpacing: Integer read FLineSpacing write FLineSpacing default TTextEditorDefaults.LineSpacing;
     property Lines: TTextEditorLines read FLines write SetLines;
     property MacroRecorder: TTextEditorMacroRecorder read FMacroRecorder write FMacroRecorder;
     property Marks: TTextEditorMarkList read FMarkList;
     property MatchingPairs: TTextEditorMatchingPairs read FMatchingPairs write FMatchingPairs;
-    property MaxLength: Integer read FMaxLength write FMaxLength default 0;
+    property MaxLength: Integer read FMaxLength write FMaxLength default TTextEditorDefaults.MaxLength;
     property Minimap: TTextEditorMinimap read FMinimap write FMinimap;
     property Modified: Boolean read FState.Modified write SetModified;
     property MouseScrollCursors[const AIndex: Integer]: HCursor read GetMouseScrollCursors write SetMouseScrollCursors;
@@ -986,10 +1017,10 @@ type
     property OnSelectionChanged: TNotifyEvent read FEvents.OnSelectionChanged write FEvents.OnSelectionChanged;
     property Options: TTextEditorOptions read FOptions write SetOptions default TTextEditorDefaults.Options;
     property PaintLock: Integer read FPaintLock write FPaintLock;
-    property ParentColor default False;
-    property ParentFont default False;
+    property ParentColor default TTextEditorDefaults.ParentColor;
+    property ParentFont default TTextEditorDefaults.ParentFont;
     property PreviousCharAtCursor: Char read GetPreviousCharAtCursor;
-    property ReadOnly: Boolean read GetReadOnly write SetReadOnly default False;
+    property ReadOnly: Boolean read GetReadOnly write SetReadOnly default TTextEditorDefaults.ReadOnly;
     property RedoList: TTextEditorUndoList read FRedoList;
     property Replace: TTextEditorReplace read FReplace write FReplace;
     property ReplaceCanceled: Boolean read FState.ReplaceCanceled;
@@ -1014,9 +1045,9 @@ type
     property SpellCheck: TTextEditorSpellCheck read FSpellCheck write FSpellCheck;
 {$ENDIF}
     property SyncEdit: TTextEditorSyncEdit read FSyncEdit write SetSyncEdit;
-    property OvertypeMode: TTextEditorOvertypeMode read FOvertypeMode write SetOvertypeMode default omInsert;
+    property OvertypeMode: TTextEditorOvertypeMode read FOvertypeMode write SetOvertypeMode default TTextEditorDefaults.OvertypeMode;
     property Tabs: TTextEditorTabs read FTabs write SetTabs;
-    property TabStop default True;
+    property TabStop default TTextEditorDefaults.TabStop;
     property Text: string read GetText write SetText;
     property TextBetween[const ATextBeginPosition: TTextEditorTextPosition; const ATextEndPosition: TTextEditorTextPosition]: string read GetTextBetween write SetTextBetween;
     property TextPosition: TTextEditorTextPosition read GetTextPosition write SetTextPosition;
@@ -1028,10 +1059,10 @@ type
     property URIOpener: Boolean read FState.URIOpener write FState.URIOpener;
     property ViewPosition: TTextEditorViewPosition read FViewPosition write SetViewPosition;
     property VisibleLineCount: Integer read FLineNumbers.VisibleCount;
-    property WantReturns: Boolean read FState.WantReturns write FState.WantReturns default True;
+    property WantReturns: Boolean read FState.WantReturns write FState.WantReturns default TTextEditorDefaults.WantReturns;
     property WordWrap: TTextEditorWordWrap read FWordWrap write SetWordWrap;
-    property ZoomDivider: Integer read FZoomDivider write FZoomDivider default 0;
-    property ZoomPercentage: Integer read FZoomPercentage write FZoomPercentage default 100;
+    property ZoomDivider: Integer read FZoom.Divider write FZoom.Divider default TTextEditorDefaults.ZoomDivider;
+    property ZoomPercentage: Integer read FZoom.Percentage write FZoom.Percentage default TTextEditorDefaults.ZoomPercentage;
   end;
 
   [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
@@ -1053,6 +1084,8 @@ type
     property Ctl3D;
     property Cursor;
     property Enabled;
+    property FileMaxReadBufferSize;
+    property FileMinShowProgressSize;
     property FontStyles;
     property Fonts;
     property Height;
@@ -1156,7 +1189,7 @@ type
     property WordWrap;
   end;
 
-  TCustomDBTextEditor = class(TCustomTextEditor)
+  TCustomDBTextEditor = class abstract(TCustomTextEditor)
   strict private
     FBeginEdit: Boolean;
     FDataLink: TFieldDataLink;
@@ -1214,8 +1247,10 @@ type
     property DataSource;
     property Enabled;
     property Field;
-    property Fonts;
+    property FileMaxReadBufferSize;
+    property FileMinShowProgressSize;
     property FontStyles;
+    property Fonts;
     property Height;
     property HighlightLine;
     property Highlighter;
@@ -1373,31 +1408,34 @@ begin
 
   inherited Create(AOwner);
 
-  Height := 150;
-  Width := 200;
-  Cursor := crIBeam;
+  Height := TTextEditorDefaults.Height;
+  Width := TTextEditorDefaults.Width;
+  Cursor := TTextEditorDefaults.Cursor;
   Color := TColors.SysWindow;
   DoubleBuffered := False;
   ControlStyle := ControlStyle + [csOpaque, csSetCaption, csNeedsBorderPaint];
 
-  FState.CanChangeSize := True;
+  FState.CanChangeSize := TTextEditorDefaults.CanChangeSize;
   FFile.Loaded := False;
   FFile.Saved := False;
+  FFile.MaxReadBufferSize := TTextEditorDefaults.FileMaxReadBufferSize;
+  FFile.MinShowProgressSize := TTextEditorDefaults.FileMinShowProgressSize;
 
   FSystemMetrics.HorizontalDrag := GetSystemMetrics(SM_CXDRAG);
   FSystemMetrics.VerticalDrag := GetSystemMetrics(SM_CYDRAG);
   FSystemMetrics.VerticalScroll := GetSystemMetrics(SM_CYVSCROLL);
 
-  FBorderStyle := bsSingle;
+  FBorderStyle := TTextEditorDefaults.BorderStyle;
   FDoubleClickTime := GetDoubleClickTime;
   FLineNumbers.ResetCache := True;
-  FMaxLength := 0;
+  FMaxLength := TTextEditorDefaults.MaxLength;
   FToggleCase.Text := '';
   FState.URIOpener := False;
   FState.ReplaceLock := False;
+  FState.ReadOnly := TTextEditorDefaults.ReadOnly;
   FMultiEdit.Position.Row := -1;
-  FZoomDivider := 0;
-  FZoomPercentage := 100;
+  FZoom.Divider := TTextEditorDefaults.ZoomDivider;
+  FZoom.Percentage := TTextEditorDefaults.ZoomPercentage;
   { Character count }
   ResetCharacterCount;
   { Code folding }
@@ -1413,7 +1451,7 @@ begin
   { Matching pair }
   FMatchingPairs := TTextEditorMatchingPairs.Create;
   { Line spacing }
-  FLineSpacing := 0;
+  FLineSpacing := TTextEditorDefaults.LineSpacing;
   { Special chars }
   FSpecialChars := TTextEditorSpecialChars.Create;
   FSpecialChars.OnChange := SpecialCharsChanged;
@@ -1452,8 +1490,8 @@ begin
   FPaintHelper := TTextEditorPaintHelper.Create([], FFonts.Text);
   FItalic.Bitmap := TBitmap.Create;
   FItalic.Offset := 0;
-  ParentFont := False;
-  ParentColor := False;
+  ParentColor := TTextEditorDefaults.ParentColor;
+  ParentFont := TTextEditorDefaults.ParentFont;
   { Undo & Redo }
   FState.UndoRedo := False;
   FUndo := TTextEditorUndo.Create;
@@ -1479,15 +1517,15 @@ begin
   FRuler := TTextEditorRuler.Create;
   FRuler.OnChange := RulerChanged;
   { Tabs }
-  TabStop := True;
+  TabStop := TTextEditorDefaults.TabStop;
   FTabs := TTextEditorTabs.Create;
   FTabs.OnChange := TabsChanged;
   { Text }
-  FOvertypeMode := omInsert;
+  FOvertypeMode := TTextEditorDefaults.OvertypeMode;
   FKeyboardHandler := TTextEditorKeyboardHandler.Create;
   FKeyCommands := TTextEditorKeyCommands.Create(Self);
   SetDefaultKeyCommands;
-  FState.WantReturns := True;
+  FState.WantReturns := TTextEditorDefaults.WantReturns;
   FScrollHelper.HorizontalPosition := 0;
   FLineNumbers.TopLine := 1;
   FViewPosition.Column := 1;
@@ -2032,13 +2070,14 @@ var
   LPText: PChar;
   LTextPosition: TTextEditorTextPosition;
   LLine: Integer;
-  LLineFeed: Boolean;
+  LLineBreak: Boolean;
 begin
   Result := 0;
 
   LPText := PChar(Text);
   LTextPosition := TextPosition;
   LLine := 0;
+
   while LPText^ <> TControlCharacters.Null do
   begin
     if LLine = LTextPosition.Line then
@@ -2047,7 +2086,7 @@ begin
       Exit;
     end;
 
-    LLineFeed := LPText^ in [TControlCharacters.CarriageReturn, TControlCharacters.Linefeed];
+    LLineBreak := IsLineTerminatorCharacter(LPText^);
 
     if LPText^ = TControlCharacters.CarriageReturn then
     begin
@@ -2061,7 +2100,7 @@ begin
       Inc(LPText);
     end;
 
-    if LLineFeed then
+    if LLineBreak then
       Inc(LLine)
     else
     begin
@@ -2221,9 +2260,13 @@ function TCustomTextEditor.GetEndOfLine(const ALine: PChar): PChar;
 begin
   Result := ALine;
 
-  if Assigned(Result) then
-  while not (Result^ in [TControlCharacters.Null, TControlCharacters.Linefeed, TControlCharacters.CarriageReturn]) do
-    Inc(Result);
+  while Result^ <> TControlCharacters.Null do
+  begin
+    if IsLineTerminatorCharacter(Result^) then
+      Break
+    else
+      Inc(Result);
+  end;
 end;
 
 function TCustomTextEditor.GetFoldingOnCurrentLine: Boolean;
@@ -5479,6 +5522,7 @@ begin
     FUndoList.AddChange(crCaret, LTextPosition, LTextPosition, LTextPosition, '', smNormal);
 
     LDeleteComment := False;
+
     if LCommentIndex <> -2 then
     begin
       LDeleteComment := True;
@@ -5492,6 +5536,7 @@ begin
 
     Inc(LCommentIndex, 2);
     LComment := '';
+
     if LCommentIndex < LLength - 1 then
       LComment := FHighlighter.Comments.BlockComments[LCommentIndex];
 
@@ -5968,17 +6013,28 @@ begin
       SelectAll;
 
     case ACoding of
-      eASCIIDecimal: LText := TNetEncoding.ASCIIDecimal.Decode(SelectedText);
-      eBase32: LText := TNetEncoding.Base32.Decode(SelectedText);
-      eBase64: LText := TNetEncoding.Base64NoLineBreaks.Decode(SelectedText);
-      eBase64WithLineBreaks: LBytes := TNetEncoding.Base64.Decode(FLines.Encoding.GetBytes(SelectedText));
-      eBase85: LText := TNetEncoding.Base85.Decode(SelectedText);
-      eBase91: LText := TNetEncoding.Base91.Decode(SelectedText);
-      eBase128: LText := TNetEncoding.Base128.Decode(SelectedText);
-      eBase256: LText := TNetEncoding.Base256.Decode(SelectedText);
-      eBase1024: LText := TNetEncoding.Base1024.Decode(SelectedText);
-      eBase4096: LText := TNetEncoding.Base4096.Decode(SelectedText);
-      eBinary: LText := TNetEncoding.Binary.Decode(SelectedText);
+      eASCIIDecimal:
+        LText := TNetEncoding.ASCIIDecimal.Decode(SelectedText);
+      eBase32:
+        LText := TNetEncoding.Base32.Decode(SelectedText);
+      eBase64:
+        LText := TNetEncoding.Base64NoLineBreaks.Decode(SelectedText);
+      eBase64WithLineBreaks:
+        LBytes := TNetEncoding.Base64.Decode(FLines.Encoding.GetBytes(SelectedText));
+      eBase85:
+        LText := TNetEncoding.Base85.Decode(SelectedText);
+      eBase91:
+        LText := TNetEncoding.Base91.Decode(SelectedText);
+      eBase128:
+        LText := TNetEncoding.Base128.Decode(SelectedText);
+      eBase256:
+        LText := TNetEncoding.Base256.Decode(SelectedText);
+      eBase1024:
+        LText := TNetEncoding.Base1024.Decode(SelectedText);
+      eBase4096:
+        LText := TNetEncoding.Base4096.Decode(SelectedText);
+      eBinary:
+        LText := TNetEncoding.Binary.Decode(SelectedText);
       eHex:
         if FLines.Encoding = TEncoding.BigEndianUnicode then
           LText := TNetEncoding.HexBigEndian.Decode(SelectedText)
@@ -5995,17 +6051,25 @@ begin
           LText := TNetEncoding.HexLittleEndianWithoutSpaces.Decode(SelectedText)
         else
           LText := TNetEncoding.HexWithoutSpaces.Decode(SelectedText);
-      eHTML: LBytes := TNetEncoding.HTML.Decode(FLines.Encoding.GetBytes(SelectedText));
-      eOctal: LText := TNetEncoding.Octal.Decode(SelectedText);
-      eRotate5: LText := TNetEncoding.Rotate5.Decode(SelectedText);
-      eRotate13: LText := TNetEncoding.Rotate13.Decode(SelectedText);
-      eRotate18: LText := TNetEncoding.Rotate18.Decode(SelectedText);
-      eRotate47: LText := TNetEncoding.Rotate47.Decode(SelectedText);
-      eURL: LBytes := TNetEncoding.URL.Decode(FLines.Encoding.GetBytes(SelectedText));
+      eHTML:
+        LBytes := TNetEncoding.HTML.Decode(FLines.Encoding.GetBytes(SelectedText));
+      eOctal:
+        LText := TNetEncoding.Octal.Decode(SelectedText);
+      eRotate5:
+        LText := TNetEncoding.Rotate5.Decode(SelectedText);
+      eRotate13:
+        LText := TNetEncoding.Rotate13.Decode(SelectedText);
+      eRotate18:
+        LText := TNetEncoding.Rotate18.Decode(SelectedText);
+      eRotate47:
+        LText := TNetEncoding.Rotate47.Decode(SelectedText);
+      eURL:
+        LBytes := TNetEncoding.URL.Decode(FLines.Encoding.GetBytes(SelectedText));
     end;
 
     case ACoding of
-      eBase64WithLineBreaks, eHTML, eURL: LText := FLines.Encoding.GetString(LBytes);
+      eBase64WithLineBreaks, eHTML, eURL:
+        LText := FLines.Encoding.GetString(LBytes);
     end;
 
     if LText <> '' then
@@ -6030,17 +6094,28 @@ begin
       SelectAll;
 
     case ACoding of
-      eASCIIDecimal: LText := TNetEncoding.ASCIIDecimal.Encode(SelectedText);
-      eBase32: LText := TNetEncoding.Base32.Encode(SelectedText);
-      eBase64: LText := TNetEncoding.Base64NoLineBreaks.Encode(SelectedText);
-      eBase64WithLineBreaks: LBytes := TNetEncoding.Base64.Encode(FLines.Encoding.GetBytes(SelectedText));
-      eBase85: LText := TNetEncoding.Base85.Encode(SelectedText);
-      eBase91: LText := TNetEncoding.Base91.Encode(SelectedText);
-      eBase128: LText := TNetEncoding.Base128.Encode(SelectedText);
-      eBase256: LText := TNetEncoding.Base256.Encode(SelectedText);
-      eBase1024: LText := TNetEncoding.Base1024.Encode(SelectedText);
-      eBase4096: LText := TNetEncoding.Base4096.Encode(SelectedText);
-      eBinary: LText := TNetEncoding.Binary.Encode(SelectedText);
+      eASCIIDecimal:
+        LText := TNetEncoding.ASCIIDecimal.Encode(SelectedText);
+      eBase32:
+        LText := TNetEncoding.Base32.Encode(SelectedText);
+      eBase64:
+        LText := TNetEncoding.Base64NoLineBreaks.Encode(SelectedText);
+      eBase64WithLineBreaks:
+        LBytes := TNetEncoding.Base64.Encode(FLines.Encoding.GetBytes(SelectedText));
+      eBase85:
+        LText := TNetEncoding.Base85.Encode(SelectedText);
+      eBase91:
+        LText := TNetEncoding.Base91.Encode(SelectedText);
+      eBase128:
+        LText := TNetEncoding.Base128.Encode(SelectedText);
+      eBase256:
+        LText := TNetEncoding.Base256.Encode(SelectedText);
+      eBase1024:
+        LText := TNetEncoding.Base1024.Encode(SelectedText);
+      eBase4096:
+        LText := TNetEncoding.Base4096.Encode(SelectedText);
+      eBinary:
+        LText := TNetEncoding.Binary.Encode(SelectedText);
       eHex:
         if FLines.Encoding = TEncoding.BigEndianUnicode then
           LText := TNetEncoding.HexBigEndian.Encode(SelectedText)
@@ -6057,17 +6132,25 @@ begin
           LText := TNetEncoding.HexLittleEndianWithoutSpaces.Encode(SelectedText)
         else
           LText := TNetEncoding.HexWithoutSpaces.Encode(SelectedText);
-      eHTML: LBytes := TNetEncoding.HTML.Encode(FLines.Encoding.GetBytes(SelectedText));
-      eOctal: LText := TNetEncoding.Octal.Encode(SelectedText);
-      eRotate5: LText := TNetEncoding.Rotate5.Encode(SelectedText);
-      eRotate13: LText := TNetEncoding.Rotate13.Encode(SelectedText);
-      eRotate18: LText := TNetEncoding.Rotate18.Encode(SelectedText);
-      eRotate47: LText := TNetEncoding.Rotate47.Encode(SelectedText);
-      eURL: LBytes := TNetEncoding.URL.Encode(FLines.Encoding.GetBytes(SelectedText));
+      eHTML:
+        LBytes := TNetEncoding.HTML.Encode(FLines.Encoding.GetBytes(SelectedText));
+      eOctal:
+        LText := TNetEncoding.Octal.Encode(SelectedText);
+      eRotate5:
+        LText := TNetEncoding.Rotate5.Encode(SelectedText);
+      eRotate13:
+        LText := TNetEncoding.Rotate13.Encode(SelectedText);
+      eRotate18:
+        LText := TNetEncoding.Rotate18.Encode(SelectedText);
+      eRotate47:
+        LText := TNetEncoding.Rotate47.Encode(SelectedText);
+      eURL:
+        LBytes := TNetEncoding.URL.Encode(FLines.Encoding.GetBytes(SelectedText));
     end;
 
     case ACoding of
-      eBase64WithLineBreaks, eHTML, eURL: LText := FLines.Encoding.GetString(LBytes);
+      eBase64WithLineBreaks, eHTML, eURL:
+        LText := FLines.Encoding.GetString(LBytes);
     end;
 
     if LText <> '' then
@@ -6378,6 +6461,7 @@ var
   LCodeFoldingRange: TTextEditorCodeFoldingRange;
 begin
   LLength := Length(FHighlighter.Comments.LineComments);
+
   if LLength > 0 then
   begin
     LTextPosition := TextPosition;
@@ -6397,6 +6481,7 @@ begin
 
     FLines.BeginUpdate;
     FUndoList.BeginBlock;
+
     for LLine := LLine to LEndLine do
     begin
       LCodeFoldingRange := CodeFoldingRangeForLine(LLine + 1);
@@ -6658,6 +6743,7 @@ begin
   end;
 
   LTextPosition := TextPosition;
+
   if toTabsToSpaces in FTabs.Options then
     LTabWidth := FTabs.Width
   else
@@ -7034,6 +7120,7 @@ begin
     { Size }
     LBitmap.Width := FPaintHelper.CharWidth;
     LBitmap.Height := GetLineHeight;
+
     { Character }
     with LBitmap.Canvas do
     begin
@@ -7241,6 +7328,7 @@ begin
       if Length(LWords) = 3 then
       begin
         LPosition := Pos(':', LWords[1]);
+
         if LPosition > 0 then
           LMaxDistance := StrToIntDef(Copy(LWords[1], LPosition + 1), FSearch.NearOperator.MaxDistance)
         else
@@ -7394,6 +7482,7 @@ begin
       begin
         LPKeyWord := PChar(AWord);
         LPBookmarkText := LPText;
+
         { Check if the keyword found }
         while (LPText^ <> TControlCharacters.Null) and (LPKeyWord^ <> TControlCharacters.Null) and
           AreCharsSame(LPText, LPKeyWord) do
@@ -7789,6 +7878,7 @@ begin
     begin
       LPLine := PChar(FLines.Items^[LDestinationPosition.Line].TextLine);
       Inc(LPLine, LDestinationPosition.Char - 1);
+
       while (LPLine^ <> TControlCharacters.Null) and
         (IsCombiningCharacter(LPLine) or
          not (eoShowNullCharacters in Options) and (LPLine^ = TControlCharacters.Substitute) or
@@ -7854,6 +7944,7 @@ var
   LLineText: string;
 begin
   LTextPosition := TextPosition;
+
   if LTextPosition.Line < FLines.Count - 1 then
   begin
     LSelectionBeginPosition := SelectionBeginPosition;
@@ -7952,6 +8043,7 @@ begin
       begin
         LPMultiCaretRecord1 := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex1]);
         LPMultiCaretRecord2 := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex2]);
+
         if (LPMultiCaretRecord1^.ViewPosition.Row = LPMultiCaretRecord2^.ViewPosition.Row) and
           (LPMultiCaretRecord1^.ViewPosition.Column = LPMultiCaretRecord2^.ViewPosition.Column) then
         begin
@@ -7963,6 +8055,7 @@ begin
     for LIndex1 := FMultiEdit.Carets.Count - 1 downto 0 do
     begin
       LPMultiCaretRecord1 := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex1]);
+
       if LPMultiCaretRecord1^.ViewPosition.Row > FLineNumbers.Count then
       begin
         Dispose(LPMultiCaretRecord1);
@@ -8440,6 +8533,7 @@ var
                 LOpenTokenFoldRangeList.Add(LCodeFoldingRange);
                 Inc(LFoldCount);
                 Dec(LPText); { The end of the while loop will increase }
+
                 Result := LRegionItem.OpenTokenBreaksLine;
 
                 if LRegionItem.OpenTokenBreaksLine and LRegionItem.RemoveRange then
@@ -8574,7 +8668,7 @@ var
 
           while (LPText^ <> TControlCharacters.Null) and not (LPText^ in [' ', '>']) do
           begin
-            if LPText^ in [TControlCharacters.CarriageReturn, TControlCharacters.Linefeed] then
+            if IsLineTerminatorCharacter(LPText^) then
               Break;
 
             LTokenName := LTokenName + CaseUpper(LPText^);
@@ -8588,7 +8682,7 @@ var
             if LPText^ = ' ' then
             while (LPText^ <> TControlCharacters.Null) and not (LPText^ in ['/', '>']) do
             begin
-              if LPText^ in [TControlCharacters.CarriageReturn, TControlCharacters.Linefeed] then
+              if IsLineTerminatorCharacter(LPText^) then
                 Break;
 
               LTokenAttributes := LTokenAttributes + CaseUpper(LPText^);
@@ -9222,16 +9316,17 @@ procedure TCustomTextEditor.SetCaretIndex(const AValue: Integer);
 var
   LPText: PChar;
   LIndex: Integer;
-  LLineFeed: Boolean;
+  LLineBreak: Boolean;
   LTextPosition: TTextEditorTextPosition;
 begin
   LPText := PChar(Text);
   LIndex := 0;
   LTextPosition.Char := 1;
   LTextPosition.Line := 0;
+
   while (LPText^ <> TControlCharacters.Null) and (LIndex < AValue) do
   begin
-    LLineFeed := LPText^ in [TControlCharacters.CarriageReturn, TControlCharacters.Linefeed];
+    LLineBreak := IsLineTerminatorCharacter(LPText^);
 
     if LPText^ = TControlCharacters.CarriageReturn then
     begin
@@ -9245,7 +9340,7 @@ begin
       Inc(LPText);
     end;
 
-    if LLineFeed then
+    if LLineBreak then
     begin
       LTextPosition.Char := 1;
       LTextPosition.Line := LTextPosition.Line + 1;
@@ -9272,6 +9367,22 @@ end;
 procedure TCustomTextEditor.SetDefaultKeyCommands;
 begin
   FKeyCommands.ResetDefaults;
+end;
+
+procedure TCustomTextEditor.SetFileMaxReadBufferSize(const AValue: Integer);
+begin
+  if AValue > TMinValues.FileReadBufferSize then
+    FFile.MaxReadBufferSize := AValue
+  else
+    FFile.MaxReadBufferSize := TMinValues.FileReadBufferSize;
+end;
+
+procedure TCustomTextEditor.SetFileMinShowProgressSize(const AValue: Int64);
+begin
+  if AValue > TMinValues.FileShowProgressSize then
+    FFile.MinShowProgressSize := AValue
+  else
+    FFile.MinShowProgressSize := TMinValues.FileShowProgressSize;
 end;
 
 procedure TCustomTextEditor.SetOvertypeMode(const AValue: TTextEditorOvertypeMode);
@@ -15504,6 +15615,7 @@ var
       for LIndex := 0 to FMultiEdit.Carets.Count - 1 do
       begin
         LMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex])^;
+
         if LMultiCaretRecord.SelectionBegin.Line = LCurrentLine then
         begin
           LLineSelectionStart := LMultiCaretRecord.SelectionBegin.Char;
@@ -16746,7 +16858,7 @@ begin
             else
               LLength := 0;
 
-            if LRun^ = TControlCharacters.CarriageReturn then
+            if IsLineTerminatorCharacter(LRun^) then
             begin
               Inc(LRun);
 
@@ -17212,6 +17324,7 @@ var
           Inc(LPText);
 
         Inc(Result);
+
         LPText := GetEndOfLine(LPText);
       end;
     end;
@@ -17292,6 +17405,7 @@ var
 
         LPStart := LPText;
         LPText := GetEndOfLine(LPStart);
+
         if LPText = LPStart then
         begin
           if LPText^ = TControlCharacters.Null then
@@ -17400,7 +17514,7 @@ var
               AChangeBlockNumber);
         end;
 
-        if (LPText^ = TControlCharacters.CarriageReturn) or (LPText^ = TControlCharacters.Linefeed) then
+        if IsLineTerminatorCharacter(LPText^) then
         begin
           Inc(LPText);
 
@@ -17410,6 +17524,7 @@ var
           Inc(LCurrentLine);
           Inc(LTextPosition.Line);
         end;
+
         LPStart := LPText;
       until LPText^ = TControlCharacters.Null;
 
@@ -18890,6 +19005,7 @@ begin
     LBeginRow := LViewPosition.Row;
 
   LEndRow := AViewPosition.Row;
+
   if LBeginRow > LEndRow then
     SwapInt(LBeginRow, LEndRow);
 
@@ -19490,6 +19606,7 @@ var
   LLineSelectionStart, LLineSelectionEnd: Integer;
   LStringList: TStringList;
   LSelectionAvailable: Boolean;
+  LBackspaceCount: Integer;
 
   function CodeFoldingExpandLine(const ALine: Integer): Integer;
   var
@@ -19514,6 +19631,7 @@ begin
   LCommand := ACommand;
   LChar := AChar;
   LSelectionAvailable := False;
+  LBackspaceCount := 1;
 
   { First the program event handler gets a chance to process the command }
   DoOnProcessCommand(LCommand, LChar, AData);
@@ -19597,6 +19715,7 @@ begin
               LStringList := TStringList.Create;
               try
                 LStringList.Text := GetClipboardText;
+
                 if Trim(LStringList.Text) <> '' then
                 begin
                   LRows := LStringList.Count - 1;
@@ -19636,6 +19755,7 @@ begin
                   LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex1]);
                   LViewPosition := LPMultiCaretRecord^.ViewPosition;
                   ViewPosition := LViewPosition;
+                  LBackspaceCount := LViewPosition.Column;
 
                   if LCommand = TKeyCommands.Tab then
                   begin
@@ -19645,6 +19765,7 @@ begin
 
                   ExecuteCommand(LCommand, LChar, AData);
 
+                  Dec(LBackspaceCount, ViewPosition.Column);
                   LSelectionAvailable := FMultiEdit.SelectionAvailable;
 
                   if FMultiEdit.SelectionAvailable then
@@ -19695,6 +19816,7 @@ begin
                   for LIndex2 := 0 to FMultiEdit.Carets.Count - 1 do
                   begin
                     LPMultiCaretRecord := PTextEditorMultiCaretRecord(FMultiEdit.Carets[LIndex2]);
+
                     case LCommand of
                       TKeyCommands.Char, TKeyCommands.Tab, TKeyCommands.Paste, TKeyCommands.Backspace:
                         case LCommand of
@@ -19702,7 +19824,7 @@ begin
                             Inc(LPMultiCaretRecord^.ViewPosition.Column, LLength);
                           TKeyCommands.Backspace:
                             if not LSelectionAvailable and (LPMultiCaretRecord^.ViewPosition.Column > 1) then
-                              Dec(LPMultiCaretRecord^.ViewPosition.Column);
+                              Dec(LPMultiCaretRecord^.ViewPosition.Column, LBackspaceCount);
                           TKeyCommands.Paste:
                             begin
                               LPMultiCaretRecord^.ViewPosition.Column := LLength + 1;
@@ -20414,7 +20536,7 @@ begin
     if LCodeFoldingRange.FromLine > ALine then
       Break
     else
-    if (LCodeFoldingRange.FromLine <= ALine) and LCodeFoldingRange.Collapsed then
+    if LCodeFoldingRange.Collapsed and (LCodeFoldingRange.FromLine <= ALine) then
       CodeFoldingExpand(LCodeFoldingRange);
   end;
 
@@ -20690,15 +20812,9 @@ var
 begin
   ResetCharacterCount;
 
-  FLines.ShowProgress := AStream.Size > TMaxValues.ShowProgressSize;
-
-  if FLines.ShowProgress then
-    FLines.FileSize := AStream.Size;
-
   try
     LWordWrapEnabled := FWordWrap.Active;
     FWordWrap.Active := False;
-    FLines.TrailingLineBreak := eoTrailingLineBreak in FOptions;
 
     if Assigned(Parent) then
     begin
@@ -20707,6 +20823,17 @@ begin
       ClearBookmarks;
     end;
 
+    FLines.BufferSize := FFile.MaxReadBufferSize;
+    FLines.ShowProgress := AStream.Size > FFile.MinShowProgressSize;
+
+    if FLines.ShowProgress then
+    begin
+      FLines.ProgressPosition := 0;
+      FLines.ProgressType := ptLoading;
+      FLines.ProgressStep := AStream.Size div 100;
+    end;
+
+    FLines.TrailingLineBreak := eoTrailingLineBreak in FOptions;
     FLines.LoadFromStream(AStream, AEncoding);
 
     if FLines.Count = 0 then
@@ -21050,14 +21177,17 @@ begin
       DeleteBookmark(LBookmark);
 
     LBookmark := TTextEditorMark.Create(Self);
+
     with LBookmark do
     begin
       Line := ATextPosition.Line;
       Char := ATextPosition.Char;
+
       if AImageIndex = -1 then
         ImageIndex := Min(AIndex, 9)
       else
         ImageIndex := AImageIndex;
+
       Index := AIndex;
       Visible := True;
     end;
@@ -21263,6 +21393,7 @@ begin
       FHighlighter.GetToken(LWord);
 
       LTokenType := FHighlighter.TokenType;
+
       if not (LTokenType in [ttBlockComment, ttLineComment]) and not (LPreviousTokenType in [ttBlockComment, ttLineComment]) then
         LText := LText + LWord;
 
@@ -21585,6 +21716,7 @@ begin
             FreeAndNil(FScrollHelper.Wnd);
             RecreateWnd;
           end;
+
           Exit;
         end;
       AC_REFRESH:
@@ -21592,8 +21724,10 @@ begin
         begin
           RefreshEditScrolls(SkinData, FScrollHelper.Wnd);
           CommonMessage(AMessage, FSkinData);
+
           if HandleAllocated and Visible then
             RedrawWindow(Handle, nil, 0, RDWA_REPAINT);
+
           Exit;
         end;
       AC_GETDEFSECTION:
@@ -21605,6 +21739,7 @@ begin
         begin
           if Assigned(FSkinData.SkinManager) then
             AMessage.Result := FSkinData.SkinManager.SkinCommonInfo.Sections[ssEdit] + 1;
+
           Exit;
         end;
       AC_SETGLASSMODE:
@@ -21669,21 +21804,21 @@ var
   LPixelsPerInch: Integer;
   LMultiplier: Integer;
 begin
-  FZoomPercentage := APercentage;
+  FZoom.Percentage := APercentage;
 
   IncPaintLock;
   try
     LPixelsPerInch := {$IFDEF ALPHASKINS}GetPPI(SkinData){$ELSE}Screen.PixelsPerInch{$ENDIF};
 
-    if FZoomDivider = 0 then
-      FZoomDivider := LPixelsPerInch;
+    if FZoom.Divider = 0 then
+      FZoom.Divider := LPixelsPerInch;
 
-    LMultiplier := Round((FZoomPercentage / 100) * LPixelsPerInch);
+    LMultiplier := Round((FZoom.Percentage / 100) * LPixelsPerInch);
 
-    ChangeObjectScale(LPixelsPerInch, FZoomDivider, True);
+    ChangeObjectScale(LPixelsPerInch, FZoom.Divider, True);
     ChangeObjectScale(LMultiplier, LPixelsPerInch, True);
 
-    FZoomDivider := LMultiplier;
+    FZoom.Divider := LMultiplier;
   finally
     DecPaintLock;
   end;
@@ -21760,8 +21895,7 @@ begin
 
   while LPText^ <> TControlCharacters.Null do
   begin
-    while ((LPText^ < TCharacters.ExclamationMark) or IsWordBreakChar(LPText^)) and
-      (LPText^ <> TControlCharacters.Null) do
+    while (LPText^ <> TControlCharacters.Null) and ((LPText^ < TCharacters.ExclamationMark) or IsWordBreakChar(LPText^)) do
       Inc(LPText);
 
     if LPText^ = TControlCharacters.Null then

@@ -59,6 +59,7 @@ var
   LIntToIdent: TIntToIdent;
 begin
   LIntToIdent := FindIntToIdent(ATypeInfo);
+
   if Assigned(LIntToIdent) and LIntToIdent(AValue, LIdent) then
     Result := LIdent
   else
@@ -73,6 +74,7 @@ begin
   Result := '';
 
   LBaseType := GetTypeData(ATypeInfo)^.CompType^;
+
   for LIndex := 0 to SizeOf(TIntegerSet) * 8 - 1 do
   if LIndex in TIntegerSet(AValue) then
   begin

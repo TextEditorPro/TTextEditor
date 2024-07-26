@@ -84,6 +84,7 @@ var
   LValue: Integer;
 begin
   LValue := EnsureRange(AValue, 2, 12);
+
   if FDigitCount <> LValue then
   begin
     FDigitCount := LValue;
@@ -106,8 +107,10 @@ begin
   if FStartFrom <> AValue then
   begin
     FStartFrom := AValue;
+
     if FStartFrom < 0 then
       FStartFrom := 0;
+
     DoChange
   end;
 end;

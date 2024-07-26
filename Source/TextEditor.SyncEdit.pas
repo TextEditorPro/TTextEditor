@@ -87,6 +87,7 @@ var
 begin
   for LIndex := FSyncItems.Count - 1 downto 0 do
     Dispose(PTextEditorTextPosition(FSyncItems.Items[LIndex]));
+
   FSyncItems.Clear;
 end;
 

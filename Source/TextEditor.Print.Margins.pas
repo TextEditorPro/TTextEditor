@@ -249,8 +249,10 @@ begin
     PixelLeft := APrinterInfo.PixFromLeft(FLeft + FMargin);
     PixelRight := APrinterInfo.PrintableWidth - APrinterInfo.PixFromRight(FRight);
   end;
+
   if ALineNumbers and (not ALineNumbersInMargin) then
     PixelLeft := PixelLeft + TextWidth(ACanvas, IntToStr(AMaxLineNumber) + ': ');
+
   PixelTop := APrinterInfo.PixFromTop(FTop);
   PixelBottom := APrinterInfo.PrintableHeight - APrinterInfo.PixFromBottom(FBottom);
   PixelHeader := APrinterInfo.PixFromTop(FHeader);

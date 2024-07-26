@@ -20,11 +20,11 @@ type
 
   TTextEditorLines = class(TStrings)
   strict private
+    FBufferSize: Integer;
     FCapacity: Integer;
     FColumns: Boolean;
     FCount: Integer;
     FEncoding: System.SysUtils.TEncoding;
-    FFileSize: Int64;
     FIndexOfLongestLine: Integer;
     FItems: PEditorStringRecordItems;
     FLengthOfLongestLine: Integer;
@@ -42,6 +42,7 @@ type
     FOwner: TObject;
     FPaintProgress: TNotifyEvent;
     FProgressPosition: Byte;
+    FProgressStep: Int64;
     FProgressType: TTextEditorProgressType;
     FSavingToStream: Boolean;
     FShowProgress: Boolean;
@@ -55,6 +56,7 @@ type
     function ExpandString(const AIndex: Integer): string;
     function GetExpandedString(const AIndex: Integer): string;
     function GetExpandedStringLength(const AIndex: Integer): Integer;
+    function GetLineBreakFromFlags(const AFlags: TTextEditorStringFlags): string; inline;
     function GetLineState(const AIndex: Integer): TTextEditorLineState;
     function GetPartialTextLength(const AStart, AEnd: Integer): Integer;
     function GetPartialTextStr(const AStart, AEnd: Integer): string;
@@ -108,12 +110,12 @@ type
     procedure SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil); override;
     procedure Sort(const ABeginLine: Integer; const AEndLine: Integer); virtual;
     procedure Trim(const ATrimStyle: TTextEditorTrimStyle; const ABeginLine: Integer; const AEndLine: Integer);
+    property BufferSize: Integer read FBufferSize write FBufferSize;
     property Columns: Boolean read FColumns write FColumns;
     property Count: Integer read FCount;
     property Encoding: TEncoding read FEncoding write SetEncoding;
     property ExpandedStringLengths[const AIndex: Integer]: Integer read GetExpandedStringLength;
     property ExpandedStrings[const AIndex: Integer]: string read GetExpandedString;
-    property FileSize: Int64 read FFileSize write FFileSize;
     property Items: PEditorStringRecordItems read FItems;
     property LineBreak: TTextEditorLineBreak read FLineBreak write FLineBreak default lbCRLF;
     property LineState[const AIndex: Integer]: TTextEditorLineState read GetLineState write SetLineState;
@@ -129,6 +131,7 @@ type
     property Owner: TObject read FOwner write FOwner;
     property PaintProgress: TNotifyEvent read FPaintProgress write FPaintProgress;
     property ProgressPosition: Byte read FProgressPosition write FProgressPosition;
+    property ProgressStep: Int64 read FProgressStep write FProgressStep;
     property ProgressType: TTextEditorProgressType read FProgressType write FProgressType;
     property Ranges[const AIndex: Integer]: TTextEditorLinesRange read GetRanges write SetRanges;
     property ShowProgress: Boolean read FShowProgress write FShowProgress;
@@ -244,6 +247,7 @@ begin
     if FCount > 0 then
     begin
       LPStringRecord := @FItems^[0];
+
       for LIndex := 0 to FCount - 1 do
       begin
         if sfExpandedLengthUnknown in LPStringRecord^.Flags then
@@ -266,6 +270,20 @@ begin
     Result := 0;
 end;
 
+function TTextEditorLines.GetLineBreakFromFlags(const AFlags: TTextEditorStringFlags): string;
+begin
+  if (sfLineBreakCR in AFlags) and (sfLineBreakLF in AFlags) then
+    Result := TControlCharacters.CarriageReturnLineFeed
+  else
+  if sfLineBreakLF in AFlags then
+    Result := TControlCharacters.Linefeed
+  else
+  if sfLineBreakCR in AFlags then
+    Result := TControlCharacters.CarriageReturn
+  else
+    Result := DefaultLineBreak;
+end;
+
 function TTextEditorLines.GetLineBreak(const AIndex: Integer): string;
 var
   LFlags: TTextEditorStringFlags;
@@ -278,16 +296,7 @@ begin
   if Assigned(LPStringRecord) then
     LFlags := LPStringRecord^.Flags;
 
-  if (sfLineBreakCR in LFlags) and (sfLineBreakLF in LFlags) then
-    Result := TControlCharacters.CarriageReturnLineFeed
-  else
-  if sfLineBreakLF in LFlags then
-    Result := TControlCharacters.Linefeed
-  else
-  if sfLineBreakCR in LFlags then
-    Result := TControlCharacters.CarriageReturn
-  else
-    Result := DefaultLineBreak;
+  Result := GetLineBreakFromFlags(LFlags);
 end;
 
 function TTextEditorLines.LineBreakLength(const AIndex: Integer): Integer;
@@ -336,6 +345,7 @@ begin
   if (AIndex < 0) or (AIndex > FCount) then
     ListIndexOutOfBounds(AIndex);
 {$ENDIF}
+
   Finalize(FItems^[AIndex]);
   Dec(FCount);
 
@@ -354,21 +364,28 @@ var
   LCount: Integer;
 begin
   LCount := ACount;
+
   if LCount > 0 then
   begin
 {$IFDEF TEXT_EDITOR_RANGE_CHECKS}
     if (AIndex < 0) or (AIndex > FCount) then
       ListIndexOutOfBounds(AIndex);
 {$ENDIF}
+
     LLinesAfter := FCount - (AIndex + LCount);
+
     if LLinesAfter < 0 then
       LCount := FCount - AIndex - 1;
+
     Finalize(FItems^[AIndex], LCount);
+
     if LLinesAfter > 0 then
       System.Move(FItems[AIndex + LCount], FItems[AIndex], LLinesAfter * TEXT_EDITOR_STRING_RECORD_SIZE);
+
     Dec(FCount, LCount);
 
     FIndexOfLongestLine := -1;
+
     if Assigned(FOnDeleted) then
       FOnDeleted(Self, AIndex, LCount);
   end;
@@ -431,8 +448,6 @@ end;
 
 function TTextEditorLines.GetExpandedString(const AIndex: Integer): string;
 begin
-  Result := '';
-
   if IsValidIndex(AIndex) then
   begin
     if sfHasNoTabs in FItems^[AIndex].Flags then
@@ -440,6 +455,8 @@ begin
     else
       Result := ExpandString(AIndex);
   end
+  else
+    Result := '';
 end;
 
 function TTextEditorLines.GetExpandedStringLength(const AIndex: Integer): Integer;
@@ -521,9 +538,8 @@ begin
     if FSavingToStream and TrimTrailingSpaces then
       TextLine := TextEditor.Utils.TrimRight(TextLine);
 
-    if FSavingToStream then
-      if sfEmptyLine in Flags then
-        Continue;
+    if FSavingToStream and (sfEmptyLine in Flags) then
+      Continue;
 
     Inc(Result, Length(TextLine) + LineBreakLength(LIndex))
   end;
@@ -542,6 +558,7 @@ begin
     LStringRecord := FItems^[LIndex];
 
     LLength := Length(LStringRecord.TextLine);
+
     if LLength > 0 then
     begin
       LPValue := @LStringRecord.TextLine[1];
@@ -577,9 +594,8 @@ begin
     if FSavingToStream and TrimTrailingSpaces then
       TextLine := TextEditor.Utils.TrimRight(TextLine);
 
-    if FSavingToStream then
-      if sfEmptyLine in Flags then
-        Continue;
+    if FSavingToStream and (sfEmptyLine in Flags) then
+      Continue;
 
     Inc(Result, Length(TextLine) + LineBreakLength(LIndex))
   end;
@@ -605,13 +621,14 @@ end;
 
 function TTextEditorLines.DefaultLineBreak: string;
 begin
-  if FLineBreak = lbCRLF then
-    Result := TControlCharacters.CarriageReturnLinefeed
-  else
-  if FLineBreak = lbLF then
-    Result := TControlCharacters.Linefeed
-  else
-    Result := TControlCharacters.CarriageReturn;
+  case FLineBreak of
+    lbCRLF:
+      Result := TControlCharacters.CarriageReturnLinefeed;
+    lbCR:
+      Result := TControlCharacters.CarriageReturn;
+    lbLF:
+      Result := TControlCharacters.Linefeed;
+  end;
 end;
 
 function TTextEditorLines.GetPartialTextStr(const AStart, AEnd: Integer): string;
@@ -638,25 +655,16 @@ begin
     if FSavingToStream and (sfEmptyLine in LStringRecord.Flags) then
       Continue;
 
-    if (sfLineBreakCR in LStringRecord.Flags) and (sfLineBreakLF in LStringRecord.Flags) then
-      LLineBreak := TControlCharacters.CarriageReturnLinefeed
-    else
-    if sfLineBreakLF in LStringRecord.Flags then
-      LLineBreak := TControlCharacters.Linefeed
-    else
-    if sfLineBreakCR in LStringRecord.Flags then
-      LLineBreak := TControlCharacters.CarriageReturn
-    else
-      LLineBreak := DefaultLineBreak;
+    LLineBreak := GetLineBreakFromFlags(LStringRecord.Flags);
+    LLineBreakLength := LLineBreak.Length;
+    LLength := LStringRecord.TextLine.Length;
 
-    LLineBreakLength := Length(LLineBreak);
-
-    LLength := Length(LStringRecord.TextLine);
     if LLength <> 0 then
     begin
       System.Move(Pointer(LStringRecord.TextLine)^, LPValue^, LLength * SizeOf(Char));
 
       LIndex2 := 0;
+
       while LIndex2 < LLength do
       begin
         if LPValue^ = TControlCharacters.Substitute then
@@ -699,19 +707,9 @@ begin
     if FSavingToStream and (sfEmptyLine in LStringRecord.Flags) then
       Continue;
 
-    if (sfLineBreakCR in LStringRecord.Flags) and (sfLineBreakLF in LStringRecord.Flags) then
-      LLineBreak := TControlCharacters.CarriageReturnLinefeed
-    else
-    if sfLineBreakLF in LStringRecord.Flags then
-      LLineBreak := TControlCharacters.Linefeed
-    else
-    if sfLineBreakCR in LStringRecord.Flags then
-      LLineBreak := TControlCharacters.CarriageReturn
-    else
-      LLineBreak := DefaultLineBreak;
-
-    LLineBreakLength := Length(LLineBreak);
-    LLength := Length(LStringRecord.TextLine);
+    LLineBreak := GetLineBreakFromFlags(LStringRecord.Flags);
+    LLineBreakLength := LLineBreak.Length;
+    LLength := LStringRecord.TextLine.Length;
 
     if LLength <> 0 then
     begin
@@ -1048,202 +1046,195 @@ end;
 procedure TTextEditorLines.LoadFromStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil);
 var
   LBuffer: TBytes;
-  LString: string;
-  LWithBOM: Boolean;
+  LBufferSize: Integer;
   LEncoding: System.SysUtils.TEncoding;
-  LPreambleLength: Integer;
-  LBufferLength, LLength: Integer;
+  LWithBOM: Boolean;
+  LStreamReader: TStreamReader;
+  LCharBuffer: TCharArray;
+  LContent: string;
+  LProgressPosition, LProgress: Int64;
   LPValue, LPLastChar, LPStartValue: PChar;
-  LRead: Boolean;
-  LPosition: Integer;
-  LProgressPosition, LProgress, LProgressInc: Int64;
+  LReadCount: Integer;
   LFlags: TTextEditorStringFlags;
+  LLineBreak: Boolean;
+  LTempLine: string;
 begin
   FStreaming := True;
 
-  SetLength(LBuffer, AStream.Size);
-  AStream.ReadBuffer(LBuffer, Length(LBuffer));
+  if AStream.Size > FBufferSize then
+    LBufferSize := FBufferSize
+  else
+    LBufferSize := AStream.Size;
 
   LEncoding := nil;
 
   if Assigned(AEncoding) then
     LEncoding := AEncoding
   else
-  if IsUTF8Buffer(LBuffer, LWithBOM) then
   begin
-    if LWithBOM then
-      LEncoding := TEncoding.UTF8
-    else
-      LEncoding := TextEditor.Encoding.TEncoding.UTF8WithoutBOM;
-  end;
+    SetLength(LBuffer, LBufferSize);
+    AStream.ReadBuffer(LBuffer, Length(LBuffer));
 
-  LPreambleLength := TEncoding.GetBufferEncoding(LBuffer, LEncoding);
+    if IsUTF8Buffer(LBuffer, LWithBOM) then
+    begin
+      if LWithBOM then
+        LEncoding := TEncoding.UTF8
+      else
+        LEncoding := TextEditor.Encoding.TEncoding.UTF8WithoutBOM;
+    end
+    else
+      TEncoding.GetBufferEncoding(LBuffer, LEncoding);
+
+    SetLength(LBuffer, 0);
+  end;
 
   Encoding := LEncoding;
 
-  LProgress := 0;
+  LProgress := FProgressStep;
   LProgressPosition := 0;
-  LProgressInc := 0;
-  { Progression is divided into a hundred, resulting optimal amount of paint events. }
-  if FShowProgress then
-  begin
-    FProgressPosition := 0;
-    FProgressType := ptLoading;
-    LProgressInc := FileSize div 100;
-  end;
+  LLineBreak := True;
 
   BeginUpdate;
-  Clear;
   try
+    Clear;
+
+    AStream.Position := 0;
+
+    LStreamReader := TStreamReader.Create(AStream, Encoding, True, LBufferSize);
     try
-      LRead := False;
-      LPosition := LPreambleLength;
-      LBufferLength := Length(LBuffer) - LPreambleLength;
-      { Large files can cause easily integer overflow without limiting the buffer size. }
-      while not LRead do
-      begin
-        if LBufferLength > TMaxValues.BufferSize then
-        begin
-          LLength := TMaxValues.BufferSize - LPreambleLength;
-          { Find the previous line end }
-          while (LLength > 0) and
-            (LBuffer[LPosition + LLength] <> TControlCharacterKeys.Linefeed) and
-            (LBuffer[LPosition + LLength] <> TControlCharacterKeys.CarriageReturn) do
-            Dec(LLength);
-          { Include line breaks }
-          while (LBuffer[LPosition + LLength] = TControlCharacterKeys.Linefeed) or
-            (LBuffer[LPosition + LLength] = TControlCharacterKeys.CarriageReturn) do
-            Inc(LLength);
+      try
+        SetLength(LCharBuffer, LBufferSize);
 
-          if LLength = 0 then
-            LLength := TMaxValues.BufferSize - LPreambleLength;
-
-          LString := Encoding.GetString(LBuffer, LPosition, LLength);
-          Dec(LBufferLength, LLength);
-          Inc(LPosition, LLength);
-        end
-        else
+        while not LStreamReader.EndOfStream do
         begin
-          LString := Encoding.GetString(LBuffer, LPosition, LBufferLength);
-          LRead := True;
+          LReadCount := LStreamReader.ReadBlock(LCharBuffer, 0, LBufferSize);
+
+          if LReadCount <> 0 then
+          begin
+            SetString(LContent, PChar(@LCharBuffer[0]), LReadCount);
+
+            LPValue := @LContent[1];
+            LPLastChar := @LContent[LReadCount];
+
+            while LPValue <= LPLastChar do
+            begin
+              LPStartValue := LPValue;
+
+              while LPValue <= LPLastChar do
+              begin
+                if IsLineTerminatorCharacter(LPValue^) then
+                  Break;
+
+                if LPValue^ = TControlCharacters.Null then
+                  LPValue^ := TControlCharacters.Substitute;
+
+                Inc(LPValue);
+              end;
+
+              if FCount = FCapacity then
+                Grow;
+
+              with FItems^[FCount] do
+              begin
+                if LLineBreak then
+                  Pointer(TextLine) := nil;
+
+                if LPValue = LPStartValue then
+                  TextLine := ''
+                else
+                  SetString(TextLine, LPStartValue, LPValue - LPStartValue);
+
+                if not LLineBreak then
+                  TextLine := LTempLine + TextLine;
+
+                Range := nil;
+                ExpandedLength := -1;
+                Flags := [sfExpandedLengthUnknown];
+                OriginalLineNumber := FCount;
+
+                if LPValue^ = TControlCharacters.CarriageReturn then
+                begin
+                  Inc(LPValue);
+                  Include(Flags, sfLineBreakCR);
+                end;
+
+                if LPValue^ = TControlCharacters.Linefeed then
+                begin
+                  Inc(LPValue);
+                  Include(Flags, sfLineBreakLF);
+                end;
+
+                LLineBreak := Flags * [sfLineBreakCR, sfLineBreakLF] <> [];
+
+                if LLineBreak then
+                  Inc(FCount)
+                else
+                  LTempLine := TextLine;
+              end;
+
+              if FShowProgress then
+              begin
+                Inc(LProgressPosition, LPValue - LPStartValue);
+
+                if LProgressPosition > LProgress then
+                begin
+                  Inc(FProgressPosition);
+
+                  if Assigned(FPaintProgress) then
+                    FPaintProgress(nil);
+
+                  Inc(LProgress, FProgressStep);
+                end;
+              end;
+            end;
+          end;
         end;
 
-        LLength := Length(LString);
+        if not LLineBreak then
+          Inc(FCount);
 
-        if LLength > 0 then
+        if FCount > 0 then
         begin
-          LPValue := @LString[1];
-          LPLastChar := @LString[LLength];
-
-          while LPValue <= LPLastChar do
+          if LLineBreak then
           begin
-            LPStartValue := LPValue;
-            { Delphi strings end with none char (#0). That's why those characters are changed to substitute characters. }
-            while (LPValue <= LPLastChar) and
-              (LPValue^ <> TControlCharacters.CarriageReturn) and (LPValue^ <> TControlCharacters.Linefeed) and
-              (LPValue^ <> TCharacters.LineSeparator) do
-            begin
-              if LPValue^ = TControlCharacters.Null then
-                LPValue^ := TControlCharacters.Substitute;
-
-              Inc(LPValue);
-            end;
-
             if FCount = FCapacity then
               Grow;
 
             with FItems^[FCount] do
             begin
               Pointer(TextLine) := nil;
-
-              if LPValue = LPStartValue then
-                TextLine := ''
-              else
-                SetString(TextLine, LPStartValue, LPValue - LPStartValue);
-
+              TextLine := '';
               Range := nil;
               ExpandedLength := -1;
               Flags := [sfExpandedLengthUnknown];
               OriginalLineNumber := FCount;
-
-              { Line break can be CR+LF (Windows), LF (Unix), and CR (Mac). }
-              if LPValue^ = TControlCharacters.CarriageReturn then
-              begin
-                Inc(LPValue);
-                Include(Flags, sfLineBreakCR);
-              end;
-
-              if LPValue^ = TControlCharacters.Linefeed then
-              begin
-                Inc(LPValue);
-                Include(Flags, sfLineBreakLF);
-              end;
-
-              if LPValue^ = TCharacters.LineSeparator then
-                Inc(LPValue);
             end;
 
             Inc(FCount);
-
-            if FShowProgress then
-            begin
-              Inc(LProgressPosition, LPValue - LPStartValue);
-
-              if LProgressPosition > LProgress then
-              begin
-                Inc(FProgressPosition);
-
-                if Assigned(FPaintProgress) then
-                  FPaintProgress(nil);
-
-                Inc(LProgress, LProgressInc);
-              end;
-            end;
-          end;
-        end;
-
-        SetLength(LString, 0);
-      end;
-      { Add the last line, if there was a line break. }
-      if FCount > 0 then
-      begin
-        LFlags := FItems^[FCount - 1].Flags;
-        if (sfLineBreakCR in LFlags) or (sfLineBreakLF in LFlags) then
-        begin
-          if FCount = FCapacity then
-            Grow;
-
-          with FItems^[FCount] do
-          begin
-            Pointer(TextLine) := nil;
-            TextLine := '';
-            Range := nil;
-            ExpandedLength := -1;
-            Flags := [sfExpandedLengthUnknown];
-            OriginalLineNumber := FCount;
           end;
 
-          Inc(FCount);
+          LFlags := FItems^[0].Flags;
+
+          if (sfLineBreakCR in LFlags) and (sfLineBreakLF in LFlags) then
+            LineBreak := lbCRLF
+          else
+          if sfLineBreakCR in LFlags then
+            LineBreak := lbCR
+          else
+          if sfLineBreakLF in LFlags then
+            LineBreak := lbLF;
         end;
-        { Set default line break }
-        if (sfLineBreakCR in LFlags) and (sfLineBreakLF in LFlags) then
-          LineBreak := lbCRLF
-        else
-        if (sfLineBreakCR in LFlags) then
-          LineBreak := lbCR
-        else
-        if (sfLineBreakLF in LFlags) then
-          LineBreak := lbLF;
+      except
+        on E: Exception do
+          raise ETextEditorLinesException.Create(E.Message);
       end;
-    except
-      on E: Exception do
-        raise ETextEditorLinesException.Create(E.Message);
+    finally
+      LStreamReader.Free;
     end;
   finally
     EndUpdate;
   end;
 
-  { Scan highlighter ranges }
   if Assigned(OnInserted) then
     OnInserted(Self, 0, FCount);
 
@@ -1268,21 +1259,24 @@ begin
   FSavingToStream := True;
   try
     LPreamble := FEncoding.GetPreamble;
+
     if Length(LPreamble) > 0 then
       AStream.WriteBuffer(LPreamble[0], Length(LPreamble));
 
     FTextLength := GetTextLength;
+
     if FTextLength >= TMaxValues.TextLength then
     begin
       LPreviousStart := 0;
       LEnd := 0;
       LLineInc := FCount div 2;
+
       while LEnd < FCount do
       begin
         LStart := LEnd;
         LEnd := Min(LEnd + LLineInc, FCount);
-
         FTextLength := GetPartialTextLength(LStart, LEnd);
+
         if FTextLength >= TMaxValues.TextLength then
         begin
           LEnd := LPreviousStart;
@@ -1291,7 +1285,6 @@ begin
         else
         begin
           LPreviousStart := LStart;
-
           LText := GetPartialTextStr(LStart, LEnd);
           LBuffer := FEncoding.GetBytes(LText);
           SetLength(LText, 0);
@@ -1365,6 +1358,7 @@ begin
   if (AIndex < 0) or (AIndex >= FCount) then
     ListIndexOutOfBounds(AIndex);
 {$ENDIF}
+
   FItems^[AIndex].Range := ARange;
 end;
 
@@ -1422,17 +1416,20 @@ begin
     Clear;
     FIndexOfLongestLine := -1;
     LLength := Length(AValue);
+
     if LLength > 0 then
     begin
       LPValue := @AValue[1];
       LPLastChar := @AValue[LLength];
+
       while LPValue <= LPLastChar do
       begin
         LPStartValue := LPValue;
-        while (LPValue <= LPLastChar) and
-          (LPValue^ <> TControlCharacters.CarriageReturn) and
-          (LPValue^ <> TControlCharacters.Linefeed) and
-          (LPValue^ <> TCharacters.LineSeparator) do
+
+        while LPValue <= LPLastChar do
+        if IsLineTerminatorCharacter(LPValue^) then
+          Break
+        else
           Inc(LPValue);
 
         if FCount = FCapacity then
@@ -1441,10 +1438,12 @@ begin
         with FItems^[FCount] do
         begin
           Pointer(TextLine) := nil;
+
           if LPValue = LPStartValue then
             TextLine := ''
           else
             SetString(TextLine, LPStartValue, LPValue - LPStartValue);
+
           Range := nil;
           ExpandedLength := -1;
           Flags := [sfExpandedLengthUnknown];
@@ -1463,9 +1462,6 @@ begin
             Inc(LPValue);
             Include(Flags, sfLineBreakLF);
           end;
-
-          if LPValue^ = TCharacters.LineSeparator then
-            Inc(LPValue);
         end;
       end;
     end;

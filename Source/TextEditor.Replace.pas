@@ -61,6 +61,7 @@ begin
   if FEngine <> AValue then
   begin
     FEngine := AValue;
+
     if Assigned(FOnChange) then
       FOnChange(rcEngineUpdate);
   end;

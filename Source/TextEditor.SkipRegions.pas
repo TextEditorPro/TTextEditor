@@ -34,13 +34,12 @@ type
 
 implementation
 
-
-
 { TTextEditorSkipRegions }
 
 function TTextEditorSkipRegions.Add(const AOpenToken, ACloseToken: string): TTextEditorSkipRegionItem;
 begin
   Result := TTextEditorSkipRegionItem(inherited Add);
+
   with Result do
   begin
     OpenToken := AOpenToken;
@@ -54,9 +53,11 @@ var
   LSkipRegion: TTextEditorSkipRegionItem;
 begin
   Result := False;
+
   for LIndex := 0 to Count - 1 do
   begin
     LSkipRegion := SkipRegionItems[LIndex];
+
     if (LSkipRegion.OpenToken = AOpenToken) and (LSkipRegion.CloseToken = ACloseToken) then
       Exit(True);
   end;

@@ -235,18 +235,21 @@ begin
 
       if FVertScrollWnd.Enabled then
         LDetails := StyleServices.GetElementDetails(VertSliderState);
+
       StyleServices.DrawElement(LBitmap.Canvas.Handle, LDetails, VertSliderRect{$IF CompilerVersion  >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       if FVertScrollWnd.Enabled then
         LDetails := StyleServices.GetElementDetails(VertUpState)
       else
         LDetails := StyleServices.GetElementDetails(tsArrowBtnUpDisabled);
+
       StyleServices.DrawElement(LBitmap.Canvas.Handle, LDetails, VertUpButtonRect{$IF CompilerVersion  >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       if FVertScrollWnd.Enabled then
         LDetails := StyleServices.GetElementDetails(VertDownState)
       else
         LDetails := StyleServices.GetElementDetails(tsArrowBtnDownDisabled);
+
       StyleServices.DrawElement(LBitmap.Canvas.Handle, LDetails, VertDownButtonRect{$IF CompilerVersion  >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       LRect := VertScrollRect;
@@ -330,6 +333,7 @@ begin
     if FVertScrollWnd.Visible then
     begin
       LRect := VertScrollRect;
+
       if Control.UseRightToLeftScrollBar then
         OffsetRect(LRect, -LRect.Left + LBorderSize, 0);
 
@@ -346,6 +350,7 @@ begin
     if FHorzScrollWnd.Visible then
     begin
       LRect := HorzScrollRect;
+
       if Control.UseRightToLeftScrollBar then
         OffsetRect(LRect, VertScrollRect.Width, 0);
 
@@ -502,8 +507,10 @@ begin
     GetScrollInfo(Handle, SB_VERT, LScrollInfo);
 
     LOverrideMax := LScrollInfo.nMax;
+
     if 0 < LScrollInfo.nPage then
       LOverrideMax := LScrollInfo.nMax - Integer(LScrollInfo.nPage) + 1;
+
     ScrollPos := System.Math.EnsureRange(ListPos + (LOverrideMax - LScrollInfo.nMin) * ((Mouse.CursorPos.Y - PrevScrollPos) /
       (VertTrackRect.Height - VertSliderRect.Height)), LScrollInfo.nMin, LOverrideMax);
     LScrollInfo.fMask := SIF_POS;
@@ -530,8 +537,10 @@ begin
     GetScrollInfo(Handle, SB_HORZ, LScrollInfo);
 
     LOverrideMax := LScrollInfo.nMax;
+
     if 0 < LScrollInfo.nPage then
       LOverrideMax := LScrollInfo.nMax - Integer(LScrollInfo.nPage) + 1;
+
     ScrollPos := System.Math.EnsureRange(ListPos + (LOverrideMax - LScrollInfo.nMin) * ((Mouse.CursorPos.X - PrevScrollPos) /
       (HorzTrackRect.Width - HorzSliderRect.Width)), LScrollInfo.nMin, LOverrideMax);
     LScrollInfo.fMask := SIF_POS;
@@ -576,6 +585,7 @@ begin
   end;
 
   CallDefaultProc(TMessage(AMessage));
+
   if FLeftMouseButtonDown then
     PaintScroll;
 
@@ -730,9 +740,11 @@ begin
   LPoint := NCMousePosToClient(Point(AMessage.XPos, AMessage.YPos));
 
   LUpdateScroll := False;
+
   if FVertScrollWnd.Visible and FVertScrollWnd.Enabled then
   begin
     LIsPointInRect := PtInRect(VertSliderRect, LPoint);
+
     if LIsPointInRect and (VertSliderState = tsThumbBtnVertNormal) then
     begin
       VertSliderState := tsThumbBtnVertHot;
@@ -746,6 +758,7 @@ begin
     end;
 
     LIsPointInRect := PtInRect(VertDownButtonRect, LPoint);
+
     if LIsPointInRect and (VertDownState = tsArrowBtnDownNormal) then
     begin
       VertDownState := tsArrowBtnDownHot;
@@ -759,6 +772,7 @@ begin
     end;
 
     LIsPointInRect := PtInRect(VertUpButtonRect, LPoint);
+
     if LIsPointInRect and (VertUpState = tsArrowBtnUpNormal) then
     begin
       VertUpState := tsArrowBtnUpHot;
@@ -775,6 +789,7 @@ begin
   if FHorzScrollWnd.Visible and FHorzScrollWnd.Enabled then
   begin
     LIsPointInRect := PtInRect(HorzSliderRect, LPoint);
+
     if LIsPointInRect and (HorzSliderState = tsThumbBtnHorzNormal) then
     begin
       HorzSliderState := tsThumbBtnHorzHot;
@@ -788,6 +803,7 @@ begin
     end;
 
     LIsPointInRect := PtInRect(HorzDownButtonRect, LPoint);
+
     if LIsPointInRect and (HorzDownState = tsArrowBtnRightNormal) then
     begin
       HorzDownState := tsArrowBtnRightHot;
@@ -801,6 +817,7 @@ begin
     end;
 
     LIsPointInRect := PtInRect(HorzUpButtonRect, LPoint);
+
     if LIsPointInRect and (HorzUpState = tsArrowBtnLeftNormal) then
     begin
       HorzUpState := tsArrowBtnLeftHot;

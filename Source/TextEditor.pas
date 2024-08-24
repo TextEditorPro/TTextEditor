@@ -727,8 +727,8 @@ type
     procedure PaintCaret;
     procedure PaintCaretBlock(const AViewPosition: TTextEditorViewPosition);
     procedure PaintCodeFolding(const AClipRect: TRect; const AFirstRow, ALastRow: Integer);
-    procedure PaintCodeFoldingCollapsedLine(const AFoldRange: TTextEditorCodeFoldingRange; const ALineRect: TRect);
     procedure PaintCodeFoldingCollapseMark(const AFoldRange: TTextEditorCodeFoldingRange; const ACurrentLineText: string; const ATokenPosition, ATokenLength, ALine: Integer; const ALineRect: TRect);
+    procedure PaintCodeFoldingCollapsedLine(const AFoldRange: TTextEditorCodeFoldingRange; const ALineRect: TRect);
     procedure PaintCodeFoldingLine(const AClipRect: TRect; const ALine: Integer);
     procedure PaintGuides(const AFirstRow, ALastRow: Integer);
     procedure PaintLeftMargin(const AClipRect: TRect; const AFirstLine, ALastTextLine, ALastLine: Integer);
@@ -899,11 +899,11 @@ type
     procedure SaveToStream(const AStream: TStream; const AEncoding: System.SysUtils.TEncoding = nil);
     procedure SelectAll;
     procedure SetBookmark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition; const AImageIndex: Integer = -1);
-    procedure SetTextPositionAndSelection(const ATextPosition, ABlockBeginPosition, ABlockEndPosition: TTextEditorTextPosition);
     procedure SetFocus; override;
     procedure SetMark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition; const AImageIndex: Integer; const AColor: TColor = TColors.SysNone);
     procedure SetOption(const AOption: TTextEditorOption; const AEnabled: Boolean);
     procedure SetSelectedTextEmpty(const AChangeString: string = '');
+    procedure SetTextPositionAndSelection(const ATextPosition, ABlockBeginPosition, ABlockEndPosition: TTextEditorTextPosition);
     procedure SizeOrFontChanged(const AFontChanged: Boolean = True);
     procedure Sort(const AOptions: TTextEditorSortOptions);
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
@@ -946,9 +946,9 @@ type
     property CompletionProposal: TTextEditorCompletionProposal read FCompletionProposal write FCompletionProposal;
     property Cursor default TTextEditorDefaults.Cursor;
     property FileDateTime: TDateTime read FFile.DateTime write FFile.DateTime;
-    property FilePath: string read FFile.Path write FFile.Path;
     property FileMaxReadBufferSize: Integer Read FFile.MaxReadBufferSize write SetFileMaxReadBufferSize default TTextEditorDefaults.FileMaxReadBufferSize;
     property FileMinShowProgressSize: Int64 read FFile.MinShowProgressSize write SetFileMinShowProgressSize default TTextEditorDefaults.FileMinShowProgressSize;
+    property FilePath: string read FFile.Path write FFile.Path;
     property Filename: string read FFile.Name write FFile.Name;
     property FoldingExists: Boolean read FCodeFoldings.Exists;
     property FoldingOnCurrentLine: Boolean read GetFoldingOnCurrentLine;
@@ -1002,6 +1002,7 @@ type
     property OnLinesDeleted: TStringListChangeEvent read FEvents.OnLinesDeleted write FEvents.OnLinesDeleted;
     property OnLinesInserted: TStringListChangeEvent read FEvents.OnLinesInserted write FEvents.OnLinesInserted;
     property OnLinesPutted: TStringListChangeEvent read FEvents.OnLinesPutted write FEvents.OnLinesPutted;
+    property OnLinkClick: TTextEditorLinkClickEvent read FEvents.OnLinkClick write FEvents.OnLinkClick;
     property OnLoadingProgress: TNotifyEvent read FEvents.OnLoadingProgress write FEvents.OnLoadingProgress;
     property OnMarkPanelLinePaint: TTextEditorMarkPanelLinePaintEvent read FEvents.OnMarkPanelLinePaint write FEvents.OnMarkPanelLinePaint;
     property OnModified: TNotifyEvent read FEvents.OnModified write FEvents.OnModified;
@@ -1132,6 +1133,7 @@ type
     property OnKeyPress;
     property OnKeyUp;
     property OnLeftMarginClick;
+    property OnLinkClick;
     property OnLoadingProgress;
     property OnMarkPanelLinePaint;
     property OnModified;
@@ -1295,6 +1297,7 @@ type
     property OnKeyPress;
     property OnKeyUp;
     property OnLeftMarginClick;
+    property OnLinkClick;
     property OnLoadData;
     property OnLoadingProgress;
     property OnMarkPanelLinePaint;

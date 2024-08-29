@@ -66,6 +66,7 @@ begin
   try
     LRegex := TRegEx.Create(FPattern, FOptions);
     LMatch := LRegex.Match(ALines.Text);
+
     while LMatch.Success do
     begin
       AddResult(LMatch.Index, LMatch.Length);

@@ -269,9 +269,11 @@ procedure TTextEditorCodeFoldingHintForm.Execute(const X, Y: Integer);
     LHeight := FEffectiveItemHeight * ItemList.Count + LBorderWidth + 2 * Margin;
 
     Canvas.Font.Assign(Font);
+
     for LIndex := 0 to ItemList.Count - 1 do
     begin
       LNewWidth := Canvas.TextWidth(ItemList[LIndex]);
+
       if LNewWidth > LWidth then
         LWidth := LNewWidth;
     end;
@@ -281,6 +283,7 @@ procedure TTextEditorCodeFoldingHintForm.Execute(const X, Y: Integer);
     if LX + LWidth > GetWorkAreaWidth then
     begin
       LX := GetWorkAreaWidth - LWidth - 5;
+
       if LX < 0 then
         LX := 0;
     end;
@@ -288,6 +291,7 @@ procedure TTextEditorCodeFoldingHintForm.Execute(const X, Y: Integer);
     if LY + LHeight > GetWorkAreaHeight then
     begin
       LY := LY - LHeight - (Owner as TCustomTextEditor).LineHeight - 2;
+
       if LY < 0 then
         LY := 0;
     end;

@@ -123,6 +123,7 @@ begin
     begin
       LPValue := FRun - FPatternLength + 1;
       LIndex := 1;
+
       while FPattern[LIndex] = LPValue^ do
       begin
         if LIndex = FPatternLength then
@@ -215,6 +216,7 @@ begin
   Result := 0;
 
   FTextLength := Length(AText);
+
   if FTextLength >= FPatternLength then
   begin
     FTextToSearch := AText;

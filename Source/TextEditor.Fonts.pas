@@ -207,7 +207,7 @@ begin
 end;
 
 procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivider: Integer; const AIsDpiChange: Boolean);
-{$IF CompilerVersion <= 35.0}
+
   procedure ChangeScale(const AFont: TFont);
   begin
     if AFont.PixelsPerInch <> AMultiplier then
@@ -218,23 +218,14 @@ procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivide
         AFont.PixelsPerInch := AMultiplier;
     end;
   end;
-{$ENDIF}
-begin
-{$IF CompilerVersion > 35.0}
-  FCodeFoldingHint.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
-  FCompletionProposal.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
-  FLineNumbers.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
-  FMinimap.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
-  FRuler.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
-  FText.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
-{$ELSE}
+
+  begin
   ChangeScale(FCodeFoldingHint);
   ChangeScale(FCompletionProposal);
   ChangeScale(FLineNumbers);
   ChangeScale(FMinimap);
   ChangeScale(FRuler);
   ChangeScale(FText);
-{$ENDIF}
 end;
 
 procedure TTextEditorFonts.SetCodeFoldingHint(const AValue: TFont);

@@ -201,8 +201,6 @@ type
     procedure SetMinimapBackground(const AValue: TColor);
     procedure SetMinimapBookmark(const AValue: TColor);
     procedure SetMinimapVisibleRows(const AValue: TColor);
-    //procedure SetMultiEditBackground(const AValue: TColor);
-    //procedure SetMultiEditForeground(const AValue: TColor);
     procedure SetRightMargin(const AValue: TColor);
     procedure SetRightMovingEdge(const AValue: TColor);
     procedure SetRulerBackground(const AValue: TColor);

@@ -59,16 +59,13 @@ begin
   inherited;
 
   FAlign := maRight;
-
-  FVisible := False;
-  FWidth := 140;
+  FClicked := False;
+  FCursor := crArrow;
   FDragging := False;
   FOptions := [];
-  FCursor := crArrow;
-
-  FClicked := False;
-
   FTopLine := 1;
+  FVisible := False;
+  FWidth := 140;
 
   FIndicator := TTextEditorMinimapIndicator.Create;
   FShadow := TTextEditorMinimapShadow.Create;
@@ -140,6 +137,7 @@ var
   LValue: Integer;
 begin
   LValue := Max(0, AValue);
+
   if FWidth <> LValue then
   begin
     FWidth := LValue;

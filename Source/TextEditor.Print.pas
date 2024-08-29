@@ -179,8 +179,10 @@ begin
   FPrinterInfo.Free;
   FFont.Free;
   FOldFont.Free;
+
   for LIndex := FPages.Count - 1 downto 0 do
     TTextEditorPageLine(FPages[LIndex]).Free;
+
   FPages.Free;
   FPaintHelper.Free;
 
@@ -198,15 +200,18 @@ begin
     BeginUpdate;
     try
       Clear;
+
       for LIndex := 0 to AValue.Count - 1 do
       begin
         LLine := ConvertTabs(AValue[LIndex], FTabWidth, LHasTabs, FColumns);
         LPosition := Pos(TControlCharacters.Tab, LLine);
+
         while LPosition > 0 do
         begin
           LLine[LPosition] := ' ';
           LPosition := Pos(TControlCharacters.Tab, LLine);
         end;
+
         Add(LLine);
       end;
     finally
@@ -248,6 +253,7 @@ begin
   if AValue <> FWrap then
   begin
     FWrap := AValue;
+
     if FPages.Count > 0 then
     begin
       CalculatePages;
@@ -305,6 +311,7 @@ begin
     FHighlighter.ResetRange;
     FLines.Objects[0] := FHighlighter.Range;
     LIndex := 1;
+
     while LIndex < FLines.Count do
     begin
       FHighlighter.SetLine(FLines[LIndex - 1]);
@@ -312,6 +319,7 @@ begin
       FLines.Objects[LIndex] := FHighlighter.Range;
       Inc(LIndex);
     end;
+
     FHighlighterRangesSet := True;
   end;
 end;
@@ -336,6 +344,7 @@ begin
 
   for LIndex := 0 to FPages.Count - 1 do
     TTextEditorPageLine(FPages[LIndex]).Free;
+
   FPages.Clear;
 
   FMaxWidth := FMargins.PixelRight - FMargins.PixelLeft;
@@ -401,6 +410,7 @@ begin
           while Length(LText) > 0 do
           begin
             Delete(LText, 1, FMaxColumn);
+
             if Length(LText) > 0 then
               LYPos := LYPos + FLineHeight;
           end;
@@ -443,17 +453,21 @@ var
     LWrapPosition: TTextEditorWrapPosition;
   begin
     LIndex := 1;
+
     while LIndex <= Length(AText) do
     begin
       LText := '';
+
       while (Length(LText) < FMaxColumn) and (LIndex <= Length(AText)) do
       begin
         LText := LText + AText[LIndex];
         Inc(LIndex);
       end;
+
       LWrapPosition := TTextEditorWrapPosition.Create;
       LWrapPosition.Index := LIndex - 1;
       LList.Add(LWrapPosition);
+
       if (Length(LText) - LIndex) <= FMaxColumn then
         Break;
     end;
@@ -515,6 +529,7 @@ var
   procedure ClippedTextOut(X, Y: Integer; AText: string);
   begin
     AText := ClipLineToRect(AText);
+
     if Highlight and Assigned(FHighlighter) and (FLines.Count > 0) then
     begin
       SetBkMode(FCanvas.Handle, TRANSPARENT);
@@ -535,6 +550,7 @@ var
     LLast := LTokenPosition;
     LFirstPosition := LTokenPosition;
     LTokenEnd := LTokenPosition + Length(LToken);
+
     while (LCount < AList.Count) and (LTokenEnd > TTextEditorWrapPosition(AList[LCount]).Index) do
     begin
       LTempText := Copy(AText, LLast + 1, TTextEditorWrapPosition(AList[LCount]).Index - LLast);
@@ -544,6 +560,7 @@ var
       LCount := LCount + 1;
       FYPos := FYPos + FLineHeight;
     end;
+
     LTempText := Copy(AText, LLast + 1, LTokenEnd - LLast);
     ClippedTextOut(FMargins.PixelLeft + LFirstPosition * FPaintHelper.CharWidth, FYPos, LTempText);
     LTokenStart := LTokenPosition + Length(LToken) - Length(LTempText);
@@ -561,15 +578,18 @@ begin
     if Highlight and Assigned(FHighlighter) and (FLines.Count > 0) then
     begin
       SaveFont;
-       if FLineNumber = 0 then
+
+      if FLineNumber = 0 then
         FHighlighter.ResetRange
       else
         FHighlighter.SetRange(FLines.Objects[FLineNumber - 1]);
+
       FHighlighter.SetLine(AText);
       LToken := '';
       LTokenStart := 0;
       LCount := 0;
       LLeft := FMargins.PixelLeft;
+
       while not FHighlighter.EndOfLine do
       begin
         FHighlighter.GetToken(LToken);
@@ -582,15 +602,20 @@ begin
         if Assigned(LHighlighterAttribute) then
         begin
           FCanvas.Font.Style := LHighlighterAttribute.FontStyles;
+
           if FColors then
           begin
             LColor := LHighlighterAttribute.Foreground;
+
             if LColor = TColors.SysNone then
               LColor := FFont.Color;
+
             FCanvas.Font.Color := LColor;
             LColor := LHighlighterAttribute.Background;
+
             if LColor = TColors.SysNone then
               LColor := FDefaultBackground;
+
             FCanvas.Brush.Color := LColor;
           end
           else
@@ -598,6 +623,7 @@ begin
         end;
 
         LHandled := False;
+
         if Assigned(AList) then
           if LCount < AList.Count then
           begin
@@ -615,6 +641,7 @@ begin
               SplitToken;
             end;
           end;
+
         if not LHandled then
         begin
           if not Wrap and (LLeft + TextWidth(FCanvas, LToken) > LClipRect.Right) then
@@ -623,8 +650,10 @@ begin
           ClippedTextOut(LLeft, FYPos, LToken);
           Inc(LLeft, TextWidth(FCanvas, LToken));
         end;
+
         FHighlighter.Next;
       end;
+
       RestoreFont;
     end
     else
@@ -632,14 +661,17 @@ begin
       LLines := TStringList.Create;
       try
         LOldWrapPosition := 0;
+
         if Assigned(AList) then
         for LIndex := 0 to AList.Count - 1 do
         begin
           LWrapPosition := TTextEditorWrapPosition(AList[LIndex]).Index;
+
           if LIndex = 0 then
             LTempText := Copy(AText, 1, LWrapPosition)
           else
             LTempText := Copy(AText, LOldWrapPosition + 1, LWrapPosition - LOldWrapPosition);
+
           LLines.Add(LTempText);
           LOldWrapPosition := LWrapPosition;
         end;
@@ -650,6 +682,7 @@ begin
         for LIndex := 0 to LLines.Count - 1 do
         begin
           ClippedTextOut(FMargins.PixelLeft, FYPos, LLines[LIndex]);
+
           if LIndex < LLines.Count - 1 then
             FYPos := FYPos + FLineHeight;
         end;
@@ -687,16 +720,20 @@ begin
     FCanvas.Brush.Color := Color;
     FMargins.InitPage(FCanvas, APageNumber, FPrinterInfo, FLineNumbers, FLineNumbersInMargin, FLines.Count - 1 + FLineOffset);
     FHeader.Print(FCanvas, APageNumber + FPageOffset);
+
     if FPages.Count > 0 then
     begin
       FYPos := FMargins.PixelTop;
+
       if APageNumber = FPageCount then
         LEndLine := FLines.Count - 1
       else
         LEndLine := TTextEditorPageLine(FPages[APageNumber]).FirstLine - 1;
+
       for LIndex := TTextEditorPageLine(FPages[APageNumber - 1]).FirstLine to LEndLine do
       begin
         FLineNumber := LIndex + 1;
+
         if (not FSelectedOnly or ((LIndex >= FBlockBeginPosition.Line - 1) and (LIndex <= FBlockEndPosition.Line - 1))) then
         begin
           if not FSelectedOnly then
@@ -707,17 +744,21 @@ begin
               LSelectionStart := FBlockBeginPosition.Char
             else
               LSelectionStart := 1;
+
             if (FSelectionMode = smColumn) or (LIndex = FBlockEndPosition.Line - 1) then
               LSelectionLength := FBlockEndPosition.Char - LSelectionStart
             else
               LSelectionLength := MaxInt;
+
             WriteLine(Copy(FLines[LIndex], LSelectionStart, LSelectionLength));
           end;
+
           if Assigned(FOnPrintLine) then
             FOnPrintLine(Self, LIndex + 1, APageNumber);
         end;
       end;
     end;
+
     FFooter.Print(FCanvas, APageNumber + FPageOffset);
   end;
 end;
@@ -748,11 +789,14 @@ begin
   LEndPage := AEndPage;
   FPrinting := True;
   FAbort := False;
+
   if FDocumentTitle <> '' then
     Printer.Title := FDocumentTitle
   else
     Printer.Title := FTitle;
+
   Printer.BeginDoc;
+
   if Printer.Printing then
   begin
     PrintStatus(psBegin, AStartPage, FAbort);
@@ -761,28 +805,37 @@ begin
     for LIndex := 1 to Copies do
     begin
       LPage := AStartPage;
+
       if LEndPage < 0 then
         LEndPage := FPageCount;
+
       while (LPage <= LEndPage) and (not FAbort) do
       begin
         PrintPage(LPage);
+
         if ((LPage < LEndPage) or (LIndex < Copies)) and not FAbort then
           Printer.NewPage;
+
         Inc(LPage);
       end;
     end;
+
     if not FAbort then
       PrintStatus(psEnd, LEndPage, FAbort);
+
     Printer.EndDoc;
   end;
+
   FPrinting := False;
 end;
 
 procedure TTextEditorPrint.PrintStatus(const AStatus: TTextEditorPrintStatus; const APageNumber: Integer; var AAbort: Boolean);
 begin
   AAbort := False;
+
   if Assigned(FOnPrintStatus) then
     FOnPrintStatus(Self, AStatus, APageNumber, AAbort);
+
   if AAbort and FPrinting then
     Printer.Abort;
 end;
@@ -793,6 +846,7 @@ var
   LHandle: HDC;
 begin
   Result := 0;
+
   if FPagesCounted then
     Result := FPageCount
   else
@@ -838,6 +892,7 @@ begin
   FHeader.LoadFromStream(AStream);
   FFooter.LoadFromStream(AStream);
   FMargins.LoadFromStream(AStream);
+
   with AStream do
   begin
     Read(LLength, SizeOf(LLength));

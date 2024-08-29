@@ -62,6 +62,7 @@ function TTextEditorPrinterInfo.PixFromBottom(const AValue: Double): Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := Round(AValue * FYPixPermm - FBottomMargin);
 end;
 
@@ -69,6 +70,7 @@ function TTextEditorPrinterInfo.PixFromLeft(const AValue: Double): Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := Round(AValue * FXPixPermm - FLeftMargin);
 end;
 
@@ -76,6 +78,7 @@ function TTextEditorPrinterInfo.PixFromRight(const AValue: Double): Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := Round(AValue * FXPixPermm - FRightMargin);
 end;
 
@@ -83,6 +86,7 @@ function TTextEditorPrinterInfo.PixFromTop(const AValue: Double): Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := Round(AValue * FYPixPermm - FTopMargin);
 end;
 
@@ -106,6 +110,7 @@ function TTextEditorPrinterInfo.GetBottomMargin: Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := FBottomMargin;
 end;
 
@@ -113,6 +118,7 @@ function TTextEditorPrinterInfo.GetLeftMargin: Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := FLeftMargin;
 end;
 
@@ -120,6 +126,7 @@ function TTextEditorPrinterInfo.GetPhysicalHeight: Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := FPhysicalHeight;
 end;
 
@@ -127,6 +134,7 @@ function TTextEditorPrinterInfo.GetPhysicalWidth: Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := FPhysicalWidth;
 end;
 
@@ -134,6 +142,7 @@ function TTextEditorPrinterInfo.GetPrintableHeight: Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := FPrintableHeight;
 end;
 
@@ -141,6 +150,7 @@ function TTextEditorPrinterInfo.GetPrintableWidth: Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := FPrintableWidth;
 end;
 
@@ -148,6 +158,7 @@ function TTextEditorPrinterInfo.GetRightMargin: Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := FRightMargin;
 end;
 
@@ -155,6 +166,7 @@ function TTextEditorPrinterInfo.GetTopMargin: Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := FTopMargin;
 end;
 
@@ -162,6 +174,7 @@ function TTextEditorPrinterInfo.GetXPixPerInch: Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := FXPixPerInch;
 end;
 
@@ -169,6 +182,7 @@ function TTextEditorPrinterInfo.GetXPixPermm: Single;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := FXPixPermm;
 end;
 
@@ -176,6 +190,7 @@ function TTextEditorPrinterInfo.GetYPixPerInch: Integer;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := FYPixPerInch;
 end;
 
@@ -183,6 +198,7 @@ function TTextEditorPrinterInfo.GetYPixPermm: Single;
 begin
   if not FIsUpdated then
     UpdatePrinter;
+
   Result := FYPixPermm;
 end;
 
@@ -190,11 +206,13 @@ procedure TTextEditorPrinterInfo.UpdatePrinter;
 begin
   FIsUpdated := True;
   Printer.Refresh;
+
   if Printer.Printers.Count <= 0 then
   begin
     FillDefault;
     Exit;
   end;
+
   FPhysicalWidth := GetDeviceCaps(Printer.Handle, Winapi.Windows.PhysicalWidth);
   FPhysicalHeight := GetDeviceCaps(Printer.Handle, Winapi.Windows.PhysicalHeight);
   FPrintableWidth := Printer.PageWidth;

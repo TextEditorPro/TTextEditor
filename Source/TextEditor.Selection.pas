@@ -55,6 +55,7 @@ begin
     Self.FMode := FMode;
     Self.FOptions := FOptions;
     Self.FVisible := FVisible;
+
     if Assigned(Self.FOnChange) then
       Self.FOnChange(Self);
   end

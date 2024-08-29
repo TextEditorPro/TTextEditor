@@ -48,6 +48,7 @@ begin
   begin
     Self.FVisible := FVisible;
     Self.FWidth := FWidth;
+
     if Assigned(Self.FOnChange) then
       Self.FOnChange(Self);
   end
@@ -71,6 +72,7 @@ var
   LValue: Integer;
 begin
   LValue := Max(0, AValue);
+
   if FWidth <> LValue then
   begin
     FWidth := LValue;

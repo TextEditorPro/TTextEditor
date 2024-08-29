@@ -49,12 +49,13 @@ var
   LIndex, LLength: Integer;
 begin
   LLength := Length(FBlockComments);
-
   LIndex := 0;
+
   while LIndex < LLength do
   begin
     if (FBlockComments[LIndex] = AOpenToken) and (FBlockComments[LIndex + 1] = ACloseToken) then
       Exit;
+
     Inc(LIndex, 2);
   end;
 

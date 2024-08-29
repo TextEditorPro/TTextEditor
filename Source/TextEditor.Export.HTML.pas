@@ -116,6 +116,7 @@ begin
   end;
 
   LLineNumber := '';
+
   if LShowLineNumbers then
     LLineNumberHTML := '<span style="display:inline-block;text-align:right;text-valign:center;' +
       ';font-family:' + LTextEditor.Fonts.LineNumbers.Name +
@@ -142,6 +143,7 @@ begin
     LPreviousElement := '';
     LTextLine := '';
     LSpaces := '';
+
     while not LTextEditor.Highlighter.EndOfLine do
     begin
       LHighlighterAttribute := LTextEditor.Highlighter.TokenAttribute;

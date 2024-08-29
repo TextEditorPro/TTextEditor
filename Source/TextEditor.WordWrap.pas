@@ -84,6 +84,7 @@ begin
     Exit;
 
   FBitmap := Vcl.Graphics.TBitmap.Create;
+
   with FBitmap do
   begin
     Canvas.Brush.Color := TColors.Fuchsia;

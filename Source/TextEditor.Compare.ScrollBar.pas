@@ -123,6 +123,7 @@ begin
     FScrollWnd.Free;
     FScrollWnd := nil;
   end;
+
   if Assigned(FSkinData) then
   begin
     FSkinData.Free;
@@ -136,6 +137,7 @@ end;
 procedure TTextEditorCompareScrollBar.AfterConstruction;
 begin
   inherited AfterConstruction;
+
 {$IFDEF ALPHASKINS}
   if HandleAllocated then
     RefreshEditScrolls(SkinData, FScrollWnd);
@@ -270,6 +272,7 @@ begin
 
   if Assigned(FEditorLeft) then
     FVisibleLines := FEditorLeft.VisibleLineCount;
+
   UpdateScrollBars;
 
   inherited Invalidate;
@@ -314,6 +317,7 @@ begin
 
     LScrollInfo.nMin := 1;
     LScrollInfo.nTrackPos := 0;
+
     if LVerticalMaxScroll <= TMaxValues.ScrollRange then
     begin
       LScrollInfo.nMax := Max(1, LVerticalMaxScroll);
@@ -347,11 +351,12 @@ begin
 
   LValue := Min(AValue, FEditorLeft.LineNumbersCount - FVisibleLines + 1);
   LValue := Max(LValue, 1);
+
   if FTopLine <> LValue then
   begin
     FTopLine := LValue;
-
     FScrollBarTopLine := 1;
+
     if Assigned(FEditorLeft) then
       FScrollBarTopLine := Max(FTopLine - Abs(Trunc((ClientHeight - FVisibleLines) *
         (FTopLine / Max(FEditorLeft.LineNumbersCount - FVisibleLines, 1)))), 1);
@@ -429,10 +434,12 @@ begin
   begin
     LNewLine := LNewLine - FVisibleLines div 2;
     LStep := Abs(LNewLine - TopLine) div 5;
+
     if LNewLine < TopLine then
     while LNewLine < TopLine - LStep do
     begin
       TopLine := TopLine - LStep;
+
       if TopLine = LPreviousLine then
         Break
       else
@@ -444,6 +451,7 @@ begin
     while LNewLine > TopLine + LStep do
     begin
       TopLine := TopLine + LStep;
+
       if TopLine = LPreviousLine then
         Break
       else
@@ -451,8 +459,10 @@ begin
 
       Invalidate;
     end;
+
     TopLine := LNewLine;
   end;
+
   FScrollBarOffsetY := LNewLine - TopLine;
 end;
 
@@ -463,9 +473,12 @@ begin
   LTemp := FEditorLeft.LineNumbersCount - ClientHeight;
   LTemp2 := Max(AY - FScrollBarOffsetY, 0);
   FScrollBarTopLine := Max(1, Trunc((LTemp / Max(ClientHeight - FVisibleLines, 1)) * LTemp2));
+
   if (LTemp > 0) and (FScrollBarTopLine > LTemp) then
     FScrollBarTopLine := LTemp;
+
   LTopLine := Max(1, FScrollBarTopLine + LTemp2);
+
   if TopLine <> LTopLine then
   begin
     TopLine := LTopLine;
@@ -500,6 +513,7 @@ begin
     SB_THUMBPOSITION, SB_THUMBTRACK:
       begin
         LLineNumbersCount := Max(FEditorLeft.LineNumbersCount, FEditorRight.LineNumbersCount);
+
         if LLineNumbersCount > TMaxValues.ScrollRange then
           TopLine := MulDiv(FVisibleLines + LLineNumbersCount - 1, AMessage.Pos, TMaxValues.ScrollRange)
         else
@@ -536,6 +550,7 @@ begin
           FreeAndNil(FScrollWnd);
           RecreateWnd;
         end;
+
         Exit;
       end;
     AC_REFRESH:
@@ -574,6 +589,7 @@ begin
         begin
           if not InUpdating(FSkinData, True) then
             Perform(WM_NCPAINT, 0, 0);
+
           Exit;
         end;
     end;

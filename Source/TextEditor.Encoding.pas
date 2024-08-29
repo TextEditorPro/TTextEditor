@@ -247,9 +247,11 @@ begin
   if not Assigned(FUTF8WithoutBOM) then
   begin
     LEncoding := TUTF8WithoutBOM.Create(CP_UTF8, 0, 0);
+
     if Assigned(AtomicCmpExchange(Pointer(FUTF8WithoutBOM), Pointer(LEncoding), nil)) then
       LEncoding.Free;
   end;
+
   Result := FUTF8WithoutBOM;
 end;
 

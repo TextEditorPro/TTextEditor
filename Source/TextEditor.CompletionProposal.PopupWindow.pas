@@ -113,6 +113,7 @@ begin
   if Assigned(ASource) and (ASource is TTextEditorCompletionProposal) then
   begin
     FCompletionProposal := ASource as TTextEditorCompletionProposal;
+
     with FCompletionProposal do
     begin
       Self.FCaseSensitive := cpoCaseSensitive in Options;
@@ -131,6 +132,7 @@ var
   LTextEditor: TCustomTextEditor;
 begin
   LTextEditor := nil;
+
   if Assigned(Owner) then
     LTextEditor := Owner as TCustomTextEditor;
 
@@ -146,6 +148,7 @@ var
   LTextEditor: TCustomTextEditor;
 begin
   LTextEditor := nil;
+
   if Assigned(Owner) then
     LTextEditor := Owner as TCustomTextEditor;
 
@@ -162,6 +165,7 @@ var
   LTextEditor: TCustomTextEditor;
 begin
   LTextEditor := nil;
+
   if Assigned(Owner) then
     LTextEditor := Owner as TCustomTextEditor;
 
@@ -181,6 +185,7 @@ var
   LTextPosition: TTextEditorTextPosition;
 begin
   LTextEditor := nil;
+
   if Assigned(Owner) then
     LTextEditor := Owner as TCustomTextEditor;
 
@@ -208,6 +213,7 @@ begin
       with LTextEditor do
       begin
         LTextPosition := TextPosition;
+
         if LTextPosition.Char <= Length(FLines[LTextPosition.Line]) then
           LChar := FLines[LTextPosition.Line][LTextPosition.Char]
         else
@@ -275,8 +281,10 @@ begin
             if (Owner as TCustomTextEditor).IsWordBreakChar(AKey) and Assigned(FOnValidate) then
               if AKey = TCharacters.Space then
                 FOnValidate(Self, TControlCharacters.Null);
+
           CurrentString := FCurrentString + AKey;
         end;
+
         if (cpoAutoInvoke in FCompletionProposal.Options) and (Length(FItemIndexArray) = 0) or
           (Pos(AKey, FCompletionProposal.CloseChars) <> 0) then
           Hide
@@ -349,18 +357,21 @@ begin
       if LPosition > 0 then
       begin
         LWidth := 0;
+
         if LPosition > 1 then
         begin
           LTemp := Copy(LText, 1, LPosition - 1);
           Canvas.TextOut(FMargin, LTop, LTemp);
           Inc(LWidth, Canvas.TextWidth(LTemp));
         end;
+
         Canvas.Font.Style := Canvas.Font.Style + [fsUnderline];
         LTemp := Copy(LText, LPosition, Length(FCurrentString));
         Canvas.TextOut(FMargin + LWidth, LTop, LTemp);
         Inc(LWidth, Canvas.TextWidth(LTemp));
         Canvas.Font.Style := Canvas.Font.Style - [fsUnderline];
         LTemp := Copy(LText, LPosition + Length(FCurrentString));
+
         if LTemp <> '' then
           Canvas.TextOut(FMargin + LWidth, LTop, LTemp);
       end
@@ -373,14 +384,17 @@ begin
       Inc(LTop, FItemHeight);
     end;
   end;
+
   Canvas.Draw(0, 0, FBitmapBuffer);
 end;
 
 procedure TTextEditorCompletionProposalPopupWindow.MoveSelectedLine(const ALineCount: Integer);
 begin
   FSelectedLine := EnsureRange(FSelectedLine + ALineCount, 0, Max(Length(FItemIndexArray) - 1, 0));
+
   if FSelectedLine >= TopLine + FCompletionProposal.VisibleLines then
     TopLine := FSelectedLine - FCompletionProposal.VisibleLines + 1;
+
   if FSelectedLine < TopLine then
     TopLine := FSelectedLine;
 end;
@@ -419,18 +433,21 @@ procedure TTextEditorCompletionProposalPopupWindow.SetCurrentString(const AValue
     LItemsCount := FItems.Count;
     SetLength(FItemIndexArray, 0);
     SetLength(FItemIndexArray, LItemsCount);
+
     for LIndex := 0 to LItemsCount - 1 do
     if AShowAllItems or MatchItem1(LIndex) then
     begin
       FItemIndexArray[LIndex2] := LIndex;
       Inc(LIndex2);
     end;
+
     for LIndex := 0 to LItemsCount - 1 do
     if MatchItem2(LIndex) then
     begin
       FItemIndexArray[LIndex2] := LIndex;
       Inc(LIndex2);
     end;
+
     SetLength(FItemIndexArray, LIndex2);
   end;
 
@@ -448,6 +465,7 @@ begin
   else
   begin
     LIndex := 0;
+
     while (LIndex < FItems.Count) and not MatchItem1(LIndex) do
       Inc(LIndex);
 
@@ -512,6 +530,7 @@ var
     LMaxDescriptionIndex := -1;
     LMaxLength := 0;
     LMaxDescriptionLength := 0;
+
     for LIndex := 0 to FItems.Count - 1 do
     begin
       LItem := FItems[LIndex];
@@ -519,6 +538,7 @@ var
       LDescription := LItem.Description;
 
       LLength := Length(LText);
+
       if LLength > LMaxLength then
       begin
         LMaxLength := LLength;
@@ -528,6 +548,7 @@ var
       if ShowDescription then
       begin
         LLength := Length(LDescription);
+
         if LLength > LMaxDescriptionLength then
         begin
           LMaxDescriptionLength := LLength;
@@ -542,6 +563,7 @@ var
     LWidth := FItemWidth + 2 * GetSystemMetrics(SM_CXVSCROLL);
 
     FItemDescriptionWidth := 0;
+
     if LMaxDescriptionIndex > -1 then
     begin
       LText := FItems[LMaxDescriptionIndex].Description;
@@ -556,6 +578,7 @@ var
     if LPoint.X + LWidth > Screen.DesktopWidth then
     begin
       LPoint.X := Screen.DesktopWidth - LWidth - 5;
+
       if LPoint.X < 0 then
         LPoint.X := 0;
     end;
@@ -563,6 +586,7 @@ var
     if LPoint.Y + LHeight > Screen.DesktopHeight then
     begin
       LPoint.Y := LPoint.Y - LHeight - (Owner as TCustomTextEditor).LineHeight - 2;
+
       if LPoint.Y < 0 then
         LPoint.Y := 0;
     end;
@@ -603,6 +627,7 @@ begin
     CalculateFormPlacement;
     SetAutoConstraints;
     CurrentString := ACurrentString;
+
     if Length(FItemIndexArray) > 0 then
     begin
       if cpoShowShadow in FCompletionProposal.Options then
@@ -644,6 +669,7 @@ begin
     Exit;
 
   LTextEditor := nil;
+
   if Assigned(Owner) then
     LTextEditor := Owner as TCustomTextEditor;
 
@@ -659,14 +685,17 @@ begin
       if not SelectionAvailable then
       begin
         LIndex := LTextPosition.Char - 1;
+
         if LIndex <= Length(LLineText) then
         while (LIndex > 0) and (LLineText[LIndex] > TCharacters.Space) and not LTextEditor.IsWordBreakChar(LLineText[LIndex]) do
           Dec(LIndex);
 
         SelectionBeginPosition := GetPosition(LIndex + 1, LTextPosition.Line);
+
         if AEndToken = TControlCharacters.Null then
         begin
           LLine := Lines[LTextPosition.Line];
+
           if (Length(LLine) >= LTextPosition.Char) and IsWordBreakChar(LLine[LTextPosition.Char]) then
             SelectionEndPosition := LTextPosition
           else
@@ -695,9 +724,9 @@ begin
             LSnippetItem := CompletionProposal.Snippets.Item[LItem.SnippetIndex];
 
             LStringList.Text := LSnippetItem.Snippet.Text;
-
             LCharCount := 0;
             LPLineText := PChar(LLineText);
+
             for LIndex := 0 to SelectionBeginPosition.Char - 1 do //FI:W528 Variable 'LIndex' not used in FOR-loop
             begin
               if LPLineText^ = TControlCharacters.Tab then
@@ -708,6 +737,7 @@ begin
               if LPLineText^ <> TControlCharacters.Null then
                 Inc(LPLineText);
             end;
+
             Dec(LCharCount);
 
             if toTabsToSpaces in Tabs.Options then
@@ -807,6 +837,7 @@ begin
   Result := '';
 
   LTextEditor := nil;
+
   if Assigned(Owner) then
     LTextEditor := Owner as TCustomTextEditor;
 
@@ -816,6 +847,7 @@ begin
 
     LLineText := FLines[LTextPosition.Line];
     LIndex := LTextPosition.Char - 1;
+
     if LIndex <= Length(LLineText) then
     begin
       while (LIndex > 0) and (LLineText[LIndex] > TCharacters.Space) and not LTextEditor.IsWordBreakChar(LLineText[LIndex]) do
@@ -850,6 +882,7 @@ begin
   else
   begin
     EnableScrollBar(Handle, SB_VERT, ESB_ENABLE_BOTH);
+
     if TopLine <= 0 then
       EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_UP)
     else

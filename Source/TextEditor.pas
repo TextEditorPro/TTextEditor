@@ -7322,7 +7322,7 @@ begin
 
   if not FState.ReplaceLock and FSearch.NearOperator.Enabled then
   begin
-    LSearchTextUpper := LSearchText.ToUpper;
+    LSearchTextUpper := LSearchText.ToUpperInvariant;
 
     if (Pos(' NEAR ', LSearchTextUpper) > 0) or (Pos(' NEAR:', LSearchTextUpper) > 0) then
     begin

@@ -34,9 +34,9 @@ type
   protected
     FEditor: TCustomControl;
     FOnChange: TNotifyEvent;
-    function GetItem(AIndex: Integer): TTextEditorMark;
+    function GetItem(const AIndex: TListItemIndex): TTextEditorMark;
     procedure Notify(Ptr: Pointer; Action: TListNotification); override;
-    procedure SetItem(AIndex: Integer; AItem: TTextEditorMark);
+    procedure SetItem(const AIndex: TListItemIndex; AItem: TTextEditorMark);
     property OwnsObjects;
   public
     constructor Create(AOwner: TCustomControl);
@@ -44,10 +44,10 @@ type
     function Find(const AIndex: Integer): TTextEditorMark;
     function First: TTextEditorMark;
     function Last: TTextEditorMark;
-    procedure ClearLine(ALine: Integer);
-    procedure GetMarksForLine(ALine: Integer; var AMarks: TTextEditorMarks);
+    procedure ClearLine(const ALine: Integer);
+    procedure GetMarksForLine(const ALine: Integer; var AMarks: TTextEditorMarks);
     procedure Place(AMark: TTextEditorMark);
-    property Items[AIndex: Integer]: TTextEditorMark read GetItem write SetItem; default;
+    property Items[const AIndex: TListItemIndex]: TTextEditorMark read GetItem write SetItem; default;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   end;
 
@@ -75,12 +75,12 @@ begin
     FOnChange(Self);
 end;
 
-function TTextEditorMarkList.GetItem(AIndex: Integer): TTextEditorMark;
+function TTextEditorMarkList.GetItem(const AIndex: TListItemIndex): TTextEditorMark;
 begin
   Result := TTextEditorMark(inherited GetItem(AIndex));
 end;
 
-procedure TTextEditorMarkList.SetItem(AIndex: Integer; AItem: TTextEditorMark);
+procedure TTextEditorMarkList.SetItem(const AIndex:TListItemIndex; AItem: TTextEditorMark);
 begin
   inherited SetItem(AIndex, AItem);
 end;
@@ -122,7 +122,7 @@ begin
   Result := TTextEditorMark(inherited Extract(AItem));
 end;
 
-procedure TTextEditorMarkList.ClearLine(ALine: Integer);
+procedure TTextEditorMarkList.ClearLine(const ALine: Integer);
 var
   LIndex: Integer;
 begin
@@ -131,7 +131,7 @@ begin
     Delete(LIndex);
 end;
 
-procedure TTextEditorMarkList.GetMarksForLine(ALine: Integer; var AMarks: TTextEditorMarks);
+procedure TTextEditorMarkList.GetMarksForLine(const ALine: Integer; var AMarks: TTextEditorMarks);
 var
   LIndex, LIndex2: Integer;
   LMark: TTextEditorMark;

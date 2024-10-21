@@ -16482,6 +16482,8 @@ var
 
       FHighlighter.SetLine(LCurrentLineText);
       LWordWrapTokenPosition := 0;
+      LIsSyncEditBlock := False;
+      LIsSearchInSelectionBlock := False;
 
       while LCurrentRow = LCurrentLine + 1 do
       begin

@@ -36,9 +36,6 @@
             "Attributes": {
               "Element": "String"
             },
-            "Properties": {
-              "CloseOnEndOfLine": true
-            },
             "TokenRange": {
               "Open": "'",
               "Close": "'"
@@ -885,6 +882,7 @@
               "exit",
               "extended",
               "external",
+              "external name",
               "false",
               "fetch",
               "file",
@@ -1397,12 +1395,12 @@
           {
             "OpenToken": "'",
             "CloseToken": "'",
-            "RegionType": "SingleLineString"
+            "RegionType": "MultiLineString"
           },
           {
             "OpenToken": "\"",
             "CloseToken": "\"",
-            "RegionType": "SingleLineString"
+            "RegionType": "MultiLineString"
           },
           {
             "OpenToken": "--",

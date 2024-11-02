@@ -1,0 +1,627 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "// Hello, World! in Odin\r\n",
+      "\r\n",
+      "package main\r\n",
+      "\r\n",
+      "import \"core:fmt\"\r\n",
+      "\r\n",
+      "main :: proc() {\r\n",
+      "{\r\n",
+      "    fmt.println(\"Hello, World!\\n\");\r\n",
+      "}"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "//"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "`",
+              "Close": "`"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\`",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abcdefABCDEF",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0x",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "asm",
+              "auto_cast",
+              "bit_set",
+              "break",
+              "case",
+              "cast",
+              "context",
+              "continue",
+              "defer",
+              "distinct",
+              "do",
+              "dynamic",
+              "else",
+              "enum",
+              "fallthrough",
+              "for",
+              "foreign",
+              "if",
+              "import",
+              "in",
+              "map",
+              "not_in",
+              "or_else",
+              "or_return",
+              "package",
+              "proc",
+              "return",
+              "struct",
+              "switch",
+              "transmute",
+              "typeid",
+              "union",
+              "using",
+              "when",
+              "where"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Words": [
+              "any",
+              "b8",
+              "b16",
+              "b32",
+              "b64",
+              "bool",
+              "byte",
+              "complex32",
+              "complex64",
+              "complex128",
+              "cstring",
+              "f16",
+              "f16be",
+              "f16le",
+              "f32",
+              "f32be",
+              "f32le",
+              "f64",
+              "f64be",
+              "f64le",
+              "i8",
+              "i16",
+              "i16be",
+              "i16le",
+              "i32",
+              "i32be",
+              "i32le",
+              "i64",
+              "i64be",
+              "i64le",
+              "i128",
+              "i128be",
+              "i128le",
+              "int",
+              "quaternion64",
+              "quaternion128",
+              "quaternion256",
+              "rawptr",
+              "rune",
+              "runtime.Maybe",
+              "string",
+              "typeid",
+              "u8",
+              "u16",
+              "u16be",
+              "u16le",
+              "u32",
+              "u32be",
+              "u32le",
+              "u64",
+              "u64be",
+              "u64le",
+              "u128",
+              "u128be",
+              "u128le",
+              "uint",
+              "uintptr"
+            ],
+            "Attributes": {
+              "Element": "MethodName"
+            }
+          },
+          {
+            "Type": "Number",
+            "Words": [
+              "false",
+              "nil",
+              "odin_arch",
+              "odin_build_mode",
+              "odin_compile_timestamp",
+              "odin_debug",
+              "odin_default_to_nil_allocator",
+              "odin_default_to_panic_allocator",
+              "odin_disable_assert",
+              "odin_endian",
+              "odin_error_pos_style",
+              "odin_no_crt",
+              "odin_no_entry_point",
+              "odin_no_rtti",
+              "odin_os",
+              "odin_platform_subtarget",
+              "odin_root",
+              "odin_vendor",
+              "odin_version",
+              "odin_windows_subsystem",
+              "true"
+            ],
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "abs",
+              "adjugate",
+              "align_of",
+              "append",
+              "append_elem",
+              "append_elem_string",
+              "append_elems",
+              "append_nothing",
+              "append_soa",
+              "append_soa_elem",
+              "append_soa_elems",
+              "append_string",
+              "assert",
+              "assert_contextless",
+              "assign_at",
+              "assign_at_elem",
+              "assign_at_elem_string",
+              "assign_at_elems",
+              "cap",
+              "card",
+              "clamp",
+              "clear",
+              "clear_dynamic_array",
+              "clear_map",
+              "clear_soa",
+              "close",
+              "complex",
+              "conj",
+              "container_of",
+              "copy",
+              "copy_from_string",
+              "copy_slice",
+              "delete",
+              "delete_cstring",
+              "delete_dynamic_array",
+              "delete_key",
+              "delete_map",
+              "delete_slice",
+              "delete_soa",
+              "delete_string",
+              "determinant",
+              "expand",
+              "expand_values",
+              "find_index",
+              "free",
+              "free_all",
+              "get_hash",
+              "hadamard_product",
+              "hermitian_adjoint",
+              "imag",
+              "init_global_temporary_allocator",
+              "inject_at",
+              "inject_at_elem",
+              "inject_at_elem_string",
+              "inject_at_elems",
+              "inverse",
+              "inverse_transpose",
+              "jmag",
+              "kmag",
+              "len",
+              "make",
+              "make_dynamic_array",
+              "make_dynamic_array_len",
+              "make_dynamic_array_len_cap",
+              "make_map",
+              "make_map_cap",
+              "make_multi_pointer",
+              "make_slice",
+              "make_soa",
+              "make_soa_aligned",
+              "make_soa_dynamic_array",
+              "make_soa_dynamic_array_len",
+              "make_soa_dynamic_array_len_cap",
+              "make_soa_slice",
+              "map_insert",
+              "map_upsert",
+              "matrix_flatten",
+              "matrix_minor",
+              "matrix_trace",
+              "max",
+              "min",
+              "new",
+              "new_clone",
+              "non_zero_append",
+              "non_zero_append_elem",
+              "non_zero_append_elem_string",
+              "non_zero_append_elems",
+              "non_zero_append_soa_elem",
+              "non_zero_append_soa_elems",
+              "non_zero_reserve",
+              "non_zero_reserve_dynamic_array",
+              "non_zero_reserve_soa",
+              "non_zero_resize",
+              "non_zero_resize_dynamic_array",
+              "non_zero_resize_soa",
+              "offset_of",
+              "offset_of_by_string",
+              "offset_of_member",
+              "offset_of_selector",
+              "open",
+              "ordered_remove",
+              "ordered_remove_soa",
+              "outer_product",
+              "panic",
+              "panic_contextless",
+              "pi",
+              "pop",
+              "pop_front",
+              "pop_front_safe",
+              "pop_safe",
+              "printf",
+              "println",
+              "quaternion",
+              "raw_data",
+              "raw_soa_footer_dynamic_array",
+              "raw_soa_footer_slice",
+              "real",
+              "remove_range",
+              "reserve",
+              "reserve",
+              "reserve_dynamic_array",
+              "reserve_map",
+              "reserve_soa",
+              "resize",
+              "resize_dynamic_array",
+              "resize_soa",
+              "shrink",
+              "shrink",
+              "shrink_map",
+              "size_of",
+              "sleep",
+              "soa_unzip",
+              "soa_zip",
+              "swizzle",
+              "transpose",
+              "type_info_of",
+              "type_of",
+              "typeid_of",
+              "unimplemented",
+              "unimplemented_contextless",
+              "unordered_remove",
+              "unordered_remove_soa"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "!",
+              "-",
+              "#",
+              "$",
+              "%",
+              "&",
+              "(",
+              ")",
+              "*",
+              ",",
+              ".",
+              "/",
+              ":",
+              ";",
+              "?",
+              "@",
+              "[",
+              "]",
+              "^",
+              "`",
+              "{",
+              "|",
+              "}",
+              "~",
+              "+",
+              "<",
+              "=",
+              ">"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\",
+          "HideGuideLineAtFirstColumn": true
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "//",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "`",
+        "CloseToken": "`"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "`",
+        "CloseToken": "`",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "//",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

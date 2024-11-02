@@ -769,6 +769,7 @@ begin
   if OpenClipboard then
   try
     Clipboard.Clear;
+
     { Set ANSI text only on Win9X, WinNT automatically creates ANSI from Unicode }
     if Win32Platform <> VER_PLATFORM_WIN32_NT then
     begin
@@ -788,9 +789,11 @@ begin
         end;
       end;
     end;
+
     { Set unicode text, this also works on Win9X, even if the clipboard-viewer
       can't show it, Word 2000+ can paste it including the unicode only characters }
     LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, (LLength + 1) * SizeOf(Char));
+
     if LGlobalMem <> 0 then
     begin
       LPGlobalLock := GlobalLock(LGlobalMem);
@@ -805,7 +808,7 @@ begin
       end;
     end;
 
-    if AHTML <> '' then
+    if not AHTML.IsEmpty then
     begin
       LHTML := FormatForClipboard(AHTML) + #0;
       LLength := Length(LHTML);

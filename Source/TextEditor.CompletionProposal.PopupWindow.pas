@@ -573,6 +573,10 @@ var
       Inc(LWidth, FItemDescriptionWidth);
     end;
 
+    var MaxW := (Screen.DesktopWidth div 4) * 3;
+    if LWidth > MaxW then
+      LWidth := MaxW;
+
     LHeight := FItemHeight * Min(FItems.Count, FCompletionProposal.VisibleLines) + 2;
 
     if LPoint.X + LWidth > Screen.DesktopWidth then

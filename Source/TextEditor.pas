@@ -435,7 +435,6 @@ type
     function GetCharWidth: Integer;
     function GetEndOfLine(const ALine: PChar): PChar;
     function GetFoldingOnCurrentLine: Boolean;
-    function GetHighlighterAttributeAtRowColumn(const ATextPosition: TTextEditorTextPosition; var AToken: string; var ATokenType: TTextEditorRangeType; var AStart: Integer; var AHighlighterAttribute: TTextEditorHighlighterAttribute): Boolean;
     function GetHookedCommandHandlersCount: Integer;
     function GetHorizontalScrollMax: Integer;
     function GetLastWordFromCursor: string;
@@ -730,8 +729,8 @@ type
     procedure PaintCodeFolding(const AClipRect: TRect; const AFirstRow, ALastRow: Integer);
     procedure PaintCodeFoldingCollapseMark(const AFoldRange: TTextEditorCodeFoldingRange; const ACurrentLineText: string; const ATokenPosition, ATokenLength, ALine: Integer; const ALineRect: TRect);
     procedure PaintCodeFoldingCollapsedLine(const AFoldRange: TTextEditorCodeFoldingRange; const ALineRect: TRect);
+    procedure PaintCodeFoldingGuides(const AFirstRow, ALastRow: Integer);
     procedure PaintCodeFoldingLine(const AClipRect: TRect; const ALine: Integer);
-    procedure PaintGuides(const AFirstRow, ALastRow: Integer);
     procedure PaintLeftMargin(const AClipRect: TRect; const AFirstLine, ALastTextLine, ALastLine: Integer);
     procedure PaintMinimapIndicator(const AClipRect: TRect);
     procedure PaintMinimapShadow(const ACanvas: TCanvas; const AClipRect: TRect);
@@ -774,6 +773,7 @@ type
     function FindPrevious(const AHandleNotFound: Boolean = True): Boolean;
     function GetBookmark(const AIndex: Integer; var ATextPosition: TTextEditorTextPosition): Boolean;
     function GetCompareLineNumberOffsetCache(const ALine: Integer): Integer;
+    function GetHighlighterAttributeAtRowColumn(const ATextPosition: TTextEditorTextPosition; var AToken: string; var ATokenType: TTextEditorRangeType; var AStart: Integer; var AHighlighterAttribute: TTextEditorHighlighterAttribute): Boolean;
     function GetNextBreakPosition(const ATextPosition: TTextEditorTextPosition): TTextEditorTextPosition;
     function GetPreviousBreakPosition(const ATextPosition: TTextEditorTextPosition): TTextEditorTextPosition;
     function GetTextPositionOfMouse(out ATextPosition: TTextEditorTextPosition): Boolean;
@@ -5988,6 +5988,8 @@ var
   LChar: Integer;
 begin
   LTextPosition := TextPosition;
+  if LTextPosition.Line >= FLines.Count then
+    Exit;
   LLineText := FLines.Items^[LTextPosition.Line].TextLine;
   LEndOfLineCaretPosition := GetPosition(Length(LLineText) + 1, LTextPosition.Line);
   LPLine := PChar(LLineText);
@@ -6228,6 +6230,8 @@ var
   LSpaceCount: Integer;
 begin
   LTextPosition := TextPosition;
+  if LTextPosition.Line >= FLines.Count then
+    Exit;
   LLineText := FLines.Items^[LTextPosition.Line].TextLine;
   LSpaceCount := LeftSpaceCount(LLineText) + 1;
 
@@ -9425,10 +9429,6 @@ procedure TCustomTextEditor.SetHorizontalScrollPosition(const AValue: Integer);
 var
   LValue: Integer;
 begin
-  if Assigned(Parent) then
-    if GetWindowLong(Handle, GWL_STYLE) and WS_HSCROLL = 0 then
-      Exit;
-
   LValue := AValue;
 
   if FWordWrap.Active or (LValue < 0) then
@@ -10064,12 +10064,17 @@ begin
   if not HandleAllocated or PaintLocked or FLines.Streaming or FHighlighter.Loading then
     Exit;
 
-  if (FScroll.Bars <> ssNone) and (FLines.Count > 0) then
+  if FLines.Count > 0 then
   begin
     LScrollInfo.cbSize := SizeOf(ScrollInfo);
     LScrollInfo.fMask := SIF_DISABLENOSCROLL;
 
-    if (FScroll.Bars in [ssBoth, ssHorizontal]) and not FWordWrap.Active then
+    if FWordWrap.Active then
+    begin
+      FScrollHelper.HorizontalPosition := 0;
+      ShowScrollBar(Handle, SB_HORZ, False);
+    end
+    else
     begin
       LHorizontalScrollMax := Max(GetHorizontalScrollMax - 1, 0);
 
@@ -10099,61 +10104,51 @@ begin
       end;
 
       if not FMinimap.Dragging then
-        ShowScrollBar(Handle, SB_HORZ, FScrollHelper.HorizontalVisible);
+        ShowScrollBar(Handle, SB_HORZ, (FScroll.Bars in [ssBoth, ssHorizontal]) and FScrollHelper.HorizontalVisible);
 
       SetScrollInfo(Handle, SB_HORZ, LScrollInfo, True);
 
       if not FMinimap.Dragging then
         EnableScrollBar(Handle, SB_HORZ, ESB_ENABLE_BOTH);
-    end
-    else
-    begin
-      FScrollHelper.HorizontalPosition := 0;
-      ShowScrollBar(Handle, SB_HORZ, False);
     end;
 
-    if FScroll.Bars in [ssBoth, ssVertical] then
+    LVerticalMaxScroll := FLineNumbers.Count;
+
+    if soPastEndOfFileMarker in FScroll.Options then
+      Inc(LVerticalMaxScroll, FLineNumbers.VisibleCount - 1);
+
+    LScrollInfo.nMin := 0;
+
+    if LVerticalMaxScroll <= TMaxValues.ScrollRange then
     begin
-      LVerticalMaxScroll := FLineNumbers.Count;
-
-      if soPastEndOfFileMarker in FScroll.Options then
-        Inc(LVerticalMaxScroll, FLineNumbers.VisibleCount - 1);
-
-      LScrollInfo.nMin := 0;
-
-      if LVerticalMaxScroll <= TMaxValues.ScrollRange then
-      begin
-        LScrollInfo.nMax := Max(0, LVerticalMaxScroll);
-        LScrollInfo.nPage := FLineNumbers.VisibleCount;
-        LScrollInfo.nPos := TopLine - 1;
-      end
-      else
-      begin
-        LScrollInfo.nMax := TMaxValues.ScrollRange;
-        LScrollInfo.nPage := MulDiv(TMaxValues.ScrollRange, FLineNumbers.VisibleCount, LVerticalMaxScroll);
-        LScrollInfo.nPos := MulDiv(TMaxValues.ScrollRange, TopLine, LVerticalMaxScroll);
-      end;
-
-      FScrollHelper.VerticalVisible := LScrollInfo.nMax > FLineNumbers.VisibleCount;
-
-      if FScrollHelper.VerticalVisible then
-        LScrollInfo.fMask := SIF_ALL
-      else
-      begin
-        TopLine := 1;
-        LScrollInfo.fMask := SIF_DISABLENOSCROLL;
-      end;
-
-      if not FMinimap.Dragging then
-        ShowScrollBar(Handle, SB_VERT, FScrollHelper.VerticalVisible);
-
-      SetScrollInfo(Handle, SB_VERT, LScrollInfo, True);
-
-      if not FMinimap.Dragging then
-        EnableScrollBar(Handle, SB_VERT, ESB_ENABLE_BOTH);
+      LScrollInfo.nMax := Max(0, LVerticalMaxScroll);
+      LScrollInfo.nPage := FLineNumbers.VisibleCount;
+      LScrollInfo.nPos := TopLine - 1;
     end
     else
-      ShowScrollBar(Handle, SB_VERT, False);
+    begin
+      LScrollInfo.nMax := TMaxValues.ScrollRange;
+      LScrollInfo.nPage := MulDiv(TMaxValues.ScrollRange, FLineNumbers.VisibleCount, LVerticalMaxScroll);
+      LScrollInfo.nPos := MulDiv(TMaxValues.ScrollRange, TopLine, LVerticalMaxScroll);
+    end;
+
+    FScrollHelper.VerticalVisible := LScrollInfo.nMax > FLineNumbers.VisibleCount;
+
+    if FScrollHelper.VerticalVisible then
+      LScrollInfo.fMask := SIF_ALL
+    else
+    begin
+      TopLine := 1;
+      LScrollInfo.fMask := SIF_DISABLENOSCROLL;
+    end;
+
+    if not FMinimap.Dragging then
+      ShowScrollBar(Handle, SB_VERT, (FScroll.Bars in [ssBoth, ssVertical]) and FScrollHelper.VerticalVisible);
+
+    SetScrollInfo(Handle, SB_VERT, LScrollInfo, True);
+
+    if not FMinimap.Dragging then
+      EnableScrollBar(Handle, SB_VERT, ESB_ENABLE_BOTH);
   end
   else
     ShowScrollBar(Handle, SB_BOTH, False);
@@ -11468,34 +11463,56 @@ var
 
     LPopupMenu := TPopupMenu.Create(Self);
     LPopupMenu.Images := TImageList.Create(LPopupMenu);
-    with LPopupMenu.Images do
-    begin
-      ColorDepth := cd8Bit;
-      Height := FImagesBookmark.Height;
-      Width := FImagesBookmark.Width;
-    end;
 
-    for LIndex := 9 to 13 do
+    if Assigned(LeftMargin.Bookmarks.Images) then
     begin
-      LBitmap := FImagesBookmark.GetBitmap(LIndex, FColors.LeftMarginBackground);
-      try
-        LPopupMenu.Images.Add(LBitmap, nil);
-      finally
-        FreeAndNil(LBitmap);
+      LPopupMenu.Images.ColorDepth := LeftMargin.Bookmarks.Images.ColorDepth;
+      // All that exceeds first 9 bookmarks is "colored"
+      for LIndex := 9 to LeftMargin.Bookmarks.Images.Count - 1 do
+      begin
+        LMenuItem := TMenuItem.Create(LPopupMenu);
+        // Use names, if image list supports it
+        if LeftMargin.Bookmarks.Images.IsImageNameAvailable then
+          LMenuItem.Caption := LeftMargin.Bookmarks.Images.GetNameByIndex(LIndex)
+        else
+          LMenuItem.Caption := ' ';
+        LMenuItem.Tag := LIndex;
+        LMenuItem.OnClick := DoOnBookmarkPopup;
+        LMenuItem.ImageIndex := LPopupMenu.Images.AddImage(LeftMargin.Bookmarks.Images, LIndex) - 1;
+        LPopupMenu.Items.Add(LMenuItem);
       end;
-    end;
-
-    LBookmarkColors := [STextEditorBookmarkYellow, STextEditorBookmarkRed, STextEditorBookmarkGreen,
-      STextEditorBookmarkBlue, STextEditorBookmarkPurple];
-
-    for LIndex := 0 to Length(LBookmarkColors) - 1 do
+    end
+    else
     begin
-      LMenuItem := TMenuItem.Create(LPopupMenu);
-      LMenuItem.Caption := LBookmarkColors[LIndex];
-      LMenuItem.ImageIndex := LIndex;
-      LMenuItem.Tag := 9 + LIndex;
-      LMenuItem.OnClick := DoOnBookmarkPopup;
-      LPopupMenu.Items.Add(LMenuItem);
+      with LPopupMenu.Images do
+      begin
+        ColorDepth := cd8Bit;
+        Height := FImagesBookmark.Height;
+        Width := FImagesBookmark.Width;
+      end;
+
+      for LIndex := 9 to 13 do
+      begin
+        LBitmap := FImagesBookmark.GetBitmap(LIndex, FColors.LeftMarginBackground);
+        try
+          LPopupMenu.Images.Add(LBitmap, nil);
+        finally
+          FreeAndNil(LBitmap);
+        end;
+      end;
+
+      LBookmarkColors := [STextEditorBookmarkYellow, STextEditorBookmarkRed, STextEditorBookmarkGreen,
+        STextEditorBookmarkBlue, STextEditorBookmarkPurple];
+
+      for LIndex := 0 to Length(LBookmarkColors) - 1 do
+      begin
+        LMenuItem := TMenuItem.Create(LPopupMenu);
+        LMenuItem.Caption := LBookmarkColors[LIndex];
+        LMenuItem.ImageIndex := LIndex;
+        LMenuItem.Tag := 9 + LIndex;
+        LMenuItem.OnClick := DoOnBookmarkPopup;
+        LPopupMenu.Items.Add(LMenuItem);
+      end;
     end;
 {$IFDEF ALPHASKINS}
     if Assigned(SkinData.SkinManager) then
@@ -12239,6 +12256,7 @@ var
     for LIndex := 0 to AMarkList.Count - 1 do
     begin
       LMark := AMarkList[LIndex];
+
       if LMark.Line >= AIndex then
         LMark.Line := LMark.Line + ACount;
     end;
@@ -12539,79 +12557,84 @@ begin
 
       if FMouse.DownInText then
       begin
-        FKeyboardHandler.ExecuteMouseDown(Self, AButton, AShift, X, Y);
+        IncPaintLock;
+        try
+          FKeyboardHandler.ExecuteMouseDown(Self, AButton, AShift, X, Y);
 
-        if (AButton = mbLeft) and (ssDouble in AShift) then
-        begin
-          FLast.DblClick := GetTickCount;
-          FLast.Row := LSelectedRow;
-          Exit;
-        end
-        else
-        if (soTripleClickRowSelect in FSelection.Options) and (AShift = [ssLeft]) and (FLast.DblClick > 0) then
-        begin
-          if (GetTickCount - FLast.DblClick < FDoubleClickTime) and (FLast.Row = LSelectedRow) then
+          if (AButton = mbLeft) and (ssDouble in AShift) then
           begin
-            DoTripleClick;
-
-            Invalidate;
+            FLast.DblClick := GetTickCount;
+            FLast.Row := LSelectedRow;
             Exit;
-          end;
-          FLast.DblClick := 0;
-        end;
-
-        if AButton = mbLeft then
-        begin
-          if (FLast.Row > 0) and (FLast.Row <= FLines.Count) then
-            DoTrimTrailingSpaces(FLast.Row - 1);
-
-          FLast.Row := LSelectedRow;
-
-          FUndoList.AddChange(crCaret, TextPosition, SelectionBeginPosition, SelectionEndPosition, '', FSelection.ActiveMode);
-          TextPosition := LTextPosition;
-
-          MouseCapture := True;
-          Exclude(FState.Flags, sfWaitForDragging);
-
-          if LSelectionAvailable and (eoDragDropEditing in FOptions) and (X > FLeftMarginWidth) and
-            (FSelection.Mode = smNormal) and IsTextPositionInSelection(LTextPosition) then
-            Include(FState.Flags, sfWaitForDragging);
-        end
-        else
-        if AButton = mbRight then
-        begin
-          if (coRightMouseClickMove in FCaret.Options) and
-            (LSelectionAvailable and not IsTextPositionInSelection(LTextPosition) or not LSelectionAvailable) then
-          begin
-            Invalidate;
-
-            FPosition.SelectionEnd := FPosition.SelectionBegin;
-            TextPosition := LTextPosition;
           end
           else
-            Exit;
-        end;
-
-        if FState.Flags * [sfWaitForDragging, sfDblClicked] = [] then
-        begin
-          if ssShift in AShift then
-            SetSelectionEndPosition(TextPosition)
-          else
+          if (soTripleClickRowSelect in FSelection.Options) and (AShift = [ssLeft]) and (FLast.DblClick > 0) then
           begin
-            if soALTSetsColumnMode in FSelection.Options then
-              if not (ssAlt in AShift) and not (ssCtrl in AShift) and FState.AltDown then
-              begin
-                FSelection.Mode := FSaveSelectionMode;
-                FScroll.SetOption(soPastEndOfLine, FSaveScrollOption);
-                FState.AltDown := False;
-              end;
+            if (GetTickCount - FLast.DblClick < FDoubleClickTime) and (FLast.Row = LSelectedRow) then
+            begin
+              DoTripleClick;
 
-            TextPosition := LTextPosition;
-            SelectionBeginPosition := LTextPosition;
-
-            if LSelectionAvailable then
-              SelectionEndPosition := LTextPosition;
+              Invalidate;
+              Exit;
+            end;
+            FLast.DblClick := 0;
           end;
+
+          if AButton = mbLeft then
+          begin
+            if (FLast.Row > 0) and (FLast.Row <= FLines.Count) then
+              DoTrimTrailingSpaces(FLast.Row - 1);
+
+            FLast.Row := LSelectedRow;
+
+            FUndoList.AddChange(crCaret, TextPosition, SelectionBeginPosition, SelectionEndPosition, '', FSelection.ActiveMode);
+            TextPosition := LTextPosition;
+
+            MouseCapture := True;
+            Exclude(FState.Flags, sfWaitForDragging);
+
+            if LSelectionAvailable and (eoDragDropEditing in FOptions) and (X > FLeftMarginWidth) and
+              (FSelection.Mode = smNormal) and IsTextPositionInSelection(LTextPosition) then
+              Include(FState.Flags, sfWaitForDragging);
+          end
+          else
+          if AButton = mbRight then
+          begin
+            if (coRightMouseClickMove in FCaret.Options) and
+              (LSelectionAvailable and not IsTextPositionInSelection(LTextPosition) or not LSelectionAvailable) then
+            begin
+              Invalidate;
+
+              FPosition.SelectionEnd := FPosition.SelectionBegin;
+              TextPosition := LTextPosition;
+            end
+            else
+              Exit;
+          end;
+
+          if FState.Flags * [sfWaitForDragging, sfDblClicked] = [] then
+          begin
+            if ssShift in AShift then
+              SetSelectionEndPosition(TextPosition)
+            else
+            begin
+              if soALTSetsColumnMode in FSelection.Options then
+                if not (ssAlt in AShift) and not (ssCtrl in AShift) and FState.AltDown then
+                begin
+                  FSelection.Mode := FSaveSelectionMode;
+                  FScroll.SetOption(soPastEndOfLine, FSaveScrollOption);
+                  FState.AltDown := False;
+                end;
+
+              TextPosition := LTextPosition;
+              SelectionBeginPosition := LTextPosition;
+
+              if LSelectionAvailable then
+                SelectionEndPosition := LTextPosition;
+            end;
+          end;
+        finally
+          DecPaintLock;
         end;
       end
       else
@@ -13027,16 +13050,17 @@ begin
   if FState.Flags * [sfDblClicked, sfWaitForDragging] = [sfWaitForDragging] then
   begin
     LTextPosition := PixelsToTextPosition(X, Y);
-
     TextPosition := LTextPosition;
+
     if not (ssShift in AShift) then
       SetSelectionBeginPosition(LTextPosition);
-    SetSelectionEndPosition(LTextPosition);
 
+    SetSelectionEndPosition(LTextPosition);
     ClearMinimapBuffer;
 
     Exclude(FState.Flags, sfWaitForDragging);
   end;
+
   Exclude(FState.Flags, sfDblClicked);
 end;
 
@@ -13102,7 +13126,7 @@ begin
     PaintRightMargin(LDrawRect);
 
     if FCodeFolding.Visible and not FCodeFolding.TextFolding.Active and CodeFolding.GuideLines.Visible then
-      PaintGuides(FLineNumbers.TopLine, Min(FLineNumbers.TopLine + FLineNumbers.VisibleCount, FLineNumbers.Count));
+      PaintCodeFoldingGuides(FLineNumbers.TopLine, Min(FLineNumbers.TopLine + FLineNumbers.VisibleCount, FLineNumbers.Count));
 
     if not (csDesigning in ComponentState) then
     begin
@@ -13602,7 +13626,7 @@ begin
   Canvas.Brush.Color := LOldBrushColor;
 end;
 
-procedure TCustomTextEditor.PaintGuides(const AFirstRow, ALastRow: Integer);
+procedure TCustomTextEditor.PaintCodeFoldingGuides(const AFirstRow, ALastRow: Integer);
 var
   LCurrentLine: Integer;
   LCodeFoldingRange, LCodeFoldingRangeTo: TTextEditorCodeFoldingRange;
@@ -13788,7 +13812,8 @@ begin
           if Assigned(LCodeFoldingRange.RegionItem) and not LCodeFoldingRange.RegionItem.ShowGuideLine then
             Continue;
 
-          LX := FLeftMarginWidth + GetLineIndentLevel(LCodeFoldingRange.ToLine - 1) * FPaintHelper.CharWidth + FCodeFolding.GuideLines.Padding;
+          LX := FLeftMarginWidth + GetLineIndentLevel(LCodeFoldingRange.ToLine - 1) * FPaintHelper.CharWidth +
+            FCodeFolding.GuideLines.Padding;
 
           if LHideAtFirstColumn and (LX < FLeftMarginWidth + FPaintHelper.CharWidth) or
             LHideInActiveRow and (LRow = FViewPosition.Row) then
@@ -13796,9 +13821,9 @@ begin
 
           if LHideOverText then
           begin
-            LX1 := LX + 1;
-            LColor := Canvas.Pixels[LX1, LY];
-            LZ := LY;
+            LX1 := LX;
+            LColor := Canvas.Pixels[LX1 + 1, LY];
+            LZ := LY + 2;
             LSkip := False;
 
             while LZ < LHeight do
@@ -14253,6 +14278,7 @@ var
           for LIndex := FBookmarkList.Count - 1 downto 0 do
           begin
             LMark := FBookmarkList.Items[LIndex];
+
             if LMark.Visible and (LMark.Line + 1 = LMarkLine) then
               DrawBookmark(LMark, LOverlappingOffsets[ALastLine - LLine], LMarkLine);
           end;
@@ -16486,6 +16512,8 @@ var
 
       FHighlighter.SetLine(LCurrentLineText);
       LWordWrapTokenPosition := 0;
+      LIsSyncEditBlock := False;
+      LIsSearchInSelectionBlock := False;
 
       while LCurrentRow = LCurrentLine + 1 do
       begin
@@ -19201,6 +19229,7 @@ begin
   while LIndex < FBookmarkList.Count do
   begin
     LBookmark := FBookmarkList.Items[LIndex];
+
     if LBookmark.Line = ALine then
     begin
       if LBookmark.Index = AIndex then
@@ -20480,6 +20509,7 @@ var
   LBookmark: TTextEditorMark;
 begin
   LBookmark := FBookmarkList.Find(AIndex);
+
   if Assigned(LBookmark) then
   begin
     LTextPosition.Char := LBookmark.Char;

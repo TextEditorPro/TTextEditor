@@ -30,6 +30,8 @@ type
   TTextEditorMarkEvent = procedure(ASender: TObject; var AMark: TTextEditorMark) of object;
   TTextEditorMarks = array of TTextEditorMark;
 
+  TListItemIndex = {$IF CompilerVersion >= 36}NativeInt{$ELSE}Integer{$IFEND};
+
   TTextEditorMarkList = class(TObjectList)
   protected
     FEditor: TCustomControl;

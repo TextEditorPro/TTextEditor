@@ -1289,6 +1289,7 @@ begin
         else
         begin
           LPreviousStart := LStart;
+
           LText := GetPartialTextStr(LStart, LEnd);
           LBuffer := FEncoding.GetBytes(LText);
           SetLength(LText, 0);
@@ -1349,11 +1350,8 @@ end;
 
 procedure TTextEditorLines.DoTrimTrailingSpaces(const AIndex: Integer);
 begin
-{$IFDEF TEXT_EDITOR_RANGE_CHECKS}
   if IsValidIndex(AIndex) then
-{$ENDIF}
-  with FItems^[AIndex] do
-  TextLine := TextEditor.Utils.TrimRight(TextLine);
+    FItems^[AIndex].TextLine := TextEditor.Utils.TrimRight(FItems^[AIndex].TextLine);
 end;
 
 procedure TTextEditorLines.SetRanges(const AIndex: Integer; const ARange: TTextEditorLinesRange);

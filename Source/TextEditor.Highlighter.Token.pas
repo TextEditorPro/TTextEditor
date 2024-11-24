@@ -167,26 +167,21 @@ end;
 
 procedure TTextEditorMultiToken.DeleteSymbol(const AIndex: Integer);
 begin
-{$IFDEF TEXT_EDITOR_RANGE_CHECKS}
   if (AIndex > -1) and (AIndex < FSymbols.Count) then
-{$ENDIF}
     FSymbols.Delete(AIndex)
 end;
 
 function TTextEditorMultiToken.GetSymbol(const AIndex: Integer): string;
 begin
-{$IFDEF TEXT_EDITOR_RANGE_CHECKS}
-  Result := '';
   if (AIndex > -1) and (AIndex < FSymbols.Count) then
-{$ENDIF}
     Result := FSymbols[AIndex]
+  else
+    Result := '';
 end;
 
 procedure TTextEditorMultiToken.SetSymbol(const AIndex: Integer; const ASymbol: string);
 begin
-{$IFDEF TEXT_EDITOR_RANGE_CHECKS}
   if (AIndex > -1) and (AIndex < FSymbols.Count) then
-{$ENDIF}
     FSymbols[AIndex] := ASymbol
 end;
 

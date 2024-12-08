@@ -192,17 +192,17 @@ destructor TTextEditorHighlighter.Destroy;
 begin
   Clear;
 
-  FreeAndNil(FComments);
-  FreeAndNil(FMainRules);
-  FreeAndNil(FAttributes);
-  FreeAndNil(FCompletionProposalSkipRegions);
-  FreeAndNil(FMatchingPairs);
-  FreeAndNil(FColors);
+  FComments.Free;
+  FMainRules.Free;
+  FAttributes.Free;
+  FCompletionProposalSkipRegions.Free;
+  FMatchingPairs.Free;
+  FColors.Free;
 
   FreeTemporaryTokens;
 
-  FreeAndNil(FTemporaryTokens);
-  FreeAndNil(FJSON);
+  FTemporaryTokens.Free;
+  FJSON.Free;
 
   inherited Destroy;
 end;
@@ -525,6 +525,8 @@ begin
   if not Assigned(AStringList) then
     Exit;
 
+  AStringList.BeginUpdate;
+
   for LIndex := 0 to FMainRules.KeyListCount - 1 do
   begin
     LKeyList := FMainRules.KeyList[LIndex];
@@ -532,6 +534,8 @@ begin
     for LIndex2 := 0 to LKeyList.KeyList.Count - 1 do
       AStringList.Add(LKeyList.KeyList[LIndex2]);
   end;
+
+  AStringList.EndUpdate;
 end;
 
 function TTextEditorHighlighter.GetLoad: TFileName;
@@ -723,11 +727,13 @@ begin
             Dec(LPText);
             { Space or tab characters }
             LKeyWord := ':';
+
             while (LPText >= LPStart) and (LPText^ in [TCharacters.Space, TControlCharacters.Tab]) do
             begin
               LKeyWord := LPText^ + LKeyWord;
               Dec(LPText);
             end;
+
             { Keyword }
             while (LPText >= LPStart) and not (LPText^ in [TCharacters.Space, TControlCharacters.Tab, '{', '(']) do
             begin
@@ -774,7 +780,7 @@ procedure TTextEditorHighlighter.LoadFromJSON;
 var
   LStringStream: TStringStream;
 begin
-  if Assigned(FJSON) and (Trim(FJSON.Text) = '') then
+  if Assigned(FJSON) and FJSON.Text.Trim.IsEmpty then
     Exit;
 
   LStringStream := TStringStream.Create;
@@ -813,7 +819,7 @@ begin
     try
       LEditor.OnAdditionalKeywords(LEditor, FName, LKeywords);
 
-      if Trim(LKeywords.Text) <> '' then
+      if not Trim(LKeywords.Text).IsEmpty then
         AddKeywords(LKeywords);
     finally
       LKeywords.Free;

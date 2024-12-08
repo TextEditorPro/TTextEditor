@@ -55,6 +55,7 @@ begin
     Self.FPosition := FPosition;
     Self.FOptions := FOptions;
     Self.FCursor := FCursor;
+
     Self.DoChange;
   end
   else
@@ -80,6 +81,7 @@ begin
   if FPosition <> AValue then
   begin
     FPosition := AValue;
+
     DoChange
   end;
 end;
@@ -89,6 +91,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange
   end;
 end;

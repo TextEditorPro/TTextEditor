@@ -20,19 +20,17 @@ type
     constructor Create(const AttributeName: string);
     procedure Assign(ASource: TPersistent); override;
   public
-    property Name: string read FName write FName;
     property Background: TColor read FBackground write FBackground default TColors.SysNone;
     property Element: string read FElement write FElement;
     property EscapeChar: Char read FEscapeChar write FEscapeChar default TControlCharacters.Null;
     property FontStyles: TFontStyles read FFontStyles write FFontStyles;
     property Foreground: TColor read FForeground write FForeground default TColors.SysNone;
+    property Name: string read FName write FName;
     property ParentBackground: Boolean read FParentBackground write FParentBackground;
     property ParentForeground: Boolean read FParentForeground write FParentForeground;
   end;
 
 implementation
-
-
 
 constructor TTextEditorHighlighterAttribute.Create(const AttributeName: string);
 begin

@@ -13,7 +13,7 @@
       "\r\n",
       "You can include literal backticks like `` `this` ``.\r\n",
       "\r\n",
-      "Welcome to my homepage [hyperlink syntax](http://www.bonecode.com)"
+      "Welcome to my homepage [hyperlink syntax](https://texteditor.pro)"
     ],
     "Editor": {
       "URIOpener": true
@@ -29,9 +29,6 @@
             "Attributes": {
               "Element": "String"
             },
-            "Properties": {
-              "CloseOnEndOfLine": true
-            },
             "TokenRange": {
               "Open": "\"",
               "Close": "\""
@@ -44,7 +41,6 @@
                     "Element": "String"
                   },
                   "Properties": {
-                    "CloseOnEndOfLine": true,
                     "CloseOnTerm": true
                   },
                   "TokenRange": {
@@ -58,7 +54,6 @@
                     "Element": "String"
                   },
                   "Properties": {
-                    "CloseOnEndOfLine": true,
                     "CloseOnTerm": true
                   },
                   "TokenRange": {
@@ -104,12 +99,9 @@
             "Attributes": {
               "Element": "String"
             },
-            "Properties": {
-              "CloseOnEndOfLine": true
-            },
             "TokenRange": {
-              "Open": "``",
-              "Close": "``"
+              "Open": "```",
+              "Close": "```"
             },
             "SubRules": {
               "Range": [
@@ -119,7 +111,6 @@
                     "Element": "String"
                   },
                   "Properties": {
-                    "CloseOnEndOfLine": true,
                     "CloseOnTerm": true
                   },
                   "TokenRange": {
@@ -133,7 +124,46 @@
                     "Element": "String"
                   },
                   "Properties": {
-                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "TokenRange": {
+              "Open": "``",
+              "Close": "``"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\`",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
                     "CloseOnTerm": true
                   },
                   "TokenRange": {
@@ -150,7 +180,18 @@
               "Element": "String"
             },
             "Properties": {
+              "CloseOnTerm": true,
               "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "*",
+              "Close": "*"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
             },
             "TokenRange": {
               "Open": "`",
@@ -164,7 +205,6 @@
                     "Element": "String"
                   },
                   "Properties": {
-                    "CloseOnEndOfLine": true,
                     "CloseOnTerm": true
                   },
                   "TokenRange": {
@@ -178,7 +218,6 @@
                     "Element": "String"
                   },
                   "Properties": {
-                    "CloseOnEndOfLine": true,
                     "CloseOnTerm": true
                   },
                   "TokenRange": {
@@ -187,6 +226,16 @@
                   }
                 }
               ]
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Attributes": {
+              "Element": "Symbol"
+            },
+            "TokenRange": {
+              "Open": "~~~",
+              "Close": "~~~"
             }
           },
           {
@@ -206,9 +255,6 @@
             "Attributes": {
               "Element": "Number"
             },
-            "Properties": {
-              "CloseOnEndOfLine": true
-            },
             "TokenRange": {
               "Open": "[",
               "Close": "]"
@@ -225,6 +271,19 @@
             "TokenRange": {
               "Open": "**",
               "Close": "**"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Attributes": {
+              "Element": "Symbol"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "(#",
+              "Close": ")"
             }
           },
           {
@@ -262,21 +321,36 @@
         ],
         "KeyList": [
           {
+            "Type": "Number",
+            "Words": [
+              "* "
+            ],
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
             "Type": "Symbol",
             "Words": [
-              "<",
-              ">",
-              "=",
-              "/",
-              ".",
-              ",",
+              "!",
               "-",
-              "+",
+              "$",
               "(",
               ")",
+              ",",
+              ".",
+              "/",
+              ":",
+              ";",
+              "\\",
               "{",
+              "|",
               "}",
-              "!"
+              "~",
+              "+",
+              "<",
+              "=",
+              ">"
             ],
             "Attributes": {
               "Element": "Symbol"

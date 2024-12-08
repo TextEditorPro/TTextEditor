@@ -183,12 +183,14 @@ var
 begin
   if FInKeyDown then
     Exit;
+
   FInKeyDown := True;
   try
     with FKeyDownChain do
     for LIndex := Count - 1 downto 0 do
     begin
       TKeyEvent(Items[LIndex])(ASender, Key, Shift);
+
       if Key = 0 then
       begin
         FInKeyDown := False;
@@ -206,6 +208,7 @@ var
 begin
   if FInKeyUp then
     Exit;
+
   FInKeyUp := True;
   try
     with FKeyUpChain do
@@ -230,6 +233,7 @@ var
 begin
   if FInKeyPress then
     Exit;
+
   FInKeyPress := True;
   try
     with FKeyPressChain do

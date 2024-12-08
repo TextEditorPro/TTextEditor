@@ -53,6 +53,7 @@ begin
     Self.FShowOnlyModified := FShowOnlyModified;
     Self.FVisible := FVisible;
     Self.FWidth := FWidth;
+
     Self.DoChange;
   end
   else
@@ -83,6 +84,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange
   end;
 end;
@@ -92,6 +94,7 @@ begin
   if FWidth <> AValue then
   begin
     FWidth := AValue;
+
     DoChange
   end;
 end;

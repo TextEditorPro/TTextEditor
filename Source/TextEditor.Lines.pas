@@ -397,7 +397,7 @@ var
 begin
   with FItems^[AIndex] do
   begin
-    if TextLine = '' then
+    if TextLine.IsEmpty then
     begin
       Result := '';
 
@@ -870,7 +870,7 @@ procedure TTextEditorLines.InsertText(const AIndex: Integer; const AText: string
 var
   LStringList: TStringList;
 begin
-  if AText = '' then
+  if AText.IsEmpty then
     Exit;
 
   LStringList := TStringList.Create;

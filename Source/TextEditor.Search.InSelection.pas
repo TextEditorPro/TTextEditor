@@ -47,6 +47,7 @@ begin
     Self.FActive := FActive;
     Self.FSelectionBeginPosition := FSelectionBeginPosition;
     Self.FSelectionEndPosition := FSelectionEndPosition;
+
     Self.DoChange;
   end
   else
@@ -58,6 +59,7 @@ begin
   if FActive <> AValue then
   begin
     FActive := AValue;
+
     DoChange;
   end;
 end;

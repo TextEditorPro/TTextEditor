@@ -65,13 +65,11 @@ begin
   CreateNew(AOwner);
 
   ControlStyle := ControlStyle + [csNoDesignVisible, csReplicatable];
+
   if not (csDesigning in ComponentState) then
     ControlStyle := ControlStyle + [csAcceptsControls];
 
   FBufferBitmap := Vcl.Graphics.TBitmap.Create;
-  Visible := False;
-
-  Color := FBackgroundColor;
 
   FItemList := TStringList.Create;
 
@@ -82,6 +80,8 @@ begin
   FBackgroundColor := TColors.SysWindow;
   FBorderColor := TColors.SysBtnFace;
 
+  Visible := False;
+  Color := FBackgroundColor;
   BorderStyle := bsNone;
   FormStyle := fsStayOnTop;
 
@@ -177,8 +177,11 @@ var
   LIndex: Integer;
 begin
   ResetCanvas;
+
   LRect := ClientRect;
+
   Winapi.Windows.ExtTextOut(FBufferBitmap.Canvas.Handle, 0, 0, ETO_OPAQUE, LRect, '', 0, nil);
+
   FBufferBitmap.Canvas.Pen.Color := FBorderColor;
   FBufferBitmap.Canvas.Rectangle(LRect);
 

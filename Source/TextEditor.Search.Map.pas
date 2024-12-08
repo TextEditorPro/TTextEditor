@@ -59,6 +59,7 @@ begin
     Self.FOptions := Options;
     Self.FWidth := FWidth;
     Self.FCursor := FCursor;
+
     Self.DoChange;
   end
   else
@@ -68,6 +69,7 @@ end;
 procedure TTextEditorSearchMap.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
   FWidth := MulDiv(FWidth, AMultiplier, ADivider);
+
   DoChange;
 end;
 
@@ -94,6 +96,7 @@ begin
   if FAlign <> AValue then
   begin
     FAlign := AValue;
+
     DoChange;
   end;
 end;
@@ -103,6 +106,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange;
   end;
 end;
@@ -112,6 +116,7 @@ begin
   if FOptions <> AValue then
   begin
     FOptions := AValue;
+
     DoChange;
   end;
 end;

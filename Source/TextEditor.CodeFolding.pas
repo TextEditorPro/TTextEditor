@@ -128,6 +128,7 @@ begin
   if FMarkStyle <> AValue then
   begin
     FMarkStyle := AValue;
+
     DoChange;
   end;
 end;
@@ -146,6 +147,7 @@ end;
 procedure TTextEditorCodeFolding.SetOptions(const AValue: TTextEditorCodeFoldingOptions);
 begin
   FOptions := AValue;
+
   DoChange;
 end;
 
@@ -177,6 +179,7 @@ begin
   if FPadding <> AValue then
   begin
     FPadding := AValue;
+
     DoChange;
   end;
 end;
@@ -198,6 +201,7 @@ begin
   if FWidth <> LValue then
   begin
     FWidth := LValue;
+
     DoChange;
   end;
 end;

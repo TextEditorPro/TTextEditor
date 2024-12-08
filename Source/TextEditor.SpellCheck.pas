@@ -404,12 +404,14 @@ begin
     Exit;
 
   LErrorItem := PTextEditorTextPosition(FItems[0]);
+
   if IsErrorItemGreaterThanTextPosition then
     Exit(0);
 
   LHigh := FItems.Count - 1;
 
   LErrorItem := PTextEditorTextPosition(FItems[LHigh]);
+
   if IsErrorItemLowerThanTextPosition then
     Exit(0);
 

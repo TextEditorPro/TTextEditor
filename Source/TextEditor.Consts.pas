@@ -35,18 +35,20 @@ type
     CtrlBackspace = #127;
     Dot = '.';
     ExclamationMark = #33;
-    LineSeparator = Char($2028);
+    Hyphen = '-';
+    LineSeparator = Char($2028); // TODO: move to control character
     LowLine = #95;
     NonBreakingSpace = #160;
-    ParagraphSeparator = Char($2029);
+    ParagraphSeparator = Char($2029); // TODO: move to control character
     Pilcrow = Char($00B6);
+    QuestionMark = '?';
     Slash = '/';
     Space = #32;
     TagClose = '>';
     TagOpen = '<';
     ThreeDots = '...';
     Underscore = '_';
-    ZeroWidthSpace = Char($200B);
+    ZeroWidthSpace = Char($200B); // TODO: move to control character
   end;
 
   TClipboardDefaults = record

@@ -3,7 +3,7 @@
 interface
 
 uses
-  System.UITypes, Vcl.Graphics;
+  System.UITypes, Vcl.Graphics, Vcl.ImgList;
 
 type
   TTextEditorInternalImage = class(TObject)
@@ -12,13 +12,15 @@ type
     FHeight: Integer;
     FImages: Vcl.Graphics.TBitmap;
     FWidth: Integer;
-    function CreateBitmapFromInternalList(const AModule: THandle; const AName: string): Vcl.Graphics.TBitmap;
+    function CreateBitmapFromImageList(AImageList: TCustomImageList; const AName: string; const APixelsPerInch: Integer): Vcl.Graphics.TBitmap;
+    function CreateBitmapFromInternalList(const AModule: THandle; const AName: string; const APixelsPerInch: Integer): Vcl.Graphics.TBitmap;
+    procedure ChangeScale(const ABitmap: Vcl.Graphics.TBitmap;const AMultiplier: Integer);
     procedure FreeBitmapFromInternalList;
   public
-    constructor Create(const AModule: THandle; const AName: string; const ACount: Integer = 1);
+    constructor Create(const AModule: THandle; const AName: string; const ACount: Integer = 1; const APixelsPerInch: Integer = 96); overload;
+    constructor Create(const AImageList: TCustomImageList; const AName: string; const APixelsPerInch: Integer = 96); overload;
     destructor Destroy; override;
     function GetBitmap(const AImageIndex: Integer; const ABackgroundColor: TColor): Vcl.Graphics.TBitmap;
-    procedure ChangeScale(const AMultiplier, ADivider: Integer); virtual;
     procedure Draw(const ACanvas: TCanvas; const ANumber: Integer; const X: Integer; const Y: Integer;
       const ALineHeight: Integer; const ATransparentColor: TColor = TColors.SysNone);
     property Height: Integer read FHeight write FHeight;
@@ -33,22 +35,33 @@ uses
 type
   TInternalResource = class(TObject)
   public
-    UsageCount: Integer;
-    Name: string;
     Bitmap: Vcl.Graphics.TBitmap;
+    Name: string;
+    UsageCount: Integer;
   end;
 
 var
   GInternalResources: TList;
 
-constructor TTextEditorInternalImage.Create(const AModule: THandle; const AName: string; const ACount: Integer = 1);
+constructor TTextEditorInternalImage.Create(const AModule: THandle; const AName: string; const ACount: Integer = 1;
+  const APixelsPerInch: Integer = 96);
 begin
   inherited Create;
 
-  FImages := CreateBitmapFromInternalList(AModule, AName);
-  FWidth := (FImages.Width + ACount shr 1) div ACount;
-  FHeight := FImages.Height;
   FCount := ACount;
+  FImages := CreateBitmapFromInternalList(AModule, AName, APixelsPerInch);
+end;
+
+constructor TTextEditorInternalImage.Create(const AImageList: TCustomImageList; const AName: string;
+  const APixelsPerInch: Integer = 96);
+begin
+  inherited Create;
+
+  FCount := AImageList.Count;
+  FHeight := AImageList.Height;
+  FWidth := AImageList.Width;
+
+  FImages := CreateBitmapFromImageList(AImageList, AName, APixelsPerInch);
 end;
 
 destructor TTextEditorInternalImage.Destroy;
@@ -61,50 +74,111 @@ end;
 function TTextEditorInternalImage.GetBitmap(const AImageIndex: Integer; const ABackgroundColor: TColor): Vcl.Graphics.TBitmap;
 begin
   Result := Vcl.Graphics.TBitmap.Create;
-  Result.TransparentColor := clFuchsia;
+  Result.TransparentColor := TCOlors.Fuchsia;
   Result.Canvas.Brush.Color := ABackgroundColor;
   Result.Width := FWidth;
   Result.Height := FHeight;
-  Draw(Result.Canvas, AImageIndex, 0, 0, FHeight, clFuchsia);
+
+  Draw(Result.Canvas, AImageIndex, 0, 0, FHeight, TColors.Fuchsia);
 end;
 
-procedure TTextEditorInternalImage.ChangeScale(const AMultiplier, ADivider: Integer);
-Var
-  LNumerator: Integer;
+procedure TTextEditorInternalImage.ChangeScale(const ABitmap: Vcl.Graphics.TBitmap; const AMultiplier: Integer);
 begin
-  LNumerator := (AMultiplier div ADivider) * ADivider;
-  FWidth := MulDiv(FWidth, LNumerator, ADivider);
-  ResizeBitmap(FImages, FWidth * FCount, MulDiv(FImages.Height, LNumerator, ADivider));
-  FHeight := FImages.Height;
+  if AMultiplier = 96 then
+    Exit;
+
+  FHeight := MulDiv(FHeight, AMultiplier, 96);
+  FWidth := MulDiv(FWidth, AMultiplier, 96);
+
+  ResizeBitmap(ABitmap, FWidth * FCount, FHeight);
 end;
 
-function TTextEditorInternalImage.CreateBitmapFromInternalList(const AModule: THandle; const AName: string): Vcl.Graphics.TBitmap;
+function TTextEditorInternalImage.CreateBitmapFromInternalList(const AModule: THandle; const AName: string;
+  const APixelsPerInch: Integer): Vcl.Graphics.TBitmap;
 var
   LIndex: Integer;
   LInternalResource: TInternalResource;
 begin
-  for LIndex := 0 to GInternalResources.Count - 1 do
-  begin
-    LInternalResource := TInternalResource(GInternalResources[LIndex]);
-    if LInternalResource.Name = UpperCase(AName) then
+  Result := nil;
+  try
+    for LIndex := 0 to GInternalResources.Count - 1 do
+    begin
+      LInternalResource := TInternalResource(GInternalResources[LIndex]);
+
+      if LInternalResource.Name = UpperCase(AName) then
+      with LInternalResource do
+      begin
+        UsageCount := UsageCount + 1;
+        Exit(Bitmap);
+      end;
+    end;
+
+    Result := Vcl.Graphics.TBitmap.Create;
+    Result.Handle := LoadBitmap(AModule, PChar(AName));
+
+    FHeight := Result.Height;
+    FWidth := Result.Width div FCount;
+
+    LInternalResource := TInternalResource.Create;
+
     with LInternalResource do
     begin
-      UsageCount := UsageCount + 1;
-      Exit(Bitmap);
+      UsageCount := 1;
+      Name := UpperCase(AName);
+      Bitmap := Result;
     end;
-  end;
 
-  Result := Vcl.Graphics.TBitmap.Create;
-  Result.Handle := LoadBitmap(AModule, PChar(AName));
-
-  LInternalResource := TInternalResource.Create;
-  with LInternalResource do
-  begin
-    UsageCount := 1;
-    Name := UpperCase(AName);
-    Bitmap := Result;
+    GInternalResources.Add(LInternalResource);
+  finally
+    if Assigned(Result) then
+      ChangeScale(Result, APixelsPerInch);
   end;
-  GInternalResources.Add(LInternalResource);
+end;
+
+function TTextEditorInternalImage.CreateBitmapFromImageList(AImageList: TCustomImageList; const AName: string;
+  const APixelsPerInch: Integer): Vcl.Graphics.TBitmap;
+var
+  LIndex: Integer;
+  LInternalResource: TInternalResource;
+begin
+  Result := nil;
+  try
+    for LIndex := 0 to GInternalResources.Count - 1 do
+    begin
+      LInternalResource := TInternalResource(GInternalResources[LIndex]);
+
+      if LInternalResource.Name = UpperCase(AName) then
+      with LInternalResource do
+      begin
+        UsageCount := UsageCount + 1;
+        Exit(Bitmap);
+      end;
+    end;
+
+    Result := Vcl.Graphics.TBitmap.Create;
+    Result.Width := AImageList.Width * AImageList.Count;
+    Result.Height := AImageList.Height;
+    Result.PixelFormat := pf32bit;
+    Result.Canvas.Brush.Color := TColors.Fuchsia;
+    Result.Canvas.FillRect(Rect(0, 0, Result.Width, Result.Height));
+
+    for LIndex := 0 to AImageList.Count - 1 do
+      AImageList.Draw(Result.Canvas, LIndex * AImageList.Width, 0, LIndex);
+
+    LInternalResource := TInternalResource.Create;
+
+    with LInternalResource do
+    begin
+      UsageCount := 1;
+      Name := UpperCase(AName);
+      Bitmap := Result;
+    end;
+
+    GInternalResources.Add(LInternalResource);
+  finally
+    if Assigned(Result) then
+      ChangeScale(Result, APixelsPerInch);
+  end;
 end;
 
 procedure TTextEditorInternalImage.FreeBitmapFromInternalList;
@@ -123,19 +197,22 @@ var
 
 begin
   LIndex := FindImageIndex;
+
   if LIndex = -1 then
     Exit;
 
   LInternalResource := TInternalResource(GInternalResources[LIndex]);
+
   with LInternalResource do
   begin
     UsageCount := UsageCount - 1;
+
     if UsageCount = 0 then
     begin
       Bitmap.Free;
       Bitmap := nil;
       GInternalResources.Delete(LIndex);
-      LInternalResource.Free;
+      Free;
     end;
   end;
 end;
@@ -162,6 +239,8 @@ begin
       LY := (FHeight - ALineHeight) div 2;
       LSourceRect := Rect(ANumber * FWidth, LY, (ANumber + 1) * FWidth, LY + ALineHeight);
     end;
+
+    ACanvas.Brush.Style := bsClear;
 
     if ATransparentColor = TColors.SysNone then
       ACanvas.CopyRect(LDestinationRect, FImages.Canvas, LSourceRect)

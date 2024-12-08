@@ -63,6 +63,7 @@ begin
     Self.FActive := FActive;
     Self.FWidth := FWidth;
     Self.FIndicator.Assign(FIndicator);
+
     Self.DoChange;
   end
   else
@@ -133,6 +134,7 @@ begin
   if FActive <> AValue then
   begin
     FActive := AValue;
+
     DoChange;
   end;
 end;
@@ -147,6 +149,7 @@ begin
   if FWidth <> AValue then
   begin
     FWidth := AValue;
+
     DoChange;
   end;
 end;

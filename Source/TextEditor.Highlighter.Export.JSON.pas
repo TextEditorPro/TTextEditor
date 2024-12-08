@@ -78,7 +78,7 @@ begin
   for LIndex := 0 to SizeOf(TIntegerSet) * 8 - 1 do
   if LIndex in TIntegerSet(AValue) then
   begin
-    if Result <> '' then
+    if not Result.IsEmpty then
       Result := Result + ';';
 
     Result := Result + Copy(GetEnumName(LBaseType, LIndex), 3);
@@ -151,7 +151,7 @@ begin
 
       LStyle := SetAsString(LPPropInfo^.PropType^, GetOrdProp(FEditor.FontStyles, LPPropInfo));
 
-      if LStyle <> '' then
+      if not LStyle.IsEmpty then
       begin
         LJSONObject := LJSONArray.AddObject;
         LJSONObject['Name'] := string(LPPropInfo.Name);

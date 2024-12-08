@@ -115,6 +115,7 @@ begin
   Result := 0;
 
   Inc(FRun, FPatternLength);
+
   while FRun < FTheEnd do
   begin
     if FPattern[FPatternLength] <> FRun^ then
@@ -133,8 +134,7 @@ begin
 
           Inc(FCount);
 
-          Result := FRun - FOrigin - FPatternLength + 2;
-          Exit;
+          Exit(FRun - FOrigin - FPatternLength + 2);
         end;
 
         Inc(LIndex);
@@ -197,6 +197,7 @@ begin
   Clear;
 
   LPosition := FindFirst(ALines.Text);
+
   while LPosition > 0 do
   begin
     FResults.Add(LPosition);

@@ -65,6 +65,7 @@ type
     FYPos: Integer;
     function ClipLineToRect(var ALine: string): string;
     function GetPageCount: Integer;
+    function WrapTextEx(const ALine: string; const ABreakChars: TSysCharSet; const AMaxColumn: Integer; const AList: TList): Boolean;
     procedure CalculatePages;
     procedure HandleWrap(const AText: string);
     procedure InitHighlighterRanges;
@@ -790,10 +791,10 @@ begin
   FPrinting := True;
   FAbort := False;
 
-  if FDocumentTitle <> '' then
-    Printer.Title := FDocumentTitle
+  if FDocumentTitle.IsEmpty then
+    Printer.Title := FTitle
   else
-    Printer.Title := FTitle;
+    Printer.Title := FDocumentTitle;
 
   Printer.BeginDoc;
 
@@ -813,7 +814,7 @@ begin
       begin
         PrintPage(LPage);
 
-        if ((LPage < LEndPage) or (LIndex < Copies)) and not FAbort then
+        if not FAbort and ((LPage < LEndPage) or (LIndex < Copies)) then
           Printer.NewPage;
 
         Inc(LPage);
@@ -867,6 +868,50 @@ begin
       LCanvas.Free;
     end;
   end;
+end;
+
+function TTextEditorPrint.WrapTextEx(const ALine: string; const ABreakChars: TSysCharSet; const AMaxColumn: Integer; const AList: TList): Boolean;
+var
+  LWrapPosition: TTextEditorWrapPosition;
+  LPosition, LPreviousPosition: Integer;
+  LFound: Boolean;
+begin
+  if Length(ALine) <= AMaxColumn then
+  begin
+    Result := True;
+    Exit;
+  end;
+
+  Result := False;
+
+  LPosition := 1;
+  LPreviousPosition := 0;
+  LWrapPosition := TTextEditorWrapPosition.Create;
+
+  while LPosition <= Length(ALine) do
+  begin
+    LFound := (LPosition - LPreviousPosition > AMaxColumn) and (LWrapPosition.Index <> 0);
+
+    if not LFound and (ALine[LPosition] <= High(Char)) and (Char(ALine[LPosition]) in ABreakChars) then
+      LWrapPosition.Index := LPosition;
+
+    if LFound then
+    begin
+      Result := True;
+      AList.Add(LWrapPosition);
+      LPreviousPosition := LWrapPosition.Index;
+
+      if ((Length(ALine) - LPreviousPosition) > AMaxColumn) and (LPosition < Length(ALine)) then
+        LWrapPosition := TTextEditorWrapPosition.Create
+      else
+        Break;
+    end;
+
+    Inc(LPosition);
+  end;
+
+  if (AList.Count = 0) or (AList.Last <> LWrapPosition) then
+    LWrapPosition.Free;
 end;
 
 procedure TTextEditorPrint.SetEditor(const AValue: TCustomTextEditor);

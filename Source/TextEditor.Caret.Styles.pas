@@ -40,6 +40,7 @@ begin
   begin
     Self.FOverwrite := FOverwrite;
     Self.FInsert := FInsert;
+
     Self.DoChange;
   end
   else
@@ -57,6 +58,7 @@ begin
   if FInsert <> AValue then
   begin
     FInsert := AValue;
+
     DoChange;
   end;
 end;
@@ -66,6 +68,7 @@ begin
   if FOverwrite <> AValue then
   begin
     FOverwrite := AValue;
+
     DoChange;
   end;
 end;

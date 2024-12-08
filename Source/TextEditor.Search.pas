@@ -98,6 +98,7 @@ begin
     Self.FMap.Assign(FMap);
     Self.FInSelection.Assign(FInSelection);
     Self.FNearOperator.Assign(FNearOperator);
+
     Self.DoChange;
   end
   else
@@ -243,6 +244,7 @@ begin
       Exit;
 
   LSearchItem := PTextEditorSearchItem(FItems[LHigh]);
+
   if IsSearchItemLowerThanTextPosition then
     Exit(LHigh);
 

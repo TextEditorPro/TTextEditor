@@ -58,6 +58,7 @@ begin
     Self.FOptions := FOptions;
     Self.FWantTabs := FWantTabs;
     Self.FWidth := FWidth;
+
     Self.DoChange;
   end
   else
@@ -77,6 +78,7 @@ begin
   if FOptions <> AValue then
   begin
     FOptions := AValue;
+
     DoChange;
   end;
 end;
@@ -90,6 +92,7 @@ begin
   if FWidth <> LValue then
   begin
     FWidth := LValue;
+
     DoChange;
   end;
 end;
@@ -99,6 +102,7 @@ begin
   if FWantTabs <> AValue then
   begin
     FWantTabs := AValue;
+
     DoChange;
   end;
 end;

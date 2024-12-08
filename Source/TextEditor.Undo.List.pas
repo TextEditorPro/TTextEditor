@@ -75,6 +75,7 @@ destructor TTextEditorUndoList.Destroy;
 begin
   Clear;
   FItems.Free;
+
   inherited Destroy;
 end;
 
@@ -120,6 +121,7 @@ begin
       Inc(FChangeCount);
 
     LNewItem := TTextEditorUndoItem.Create;
+
     with LNewItem do
     begin
       if AChangeBlockNumber <> 0 then

@@ -75,6 +75,7 @@ end;
 destructor TTextEditorSyncEdit.Destroy;
 begin
   ClearSyncItems;
+
   FSyncItems.Free;
   FActivator.Free;
 
@@ -99,6 +100,7 @@ begin
     Self.FActive := FActive;
     Self.FShortCut := FShortCut;
     Self.FActivator.Assign(FActivator);
+
     Self.DoChange(Self);
   end
   else
@@ -114,6 +116,7 @@ end;
 procedure TTextEditorSyncEdit.SetVisible(const AValue: Boolean);
 begin
   FVisible := AValue;
+
   DoChange(Self);
 end;
 

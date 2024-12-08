@@ -12,11 +12,11 @@ type
     FFont: TFont;
     FStringList: TStrings;
     FTextEditor: TCustomControl;
-    function GetStyle(const AHighlighterAttribute: TTextEditorHighlighterAttribute): string;
     procedure CreateFooter;
-    procedure CreateHeader;
     procedure CreateHTMLDocument;
+    procedure CreateHeader;
     procedure CreateLines;
+    procedure GetStyle(const AHighlighterAttribute: TTextEditorHighlighterAttribute; var AStyle: string);
   public
     constructor Create(const ATextEditor: TCustomControl; const AFont: TFont; const ACharSet: string); overload;
     destructor Destroy; override;
@@ -36,7 +36,8 @@ begin
   FTextEditor := ATextEditor;
   FFont := AFont;
   FCharSet := ACharSet;
-  if FCharSet = '' then
+
+  if FCharSet.IsEmpty then
     FCharSet := 'utf-8';
 
   FStringList := TStringList.Create;
@@ -51,9 +52,13 @@ end;
 
 procedure TTextEditorExportHTML.CreateHTMLDocument;
 begin
+  FStringList.BeginUpdate;
+
   CreateHeader;
   CreateLines;
   CreateFooter;
+
+  FStringList.EndUpdate;
 end;
 
 procedure TTextEditorExportHTML.CreateHeader;
@@ -68,32 +73,32 @@ begin
   FStringList.Add('<body>');
 end;
 
-function TTextEditorExportHTML.GetStyle(const AHighlighterAttribute: TTextEditorHighlighterAttribute): string;
+procedure TTextEditorExportHTML.GetStyle(const AHighlighterAttribute: TTextEditorHighlighterAttribute; var AStyle: string);
 begin
-  Result := 'box-sizing:border-box;font-family:' + FFont.Name +
+  AStyle := 'box-sizing:border-box;font-family:' + FFont.Name +
     ';font-size:' + IntToStr(FFont.Size) + 'pt' +
     ';color:' + ColorToHex(AHighlighterAttribute.Foreground).ToLower +
     ';background-color:' + ColorToHex(AHighlighterAttribute.Background).ToLower;
 
   if TFontStyle.fsBold in AHighlighterAttribute.FontStyles then
-    Result := Result + ';font-weight:700'
+    AStyle := AStyle + ';font-weight:700'
   else
-    Result := Result + ';font-weight:400';
+    AStyle := AStyle + ';font-weight:400';
 
   if TFontStyle.fsItalic in AHighlighterAttribute.FontStyles then
-    Result := Result + ';font-style:italic';
+    AStyle := AStyle + ';font-style:italic';
 
   if TFontStyle.fsUnderline in AHighlighterAttribute.FontStyles then
-    Result := Result + ';text-decoration:underline';
+    AStyle := AStyle + ';text-decoration:underline';
 
   if TFontStyle.fsStrikeOut in AHighlighterAttribute.FontStyles then
-    Result := Result + ';text-decoration:line-through';
+    AStyle := AStyle + ';text-decoration:line-through';
 end;
 
 procedure TTextEditorExportHTML.CreateLines;
 var
   LIndex, LStartLine, LEndLine: Integer;
-  LLineNumber, LLineNumberHTML, LTextLine, LSpaces, LToken: string;
+  LLineNumber, LLineNumberHTML, LTextLine, LSpaces, LToken, LStyle: string;
   LHighlighterAttribute: TTextEditorHighlighterAttribute;
   LPreviousElement: string;
   LTextEditor: TTextEditor;
@@ -156,13 +161,16 @@ begin
       else
       if Assigned(LHighlighterAttribute) then
       begin
-        if (LPreviousElement <> '') and (LPreviousElement <> LHighlighterAttribute.Element) then
+        if not LPreviousElement.IsEmpty and (LPreviousElement <> LHighlighterAttribute.Element) then
           LTextLine := LTextLine + '</span>';
 
         if LPreviousElement <> LHighlighterAttribute.Element then
-          LTextLine := LTextLine + '<span style="' + GetStyle(LHighlighterAttribute) + '">';
+        begin
+          GetStyle(LHighlighterAttribute, LStyle);
+          LTextLine := LTextLine + '<span style="' + LStyle + '">';
+        end;
 
-        if LSpaces <> '' then
+        if not LSpaces.IsEmpty then
         begin
           LTextLine := LTextLine + LSpaces;
           LSpaces := '';

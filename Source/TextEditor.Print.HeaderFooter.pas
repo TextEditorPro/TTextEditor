@@ -24,7 +24,7 @@ type
   public
     property Alignment: TAlignment read FAlignment write FAlignment;
     property Font: TFont read FFont write SetFont;
-    property Index: Integer read FIndex write FIndex;
+    property &Index: Integer read FIndex write FIndex;
     property LineNumber: Integer read FLineNumber write FLineNumber;
     property Text: string read FText write FText;
   end;
@@ -102,19 +102,21 @@ type
 implementation
 
 uses
-  System.Math, TextEditor.Consts;
+  System.Math, System.Types, TextEditor.Consts;
 
 { TTextEditorSectionItem }
 
 constructor TTextEditorSectionItem.Create;
 begin
   inherited;
+
   FFont := TFont.Create;
 end;
 
 destructor TTextEditorSectionItem.Destroy;
 begin
   inherited;
+
   FFont.Free;
 end;
 
@@ -134,6 +136,92 @@ var
     begin
       DoAppend(Copy(LString, First, After - First));
       First := After;
+    end;
+  end;
+
+  function IntToRoman(const AValue: Integer): string;
+  var
+    LValue: Integer;
+  begin
+    Result := '';
+
+    LValue := AValue;
+    while LValue >= 1000 do
+    begin
+      Result := Result + 'M';
+      Dec(LValue, 1000);
+    end;
+
+    if LValue >= 900 then
+    begin
+      Result := Result + 'CM';
+      Dec(LValue, 900);
+    end;
+
+    while LValue >= 500 do
+    begin
+      Result := Result + 'D';
+      Dec(LValue, 500);
+    end;
+
+    if LValue >= 400 then
+    begin
+      Result := Result + 'CD';
+      Dec(LValue, 400);
+    end;
+
+    while LValue >= 100 do
+    begin
+      Result := Result + 'C';
+      Dec(LValue, 100);
+    end;
+
+    if LValue >= 90 then
+    begin
+      Result := Result + 'XC';
+      Dec(LValue, 90);
+    end;
+
+    while LValue >= 50 do
+    begin
+      Result := Result + 'L';
+      Dec(LValue, 50);
+    end;
+
+    if LValue >= 40 then
+    begin
+      Result := Result + 'XL';
+      Dec(LValue, 40);
+    end;
+
+    while LValue >= 10 do
+    begin
+      Result := Result + 'X';
+      Dec(LValue, 10);
+    end;
+
+    if LValue >= 9 then
+    begin
+      Result := Result + 'IX';
+      Dec(LValue, 9);
+    end;
+
+    while LValue >= 5 do
+    begin
+      Result := Result + 'V';
+      Dec(LValue, 5);
+    end;
+
+    if LValue >= 4 then
+    begin
+      Result := Result + 'IV';
+      Dec(LValue, 4);
+    end;
+
+    while LValue > 0 do
+    begin
+      Result := Result + 'I';
+      Dec(LValue);
     end;
   end;
 
@@ -202,7 +290,7 @@ begin
 
   LString := FText;
 
-  if TextEditor.Utils.Trim(LString) = '' then
+  if TextEditor.Utils.Trim(LString).IsEmpty then
     Exit;
 
   LLength := Length(LString);
@@ -227,7 +315,7 @@ begin
             begin
               Inc(Run);
               Start := Run;
-              break;
+              Break;
             end
             else
             begin
@@ -315,7 +403,7 @@ var
 begin
   with AStream do
   begin
-    LLength := Length(FText);
+    LLength := FText.Length;
     Write(LLength, SizeOf(LLength));
     Write(PChar(FText)^, LLength * SizeOf(Char));
     Write(FLineNumber, SizeOf(FLineNumber));
@@ -375,6 +463,7 @@ var
   LIndex: Integer;
 begin
   Clear;
+
   FItems.Free;
   FDefaultFont.Free;
   FOldPen.Free;
@@ -404,6 +493,7 @@ begin
   LSectionItem.LineNumber := ALineNumber;
   LSectionItem.Index := FItems.Add(LSectionItem);
   LSectionItem.Text := AText;
+
   Result := LSectionItem.Index;
 end;
 
@@ -425,6 +515,7 @@ var
 begin
   for LIndex := 0 to FItems.Count - 1 do
     TTextEditorSectionItem(FItems[LIndex]).Free;
+
   FItems.Clear;
 end;
 
@@ -435,27 +526,30 @@ end;
 
 procedure TTextEditorSection.FixLines;
 var
-  i, LCurrentLine: Integer;
+  LIndex, LCurrentLine: Integer;
   LLineInfo: TTextEditorLineInfo;
+  LSectionItem: TTextEditorSectionItem;
 begin
-  for i := 0 to FLineInfo.Count - 1 do
-    TTextEditorLineInfo(FLineInfo[i]).Free;
+  for LIndex := 0 to FLineInfo.Count - 1 do
+    TTextEditorLineInfo(FLineInfo[LIndex]).Free;
 
   FLineInfo.Clear;
   LCurrentLine := 0;
   FLineCount := 0;
 
-  for i := 0 to FItems.Count - 1 do
+  for LIndex := 0 to FItems.Count - 1 do
   begin
-    if TTextEditorSectionItem(FItems[i]).LineNumber <> LCurrentLine then
+    LSectionItem := TTextEditorSectionItem(FItems[LIndex]);
+
+    if LSectionItem.LineNumber <> LCurrentLine then
     begin
-      LCurrentLine := TTextEditorSectionItem(FItems[i]).LineNumber;
+      LCurrentLine := LSectionItem.LineNumber;
       FLineCount := FLineCount + 1;
       LLineInfo := TTextEditorLineInfo.Create;
       FLineInfo.Add(LLineInfo);
     end;
 
-    TTextEditorSectionItem(FItems[i]).LineNumber := FLineCount;
+    LSectionItem.LineNumber := FLineCount;
   end;
 end;
 

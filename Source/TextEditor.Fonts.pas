@@ -125,12 +125,12 @@ end;
 
 destructor TTextEditorFonts.Destroy;
 begin
-  FreeAndNil(FCodeFoldingHint);
-  FreeAndNil(FCompletionProposal);
-  FreeAndNil(FLineNumbers);
-  FreeAndNil(FMinimap);
-  FreeAndNil(FRuler);
-  FreeAndNil(FText);
+  FCodeFoldingHint.Free;
+  FCompletionProposal.Free;
+  FLineNumbers.Free;
+  FMinimap.Free;
+  FRuler.Free;
+  FText.Free;
 
   inherited Destroy;
 end;
@@ -219,7 +219,7 @@ procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivide
     end;
   end;
 
-  begin
+begin
   ChangeScale(FCodeFoldingHint);
   ChangeScale(FCompletionProposal);
   ChangeScale(FLineNumbers);

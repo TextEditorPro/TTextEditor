@@ -41,7 +41,6 @@ end;
 destructor TTextEditorActiveLine.Destroy;
 begin
   FIndicator.Free;
-  FIndicator := nil;
 
   inherited;
 end;
@@ -86,6 +85,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange(Self);
   end;
 end;

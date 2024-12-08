@@ -200,9 +200,7 @@ end;
 
 destructor TTextEditorCodeFoldingRanges.Destroy;
 begin
-  FList.Clear;
   FList.Free;
-  FList := nil;
 
   inherited;
 end;
@@ -263,9 +261,7 @@ end;
 
 destructor TTextEditorCodeFoldingRange.Destroy;
 begin;
-  FSubCodeFoldingRanges.Clear;
   FSubCodeFoldingRanges.Free;
-  FSubCodeFoldingRanges := nil;
 
   inherited;
 end;

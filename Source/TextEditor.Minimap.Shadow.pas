@@ -49,6 +49,7 @@ begin
     Self.FAlphaBlending := FAlphaBlending;
     Self.FColor := FColor;
     Self.FVisible := FVisible;
+
     Self.DoChange;
   end
   else
@@ -66,6 +67,7 @@ begin
   if FAlphaBlending <> AValue then
   begin
     FAlphaBlending := AValue;
+
     DoChange;
   end;
 end;
@@ -75,6 +77,7 @@ begin
   if FColor <> AValue then
   begin
     FColor := AValue;
+
     DoChange;
   end;
 end;
@@ -84,6 +87,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange;
   end;
 end;
@@ -93,6 +97,7 @@ begin
   if FWidth <> AValue then
   begin
     FWidth := AValue;
+
     DoChange;
   end;
 end;

@@ -35,6 +35,7 @@ begin
   with ASource as TTextEditorCaretNonBlinking do
   begin
     Self.FActive := FActive;
+
     Self.DoChange;
   end
   else
@@ -52,6 +53,7 @@ begin
   if FActive <> AValue then
   begin
     FActive := AValue;
+
     DoChange;
   end;
 end;

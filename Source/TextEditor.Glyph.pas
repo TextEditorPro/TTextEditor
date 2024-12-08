@@ -46,14 +46,14 @@ constructor TTextEditorGlyph.Create(const AModule: THandle = 0; const AName: str
 begin
   inherited Create;
 
-  if AName <> '' then
+  if AName.IsEmpty then
+    FInternalMaskColor := TColors.SysNone
+  else
   begin
     FInternalGlyph := Vcl.Graphics.TBitmap.Create;
     FInternalGlyph.Handle := LoadBitmap(AModule, PChar(AName));
     FInternalMaskColor := AMaskColor;
-  end
-  else
-    FInternalMaskColor := TColors.SysNone;
+  end;
 
   FVisible := True;
   FBitmap := Vcl.Graphics.TBitmap.Create;
@@ -64,10 +64,7 @@ end;
 destructor TTextEditorGlyph.Destroy;
 begin
   if Assigned(FInternalGlyph) then
-  begin
     FInternalGlyph.Free;
-    FInternalGlyph := nil;
-  end;
 
   FBitmap.Free;
 
@@ -83,7 +80,8 @@ begin
   if Assigned(FInternalGlyph) then
     ResizeBitmap(FInternalGlyph, MulDiv(FInternalGlyph.Width, LNumerator, ADivider), MulDiv(FInternalGlyph.Height, LNumerator, ADivider));
 
-  ResizeBitmap(FBitmap, MulDiv(FBitmap.Width, LNumerator, ADivider), MulDiv(FBitmap.Height, LNumerator, ADivider));
+  if (FBitmap.Height <> 0) and (FBitmap.Width <> 0) then
+    ResizeBitmap(FBitmap, MulDiv(FBitmap.Width, LNumerator, ADivider), MulDiv(FBitmap.Height, LNumerator, ADivider));
 end;
 
 procedure TTextEditorGlyph.Assign(ASource: TPersistent);
@@ -135,6 +133,7 @@ begin
   LGlyphBitmap.Transparent := True;
   LGlyphBitmap.TransparentMode := tmFixed;
   LGlyphBitmap.TransparentColor := LMaskColor;
+
   ACanvas.Draw(X, LY, LGlyphBitmap);
 end;
 

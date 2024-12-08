@@ -88,6 +88,7 @@ begin
   begin
     FMode := AValue;
     ActiveMode := AValue;
+
     DoChange;
   end;
 end;
@@ -97,6 +98,7 @@ begin
   if FActiveMode <> AValue then
   begin
     FActiveMode := AValue;
+
     DoChange;
   end;
 end;
@@ -106,6 +108,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange;
   end;
 end;
@@ -115,6 +118,7 @@ begin
   if FOptions <> AValue then
   begin
     FOptions := AValue;
+
     DoChange;
   end;
 end;

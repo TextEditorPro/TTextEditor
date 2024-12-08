@@ -53,7 +53,7 @@ end;
 destructor TTextEditorHighlighterColors.Destroy;
 begin
   FElements.Clear;
-  FreeAndNil(FElements);
+  FElements.Free;
 
   inherited;
 end;

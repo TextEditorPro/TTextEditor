@@ -157,6 +157,7 @@ begin
     if (csDesigning in LEditor.ComponentState) or (eoLoadColors in LEditor.Options) then
     begin
       LColorsObject := AThemeObject['Colors'].ObjectValue;
+
       if Assigned(LColorsObject) then
       with LEditor.Colors do
       begin
@@ -442,7 +443,8 @@ begin
   if Assigned(ARangeObject) then
   begin
     LName := ARangeObject['File'].Value;
-    if (hoMultiHighlighter in FHighlighter.Options) and (LName <> '') then
+
+    if (hoMultiHighlighter in FHighlighter.Options) and not LName.IsEmpty then
     begin
       LElementPrefix := ARangeObject['ElementPrefix'].Value;
       LEditor := FHighlighter.Editor as TCustomTextEditor;
@@ -497,10 +499,10 @@ begin
         ARange.CaseSensitive := ARangeObject.ValueBoolean['CaseSensitive'];
         ImportAttributes(ARange.Attribute, ARangeObject['Attributes'].ObjectValue, AElementPrefix);
 
-        if ARangeObject['AllowedCharacters'].Value <> '' then
+        if not ARangeObject['AllowedCharacters'].Value.IsEmpty then
           ARange.AllowedCharacters := ARangeObject['AllowedCharacters'].ToSet;
 
-        if ARangeObject['Delimiters'].Value <> '' then
+        if not ARangeObject['Delimiters'].Value.IsEmpty then
           ARange.Delimiters := ARangeObject['Delimiters'].ToSet;
 
         ARange.TokenType := StrToRangeType(ARangeObject['Type'].Value);
@@ -511,14 +513,16 @@ begin
         begin
           with ARange do
           begin
+            CloseOnAnyTerm := LPropertiesObject.ValueBoolean['CloseOnAnyTerm'];
             CloseOnEndOfLine := LPropertiesObject.ValueBoolean['CloseOnEndOfLine'];
             CloseOnTerm := LPropertiesObject.ValueBoolean['CloseOnTerm'];
-            CloseOnAnyTerm := LPropertiesObject.ValueBoolean['CloseOnAnyTerm'];
+            CloseParent := LPropertiesObject.ValueBoolean['CloseParent'];
+            HereDocument := LPropertiesObject.ValueBoolean['HereDocument'];
+            OpenBeginningOfLine := LPropertiesObject.ValueBoolean['OpenBeginningOfLine'];
+            OpenEndOfLine := LPropertiesObject.ValueBoolean['OpenEndOfLine'];
             SkipWhitespace := LPropertiesObject.ValueBoolean['SkipWhitespace'];
             SkipWhitespaceOnce := LPropertiesObject.ValueBoolean['SkipWhitespaceOnce'];
-            CloseParent := LPropertiesObject.ValueBoolean['CloseParent'];
             UseDelimitersForText := LPropertiesObject.ValueBoolean['UseDelimitersForText'];
-            HereDocument := LPropertiesObject.ValueBoolean['HereDocument'];
           end;
 
           LArrayValue := LPropertiesObject['AlternativeClose'].ArrayValue;
@@ -530,9 +534,6 @@ begin
             for LIndex := 0 to ARange.AlternativeCloseArrayCount - 1 do
               ARange.AlternativeCloseArray[LIndex] := LArrayValue.Items[LIndex].Value;
           end;
-
-          ARange.OpenBeginningOfLine := LPropertiesObject.ValueBoolean['OpenBeginningOfLine'];
-          ARange.OpenEndOfLine := LPropertiesObject.ValueBoolean['OpenEndOfLine'];
         end;
 
         with ARange do
@@ -620,7 +621,7 @@ begin
     begin
       LName := LJSONDataValue.ObjectValue['File'].Value;
 
-      if LName <> '' then
+      if not LName.IsEmpty then
       begin
         LEditor := FHighlighter.Editor as TCustomTextEditor;
         LFileStream := LEditor.CreateHighlighterStream(LName);
@@ -640,7 +641,8 @@ begin
         end;
       end;
 
-      if FHighlighter.CompletionProposalSkipRegions.Contains(LJSONDataValue.ObjectValue['OpenToken'].Value, LJSONDataValue.ObjectValue['CloseToken'].Value) then
+      if FHighlighter.CompletionProposalSkipRegions.Contains(LJSONDataValue.ObjectValue['OpenToken'].Value,
+        LJSONDataValue.ObjectValue['CloseToken'].Value) then
         Continue;
     end;
 
@@ -708,7 +710,7 @@ begin
       begin
         LName := LJSONDataValue.ObjectValue['File'].Value;
 
-        if LName <> '' then
+        if not LName.IsEmpty then
         begin
           LEditor := FHighlighter.Editor as TCustomTextEditor;
           LFileStream := LEditor.CreateHighlighterStream(LName);
@@ -738,7 +740,7 @@ begin
         LRegionItem.NoSubs := True;
         FHighlighter.AddKeyChar(ctFoldOpen, LOpenToken[1]);
 
-        if LCloseToken <> '' then
+        if not LCloseToken.IsEmpty then
           FHighlighter.AddKeyChar(ctFoldClose, LCloseToken[1]);
       end
       else
@@ -755,10 +757,10 @@ begin
             SkipIfNextCharIsNot := LJSONDataValue.ObjectValue['NextCharIsNot'].Value[1];
         end;
 
-        if LOpenToken <> '' then
+        if not LOpenToken.IsEmpty then
           FHighlighter.AddKeyChar(ctSkipOpen, LOpenToken[1]);
 
-        if LCloseToken <> '' then
+        if not LCloseToken.IsEmpty then
           FHighlighter.AddKeyChar(ctSkipClose, LCloseToken[1]);
       end;
     end;
@@ -796,7 +798,7 @@ begin
       begin
         LName := LJSONDataValue.ObjectValue['File'].Value;
 
-        if LName <> '' then
+        if not LName.IsEmpty then
         begin
           LEditor := FHighlighter.Editor as TCustomTextEditor;
           LFileStream := LEditor.CreateHighlighterStream(LName);
@@ -862,13 +864,13 @@ begin
         CheckIfThenOneLiner := LMemberObject.ValueBoolean['CheckIfThenOneLiner'];
       end;
 
-      if LOpenToken <> '' then
+      if not LOpenToken.IsEmpty then
         FHighlighter.AddKeyChar(ctFoldOpen, LOpenToken[1]);
 
-      if LRegionItem.BreakIfNotFoundBeforeNextRegion <> '' then
+      if not LRegionItem.BreakIfNotFoundBeforeNextRegion.IsEmpty then
         FHighlighter.AddKeyChar(ctFoldOpen, LRegionItem.BreakIfNotFoundBeforeNextRegion[1]);
 
-      if LCloseToken <> '' then
+      if not LCloseToken.IsEmpty then
         FHighlighter.AddKeyChar(ctFoldClose, LCloseToken[1]);
     end;
   end;
@@ -978,7 +980,7 @@ begin
     begin
       LName := LJSONDataValue.ObjectValue['File'].Value;
 
-      if LName <> '' then
+      if not LName.IsEmpty then
       begin
         LEditor := FHighlighter.Editor as TCustomTextEditor;
         LFileStream := LEditor.CreateHighlighterStream(LName);

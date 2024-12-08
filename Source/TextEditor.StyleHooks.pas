@@ -183,18 +183,21 @@ begin
 
       if FHorzScrollWnd.Enabled then
         LDetails := StyleServices.GetElementDetails(HorzSliderState);
+
       StyleServices.DrawElement(LBitmap.Canvas.Handle, LDetails, HorzSliderRect{$IF CompilerVersion >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       if FHorzScrollWnd.Enabled then
         LDetails := StyleServices.GetElementDetails(HorzUpState)
       else
         LDetails := StyleServices.GetElementDetails(tsArrowBtnLeftDisabled);
+
       StyleServices.DrawElement(LBitmap.Canvas.Handle, LDetails, HorzUpButtonRect{$IF CompilerVersion >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       if FHorzScrollWnd.Enabled then
         LDetails := StyleServices.GetElementDetails(HorzDownState)
       else
         LDetails := StyleServices.GetElementDetails(tsArrowBtnRightDisabled);
+
       StyleServices.DrawElement(LBitmap.Canvas.Handle, LDetails, HorzDownButtonRect{$IF CompilerVersion >= 34}, nil, FVertScrollWnd.CurrentPPI{$IFEND});
 
       LRect := HorzScrollRect;

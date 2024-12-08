@@ -76,6 +76,7 @@ begin
   if FWidth <> LValue then
   begin
     FWidth := LValue;
+
     DoChange
   end;
 end;
@@ -85,6 +86,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange
   end;
 end;

@@ -30,6 +30,7 @@ type
     FShowDescription: Boolean;
     FTopLine: Integer;
     FValueSet: Boolean;
+    function ActivateDropShadow(const AHandle: THandle): Boolean;
     function GetItemHeight: Integer;
     procedure AddKeyHandlers;
     procedure EditorKeyDown(ASender: TObject; var AKey: Word; AShift: TShiftState);
@@ -157,6 +158,36 @@ begin
     LTextEditor.RemoveKeyPressHandler(EditorKeyPress);
     LTextEditor.RemoveKeyDownHandler(EditorKeyDown);
     LTextEditor.SetFocus;
+  end;
+end;
+
+function TTextEditorCompletionProposalPopupWindow.ActivateDropShadow(const AHandle: THandle): Boolean;
+
+  function IsXP: Boolean;
+  begin
+    Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and CheckWin32Version(5, 1);
+  end;
+
+const
+  SPI_SETDROPSHADOW = $1025;
+  CS_DROPSHADOW = $00020000;
+var
+  LClassLong: Cardinal;
+  LParam: Boolean;
+begin
+  Result := False;
+
+  LParam := True;
+
+  if IsXP and SystemParametersInfo(SPI_SETDROPSHADOW, 0, @LParam, 0) then
+  begin
+    LClassLong := GetClassLong(AHandle, GCL_STYLE);
+    LClassLong := LClassLong or CS_DROPSHADOW;
+
+    Result := SetClassLong(AHandle, GCL_STYLE, LClassLong) <> 0;
+
+    if Result then
+      SendMessage(AHandle, CM_RECREATEWND, 0, 0);
   end;
 end;
 
@@ -372,7 +403,7 @@ begin
         Canvas.Font.Style := Canvas.Font.Style - [fsUnderline];
         LTemp := Copy(LText, LPosition + Length(FCurrentString));
 
-        if LTemp <> '' then
+        if not LTemp.IsEmpty then
           Canvas.TextOut(FMargin + LWidth, LTop, LTemp);
       end
       else

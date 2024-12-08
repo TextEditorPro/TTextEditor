@@ -221,8 +221,11 @@ begin
     Result := -1;
     Exit;
   end;
+
   AEditor.FreeNotification(Self);
+
   Result := FEditors.Add(AEditor);
+
   DoAddEditor(AEditor);
 end;
 
@@ -244,6 +247,7 @@ begin
       FEvents.Delete(LIndex);
       LObject.Free;
     end;
+
     FEvents.Free;
     FEvents := nil;
   end;
@@ -258,6 +262,7 @@ var
 function NewPluginCommand: TTextEditorCommand;
 begin
   Result := GCurrentCommand;
+
   Inc(GCurrentCommand);
 end;
 
@@ -353,6 +358,7 @@ var
   LEditor: TCustomTextEditor;
 begin
   LEditor := Editor as TCustomTextEditor;
+
   if LEditor <> AValue then
   try
     if Assigned(LEditor) and (FEditors.Count = 1) then
@@ -424,6 +430,7 @@ procedure TCustomEditorMacroRecorder.InsertCustomEvent(const AIndex: Integer; co
 begin
   if not Assigned(FEvents) then
     FEvents := TList.Create;
+
   FEvents.Insert(AIndex, AEvent);
 end;
 
@@ -449,6 +456,7 @@ var
   LCount, LIndex: Integer;
 begin
   Stop;
+
   if AClear then
     Clear;
 
@@ -544,9 +552,11 @@ begin
   FState := msPlaying;
   try
     StateChanged;
+
     for LIndex := 0 to EventCount - 1 do
     begin
       Events[LIndex].Playback(AEditor);
+
       if State <> msPlaying then
         break;
     end;
@@ -703,6 +713,7 @@ var
   LKeyCommand: TTextEditorKeyCommand;
 begin
   Assert(ANewShortCut <> 0);
+
   if [csDesigning] * ComponentState = [csDesigning] then
     if TCustomTextEditor(AEditor).KeyCommands.FindShortcut(ANewShortCut) >= 0 then
       raise ETextEditorMacroRecorderException.Create(STextEditorShortcutAlreadyExists)
@@ -712,9 +723,11 @@ begin
   if AOldShortCut <> 0 then
   begin
     LIndex := TCustomTextEditor(AEditor).KeyCommands.FindShortcut(AOldShortCut);
+
     if LIndex >= 0 then
     begin
       LKeyCommand := TCustomTextEditor(AEditor).KeyCommands[LIndex];
+
       if LKeyCommand.Command = ACommandID then
       begin
         LKeyCommand.ShortCut := ANewShortCut;
@@ -730,6 +743,7 @@ begin
     LKeyCommand.Free;
     raise;
   end;
+
   LKeyCommand.Command := ACommandID;
   TCustomTextEditor(AEditor).RegisterCommandHandler(OnCommand, Self);
 end;
@@ -745,9 +759,11 @@ begin
 
   LEditor := AEditor as TCustomTextEditor;
   LEditor.UnregisterCommandHandler(OnCommand);
+
   if Assigned(LEditor.KeyCommands) then
   begin
     LIndex := LEditor.KeyCommands.FindShortcut(AShortCut);
+
     if (LIndex >= 0) and (LEditor.KeyCommands[LIndex].Command = ACommandID) then
       LEditor.KeyCommands[LIndex].Free;
   end;
@@ -775,6 +791,7 @@ var
   LIndex: Integer;
 begin
   LIndex := 1;
+
   while LIndex <= RepeatCount do
   begin
     TCustomTextEditor(AEditor).CommandProcessor(Command, TControlCharacters.Null, nil);
@@ -795,10 +812,12 @@ var
   LString: string;
 begin
   LString := AString;
+
   if Length(LString) >= 1 then
     Key := LString[1]
   else
     Key := ' ';
+
   Delete(LString, 1, 1);
   RepeatCount := StrToIntDef(TextEditor.Utils.Trim(LString), 1);
 end;
@@ -820,6 +839,7 @@ var
   LIndex: Integer;
 begin
   LIndex := 1;
+
   while LIndex <= RepeatCount do
   begin
     TCustomTextEditor(AEditor).CommandProcessor(TKeyCommands.Char, Key, nil);
@@ -851,6 +871,7 @@ begin
   LDotPosition := Pos(',', LString);
   LOpenPosition := Pos('(', LString);
   LClosePosition := Pos(')', LString);
+
   if (not((LDotPosition = 0) or (LOpenPosition = 0) or (LClosePosition = 0))) and ((LDotPosition > LOpenPosition) and
     (LDotPosition < LClosePosition)) then
   begin
@@ -912,10 +933,12 @@ var
   begin
     Result := Length(S);
     P := PChar(Delimiters);
+
     while Result > 0 do
     begin
       if (S[Result] <> TControlCharacters.Null) and Assigned(WStrScan(P, S[Result])) then
         Exit;
+
       Dec(Result);
     end;
   end;
@@ -949,6 +972,7 @@ begin
   finally
     FreeMem(LPBuffer);
   end;
+
   AStream.Read(FRepeatCount, SizeOf(FRepeatCount));
 end;
 
@@ -957,10 +981,12 @@ var
   LIndex, LIndex2: Integer;
 begin
   LIndex := 1;
+
   while LIndex <= RepeatCount do
   begin
     for LIndex2 := 1 to Length(Value) do
       TCustomTextEditor(AEditor).CommandProcessor(TKeyCommands.Char, Value[LIndex2], nil);
+
     Inc(LIndex);
   end;
 end;

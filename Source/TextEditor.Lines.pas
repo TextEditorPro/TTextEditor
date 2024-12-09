@@ -1109,7 +1109,7 @@ begin
         begin
           LReadCount := LStreamReader.ReadBlock(LCharBuffer, 0, LBufferSize);
 
-          if LReadCount <> 0 then
+          if LReadCount > 0 then
           begin
             SetString(LContent, PChar(@LCharBuffer[0]), LReadCount);
 

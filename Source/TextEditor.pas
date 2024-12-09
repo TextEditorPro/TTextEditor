@@ -1655,6 +1655,7 @@ begin
   FFonts.Free;
   FFontStyles.Free;
   FHighlightLine.Free;
+  FHighlightLine := nil;
   FHighlighter.Free;
 
   if Assigned(FTheme) then

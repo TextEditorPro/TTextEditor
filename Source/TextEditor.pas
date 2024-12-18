@@ -4986,6 +4986,7 @@ begin
       if FWordWrap.Active then
       begin
         LWidth := GetTokenWidth(LHelper, 1, 0);
+
         FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] - 1;
         FWordWrapLine.ViewLength[FViewPosition.Row] := FWordWrapLine.ViewLength[FViewPosition.Row] - 1;
         FWordWrapLine.Width[FViewPosition.Row] := FWordWrapLine.Width[FViewPosition.Row] - LWidth;
@@ -5683,7 +5684,7 @@ begin
   end
   else
   begin
-    if (rmoAutoLinebreak in FRightMargin.Options) and (FViewPosition.Column > FRightMargin.Position) then
+    if (rmoAutoLineBreak in FRightMargin.Options) and (FViewPosition.Column > FRightMargin.Position) then
     begin
       DoLineBreak;
       LTextPosition.Char := 1;
@@ -6257,17 +6258,32 @@ end;
 procedure TCustomTextEditor.DoHomeKey(const ASelection: Boolean);
 var
   LLineText: string;
-  LTextPosition: TTextEditorTextPosition;
+  LBwforeTextPosition, LAfterTextPosition: TTextEditorTextPosition;
+  LViewPosition: TTextEditorViewPosition;
   LSpaceCount: Integer;
 begin
-  LTextPosition := TextPosition;
-  LLineText := FLines.Items^[LTextPosition.Line].TextLine;
-  LSpaceCount := LeftSpaceCount(LLineText) + 1;
+  LBwforeTextPosition := TextPosition;
 
-  if LTextPosition.Char <= LSpaceCount then
-    LSpaceCount := 1;
+  if FWordWrap.Active then
+  begin
+    LViewPosition := ViewPosition;
+    LViewPosition.Column := 1;
 
-  MoveCaretAndSelection(LTextPosition, GetPosition(LSpaceCount, FPosition.Text.Line), ASelection);
+    LAfterTextPosition := ViewToTextPosition(LViewPosition);
+  end
+  else
+  begin
+    LLineText := FLines[LBwforeTextPosition.Line];
+
+    LSpaceCount := LeftSpaceCount(LLineText) + 1;
+
+    if LBwforeTextPosition.Char <= LSpaceCount then
+      LSpaceCount := 1;
+
+    LAfterTextPosition := GetPosition(LSpaceCount, LBwforeTextPosition.Line);
+  end;
+
+  MoveCaretAndSelection(LBwforeTextPosition, LAfterTextPosition, ASelection);
 end;
 
 procedure TCustomTextEditor.DoImeStr(const AData: Pointer);
@@ -11954,6 +11970,16 @@ begin
   finally
     if Assigned(LData) then
       FreeMem(LData);
+  end;
+
+  if not ReadOnly and FCaret.MultiEdit.Active and not FMouse.OverURI and (ssCtrl in AShift) and (ssShift in AShift) and
+    not (ssAlt in AShift) and (AKey in [VK_UP, VK_DOWN]) then
+  begin
+    AddCaret(ViewPosition);
+    MoveCaretVertically(IfThen(AKey = VK_DOWN, 1, -1), False);
+    AddCaret(ViewPosition);
+    Invalidate;
+    Exit;
   end;
 
   if soALTSetsColumnMode in FSelection.Options then
@@ -19834,7 +19860,8 @@ var
   LLineSelectionStart, LLineSelectionEnd: Integer;
   LStringList: TStringList;
   LSelectionAvailable: Boolean;
-  LBackspaceCount: Integer;
+  LBackspaceCount, LSpaceCount: Integer;
+  LLineText: string;
 
   function CodeFoldingExpandLine(const ALine: Integer): Integer;
   var
@@ -20060,7 +20087,18 @@ begin
                               Inc(LRows, LPasteRows);
                             end;
                         end;
-                      TKeyCommands.LineBegin, TKeyCommands.SelectionLineBegin:
+                      TKeyCommands.LineBegin:
+                        begin
+                          LTextPosition := ViewToTextPosition(LPMultiCaretRecord^.ViewPosition);
+                          LLineText := FLines[LTextPosition.Line];
+                          LSpaceCount := LeftSpaceCount(LLineText) + 1;
+
+                          if LTextPosition.Char <= LSpaceCount then
+                            LSpaceCount := 1;
+
+                          LPMultiCaretRecord^.ViewPosition.Column := LSpaceCount;
+                        end;
+                      TKeyCommands.SelectionLineBegin:
                         LPMultiCaretRecord^.ViewPosition.Column := 1;
                       TKeyCommands.LineEnd, TKeyCommands.SelectionLineEnd:
                         LPMultiCaretRecord^.ViewPosition.Column := FLines.ExpandedStringLengths[LPMultiCaretRecord^.ViewPosition.Row - 1] + 1;
@@ -21861,10 +21899,16 @@ begin
           LViewPosition.Column := LVisibleChars + 1;
       end
       else
-      if LViewPosition.Column > FWordWrapLine.ViewLength[LViewPosition.Row] + 1 then
+      if LViewPosition.Column > FWordWrapLine.ViewLength[LViewPosition.Row] then
       begin
         LViewPosition.Column := LViewPosition.Column - FWordWrapLine.ViewLength[LViewPosition.Row];
         LViewPosition.Row := LViewPosition.Row + 1;
+
+        if TextPosition.Line <> ViewToTextPosition(LViewPosition).Line then
+        begin
+          LViewPosition.Row := LViewPosition.Row - 1;
+          LViewPosition.Column := LViewPosition.Column + FWordWrapLine.ViewLength[LViewPosition.Row];
+        end;
       end;
     end;
 

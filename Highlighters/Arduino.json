@@ -1,0 +1,477 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "// Hello, World! in Arduino\r\n",
+      "#include <LiquidCrystal.h>\r\n",
+      "\r\n",
+      "const int rs = 12, en = 11, d4 = 5, d5 = 4, d6 = 3, d7 = 2;\r\n",
+      "LiquidCrystal lcd(rs, en, d4, d5, d6, d7);\r\n",
+      "\r\n",
+      "void setup() {\r\n",
+      "  lcd.begin(16, 2);\r\n",
+      "  lcd.print(\"Hello, World!\");\r\n",
+      "}\r\n",
+      "\r\n",
+      "void loop() {\r\n",
+      "  lcd.setCursor(0, 1);\r\n",
+      "  lcd.print(millis() / 1000);\r\n",
+      "}"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "//"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abcdefABCDEF",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0x",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "break",
+              "case",
+              "class",
+              "continue",
+              "default",
+              "do",
+              "else",
+              "for",
+              "goto",
+              "if",
+              "private",
+              "public",
+              "return",
+              "struct",
+              "switch",
+              "typedef",
+              "while"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Directive",
+            "Words": [
+              "#define",
+              "#else",
+              "#endif",
+              "#if",
+              "#ifndef",
+              "#include",
+              "#undef",
+              "defined"
+            ],
+            "Attributes": {
+              "Element": "Directive"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "client",
+              "ipaddress",
+              "keyboard",
+              "lcd",
+              "mouse",
+              "serial",
+              "server",
+              "wifiudp"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Words": [
+              "abs",
+              "analogread",
+              "analogreadresolution",
+              "analogreference",
+              "analogwrite",
+              "analogwriteresolution",
+              "attachinterrupt",
+              "autoscroll",
+              "available",
+              "availableforwrite",
+              "begin",
+              "beginpacket",
+              "begintransaction",
+              "begintransmission",
+              "bit",
+              "bitclear",
+              "bitread",
+              "bitset",
+              "bitwrite",
+              "blink",
+              "charat",
+              "clear",
+              "clearwiretimeoutflag",
+              "click",
+              "concat",
+              "connect",
+              "connected",
+              "constrain",
+              "cos",
+              "createchar",
+              "cursor",
+              "delay",
+              "delaymicroseconds",
+              "detachinterrupt",
+              "digitalpintointerrupt",
+              "digitalread",
+              "digitalwrite",
+              "display",
+              "end",
+              "endpacket",
+              "endswith",
+              "endtransaction",
+              "endtransmission",
+              "equals",
+              "find",
+              "finduntil",
+              "flush",
+              "gatewayip",
+              "getwiretimeoutflag",
+              "highbyte",
+              "home",
+              "indexof",
+              "interrupts",
+              "isalpha",
+              "isalphanumeric",
+              "isascii",
+              "iscontrol",
+              "isdigit",
+              "isgraph",
+              "ishexadecimaldigit",
+              "islowercase",
+              "ispressed",
+              "isprintable",
+              "ispunct",
+              "isspace",
+              "isuppercase",
+              "iswhitespace",
+              "lastindexof",
+              "lefttoright",
+              "length",
+              "liquidcrystal",
+              "localip",
+              "loop",
+              "lowbyte",
+              "map",
+              "max",
+              "micros",
+              "millis",
+              "min",
+              "move",
+              "noautoscroll",
+              "noblink",
+              "nocursor",
+              "nodisplay",
+              "nointerrupts",
+              "notone",
+              "onreceive",
+              "onrequest",
+              "parsefloat",
+              "parseint",
+              "parsepacket",
+              "peek",
+              "pinmode",
+              "pow",
+              "press",
+              "print",
+              "println",
+              "pulsein",
+              "pulseinlong",
+              "random",
+              "randomseed",
+              "read",
+              "readbytes",
+              "readbytesuntil",
+              "readstring",
+              "readstringuntil",
+              "release",
+              "releaseall",
+              "remoteip",
+              "remoteport",
+              "replace",
+              "requestfrom",
+              "righttoleft",
+              "scrolldisplayleft",
+              "scrolldisplayright",
+              "serialevent",
+              "setbitorder",
+              "setcharat",
+              "setclock",
+              "setclockdivider",
+              "setcursor",
+              "setdatamode",
+              "settimeout",
+              "setup",
+              "setwiretimeout",
+              "shiftin",
+              "shiftout",
+              "sin",
+              "sq",
+              "sqrt",
+              "startswith",
+              "stop",
+              "subnetmask",
+              "substring",
+              "tan",
+              "toint",
+              "tolowercase",
+              "tone",
+              "touppercase",
+              "transfer",
+              "trim",
+              "usinginterrupt",
+              "write"
+            ],
+            "Attributes": {
+              "Element": "MethodName"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "array",
+              "bool",
+              "boolean",
+              "byte",
+              "char",
+              "const",
+              "double",
+              "float",
+              "high",
+              "input",
+              "input_pullup",
+              "int",
+              "led_builtin",
+              "long",
+              "low",
+              "output",
+              "short",
+              "static",
+              "string",
+              "uint8_t",
+              "uint16_t",
+              "uint32_t",
+              "unsigned ",
+              "void",
+              "word"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Number",
+            "Words": [
+              "false",
+              "true"
+            ],
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "!",
+              "-",
+              "%",
+              "&",
+              "(",
+              ")",
+              "*",
+              ",",
+              ".",
+              "/",
+              ":",
+              ";",
+              "[",
+              "]",
+              "^",
+              "{",
+              "|",
+              "}",
+              "~",
+              "+",
+              "<",
+              "=",
+              ">"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".-0123456789eE",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "//",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "//",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

@@ -140,7 +140,7 @@ type
     procedure LoadFromFile(const AFilename: string);
     procedure LoadFromStream(const ASource: TStream; const AClear: Boolean = True);
     procedure Pause;
-    procedure PlaybackMacro(const AEditor: TCustomControl);
+    procedure PlaybackMacro(const AEditor: TCustomControl; const AUntilEndOfFile: Boolean = False);
     procedure RecordMacro(const AEditor: TCustomControl);
     procedure Resume;
     procedure SaveToFile(const AFilename: string);
@@ -542,31 +542,41 @@ begin
   StateChanged;
 end;
 
-procedure TCustomEditorMacroRecorder.PlaybackMacro(const AEditor: TCustomControl);
+procedure TCustomEditorMacroRecorder.PlaybackMacro(const AEditor: TCustomControl; const AUntilEndOfFile: Boolean = False);
 var
   LIndex: Integer;
+  LStartLine, LEndLine: Integer;
+  LEditor: TCustomTextEditor;
 begin
   if State <> msStopped then
     Error(STextEditorCannotPlay);
 
-  FState := msPlaying;
-  try
-    StateChanged;
+  LEditor := AEditor as TCustomTextEditor;
 
-    for LIndex := 0 to EventCount - 1 do
-    begin
-      Events[LIndex].Playback(AEditor);
+  repeat
+    LStartLine  := LEditor.TextPosition.Line;
 
-      if State <> msPlaying then
-        break;
-    end;
-  finally
-    if State = msPlaying then
-    begin
-      FState := msStopped;
+    FState := msPlaying;
+    try
       StateChanged;
+
+      for LIndex := 0 to EventCount - 1 do
+      begin
+        Events[LIndex].Playback(AEditor);
+
+        if State <> msPlaying then
+          Break;
+      end;
+    finally
+      if State = msPlaying then
+      begin
+        FState := msStopped;
+        StateChanged;
+      end;
     end;
-  end;
+
+    LEndLine  := LEditor.TextPosition.Line;
+  until not AUntilEndOfFile or AUntilEndOfFile and (LEndLine <= LStartLine);
 end;
 
 procedure TCustomEditorMacroRecorder.RecordMacro(const AEditor: TCustomControl);

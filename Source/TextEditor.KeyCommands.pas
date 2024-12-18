@@ -717,8 +717,8 @@ begin
   Add(TKeyCommands.DeleteWordForward, [ssCtrl], vkDelete);
   { Line operations }
   Add(TKeyCommands.InsertLine, [ssCtrl], Ord('M'));
-  Add(TKeyCommands.MoveLineUp, [ssCtrl, ssShift], vkUp);
-  Add(TKeyCommands.MoveLineDown, [ssCtrl, ssShift], vkDown);
+  Add(TKeyCommands.MoveLineUp, [ssCtrl, ssAlt, ssShift], vkUp);
+  Add(TKeyCommands.MoveLineDown, [ssCtrl, ssAlt, ssShift], vkDown);
   Add(TKeyCommands.DeleteLine, [ssCtrl], Ord('Y'));
   Add(TKeyCommands.DeleteEndOfLine, [ssCtrl, ssShift], Ord('Y'));
   { Bookmarks }

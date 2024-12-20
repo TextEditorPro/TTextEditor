@@ -1,4 +1,5 @@
-﻿unit TextEditor.Print;
+﻿{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
+unit TextEditor.Print;
 
 interface
 

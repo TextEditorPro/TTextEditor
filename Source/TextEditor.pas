@@ -472,7 +472,7 @@ type
     function GetViewTextLineNumber(const AViewLineNumber: Integer): Integer;
     function GetVisibleChars(const ARow: Integer; const ALineText: string = ''): Integer;
     function IsTextPositionInSearchBlock(const ATextPosition: TTextEditorTextPosition): Boolean;
-    function LeftSpaceCount(const ALine: string; const AWantTabs: Boolean = False): Integer;
+    function LeftSpaceCount(const ALine: string): Integer;
     function NextWordPosition(const ATextPosition: TTextEditorTextPosition): TTextEditorTextPosition; overload;
     function NextWordPosition: TTextEditorTextPosition; overload;
     function PaintLocked: Boolean; inline;
@@ -4185,7 +4185,7 @@ begin
   Result := True;
 end;
 
-function TCustomTextEditor.LeftSpaceCount(const ALine: string; const AWantTabs: Boolean = False): Integer;
+function TCustomTextEditor.LeftSpaceCount(const ALine: string): Integer;
 var
   LPLine: PChar;
 begin
@@ -4194,24 +4194,21 @@ begin
   if ALine.IsEmpty then
     Exit;
 
-  if eoAutoIndent in FOptions then
+  LPLine := PChar(ALine);
+
+  while (LPLine^ > TControlCharacters.Null) and (LPLine^ <= TCharacters.Space) do
   begin
-    LPLine := PChar(ALine);
-
-    while (LPLine^ > TControlCharacters.Null) and (LPLine^ <= TCharacters.Space) do
+    if LPLine^ = TControlCharacters.Tab then
     begin
-      if (LPLine^ = TControlCharacters.Tab) and AWantTabs then
-      begin
-        if FLines.Columns then
-          Inc(Result, FTabs.Width - Result mod FTabs.Width)
-        else
-          Inc(Result, FTabs.Width)
-      end
+      if FLines.Columns then
+        Inc(Result, FTabs.Width - Result mod FTabs.Width)
       else
-        Inc(Result);
+        Inc(Result, FTabs.Width)
+    end
+    else
+      Inc(Result);
 
-      Inc(LPLine);
-    end;
+    Inc(LPLine);
   end;
 end;
 
@@ -5294,7 +5291,7 @@ begin
           if (eoTrimTrailingSpaces in Options) and (LLength = 0) then
           while LBackCounterLine >= 0 do
           begin
-            LSpaceCount2 := LeftSpaceCount(FLines[LBackCounterLine], True);
+            LSpaceCount2 := LeftSpaceCount(FLines[LBackCounterLine]);
 
             if LSpaceCount2 < LSpaceCount1 then
               Break;
@@ -5542,7 +5539,7 @@ begin
     LIndex := 0;
     LCommentIndex := -2;
     LLineText := FLines.Items^[LBeginLine].TextLine;
-    LSpaceCount := LeftSpaceCount(LLineText, False);
+    LSpaceCount := LeftSpaceCount(LLineText);
     LSpaces := Copy(LLineText, 1, LSpaceCount);
     LLineText := TextEditor.Utils.TrimLeft(LLineText);
 
@@ -5591,7 +5588,7 @@ begin
 
     Inc(LCommentIndex);
     LLineText := FLines.Items^[LEndLine].TextLine;
-    LSpaceCount := LeftSpaceCount(LLineText, False);
+    LSpaceCount := LeftSpaceCount(LLineText);
     LSpaces := Copy(LLineText, 1, LSpaceCount);
     LLineText := TextEditor.Utils.TrimLeft(LLineText);
 
@@ -6395,7 +6392,7 @@ begin
         if LTextPosition.Char > 1 then
         begin
           { A line break after the first char and before the end of the line. }
-          LSpaceCount1 := LeftSpaceCount(LLineText, True);
+          LSpaceCount1 := LeftSpaceCount(LLineText);
           LSpaceBuffer := '';
 
           if AAddSpaceBuffer then
@@ -6445,7 +6442,7 @@ begin
         LSpaceCount1 := 0;
 
         if eoAutoIndent in FOptions then
-          LSpaceCount1 := LeftSpaceCount(LLineText, True);
+          LSpaceCount1 := LeftSpaceCount(LLineText);
 
         LSpaceBuffer := '';
 
@@ -6547,7 +6544,7 @@ begin
       LIndex := 0;
       LCommentIndex := -1;
       LLineText := FLines.Items^[LLine].TextLine;
-      LSpaceCount := LeftSpaceCount(LLineText, False);
+      LSpaceCount := LeftSpaceCount(LLineText);
       LSpaces := Copy(LLineText, 1, LSpaceCount);
       LLineText := TextEditor.Utils.TrimLeft(LLineText);
 
@@ -6801,6 +6798,9 @@ begin
 
   LTextPosition := TextPosition;
 
+  if (toTabsToSpaces in FTabs.Options) and ((LTextPosition.Char - 1) mod FTabs.Width <> 0) then
+    Exit;
+
   if toTabsToSpaces in FTabs.Options then
     LTabWidth := FTabs.Width
   else
@@ -6813,7 +6813,7 @@ begin
 
   if LNewX <> TextPosition.Char then
   begin
-    LOldSelectedText := Copy(FLines.Items^[LTextPosition.Line].TextLine, LNewX, LTabWidth);
+    LOldSelectedText := Copy(FLines[LTextPosition.Line], LNewX, LTabWidth);
 
     if toTabsToSpaces in FTabs.Options then
     begin
@@ -6824,7 +6824,7 @@ begin
     if LOldSelectedText <> TControlCharacters.Tab then
       Exit;
 
-    LTextLine := FLines.Items^[LTextPosition.Line].TextLine;
+    LTextLine := FLines[LTextPosition.Line];
     Delete(LTextLine, LNewX, LTabWidth);
     FLines[LTextPosition.Line] := LTextLine;
 
@@ -6940,11 +6940,10 @@ begin
       while (LPreviousLine >= 0) and FLines.Items^[LPreviousLine].TextLine.IsEmpty do
         Dec(LPreviousLine);
 
-      LPreviousLineCharCount := LeftSpaceCount(FLines[LPreviousLine], toTabsToSpaces in FTabs.Options);
+      LPreviousLineCharCount := LeftSpaceCount(FLines[LPreviousLine]);
 
       if LPreviousLineCharCount > ATextPosition.Char then
-        LCharCount := LPreviousLineCharCount - LeftSpaceCount(FLines.Items^[ATextPosition.Line].TextLine,
-          toTabsToSpaces in FTabs.Options);
+        LCharCount := LPreviousLineCharCount - LeftSpaceCount(FLines.Items^[ATextPosition.Line].TextLine);
     end;
 
   if LLengthAfterLine > 1 then
@@ -9063,7 +9062,7 @@ var
           LTextLine := FLines[LLine - 1];
 
           if FCodeFolding.TextFolding.OutlinedBySpacesAndTabs then
-            LCharCount := LeftSpaceCount(LTextLine, True)
+            LCharCount := LeftSpaceCount(LTextLine)
           else
             LCharCount := LeftCharCount(LTextLine, FCodeFolding.TextFolding.OutlineCharacter);
 

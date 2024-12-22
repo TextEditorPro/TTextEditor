@@ -3221,17 +3221,22 @@ var
   LRect: TRect;
   LPToken: PChar;
   LToken: string;
-  LFlags: Cardinal;
   LIsFixedSizeFont: Boolean;
 
   function GetTokenWidth(const AToken: string; const ATokenLength: Integer = -1): Integer;
   var
     LLength: Integer;
+    LFlags: Cardinal;
   begin
     if ATokenLength = -1 then
       LLength := ALength
     else
       LLength := ATokenLength;
+
+    LFlags := DT_LEFT or DT_CALCRECT or DT_NOCLIP or DT_NOPREFIX or DT_SINGLELINE;
+
+    if ARTLReading then
+      LFlags := LFlags or DT_RTLREADING;
 
     DrawText(FPaintHelper.StockBitmap.Canvas.Handle, AToken, LLength, LRect, LFlags);
 
@@ -3263,15 +3268,10 @@ begin
 
   LIsFixedSizeFont := FPaintHelper.FixedSizeFont and (Ord(LChar) <= 255);
 
-  LFlags := DT_LEFT or DT_CALCRECT or DT_NOCLIP or DT_NOPREFIX or DT_SINGLELINE;
-
-  if ARTLReading then
-    LFlags := LFlags or DT_RTLREADING;
-
   if ARTLReading then
   begin
-    { Right-to-left token can start with space or tabs }
     LPToken := PChar(AToken);
+
     while LPToken^ <> TControlCharacters.Null do
     begin
       if Ord(LPToken^) > TCharacters.AnsiCharCount then
@@ -3283,41 +3283,34 @@ begin
     Result := FPaintHelper.FontStock.CharWidth * ALength;
   end
   else
-  if LChar = TControlCharacters.Substitute then
-  begin
-    if eoShowNullCharacters in Options then
-      Result := GetControlCharacterWidth
-    else
-      Result := 0
-  end
+  if LChar <= TCharacters.Space then
+  case LChar of
+    TCharacters.Space:
+      Result := FPaintHelper.FontStock.CharWidth * ALength;
+    TControlCharacters.Substitute:
+      if eoShowNullCharacters in Options then
+        Result := GetControlCharacterWidth
+      else
+        Result := 0;
+    TControlCharacters.Tab:
+      begin
+        if FLines.Columns then
+          Result := FTabs.Width - ACharsBefore mod FTabs.Width
+        else
+          Result := FTabs.Width;
+
+        Result := Result * FPaintHelper.FontStock.CharWidth + (ALength - 1) * FPaintHelper.FontStock.CharWidth * FTabs.Width;
+      end;
+    TCharacters.ZeroWidthSpace:
+      if eoShowZeroWidthSpaces in Options then
+        Result := GetControlCharacterWidth
+      else
+        Result := 0;
   else
-  if (LChar < TCharacters.Space) and (LChar in TControlCharacters.AsSet) then
-  begin
-    if eoShowControlCharacters in Options then
+    if (eoShowControlCharacters in Options) and (LChar in TControlCharacters.AsSet) then
       Result := GetControlCharacterWidth
     else
       Result := 0;
-  end
-  else
-  if LChar = TCharacters.ZeroWidthSpace then
-  begin
-    if eoShowZeroWidthSpaces in Options then
-      Result := GetControlCharacterWidth
-    else
-      Result := 0
-  end
-  else
-  if LChar = TCharacters.Space then
-    Result := FPaintHelper.FontStock.CharWidth * ALength
-  else
-  if LChar = TControlCharacters.Tab then
-  begin
-    if FLines.Columns then
-      Result := FTabs.Width - ACharsBefore mod FTabs.Width
-    else
-      Result := FTabs.Width;
-
-    Result := Result * FPaintHelper.FontStock.CharWidth + (ALength - 1) * FPaintHelper.FontStock.CharWidth * FTabs.Width;
   end
   else
   if LIsFixedSizeFont or AMinimap then
@@ -3398,6 +3391,7 @@ var
     LLength := 0;
     LViewLength := 0;
     LCharsBefore := 0;
+
     while not FHighlighter.EndOfLine do
     begin
       if LNextTokenText.IsEmpty then
@@ -3931,6 +3925,7 @@ var
     Result := False;
 
     LPWordAtCursor := LPLine;
+
     if ABeginWithBreakChar then
       Dec(LPWordAtCursor);
 
@@ -4082,6 +4077,7 @@ begin
           LPBookmarkText := LPText;
           { Check if the open keyword found }
           LPKeyWord := PChar(LFoldRegionItem.OpenToken);
+
           while (LPText^ <> TControlCharacters.Null) and (LPKeyWord^ <> TControlCharacters.Null) and
             (CaseUpper(LPText^) = LPKeyWord^) do
           begin
@@ -4716,7 +4712,7 @@ end;
 
 procedure TCustomTextEditor.CodeFoldingResetCaches;
 var
-  LIndex, {LIndexRange,} LLength: Integer;
+  LIndex, LLength: Integer;
   LCodeFoldingRange: TTextEditorCodeFoldingRange;
   LShowTreeLine: Boolean;
 begin
@@ -6361,8 +6357,6 @@ begin
   if AddSnippet(seEnter, LTextPosition) then
     Exit;
 
-  DoTrimTrailingSpaces(LTextPosition.Line);
-
   FUndoList.BeginBlock(4);
   try
     if GetSelectionAvailable then
@@ -6375,6 +6369,8 @@ begin
 
     LLineText := FLines[LTextPosition.Line];
     LLength := Length(LLineText);
+
+    DoTrimTrailingSpaces(LTextPosition.Line);
 
     if LLength > 0 then
     begin

@@ -22,11 +22,11 @@ uses
   TextEditor.Scroll, TextEditor.Search, TextEditor.Search.Base, TextEditor.Selection, TextEditor.SkipRegions,
   TextEditor.SpecialChars, TextEditor.SyncEdit, TextEditor.Tabs, TextEditor.Types, TextEditor.Undo,
   TextEditor.Undo.List, TextEditor.UnknownChars, TextEditor.Utils, TextEditor.WordWrap
-{$IFDEF TEXT_EDITOR_SPELL_CHECK}
-  , TextEditor.SpellCheck
-{$ENDIF}
 {$IFDEF ALPHASKINS}
   , acSBUtils, sCommonData
+{$ENDIF}
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+  , TextEditor.SpellCheck
 {$ENDIF};
 
 type
@@ -1375,14 +1375,14 @@ uses
   TextEditor.Language, TextEditor.LeftMargin.Border, TextEditor.LeftMargin.LineNumbers, TextEditor.Scroll.Hint,
   TextEditor.Search.Map, TextEditor.Search.Normal, TextEditor.Search.RegularExpressions, TextEditor.Search.WildCard,
   TextEditor.Undo.Item
-{$IFDEF ALPHASKINS}
-  , acGlow, sConst, sMessages, sSkinManager, sStyleSimply, sVCLUtils
+{$IFDEF VCL_STYLES}
+  , TextEditor.StyleHooks
 {$ENDIF}
 {$IFDEF BASENCODING}
   , TextEditor.Encoding
 {$ENDIF}
-{$IFDEF VCL_STYLES}
-  , TextEditor.StyleHooks
+{$IFDEF ALPHASKINS}
+  , acGlow, sConst, sMessages, sSkinManager, sStyleSimply, sVCLUtils
 {$ENDIF};
 
 type
@@ -4485,6 +4485,7 @@ function TCustomTextEditor.ScanHighlighterRangesFrom(const AIndex: Integer): Int
 var
   LRange: TTextEditorRange;
   LProgress, LProgressInc: Int64;
+  LProgressPositionInc: Integer;
 begin
   Result := AIndex;
 
@@ -4498,12 +4499,15 @@ begin
 
   LProgress := 0;
   LProgressInc := 0;
+  LProgressPositionInc := 1;
 
   if FLines.ShowProgress then
   begin
     FLines.ProgressPosition := 0;
     FLines.ProgressType := ptProcessing;
-    LProgressInc := FLines.Count div 100;
+
+    LProgressInc := Max(FLines.Count div 100, 1);
+    LProgressPositionInc := Max(Round(100 / FLines.Count), 1);
   end;
 
   if FLines.Count > 0 then
@@ -4527,7 +4531,7 @@ begin
     begin
       if Result > LProgress then
       begin
-        FLines.ProgressPosition := FLines.ProgressPosition + 1;
+        FLines.ProgressPosition := FLines.ProgressPosition + LProgressPositionInc;
 
         if Assigned(FEvents.OnLoadingProgress) then
           FEvents.OnLoadingProgress(Self)
@@ -8791,7 +8795,8 @@ var
   var
     LIndex, LPreviousLine: Integer;
     LCodeFoldingRange: TTextEditorCodeFoldingRange;
-    LProgressPosition, LProgress, LProgressInc: Int64;
+    LProgressPosition, LProgress, LProgressInc, LLength: Int64;
+    LProgressPositionInc: Integer;
   begin
     LFoldCount := 0;
     LOpenTokenSkipFoldRangeList := TList.Create;
@@ -8812,12 +8817,16 @@ var
       LProgress := 0;
       LProgressPosition := 0;
       LProgressInc := 0;
+      LProgressPositionInc := 1;
 
       if FLines.ShowProgress then
       begin
         FLines.ProgressPosition := 0;
         FLines.ProgressType := ptProcessing;
-        LProgressInc := (Length(FLineNumbers.Cache) - 1) div 100;
+
+        LLength := Length(FLineNumbers.Cache) - 1;
+        LProgressInc := Max(LLength div 100, 1);
+        LProgressPositionInc := Max(Round(100 / LLength), 1);
       end;
 
       for LIndex := 1 to Length(FLineNumbers.Cache) - 1 do
@@ -8893,7 +8902,7 @@ var
 
           if LProgressPosition > LProgress then
           begin
-            FLines.ProgressPosition := FLines.ProgressPosition + 1;
+            FLines.ProgressPosition := FLines.ProgressPosition + LProgressPositionInc;
 
             if Assigned(FEvents.OnLoadingProgress) then
               FEvents.OnLoadingProgress(Self)
@@ -11374,6 +11383,7 @@ begin
     CodeFoldingResetCaches;
     SearchAll;
     RescanCodeFoldingRanges;
+    RescanHighlighterRanges;
   finally
     if LChangeTrim then
       Include(FOptions, eoTrimTrailingSpaces);
@@ -15011,6 +15021,7 @@ begin
       DrawRectangle(LTextPosition);
     end;
   end;
+
   Canvas.Pen.Color := LOldPenColor;
   Canvas.Brush.Style := LOldBrushStyle;
 end;
@@ -15990,26 +16001,25 @@ var
     LTokenLength := ATokenLength;
     LPToken := PChar(LToken);
 
-    if eoShowNonBreakingSpaceAsSpace in Options then
-      if LPToken^ = TCharacters.NonBreakingSpace then
-        LPToken^ := TCharacters.Space;
+    if (eoShowNonBreakingSpaceAsSpace in Options) and (LPToken^ = TCharacters.NonBreakingSpace) then
+      LPToken^ := TCharacters.Space;
 
-    if LPToken^ = TCharacters.Space then
-      LEmptySpace := esSpace
+    LEmptySpace := esNone;
+
+    if LPToken^ <= TCharacters.Space then
+    case LPToken^ of
+      TCharacters.Space:
+        LEmptySpace := esSpace;
+      TControlCharacters.Substitute:
+        LEmptySpace := esNull;
+      TControlCharacters.Tab:
+        LEmptySpace := esTab;
+      TCharacters.ZeroWidthSpace:
+        LEmptySpace := esZeroWidthSpace;
     else
-    if LPToken^ = TControlCharacters.Tab then
-      LEmptySpace := esTab
-    else
-    if LPToken^ = TControlCharacters.Substitute then
-      LEmptySpace := esNull
-    else
-    if (LPToken^ < TCharacters.Space) and (LPToken^ in TControlCharacters.AsSet) then
-      LEmptySpace := esControlCharacter
-    else
-    if LPToken^ = TCharacters.ZeroWidthSpace then
-      LEmptySpace := esZeroWidthSpace
-    else
-      LEmptySpace := esNone;
+      if LPToken^ in TControlCharacters.AsSet then
+         LEmptySpace := esControlCharacter;
+    end;
 
     if (LEmptySpace <> esNone) and FSpecialChars.Visible then
     begin
@@ -20358,6 +20368,7 @@ begin
         FUndoList.BeginBlock;
         try
           LTextPosition := TextPosition;
+
           FUndoList.AddChange(crCaret, LSelectionBeginPosition, LSelectionBeginPosition, LSelectionEndPosition, '',
             FSelection.ActiveMode);
 
@@ -20374,22 +20385,30 @@ begin
               TCustomTextEditor(ASource).SetSelectedTextEmpty;
 
             if LDropAfter then
+            begin
               LNewCaretPosition.Line := LNewCaretPosition.Line - LLinesDeleted;
+
+              if LSelectionBeginPosition.Line = LSelectionEndPosition.Line then
+                LNewCaretPosition.Char := LNewCaretPosition.Char - LDragDropText.Length;
+            end;
           end;
 
           LChangeScrollPastEndOfLine := not (soPastEndOfLine in FScroll.Options);
           try
             if LChangeScrollPastEndOfLine then
               FScroll.SetOption(soPastEndOfLine, True);
+
             TextPosition := LNewCaretPosition;
 
             DoInsertText(LDragDropText);
 
             FPosition.SelectionBegin := LNewCaretPosition;
+
             if LSelectionBeginPosition.Line = LSelectionEndPosition.Line  then
               FPosition.SelectionEnd.Char := LNewCaretPosition.Char + LSelectionEndPosition.Char - LSelectionBeginPosition.Char
             else
               FPosition.SelectionEnd.Char := LSelectionEndPosition.Char;
+
             FPosition.SelectionEnd.Line := LNewCaretPosition.Line + LSelectionEndPosition.Line - LSelectionBeginPosition.Line;
           finally
             if LChangeScrollPastEndOfLine then
@@ -21225,6 +21244,7 @@ begin
     CodeFoldingResetCaches;
     SearchAll;
     RescanCodeFoldingRanges;
+    RescanHighlighterRanges;
   finally
     if LChangeTrim then
       Include(FOptions, eoTrimTrailingSpaces);

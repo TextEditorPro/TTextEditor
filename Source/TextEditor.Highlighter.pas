@@ -392,15 +392,15 @@ begin
       LParser := FRange.SymbolList[AnsiChar(FRange.CaseFunct(FLine[FRunPosition]))]
     else
     case FLine[FRunPosition] of
-    { Turkish special characters }
+      { Turkish special characters }
       'ç', 'Ç':
-        LParser := FRange.SymbolList['C'];
+         LParser := FRange.SymbolList['C'];
       'ı', 'İ':
-        LParser := FRange.SymbolList['I'];
+         LParser := FRange.SymbolList['I'];
       'ş', 'Ş':
-        LParser := FRange.SymbolList['S'];
+         LParser := FRange.SymbolList['S'];
       'ğ', 'Ğ':
-        LParser := FRange.SymbolList['G'];
+         LParser := FRange.SymbolList['G'];
     else
       LParser := FRange.SymbolList['a'];
     end;

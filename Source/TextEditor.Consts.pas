@@ -44,6 +44,8 @@ type
     QuestionMark = '?';
     Slash = '/';
     Space = #32;
+    SquareBracketClose = ']';
+    SquareBracketOpen = '[';
     TagClose = '>';
     TagOpen = '<';
     ThreeDots = '...';

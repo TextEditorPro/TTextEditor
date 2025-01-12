@@ -691,7 +691,7 @@ type
     function PixelAndRowToViewPosition(const X, ARow: Integer; const ALineText: string = ''): TTextEditorViewPosition;
     function PixelsToViewPosition(const X, Y: Integer): TTextEditorViewPosition;
     function TextPositionToCharIndex(const ATextPosition: TTextEditorTextPosition): Integer;
-    procedure ChangeScale(AMultiplier, ADivider: Integer; AIsDpiChange: Boolean); override;
+    procedure ChangeScale(AMultiplier, ADivider: Integer{$IF CompilerVersion >= 31}; AIsDpiChange: Boolean{$IFEND}); override;
     procedure CodeFoldingExpand(const AFoldRange: TTextEditorCodeFoldingRange);
     procedure CreateParams(var AParams: TCreateParams); override;
     procedure CreateWnd; override;
@@ -816,7 +816,7 @@ type
     procedure BeginUndoBlock;
     procedure BeginUpdate;
     procedure ChainEditor(const AEditor: TCustomTextEditor);
-    procedure ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer; const AIsDpiChange: Boolean);
+    procedure ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer{$IF CompilerVersion >= 31}; const AIsDpiChange: Boolean{$IFEND});
     procedure Clear;
     procedure ClearBookmarks;
     procedure ClearHighlightLine;
@@ -10856,18 +10856,20 @@ begin
   LUndoList.OnAddedUndo(ASender);
 end;
 
-procedure TCustomTextEditor.ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer; const AIsDpiChange: Boolean);
+procedure TCustomTextEditor.ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer{$IF CompilerVersion >= 31}; const AIsDpiChange: Boolean{$IFEND});
 begin
   if AMultiplier = ADivider then
     Exit;
 
+{$IF CompilerVersion >= 31}
   FPixelsPerInch := AMultiplier;
+{$IFEND}
 
   if Assigned(FEvents.OnChangeScale) and not FZoom.Return then
-    FEvents.OnChangeScale(Self, AMultiplier, ADivider, AIsDpiChange);
+    FEvents.OnChangeScale(Self, AMultiplier, ADivider{$IF CompilerVersion >= 31}, AIsDpiChange{$IFEND});
 
   if Assigned(FFonts) then
-    FFonts.ChangeScale(AMultiplier, ADivider, AIsDpiChange);
+    FFonts.ChangeScale(AMultiplier, ADivider{$IF CompilerVersion >= 31}, AIsDpiChange{$IFEND});
 
   if Assigned(FLeftMargin) then
     FLeftMargin.ChangeScale(AMultiplier, ADivider);
@@ -10904,15 +10906,15 @@ begin
   SizeOrFontChanged;
 end;
 
-procedure TCustomTextEditor.ChangeScale(AMultiplier, ADivider: Integer; AIsDpiChange: Boolean);
+procedure TCustomTextEditor.ChangeScale(AMultiplier, ADivider: Integer{$IF CompilerVersion >= 31}; AIsDpiChange: Boolean{$IFEND});
 begin
   if csDesigning in ComponentState then
     Exit;
 
-  if AIsDpiChange or (AMultiplier <> ADivider) then
-    ChangeObjectScale(AMultiplier, ADivider, AIsDpiChange);
+  if {$IF CompilerVersion >= 31}AIsDpiChange or{$IFEND} (AMultiplier <> ADivider) then
+    ChangeObjectScale(AMultiplier, ADivider{$IF CompilerVersion >= 31}, AIsDpiChange{$IFEND});
 
-  inherited ChangeScale(AMultiplier, ADivider, AIsDpiChange);
+  inherited ChangeScale(AMultiplier, ADivider{$IF CompilerVersion >= 31}, AIsDpiChange{$IFEND});
 end;
 
 procedure TCustomTextEditor.CreateParams(var AParams: TCreateParams);
@@ -14399,8 +14401,8 @@ var
 
       if FLeftMargin.LineState.Align = lsLeft then
       begin
-        LLineStateRect.Left := 0;
-        LLineStateRect.Right := FLeftMargin.LineState.Width;
+        LLineStateRect.Left := FLeftMargin.LineState.Offset;
+        LLineStateRect.Right := FLeftMargin.LineState.Width + FLeftMargin.LineState.Offset;
       end
       else
       begin
@@ -17109,6 +17111,28 @@ var
     end;
   end;
 
+  procedure SkipCData;
+  begin
+    Inc(LPChar, 3);
+    Inc(LChar, 3);
+
+    while LPChar^ <> TControlCharacters.Null do
+    begin
+      if (LPChar^ = TCharacters.SquareBracketClose) and ((LPChar + 1)^ = TCharacters.SquareBracketClose) and
+        ((LPChar + 2)^ = TCharacters.TagClose) then
+      begin
+        Inc(LPChar, 3);
+        Inc(LChar, 3);
+        Break;
+      end;
+
+      LineChange;
+
+      Inc(LPChar);
+      Inc(LChar);
+    end;
+  end;
+
 begin
   LTextPosition := TextPosition;
   LLineText := FLines[LTextPosition.Line];
@@ -17165,6 +17189,12 @@ begin
     begin
       if LPChar^ = TCharacters.TagOpen then
       begin
+        if ((LPChar + 1)^ = TCharacters.ExclamationMark) and ((LPChar + 2)^ = TCharacters.SquareBracketOpen) and ((LPChar + 3)^ = 'C') then
+        begin
+          SkipCData;
+          Continue;
+        end;
+
         if ((LPChar + 1)^ = TCharacters.ExclamationMark) and ((LPChar + 2)^ = TCharacters.Hyphen) and ((LPChar + 3)^ = TCharacters.Hyphen) then
         begin
           SkipComment;

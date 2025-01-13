@@ -14055,14 +14055,8 @@ var
       LCompareMode := lnoCompareMode in FLeftMargin.LineNumbers.Options;
       LCompareEmptyLine := False;
       LLeftMarginWidth := LLineRect.Left + FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 1;
-      LLongLineWidth := 0;
-      LShortLineWith := 0;
-
-      if lnoIntens in LeftMargin.LineNumbers.Options then
-      begin
-        LLongLineWidth := (FLeftMarginCharWidth - 9) shr 1;
-        LShortLineWith := (FLeftMarginCharWidth - 1) shr 1;
-      end;
+      LLongLineWidth := FLeftMarginCharWidth shr 1;
+      LShortLineWith := 1;
 
       for LIndex := AFirstLine to LLastTextLine do
       begin
@@ -14145,15 +14139,17 @@ var
               (LIndex <> LeftMargin.LineNumbers.StartFrom) then
             begin
               LOldColor := Canvas.Pen.Color;
+
               Canvas.Pen.Color := FColors.LeftMarginLineNumberLine;
+
               LTop := LLineRect.Top + (LLineHeight shr 1);
 
               if LLine mod 5 = 0 then
-                Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + LLongLineWidth - LMargin, LTop)
+                Canvas.MoveTo(LLeftMarginWidth - LLongLineWidth - LMargin - LLongLineWidth, LTop)
               else
-                Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + LShortLineWith - LMargin, LTop);
+                Canvas.MoveTo(LLeftMarginWidth - LShortLineWith - LMargin - LLongLineWidth, LTop);
 
-              Canvas.LineTo(LLeftMarginWidth - LShortLineWith - LMargin, LTop);
+              Canvas.LineTo(LLeftMarginWidth - LMargin - LLongLineWidth, LTop);
               Canvas.Pen.Color := LOldColor;
 
               Continue;
@@ -14176,7 +14172,7 @@ var
         LLength := Length(LLineNumber);
         LPLineNumber := PChar(LLineNumber);
         GetTextExtentPoint32(Canvas.Handle, LPLineNumber, LLength, LTextSize);
-        Winapi.Windows.ExtTextOut(Canvas.Handle, LLeftMarginWidth - 1 - LMargin - LTextSize.cx,
+        Winapi.Windows.ExtTextOut(Canvas.Handle, LLeftMarginWidth - LMargin - LTextSize.cx - 1,
           LLineRect.Top + ((LLineHeight - Integer(LTextSize.cy)) shr 1), ETO_OPAQUE, @LLineRect, LPLineNumber, LLength, nil);
       end;
 

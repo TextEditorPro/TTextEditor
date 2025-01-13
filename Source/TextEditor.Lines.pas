@@ -745,7 +745,7 @@ var
   LDelta: Integer;
 begin
   if FCapacity > 64 then
-    LDelta := (FCapacity * 3) div 2
+    LDelta := (FCapacity * 3) shr 1
   else
   if FCapacity > 8 then
     LDelta := 16
@@ -1269,7 +1269,7 @@ begin
     begin
       LPreviousStart := 0;
       LEnd := 0;
-      LLineInc := FCount div 2;
+      LLineInc := FCount shr 1;
 
       while LEnd < FCount do
       begin
@@ -1280,7 +1280,7 @@ begin
         if FTextLength >= TMaxValues.TextLength then
         begin
           LEnd := LPreviousStart;
-          LLineInc := LLineInc div 2;
+          LLineInc := LLineInc shr 1;
         end
         else
         begin

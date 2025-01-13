@@ -80,7 +80,7 @@ end;
 
 function TTextEditorMethodList.GetCount: Integer;
 begin
-  Result := FData.Count div 2;
+  Result := FData.Count shr 1;
 end;
 
 function TTextEditorMethodList.GetItem(const AIndex: Integer): TMethod;

@@ -437,12 +437,12 @@ begin
   FVirtualOffset.X := MARGIN_WIDTH_LEFT_AND_RIGHT;
 
   if FVirtualSize.X < ClientWidth then
-    Inc(FVirtualOffset.X, (ClientWidth - FVirtualSize.X) div 2);
+    Inc(FVirtualOffset.X, (ClientWidth - FVirtualSize.X) shr 1);
 
   FVirtualOffset.Y := MARGIN_HEIGHT_TOP_AND_BOTTOM;
 
   if FVirtualSize.Y < ClientHeight then
-    Inc(FVirtualOffset.Y, (ClientHeight - FVirtualSize.Y) div 2);
+    Inc(FVirtualOffset.Y, (ClientHeight - FVirtualSize.Y) shr 1);
 
   UpdateScrollbars;
   FScrollPosition := Point(0, 0);
@@ -600,9 +600,9 @@ begin
       SB_LINEUP:
         ScrollHorizontallyFor(LWidth div 10);
       SB_PAGEDOWN:
-        ScrollHorizontallyFor(-(LWidth div 2));
+        ScrollHorizontallyFor(-(LWidth shr 1));
       SB_PAGEUP:
-        ScrollHorizontallyFor(LWidth div 2);
+        ScrollHorizontallyFor(LWidth shr 1);
       SB_THUMBPOSITION, SB_THUMBTRACK:
       begin
 {$IFDEF ALPHASKINS}

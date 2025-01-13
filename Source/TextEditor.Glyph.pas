@@ -128,7 +128,7 @@ begin
   LY := Y;
 
   if ALineHeight <> 0 then
-    Inc(LY, Abs(LGlyphBitmap.Height - ALineHeight) div 2);
+    Inc(LY, Abs(LGlyphBitmap.Height - ALineHeight) shr 1);
 
   LGlyphBitmap.Transparent := True;
   LGlyphBitmap.TransparentMode := tmFixed;

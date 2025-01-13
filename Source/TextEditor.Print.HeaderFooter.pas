@@ -742,7 +742,7 @@ begin
         taRightJustify:
           LX := PixelRightTextIndent - TextWidth(ACanvas, LText);
         taCenter:
-          LX := (PixelLeftTextIndent + PixelRightTextIndent - TextWidth(ACanvas, LText)) div 2;
+          LX := (PixelLeftTextIndent + PixelRightTextIndent - TextWidth(ACanvas, LText)) shr 1;
       end;
     end;
 

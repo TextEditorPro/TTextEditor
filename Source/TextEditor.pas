@@ -2261,7 +2261,7 @@ begin
 
     while LFirst <= LLast do
     begin
-      LPivot := (LFirst + LLast) div 2;
+      LPivot := (LFirst + LLast) shr 1;
 
       if FLineNumbers.Cache[LPivot] > AViewLineNumber then
         LLast := LPivot - 1
@@ -7146,8 +7146,8 @@ begin
       end;
     csHalfBlock:
       begin
-        LCaretHeight := GetLineHeight div 2;
-        Y := GetLineHeight div 2;
+        LCaretHeight := GetLineHeight shr 1;
+        Y := GetLineHeight shr 1;
         Inc(LPoint.Y, Y);
         Inc(LPoint.X);
       end;
@@ -10293,7 +10293,7 @@ begin
 
         for LIndex := 0 to LNumberDropped - 1 do
         begin
-          DragQueryFileW(THandle(AMessage.wParam), LIndex, LFilename, SizeOf(LFilename) div 2);
+          DragQueryFileW(THandle(AMessage.wParam), LIndex, LFilename, SizeOf(LFilename) shr 1);
           LFilesList.Add(LFilename)
         end;
 
@@ -11663,7 +11663,7 @@ begin
     FViewPosition.Row := LNewLine
   else
   begin
-    LNewLine := LNewLine - FLineNumbers.VisibleCount div 2;
+    LNewLine := LNewLine - FLineNumbers.VisibleCount shr 1;
     LStep := Abs(LNewLine - TopLine) div 5;
 
     if LNewLine < TopLine then
@@ -13433,7 +13433,7 @@ var
     LTempY: Integer;
   begin
     LHeight := LRect.Right - LRect.Left;
-    LRect.Top := LRect.Top + (GetLineHeight - LHeight) div 2 + 1;
+    LRect.Top := LRect.Top + (GetLineHeight - LHeight) shr 1 + 1;
     LRect.Bottom := LRect.Top + LHeight - 1;
     LRect.Right := LRect.Right - 1;
 
@@ -13443,7 +13443,7 @@ var
       begin
         LPoints[0] := Point(LRect.Left, LRect.Top);
         LPoints[1] := Point(LRect.Left, LRect.Bottom - 1);
-        LPoints[2] := Point(LRect.Right - (FCodeFolding.Width + 1) mod 2, LRect.Top + LRect.Height div 2);
+        LPoints[2] := Point(LRect.Right - (FCodeFolding.Width + 1) mod 2, LRect.Top + LRect.Height shr 1);
 
         Canvas.Polygon(LPoints);
       end
@@ -13452,7 +13452,7 @@ var
       begin
         LPoints[0] := Point(LRect.Left, LRect.Bottom - 1);
         LPoints[1] := Point(LRect.Right - (FCodeFolding.Width + 1) mod 2, LRect.Bottom - 1);
-        LPoints[2] := Point(LRect.Left + LRect.Width div 2, LRect.Top + 1);
+        LPoints[2] := Point(LRect.Left + LRect.Width shr 1, LRect.Top + 1);
 
         Canvas.Polygon(LPoints);
       end
@@ -13460,7 +13460,7 @@ var
       begin
         LPoints[0] := Point(LRect.Left, LRect.Top + 1);
         LPoints[1] := Point(LRect.Right - (FCodeFolding.Width + 1) mod 2, LRect.Top + 1);
-        LPoints[2] := Point(LRect.Left + LRect.Width div 2, LRect.Bottom - 1);
+        LPoints[2] := Point(LRect.Left + LRect.Width shr 1, LRect.Bottom - 1);
 
         Canvas.Polygon(LPoints);
       end;
@@ -13476,14 +13476,14 @@ var
         Canvas.Ellipse(LRect);
       end;
       { - }
-      LTempY := LRect.Top + ((LRect.Bottom - LRect.Top) div 2);
+      LTempY := LRect.Top + ((LRect.Bottom - LRect.Top) shr 1);
       Canvas.MoveTo(LRect.Left + LRect.Width div 4, LTempY);
       Canvas.LineTo(LRect.Right - LRect.Width div 4, LTempY);
 
       if LFoldRange.Collapsed then
       begin
         { + }
-        LTempY := (LRect.Right - LRect.Left) div 2;
+        LTempY := (LRect.Right - LRect.Left) shr 1;
         Canvas.MoveTo(LRect.Left + LTempY, LRect.Top + LRect.Width div 4);
         Canvas.LineTo(LRect.Left + LTempY, LRect.Bottom - LRect.Width div 4);
       end;
@@ -13497,7 +13497,7 @@ var
         LRect.Top := AClipRect.Top;
 
         Canvas.MoveTo(LRect.Left, LRect.Bottom);
-        Canvas.LineTo(LRect.Left + LRect.Width div 2, LRect.Top);
+        Canvas.LineTo(LRect.Left + LRect.Width shr 1, LRect.Top);
         Canvas.LineTo(LRect.Right - (FCodeFolding.Width + 1) mod 2, LRect.Bottom);
       end
       else
@@ -13507,7 +13507,7 @@ var
         LRect.Bottom := AClipRect.Bottom;
 
         Canvas.MoveTo(LRect.Left, LRect.Top);
-        Canvas.LineTo(LRect.Left + LRect.Width div 2, LRect.Bottom);
+        Canvas.LineTo(LRect.Left + LRect.Width shr 1, LRect.Bottom);
         Canvas.LineTo(LRect.Right - (FCodeFolding.Width + 1) mod 2, LRect.Top);
       end
     end;
@@ -13530,7 +13530,7 @@ begin
 
       if CodeFoldingTreeLineForLine(ALine) and not (LShowCollapseMarkAtTheEnd and LEndForLine) then
       begin
-        LX := LRect.Left + ((LRect.Right - LRect.Left) div 2) - 1;
+        LX := LRect.Left + ((LRect.Right - LRect.Left) shr 1) - 1;
         Canvas.MoveTo(LX, LRect.Top);
         Canvas.LineTo(LX, LRect.Bottom);
       end;
@@ -13544,7 +13544,7 @@ begin
         end
         else
         begin
-          LX := LRect.Left + ((LRect.Right - LRect.Left) div 2) - 1;
+          LX := LRect.Left + ((LRect.Right - LRect.Left) shr 1) - 1;
           Canvas.MoveTo(LX, LRect.Top);
           LY := LRect.Top + ((LRect.Bottom - LRect.Top) - 4);
           Canvas.LineTo(LX, LY);
@@ -13639,8 +13639,8 @@ begin
                 { [...] }
                 LDotSpace := (LCollapseMarkRect.Width - 8) div 4;
 
-                LY := LCollapseMarkRect.Top + (LCollapseMarkRect.Bottom - LCollapseMarkRect.Top) div 2;
-                LX := LCollapseMarkRect.Left + LDotSpace + (LCollapseMarkRect.Width - LDotSpace * 4 - 6) div 2;
+                LY := LCollapseMarkRect.Top + (LCollapseMarkRect.Bottom - LCollapseMarkRect.Top) shr 1;
+                LX := LCollapseMarkRect.Left + LDotSpace + (LCollapseMarkRect.Width - LDotSpace * 4 - 6) shr 1;
 
                 LIndex := 1;
 
@@ -13653,11 +13653,11 @@ begin
               end;
             imsTriangle:
               begin
-                LX := (LCollapseMarkRect.Width - LCollapseMarkRect.Height) div 2;
+                LX := (LCollapseMarkRect.Width - LCollapseMarkRect.Height) shr 1;
                 LY := (LCollapseMarkRect.Width + 1) mod 2;
                 LPoints[0] := Point(LCollapseMarkRect.Left + LX + 2, LCollapseMarkRect.Top + 2);
                 LPoints[1] := Point(LCollapseMarkRect.Right - LX - 3 - LY, LCollapseMarkRect.Top + 2);
-                LPoints[2] := Point(LCollapseMarkRect.Left + LCollapseMarkRect.Width div 2 - LY, LCollapseMarkRect.Bottom - 3);
+                LPoints[2] := Point(LCollapseMarkRect.Left + LCollapseMarkRect.Width shr 1 - LY, LCollapseMarkRect.Bottom - 3);
 
                 Canvas.Polygon(LPoints);
               end;
@@ -14060,8 +14060,8 @@ var
 
       if lnoIntens in LeftMargin.LineNumbers.Options then
       begin
-        LLongLineWidth := (FLeftMarginCharWidth - 9) div 2;
-        LShortLineWith := (FLeftMarginCharWidth - 1) div 2;
+        LLongLineWidth := (FLeftMarginCharWidth - 9) shr 1;
+        LShortLineWith := (FLeftMarginCharWidth - 1) shr 1;
       end;
 
       for LIndex := AFirstLine to LLastTextLine do
@@ -14146,7 +14146,7 @@ var
             begin
               LOldColor := Canvas.Pen.Color;
               Canvas.Pen.Color := FColors.LeftMarginLineNumberLine;
-              LTop := LLineRect.Top + (LLineHeight div 2);
+              LTop := LLineRect.Top + (LLineHeight shr 1);
 
               if LLine mod 5 = 0 then
                 Canvas.MoveTo(LLeftMarginWidth - FLeftMarginCharWidth + LLongLineWidth - LMargin, LTop)
@@ -14177,7 +14177,7 @@ var
         LPLineNumber := PChar(LLineNumber);
         GetTextExtentPoint32(Canvas.Handle, LPLineNumber, LLength, LTextSize);
         Winapi.Windows.ExtTextOut(Canvas.Handle, LLeftMarginWidth - 1 - LMargin - LTextSize.cx,
-          LLineRect.Top + ((LLineHeight - Integer(LTextSize.cy)) div 2), ETO_OPAQUE, @LLineRect, LPLineNumber, LLength, nil);
+          LLineRect.Top + ((LLineHeight - Integer(LTextSize.cy)) shr 1), ETO_OPAQUE, @LLineRect, LPLineNumber, LLength, nil);
       end;
 
       FPaintHelper.SetBackgroundColor(FColors.LeftMarginBackground);
@@ -14558,7 +14558,7 @@ procedure TCustomTextEditor.PaintMouseScrollPoint;
 var
   LHalfWidth: Integer;
 begin
-  LHalfWidth := FScroll.Indicator.Width div 2;
+  LHalfWidth := FScroll.Indicator.Width shr 1;
 
   FScroll.Indicator.Draw(Canvas, FMouse.ScrollingPoint.X - LHalfWidth, FMouse.ScrollingPoint.Y - LHalfWidth);
 end;
@@ -14650,7 +14650,7 @@ begin
           LNumbers := IntToStr(LIndex);
           LRect.Left := LLeft;
           LRect.Right := LLeft + Length(LNumbers) * FPaintHelper.CharWidth;
-          LWidth := LRect.Width div 2;
+          LWidth := LRect.Width shr 1;
           Dec(LRect.Left, LWidth);
           Dec(LRect.Right, LWidth);
 
@@ -14954,7 +14954,7 @@ begin
         end
         else
         begin
-          LY := LCharRect.Top + GetLineHeight div 2;
+          LY := LCharRect.Top + GetLineHeight shr 1;
 
           MoveTo(LCharRect.Left, LY);
           LineTo(LCharRect.Left + 11, LY);
@@ -15359,9 +15359,9 @@ var
         Exit;
 
       LSpaceWidth := LTextRect.Width div LTokenLength;
-      LRect.Top := LTokenRect.Top + LTokenRect.Height div 2;
+      LRect.Top := LTokenRect.Top + LTokenRect.Height shr 1;
       LRect.Bottom := LRect.Top + 2;
-      LRect.Left := LTextRect.Left + LSpaceWidth div 2;
+      LRect.Left := LTextRect.Left + LSpaceWidth shr 1;
 
       LIndex := 0;
 
@@ -17028,7 +17028,7 @@ begin
     csHalfBlock:
       begin
         LWidth := FPaintHelper.CharWidth;
-        LHeight := GetLineHeight div 2;
+        LHeight := GetLineHeight shr 1;
         FCaretHelper.Offset.Y := FCaretHelper.Offset.Y + LHeight;
       end;
     csBlock:
@@ -20490,7 +20490,7 @@ begin
     begin
       if LCaretRow < TopLine - 1 then
       begin
-        LMiddle := FLineNumbers.VisibleCount div 2;
+        LMiddle := FLineNumbers.VisibleCount shr 1;
 
         if LCaretRow - LMiddle < 0 then
           TopLine := 1
@@ -20500,13 +20500,13 @@ begin
       else
       if LCaretRow > TopLine + FLineNumbers.VisibleCount - 2 then
       begin
-        LMiddle := FLineNumbers.VisibleCount div 2;
+        LMiddle := FLineNumbers.VisibleCount shr 1;
         TopLine := LCaretRow - FLineNumbers.VisibleCount - 1 + LMiddle;
       end
       else
       if AEvenIfVisible then
       begin
-        LMiddle := FLineNumbers.VisibleCount div 2;
+        LMiddle := FLineNumbers.VisibleCount shr 1;
         TopLine := LCaretRow - LMiddle + 1;
       end;
     end
@@ -20518,7 +20518,7 @@ begin
       TopLine := LCaretRow - (FLineNumbers.VisibleCount - 1);
 
     if (LPoint.X < LLeftMarginWidth) or (LPoint.X >= LLeftMarginWidth + FScrollHelper.PageWidth) then
-      SetHorizontalScrollPosition(LPoint.X + FScrollHelper.HorizontalPosition - FLeftMarginWidth - FScrollHelper.PageWidth div 2)
+      SetHorizontalScrollPosition(LPoint.X + FScrollHelper.HorizontalPosition - FLeftMarginWidth - FScrollHelper.PageWidth shr 1)
     else
     if LPoint.X = LLeftMarginWidth then
       SetHorizontalScrollPosition(0)
@@ -20868,7 +20868,7 @@ begin
     rpTop:
       TopLine := LViewPosition.Row;
     rpMiddle:
-      TopLine := Max(LViewPosition.Row - FLineNumbers.VisibleCount div 2 + 1, 1);
+      TopLine := Max(LViewPosition.Row - FLineNumbers.VisibleCount shr 1 + 1, 1);
     rpBottom:
       TopLine := Max(LViewPosition.Row - FLineNumbers.VisibleCount + 1, 1);
   end;
@@ -22176,7 +22176,7 @@ var
 
     while LLow <= LHigh do
     begin
-      LMiddle := (LLow + LHigh) div 2;
+      LMiddle := (LLow + LHigh) shr 1;
       LLine := FLines.Items^[LMiddle].OriginalLineNumber;
 
       if LLine > ALine then

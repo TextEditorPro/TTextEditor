@@ -297,9 +297,9 @@ function MiddleColor(const AColor1, AColor2: TColor): TColor;
 var
   LRed, LGreen, LBlue: Byte;
 begin
-  LRed := (GetRValue(AColor1) + GetRValue(AColor2)) div 2;
-  LGreen := (GetGValue(AColor1) + GetGValue(AColor2)) div 2;
-  LBlue := (GetBValue(AColor1) + GetBValue(AColor2)) div 2;
+  LRed := (GetRValue(AColor1) + GetRValue(AColor2)) shr 1;
+  LGreen := (GetGValue(AColor1) + GetGValue(AColor2)) shr 1;
+  LBlue := (GetBValue(AColor1) + GetBValue(AColor2)) shr 1;
 
   Result := RGB(LRed, LGreen, LBlue);
 end;

@@ -230,13 +230,13 @@ begin
     if ALineHeight >= FHeight then
     begin
       LSourceRect := Rect(ANumber * FWidth, 0, (ANumber + 1) * FWidth, FHeight);
-      Inc(LY, (ALineHeight - FHeight) div 2);
+      Inc(LY, (ALineHeight - FHeight) shr 1);
       LDestinationRect := Rect(X, LY, X + FWidth, LY + FHeight);
     end
     else
     begin
       LDestinationRect := Rect(X, LY, X + FWidth, LY + ALineHeight);
-      LY := (FHeight - ALineHeight) div 2;
+      LY := (FHeight - ALineHeight) shr 1;
       LSourceRect := Rect(ANumber * FWidth, LY, (ANumber + 1) * FWidth, LY + ALineHeight);
     end;
 

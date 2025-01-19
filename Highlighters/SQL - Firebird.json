@@ -461,7 +461,25 @@
             "TokenRange": {
               "Open": "join",
               "Close": "("
-            }
+            },
+            "SubRules": {
+              "Range": [
+							  {
+			            "Type": "Method",
+			            "Attributes": {
+			              "Element": "MethodName"
+			            },
+			            "Properties": {
+			              "CloseOnEndOfLine": true,
+			              "CloseOnTerm": true,
+										"CloseParent": true
+			            },
+			            "TokenRange": {
+			              "Open": "rdb$"
+			            }
+			          }
+							]
+						}
           },
           {
             "Type": "MethodName",

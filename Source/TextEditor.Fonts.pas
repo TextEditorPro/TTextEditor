@@ -34,7 +34,7 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Assign(ASource: TPersistent); override;
-    procedure ChangeScale(const AMultiplier: Integer; const ADivider: Integer{$IF CompilerVersion >= 31}; const AIsDpiChange: Boolean{$IFEND});
+    procedure ChangeScale(const AMultiplier: Integer; const ADivider: Integer{$IF CompilerVersion >= 35}; const AIsDpiChange: Boolean{$IFEND});
     procedure SetDefaults;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
@@ -206,7 +206,7 @@ begin
     FOnChange(Self);
 end;
 
-procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivider: Integer{$IF CompilerVersion >= 31}; const AIsDpiChange: Boolean{$IFEND});
+procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivider: Integer{$IF CompilerVersion >= 35}; const AIsDpiChange: Boolean{$IFEND});
 
   procedure ChangeScale(const AFont: TFont);
   begin
@@ -214,7 +214,7 @@ procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivide
     begin
       AFont.Height := MulDiv(AFont.Height, AMultiplier, ADivider);
 
-{$IF CompilerVersion >= 31}
+{$IF CompilerVersion >= 35}
       if AIsDpiChange then
         AFont.PixelsPerInch := AMultiplier;
 {$IFEND}

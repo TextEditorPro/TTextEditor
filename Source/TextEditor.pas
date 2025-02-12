@@ -691,7 +691,7 @@ type
     function PixelAndRowToViewPosition(const X, ARow: Integer; const ALineText: string = ''): TTextEditorViewPosition;
     function PixelsToViewPosition(const X, Y: Integer): TTextEditorViewPosition;
     function TextPositionToCharIndex(const ATextPosition: TTextEditorTextPosition): Integer;
-    procedure ChangeScale(AMultiplier, ADivider: Integer{$IF CompilerVersion >= 31}; AIsDpiChange: Boolean{$IFEND}); override;
+    procedure ChangeScale(AMultiplier, ADivider: Integer{$IF CompilerVersion >= 35}; AIsDpiChange: Boolean{$IFEND}); override;
     procedure CodeFoldingExpand(const AFoldRange: TTextEditorCodeFoldingRange);
     procedure CreateParams(var AParams: TCreateParams); override;
     procedure CreateWnd; override;
@@ -816,7 +816,7 @@ type
     procedure BeginUndoBlock;
     procedure BeginUpdate;
     procedure ChainEditor(const AEditor: TCustomTextEditor);
-    procedure ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer{$IF CompilerVersion >= 31}; const AIsDpiChange: Boolean{$IFEND});
+    procedure ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer{$IF CompilerVersion >= 35}; const AIsDpiChange: Boolean{$IFEND});
     procedure Clear;
     procedure ClearBookmarks;
     procedure ClearHighlightLine;
@@ -10862,20 +10862,20 @@ begin
   LUndoList.OnAddedUndo(ASender);
 end;
 
-procedure TCustomTextEditor.ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer{$IF CompilerVersion >= 31}; const AIsDpiChange: Boolean{$IFEND});
+procedure TCustomTextEditor.ChangeObjectScale(const AMultiplier: Integer; const ADivider: Integer{$IF CompilerVersion >= 35}; const AIsDpiChange: Boolean{$IFEND});
 begin
   if AMultiplier = ADivider then
     Exit;
 
-{$IF CompilerVersion >= 31}
+{$IF CompilerVersion >= 35}
   FPixelsPerInch := AMultiplier;
 {$IFEND}
 
   if Assigned(FEvents.OnChangeScale) and not FZoom.Return then
-    FEvents.OnChangeScale(Self, AMultiplier, ADivider{$IF CompilerVersion >= 31}, AIsDpiChange{$IFEND});
+    FEvents.OnChangeScale(Self, AMultiplier, ADivider{$IF CompilerVersion >= 35}, AIsDpiChange{$IFEND});
 
   if Assigned(FFonts) then
-    FFonts.ChangeScale(AMultiplier, ADivider{$IF CompilerVersion >= 31}, AIsDpiChange{$IFEND});
+    FFonts.ChangeScale(AMultiplier, ADivider{$IF CompilerVersion >= 35}, AIsDpiChange{$IFEND});
 
   if Assigned(FLeftMargin) then
     FLeftMargin.ChangeScale(AMultiplier, ADivider);
@@ -10912,15 +10912,15 @@ begin
   SizeOrFontChanged;
 end;
 
-procedure TCustomTextEditor.ChangeScale(AMultiplier, ADivider: Integer{$IF CompilerVersion >= 31}; AIsDpiChange: Boolean{$IFEND});
+procedure TCustomTextEditor.ChangeScale(AMultiplier, ADivider: Integer{$IF CompilerVersion >= 35}; AIsDpiChange: Boolean{$IFEND});
 begin
   if csDesigning in ComponentState then
     Exit;
 
-  if {$IF CompilerVersion >= 31}AIsDpiChange or{$IFEND} (AMultiplier <> ADivider) then
-    ChangeObjectScale(AMultiplier, ADivider{$IF CompilerVersion >= 31}, AIsDpiChange{$IFEND});
+  if {$IF CompilerVersion >= 35}AIsDpiChange or{$IFEND} (AMultiplier <> ADivider) then
+    ChangeObjectScale(AMultiplier, ADivider{$IF CompilerVersion >= 35}, AIsDpiChange{$IFEND});
 
-  inherited ChangeScale(AMultiplier, ADivider{$IF CompilerVersion >= 31}, AIsDpiChange{$IFEND});
+  inherited ChangeScale(AMultiplier, ADivider{$IF CompilerVersion >= 35}, AIsDpiChange{$IFEND});
 end;
 
 procedure TCustomTextEditor.CreateParams(var AParams: TCreateParams);
@@ -13964,9 +13964,11 @@ var
 begin
   if not Assigned(FImagesBookmark) then
   begin
+  {$IF CompilerVersion >= 35}
     if FLeftMargin.Bookmarks.Scaled then
       LPixelsPerInch := FPixelsPerInch
     else
+  {$ENDIF}
       LPixelsPerInch := 96;
 
     if Assigned(FLeftMargin.Bookmarks.Images) then
@@ -22150,10 +22152,10 @@ begin
     LMultiplier := Round((FZoom.Percentage / 100) * LPixelsPerInch);
 
     FZoom.Return := True;
-    ChangeObjectScale(LPixelsPerInch, FZoom.Divider, True);
+    ChangeObjectScale(LPixelsPerInch, FZoom.Divider{$IF CompilerVersion >= 35}, True{$ENDIF});
     FZoom.Return := False;
 
-    ChangeObjectScale(LMultiplier, LPixelsPerInch, True);
+    ChangeObjectScale(LMultiplier, LPixelsPerInch{$IF CompilerVersion >= 35}, True{$ENDIF});
 
     FZoom.Divider := LMultiplier;
   finally

@@ -256,6 +256,26 @@
               "Element": "Number"
             },
             "TokenRange": {
+              "Open": "![[",
+              "Close": "]]"
+            }
+          },
+          {
+            "Type": "Number",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "TokenRange": {
+              "Open": "[[",
+              "Close": "]]"
+            }
+          },
+          {
+            "Type": "Number",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "TokenRange": {
               "Open": "[",
               "Close": "]"
             }

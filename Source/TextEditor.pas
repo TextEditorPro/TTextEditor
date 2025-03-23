@@ -12276,12 +12276,7 @@ begin
     FEvents.OnLinesDeleted(Self, LIndex, ACount);
 
   if FHighlighter.Loaded then
-  begin
-    LIndex := Max(LIndex, 1);
-
-    if FLines.Count > 0 then
-      ScanHighlighterRangesFrom(LIndex);
-  end;
+    RescanHighlighterRanges;
 
   CreateLineNumbersCache(True);
   CodeFoldingResetCaches;
@@ -17549,8 +17544,6 @@ var
     LFirstLine, LLastLine, LCurrentLine: Integer;
     LDeletePosition, LViewDeletePosition, LDeletePositionEnd, LViewDeletePositionEnd: Integer;
   begin
-    FLines.BeginUpdate;
-
     case FSelection.ActiveMode of
       smNormal:
         if FLines.Count > 0 then
@@ -17596,8 +17589,6 @@ var
           end;
         end;
     end;
-
-    FLines.EndUpdate;
   end;
 
   procedure InsertText;

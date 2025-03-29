@@ -86,9 +86,15 @@ type
 
 implementation
 
-const
-  mmPerInch = 25.4;
-  mmPerCm = 10;
+uses
+  Winapi.Windows, System.Types;
+
+type
+  TUnitFactor = record
+  const
+    PerInch = 25.4;
+    PerCm = 10;
+  end;
 
 constructor TTextEditorPrintMargins.Create;
 begin
@@ -112,11 +118,11 @@ function TTextEditorPrintMargins.ConvertTo(AValue: Double): Double;
 begin
   case FUnitSystem of
     usCm:
-      Result := AValue * mmPerCm;
+      Result := AValue * TUnitFactor.PerCm;
     usInch:
-      Result := AValue * mmPerInch;
+      Result := AValue * TUnitFactor.PerInch;
     muThousandthsOfInches:
-      Result := mmPerInch * AValue / 1000;
+      Result := TUnitFactor.PerInch * AValue / 1000;
   else
     Result := AValue;
   end;
@@ -126,11 +132,11 @@ function TTextEditorPrintMargins.ConvertFrom(AValue: Double): Double;
 begin
   case FUnitSystem of
     usCm:
-      Result := AValue / mmPerCm;
+      Result := AValue / TUnitFactor.PerCm;
     usInch:
-      Result := AValue / mmPerInch;
+      Result := AValue / TUnitFactor.PerInch;
     muThousandthsOfInches:
-      Result := 1000 * AValue / mmPerInch;
+      Result := 1000 * AValue / TUnitFactor.PerInch;
   else
     Result := AValue;
   end;

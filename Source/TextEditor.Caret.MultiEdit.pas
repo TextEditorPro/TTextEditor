@@ -46,6 +46,7 @@ begin
     Self.FActive := FActive;
     Self.FOptions := FOptions;
     Self.FStyle := FStyle;
+
     Self.DoChange;
   end
   else
@@ -63,6 +64,7 @@ begin
   if FActive <> AValue then
   begin
     FActive := AValue;
+
     DoChange;
   end;
 end;
@@ -72,6 +74,7 @@ begin
   if FStyle <> AValue then
   begin
     FStyle := AValue;
+
     DoChange;
   end;
 end;
@@ -81,6 +84,7 @@ begin
   if FOptions <> AValue then
   begin
     FOptions := AValue;
+
     DoChange;
   end;
 end;

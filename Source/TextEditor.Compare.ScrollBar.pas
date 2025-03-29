@@ -214,7 +214,7 @@ begin
   Canvas.Pen.Color := TDefaultColors.Red;
 
   LLine := 1;
-  LHalfWidth := ClientWidth div 2;
+  LHalfWidth := ClientWidth shr 1;
 
   for LIndex := FScrollBarTopLine to Min(FScrollBarTopLine + ClientHeight, FEditorLeft.Lines.Count - 1) do
   begin
@@ -432,7 +432,7 @@ begin
     TopLine := LNewLine
   else
   begin
-    LNewLine := LNewLine - FVisibleLines div 2;
+    LNewLine := LNewLine - FVisibleLines shr 1;
     LStep := Abs(LNewLine - TopLine) div 5;
 
     if LNewLine < TopLine then

@@ -36,9 +36,6 @@
             "Attributes": {
               "Element": "String"
             },
-            "Properties": {
-              "CloseOnEndOfLine": true
-            },
             "TokenRange": {
               "Open": "'",
               "Close": "'"
@@ -241,6 +238,34 @@
               "Close": ":"
             },
             "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ],
               "KeyList": [
                 {
                   "Type": "Symbol",
@@ -266,6 +291,36 @@
             },
             "TokenRange": {
               "Open": "procedure"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
             }
           },
           {
@@ -280,6 +335,36 @@
             },
             "TokenRange": {
               "Open": "function"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
             }
           },
           {
@@ -294,6 +379,36 @@
             },
             "TokenRange": {
               "Open": "package"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
             }
           },
           {
@@ -346,7 +461,25 @@
             "TokenRange": {
               "Open": "join",
               "Close": "("
-            }
+            },
+            "SubRules": {
+              "Range": [
+							  {
+			            "Type": "Method",
+			            "Attributes": {
+			              "Element": "MethodName"
+			            },
+			            "Properties": {
+			              "CloseOnEndOfLine": true,
+			              "CloseOnTerm": true,
+										"CloseParent": true
+			            },
+			            "TokenRange": {
+			              "Open": "rdb$"
+			            }
+			          }
+							]
+						}
           },
           {
             "Type": "MethodName",
@@ -529,6 +662,36 @@
             },
             "TokenRange": {
               "Open": "sequence"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
             }
           },
           {
@@ -885,6 +1048,7 @@
               "exit",
               "extended",
               "external",
+              "external name",
               "false",
               "fetch",
               "file",
@@ -1245,11 +1409,15 @@
               "atan2",
               "atanh",
               "avg",
+              "base64_decode",
+              "base64_encode",
               "bin_and",
               "bin_not",
               "bin_or",
               "bin_shl",
               "bin_shr",
+              "bin_shl_rot",
+              "bin_shr_rot",
               "bin_xor",
               "cast",
               "ceil",
@@ -1258,10 +1426,12 @@
               "char_to_uuid",
               "character_length",
               "coalesce",
+              "compare_decfloat",
               "cos",
               "cosh",
               "cot",
               "count",
+              "crypt_hash",
               "current",
               "current_connection",
               "current_date",
@@ -1273,39 +1443,58 @@
               "dateadd",
               "datediff",
               "decode",
+              "decrypt",
+              "encrypt",
               "exp",
               "extract",
               "first",
+              "first_day",
               "floor",
               "gen_id",
               "gen_uuid",
               "hash",
+              "hex_decode",
+              "hex_encode",
               "iif",
               "last",
+              "last_day",
+              "left",
               "ln",
               "log",
               "log10",
               "lower",
               "lpad",
+              "make_dbkey",
               "max",
               "maxvalue",
               "min",
               "minvalue",
               "mod",
+              "normalize_decfloat",
               "nullif",
               "octet_length",
               "overlay",
               "pi",
               "position",
               "power",
+              "quantize",
               "rand",
               "rdb$get_context",
+              "rdb$get_transaction_cn",
+              "rdb$role_in_us",
               "rdb$set_context",
+              "rdb$system_privilege",
               "replace",
               "reverse",
               "right",
               "round",
               "rpad",
+              "rsa_decrypt",
+              "rsa_encrypt",
+              "rsa_private",
+              "rsa_public",
+              "rsa_sign_hash",
+              "rsa_verify_hash",
               "sign",
               "sin",
               "sinh",
@@ -1314,10 +1503,14 @@
               "sum",
               "tan",
               "tanh",
+              "totalorder",
               "trim",
               "trim",
               "trunc",
-              "upper"
+              "unicode_char",
+              "unicode_val",
+              "upper",
+              "uuid_to_char"
             ],
             "Attributes": {
               "Element": "Method"
@@ -1397,12 +1590,12 @@
           {
             "OpenToken": "'",
             "CloseToken": "'",
-            "RegionType": "SingleLineString"
+            "RegionType": "MultiLineString"
           },
           {
             "OpenToken": "\"",
             "CloseToken": "\"",
-            "RegionType": "SingleLineString"
+            "RegionType": "MultiLineString"
           },
           {
             "OpenToken": "--",

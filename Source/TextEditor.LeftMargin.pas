@@ -114,6 +114,7 @@ begin
     Self.FMarksPanel.Assign(FMarksPanel);
     Self.FWidth := FWidth;
     Self.FVisible := FVisible;
+
     Self.DoChange;
   end
   else
@@ -168,6 +169,7 @@ begin
   if FAutosize <> AValue then
   begin
     FAutosize := AValue;
+
     DoChange
   end;
 end;
@@ -181,6 +183,7 @@ begin
   if FWidth <> LValue then
   begin
     FWidth := LValue;
+
     DoChange
   end;
 end;
@@ -190,6 +193,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange
   end;
 end;

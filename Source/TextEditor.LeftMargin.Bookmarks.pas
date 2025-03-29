@@ -12,6 +12,7 @@ type
     FLeftMargin: Integer;
     FOnChange: TNotifyEvent;
     FOwner: TComponent;
+    FScaled: Boolean;
     FShortCuts: Boolean;
     FVisible: Boolean;
     procedure DoChange;
@@ -25,6 +26,7 @@ type
   published
     property Images: TCustomImageList read FImages write SetImages;
     property LeftMargin: Integer read FLeftMargin write FLeftMargin default 2;
+    property Scaled: Boolean read FScaled write FScaled default True;
     property ShortCuts: Boolean read FShortCuts write FShortCuts default True;
     property Visible: Boolean read FVisible write SetVisible default True;
   end;
@@ -40,6 +42,7 @@ begin
 
   FOwner := AOwner;
   FLeftMargin := 2;
+  FScaled := True;
   FShortCuts := True;
   FVisible := True;
 end;
@@ -93,6 +96,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange;
   end;
 end;

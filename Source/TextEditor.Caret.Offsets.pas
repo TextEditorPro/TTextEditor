@@ -40,6 +40,7 @@ begin
   begin
     Self.FLeft := FLeft;
     Self.FTop := FTop;
+
     Self.DoChange(Self);
   end
   else
@@ -57,6 +58,7 @@ begin
   if FLeft <> AValue then
   begin
     FLeft := AValue;
+
     DoChange(Self);
   end;
 end;
@@ -66,6 +68,7 @@ begin
   if FTop <> AValue then
   begin
     FTop := AValue;
+
     DoChange(Self);
   end;
 end;

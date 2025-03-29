@@ -33,8 +33,8 @@ type
     procedure SetOption(const AOption: TTextEditorCompletionProposalOption; const AEnabled: Boolean);
     property Visible: Boolean read FVisible write FVisible;
   published
-    property CloseChars: string read FCloseChars write FCloseChars stored IsCloseCharsStored;
     property Active: Boolean read FActive write FActive default True;
+    property CloseChars: string read FCloseChars write FCloseChars stored IsCloseCharsStored;
     property KeywordCase: TTextEditorCompletionProposalKeywordCase read FKeywordCase write FKeywordCase default kcLowerCase;
     property MinHeight: Integer read FMinHeight write FMinHeight default 0;
     property MinWidth: Integer read FMinWidth write FMinWidth default 0;
@@ -71,8 +71,8 @@ end;
 
 destructor TTextEditorCompletionProposal.Destroy;
 begin
-  FreeAndNil(FSnippets);
-  FreeAndNil(FTrigger);
+  FSnippets.Free;
+  FTrigger.Free;
 
   inherited Destroy;
 end;

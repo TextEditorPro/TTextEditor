@@ -74,6 +74,7 @@ begin
     Self.FOffsets.Assign(FOffsets);
     Self.FOptions := FOptions;
     Self.FVisible := FVisible;
+
     Self.DoChange(Self);
   end
   else
@@ -115,6 +116,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange(Self);
   end;
 end;
@@ -137,6 +139,7 @@ begin
   if FOptions <> AValue then
   begin
     FOptions := AValue;
+
     DoChange(Self);
   end;
 end;

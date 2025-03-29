@@ -30,6 +30,7 @@ type
     FShowDescription: Boolean;
     FTopLine: Integer;
     FValueSet: Boolean;
+    function ActivateDropShadow(const AHandle: THandle): Boolean;
     function GetItemHeight: Integer;
     procedure AddKeyHandlers;
     procedure EditorKeyDown(ASender: TObject; var AKey: Word; AShift: TShiftState);
@@ -65,8 +66,8 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.Generics.Defaults, System.Math, System.SysUtils, System.Generics.Collections, System.UITypes,
-  TextEditor, TextEditor.CompletionProposal.Snippets, TextEditor.Consts, TextEditor.Highlighter, TextEditor.KeyCommands,
+  Winapi.Windows, System.Generics.Defaults, System.Math, System.SysUtils, System.UITypes, TextEditor,
+  TextEditor.CompletionProposal.Snippets, TextEditor.Consts, TextEditor.Highlighter, TextEditor.KeyCommands,
   TextEditor.PaintHelper;
 
 constructor TTextEditorCompletionProposalPopupWindow.Create(AOwner: TComponent);
@@ -157,6 +158,36 @@ begin
     LTextEditor.RemoveKeyPressHandler(EditorKeyPress);
     LTextEditor.RemoveKeyDownHandler(EditorKeyDown);
     LTextEditor.SetFocus;
+  end;
+end;
+
+function TTextEditorCompletionProposalPopupWindow.ActivateDropShadow(const AHandle: THandle): Boolean;
+
+  function IsXP: Boolean;
+  begin
+    Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and CheckWin32Version(5, 1);
+  end;
+
+const
+  SPI_SETDROPSHADOW = $1025;
+  CS_DROPSHADOW = $00020000;
+var
+  LClassLong: Cardinal;
+  LParam: Boolean;
+begin
+  Result := False;
+
+  LParam := True;
+
+  if IsXP and SystemParametersInfo(SPI_SETDROPSHADOW, 0, @LParam, 0) then
+  begin
+    LClassLong := GetClassLong(AHandle, GCL_STYLE);
+    LClassLong := LClassLong or CS_DROPSHADOW;
+
+    Result := SetClassLong(AHandle, GCL_STYLE, LClassLong) <> 0;
+
+    if Result then
+      SendMessage(AHandle, CM_RECREATEWND, 0, 0);
   end;
 end;
 
@@ -372,7 +403,7 @@ begin
         Canvas.Font.Style := Canvas.Font.Style - [fsUnderline];
         LTemp := Copy(LText, LPosition + Length(FCurrentString));
 
-        if LTemp <> '' then
+        if not LTemp.IsEmpty then
           Canvas.TextOut(FMargin + LWidth, LTop, LTemp);
       end
       else
@@ -573,10 +604,6 @@ var
       Inc(LWidth, FItemDescriptionWidth);
     end;
 
-    var MaxW := (Screen.DesktopWidth div 4) * 3;
-    if LWidth > MaxW then
-      LWidth := MaxW;
-
     LHeight := FItemHeight * Min(FItems.Count, FCompletionProposal.VisibleLines) + 2;
 
     if LPoint.X + LWidth > Screen.DesktopWidth then
@@ -611,19 +638,29 @@ var
 var
   LIndex, LCount: Integer;
 begin
+  if AOptions.SortByDescription then
+    FItems.Sort(TComparer<TTextEditorCompletionProposalItem>.Construct(
+      function(const ALeft, ARight: TTextEditorCompletionProposalItem): Integer
+      begin
+        Result := CompareStr(ALeft.Description, ARight.Description);
+
+        if Result = 0 then
+          Result := CompareStr(ALeft.Keyword, ARight.Keyword);
+      end))
+  else
+  if AOptions.SortByKeyword then
+    FItems.Sort(TComparer<TTextEditorCompletionProposalItem>.Construct(
+      function(const ALeft, ARight: TTextEditorCompletionProposalItem): Integer
+      begin
+        Result := CompareStr(ALeft.Keyword, ARight.Keyword);
+      end));
+
   LCount := FItems.Count;
+  SetLength(FItemIndexArray, 0);
   SetLength(FItemIndexArray, LCount);
+
   for LIndex := 0 to LCount - 1 do
     FItemIndexArray[LIndex] := LIndex;
-
-  if AOptions.SortByDescription then
-    TArray.Sort<Integer>(FItemIndexArray, TComparer<Integer>.Construct(
-      function(const ALeft, ARight: Integer): Integer
-      begin
-        Result := CompareStr(FItems[FItemIndexArray[ALeft]].Description, FItems[FItemIndexArray[ARight]].Description);
-        if Result = 0 then
-          Result := CompareStr(FItems[FItemIndexArray[ALeft]].Keyword, FItems[FItemIndexArray[ARight]].Keyword);
-      end));
 
   if Length(FItemIndexArray) > 0 then
   begin

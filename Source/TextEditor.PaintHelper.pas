@@ -511,7 +511,7 @@ begin
   FStockBitmap.Canvas.Brush.Color := TColors.White;
   FCalcExtentBaseStyle := ACalcExtentBaseStyle;
   FColor := TColors.SysWindowText;
-  FBackgroundColor := clWindow;
+  FBackgroundColor := TColors.SysWindow;
 
   SetBaseFont(ABaseFont);
 end;

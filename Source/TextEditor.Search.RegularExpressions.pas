@@ -35,7 +35,7 @@ end;
 
 destructor TTextEditorRegexSearch.Destroy;
 begin
-  FreeAndNil(FLengths);
+  FLengths.Free;
 
   inherited Destroy;
 end;

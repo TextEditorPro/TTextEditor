@@ -141,6 +141,7 @@ begin
       begin
         if Assigned(FSkinData.SkinManager) then
           AMessage.Result := FSkinData.SkinManager.SkinCommonInfo.Sections[ssEdit] + 1;
+
         Exit;
       end;
     AC_REFRESH:
@@ -148,8 +149,10 @@ begin
       begin
         RefreshEditScrolls(SkinData, FScrollWnd);
         CommonMessage(AMessage, FSkinData);
+
         if HandleAllocated and Visible then
           RedrawWindow(Handle, nil, 0, RDWA_REPAINT);
+
         Exit;
       end;
   end;

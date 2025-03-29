@@ -73,6 +73,7 @@ begin
   if FBars <> AValue then
   begin
     FBars := AValue;
+
     DoChange;
   end;
 end;
@@ -93,6 +94,7 @@ begin
     Self.FIndicator.Assign(FIndicator);
     Self.FShadow.Assign(FShadow);
     Self.FOptions := FOptions;
+
     Self.DoChange;
   end
   else
@@ -112,6 +114,7 @@ begin
   if FOptions <> AValue then
   begin
     FOptions := AValue;
+
     DoChange;
   end;
 end;

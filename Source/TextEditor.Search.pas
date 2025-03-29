@@ -98,6 +98,7 @@ begin
     Self.FMap.Assign(FMap);
     Self.FInSelection.Assign(FInSelection);
     Self.FNearOperator.Assign(FNearOperator);
+
     Self.DoChange;
   end
   else
@@ -243,6 +244,7 @@ begin
       Exit;
 
   LSearchItem := PTextEditorSearchItem(FItems[LHigh]);
+
   if IsSearchItemLowerThanTextPosition then
     Exit(LHigh);
 
@@ -251,7 +253,7 @@ begin
 
   while LLow <= LHigh do
   begin
-    LMiddle := (LLow + LHigh) div 2;
+    LMiddle := (LLow + LHigh) shr 1;
 
     LSearchItem := PTextEditorSearchItem(FItems[LMiddle]);
 
@@ -321,7 +323,7 @@ begin
 
   while LLow <= LHigh do
   begin
-    LMiddle := (LLow + LHigh) div 2;
+    LMiddle := (LLow + LHigh) shr 1;
 
     LSearchItem := PTextEditorSearchItem(FItems[LMiddle]);
 

@@ -15,6 +15,16 @@
       "SubRules": {
         "Range": [
           {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "TokenRange": {
+              "Open": "<![",
+              "Close": "]>"
+            }
+          },
+          {
             "Type": "BlockComment",
             "Attributes": {
               "Element": "Comment"
@@ -45,7 +55,7 @@
             "Attributes": {
               "Element": "ReservedWord"
             },
-            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?;'\".><# ",
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,$%^?;'\"><# ",
             "Properties": {
               "UseDelimitersForText": true
             },
@@ -167,6 +177,11 @@
             "RegionType": "SingleLineString"
           },
           {
+            "OpenToken": "<![",
+            "CloseToken": "]>",
+            "RegionType": "MultiLine"
+          },
+          {
             "OpenToken": "<!--",
             "CloseToken": "-->",
             "RegionType": "MultiLine"
@@ -202,6 +217,11 @@
         "OpenToken": "\"",
         "CloseToken": "\"",
         "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "<![",
+        "CloseToken": "]>",
+        "RegionType": "MultiLine"
       },
       {
         "OpenToken": "<!--",

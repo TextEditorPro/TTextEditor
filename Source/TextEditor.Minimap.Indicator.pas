@@ -40,6 +40,7 @@ begin
   begin
     Self.FAlphaBlending := FAlphaBlending;
     Self.FOptions := FOptions;
+
     Self.DoChange;
   end
   else
@@ -66,6 +67,7 @@ begin
   if FAlphaBlending <> AValue then
   begin
     FAlphaBlending := AValue;
+
     DoChange;
   end;
 end;

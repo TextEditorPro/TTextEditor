@@ -219,7 +219,7 @@ type
   TTextEditorLeftMarginLineStateAlign = (lsLeft, lsRight);
 
   { Right margin }
-  TTextEditorRightMarginOption = (rmoAutoLinebreak, rmoMouseMove, rmoShowMovingHint);
+  TTextEditorRightMarginOption = (rmoAutoLineBreak, rmoMouseMove, rmoShowMovingHint);
   TTextEditorRightMarginOptions = set of TTextEditorRightMarginOption;
 
   { Matching pair }
@@ -346,6 +346,7 @@ type
   TTextEditorBookmarkPlacedEvent = procedure(const ASender: TObject; const AIndex: Integer; const AImageIndex: Integer; const ATextPosition: TTextEditorTextPosition) of object;
   TTextEditorCaretChangedEvent = procedure(const ASender: TObject; const X, Y: Integer; const AOffset: Integer) of object;
   TTextEditorCodeFoldingChangeEvent = procedure(const AEvent: TTextEditorCodeFoldingChanges) of object;
+  TTexteditorChangeScaleEvent = procedure(const ASender: TObject; const AMultiplier, ADivider: Integer{$IF CompilerVersion >= 35}; const AIsDpiChange: Boolean{$IFEND}) of object;
   TTextEditorContextHelpEvent = procedure(const ASender: TObject; const AWord: string) of object;
   TTextEditorCreateHighlighterStreamEvent = procedure(const ASender: TObject; const AName: string;
     var AStream: TStream) of object;

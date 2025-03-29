@@ -1,5 +1,6 @@
 ﻿{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
 {$WARN IMPLICIT_STRING_CAST OFF}
+{$ZEROBASEDSTRINGS ON}
 unit TextEditor.Utils;
 
 {$I TextEditor.Defines.inc}
@@ -9,7 +10,6 @@ interface
 uses
   Winapi.Windows, System.Classes, System.SysUtils, System.UITypes, Vcl.Graphics, TextEditor.Types;
 
-function ActivateDropShadow(const AHandle: THandle): Boolean;
 function AutoCursor(const ACursor: TCursor = crHourGlass): IAutoCursor;
 function CaseNone(const AChar: Char): Char; inline;
 function CaseStringNone(const AString: string): string; inline;
@@ -22,24 +22,20 @@ function GetBOFPosition: TTextEditorTextPosition; inline;
 function GetClipboardText: string;
 function GetPosition(const AChar, ALine: Integer): TTextEditorTextPosition; inline;
 function GetViewPosition(const AColumn: Integer; const ARow: Integer): TTextEditorViewPosition; inline;
-function HexToColor(const AColor: string): TColor;
-function IntToRoman(const AValue: Integer): string;
 function IsAnsiUnicodeChar(const AChar: Char): Boolean; inline;
 function IsCombiningCharacter(const AChar: PChar): Boolean; inline;
 function IsRightToLeftCharacter(const AChar: Char; const AAllowEmptySpace: Boolean = True): Boolean; inline;
 function IsSamePosition(const APosition1, APosition2: TTextEditorTextPosition): Boolean; inline;
 function IsUTF8Buffer(const ABuffer: TBytes; out AWithBOM: Boolean): Boolean;
 function MessageDialog(const AMessage: string; const ADlgType: TMsgDlgType; const AButtons: TMsgDlgButtons; const ADefaultButton: TMsgDlgBtn): Integer;
-function MiddleColor(const AColor1, AColor2: TColor): TColor;
-function SetColorDef(const AColor: TColor; const ADefault: TColor): TColor; inline;
-function TextHeight(const ACanvas: TCanvas; const AText: string): Integer;
-function TextWidth(const ACanvas: TCanvas; const AText: string): Integer;
+function MiddleColor(const AColor1, AColor2: TColor): TColor; inline;
+function TextHeight(const ACanvas: TCanvas; const AText: string): Integer; inline;
+function TextWidth(const ACanvas: TCanvas; const AText: string): Integer; inline;
 function TitleCase(const AValue: string): string;
 function ToggleCase(const AValue: string): string;
 function Trim(const AText: string): string;
 function TrimLeft(const AText: string): string;
 function TrimRight(const AText: string): string;
-function WrapTextEx(const ALine: string; const ABreakChars: TSysCharSet; const AMaxColumn: Integer; const AList: TList): Boolean;
 procedure ClearList(var AList: TList);
 procedure FreeList(var AList: TList);
 procedure ResizeBitmap(const ABitmap: TBitmap; const ANewWidth, ANewHeight: Integer);
@@ -198,37 +194,6 @@ begin
   end;
 end;
 
-function ActivateDropShadow(const AHandle: THandle): Boolean;
-
-  function IsXP: Boolean;
-  begin
-    Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and CheckWin32Version(5, 1);
-  end;
-
-const
-  SPI_SETDROPSHADOW = $1025;
-  CS_DROPSHADOW = $00020000;
-
-var
-  LClassLong: Cardinal;
-  LParam: Boolean;
-begin
-  LParam := True;
-
-  if IsXP and SystemParametersInfo(SPI_SETDROPSHADOW, 0, @LParam, 0) then
-  begin
-    LClassLong := GetClassLong(AHandle, GCL_STYLE);
-    LClassLong := LClassLong or CS_DROPSHADOW;
-
-    Result := SetClassLong(AHandle, GCL_STYLE, LClassLong) <> 0;
-
-    if Result then
-      SendMessage(AHandle, CM_RECREATEWND, 0, 0);
-  end
-  else
-    Result := False;
-end;
-
 function CaseNone(const AChar: Char): Char;
 begin
   Result := AChar;
@@ -273,20 +238,6 @@ begin
   for LIndex := 1 to LLength do
   if AChar = AString[LIndex] then
     Exit(True);
-end;
-
-function HexToColor(const AColor: string): TColor;
-var
-  LColor: string;
-begin
-  Result := TColors.SysNone;
-
-  if AColor.Length = 7 then
-  begin
-    LColor := '$00' + Copy(AColor, 6, 2) + Copy(AColor, 4, 2) + Copy(AColor, 2, 2);
-
-    Result := StrToIntDef(LColor, TColors.SysNone);
-  end;
 end;
 
 function ColorToHex(const AColor: TColor): string;
@@ -347,9 +298,9 @@ function MiddleColor(const AColor1, AColor2: TColor): TColor;
 var
   LRed, LGreen, LBlue: Byte;
 begin
-  LRed := (GetRValue(AColor1) + GetRValue(AColor2)) div 2;
-  LGreen := (GetGValue(AColor1) + GetGValue(AColor2)) div 2;
-  LBlue := (GetBValue(AColor1) + GetBValue(AColor2)) div 2;
+  LRed := (GetRValue(AColor1) + GetRValue(AColor2)) shr 1;
+  LGreen := (GetGValue(AColor1) + GetGValue(AColor2)) shr 1;
+  LBlue := (GetBValue(AColor1) + GetBValue(AColor2)) shr 1;
 
   Result := RGB(LRed, LGreen, LBlue);
 end;
@@ -414,23 +365,6 @@ begin
     Result := ShowModal;
   finally
     Free;
-  end;
-end;
-
-function GetHasTabs(ALine: PChar; var ACharsBefore: Integer): Boolean;
-begin
-  Result := False;
-
-  ACharsBefore := 0;
-
-  if Assigned(ALine) then
-  while ALine^ <> TControlCharacters.Null do
-  begin
-    if ALine^ = TControlCharacters.Tab then
-      Exit(True);
-
-    Inc(ACharsBefore);
-    Inc(ALine);
   end;
 end;
 
@@ -640,7 +574,7 @@ var
   LLocaleID: LCID;
   LBytePointer: PByte;
 
-  function AnsiStringToString(const AValue: AnsiString; ACodePage: Word): string;
+  function AnsiStringToString(const AValue: AnsiString; const ACodePage: Word): string;
   var
     LInputLength, LOutputLength: Integer;
   begin
@@ -650,7 +584,7 @@ var
     MultiByteToWideChar(ACodePage, 0, PAnsiChar(AValue), LInputLength, PChar(Result), LOutputLength);
   end;
 
-  function CodePageFromLocale(ALanguage: LCID): Integer;
+  function CodePageFromLocale(const ALanguage: LCID): Integer;
   var
     LBuffer: array [0 .. 6] of Char;
   begin
@@ -699,14 +633,6 @@ begin
   finally
     Clipboard.Close;
   end;
-end;
-
-function SetColorDef(const AColor: TColor; const ADefault: TColor): TColor;
-begin
-  if AColor = TColors.SysDefault then
-    Result := ADefault
-  else
-    Result := AColor;
 end;
 
 function GetHTMLClipboardFormat: TClipFormat;
@@ -814,6 +740,7 @@ begin
       LLength := Length(LHTML);
 
       LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, LLength);
+
       if LGlobalMem <> 0 then
       begin
         LPGlobalLock := GlobalLock(LGlobalMem);
@@ -839,139 +766,13 @@ var
 begin
   LBitmap := TBitmap.Create;
   try
+    LBitmap.PixelFormat := ABitmap.PixelFormat;
     LBitmap.SetSize(ANewWidth, ANewHeight);
     LBitmap.Canvas.StretchDraw(Rect(0, 0, ANewWidth, ANewHeight), ABitmap);
-    LBitmap.SetSize(ANewWidth, ANewHeight);
+    ABitmap.SetSize(ANewWidth, ANewHeight);
     ABitmap.Canvas.Draw(0, 0, LBitmap);
   finally
     LBitmap.Free;
-  end;
-end;
-
-function WrapTextEx(const ALine: string; const ABreakChars: TSysCharSet; const AMaxColumn: Integer; const AList: TList): Boolean;
-var
-  LWrapPosition: TTextEditorWrapPosition;
-  LPosition, LPreviousPosition: Integer;
-  LFound: Boolean;
-begin
-  if Length(ALine) <= AMaxColumn then
-  begin
-    Result := True;
-    Exit;
-  end;
-
-  Result := False;
-  LPosition := 1;
-  LPreviousPosition := 0;
-  LWrapPosition := TTextEditorWrapPosition.Create;
-  while LPosition <= Length(ALine) do
-  begin
-    LFound := (LPosition - LPreviousPosition > AMaxColumn) and (LWrapPosition.Index <> 0);
-    if not LFound and (ALine[LPosition] <= High(Char)) and (Char(ALine[LPosition]) in ABreakChars) then
-      LWrapPosition.Index := LPosition;
-
-    if LFound then
-    begin
-      Result := True;
-      AList.Add(LWrapPosition);
-      LPreviousPosition := LWrapPosition.Index;
-
-      if ((Length(ALine) - LPreviousPosition) > AMaxColumn) and (LPosition < Length(ALine)) then
-        LWrapPosition := TTextEditorWrapPosition.Create
-      else
-        Break;
-    end;
-
-    Inc(LPosition);
-  end;
-
-  if (AList.Count = 0) or (AList.Last <> LWrapPosition) then
-    LWrapPosition.Free;
-end;
-
-function IntToRoman(const AValue: Integer): string;
-var
-  LValue: Integer;
-begin
-  Result := '';
-
-  LValue := AValue;
-  while LValue >= 1000 do
-  begin
-    Result := Result + 'M';
-    Dec(LValue, 1000);
-  end;
-
-  if LValue >= 900 then
-  begin
-    Result := Result + 'CM';
-    Dec(LValue, 900);
-  end;
-
-  while LValue >= 500 do
-  begin
-    Result := Result + 'D';
-    Dec(LValue, 500);
-  end;
-
-  if LValue >= 400 then
-  begin
-    Result := Result + 'CD';
-    Dec(LValue, 400);
-  end;
-
-  while LValue >= 100 do
-  begin
-    Result := Result + 'C';
-    Dec(LValue, 100);
-  end;
-
-  if LValue >= 90 then
-  begin
-    Result := Result + 'XC';
-    Dec(LValue, 90);
-  end;
-
-  while LValue >= 50 do
-  begin
-    Result := Result + 'L';
-    Dec(LValue, 50);
-  end;
-
-  if LValue >= 40 then
-  begin
-    Result := Result + 'XL';
-    Dec(LValue, 40);
-  end;
-
-  while LValue >= 10 do
-  begin
-    Result := Result + 'X';
-    Dec(LValue, 10);
-  end;
-
-  if LValue >= 9 then
-  begin
-    Result := Result + 'IX';
-    Dec(LValue, 9);
-  end;
-
-  while LValue >= 5 do
-  begin
-    Result := Result + 'V';
-    Dec(LValue, 5);
-  end;
-
-  if LValue >= 4 then
-  begin
-    Result := Result + 'IV';
-    Dec(LValue, 4);
-  end;
-
-  while LValue > 0 do
-  begin
-    Result := Result + 'I';
-    Dec(LValue);
   end;
 end;
 

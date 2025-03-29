@@ -334,7 +334,7 @@ begin
 
   while LLow <= LHigh do
   begin
-    LMiddle := (LLow + LHigh) div 2;
+    LMiddle := (LLow + LHigh) shr 1;
 
     LErrorItem := PTextEditorTextPosition(FItems[LMiddle]);
 
@@ -404,12 +404,14 @@ begin
     Exit;
 
   LErrorItem := PTextEditorTextPosition(FItems[0]);
+
   if IsErrorItemGreaterThanTextPosition then
     Exit(0);
 
   LHigh := FItems.Count - 1;
 
   LErrorItem := PTextEditorTextPosition(FItems[LHigh]);
+
   if IsErrorItemLowerThanTextPosition then
     Exit(0);
 
@@ -417,7 +419,7 @@ begin
 
   while LLow <= LHigh do
   begin
-    LMiddle := (LLow + LHigh) div 2;
+    LMiddle := (LLow + LHigh) shr 1;
 
     LErrorItem := PTextEditorTextPosition(FItems[LMiddle]);
 

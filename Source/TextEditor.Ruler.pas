@@ -60,6 +60,7 @@ begin
     Self.FHeight := FHeight;
     Self.FVisible := FVisible;
     Self.FOptions := FOptions;
+
     Self.DoChange;
   end
   else
@@ -88,6 +89,7 @@ begin
   if FHeight <> AValue then
   begin
     FHeight := AValue;
+
     DoChange
   end;
 end;
@@ -97,6 +99,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange
   end;
 end;

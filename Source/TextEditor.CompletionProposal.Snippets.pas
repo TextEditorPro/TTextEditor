@@ -207,7 +207,7 @@ end;
 
 function TTextEditorCompletionProposalSnippetItem.GetDisplayName: string;
 begin
-  Result := IfThen(FKeyword = '', STextEditorCompletionProposalSnippetItemUnnamed, FKeyword);
+  Result := IfThen(FKeyword.IsEmpty, STextEditorCompletionProposalSnippetItemUnnamed, FKeyword);
 end;
 
 { TTextEditorCompletionProposalSnippetItems }

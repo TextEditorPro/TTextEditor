@@ -150,7 +150,7 @@ type
 implementation
 
 uses
-  System.Math, TextEditor.Encoding, TextEditor.Language, TextEditor;
+  System.Math, TextEditor.Encoding, TextEditor.Language;
 
 { TTextEditorLines }
 
@@ -397,7 +397,7 @@ var
 begin
   with FItems^[AIndex] do
   begin
-    if TextLine = '' then
+    if TextLine.IsEmpty then
     begin
       Result := '';
 
@@ -745,7 +745,7 @@ var
   LDelta: Integer;
 begin
   if FCapacity > 64 then
-    LDelta := (FCapacity * 3) div 2
+    LDelta := (FCapacity * 3) shr 1
   else
   if FCapacity > 8 then
     LDelta := 16
@@ -870,7 +870,7 @@ procedure TTextEditorLines.InsertText(const AIndex: Integer; const AText: string
 var
   LStringList: TStringList;
 begin
-  if AText = '' then
+  if AText.IsEmpty then
     Exit;
 
   LStringList := TStringList.Create;
@@ -1094,8 +1094,6 @@ begin
   LProgressPosition := 0;
   LLineBreak := True;
 
-  if Owner is TCustomTextEditor then
-    TCustomTextEditor(Owner).BeginLines;
   BeginUpdate;
   try
     Clear;
@@ -1111,7 +1109,7 @@ begin
         begin
           LReadCount := LStreamReader.ReadBlock(LCharBuffer, 0, LBufferSize);
 
-          if LReadCount <> 0 then
+          if LReadCount > 0 then
           begin
             SetString(LContent, PChar(@LCharBuffer[0]), LReadCount);
 
@@ -1235,8 +1233,6 @@ begin
     end;
   finally
     EndUpdate;
-    if Owner is TCustomTextEditor then
-      TCustomTextEditor(Owner).EndLines;
   end;
 
   if Assigned(OnInserted) then
@@ -1273,7 +1269,7 @@ begin
     begin
       LPreviousStart := 0;
       LEnd := 0;
-      LLineInc := FCount div 2;
+      LLineInc := FCount shr 1;
 
       while LEnd < FCount do
       begin
@@ -1284,12 +1280,11 @@ begin
         if FTextLength >= TMaxValues.TextLength then
         begin
           LEnd := LPreviousStart;
-          LLineInc := LLineInc div 2;
+          LLineInc := LLineInc shr 1;
         end
         else
         begin
           LPreviousStart := LStart;
-
           LText := GetPartialTextStr(LStart, LEnd);
           LBuffer := FEncoding.GetBytes(LText);
           SetLength(LText, 0);
@@ -1413,8 +1408,6 @@ begin
   if Assigned(FOnBeforeSetText) then
     FOnBeforeSetText(Self);
 
-  if Owner is TCustomTextEditor then
-    TCustomTextEditor(Owner).BeginLines;
   BeginUpdate;
   try
     Clear;
@@ -1471,8 +1464,6 @@ begin
     end;
   finally
     EndUpdate;
-    if Owner is TCustomTextEditor then
-      TCustomTextEditor(Owner).EndLines;
   end;
 
   if Assigned(FOnInserted) then

@@ -90,10 +90,12 @@ object MainForm: TMainForm
     Margins.Left = 0
     Align = alClient
     CodeFolding.Visible = True
+    CodeFolding.Width = 20
     HighlightLine.Active = True
-    LeftMargin.Width = 55
+    LeftMargin.Width = 67
     OnCompletionProposalExecute = TextEditorCompletionProposalExecute
     OnCreateHighlighterStream = TextEditorCreateHighlighterStream
+    Selection.Options = [soALTSetsColumnMode, soHighlightSimilarTerms, soTermsCaseSensitive]
     TabOrder = 1
   end
   object StatusBar: TStatusBar

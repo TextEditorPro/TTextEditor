@@ -34,7 +34,7 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Assign(ASource: TPersistent); override;
-    procedure ChangeScale(const AMultiplier: Integer; const ADivider: Integer; const AIsDpiChange: Boolean);
+    procedure ChangeScale(const AMultiplier: Integer; const ADivider: Integer{$IF CompilerVersion >= 35}; const AIsDpiChange: Boolean{$IFEND});
     procedure SetDefaults;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
@@ -125,12 +125,12 @@ end;
 
 destructor TTextEditorFonts.Destroy;
 begin
-  FreeAndNil(FCodeFoldingHint);
-  FreeAndNil(FCompletionProposal);
-  FreeAndNil(FLineNumbers);
-  FreeAndNil(FMinimap);
-  FreeAndNil(FRuler);
-  FreeAndNil(FText);
+  FCodeFoldingHint.Free;
+  FCompletionProposal.Free;
+  FLineNumbers.Free;
+  FMinimap.Free;
+  FRuler.Free;
+  FText.Free;
 
   inherited Destroy;
 end;
@@ -206,7 +206,7 @@ begin
     FOnChange(Self);
 end;
 
-procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivider: Integer; const AIsDpiChange: Boolean);
+procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivider: Integer{$IF CompilerVersion >= 35}; const AIsDpiChange: Boolean{$IFEND});
 
   procedure ChangeScale(const AFont: TFont);
   begin
@@ -214,12 +214,14 @@ procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivide
     begin
       AFont.Height := MulDiv(AFont.Height, AMultiplier, ADivider);
 
+{$IF CompilerVersion >= 35}
       if AIsDpiChange then
         AFont.PixelsPerInch := AMultiplier;
+{$IFEND}
     end;
   end;
 
-  begin
+begin
   ChangeScale(FCodeFoldingHint);
   ChangeScale(FCompletionProposal);
   ChangeScale(FLineNumbers);

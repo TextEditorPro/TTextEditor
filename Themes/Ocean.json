@@ -29,7 +29,7 @@
       "EditorAssemblerCommentForeground": "clTeal",
       "EditorAssemblerReservedWordBackground": "clAqua",
       "EditorAssemblerReservedWordForeground": "clBlack",
-      "EditorAttributeBackground": "clWhite",
+      "EditorAttributeBackground": "clAqua",
       "EditorAttributeForeground": "clBlue",
       "EditorBackground": "clAqua",
       "EditorCharacterBackground": "clAqua",

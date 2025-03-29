@@ -90,6 +90,7 @@ end;
 constructor TTextEditorMarkList.Create(AOwner: TCustomControl);
 begin
   inherited Create;
+
   FEditor := AOwner;
 end;
 

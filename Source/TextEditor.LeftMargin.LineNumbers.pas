@@ -89,6 +89,7 @@ begin
   begin
     FDigitCount := LValue;
     FAutosizeDigitCount := FDigitCount;
+
     DoChange
   end;
 end;
@@ -98,6 +99,7 @@ begin
   if FOptions <> AValue then
   begin
     FOptions := AValue;
+
     DoChange
   end;
 end;
@@ -120,6 +122,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange
   end;
 end;

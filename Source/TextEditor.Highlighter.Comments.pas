@@ -16,13 +16,12 @@ type
     procedure AddChars(const AToken: string);
   public
     destructor Destroy; override;
-
     procedure AddBlockComment(const AOpenToken: string; const ACloseToken: string);
     procedure AddLineComment(const AToken: string);
     procedure Clear;
-    property Chars: TTextEditorCharSet read FChars write FChars;
     property BlockComments: TTextEditorArrayOfString read FBlockComments;
     property BlockCommentsFound: Boolean read FBlockCommentsFound;
+    property Chars: TTextEditorCharSet read FChars write FChars;
     property LineComments: TTextEditorArrayOfString read FLineComments;
     property LineCommentsFound: Boolean read FLineCommentsFound;
   end;

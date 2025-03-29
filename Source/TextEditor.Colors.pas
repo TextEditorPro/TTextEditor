@@ -117,6 +117,7 @@ type
     FSyncEditWordBorder: TColor;
     FWordWrapIndicatorArrow: TColor;
     FWordWrapIndicatorLines: TColor;
+    function SetColorDef(const AColor: TColor; const ADefault: TColor): TColor; inline;
     procedure DoChange;
     procedure SetActiveLineBackground(const AValue: TColor);
     procedure SetActiveLineBackgroundUnfocused(const AValue: TColor);
@@ -628,6 +629,14 @@ begin
     FOnChange(Self);
 end;
 
+function TTextEditorColors.SetColorDef(const AColor: TColor; const ADefault: TColor): TColor;
+begin
+  if AColor = TColors.SysDefault then
+    Result := ADefault
+  else
+    Result := AColor;
+end;
+
 procedure TTextEditorColors.SetActiveLineBackground(const AValue: TColor);
 begin
   FActiveLineBackground := SetColorDef(AValue, TDefaultColors.ActiveLineBackground);
@@ -636,6 +645,7 @@ end;
 procedure TTextEditorColors.SetActiveLineBackgroundUnfocused(const AValue: TColor);
 begin
   FActiveLineBackgroundUnfocused := SetColorDef(AValue, TDefaultColors.ActiveLineBackgroundUnfocused);
+
   DoChange;
 end;
 
@@ -647,6 +657,7 @@ end;
 procedure TTextEditorColors.SetActiveLineForegroundUnfocused(const AValue: TColor);
 begin
   FActiveLineForegroundUnfocused := SetColorDef(AValue, TDefaultColors.ActiveLineForegroundUnfocused);
+
   DoChange;
 end;
 
@@ -798,6 +809,7 @@ end;
 procedure TTextEditorColors.SetEditorBackground(const AValue: TColor);
 begin
   FEditorBackground := AValue;
+
   DoChange;
 end;
 
@@ -834,6 +846,7 @@ end;
 procedure TTextEditorColors.SetEditorForeground(const AValue: TColor);
 begin
   FEditorForeground := AValue;
+
   DoChange;
 end;
 
@@ -975,42 +988,49 @@ end;
 procedure TTextEditorColors.SetLeftMarginActiveLineBackgroundUnfocused(const AValue: TColor);
 begin
   FLeftMarginActiveLineBackgroundUnfocused := SetColorDef(AValue, TDefaultColors.ActiveLineBackgroundUnfocused);
+
   DoChange;
 end;
 
 procedure TTextEditorColors.SetLeftMarginActiveLineNumber(const AValue: TColor);
 begin
   FLeftMarginActiveLineNumber := SetColorDef(AValue, TColors.SysNone);
+
   DoChange;
 end;
 
 procedure TTextEditorColors.SetLeftMarginBackground(const AValue: TColor);
 begin
   FLeftMarginBackground := SetColorDef(AValue, TDefaultColors.LeftMarginBackground);
+
   DoChange;
 end;
 
 procedure TTextEditorColors.SetLeftMarginBookmarkPanelBackground(const AValue: TColor);
 begin
   FLeftMarginBookmarkPanelBackground := SetColorDef(AValue, TColors.SysNone);
+
   DoChange;
 end;
 
 procedure TTextEditorColors.SetLeftMarginBorder(const AValue: TColor);
 begin
   FLeftMarginBorder := SetColorDef(AValue, TDefaultColors.LeftMarginBackground);
+
   DoChange;
 end;
 
 procedure TTextEditorColors.SetLeftMarginLineNumberLine(const AValue: TColor);
 begin
   FLeftMarginLineNumberLine := SetColorDef(AValue, TDefaultColors.LineNumbers);
+
   DoChange;
 end;
 
 procedure TTextEditorColors.SetLeftMarginLineNumbers(const AValue: TColor);
 begin
   FLeftMarginLineNumbers := SetColorDef(AValue, TColors.SysWindowText);
+
   DoChange;
 end;
 

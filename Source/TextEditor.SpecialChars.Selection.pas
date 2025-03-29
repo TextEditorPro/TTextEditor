@@ -40,6 +40,7 @@ begin
   begin
     Self.FColor := FColor;
     Self.FVisible := FVisible;
+
     Self.DoChange;
   end
   else
@@ -57,6 +58,7 @@ begin
   if FColor <> AValue then
   begin
     FColor := AValue;
+
     DoChange;
   end;
 end;
@@ -66,6 +68,7 @@ begin
   if FVisible <> AValue then
   begin
     FVisible := AValue;
+
     DoChange;
   end;
 end;

@@ -90,6 +90,7 @@ begin
     Self.FVisible := FVisible;
     Self.FWidth := FWidth;
     Self.FCursor := FCursor;
+
     Self.DoChange;
   end
   else
@@ -128,6 +129,7 @@ begin
   if FAlign <> AValue then
   begin
     FAlign := AValue;
+
     DoChange;
   end;
 end;
@@ -141,6 +143,7 @@ begin
   if FWidth <> LValue then
   begin
     FWidth := LValue;
+
     DoChange;
   end;
 end;

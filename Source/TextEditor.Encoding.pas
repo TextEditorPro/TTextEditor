@@ -266,7 +266,7 @@ var
 
   procedure AddToResult;
   begin
-    if LValue <> '' then
+    if not LValue.IsEmpty then
     begin
       Result := Result + Chr(StrToIntDef(LValue, 0));
       LValue := '';
@@ -361,7 +361,7 @@ var
 
   procedure AddToResult;
   begin
-    if LValue <> '' then
+    if not LValue.IsEmpty then
     begin
       Result := Result + Chr(StrToIntDef('$' + LValue, 0));
       LValue := '';
@@ -406,7 +406,7 @@ var
 
   procedure AddToResult;
   begin
-    if LValue <> '' then
+    if not LValue.IsEmpty then
     begin
       Result := Result + Chr(StrToIntDef('$' + LValue, 0));
       LValue := '';
@@ -457,7 +457,7 @@ var
 
   procedure AddToResult;
   begin
-    if LValue <> '' then
+    if not LValue.IsEmpty then
     begin
       Result := Result + Chr(StrToIntDef('$' + LValue, 0));
       LValue := '';
@@ -626,7 +626,7 @@ var
 
   procedure AddToResult;
   begin
-    if LValue <> '' then
+    if not LValue.IsEmpty then
     begin
       Result := Result + Chr(OctToInt(LValue));
       LValue := '';

@@ -42,15 +42,15 @@ type
     function GetEditorPrint: TTextEditorPrint;
     function GetPageCount: Integer;
     function GetPageHeight100Percent: Integer;
-    function GetPageHeightFromWidth(AWidth: Integer): Integer;
+    function GetPageHeightFromWidth(const AWidth: Integer): Integer;
     function GetPageWidth100Percent: Integer;
-    function GetPageWidthFromHeight(AHeight: Integer): Integer;
+    function GetPageWidthFromHeight(const AHeight: Integer): Integer;
     procedure PaintPaper(const ACanvas: TCanvas);
-    procedure SetBorderStyle(AValue: TBorderStyle);
-    procedure SetEditorPrint(AValue: TTextEditorPrint);
-    procedure SetPageBackgroundColor(AValue: TColor);
-    procedure SetScaleMode(AValue: TTextEditorPreviewScale);
-    procedure SetScalePercent(AValue: Integer);
+    procedure SetBorderStyle(const AValue: TBorderStyle);
+    procedure SetEditorPrint(const AValue: TTextEditorPrint);
+    procedure SetPageBackgroundColor(const AValue: TColor);
+    procedure SetScaleMode(const AValue: TTextEditorPreviewScale);
+    procedure SetScalePercent(const AValue: Integer);
     procedure WMEraseBkgnd(var AMessage: TWMEraseBkgnd); message WM_ERASEBKGND;
     procedure WMGetDlgCode(var AMessage: TWMGetDlgCode); message WM_GETDLGCODE;
     procedure WMHScroll(var AMessage: TWMHScroll); message WM_HSCROLL;
@@ -62,10 +62,10 @@ type
     procedure CreateParams(var AParams: TCreateParams); override;
     procedure KeyDown(var Key: Word; Shift: TShiftState); override;
     procedure Notification(AComponent: TComponent; Operation: TOperation); override;
-    procedure ScrollHorizontallyFor(AValue: Integer);
-    procedure ScrollHorizontallyTo(AValue: Integer); virtual;
-    procedure ScrollVerticallyFor(AValue: Integer);
-    procedure ScrollVerticallyTo(AValue: Integer); virtual;
+    procedure ScrollHorizontallyFor(const AValue: Integer);
+    procedure ScrollHorizontallyTo(const AValue: Integer); virtual;
+    procedure ScrollVerticallyFor(const AValue: Integer);
+    procedure ScrollVerticallyTo(const AValue: Integer); virtual;
     procedure SizeChanged; virtual;
     procedure UpdateScrollbars; virtual;
   public
@@ -207,7 +207,7 @@ begin
   end;
 end;
 
-function TTextEditorPrintPreview.GetPageHeightFromWidth(AWidth: Integer): Integer;
+function TTextEditorPrintPreview.GetPageHeightFromWidth(const AWidth: Integer): Integer;
 begin
   if Assigned(FEditorPrint) then
   with FEditorPrint.PrinterInfo do
@@ -216,7 +216,7 @@ begin
     Result := MulDiv(AWidth, 141, 100);
 end;
 
-function TTextEditorPrintPreview.GetPageWidthFromHeight(AHeight: Integer): Integer;
+function TTextEditorPrintPreview.GetPageWidthFromHeight(const AHeight: Integer): Integer;
 begin
   if Assigned(FEditorPrint) then
   with FEditorPrint.PrinterInfo do
@@ -347,53 +347,55 @@ begin
   end;
 end;
 
-procedure TTextEditorPrintPreview.ScrollHorizontallyFor(AValue: Integer);
+procedure TTextEditorPrintPreview.ScrollHorizontallyFor(const AValue: Integer);
 begin
   ScrollHorizontallyTo(FScrollPosition.X + AValue);
 end;
 
-procedure TTextEditorPrintPreview.ScrollHorizontallyTo(AValue: Integer);
+procedure TTextEditorPrintPreview.ScrollHorizontallyTo(const AValue: Integer);
 var
-  LWidth, LPosition: Integer;
+  LWidth, LPosition, LValue: Integer;
 begin
   LWidth := ClientWidth;
   LPosition := LWidth - FVirtualSize.X;
+  LValue := AValue;
 
-  if AValue < LPosition then
-    AValue := LPosition;
+  if LValue < LPosition then
+    LValue := LPosition;
 
-  if AValue > 0 then
-    AValue := 0;
+  if LValue > 0 then
+    LValue := 0;
 
-  if FScrollPosition.X <> AValue then
+  if FScrollPosition.X <> LValue then
   begin
-    FScrollPosition.X := AValue;
+    FScrollPosition.X := LValue;
     UpdateScrollbars;
     Invalidate;
   end;
 end;
 
-procedure TTextEditorPrintPreview.ScrollVerticallyFor(AValue: Integer);
+procedure TTextEditorPrintPreview.ScrollVerticallyFor(const AValue: Integer);
 begin
   ScrollVerticallyTo(FScrollPosition.Y + AValue);
 end;
 
-procedure TTextEditorPrintPreview.ScrollVerticallyTo(AValue: Integer);
+procedure TTextEditorPrintPreview.ScrollVerticallyTo(const AValue: Integer);
 var
-  LHeight, LPosition: Integer;
+  LHeight, LPosition, LValue: Integer;
 begin
   LHeight := ClientHeight;
   LPosition := LHeight - FVirtualSize.Y;
+  LValue := AValue;
 
-  if AValue < LPosition then
-    AValue := LPosition;
+  if LValue < LPosition then
+    LValue := LPosition;
 
-  if AValue > 0 then
-    AValue := 0;
+  if LValue > 0 then
+    LValue := 0;
 
-  if FScrollPosition.Y <> AValue then
+  if FScrollPosition.Y <> LValue then
   begin
-    FScrollPosition.Y := AValue;
+    FScrollPosition.Y := LValue;
     UpdateScrollbars;
     Invalidate;
   end;
@@ -435,12 +437,12 @@ begin
   FVirtualOffset.X := MARGIN_WIDTH_LEFT_AND_RIGHT;
 
   if FVirtualSize.X < ClientWidth then
-    Inc(FVirtualOffset.X, (ClientWidth - FVirtualSize.X) div 2);
+    Inc(FVirtualOffset.X, (ClientWidth - FVirtualSize.X) shr 1);
 
   FVirtualOffset.Y := MARGIN_HEIGHT_TOP_AND_BOTTOM;
 
   if FVirtualSize.Y < ClientHeight then
-    Inc(FVirtualOffset.Y, (ClientHeight - FVirtualSize.Y) div 2);
+    Inc(FVirtualOffset.Y, (ClientHeight - FVirtualSize.Y) shr 1);
 
   UpdateScrollbars;
   FScrollPosition := Point(0, 0);
@@ -501,20 +503,22 @@ begin
   end;
 end;
 
-procedure TTextEditorPrintPreview.SetBorderStyle(AValue: TBorderStyle);
+procedure TTextEditorPrintPreview.SetBorderStyle(const AValue: TBorderStyle);
 begin
   if FBorderStyle <> AValue then
   begin
     FBorderStyle := AValue;
+
     RecreateWnd;
   end;
 end;
 
-procedure TTextEditorPrintPreview.SetPageBackgroundColor(AValue: TColor);
+procedure TTextEditorPrintPreview.SetPageBackgroundColor(const AValue: TColor);
 begin
   if FPageBackgroundColor <> AValue then
   begin
     FPageBackgroundColor := AValue;
+
     Invalidate;
   end;
 end;
@@ -526,7 +530,7 @@ begin
   Result := FEditorPrint
 end;
 
-procedure TTextEditorPrintPreview.SetEditorPrint(AValue: TTextEditorPrint);
+procedure TTextEditorPrintPreview.SetEditorPrint(const AValue: TTextEditorPrint);
 begin
   if FEditorPrint <> AValue then
   begin
@@ -537,7 +541,7 @@ begin
   end;
 end;
 
-procedure TTextEditorPrintPreview.SetScaleMode(AValue: TTextEditorPreviewScale);
+procedure TTextEditorPrintPreview.SetScaleMode(const AValue: TTextEditorPreviewScale);
 begin
   if FScaleMode <> AValue then
   begin
@@ -553,7 +557,7 @@ begin
   end;
 end;
 
-procedure TTextEditorPrintPreview.SetScalePercent(AValue: Integer);
+procedure TTextEditorPrintPreview.SetScalePercent(const AValue: Integer);
 begin
   if FScalePercent <> AValue then
   begin
@@ -596,9 +600,9 @@ begin
       SB_LINEUP:
         ScrollHorizontallyFor(LWidth div 10);
       SB_PAGEDOWN:
-        ScrollHorizontallyFor(-(LWidth div 2));
+        ScrollHorizontallyFor(-(LWidth shr 1));
       SB_PAGEUP:
-        ScrollHorizontallyFor(LWidth div 2);
+        ScrollHorizontallyFor(LWidth shr 1);
       SB_THUMBPOSITION, SB_THUMBTRACK:
       begin
 {$IFDEF ALPHASKINS}

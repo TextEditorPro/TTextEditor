@@ -223,7 +223,7 @@
         "Set": [
           {
             "Type": "Numbers",
-            "Symbols": ".-0123456789T",
+            "Symbols": ".-:0123456789T",
             "Attributes": {
               "Element": "Number"
             }

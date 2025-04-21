@@ -362,10 +362,18 @@ begin
         (FTopLine / Max(FEditorLeft.LineNumbersCount - FVisibleLines, 1)))), 1);
 
     if Assigned(FEditorLeft) then
+    begin
+      FEditorLeft.Scroll.Dragging := True;
       FEditorLeft.TopLine := FTopLine;
+      FEditorLeft.Scroll.Dragging := False;
+    end;
 
     if Assigned(FEditorRight) then
+    begin
+      FEditorRight.Scroll.Dragging := True;
       FEditorRight.TopLine := FTopLine;
+      FEditorRight.Scroll.Dragging := False;
+    end;
 
     UpdateScrollBars;
     Invalidate;

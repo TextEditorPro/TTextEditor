@@ -12,6 +12,7 @@ type
   TTextEditorScroll = class(TPersistent)
   strict private
     FBars: System.UITypes.TScrollStyle;
+    FDragging: Boolean;
     FHint: TTextEditorScrollHint;
     FIndicator: TTextEditorGlyph;
     FOnChange: TNotifyEvent;
@@ -28,6 +29,7 @@ type
     destructor Destroy; override;
     procedure Assign(ASource: TPersistent); override;
     procedure SetOption(const AOption: TTextEditorScrollOption; const AEnabled: Boolean);
+    property Dragging: Boolean read FDragging write FDragging;
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
   published
     property Bars: System.UITypes.TScrollStyle read FBars write SetBars default System.UITypes.TScrollStyle.ssBoth;
@@ -46,6 +48,7 @@ constructor TTextEditorScroll.Create;
 begin
   inherited;
 
+  FDragging := False;
   FOptions := TEXTEDITOR_DEFAULT_SCROLL_OPTIONS;
   FBars := System.UITypes.TScrollStyle.ssBoth;
   FHint := TTextEditorScrollHint.Create;

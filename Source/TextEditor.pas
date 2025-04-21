@@ -9773,7 +9773,7 @@ begin
   begin
     FLineNumbers.TopLine := LValue;
 
-    if FMinimap.Visible and not FMinimap.Dragging then
+    if FMinimap.Visible and not FScroll.Dragging then
       FMinimap.TopLine := Max(FLineNumbers.TopLine - Abs(Trunc((FMinimap.VisibleLineCount - FLineNumbers.VisibleCount) *
         (FLineNumbers.TopLine / Max(LViewLineCount - FLineNumbers.VisibleCount, 1)))), 1);
 
@@ -10125,7 +10125,7 @@ var
   LVerticalMaxScroll: Integer;
   LHorizontalScrollMax: Integer;
 begin
-  if not HandleAllocated or PaintLocked or FLines.Streaming or FHighlighter.Loading then
+  if not HandleAllocated or PaintLocked or FLines.Streaming or FHighlighter.Loading or FScroll.Dragging then
     Exit;
 
   if FLines.Count > 0 then
@@ -10167,13 +10167,9 @@ begin
         LScrollInfo.fMask := SIF_DISABLENOSCROLL;
       end;
 
-      if not FMinimap.Dragging then
-        ShowScrollBar(Handle, SB_HORZ, (FScroll.Bars in [ssBoth, ssHorizontal]) and FScrollHelper.HorizontalVisible);
-
+      ShowScrollBar(Handle, SB_HORZ, (FScroll.Bars in [ssBoth, ssHorizontal]) and FScrollHelper.HorizontalVisible);
       SetScrollInfo(Handle, SB_HORZ, LScrollInfo, True);
-
-      if not FMinimap.Dragging then
-        EnableScrollBar(Handle, SB_HORZ, ESB_ENABLE_BOTH);
+      EnableScrollBar(Handle, SB_HORZ, ESB_ENABLE_BOTH);
     end;
 
     LVerticalMaxScroll := FLineNumbers.Count;
@@ -10206,13 +10202,9 @@ begin
       LScrollInfo.fMask := SIF_DISABLENOSCROLL;
     end;
 
-    if not FMinimap.Dragging then
-      ShowScrollBar(Handle, SB_VERT, (FScroll.Bars in [ssBoth, ssVertical]) and FScrollHelper.VerticalVisible);
-
+    ShowScrollBar(Handle, SB_VERT, (FScroll.Bars in [ssBoth, ssVertical]) and FScrollHelper.VerticalVisible);
     SetScrollInfo(Handle, SB_VERT, LScrollInfo, True);
-
-    if not FMinimap.Dragging then
-      EnableScrollBar(Handle, SB_VERT, ESB_ENABLE_BOTH);
+    EnableScrollBar(Handle, SB_VERT, ESB_ENABLE_BOTH);
   end
   else
     ShowScrollBar(Handle, SB_BOTH, False);
@@ -12555,7 +12547,7 @@ begin
         FSyncEdit.Visible := False
   end;
 
-  if FMinimap.Visible and not FMinimap.Dragging then
+  if FMinimap.Visible and not FScroll.Dragging then
   begin
     GetMinimapLeftRight(LMinimapLeft, LMinimapRight);
 
@@ -12898,11 +12890,11 @@ begin
   begin
     if (X > FMinimapHelper.Left) and (X < FMinimapHelper.Right) then
     begin
-      if FMinimap.Dragging then
+      if FScroll.Dragging then
         DragMinimap(Y);
 
-      if not FMinimap.Dragging and (ssLeft in AShift) and MouseCapture and (Abs(FMouse.Down.Y - Y) >= FSystemMetrics.VerticalDrag) then
-        FMinimap.Dragging := True;
+      if not FScroll.Dragging and (ssLeft in AShift) and MouseCapture and (Abs(FMouse.Down.Y - Y) >= FSystemMetrics.VerticalDrag) then
+        FScroll.Dragging := True;
     end;
     Exit;
   end;
@@ -13033,7 +13025,7 @@ var
   LTextPosition: TTextEditorTextPosition;
 begin
   FMinimap.Clicked := False;
-  FMinimap.Dragging := False;
+  FScroll.Dragging := False;
 
   Exclude(FState.Flags, sfInSelection);
 
@@ -13261,7 +13253,7 @@ begin
 
       LSelectionAvailable := GetSelectionAvailable;
 
-      if not FMinimap.Dragging and (LDrawRect.Height = FMinimapHelper.BufferBitmap.Height) and (FLast.TopLine = FLineNumbers.TopLine) and
+      if not FScroll.Dragging and (LDrawRect.Height = FMinimapHelper.BufferBitmap.Height) and (FLast.TopLine = FLineNumbers.TopLine) and
         (FLast.LineNumberCount = FLineNumbers.Count) and
         (not LSelectionAvailable or LSelectionAvailable and (FPosition.SelectionBegin.Line >= FLineNumbers.TopLine) and
         (FPosition.SelectionEnd.Line <= FLineNumbers.TopLine + FLineNumbers.VisibleCount)) then
@@ -13788,10 +13780,7 @@ var
     else
       LStyle := FCodeFolding.GuideLines.Style;
 
-    if LStyle = lsDash then
-      LN := 3
-    else
-      LN := 1;
+    LN := IfThen(LStyle = lsDash, 3, 1);
 
     while LY < Result.Height do
     begin
@@ -13828,7 +13817,7 @@ begin
 
   LDeepestLevel := 0;
 
-  if FCodeFolding.GuideLines.Visible and not FMinimap.Dragging then
+  if FCodeFolding.GuideLines.Visible and not FScroll.Dragging then
     LDeepestLevel := GetDeepestLevel;
 
   LTopLine := GetViewTextLineNumber(AFirstRow);
@@ -15766,11 +15755,14 @@ var
         if (LBackgroundColor <> FColors.SearchHighlighterBackground) and (LBackgroundColor <> TColors.Red) then
           LBackgroundColor := FColors.MinimapVisibleRows;
 
-    if LCustomLineColors and (LCustomForegroundColor <> TColors.SysNone) then
-      LForegroundColor := LCustomForegroundColor;
+    if LCustomLineColors then
+    begin
+      if LCustomForegroundColor <> TColors.SysNone then
+        LForegroundColor := LCustomForegroundColor;
 
-    if LCustomLineColors and (LCustomBackgroundColor <> TColors.SysNone) and not LTokenHelper.CustomBackgroundColor then
-      LBackgroundColor := LCustomBackgroundColor;
+      if (LCustomBackgroundColor <> TColors.SysNone) and not LTokenHelper.CustomBackgroundColor then
+        LBackgroundColor := LCustomBackgroundColor;
+    end;
 
     LText := LTokenHelper.Text;
 
@@ -15789,8 +15781,7 @@ var
         SetDrawingColors(False);
 
         LTokenLength := Length(LText);
-        LTokenRect.Right := LTokenRect.Left + GetTokenWidth(LText, LTokenLength, LTokenHelper.ExpandedCharsBefore,
-          AMinimap, True);
+        LTokenRect.Right := LTokenRect.Left + GetTokenWidth(LText, LTokenLength, LTokenHelper.ExpandedCharsBefore, AMinimap, True);
         LTempRect := LTokenRect;
 
         PaintToken(LText, LTokenLength);
@@ -15801,8 +15792,7 @@ var
           { Get the unselected part from the end of the text }
           LText := Copy(LTempText, LTokenLength - (LLastColumn - LLineSelectionEnd) + 1);
           { Set left of the rect }
-          LTokenRect.Left := LSelectedRect.Left + GetTokenWidth(LText, Length(LText), LTokenHelper.ExpandedCharsBefore,
-            AMinimap, True);
+          LTokenRect.Left := LSelectedRect.Left + GetTokenWidth(LText, Length(LText), LTokenHelper.ExpandedCharsBefore, AMinimap, True);
           { Delete the unselected part from the end of the text }
           LText := LTempText;
           Delete(LText, LTokenLength - (LLastColumn - LLineSelectionEnd) + 1, LLineSelectionEnd - LLineSelectionStart);
@@ -15813,8 +15803,7 @@ var
           { Get the unselected part from the start of the text }
           LText := Copy(LTempText, (LLineSelectionStart - LFirstColumn) + 1);
           { Set left of the rect }
-          LTokenRect.Left := LSelectedRect.Left + GetTokenWidth(LText, Length(LText), LTokenHelper.ExpandedCharsBefore,
-            AMinimap, True);
+          LTokenRect.Left := LSelectedRect.Left + GetTokenWidth(LText, Length(LText), LTokenHelper.ExpandedCharsBefore, AMinimap, True);
           { Delete the unselected part from the end of the text }
           LText := LTempText;
           Delete(LText, (LLineSelectionStart - LFirstColumn) + 1, LLineSelectionEnd - LLineSelectionStart);
@@ -15860,6 +15849,7 @@ var
 
           Delete(LText, 1, LTokenLength);
         end;
+
         { Selected part of the token }
         LTokenLength := Min(LLineSelectionEnd, LLastColumn) - LFirstColumn - LTokenLength;
         LTokenRect.Right := LTokenRect.Left + GetTokenWidth(LText, LTokenLength, LTokenHelper.ExpandedCharsBefore, AMinimap);
@@ -15921,16 +15911,18 @@ var
         if (LViewLine >= TopLine) and (LViewLine < TopLine + FLineNumbers.VisibleCount) then
           LBackgroundColor := FColors.MinimapVisibleRows;
 
-      if LCustomLineColors and (LCustomForegroundColor <> TColors.SysNone) then
-        LForegroundColor := LCustomForegroundColor;
+      if LCustomLineColors then
+      begin
+        if LCustomForegroundColor <> TColors.SysNone then
+          LForegroundColor := LCustomForegroundColor;
 
-      if LCustomLineColors and (LCustomBackgroundColor <> TColors.SysNone) then
-        LBackgroundColor := LCustomBackgroundColor;
+        if LCustomBackgroundColor <> TColors.SysNone then
+          LBackgroundColor := LCustomBackgroundColor;
+      end;
 
       if FSelection.Mode = smNormal then
       begin
-        SetDrawingColors(not (soToEndOfLine in FSelection.Options) and
-          not FMultiEdit.SelectionAvailable and
+        SetDrawingColors(not (soToEndOfLine in FSelection.Options) and not FMultiEdit.SelectionAvailable and
           (LIsLineSelected or LSelected and (LLineSelectionEnd > LLastColumn)));
 
         LTokenRect.Right := LLineRect.Right;
@@ -16024,7 +16016,7 @@ var
         LEmptySpace := esZeroWidthSpace;
     else
       if LPToken^ in TControlCharacters.AsSet then
-         LEmptySpace := esControlCharacter;
+        LEmptySpace := esControlCharacter;
     end;
 
     if (LEmptySpace <> esNone) and FSpecialChars.Visible then
@@ -16592,7 +16584,7 @@ var
         LCustomLineColors := False;
 
         if FHighlightLine.Active and not LCurrentLineText.IsEmpty then
-        for LIndex := 0 to FHighlightLine.Items.Count - 1 do
+        for LIndex := FHighlightLine.Items.Count - 1 downto 0 do
         begin
           LItem := FHighlightLine.Item[LIndex];
 

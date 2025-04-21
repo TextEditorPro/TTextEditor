@@ -486,6 +486,7 @@
                 {
                   "Type": "ReservedWord",
                   "Words": [
+                    "const",
                     "default",
                     "index",
                     "read",

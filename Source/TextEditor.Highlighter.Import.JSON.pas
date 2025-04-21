@@ -1088,6 +1088,7 @@ begin
 
     LItem := LEditor.HighlightLine.Items.Add;
 
+    LItem.Imported := True;
     LItem.Background := LJSONDataValue.ObjectValue['BackgroundColor'].ToColor;
     LItem.Foreground := LJSONDataValue.ObjectValue['ForegroundColor'].ToColor;
 

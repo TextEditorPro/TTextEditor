@@ -2,25 +2,16 @@
   "Highlighter": {
     "Sample": [
       "{\r\n",
-      "  \"firstName\": \"John\",\r\n",
-      "  \"lastName\": \"Smith\",\r\n",
-      "  \"age\": 25,\r\n",
-      "  \"address\": {\r\n",
-      "    \"streetAddress\": \"21 2nd Street\",\r\n",
-      "    \"city\": \"New York\",\r\n",
-      "    \"state\": \"NY\",\r\n",
-      "    \"postalCode\": \"10021\"\r\n",
-      "  },\r\n",
-      "  \"phoneNumber\": [\r\n",
-      "    {\r\n",
-      "      \"type\": \"home\",\r\n",
-      "      \"number\": \"212 555-1234\"\r\n",
-      "    },\r\n",
-      "    {\r\n",
-      "      \"type\": \"fax\",\r\n",
-      "      \"number\": \"646 555-4567\"\r\n",
-      "    }\r\n",
-      "  ]\r\n",
+      "  // comments\r\n",
+      "    unquoted: 'and you can quote me on that',\r\n",
+      "    singleQuotes: 'I can use \"double quotes\" here',\r\n",
+      "    lineBreaks: \"Look, Mom! \\r\n",
+      "  No \\n's!\",\r\n",
+      "    hexadecimal: 0xdecaf,\r\n",
+      "    leadingDecimalPoint: .8675309, andTrailing: 8675309.,\r\n",
+      "    positiveSign: +1,\r\n",
+      "    trailingComma: 'in objects', andIn: ['arrays',],\r\n",
+      "  \"backwardsCompatible\": \"with JSON\",\r\n",
       "}"
     ],
     "MainRules": {
@@ -30,6 +21,28 @@
       "Delimiters": "!\"#$%&'()*+,-./:;<=>?@[\\]^`{|}~",
       "SubRules": {
         "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "//"
+            }
+          },
           {
             "Type": "String",
             "Attributes": {
@@ -41,6 +54,19 @@
             "TokenRange": {
               "Open": "\"",
               "Close": "\""
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "Attribute"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
             }
           },
           {
@@ -66,9 +92,6 @@
                   "Attributes": {
                     "Element": "String"
                   },
-                  "Properties": {
-                    "CloseOnEndOfLine": true
-                  },
                   "TokenRange": {
                     "Open": "\"",
                     "Close": "\""
@@ -93,6 +116,48 @@
                         "Type": "String",
                         "Attributes": {
                           "Element": "String"
+                        },
+                        "Properties": {
+                          "CloseOnEndOfLine": true,
+                          "CloseOnTerm": true
+                        },
+                        "TokenRange": {
+                          "Open": "\\\\",
+                          "Close": ""
+                        }
+                      }
+                    ]
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "Attribute"
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  },
+                  "SubRules": {
+                    "Range": [
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "Attribute"
+                        },
+                        "Properties": {
+                          "CloseOnEndOfLine": true,
+                          "CloseOnTerm": true
+                        },
+                        "TokenRange": {
+                          "Open": "\\'",
+                          "Close": "'"
+                        }
+                      },
+                      {
+                        "Type": "String",
+                        "Attributes": {
+                          "Element": "Attribute"
                         },
                         "Properties": {
                           "CloseOnEndOfLine": true,

@@ -1228,7 +1228,7 @@ type
     destructor Destroy; override;
     procedure DragDrop(ASource: TObject; X, Y: Integer); override;
     procedure ExecuteCommand(const ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer); override;
-    procedure LoadMemo;
+    procedure LoadBlob;
     procedure Notification(AComponent: TComponent; AOperation: TOperation); override;
   end;
 
@@ -22318,7 +22318,7 @@ end;
 
 procedure TCustomDBTextEditor.CMGetDataLink(var AMessage: TMessage);
 begin
-  AMessage.Result := Integer(FDataLink);
+  AMessage.Result := Winapi.Windows.LRESULT(FDataLink);
 end;
 
 procedure TCustomDBTextEditor.DataChange(Sender: TObject);
@@ -22332,7 +22332,7 @@ begin
     end;
 
     if FDataLink.Field.IsBlob then
-      LoadMemo
+      LoadBlob
     else
       Text := FDataLink.Field.Text;
 
@@ -22340,12 +22340,10 @@ begin
       FLoadData(Self);
   end
   else
-  begin
-    if csDesigning in ComponentState then
-      Text := Name
-    else
-      Text := '';
-  end;
+  if csDesigning in ComponentState then
+    Text := Name
+  else
+    Text := '';
 end;
 
 procedure TCustomDBTextEditor.DragDrop(ASource: TObject; X, Y: Integer);
@@ -22357,9 +22355,8 @@ end;
 
 procedure TCustomDBTextEditor.EditingChange(Sender: TObject);
 begin
-  if FDataLink.Editing then
-    if Assigned(FDataLink.DataSource) and (FDataLink.DataSource.State <> dsInsert) then
-      FBeginEdit := True;
+  if FDataLink.Editing and Assigned(FDataLink.DataSource) and (FDataLink.DataSource.State <> dsInsert) then
+    FBeginEdit := True;
 end;
 
 procedure TCustomDBTextEditor.ExecuteCommand(const ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer);
@@ -22402,13 +22399,13 @@ begin
     DataChange(Self);
 end;
 
-procedure TCustomDBTextEditor.LoadMemo;
+procedure TCustomDBTextEditor.LoadBlob;
 var
   LStream: TStream;
 begin
   LStream := FDataLink.DataSet.CreateBlobStream(FDataLink.Field, bmRead);
   try
-    LoadFromStream(LStream);
+    LoadFromStream(LStream, Lines.Encoding);
   finally
     LStream.Free;
   end;
@@ -22475,7 +22472,7 @@ begin
 
     LStream := TMemoryStream.Create;
     try
-      SaveToStream(LStream);
+      SaveToStream(LStream, Lines.Encoding);
 
       LBlobField.ReadOnly := False;
       LBlobField.LoadFromStream(LStream);

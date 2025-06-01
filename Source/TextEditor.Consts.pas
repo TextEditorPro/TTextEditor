@@ -246,6 +246,9 @@ type
     Text = '{Text}';
   end;
 
+const
+  sDoubleLineBreak = sLineBreak + sLineBreak;
+
 function ControlCharacterToName(const AChar: Char): string; inline;
 function IsLineTerminatorCharacter(const AChar: Char): Boolean; inline;
 

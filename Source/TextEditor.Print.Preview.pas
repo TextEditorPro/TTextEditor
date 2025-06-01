@@ -9,7 +9,9 @@ interface
 uses
   Winapi.Messages, Winapi.Windows, System.Classes, System.SysUtils, System.UITypes, Vcl.Controls, Vcl.Forms,
   Vcl.Graphics, TextEditor.Print
-{$IFDEF ALPHASKINS}, acSBUtils, sCommonData{$ENDIF};
+{$IFDEF ALPHASKINS}
+  , acSBUtils, sCommonData
+{$ENDIF};
 
 type
   TTextEditorPreviewPageEvent = procedure(ASender: TObject; APageNumber: Integer) of object;
@@ -112,7 +114,9 @@ implementation
 
 uses
   System.Types
-{$IFDEF ALPHASKINS}, Winapi.CommCtrl, sConst, sMessages, sStyleSimply, sVCLUtils{$ENDIF};
+{$IFDEF ALPHASKINS}
+  , Winapi.CommCtrl, sSkinManager, sConst, sMessages, sStyleSimply, sVCLUtils
+{$ENDIF};
 
 const
   MARGIN_WIDTH_LEFT_AND_RIGHT = 12;

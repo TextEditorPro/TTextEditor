@@ -42,19 +42,6 @@
             }
           },
           {
-            "Type": "MethodItalic",
-            "Attributes": {
-              "Element": "MethodItalic"
-            },
-            "Properties": {
-              "CloseOnEndOfLine": true
-            },
-            "TokenRange": {
-              "Open": "\"boolean",
-              "Close": "\""
-            }
-          },
-          {
             "Type": "String",
             "Attributes": {
               "Element": "String"
@@ -64,6 +51,19 @@
             },
             "TokenRange": {
               "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "MethodItalic",
+            "Attributes": {
+              "Element": "MethodItalic"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"boolean",
               "Close": "\""
             }
           },
@@ -464,22 +464,22 @@
             },
             "SubRules": {
               "Range": [
-							  {
-			            "Type": "Method",
-			            "Attributes": {
-			              "Element": "MethodName"
-			            },
-			            "Properties": {
-			              "CloseOnEndOfLine": true,
-			              "CloseOnTerm": true,
-										"CloseParent": true
-			            },
-			            "TokenRange": {
-			              "Open": "rdb$"
-			            }
-			          }
-							]
-						}
+                {
+                  "Type": "Method",
+                  "Attributes": {
+                    "Element": "MethodName"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true,
+                    "CloseParent": true
+                  },
+                  "TokenRange": {
+                    "Open": "rdb$"
+                  }
+                }
+              ]
+            }
           },
           {
             "Type": "MethodName",
@@ -633,6 +633,19 @@
             },
             "SubRules": {
               "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                },
                 {
                   "Type": "ReservedWord",
                   "Attributes": {

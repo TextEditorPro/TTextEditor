@@ -70,9 +70,10 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.Math, System.SysUtils, System.UITypes, Vcl.Graphics, TextEditor.Consts, TextEditor.Types
+  Winapi.Windows, System.Math, System.SysUtils, System.UITypes, Vcl.Graphics, TextEditor.Consts,
+  TextEditor.Types
 {$IFDEF ALPHASKINS}
-  , Winapi.CommCtrl, sConst, sMessages, sStyleSimply, sVCLUtils
+  , Winapi.CommCtrl, sConst, sMessages, sSkinManager, sStyleSimply, sVCLUtils
 {$ENDIF};
 
 constructor TTextEditorCompareScrollBar.Create(AOwner: TComponent);

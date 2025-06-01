@@ -767,10 +767,10 @@ begin
 
   InsertItem(AIndex, AValue);
 
+  EndUpdate;
+
   if Assigned(FOnInserted) then
     FOnInserted(Self, AIndex, 1);
-
-  EndUpdate;
 end;
 
 procedure TTextEditorLines.InsertItem(const AIndex: Integer; const AValue: string);
@@ -1027,19 +1027,19 @@ begin
       end;
     end;
 
-    AStrings.Clear;
-
-    if Assigned(FOnInserted) then
-      FOnInserted(Self, 0, FCount);
-
-    if Assigned(FOnChange) then
-      FOnChange(Self);
-
-    if Assigned(FOnAfterSetText) then
-      FOnAfterSetText(Self);
+    AStrings.Clear; // TODO: ???
   finally
     EndUpdate;
   end;
+
+  if Assigned(FOnInserted) then
+    FOnInserted(Self, 0, FCount);
+
+  if Assigned(FOnChange) then
+    FOnChange(Self);
+
+  if Assigned(FOnAfterSetText) then
+    FOnAfterSetText(Self);
 
   FStreaming := False;
 end;

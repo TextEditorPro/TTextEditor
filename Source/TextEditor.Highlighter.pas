@@ -800,6 +800,7 @@ var
 begin
   LEditor := FEditor as TCustomTextEditor;
   LEditorIsEmpty := LEditor.Text.IsEmpty;
+  LEditor.ClearCodeFolding;
 
   FName := AName;
   FLoading := True;
@@ -831,13 +832,14 @@ begin
   if Assigned(FBeforePrepare) then
     SetOption(hoExecuteBeforePrepare, True);
 
+  FLoading := False;
+
   if not LEditorIsEmpty then
   begin
     LEditor.RescanHighlighterRanges;
-    LEditor.RescanCodeFoldingRanges;
+    LEditor.InitCodeFolding;
   end;
 
-  FLoading := False;
   FLoaded := True;
 end;
 

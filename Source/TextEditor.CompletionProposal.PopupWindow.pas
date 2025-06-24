@@ -203,6 +203,7 @@ begin
   if Assigned(LTextEditor) then
   begin
     FBitmapBuffer.Canvas.Font.Assign(LTextEditor.Fonts.CompletionProposal);
+
     Result := TextHeight(FBitmapBuffer.Canvas, 'X');
   end
   else
@@ -456,40 +457,51 @@ procedure TTextEditorCompletionProposalPopupWindow.SetCurrentString(const AValue
       Result := Pos(AnsiUpperCase(AValue), AnsiUpperCase(LCompareString)) > 1
   end;
 
-  procedure RecalcList(const AShowAllItems: Boolean);
+  function RecalcList(const AShowAllItems: Boolean): Integer;
   var
-    LIndex, LIndex2, LItemsCount: Integer;
+    LIndex, LItemsCount: Integer;
   begin
-    LIndex2 := 0;
+    Result := 0;
+
     LItemsCount := FItems.Count;
+
     SetLength(FItemIndexArray, 0);
     SetLength(FItemIndexArray, LItemsCount);
 
     for LIndex := 0 to LItemsCount - 1 do
     if AShowAllItems or MatchItem1(LIndex) then
     begin
-      FItemIndexArray[LIndex2] := LIndex;
-      Inc(LIndex2);
+      FItemIndexArray[Result] := LIndex;
+      Inc(Result);
     end;
 
     for LIndex := 0 to LItemsCount - 1 do
     if MatchItem2(LIndex) then
     begin
-      FItemIndexArray[LIndex2] := LIndex;
-      Inc(LIndex2);
+      FItemIndexArray[Result] := LIndex;
+      Inc(Result);
     end;
 
-    SetLength(FItemIndexArray, LIndex2);
+    SetLength(FItemIndexArray, Result);
   end;
 
 var
   LIndex: Integer;
+  LHeight: Integer;
+  LCount: Integer;
 begin
   FCurrentString := AValue;
 
   if FFiltered then
   begin
-    RecalcList(AValue = '');
+    LCount := RecalcList(AValue.IsEmpty);
+
+    LHeight := FItemHeight * Min(LCount, FCompletionProposal.VisibleLines) + 2;
+
+    if cpoAutoConstraints in FCompletionProposal.Options then
+      Constraints.MinHeight := LHeight;
+
+    Height := LHeight;
     TopLine := 0;
     Repaint;
   end

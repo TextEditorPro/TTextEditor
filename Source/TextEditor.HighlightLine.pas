@@ -12,6 +12,7 @@ type
   strict private
     FBackground: TColor;
     FForeground: TColor;
+    FImported: Boolean;
     FOptions: TTextEditorHighlightLineItemOptions;
     FPattern: string;
   protected
@@ -20,6 +21,7 @@ type
     constructor Create(ACollection: TCollection); override;
     procedure Assign(ASource: TPersistent); override;
     procedure SetOption(const AOption: TTextEditorHighlightLineItemOption; const AEnabled: Boolean);
+    property Imported: Boolean read FImported write FImported;
   published
     property Background: TColor read FBackground write FBackground default TColors.SysNone;
     property Foreground: TColor read FForeground write FForeground default TColors.SysNone;
@@ -72,6 +74,7 @@ begin
 
   FBackground := TColors.SysNone;
   FForeground := TColors.SysNone;
+  FImported := False;
   FOptions := TTextEditorDefaultOptions.HighlightLine;
 end;
 

@@ -173,7 +173,9 @@ destructor TTextEditorPrint.Destroy;
 var
   LIndex: Integer;
 begin
-  FEditor.Free;
+  if Assigned(FEditor) then
+    FEditor.Free;
+
   FFooter.Free;
   FHeader.Free;
   FLines.Free;
@@ -918,16 +920,20 @@ end;
 procedure TTextEditorPrint.SetEditor(const AValue: TCustomTextEditor);
 begin
   FEditor := AValue;
-  Highlighter := AValue.Highlighter;
-  Font := AValue.Fonts.Text;
-  CharWidth := AValue.CharWidth;
-  FColumns := toColumns in AValue.Tabs.Options;
-  FTabWidth := AValue.Tabs.Width;
-  SetLines(AValue.Lines);
-  FSelectionAvailable := AValue.SelectionAvailable;
-  FBlockBeginPosition := AValue.SelectionBeginPosition;
-  FBlockEndPosition := AValue.SelectionEndPosition;
-  FSelectionMode := AValue.Selection.Mode;
+
+  if Assigned(AValue) then
+  begin
+    Highlighter := AValue.Highlighter;
+    Font := AValue.Fonts.Text;
+    CharWidth := AValue.CharWidth;
+    FColumns := toColumns in AValue.Tabs.Options;
+    FTabWidth := AValue.Tabs.Width;
+    SetLines(AValue.Lines);
+    FSelectionAvailable := AValue.SelectionAvailable;
+    FBlockBeginPosition := AValue.SelectionBeginPosition;
+    FBlockEndPosition := AValue.SelectionEndPosition;
+    FSelectionMode := AValue.Selection.Mode;
+  end;
 end;
 
 procedure TTextEditorPrint.LoadFromStream(const AStream: TStream);

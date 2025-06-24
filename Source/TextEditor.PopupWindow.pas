@@ -40,7 +40,7 @@ implementation
 uses
   Winapi.Windows
 {$IFDEF ALPHASKINS}
-  , System.SysUtils, sConst, sMessages, sSkinProps
+  , System.SysUtils, sConst, sMessages, sSkinProps, sSkinManager
 {$ENDIF};
 
 constructor TTextEditorPopupWindow.Create(AOwner: TComponent);

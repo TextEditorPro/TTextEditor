@@ -6,7 +6,9 @@ interface
 
 resourcestring
   { TextEditor }
+  STextEditorCannotOpenClipboard = 'Cannot open clipboard:';
   STextEditorHighlighterLoadFromFile = 'Load highlighter from file';
+  STextEditorOutOfResources = 'Out of system resources';
   STextEditorRightMarginPosition = 'Position: %d';
   STextEditorScrollInfo = '%d - %d';
   STextEditorScrollInfoTopLine = 'Top line: %d';

@@ -12,7 +12,6 @@ type
     FCharHeight: Integer;
     FClicked: Boolean;
     FCursor: TCursor;
-    FDragging: Boolean;
     FIndicator: TTextEditorMinimapIndicator;
     FOnChange: TNotifyEvent;
     FOptions: TTextEditorMinimapOptions;
@@ -35,7 +34,6 @@ type
     procedure SetOption(const AOption: TTextEditorMinimapOption; const AEnabled: Boolean);
     property CharHeight: Integer read FCharHeight write FCharHeight;
     property Clicked: Boolean read FClicked write FClicked;
-    property Dragging: Boolean read FDragging write FDragging;
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
     property TopLine: Integer read FTopLine write FTopLine default 1;
     property VisibleLineCount: Integer read FVisibleLineCount write FVisibleLineCount;
@@ -61,7 +59,6 @@ begin
   FAlign := maRight;
   FClicked := False;
   FCursor := crArrow;
-  FDragging := False;
   FOptions := [];
   FTopLine := 1;
   FVisible := False;

@@ -22,7 +22,7 @@ type
     sfLineBreakCR, sfLineBreakLF, sfLineStateNormal, sfLineStateModified);
   TTextEditorStringFlags = set of TTextEditorStringFlag;
 
-  TTextEditorSortOption = (soAsc, soDesc, soIgnoreCase, {$IF CompilerVersion >= 34.0}soNatural,{$ENDIF} soRandom);
+  TTextEditorSortOption = (soAsc, soDesc, soIgnoreCase, {$IF CompilerVersion >= 34}soNatural,{$ENDIF} soRandom);
   TTextEditorSortOptions = set of TTextEditorSortOption;
 
   TTextEditorLineState = (lsNone, lsNormal, lsModified);
@@ -75,7 +75,7 @@ type
 
   TTextEditorUnderline = (ulNone, ulDoubleUnderline, ulUnderline, ulWaveLine, ulWavyZigzag);
 
-  TTextEditorMoveDirection = (mdUp, mdDown, mdLeft, mdRight);
+  TTextEditorMoveDirection = (mdNone, mdUp, mdDown, mdLeft, mdRight);
   TTextEditorProgressType = (ptNone, ptProcessing, ptLoading);
 
   PTextEditorQuadColor = ^TTextEditorQuadColor;
@@ -283,7 +283,7 @@ type
   { Coding }
   TTextEditorCoding = (eASCIIDecimal, eBase32, eBase64, eBase85, eBase91, eBase128, eBase256, eBase1024,
     eBase4096, eBase64WithLineBreaks, eBinary, eHex, eHexWithoutSpaces, eHTML, eOctal, eRotate5, eRotate13, eRotate18,
-    eRotate47, eURL);
+    eRotate47, eURL, eNone);
 
   { Word wrap }
   TTextEditorWordWrapWidth = (wwwPage, wwwRightMargin);

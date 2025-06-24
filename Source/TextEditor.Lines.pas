@@ -105,6 +105,7 @@ type
     procedure InsertLine(const AIndex: Integer; const AFlag: TTextEditorStringFlag);
     procedure InsertLines(const AIndex, ACount: Integer; const AModified: Boolean; const AStrings: TStrings = nil);
     procedure InsertText(const AIndex: Integer; const AText: string);
+    procedure LoadFromFile(const AFileName: string; AEncoding: System.SysUtils.TEncoding); override;
     procedure LoadFromStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil); override;
     procedure LoadFromStrings(var AStrings: TStringList);
     procedure SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil); override;
@@ -766,10 +767,10 @@ begin
 
   InsertItem(AIndex, AValue);
 
+  EndUpdate;
+
   if Assigned(FOnInserted) then
     FOnInserted(Self, AIndex, 1);
-
-  EndUpdate;
 end;
 
 procedure TTextEditorLines.InsertItem(const AIndex: Integer; const AValue: string);
@@ -1026,21 +1027,36 @@ begin
       end;
     end;
 
-    AStrings.Clear;
-
-    if Assigned(FOnInserted) then
-      FOnInserted(Self, 0, FCount);
-
-    if Assigned(FOnChange) then
-      FOnChange(Self);
-
-    if Assigned(FOnAfterSetText) then
-      FOnAfterSetText(Self);
+    AStrings.Clear; // TODO: ???
   finally
     EndUpdate;
   end;
 
+  if Assigned(FOnInserted) then
+    FOnInserted(Self, 0, FCount);
+
+  if Assigned(FOnChange) then
+    FOnChange(Self);
+
+  if Assigned(FOnAfterSetText) then
+    FOnAfterSetText(Self);
+
   FStreaming := False;
+end;
+
+procedure TTextEditorLines.LoadFromFile(const AFileName: string; AEncoding: System.SysUtils.TEncoding);
+var
+  LStream: TStream;
+begin
+  if not FileExists(AFilename) then
+    Exit;
+
+  LStream := TFileStream.Create(AFileName, fmOpenRead or fmShareDenyWrite);
+  try
+    LoadFromStream(LStream, AEncoding);
+  finally
+    LStream.Free;
+  end;
 end;
 
 procedure TTextEditorLines.LoadFromStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil);

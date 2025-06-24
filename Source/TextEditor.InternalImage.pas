@@ -159,8 +159,10 @@ begin
     Result.Width := AImageList.Width * AImageList.Count;
     Result.Height := AImageList.Height;
     Result.PixelFormat := pf32bit;
-    Result.Canvas.Brush.Color := TColors.Fuchsia;
-    Result.Canvas.FillRect(Rect(0, 0, Result.Width, Result.Height));
+    Result.AlphaFormat := afPremultiplied;
+    FillChar(Result.ScanLine[Result.Height - 1]^, Result.Width * Result.Height * 4, 0);
+    //Result.Canvas.Brush.Color := TColors.Fuchsia;
+    //Result.Canvas.FillRect(Rect(0, 0, Result.Width, Result.Height));
 
     for LIndex := 0 to AImageList.Count - 1 do
       AImageList.Draw(Result.Canvas, LIndex * AImageList.Width, 0, LIndex);
@@ -222,6 +224,7 @@ procedure TTextEditorInternalImage.Draw(const ACanvas: TCanvas; const ANumber: I
 var
   LSourceRect, LDestinationRect: TRect;
   LY: Integer;
+  Blend: BLENDFUNCTION;
 begin
   if (ANumber >= 0) and (ANumber < FCount) then
   begin
@@ -230,20 +233,28 @@ begin
     if ALineHeight >= FHeight then
     begin
       LSourceRect := Rect(ANumber * FWidth, 0, (ANumber + 1) * FWidth, FHeight);
-      Inc(LY, (ALineHeight - FHeight) shr 1);
+      Inc(LY, (ALineHeight - FHeight) div 2);
       LDestinationRect := Rect(X, LY, X + FWidth, LY + FHeight);
     end
     else
     begin
       LDestinationRect := Rect(X, LY, X + FWidth, LY + ALineHeight);
-      LY := (FHeight - ALineHeight) shr 1;
+      LY := (FHeight - ALineHeight) div 2;
       LSourceRect := Rect(ANumber * FWidth, LY, (ANumber + 1) * FWidth, LY + ALineHeight);
     end;
 
     ACanvas.Brush.Style := bsClear;
 
     if ATransparentColor = TColors.SysNone then
-      ACanvas.CopyRect(LDestinationRect, FImages.Canvas, LSourceRect)
+    begin
+      Blend.BlendOp := AC_SRC_OVER;
+      Blend.BlendFlags := 0;
+      Blend.SourceConstantAlpha := 255;
+      Blend.AlphaFormat := AC_SRC_ALPHA;
+      AlphaBlend(ACanvas.Handle, LDestinationRect.Left, LDestinationRect.Top, LDestinationRect.Width, LDestinationRect.Height, FImages.Canvas.Handle,
+      LSourceRect.Left, LSourceRect.Top, LSourceRect.Width, LSourceRect.Height, Blend);
+      //ACanvas.CopyRect(LDestinationRect, FImages.Canvas, LSourceRect)
+    end
     else
       ACanvas.BrushCopy(LDestinationRect, FImages, LSourceRect, ATransparentColor);
   end;

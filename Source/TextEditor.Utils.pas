@@ -1,6 +1,5 @@
 ﻿{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
 {$WARN IMPLICIT_STRING_CAST OFF}
-{$ZEROBASEDSTRINGS ON}
 unit TextEditor.Utils;
 
 {$I TextEditor.Defines.inc}
@@ -8,7 +7,7 @@ unit TextEditor.Utils;
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.SysUtils, System.UITypes, Vcl.Graphics, TextEditor.Types;
+  Winapi.ActiveX, Winapi.Windows, System.Classes, System.SysUtils, System.UITypes, Vcl.Graphics, TextEditor.Types;
 
 function AutoCursor(const ACursor: TCursor = crHourGlass): IAutoCursor;
 function CaseNone(const AChar: Char): Char; inline;
@@ -18,8 +17,9 @@ function CharInString(const AChar: Char; const AString: string): Boolean; inline
 function ColorToHex(const AColor: TColor): string; inline;
 function ConvertTabs(const ALine: string; ATabWidth: Integer; var AHasTabs: Boolean; const AColumns: Boolean): string;
 function DeleteWhitespace(const AValue: string): string;
+function FormatForClipboard(const AText: string): UTF8String;
 function GetBOFPosition: TTextEditorTextPosition; inline;
-function GetClipboardText: string;
+function GetHTMLClipboardFormat: Cardinal;
 function GetPosition(const AChar, ALine: Integer): TTextEditorTextPosition; inline;
 function GetViewPosition(const AColumn: Integer; const ARow: Integer): TTextEditorViewPosition; inline;
 function IsAnsiUnicodeChar(const AChar: Char): Boolean; inline;
@@ -39,12 +39,11 @@ function TrimRight(const AText: string): string;
 procedure ClearList(var AList: TList);
 procedure FreeList(var AList: TList);
 procedure ResizeBitmap(const ABitmap: TBitmap; const ANewWidth, ANewHeight: Integer);
-procedure SetClipboardText(const AText: string; const AHTML: string);
 
 implementation
 
 uses
-  Winapi.ActiveX, System.Character, System.Generics.Collections, Vcl.ClipBrd, Vcl.Controls, Vcl.Forms, TextEditor.Consts
+  System.Character, System.Generics.Collections, Vcl.Controls, Vcl.Forms, TextEditor.Consts
 {$IFDEF ALPHASKINS}
   , sDialogs
 {$ELSE}
@@ -543,99 +542,7 @@ begin
   end;
 end;
 
-function OpenClipboard: Boolean;
-var
-  LRetryCount: Integer;
-  LDelayStepMs: Integer;
-begin
-  Result := False;
-
-  LDelayStepMs := TClipboardDefaults.DelayStepMs;
-
-  for LRetryCount := 1 to TClipboardDefaults.MaxRetries do
-  try
-    Clipboard.Open;
-    Exit(True);
-  except
-    on Exception do
-    if LRetryCount = TClipboardDefaults.MaxRetries then
-      raise
-    else
-    begin
-      Sleep(LDelayStepMs);
-      Inc(LDelayStepMs, TClipboardDefaults.DelayStepMs);
-    end;
-  end;
-end;
-
-function GetClipboardText: string;
-var
-  LGlobalMem: HGlobal;
-  LLocaleID: LCID;
-  LBytePointer: PByte;
-
-  function AnsiStringToString(const AValue: AnsiString; const ACodePage: Word): string;
-  var
-    LInputLength, LOutputLength: Integer;
-  begin
-    LInputLength := Length(AValue);
-    LOutputLength := MultiByteToWideChar(ACodePage, 0, PAnsiChar(AValue), LInputLength, nil, 0);
-    SetLength(Result, LOutputLength);
-    MultiByteToWideChar(ACodePage, 0, PAnsiChar(AValue), LInputLength, PChar(Result), LOutputLength);
-  end;
-
-  function CodePageFromLocale(const ALanguage: LCID): Integer;
-  var
-    LBuffer: array [0 .. 6] of Char;
-  begin
-    GetLocaleInfo(ALanguage, LOCALE_IDEFAULTANSICODEPAGE, LBuffer, 6);
-    Result := StrToIntDef(LBuffer, GetACP);
-  end;
-
-begin
-  Result := '';
-
-  if OpenClipboard then
-  try
-    if Clipboard.HasFormat(CF_UNICODETEXT) then
-    begin
-      LGlobalMem := Clipboard.GetAsHandle(CF_UNICODETEXT);
-
-      if LGlobalMem <> 0 then
-      try
-        Result := PChar(GlobalLock(LGlobalMem));
-      finally
-        GlobalUnlock(LGlobalMem);
-      end;
-    end
-    else
-    begin
-      LLocaleID := 0;
-      LGlobalMem := Clipboard.GetAsHandle(CF_LOCALE);
-
-      if LGlobalMem <> 0 then
-      try
-        LLocaleID := PInteger(GlobalLock(LGlobalMem))^;
-      finally
-        GlobalUnlock(LGlobalMem);
-      end;
-
-      LGlobalMem := Clipboard.GetAsHandle(CF_TEXT);
-
-      if LGlobalMem <> 0 then
-      try
-        LBytePointer := GlobalLock(LGlobalMem);
-        Result := AnsiStringToString(PAnsiChar(LBytePointer), CodePageFromLocale(LLocaleID));
-      finally
-        GlobalUnlock(LGlobalMem);
-      end;
-    end;
-  finally
-    Clipboard.Close;
-  end;
-end;
-
-function GetHTMLClipboardFormat: TClipFormat;
+function GetHTMLClipboardFormat: Cardinal;
 begin
   if CF_HTML = 0 then
     CF_HTML := RegisterClipboardFormat('HTML Format');
@@ -675,89 +582,6 @@ begin
     Format('%s%.8d', [StartFragment, LStartFragment]) + sLineBreak +
     Format('%s%.8d', [EndFragment, LEndFragment]) + sLineBreak +
     DocType + HTMLBegin + Result + HTMLEnd;
-end;
-
-{ TODO: Refactor }
-procedure SetClipboardText(const AText: string; const AHTML: string);
-var
-  LGlobalMem: HGlobal;
-  LPGlobalLock: PByte;
-  LHTML: UTF8String;
-  LLength: Integer;
-  LText: string;
-begin
-  if AText.IsEmpty then
-    Exit;
-
-  LText := StringReplace(AText, TControlCharacters.Null, '', [rfReplaceAll]);
-  LLength := Length(LText);
-
-  if OpenClipboard then
-  try
-    Clipboard.Clear;
-
-    { Set ANSI text only on Win9X, WinNT automatically creates ANSI from Unicode }
-    if Win32Platform <> VER_PLATFORM_WIN32_NT then
-    begin
-      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, LLength + 1);
-
-      if LGlobalMem <> 0 then
-      begin
-        LPGlobalLock := GlobalLock(LGlobalMem);
-        try
-          if Assigned(LPGlobalLock) then
-          begin
-            Move(PAnsiChar(AnsiString(LText))^, LPGlobalLock^, LLength + 1);
-            Clipboard.SetAsHandle(CF_TEXT, LGlobalMem);
-          end;
-        finally
-          GlobalUnlock(LGlobalMem);
-        end;
-      end;
-    end;
-
-    { Set unicode text, this also works on Win9X, even if the clipboard-viewer
-      can't show it, Word 2000+ can paste it including the unicode only characters }
-    LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, (LLength + 1) * SizeOf(Char));
-
-    if LGlobalMem <> 0 then
-    begin
-      LPGlobalLock := GlobalLock(LGlobalMem);
-      try
-        if Assigned(LPGlobalLock) then
-        begin
-          Move(PChar(LText)^, LPGlobalLock^, (LLength + 1) * SizeOf(Char));
-          Clipboard.SetAsHandle(CF_UNICODETEXT, LGlobalMem);
-        end;
-      finally
-        GlobalUnlock(LGlobalMem);
-      end;
-    end;
-
-    if not AHTML.IsEmpty then
-    begin
-      LHTML := FormatForClipboard(AHTML) + #0;
-      LLength := Length(LHTML);
-
-      LGlobalMem := GlobalAlloc(GMEM_MOVEABLE or GMEM_DDESHARE, LLength);
-
-      if LGlobalMem <> 0 then
-      begin
-        LPGlobalLock := GlobalLock(LGlobalMem);
-        try
-          if Assigned(LPGlobalLock) then
-          begin
-            Move(PAnsiChar(LHTML)^, LPGlobalLock^, LLength);
-            Clipboard.SetAsHandle(GetHTMLClipboardFormat, LGlobalMem);
-          end;
-        finally
-          GlobalUnlock(LGlobalMem);
-        end;
-      end;
-    end;
-  finally
-    Clipboard.Close;
-  end;
 end;
 
 procedure ResizeBitmap(const ABitmap: TBitmap; const ANewWidth, ANewHeight: Integer);

@@ -341,6 +341,7 @@ var
   LCloseParent: Boolean;
   LDelimiters: TTextEditorCharSet;
   LStartPosition: Integer;
+  LChar: Char;
 begin
   FreeTemporaryTokens;
 
@@ -359,8 +360,13 @@ begin
     LKeyword := PChar(FRange.AlternativeCloseArray[LIndex]);
     LPosition := FRunPosition;
 
-    while (FLine[LPosition] <> TControlCharacters.Null) and (FLine[LPosition] = LKeyword^) do
+    while True do
     begin
+      LChar := FLine[LPosition];
+
+      if (LChar = TControlCharacters.Null) or (LChar <> LKeyword^) then
+        Break;
+
       Inc(LKeyword);
       Inc(LPosition);
     end;
@@ -378,9 +384,10 @@ begin
   begin
     LCloseParent := FRange.CloseParent;
 
-    if not FSkipWhitespace and FRange.CloseOnTerm and (FLine[FRunPosition] in FRange.Delimiters) and
-      not (FRange.SkipWhitespace and (FLine[FRunPosition] in TCharacterSets.AbsoluteDelimiters)) or
-      FRange.CloseOnAnyTerm then
+    LChar := FLine[FRunPosition];
+
+    if not FSkipWhitespace and FRange.CloseOnTerm and (LChar in FRange.Delimiters) and
+      not (FRange.SkipWhitespace and (LChar in TCharacterSets.AbsoluteDelimiters)) or FRange.CloseOnAnyTerm then
     begin
       FRange := FRange.Parent;
 
@@ -388,10 +395,10 @@ begin
         FRange := FRange.Parent;
     end;
 
-    if Ord(FLine[FRunPosition]) < TCharacters.AnsiCharCount then
-      LParser := FRange.SymbolList[AnsiChar(FRange.CaseFunct(FLine[FRunPosition]))]
+    if Ord(LChar) < TCharacters.AnsiCharCount then
+      LParser := FRange.SymbolList[AnsiChar(FRange.CaseFunct(LChar))]
     else
-    case FLine[FRunPosition] of
+    case LChar of
       { Turkish special characters }
       'ç', 'Ç':
          LParser := FRange.SymbolList['C'];
@@ -415,7 +422,7 @@ begin
       FToken := FRange.DefaultToken;
       FSkipWhitespace := False;
 
-      if IsRightToLeftCharacter(FLine[FRunPosition], False) then
+      if IsRightToLeftCharacter(LChar, False) then
       begin
         FRightToLeftToken := True;
 
@@ -435,11 +442,16 @@ begin
         LStartPosition := FRunPosition;
 
         if (FRunPosition > 0) and (FLine[FRunPosition - 1] > TControlCharacters.UnitSeparator) then
-        while not (FLine[FRunPosition] in LDelimiters) and
-          (FLine[FRunPosition] > TControlCharacters.UnitSeparator) and
-          ((Ord(FLine[FRunPosition - 1]) < TCharacters.AnsiCharCount) = (Ord(FLine[FRunPosition]) < TCharacters.AnsiCharCount)) and
-          (FRunPosition - LStartPosition < FMaxLengthOfContinuousString) do
+        while FRunPosition - LStartPosition < FMaxLengthOfContinuousString do
+        begin
+          LChar := FLine[FRunPosition];
+
+          if (LChar in LDelimiters) or (LChar <= TControlCharacters.UnitSeparator) or
+             ((Ord(FLine[FRunPosition - 1]) < TCharacters.AnsiCharCount) <> (Ord(LChar) < TCharacters.AnsiCharCount)) then
+            Break;
+
           Inc(FRunPosition);
+        end;
       end;
     end
     else

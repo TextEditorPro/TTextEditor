@@ -3,12 +3,11 @@
     "Sample": [
       "// Hello, World! in C++\r\n",
       "\r\n",
-      "#include <iostream>\r\n",
+      "import std;\r\n",
       "\r\n",
       "int main()\r\n",
       "{\r\n",
-      "    std::cout << \"Hello, World!\" << std::endl;\r\n",
-      "    return 0;\r\n",
+      "  std::println(\"Hello, World!\");\r\n",
       "}"
     ],
     "MainRules": {

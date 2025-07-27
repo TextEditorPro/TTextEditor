@@ -154,8 +154,8 @@ type
   TTextEditorSelectionMode = (smColumn, smNormal);
 
   { Scroll }
-  TTextEditorScrollOption = (soHalfPage, soHintFollows, soPastEndOfFileMarker, soPastEndOfLine, soShowVerticalScrollHint,
-    soWheelClickMove);
+  TTextEditorScrollOption = (soAutoDisableScrollButtons, soHalfPage, soHintFollows, soPastEndOfFileMarker,
+    soPastEndOfLine, soShowVerticalScrollHint, soWheelClickMove);
   TTextEditorScrollOptions = set of TTextEditorScrollOption;
 
   TTextEditorScrollHintFormat = (shfTopLineOnly, shfTopToBottom);
@@ -249,7 +249,7 @@ type
   TTextEditorSpecialCharsStyle = (scsDot, scsSolid);
 
   { Minimap }
-  TTextEditorMinimapOption = (moShowBookmarks, moShowSearchResults, moShowSelection, moShowSpecialChars);
+  TTextEditorMinimapOption = (moMinimapDragsScrollbar, moShowBookmarks, moShowSearchResults, moShowSelection, moShowSpecialChars);
   TTextEditorMinimapOptions = set of TTextEditorMinimapOption;
   TTextEditorMinimapAlign = (maLeft, maRight);
   TTextEditorMinimapIndicatorOption = (ioInvertBlending, ioShowBorder, ioUseBlending);

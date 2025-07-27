@@ -41,7 +41,7 @@ type
     property Align: TTextEditorMinimapAlign read FAlign write SetAlign default maRight;
     property Cursor: TCursor read FCursor write FCursor default crArrow;
     property Indicator: TTextEditorMinimapIndicator read FIndicator write FIndicator;
-    property Options: TTextEditorMinimapOptions read FOptions write FOptions default [];
+    property Options: TTextEditorMinimapOptions read FOptions write FOptions default [moMinimapDragsScrollbar];
     property Shadow: TTextEditorMinimapShadow read FShadow write FShadow;
     property Visible: Boolean read FVisible write SetVisible default False;
     property Width: Integer read FWidth write SetWidth default 140;
@@ -59,7 +59,7 @@ begin
   FAlign := maRight;
   FClicked := False;
   FCursor := crArrow;
-  FOptions := [];
+  FOptions := [moMinimapDragsScrollbar];
   FTopLine := 1;
   FVisible := False;
   FWidth := 140;

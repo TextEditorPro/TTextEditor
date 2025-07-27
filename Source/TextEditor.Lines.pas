@@ -61,6 +61,7 @@ type
     function GetPartialTextLength(const AStart, AEnd: Integer): Integer;
     function GetPartialTextStr(const AStart, AEnd: Integer): string;
     function GetRanges(const AIndex: Integer): TTextEditorLinesRange;
+    function GetTextLines(const AIndex: Integer): string;
     function IsValidIndex(const AIndex: Integer): Boolean; inline;
     procedure ExchangeItems(const AIndex1, AIndex2: Integer);
     procedure Grow;
@@ -141,6 +142,7 @@ type
     property Strings[AIndex: Integer]: string read Get write Put; default; //FI:C110 Getter or setter name is different from property declaration
     property TabWidth: Integer read FTabWidth write SetTabWidth;
     property Text: string read GetTextStr write SetTextStr; //FI:C110 Getter or setter name is different from property declaration
+    property TextLines[const AIndex: Integer]: string read GetTextLines;
     property TrimTrailingSpaces: Boolean read FTrimTrailingSpaces write FTrimTrailingSpaces;
     property UnknownCharHigh: Byte read FUnknownCharHigh;
     property UnknownCharsVisible: Boolean write FUnknownCharsVisible;
@@ -321,7 +323,7 @@ begin
   if (AIndex < 0) or (AIndex > FCount - 1) then
     Result := 0
   else
-    Result := Length(FItems^[AIndex].TextLine);
+    Result := FItems^[AIndex].TextLine.Length;
 end;
 
 procedure TTextEditorLines.Clear;
@@ -435,6 +437,11 @@ begin
     Result := FItems^[AIndex].TextLine
   else
     Result := '';
+end;
+
+function TTextEditorLines.GetTextLines(const AIndex: Integer): string;
+begin
+  Result := FItems^[AIndex].TextLine
 end;
 
 function TTextEditorLines.GetCapacity: Integer;

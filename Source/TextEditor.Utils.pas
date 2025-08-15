@@ -240,8 +240,12 @@ begin
 end;
 
 function ColorToHex(const AColor: TColor): string;
+var
+  LRGB: Integer;
 begin
-  Result := '#' + IntToHex(GetRValue(AColor), 2) + IntToHex(GetGValue(AColor), 2) + IntToHex(GetBValue(AColor), 2);
+  LRGB := ColorToRGB(AColor);
+
+  Result := '#' + IntToHex(GetRValue(LRGB), 2) + IntToHex(GetGValue(LRGB), 2) + IntToHex(GetBValue(LRGB), 2);
 end;
 
 function ConvertTabs(const ALine: string; ATabWidth: Integer; var AHasTabs: Boolean; const AColumns: Boolean): string;
@@ -607,6 +611,7 @@ var
   LCursorPair: TCursorPair;
 begin
   LCursorPair.Initalize(Screen.Cursor, ACursor);
+
   Result := FCursorStack.Add(LCursorPair);
 end;
 
@@ -615,6 +620,7 @@ var
   LIndex: Integer;
 begin
   LIndex := AddCursorToStack(ACursor);
+
   Screen.Cursor := FCursorStack[LIndex].NewCursor;
 end;
 

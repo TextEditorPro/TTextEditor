@@ -781,6 +781,7 @@ type
     function GetWordAtPixels(const X, Y: Integer): string;
     function IsCommentAtCaretPosition: Boolean;
     function IsCommentChar(const AChar: Char): Boolean;
+    function IsEmpty: Boolean;
     function IsKeywordAtCaretPosition(const APOpenKeyWord: PBoolean = nil): Boolean;
     function IsKeywordAtCaretPositionOrAfter(const ATextPosition: TTextEditorTextPosition): Boolean;
     function IsMultiEditCaretFound(const ALine: Integer): Boolean;
@@ -3579,7 +3580,7 @@ begin
 
       if LCompareMode then
       begin
-        if sfEmptyLine in FLines.Items^[LIndex - 1].Flags then
+        if sfEmptyLine in FLines.Flags[LIndex - 1] then
           Inc(LCompareOffset);
 
         FCompareLineNumberOffsetCache[LIndex] := LCompareOffset;
@@ -10204,7 +10205,7 @@ var
   LVisible: Boolean;
 begin
   if not HandleAllocated or PaintLocked or FLines.Streaming or FHighlighter.Loading or FScroll.Dragging and
-    not (moMinimapDragsScrollbar in FMinimap.Options) then
+    not (moMinimapDragsScrollBar in FMinimap.Options) then
     Exit;
 
   if FLines.Count > 0 then
@@ -14201,7 +14202,7 @@ var
         LLine := GetViewTextLineNumber(LIndex);
 
         if LCompareMode and (FLines.Count > 0) then
-          LCompareEmptyLine := sfEmptyLine in FLines.Items^[LIndex - 1].Flags;
+          LCompareEmptyLine := sfEmptyLine in FLines.Flags[LIndex - 1];
 
         LLineRect.Top := (LIndex - TopLine) * LLineHeight;
 
@@ -18688,6 +18689,11 @@ begin
   Result := FHighlighter.Loaded and (AChar in FHighlighter.Comments.Chars);
 end;
 
+function TCustomTextEditor.IsEmpty: Boolean;
+begin
+  Result := (FLines.Count = 0) or (FLines.Count > 0) and FLines[0].Trim.IsEmpty;
+end;
+
 function TCustomTextEditor.IsTextPositionInSelection(const ATextPosition: TTextEditorTextPosition): Boolean;
 var
   LBeginTextPosition, LEndTextPosition: TTextEditorTextPosition;
@@ -22773,7 +22779,7 @@ var
   LStream: TStream;
   LBlobField: TBlobField;
 begin
-  if not FDataLink.CanModify then
+  if not FDataLink.CanModify or not Modified then
     Exit;
 
   FDataLink.Edit;

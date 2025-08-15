@@ -56,12 +56,13 @@ type
     function ExpandString(const AIndex: Integer): string;
     function GetExpandedString(const AIndex: Integer): string;
     function GetExpandedStringLength(const AIndex: Integer): Integer;
+    function GetFlags(const AIndex: Integer): TTextEditorStringFlags; inline;
     function GetLineBreakFromFlags(const AFlags: TTextEditorStringFlags): string; inline;
     function GetLineState(const AIndex: Integer): TTextEditorLineState;
     function GetPartialTextLength(const AStart, AEnd: Integer): Integer;
     function GetPartialTextStr(const AStart, AEnd: Integer): string;
     function GetRanges(const AIndex: Integer): TTextEditorLinesRange;
-    function GetTextLines(const AIndex: Integer): string;
+    function GetTextLines(const AIndex: Integer): string; inline;
     function IsValidIndex(const AIndex: Integer): Boolean; inline;
     procedure ExchangeItems(const AIndex1, AIndex2: Integer);
     procedure Grow;
@@ -118,6 +119,7 @@ type
     property Encoding: TEncoding read FEncoding write SetEncoding;
     property ExpandedStringLengths[const AIndex: Integer]: Integer read GetExpandedStringLength;
     property ExpandedStrings[const AIndex: Integer]: string read GetExpandedString;
+    property Flags[const AIndex: Integer]: TTextEditorStringFlags read GetFlags;
     property Items: PEditorStringRecordItems read FItems;
     property LineBreak: TTextEditorLineBreak read FLineBreak write FLineBreak default lbCRLF;
     property LineState[const AIndex: Integer]: TTextEditorLineState read GetLineState write SetLineState;
@@ -437,6 +439,11 @@ begin
     Result := FItems^[AIndex].TextLine
   else
     Result := '';
+end;
+
+function TTextEditorLines.GetFlags(const AIndex: Integer): TTextEditorStringFlags;
+begin
+  Result := FItems^[AIndex].Flags;
 end;
 
 function TTextEditorLines.GetTextLines(const AIndex: Integer): string;

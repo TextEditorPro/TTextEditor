@@ -411,11 +411,11 @@ begin
           if WrapTextEx(LText, [';', ')', '.'], FMaxColumn, LList) then
             CountWrapped
           else
-          while Length(LText) > 0 do
+          while LText.Length > 0 do
           begin
             Delete(LText, 1, FMaxColumn);
 
-            if Length(LText) > 0 then
+            if LText.Length > 0 then
               LYPos := LYPos + FLineHeight;
           end;
 
@@ -458,11 +458,11 @@ var
   begin
     LIndex := 1;
 
-    while LIndex <= Length(AText) do
+    while LIndex <= AText.Length do
     begin
       LText := '';
 
-      while (Length(LText) < FMaxColumn) and (LIndex <= Length(AText)) do
+      while (Length(LText) < FMaxColumn) and (LIndex <= AText.Length) do
       begin
         LText := LText + AText[LIndex];
         Inc(LIndex);
@@ -511,7 +511,7 @@ end;
 function TTextEditorPrint.ClipLineToRect(var ALine: string): string;
 begin
   while FCanvas.TextWidth(ALine) > FMaxWidth do
-    SetLength(ALine, Length(ALine) - 1);
+    SetLength(ALine, ALine.Length - 1);
 
   Result := ALine;
 end;
@@ -537,11 +537,11 @@ var
     if Highlight and Assigned(FHighlighter) and (FLines.Count > 0) then
     begin
       SetBkMode(FCanvas.Handle, TRANSPARENT);
-      Winapi.Windows.ExtTextOut(FCanvas.Handle, X, Y, 0, @LClipRect, PChar(AText), Length(AText), nil);
+      Winapi.Windows.ExtTextOut(FCanvas.Handle, X, Y, 0, @LClipRect, PChar(AText), AText.Length, nil);
       SetBkMode(FCanvas.Handle, OPAQUE);
     end
     else
-      Winapi.Windows.ExtTextOut(FCanvas.Handle, X, Y, 0, nil, PChar(AText), Length(AText), nil);
+      Winapi.Windows.ExtTextOut(FCanvas.Handle, X, Y, 0, nil, PChar(AText), AText.Length, nil);
   end;
 
   procedure SplitToken;
@@ -553,7 +553,7 @@ var
   begin
     LLast := LTokenPosition;
     LFirstPosition := LTokenPosition;
-    LTokenEnd := LTokenPosition + Length(LToken);
+    LTokenEnd := LTokenPosition + LToken.Length;
 
     while (LCount < AList.Count) and (LTokenEnd > TTextEditorWrapPosition(AList[LCount]).Index) do
     begin
@@ -567,7 +567,7 @@ var
 
     LTempText := Copy(AText, LLast + 1, LTokenEnd - LLast);
     ClippedTextOut(FMargins.PixelLeft + LFirstPosition * FPaintHelper.CharWidth, FYPos, LTempText);
-    LTokenStart := LTokenPosition + Length(LToken) - Length(LTempText);
+    LTokenStart := LTokenPosition + LToken.Length - LTempText.Length;
   end;
 
 var
@@ -639,7 +639,7 @@ begin
               FYPos := FYPos + FLineHeight;
             end
             else
-            if LTokenPosition + Length(LToken) > TTextEditorWrapPosition(AList[LCount]).Index then
+            if LTokenPosition + LToken.Length > TTextEditorWrapPosition(AList[LCount]).Index then
             begin
               LHandled := True;
               SplitToken;
@@ -680,7 +680,7 @@ begin
           LOldWrapPosition := LWrapPosition;
         end;
 
-        if Length(AText) > 0 then
+        if AText.Length > 0 then
           LLines.Add(Copy(AText, LOldWrapPosition + 1, MaxInt));
 
         for LIndex := 0 to LLines.Count - 1 do
@@ -879,7 +879,7 @@ var
   LPosition, LPreviousPosition: Integer;
   LFound: Boolean;
 begin
-  if Length(ALine) <= AMaxColumn then
+  if ALine.Length <= AMaxColumn then
   begin
     Result := True;
     Exit;
@@ -891,7 +891,7 @@ begin
   LPreviousPosition := 0;
   LWrapPosition := TTextEditorWrapPosition.Create;
 
-  while LPosition <= Length(ALine) do
+  while LPosition <= ALine.Length do
   begin
     LFound := (LPosition - LPreviousPosition > AMaxColumn) and (LWrapPosition.Index <> 0);
 
@@ -904,7 +904,7 @@ begin
       AList.Add(LWrapPosition);
       LPreviousPosition := LWrapPosition.Index;
 
-      if ((Length(ALine) - LPreviousPosition) > AMaxColumn) and (LPosition < Length(ALine)) then
+      if (ALine.Length - LPreviousPosition > AMaxColumn) and (LPosition < ALine.Length) then
         LWrapPosition := TTextEditorWrapPosition.Create
       else
         Break;
@@ -930,7 +930,7 @@ begin
     FTabWidth := AValue.Tabs.Width;
     SetLines(AValue.Lines);
     FSelectionAvailable := AValue.SelectionAvailable;
-    FBlockBeginPosition := AValue.SelectionBeginPosition;
+    FBlockBeginPosition := AValue.SelectionStartPosition;
     FBlockEndPosition := AValue.SelectionEndPosition;
     FSelectionMode := AValue.Selection.Mode;
   end;
@@ -988,10 +988,10 @@ begin
 
   with AStream do
   begin
-    LLength := Length(FTitle);
+    LLength := FTitle.Length;
     Write(LLength, SizeOf(LLength));
     Write(PChar(FTitle)^, LLength * SizeOf(Char));
-    LLength := Length(FDocumentTitle);
+    LLength := FDocumentTitle.Length;
     Write(LLength, SizeOf(LLength));
     Write(PChar(FDocumentTitle)^, LLength * SizeOf(Char));
     Write(FWrap, SizeOf(FWrap));

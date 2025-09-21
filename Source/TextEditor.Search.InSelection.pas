@@ -10,14 +10,14 @@ type
   strict private
     FActive: Boolean;
     FOnChange: TTextEditorSearchChangeEvent;
-    FSelectionBeginPosition: TTextEditorTextPosition;
+    FSelectionStartPosition: TTextEditorTextPosition;
     FSelectionEndPosition: TTextEditorTextPosition;
     procedure DoChange;
     procedure SetActive(const AValue: Boolean);
   public
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
-    property SelectionBeginPosition: TTextEditorTextPosition read FSelectionBeginPosition write FSelectionBeginPosition;
+    property SelectionStartPosition: TTextEditorTextPosition read FSelectionStartPosition write FSelectionStartPosition;
     property SelectionEndPosition: TTextEditorTextPosition read FSelectionEndPosition write FSelectionEndPosition;
   published
     property Active: Boolean read FActive write SetActive default False;
@@ -45,7 +45,7 @@ begin
   with ASource as TTextEditorSearchInSelection do
   begin
     Self.FActive := FActive;
-    Self.FSelectionBeginPosition := FSelectionBeginPosition;
+    Self.FSelectionStartPosition := FSelectionStartPosition;
     Self.FSelectionEndPosition := FSelectionEndPosition;
 
     Self.DoChange;

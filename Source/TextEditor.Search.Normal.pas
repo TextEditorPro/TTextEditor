@@ -61,7 +61,7 @@ var
   LAnsiChar: AnsiChar;
   LIndex: Integer;
 begin
-  FPatternLength := Length(FPattern);
+  FPatternLength := FPattern.Length;
 
   if FPatternLength = 0 then
     Status := STextEditorPatternIsEmpty;
@@ -216,7 +216,7 @@ begin
 
   Result := 0;
 
-  FTextLength := Length(AText);
+  FTextLength := AText.Length;
 
   if FTextLength >= FPatternLength then
   begin

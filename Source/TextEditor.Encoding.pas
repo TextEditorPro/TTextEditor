@@ -275,15 +275,18 @@ var
 
 begin
   Result := '';
+
   LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
   LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
-  for LIndex := 1 to Length(LInput) do
+
+  for LIndex := 1 to LInput.Length do
   begin
     if LInput[LIndex] = ' ' then
       AddToResult
     else
       LValue := LValue + LInput[LIndex];
   end;
+
   AddToResult;
 end;
 
@@ -292,11 +295,13 @@ var
   LIndex: Integer;
 begin
   Result := '';
-  for LIndex := 1 to Length(AInput) do
+
+  for LIndex := 1 to AInput.Length do
   begin
     Result := Result + IntToStr(Ord(AInput[LIndex]));
     Result := Result + ' ';
   end;
+
   Result := TextEditor.Utils.Trim(Result);
 end;
 
@@ -311,16 +316,21 @@ var
   LByte, LByteIndex: Byte;
 begin
   Result := '';
+
   LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
   LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
   LInput := StringReplace(LInput, ' ', '', [rfReplaceAll]);
+
   LByte := 0;
   LByteIndex := 0;
-  for LIndex := 1 to Length(LInput) do
+
+  for LIndex := 1 to LInput.Length do
   begin
     if LInput[LIndex] = '1' then
       Inc(LByte, ByteArray[LByteIndex]);
+
     Inc(LByteIndex);
+
     if LByteIndex = 8 then
     begin
       Result := Result + Chr(LByte);
@@ -340,7 +350,8 @@ var
   LHiBits: Byte;
 begin
   Result := '';
-  for LIndex := 1 to Length(AInput) do
+
+  for LIndex := 1 to AInput.Length do
   begin
     LHiBits := (Byte(AInput[LIndex]) and $F0) shr 4;
     LLoBits := Byte(AInput[LIndex]) and $0F;
@@ -348,6 +359,7 @@ begin
     Result := Result + BitArray[LLoBits];
     Result := Result + ' ';
   end;
+
   Result := TextEditor.Utils.Trim(Result);
 end;
 
@@ -370,15 +382,18 @@ var
 
 begin
   Result := '';
+
   LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
   LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
-  for LIndex := 1 to Length(LInput) do
+
+  for LIndex := 1 to LInput.Length do
   begin
     if LInput[LIndex] = ' ' then
       AddToResult
     else
       LValue := LValue + LInput[LIndex];
   end;
+
   AddToResult;
 end;
 
@@ -388,7 +403,9 @@ var
   LBytes: TBytes;
 begin
   Result := '';
+
   LBytes := TEncoding.UTF8.GetBytes(AInput);
+
   for LIndex := 0 to Length(LBytes) - 1 do
   begin
     Result := Result + IntToHex(LBytes[LIndex], 2);
@@ -415,9 +432,11 @@ var
 
 begin
   Result := '';
+
   LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
   LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
-  for LIndex := 1 to Length(LInput) do
+
+  for LIndex := 1 to LInput.Length do
   begin
     if LInput[LIndex] = ' ' then
       AddToResult
@@ -432,11 +451,13 @@ var
   LIndex: Integer;
 begin
   Result := '';
-  for LIndex := 1 to Length(AInput) do
+
+  for LIndex := 1 to AInput.Length do
   begin
     Result := Result + IntToHex(Integer(AInput[LIndex]), 4);
     Result := Result + ' ';
   end;
+
   Result := TextEditor.Utils.Trim(Result);
 end;
 
@@ -466,9 +487,11 @@ var
 
 begin
   Result := '';
+
   LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
   LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
-  for LIndex := 1 to Length(LInput) do
+
+  for LIndex := 1 to LInput.Length do
   begin
     if LInput[LIndex] = ' ' then
       AddToResult
@@ -484,13 +507,15 @@ var
   LChar: Char;
 begin
   Result := '';
-  for LIndex := 1 to Length(AInput) do
+
+  for LIndex := 1 to AInput.Length do
   begin
     LChar := AInput[LIndex];
     SwapChar(LChar);
     Result := Result + IntToHex(Integer(LChar), 4);
     Result := Result + ' ';
   end;
+
   Result := TextEditor.Utils.Trim(Result);
 end;
 
@@ -503,10 +528,13 @@ var
   LValue: string;
 begin
   Result := '';
+
   LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
   LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
+
   LIndex := 1;
-  while LIndex < Length(LInput) do
+
+  while LIndex < LInput.Length do
   begin
     LValue := LInput[LIndex] + LInput[LIndex + 1];
     Result := Result + Chr(StrToIntDef('$' + LValue, 0));
@@ -520,7 +548,9 @@ var
   LBytes: TBytes;
 begin
   Result := '';
+
   LBytes := TEncoding.UTF8.GetBytes(AInput);
+
   for LIndex := 0 to Length(LBytes) - 1 do
     Result := Result + IntToHex(LBytes[LIndex], 2);
 end;
@@ -534,10 +564,13 @@ var
   LValue: string;
 begin
   Result := '';
+
   LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
   LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
+
   LIndex := 1;
-  while LIndex < Length(LInput) do
+
+  while LIndex < LInput.Length do
   begin
     LValue := LInput[LIndex] + LInput[LIndex + 1] + LInput[LIndex + 2] + LInput[LIndex + 3];
     Result := Result + Chr(StrToIntDef('$' + LValue, 0));
@@ -550,8 +583,10 @@ var
   LIndex: Integer;
 begin
   Result := '';
-  for LIndex := 1 to Length(AInput) do
+
+  for LIndex := 1 to AInput.Length do
     Result := Result + IntToHex(Integer(AInput[LIndex]), 4);
+
   Result := TextEditor.Utils.Trim(Result);
 end;
 
@@ -564,10 +599,13 @@ var
   LValue: string;
 begin
   Result := '';
+
   LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
   LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
+
   LIndex := 1;
-  while LIndex < Length(LInput) do
+
+  while LIndex < LInput.Length do
   begin
     LValue := LInput[LIndex] + LInput[LIndex + 1] + LInput[LIndex + 2] + LInput[LIndex + 3];
     Result := Result + Chr(StrToIntDef('$' + LValue, 0));
@@ -581,12 +619,14 @@ var
   LChar: Char;
 begin
   Result := '';
-  for LIndex := 1 to Length(AInput) do
+
+  for LIndex := 1 to AInput.Length do
   begin
     LChar := AInput[LIndex];
     SwapChar(LChar);
     Result := Result + IntToHex(Integer(LChar), 4);
   end;
+
   Result := TextEditor.Utils.Trim(Result);
 end;
 
@@ -597,14 +637,18 @@ var
   LValue, LRest, LCount: Integer;
 begin
   Result := '';
+
   LValue := AValue;
+
   while LValue <> 0 do
   begin
     LRest  := LValue mod 8;
     LValue := LValue div 8;
     Result := IntToStr(LRest) + Result;
   end;
-  LCount := ADigits - Length(Result) - 1;
+
+  LCount := ADigits - Result.Length - 1;
+
   if LCount > 0 then
     Result := StringOfChar('0', LCount) + Result;
 end;
@@ -614,7 +658,8 @@ var
   LIndex: Integer;
 begin
   Result := 0;
-  for LIndex := 1 to Length(AValue) do
+
+  for LIndex := 1 to AValue.Length do
     Result := Result * 8 + StrToInt(Copy(AValue, LIndex, 1));
 end;
 
@@ -635,15 +680,18 @@ var
 
 begin
   Result := '';
+
   LInput := TextEditor.Utils.Trim(StringReplace(AInput, TControlCharacters.CarriageReturnLinefeed, ' ', [rfReplaceAll]));
   LInput := TextEditor.Utils.Trim(StringReplace(LInput, TControlCharacters.Linefeed, ' ', [rfReplaceAll]));
-  for LIndex := 1 to Length(LInput) do
+
+  for LIndex := 1 to LInput.Length do
   begin
     if LInput[LIndex] = ' ' then
       AddToResult
     else
       LValue := LValue + LInput[LIndex];
   end;
+
   AddToResult;
 end;
 
@@ -652,11 +700,13 @@ var
   LIndex: Integer;
 begin
   Result := '';
-  for LIndex := 1 to Length(AInput) do
+
+  for LIndex := 1 to AInput.Length do
   begin
     Result := Result + IntToOct(Ord(AInput[LIndex]), 2);
     Result := Result + ' ';
   end;
+
   Result := TextEditor.Utils.Trim(Result);
 end;
 
@@ -726,8 +776,8 @@ var
 begin
   Result := '';
 
-  SetLength(Result, Length(AValue));
-  for LIndex := 1 to Length(AValue) do
+  SetLength(Result, AValue.Length);
+  for LIndex := 1 to AValue.Length do
     Result[LIndex] := RotateChar(AValue[LIndex], ARotate);
 end;
 

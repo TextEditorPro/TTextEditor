@@ -70,12 +70,13 @@ type
     FOpenToken: string;
     FSkipRegions: TTextEditorSkipRegions;
     FStringEscapeChar: Char;
+    function FindItem(const AOpenToken: string): TTextEditorCodeFoldingRegionItem;
     function GetItem(const AIndex: Integer): TTextEditorCodeFoldingRegionItem;
   public
     constructor Create(AItemClass: TCollectionItemClass);
     destructor Destroy; override;
     function Add(const AOpenToken: string; const ACloseToken: string): TTextEditorCodeFoldingRegionItem;
-    function Contains(const AOpenToken: string; const ACloseToken: string): Boolean;
+    function Contains(const AOpenToken: string): Boolean;
     property CloseToken: string read FCloseToken write FCloseToken;
     property EscapeChar: Char read FEscapeChar write FEscapeChar default TControlCharacters.Null;
     property Items[const AIndex: Integer]: TTextEditorCodeFoldingRegionItem read GetItem; default;
@@ -117,15 +118,32 @@ end;
 { TTextEditorCodeFoldingRegions }
 
 function TTextEditorCodeFoldingRegion.Add(const AOpenToken: string; const ACloseToken: string): TTextEditorCodeFoldingRegionItem;
+var
+  LLow, LHigh, LMiddle, LCompare: Integer;
 begin
-  Result := TTextEditorCodeFoldingRegionItem(inherited Add);
+  LLow := 0;
+  LHigh := Count - 1;
+
+  while LLow <= LHigh do
+  begin
+    LMiddle := (LLow + LHigh) div 2;
+
+    LCompare := CompareText(AOpenToken, Items[LMiddle].OpenToken);
+
+    if LCompare < 0 then
+      LHigh := LMiddle - 1
+    else
+      LLow := LMiddle + 1;
+  end;
+
+  Result := TTextEditorCodeFoldingRegionItem(inherited Insert(LLow));
 
   with Result do
   begin
     OpenToken := AOpenToken;
-    OpenTokenLength := Length(AOpenToken);
+    OpenTokenLength := AOpenToken.Length;
     CloseToken := ACloseToken;
-    CloseTokenLength := Length(ACloseToken);
+    CloseTokenLength := ACloseToken.Length;
   end;
 end;
 
@@ -145,20 +163,34 @@ begin
   inherited;
 end;
 
-function TTextEditorCodeFoldingRegion.Contains(const AOpenToken: string; const ACloseToken: string): Boolean;
+function TTextEditorCodeFoldingRegion.FindItem(const AOpenToken: string): TTextEditorCodeFoldingRegionItem;
 var
-  LIndex: Integer;
-  LItem: TTextEditorCodeFoldingRegionItem;
+  LLow, LHigh, LMiddle, LCompare: Integer;
 begin
-  Result := False;
+  Result := nil;
 
-  for LIndex := 0 to Count - 1 do
+  LLow := 0;
+  LHigh := Count - 1;
+
+  while LLow <= LHigh do
   begin
-    LItem := Items[LIndex];
+    LMiddle := (LLow + LHigh) div 2;
 
-    if (LItem.OpenToken = AOpenToken) and (LItem.CloseToken = ACloseToken) then
-      Exit(True);
+    LCompare := CompareText(AOpenToken, Items[LMiddle].OpenToken);
+
+    if LCompare = 0 then
+      Exit(Items[LMiddle])
+    else
+    if LCompare < 0 then
+      LHigh := LMiddle - 1
+    else
+      LLow := LMiddle + 1;
   end;
+end;
+
+function TTextEditorCodeFoldingRegion.Contains(const AOpenToken: string): Boolean;
+begin
+  Result := Assigned(FindItem(AOpenToken));
 end;
 
 function TTextEditorCodeFoldingRegion.GetItem(const AIndex: Integer): TTextEditorCodeFoldingRegionItem;

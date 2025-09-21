@@ -89,7 +89,7 @@ begin
 
   LValue := LowerCase(AValue);
 
-  for LIndex := 1 to Length(AValue) do
+  for LIndex := 1 to AValue.Length do
   if Result[LIndex] = AValue[LIndex] then
     Result[LIndex] := LValue[LIndex];
 end;
@@ -102,7 +102,7 @@ begin
   Result := '';
 
   LIndex := 1;
-  LLength := Length(AValue);
+  LLength := AValue.Length;
 
   SetLength(Result, LLength);
 
@@ -340,10 +340,10 @@ function DeleteWhitespace(const AValue: string): string;
 var
   LIndex, LIndex2: Integer;
 begin
-  SetLength(Result, Length(AValue));
+  SetLength(Result, AValue.Length);
   LIndex2 := 0;
 
-  for LIndex := 1 to Length(AValue) do
+  for LIndex := 1 to AValue.Length do
   if not AValue[LIndex].IsWhiteSpace then
   begin
     Inc(LIndex2);
@@ -375,7 +375,7 @@ function TextWidth(const ACanvas: TCanvas; const AText: string): Integer;
 var
   LSize: TSize;
 begin
-  GetTextExtentPoint32(ACanvas.Handle, PChar(AText), Length(AText), LSize);
+  GetTextExtentPoint32(ACanvas.Handle, PChar(AText), AText.Length, LSize);
   Result := LSize.cx;
 end;
 
@@ -383,7 +383,7 @@ function TextHeight(const ACanvas: TCanvas; const AText: string): Integer;
 var
   LSize: TSize;
 begin
-  GetTextExtentPoint32(ACanvas.Handle, PChar(AText), Length(AText), LSize);
+  GetTextExtentPoint32(ACanvas.Handle, PChar(AText), AText.Length, LSize);
   Result := LSize.cy;
 end;
 

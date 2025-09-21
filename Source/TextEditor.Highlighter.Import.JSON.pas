@@ -818,7 +818,7 @@ begin
           end;
         end;
 
-        if ACodeFoldingRegion.Contains(LOpenToken, LCloseToken) then
+        if ACodeFoldingRegion.Contains(LOpenToken) then
           Continue;
       end;
 
@@ -1002,8 +1002,10 @@ begin
     end;
 
     New(LTokenMatch);
+
     LTokenMatch.OpenToken := LJSONDataValue.ObjectValue['OpenToken'].Value;
     LTokenMatch.CloseToken := LJSONDataValue.ObjectValue['CloseToken'].Value;
+
     FHighlighter.MatchingPairs.Add(LTokenMatch)
   end;
 end;

@@ -228,9 +228,9 @@ begin
     vkEscape:
       Hide;
     vkLeft:
-      if Length(FCurrentString) > 0 then
+      if FCurrentString.Length > 0 then
       begin
-        CurrentString := Copy(FCurrentString, 1, Length(FCurrentString) - 1);
+        CurrentString := Copy(FCurrentString, 1, FCurrentString.Length - 1);
         if Assigned(LTextEditor) then
           LTextEditor.CommandProcessor(TKeyCommands.Left, TControlCharacters.Null, nil);
       end
@@ -246,7 +246,7 @@ begin
       begin
         LTextPosition := TextPosition;
 
-        if LTextPosition.Char <= Length(FLines[LTextPosition.Line]) then
+        if LTextPosition.Char <= FLines[LTextPosition.Line].Length then
           LChar := FLines[LTextPosition.Line][LTextPosition.Char]
         else
           LChar := TCharacters.Space;
@@ -279,9 +279,9 @@ begin
     vkBack:
       if AShift = [] then
       begin
-        if Length(FCurrentString) > 0 then
+        if FCurrentString.Length > 0 then
         begin
-          CurrentString := Copy(FCurrentString, 1, Length(FCurrentString) - 1);
+          CurrentString := Copy(FCurrentString, 1, FCurrentString.Length - 1);
 
           if Assigned(LTextEditor) then
             LTextEditor.CommandProcessor(TKeyCommands.Backspace, TControlCharacters.Null, nil);
@@ -398,11 +398,11 @@ begin
         end;
 
         Canvas.Font.Style := Canvas.Font.Style + [fsUnderline];
-        LTemp := Copy(LText, LPosition, Length(FCurrentString));
+        LTemp := Copy(LText, LPosition, FCurrentString.Length);
         Canvas.TextOut(FMargin + LWidth, LTop, LTemp);
         Inc(LWidth, Canvas.TextWidth(LTemp));
         Canvas.Font.Style := Canvas.Font.Style - [fsUnderline];
-        LTemp := Copy(LText, LPosition + Length(FCurrentString));
+        LTemp := Copy(LText, LPosition + FCurrentString.Length);
 
         if not LTemp.IsEmpty then
           Canvas.TextOut(FMargin + LWidth, LTop, LTemp);
@@ -580,7 +580,7 @@ var
       LText := LItem.Keyword;
       LDescription := LItem.Description;
 
-      LLength := Length(LText);
+      LLength := LText.Length;
 
       if LLength > LMaxLength then
       begin
@@ -590,7 +590,7 @@ var
 
       if ShowDescription then
       begin
-        LLength := Length(LDescription);
+        LLength := LDescription.Length;
 
         if LLength > LMaxDescriptionLength then
         begin
@@ -702,7 +702,7 @@ var
   LItem: TTextEditorCompletionProposalItem;
   LStringList: TStringList;
   LAddedSnippet: Boolean;
-  LSnippetPosition, LSnippetSelectionBeginPosition, LSnippetSelectionEndPosition: TTextEditorTextPosition;
+  LSnippetPosition, LSnippetSelectionStartPosition, LSnippetSelectionEndPosition: TTextEditorTextPosition;
   LCharCount: Integer;
   LSpaces: string;
   LSnippetItem: TTextEditorCompletionProposalSnippetItem;
@@ -712,7 +712,7 @@ var
   function GetBeginChar(const ARow: Integer): Integer;
   begin
     if ARow = 1 then
-      Result := LTextEditor.SelectionBeginPosition.Char
+      Result := LTextEditor.SelectionStartPosition.Char
     else
       Result := LCharCount + 1;
   end;
@@ -739,11 +739,11 @@ begin
       begin
         LIndex := LTextPosition.Char - 1;
 
-        if LIndex <= Length(LLineText) then
+        if LIndex <= LLineText.Length then
         while (LIndex > 0) and (LLineText[LIndex] > TCharacters.Space) and not LTextEditor.IsWordBreakChar(LLineText[LIndex]) do
           Dec(LIndex);
 
-        SelectionBeginPosition := GetPosition(LIndex + 1, LTextPosition.Line);
+        SelectionStartPosition := GetPosition(LIndex + 1, LTextPosition.Line);
 
         if AEndToken = TControlCharacters.Null then
         begin
@@ -780,7 +780,7 @@ begin
             LCharCount := 0;
             LPLineText := PChar(LLineText);
 
-            for LIndex := 0 to SelectionBeginPosition.Char - 1 do //FI:W528 Variable 'LIndex' not used in FOR-loop
+            for LIndex := 0 to SelectionStartPosition.Char - 1 do //FI:W528 Variable 'LIndex' not used in FOR-loop
             begin
               if LPLineText^ = TControlCharacters.Tab then
                 Inc(LCharCount, Tabs.Width)
@@ -808,17 +808,17 @@ begin
             begin
               LBeginChar := GetBeginChar(LSnippetItem.Position.Row);
               LSnippetPosition := GetPosition(LBeginChar + LSnippetItem.Position.Column - 1,
-                SelectionBeginPosition.Line + LSnippetItem.Position.Row - 1);
+                SelectionStartPosition.Line + LSnippetItem.Position.Row - 1);
             end;
 
             if LSnippetItem.Selection.Active then
             begin
               LBeginChar := GetBeginChar(LSnippetItem.Selection.FromRow);
-              LSnippetSelectionBeginPosition := GetPosition(LBeginChar + LSnippetItem.Selection.FromColumn - 1,
-                SelectionBeginPosition.Line + LSnippetItem.Selection.FromRow - 1);
+              LSnippetSelectionStartPosition := GetPosition(LBeginChar + LSnippetItem.Selection.FromColumn - 1,
+                SelectionStartPosition.Line + LSnippetItem.Selection.FromRow - 1);
               LBeginChar := GetBeginChar(LSnippetItem.Selection.ToRow);
               LSnippetSelectionEndPosition := GetPosition(LBeginChar + LSnippetItem.Selection.ToColumn - 1,
-                SelectionBeginPosition.Line + LSnippetItem.Selection.ToRow - 1);
+                SelectionStartPosition.Line + LSnippetItem.Selection.ToRow - 1);
             end;
 
             LValue := LStringList.Text
@@ -851,19 +851,19 @@ begin
 
         if Assigned(LSnippetItem) and LSnippetItem.Selection.Active then
         begin
-          SelectionBeginPosition := LSnippetSelectionBeginPosition;
+          SelectionStartPosition := LSnippetSelectionStartPosition;
           SelectionEndPosition := LSnippetSelectionEndPosition;
         end
         else
         begin
-          SelectionBeginPosition := TextPosition;
-          SelectionEndPosition := SelectionBeginPosition;
+          SelectionStartPosition := TextPosition;
+          SelectionEndPosition := SelectionStartPosition;
         end;
       end
       else
       begin
         TextPosition := SelectionEndPosition;
-        SelectionBeginPosition := TextPosition;
+        SelectionStartPosition := TextPosition;
       end;
     finally
       EndUndoBlock;
@@ -901,7 +901,7 @@ begin
     LLineText := FLines[LTextPosition.Line];
     LIndex := LTextPosition.Char - 1;
 
-    if LIndex <= Length(LLineText) then
+    if LIndex <= LLineText.Length then
     begin
       while (LIndex > 0) and (LLineText[LIndex] > TCharacters.Space) and not LTextEditor.IsWordBreakChar(LLineText[LIndex]) do
         Dec(LIndex);

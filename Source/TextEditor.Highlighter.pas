@@ -726,7 +726,7 @@ begin
 
         LPText := PChar(LTextLine);
         LPStart := LPText;
-        Inc(LPText, Length(LTextLine));
+        Inc(LPText, LTextLine.Length);
         LInside := False;
 
         while LPText > LPStart do
@@ -815,6 +815,7 @@ begin
   LEditor.ClearCodeFolding;
 
   FName := AName;
+  FLoaded := False;
   FLoading := True;
 
   AStream.Position := 0;

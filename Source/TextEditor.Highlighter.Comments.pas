@@ -28,6 +28,9 @@ type
 
 implementation
 
+uses
+  System.SysUtils;
+
 destructor TTextEditorHighlighterComments.Destroy;
 begin
   Clear;
@@ -39,7 +42,7 @@ procedure TTextEditorHighlighterComments.AddChars(const AToken: string);
 var
   LIndex: Integer;
 begin
-  for LIndex := 1 to Length(AToken) do
+  for LIndex := 1 to AToken.Length do
     FChars := FChars + [AToken[LIndex]];
 end;
 

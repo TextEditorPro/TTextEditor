@@ -225,7 +225,7 @@ var
 begin
   LTokenNodeList := HeadNode.NextNodes;
   LTokenNode := nil;
-  LLength := Length(AString);
+  LLength := AString.Length;
 
   for LIndex := 1 to LLength do
   begin
@@ -712,7 +712,7 @@ begin
   for LIndex := 0 to FTokens.Count - 1 do
   begin
     LTempToken := TTextEditorToken(FTokens[LIndex]);
-    LLength := Length(LTempToken.Symbol);
+    LLength := LTempToken.Symbol.Length;
 
     if LLength < 1 then
       Continue;

@@ -1,4 +1,4 @@
-﻿package TextEditor.Delphi.Alexandria.Designtime;
+﻿package TextEditor.Delphi.Designtime;
 
 {$R *.res}
 {$R *.dres}
@@ -10,24 +10,25 @@
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
-{$LOCALSYMBOLS ON}
+{$LOCALSYMBOLS OFF}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
-{$OPTIMIZATION OFF}
+{$OPTIMIZATION ON}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
-{$REFERENCEINFO ON}
+{$REFERENCEINFO OFF}
 {$SAFEDIVIDE OFF}
-{$STACKFRAMES ON}
+{$STACKFRAMES OFF}
 {$TYPEDADDRESS OFF}
 {$VARSTRINGCHECKS ON}
 {$WRITEABLECONST ON}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DEFINE DEBUG}
+{$DEFINE RELEASE}
 {$DEFINE TEXT_EDITOR_SPELL_CHECK}
 {$ENDIF IMPLICITBUILDING}
 {$DESCRIPTION 'TTextEditor control package - designtime'}
+{$LIBSUFFIX AUTO}
 {$DESIGNONLY}
 {$IMPLICITBUILD ON}
 
@@ -35,7 +36,7 @@ requires
   designide,
   dbrtl,
   vcldb,
-  TextEditor.Delphi.Alexandria.Runtime;
+  TextEditor.Delphi.Runtime;
 
 contains
   TextEditor.Register in '..\Source\TextEditor.Register.pas',

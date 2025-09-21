@@ -111,7 +111,7 @@ begin
 
   if LTextEditor.SelectionAvailable then
   begin
-    LStartLine := LTextEditor.SelectionBeginPosition.Line;
+    LStartLine := LTextEditor.SelectionStartPosition.Line;
     LEndLine := LTextEditor.SelectionEndPosition.Line;
   end
   else

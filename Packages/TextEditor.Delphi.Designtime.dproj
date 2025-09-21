@@ -1,15 +1,15 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
         <ProjectGuid>{6E21797B-4D50-4028-9D52-05CDFE6CEAEA}</ProjectGuid>
-        <MainSource>TextEditor.Delphi.Athens.Designtime.dpk</MainSource>
+        <MainSource>TextEditor.Delphi.Designtime.dpk</MainSource>
         <Base>True</Base>
-        <Config Condition="'$(Config)'==''">Debug</Config>
-        <TargetedPlatforms>1048577</TargetedPlatforms>
+        <Config Condition="'$(Config)'==''">Release</Config>
+        <TargetedPlatforms>1</TargetedPlatforms>
         <AppType>Package</AppType>
         <FrameworkType>None</FrameworkType>
         <ProjectVersion>20.3</ProjectVersion>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
-        <ProjectName Condition="'$(ProjectName)'==''">TextEditor.Delphi.Athens.Designtime</ProjectName>
+        <ProjectName Condition="'$(ProjectName)'==''">TextEditor.Delphi.Designtime</ProjectName>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Config)'=='Base' or '$(Base)'!=''">
         <Base>true</Base>
@@ -52,8 +52,8 @@
         <Base>true</Base>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base)'!=''">
-        <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
-        <SanitizedProjectName>TextEditor_Delphi_Athens_Designtime</SanitizedProjectName>
+        <DCC_DcuOutput>..\Build\$(Platform)\$(Config)</DCC_DcuOutput>
+        <SanitizedProjectName>TextEditor_Delphi_Designtime</SanitizedProjectName>
         <DesignOnlyPackage>true</DesignOnlyPackage>
         <VerInfo_Keys>CompanyName=;FileDescription=TTextEditor;FileVersion=1.0.0.0;InternalName=;LegalCopyright=Copyright © 2023 Lasse Markus Rautiainen. All rights reserved.;LegalTrademarks=;OriginalFilename=;ProductName=TTextEditor;ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <GenPackage>true</GenPackage>
@@ -70,6 +70,7 @@
         <DCC_F>false</DCC_F>
         <DCC_WIDECHAR_REDUCED>false</DCC_WIDECHAR_REDUCED>
         <DCC_UnitSearchPath>..\Source;$(DCC_UnitSearchPath)</DCC_UnitSearchPath>
+        <DllSuffix>$(Auto)</DllSuffix>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Base_Win32)'!=''">
         <DCC_UsePackage>dbrtl;vcldb;TextEditor.Delphi.Tokyo.Runtime;TextEditor.Delphi.Runtime;TextEditor.Delphi.Athens.Runtime;$(DCC_UsePackage)</DCC_UsePackage>
@@ -88,7 +89,6 @@
         <VerInfo_IncludeVerInfo>true</VerInfo_IncludeVerInfo>
         <VerInfo_Keys>CompanyName=;FileDescription=$(MSBuildProjectName);FileVersion=1.0.0.0;InternalName=;LegalCopyright=;LegalTrademarks=;OriginalFilename=;ProgramID=com.embarcadero.$(MSBuildProjectName);ProductName=$(MSBuildProjectName);ProductVersion=1.0.0.0;Comments=</VerInfo_Keys>
         <VerInfo_Locale>1033</VerInfo_Locale>
-        <BCC_EnableBatchCompilation>true</BCC_EnableBatchCompilation>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1)'!=''">
         <DCC_LocalDebugSymbols>false</DCC_LocalDebugSymbols>
@@ -116,7 +116,7 @@
         <DCCReference Include="designide.dcp"/>
         <DCCReference Include="dbrtl.dcp"/>
         <DCCReference Include="vcldb.dcp"/>
-        <DCCReference Include="TextEditor.Delphi.Athens.Runtime.dcp"/>
+        <DCCReference Include="TextEditor.Delphi.Runtime.dcp"/>
         <DCCReference Include="..\Source\TextEditor.Register.pas"/>
         <DCCReference Include="..\Source\TextEditor.RegisterProperty.pas"/>
         <DCCReference Include="..\Source\TextEditor.Splash.pas"/>
@@ -166,7 +166,7 @@
         <BorlandProject>
             <Delphi.Personality>
                 <Source>
-                    <Source Name="MainSource">TextEditor.Delphi.Athens.Designtime.dpk</Source>
+                    <Source Name="MainSource">TextEditor.Delphi.Designtime.dpk</Source>
                 </Source>
                 <VersionInfo>
                     <VersionInfo Name="IncludeVerInfo">True</VersionInfo>
@@ -196,14 +196,24 @@
                     <VersionInfoKeys Name="Comments"/>
                 </VersionInfoKeys>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k280.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
-                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp280.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\TGPuttyLib.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\TGPuttyLib.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\HexEditor.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\HexEditor.Delphi.Designtime.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\MyComponents.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\MyComponents.Delphi.Designtime.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\MyControls.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\MyControls.Delphi.Designtime.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\TextEditor.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\TextEditor.Delphi.Designtime.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\ButtonBar.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\ButtonBar.Delphi.Designtime.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\TextEditor.Delphi.Athens.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\TextEditor.Delphi.Athens.Designtime.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\ButtonBar.Delphi.Athens.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\ButtonBar.Delphi.Athens.Designtime.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\FMX.TextEditor.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\FMX.TextEditor.Designtime.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\OpenTools.PropertyEditors.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\OpenTools.PropertyEditors.bpl not found</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dcloffice2k290.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
+                    <Excluded_Packages Name="$(BDSBIN)\dclofficexp290.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>
             </Delphi.Personality>
             <Platforms>
                 <Platform value="Win32">True</Platform>
                 <Platform value="Win64">False</Platform>
-                <Platform value="Win64x">True</Platform>
+                <Platform value="Win64x">False</Platform>
             </Platforms>
             <Deployment Version="5">
                 <DeployFile LocalName="$(BDS)\Redist\iossim32\libcgunwind.1.0.dylib" Class="DependencyModule"/>

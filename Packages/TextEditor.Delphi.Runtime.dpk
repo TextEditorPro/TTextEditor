@@ -1,4 +1,5 @@
-﻿package TextEditor.Delphi.Sydney.Runtime;
+﻿package TextEditor.Delphi.Runtime;
+
 {$R *.res}
 {$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
 {$ALIGN 8}
@@ -8,24 +9,25 @@
 {$EXTENDEDSYNTAX ON}
 {$IMPORTEDDATA ON}
 {$IOCHECKS ON}
-{$LOCALSYMBOLS ON}
+{$LOCALSYMBOLS OFF}
 {$LONGSTRINGS ON}
 {$OPENSTRINGS ON}
-{$OPTIMIZATION OFF}
+{$OPTIMIZATION ON}
 {$OVERFLOWCHECKS OFF}
 {$RANGECHECKS OFF}
-{$REFERENCEINFO ON}
+{$REFERENCEINFO OFF}
 {$SAFEDIVIDE OFF}
-{$STACKFRAMES ON}
+{$STACKFRAMES OFF}
 {$TYPEDADDRESS OFF}
 {$VARSTRINGCHECKS ON}
 {$WRITEABLECONST ON}
 {$MINENUMSIZE 1}
 {$IMAGEBASE $400000}
-{$DEFINE DEBUG}
+{$DEFINE RELEASE}
 {$DEFINE TEXT_EDITOR_SPELL_CHECK}
 {$ENDIF IMPLICITBUILDING}
 {$DESCRIPTION 'TTextEditor control package - runtime'}
+{$LIBSUFFIX AUTO}
 {$RUNONLY}
 {$IMPLICITBUILD ON}
 
@@ -35,8 +37,7 @@ requires
   dbrtl,
   vcldb,
   vclx,
-  vclimg
-{$IFDEF ALPHASKINS}, acntDX10Sydney_R{$ENDIF};
+  vclimg;
 
 contains
   TextEditor in '..\Source\TextEditor.pas',
@@ -130,6 +131,5 @@ contains
   TextEditor.UnknownChars in '..\Source\TextEditor.UnknownChars.pas',
   TextEditor.Utils in '..\Source\TextEditor.Utils.pas',
   TextEditor.WordWrap in '..\Source\TextEditor.WordWrap.pas';
-
 
 end.

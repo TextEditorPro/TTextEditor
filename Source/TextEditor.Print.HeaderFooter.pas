@@ -146,6 +146,7 @@ var
     Result := '';
 
     LValue := AValue;
+
     while LValue >= 1000 do
     begin
       Result := Result + 'M';
@@ -293,7 +294,7 @@ begin
   if TextEditor.Utils.Trim(LString).IsEmpty then
     Exit;
 
-  LLength := Length(LString);
+  LLength := LString.Length;
 
   if LLength > 0 then
   begin
@@ -484,10 +485,10 @@ var
 begin
   LSectionItem := TTextEditorSectionItem.Create;
 
-  if not Assigned(AFont) then
-    LSectionItem.Font := FDefaultFont
+  if Assigned(AFont) then
+    LSectionItem.Font := AFont
   else
-    LSectionItem.Font := AFont;
+    LSectionItem.Font := FDefaultFont;
 
   LSectionItem.Alignment := AAlignment;
   LSectionItem.LineNumber := ALineNumber;
@@ -748,7 +749,7 @@ begin
 
     LOldAlign := SetTextAlign(ACanvas.Handle, TA_BASELINE);
     Winapi.Windows.ExtTextOut(ACanvas.Handle, LX, LY + TTextEditorLineInfo(FLineInfo[LCurrentLine - 1]).MaxBaseDistance,
-      0, nil, PChar(LText), Length(LText), nil);
+      0, nil, PChar(LText), LText.Length, nil);
     SetTextAlign(ACanvas.Handle, LOldAlign);
   end;
 

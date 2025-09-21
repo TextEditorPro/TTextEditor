@@ -316,7 +316,8 @@ begin
   else
   begin
     LLineBreak := GetLineBreak(AIndex);
-    Result := Length(LLineBreak);
+
+    Result := LLineBreak.Length;
   end;
 end;
 
@@ -415,7 +416,7 @@ begin
     begin
       Result := ConvertTabs(TextLine, FTabWidth, LHasTabs, FColumns);
 
-      ExpandedLength := Length(Result);
+      ExpandedLength := Result.Length;
       Exclude(Flags, sfExpandedLengthUnknown);
       Exclude(Flags, sfHasTabs);
       Exclude(Flags, sfHasNoTabs);
@@ -479,7 +480,7 @@ begin
   if IsValidIndex(AIndex) then
   begin
     if sfExpandedLengthUnknown in FItems^[AIndex].Flags then
-      Result := Length(ExpandedStrings[AIndex])
+      Result := ExpandedStrings[AIndex].Length
     else
       Result := FItems^[AIndex].ExpandedLength;
   end
@@ -556,7 +557,7 @@ begin
     if FSavingToStream and (sfEmptyLine in Flags) then
       Continue;
 
-    Inc(Result, Length(TextLine) + LineBreakLength(LIndex))
+    Inc(Result, TextLine.Length + LineBreakLength(LIndex))
   end;
 end;
 
@@ -572,7 +573,7 @@ begin
   begin
     LStringRecord := FItems^[LIndex];
 
-    LLength := Length(LStringRecord.TextLine);
+    LLength := LStringRecord.TextLine.Length;
 
     if LLength > 0 then
     begin
@@ -612,7 +613,7 @@ begin
     if FSavingToStream and (sfEmptyLine in Flags) then
       Continue;
 
-    Inc(Result, Length(TextLine) + LineBreakLength(LIndex))
+    Inc(Result, TextLine.Length + LineBreakLength(LIndex))
   end;
 end;
 
@@ -1265,12 +1266,6 @@ begin
     EndUpdate;
   end;
 
-  if Assigned(OnInserted) then
-    OnInserted(Self, 0, FCount);
-
-  if Assigned(FOnChange) then
-    FOnChange(Self);
-
   FStreaming := False;
 end;
 
@@ -1365,7 +1360,7 @@ begin
     end;
 
     if FIndexOfLongestLine <> -1 then
-      if FItems^[FIndexOfLongestLine].ExpandedLength < Length(ConvertTabs(AValue, FTabWidth, LHasTabs, FColumns)) then
+      if FItems^[FIndexOfLongestLine].ExpandedLength < ConvertTabs(AValue, FTabWidth, LHasTabs, FColumns).Length then
         FIndexOfLongestLine := AIndex;
 
     if Assigned(FOnPutted) then
@@ -1445,7 +1440,7 @@ begin
   try
     Clear;
     FIndexOfLongestLine := -1;
-    LLength := Length(AValue);
+    LLength := AValue.Length;
 
     if LLength > 0 then
     begin

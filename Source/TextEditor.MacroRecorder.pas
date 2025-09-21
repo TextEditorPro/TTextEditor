@@ -823,7 +823,7 @@ var
 begin
   LString := AString;
 
-  if Length(LString) >= 1 then
+  if LString.Length >= 1 then
     Key := LString[1]
   else
     Key := ' ';
@@ -937,16 +937,17 @@ var
   LValue: string;
   LString: string;
 
-  function WideLastDelimiter(const Delimiters, S: string): Integer;
+  function WideLastDelimiter(const ADelimiters, AValue: string): Integer;
   var
-    P: PChar;
+    LPChar: PChar;
   begin
-    Result := Length(S);
-    P := PChar(Delimiters);
+    Result := AValue.Length;
+
+    LPChar := PChar(ADelimiters);
 
     while Result > 0 do
     begin
-      if (S[Result] <> TControlCharacters.Null) and Assigned(WStrScan(P, S[Result])) then
+      if (AValue[Result] <> TControlCharacters.Null) and Assigned(WStrScan(LPChar, AValue[Result])) then
         Exit;
 
       Dec(Result);
@@ -994,7 +995,7 @@ begin
 
   while LIndex <= RepeatCount do
   begin
-    for LIndex2 := 1 to Length(Value) do
+    for LIndex2 := 1 to Value.Length do
       TCustomTextEditor(AEditor).CommandProcessor(TKeyCommands.Char, Value[LIndex2], nil);
 
     Inc(LIndex);
@@ -1009,7 +1010,7 @@ var
   LPBuffer: PChar;
 begin
   AStream.Write(Command, SizeOf(Command));
-  LLength := Length(Value) + 1;
+  LLength := Value.Length + 1;
   AStream.Write(LLength, SizeOf(LLength));
   GetMem(LPBuffer, LLength * SizeOf(Char));
   try

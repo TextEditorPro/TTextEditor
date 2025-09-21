@@ -743,7 +743,6 @@
             "OpenToken": "INTERFACE",
             "CloseToken": "IMPLEMENTATION",
             "Properties": {
-              "ShowGuideLine": false,
               "OpenTokenBeginningOfLine": true,
               "TokenEndIsPreviousLine": true,
               "ShowGuideLine": false
@@ -764,7 +763,6 @@
             "OpenToken": "IMPLEMENTATION",
             "CloseToken": "END.",
             "Properties": {
-              "ShowGuideLine": false,
               "OpenTokenBeginningOfLine": true,
               "OpenIsClose": true,
               "SharedClose": true,

@@ -20297,7 +20297,6 @@ begin
     Exit;
 
   FCodeFoldings.AllRanges.ClearAll;
-  FCodeFoldings.AnyCollapsed := False;
 
   SetLength(FCodeFoldings.TreeLine, 0);
   SetLength(FCodeFoldings.RangeFromLine, 0);

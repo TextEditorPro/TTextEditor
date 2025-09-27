@@ -17410,9 +17410,12 @@ var
         Canvas.Brush.Color := FColors.SelectionBackground;
         FPaintHelper.SetForegroundColor(FColors.SelectionForeground);
 
+        LTextRect.Right := LTextRect.Left + LSelectedText.Length * FPaintHelper.CharWidth;
+
         Winapi.Windows.ExtTextOut(Canvas.Handle, LTextRect.Left, LTextRect.Top, ETO_OPAQUE or ETO_CLIPPED, @LTextRect,
           PChar(LSelectedText), LSelectedText.Length, nil);
 
+        LTextRect.Right := LLineRect.Right;
         LTextRect.Left := LTextRect.Left + LSelectedText.Length * FPaintHelper.CharWidth;
       end;
 

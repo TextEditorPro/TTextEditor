@@ -97,7 +97,6 @@
         <DCC_Define>RELEASE;TEXT_EDITOR_SPELL_CHECK;$(DCC_Define)</DCC_Define>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_1_Win32)'!=''">
-        <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
         <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2)'!=''">
@@ -106,7 +105,6 @@
         <DCC_GenerateStackFrames>true</DCC_GenerateStackFrames>
     </PropertyGroup>
     <PropertyGroup Condition="'$(Cfg_2_Win32)'!=''">
-        <DCC_DcuOutput>.\$(Platform)\$(Config)</DCC_DcuOutput>
         <VerInfo_Locale>1033</VerInfo_Locale>
     </PropertyGroup>
     <ItemGroup>
@@ -196,16 +194,6 @@
                     <VersionInfoKeys Name="Comments"/>
                 </VersionInfoKeys>
                 <Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\TGPuttyLib.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\TGPuttyLib.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\HexEditor.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\HexEditor.Delphi.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\MyComponents.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\MyComponents.Delphi.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\MyControls.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\MyControls.Delphi.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\TextEditor.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\TextEditor.Delphi.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\ButtonBar.Delphi.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\ButtonBar.Delphi.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\TextEditor.Delphi.Athens.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\TextEditor.Delphi.Athens.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\ButtonBar.Delphi.Athens.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\ButtonBar.Delphi.Athens.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\FMX.TextEditor.Designtime.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\FMX.TextEditor.Designtime.bpl not found</Excluded_Packages>
-                    <Excluded_Packages Name="C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\OpenTools.PropertyEditors.bpl">File C:\Users\Public\Documents\Embarcadero\Studio\23.0\Bpl\OpenTools.PropertyEditors.bpl not found</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dcloffice2k290.bpl">Microsoft Office 2000 Sample Automation Server Wrapper Components</Excluded_Packages>
                     <Excluded_Packages Name="$(BDSBIN)\dclofficexp290.bpl">Microsoft Office XP Sample Automation Server Wrapper Components</Excluded_Packages>
                 </Excluded_Packages>

@@ -32,6 +32,7 @@ type
     FCodeFoldingIndent: TColor;
     FCodeFoldingIndentHighlight: TColor;
     FCompletionProposalBackground: TColor;
+    FCompletionProposalBorder: TColor;
     FCompletionProposalForeground: TColor;
     FCompletionProposalSelectedBackground: TColor;
     FCompletionProposalSelectedText: TColor;
@@ -143,6 +144,7 @@ type
     procedure SetCodeFoldingIndent(const AValue: TColor);
     procedure SetCodeFoldingIndentHighlight(const AValue: TColor);
     procedure SetCompletionProposalBackground(const AValue: TColor);
+    procedure SetCompletionProposalBorder(const AValue: TColor);
     procedure SetCompletionProposalForeground(const AValue: TColor);
     procedure SetCompletionProposalSelectedBackground(const AValue: TColor);
     procedure SetCompletionProposalSelectedText(const AValue: TColor);
@@ -256,6 +258,7 @@ type
     property CodeFoldingIndent: TColor read FCodeFoldingIndent write SetCodeFoldingIndent default TDefaultColors.LineNumbers;
     property CodeFoldingIndentHighlight: TColor read FCodeFoldingIndentHighlight write SetCodeFoldingIndentHighlight default TDefaultColors.LineNumbers;
     property CompletionProposalBackground: TColor read FCompletionProposalBackground write SetCompletionProposalBackground default TColors.White;
+    property CompletionProposalBorder: TColor read FCompletionProposalBorder write SetCompletionProposalBorder default TdefaultColors.LineNumbers;
     property CompletionProposalForeground: TColor read FCompletionProposalForeground write SetCompletionProposalForeground default TColors.Black;
     property CompletionProposalSelectedBackground: TColor read FCompletionProposalSelectedBackground write SetCompletionProposalSelectedBackground default TColors.SysHighlight;
     property CompletionProposalSelectedText: TColor read FCompletionProposalSelectedText write SetCompletionProposalSelectedText default TColors.SysHighlightText;
@@ -388,6 +391,7 @@ begin
   FCodeFoldingHintIndicatorMark := TDefaultColors.LineNumbers;
   { Completion proposal }
   FCompletionProposalBackground := TColors.White;
+  FCompletionProposalBorder := TDefaultColors.LineNumbers;
   FCompletionProposalForeground := TColors.Black;
   FCompletionProposalSelectedBackground := TColors.SysHighlight;
   FCompletionProposalSelectedText := TColors.SysHighlightText;
@@ -522,6 +526,7 @@ begin
     Self.FCodeFoldingHintIndicatorMark := FCodeFoldingHintIndicatorMark;
     { Completion proposal }
     Self.FCompletionProposalBackground := FCompletionProposalBackground;
+    Self.FCompletionProposalBorder := FCompletionProposalBorder;
     Self.FCompletionProposalForeground := FCompletionProposalForeground;
     Self.FCompletionProposalSelectedBackground := FCompletionProposalSelectedBackground;
     Self.FCompletionProposalSelectedText := FCompletionProposalSelectedText;
@@ -748,17 +753,22 @@ end;
 
 procedure TTextEditorColors.SetCodeFoldingIndent(const AValue: TColor);
 begin
-  FCodeFoldingIndent := SetColorDef(AValue, TDefaultColors.LineNumbers)
+  FCodeFoldingIndent := SetColorDef(AValue, TDefaultColors.LineNumbers);
 end;
 
 procedure TTextEditorColors.SetCodeFoldingIndentHighlight(const AValue: TColor);
 begin
-  FCodeFoldingIndentHighlight := SetColorDef(AValue, TDefaultColors.LineNumbers)
+  FCodeFoldingIndentHighlight := SetColorDef(AValue, TDefaultColors.LineNumbers);
 end;
 
 procedure TTextEditorColors.SetCompletionProposalBackground(const AValue: TColor);
 begin
   FCompletionProposalBackground := SetColorDef(AValue, TColors.White);
+end;
+
+procedure TTextEditorColors.SetCompletionProposalBorder(const AValue: TColor);
+begin
+  FCompletionProposalBorder := SetColorDef(AValue, TDefaultColors.LineNumbers);
 end;
 
 procedure TTextEditorColors.SetCompletionProposalForeground(const AValue: TColor);

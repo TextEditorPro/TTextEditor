@@ -128,7 +128,7 @@ type
   end;
 
   TTextEditorCompletionProposalOption = (cpoAutoInvoke, cpoAutoConstraints, cpoAddHighlighterKeywords, cpoCaseSensitive,
-    cpoFiltered, cpoParseItemsFromText, cpoShowShadow);
+    cpoFiltered, cpoParseItemsFromText, cpoShowBorder, cpoShowShadow);
   TTextEditorCompletionProposalOptions = set of TTextEditorCompletionProposalOption;
 
   TTextEditorCompletionProposalKeywordCase = (kcUpperCase, kcLowerCase, kcSentenceCase);
@@ -376,7 +376,7 @@ type
     CodeFolding = [cfoAutoPadding, cfoAutoWidth, cfoHighlightMatchingPair, cfoShowTreeLine, cfoExpandByHintClick];
     CodeFoldingGuideLines = [cfgHideOverText];
     CodeFoldingHint = [hioShowBorder, hioShowMark];
-    CompletionProposal = [cpoAutoConstraints, cpoAddHighlighterKeywords, cpoFiltered, cpoParseItemsFromText];
+    CompletionProposal = [cpoAutoConstraints, cpoAddHighlighterKeywords, cpoFiltered, cpoParseItemsFromText, cpoShowBorder, cpoShowShadow];
     HighlightLine = [hlIgnoreCase, hlDeleteOnHighlighterLoad];
     MultiEdit = [meoShowActiveLine, meoShowGhost];
   end;

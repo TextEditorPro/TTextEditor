@@ -326,6 +326,41 @@
       }
     }
   },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "BythonPreprocessor": false,
+          "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "#",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "\"\"\"",
+            "CloseToken": "\"\"\"",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
   "MatchingPair": {
     "Pairs": [
       {

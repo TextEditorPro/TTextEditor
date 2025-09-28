@@ -22,6 +22,7 @@
       "CodeFoldingIndent": "$00C6B7A9",
       "CodeFoldingIndentHighlight": "clSilver",
       "CompletionProposalBackground": "$002B2B2B",
+      "CompletionProposalBorder": "$00C6B7A9",
       "CompletionProposalForeground": "$00C6B7A9",
       "CompletionProposalSelectedBackground": "$00834221",
       "CompletionProposalSelectedText": "$00C6B7A9",

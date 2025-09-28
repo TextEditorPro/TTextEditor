@@ -182,6 +182,7 @@ begin
         CodeFoldingIndent := LColorsObject['CodeFoldingIndent'].ToColor;
         CodeFoldingIndentHighlight := LColorsObject['CodeFoldingIndentHighlight'].ToColor;
         CompletionProposalBackground := LColorsObject['CompletionProposalBackground'].ToColor;
+        CompletionProposalBorder := LColorsObject['CompletionProposalBorder'].ToColor;
         CompletionProposalForeground := LColorsObject['CompletionProposalForeground'].ToColor;
         CompletionProposalSelectedBackground := LColorsObject['CompletionProposalSelectedBackground'].ToColor;
         CompletionProposalSelectedText := LColorsObject['CompletionProposalSelectedText'].ToColor;
@@ -886,6 +887,7 @@ var
   LCodeFoldingRegion: TTextEditorCodeFoldingRegion;
   LEscapeChar, LStringEscapeChar: Char;
   LHideGuideLineAtFirstColumn: Boolean;
+  LVisible: Boolean;
 begin
   if not Assigned(ACodeFoldingObject) then
     Exit;
@@ -893,6 +895,7 @@ begin
   LArray := ACodeFoldingObject['Ranges'].ArrayValue;
   LCount := LArray.Count;
   LHideGuideLineAtFirstColumn := False;
+  LVisible := True;
 
   if LCount > 0 then
   begin
@@ -907,6 +910,12 @@ begin
       if LCodeFoldingObject.Contains('Options') then
       begin
         LObject := LCodeFoldingObject['Options'].ObjectValue;
+
+        if LObject.Contains('BythonPreprocessor') then
+        begin
+          FHighlighter.BythonPreprocessor := LObject.ValueBoolean['BythonPreprocessor'];
+          LVisible := FHighlighter.BythonPreprocessor;
+        end;
 
         if LObject.Contains('EscapeChar') then
           LEscapeChar := LObject['EscapeChar'].Value[1];
@@ -952,7 +961,7 @@ begin
   end;
 
   LEditor := FHighlighter.Editor as TCustomTextEditor;
-  LEditor.CodeFolding.Visible := LCount > 0;
+  LEditor.CodeFolding.Visible := LVisible and (LCount > 0);
   LEditor.CodeFolding.GuideLines.SetOption(cfgHideAtFirstColumn, LHideGuideLineAtFirstColumn);
 end;
 

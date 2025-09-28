@@ -10672,8 +10672,6 @@ var
 begin
   AMessage.Result := 0;
 
-  FreeCompletionProposalPopupWindow;
-
   inherited;
 
   case AMessage.ScrollCode of
@@ -10771,8 +10769,6 @@ end;
 procedure TCustomTextEditor.WMKillFocus(var AMessage: TWMKillFocus);
 begin
   inherited;
-
-  FreeCompletionProposalPopupWindow;
 
   if FMultiEdit.Position.Row <> -1 then
   begin
@@ -10889,8 +10885,6 @@ var
   LVerticalMaxScroll: Integer;
 begin
   AMessage.Result := 0;
-
-  FreeCompletionProposalPopupWindow;
 
   case AMessage.ScrollCode of
     SB_TOP:
@@ -12137,7 +12131,6 @@ begin
   begin
     LCompletionProposalPopupWindow := FCompletionProposalPopupWindow;
     FCompletionProposalPopupWindow := nil; { Prevent WMKillFocus to free it again }
-    LCompletionProposalPopupWindow.Hide;
     LCompletionProposalPopupWindow.Free;
 
     FCompletionProposal.Visible := False;
@@ -12833,8 +12826,6 @@ begin
 
     if FMinimap.Visible then
       ClearMinimapBuffer;
-
-    FreeCompletionProposalPopupWindow;
 
     if not ReadOnly and FCaret.MultiEdit.Active and not FMouse.OverURI then
     begin
@@ -22956,14 +22947,6 @@ begin
 
     inherited;
 
-    case AMessage.Msg of
-      WM_IME_NOTIFY:
-        if Assigned(FCompletionProposalPopupWindow) then
-          SetCompletionProposalPopupWindowLocation;
-      WM_SIZE:
-        Invalidate;
-    end;
-
 {$IFDEF ALPHASKINS}
     case AMessage.Msg of
       CM_SHOWINGCHANGED:
@@ -22976,6 +22959,16 @@ begin
   if Assigned(FBoundLabel) then
     FBoundLabel.HandleOwnerMsg(AMessage, Self);
 {$ENDIF}
+
+  case AMessage.Msg of
+    WM_IME_NOTIFY:
+      if Assigned(FCompletionProposalPopupWindow) then
+        SetCompletionProposalPopupWindowLocation;
+    WM_KILLFOCUS, WM_LBUTTONDOWN, WM_RBUTTONDOWN, WM_VSCROLL, WM_HSCROLL:
+      FreeCompletionProposalPopupWindow;
+    WM_SIZE:
+      Invalidate;
+  end;
 end;
 
 procedure TCustomTextEditor.Zoom(const APercentage: Integer);

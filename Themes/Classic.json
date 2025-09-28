@@ -22,6 +22,7 @@
       "CodeFoldingIndent": "clSilver",
       "CodeFoldingIndentHighlight": "clYellow",
       "CompletionProposalBackground": "clNavy",
+      "CompletionProposalBorder": "clSilver",
       "CompletionProposalForeground": "clYellow",
       "CompletionProposalSelectedBackground": "clSilver",
       "CompletionProposalSelectedText": "clNavy",

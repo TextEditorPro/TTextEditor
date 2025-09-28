@@ -3,8 +3,8 @@
 interface
 
 uses
-  Winapi.Messages, System.Classes, System.Types, Vcl.Controls, Vcl.Forms, Vcl.Graphics, TextEditor.CompletionProposal,
-  TextEditor.Lines, TextEditor.PopupWindow, TextEditor.Types, TextEditor.Utils;
+  Winapi.Messages, Winapi.Windows, System.Classes, System.Types, Vcl.Controls, Vcl.Forms, Vcl.Graphics,
+  TextEditor.CompletionProposal, TextEditor.Lines, TextEditor.PopupWindow, TextEditor.Types, TextEditor.Utils;
 
 type
   TTextEditorValidateEvent = procedure(ASender: TObject; const AEndToken: Char) of object;
@@ -12,6 +12,8 @@ type
   TTextEditorCompletionProposalPopupWindow = class(TTextEditorPopupWindow)
   strict private
     FBitmapBuffer: Vcl.Graphics.TBitmap;
+    FBorderColor: TColor;
+    FBorderWidth: Integer;
     FCaseSensitive: Boolean;
     FCodeInsight: Boolean;
     FCompletionProposal: TTextEditorCompletionProposal;
@@ -30,8 +32,8 @@ type
     FShowDescription: Boolean;
     FTopLine: Integer;
     FValueSet: Boolean;
-    function ActivateDropShadow(const AHandle: THandle): Boolean;
     function GetItemHeight: Integer;
+    procedure ActivateDropShadow(const AHandle: THandle);
     procedure AddKeyHandlers;
     procedure EditorKeyDown(ASender: TObject; var AKey: Word; AShift: TShiftState);
     procedure EditorKeyPress(const ASender: TObject; var AKey: Char);
@@ -42,10 +44,11 @@ type
     procedure SetCurrentString(const AValue: string);
     procedure SetTopLine(const AValue: Integer);
     procedure UpdateScrollBar;
+    procedure WMNCCalcSize(var Message: TWMNCCalcSize); message WM_NCCALCSIZE;
+    procedure WMNCPaint(var Message: TWMNCPaint); message WM_NCPAINT;
     procedure WMVScroll(var AMessage: TWMScroll); message WM_VSCROLL;
   protected
     procedure Paint; override;
-    procedure Hide; override;
     procedure MouseDown(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer); override;
   public
     constructor Create(AOwner: TComponent); override;
@@ -66,7 +69,7 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.Generics.Defaults, System.Math, System.SysUtils, System.UITypes, TextEditor,
+  System.Generics.Defaults, System.Math, System.SysUtils, System.UITypes, TextEditor,
   TextEditor.CompletionProposal.Snippets, TextEditor.Consts, TextEditor.Highlighter, TextEditor.KeyCommands,
   TextEditor.PaintHelper;
 
@@ -77,6 +80,8 @@ begin
   FCaseSensitive := False;
   FFiltered := False;
   FItemHeight := 0;
+  FBorderColor := TColors.Gray;
+  FBorderWidth := 0;
   FMargin := 2;
   FValueSet := False;
   Visible := False;
@@ -94,19 +99,13 @@ end;
 destructor TTextEditorCompletionProposalPopupWindow.Destroy;
 begin
   RemoveKeyHandlers;
-  FBitmapBuffer.Free;
-  SetLength(FItemIndexArray, 0);
 
+  FBitmapBuffer.Free;
+
+  SetLength(FItemIndexArray, 0);
   FItems.Free;
 
   inherited Destroy;
-end;
-
-procedure TTextEditorCompletionProposalPopupWindow.Hide;
-begin
-  RemoveKeyHandlers;
-
-  inherited Hide;
 end;
 
 procedure TTextEditorCompletionProposalPopupWindow.Assign(ASource: TPersistent);
@@ -161,7 +160,7 @@ begin
   end;
 end;
 
-function TTextEditorCompletionProposalPopupWindow.ActivateDropShadow(const AHandle: THandle): Boolean;
+procedure TTextEditorCompletionProposalPopupWindow.ActivateDropShadow(const AHandle: THandle);
 
   function IsXP: Boolean;
   begin
@@ -175,8 +174,6 @@ var
   LClassLong: Cardinal;
   LParam: Boolean;
 begin
-  Result := False;
-
   LParam := True;
 
   if IsXP and SystemParametersInfo(SPI_SETDROPSHADOW, 0, @LParam, 0) then
@@ -184,9 +181,7 @@ begin
     LClassLong := GetClassLong(AHandle, GCL_STYLE);
     LClassLong := LClassLong or CS_DROPSHADOW;
 
-    Result := SetClassLong(AHandle, GCL_STYLE, LClassLong) <> 0;
-
-    if Result then
+    if SetClassLong(AHandle, GCL_STYLE, LClassLong) <> 0 then
       SendMessage(AHandle, CM_RECREATEWND, 0, 0);
   end;
 end;
@@ -238,6 +233,7 @@ begin
       begin
         if Assigned(LTextEditor) then
           LTextEditor.CommandProcessor(TKeyCommands.Left, TControlCharacters.Null, nil);
+
         Hide;
       end;
     vkRight:
@@ -252,7 +248,7 @@ begin
           LChar := TCharacters.Space;
 
         if IsWordBreakChar(LChar) then
-          Self.Hide
+          Hide
         else
           CurrentString := FCurrentString + LChar;
 
@@ -297,6 +293,7 @@ begin
   end;
 
   AKey := 0;
+
   Invalidate;
 end;
 
@@ -344,13 +341,19 @@ var
   LTextEditor: TCustomTextEditor;
 begin
   LTextEditor := nil;
+
   if Assigned(Owner) then
     LTextEditor := Owner as TCustomTextEditor;
 
-  if Assigned(LTextEditor) then
+  if not Assigned(LTextEditor) then
+    Exit;
+
+  FBorderColor := LTextEditor.Colors.CompletionProposalBorder;
+
   with FBitmapBuffer do
   begin
     Canvas.Brush.Color := LTextEditor.Colors.CompletionProposalBackground;
+
     Height := 0;
     Width := ClientWidth;
     Height := ClientHeight;
@@ -668,6 +671,7 @@ begin
       end));
 
   LCount := FItems.Count;
+
   SetLength(FItemIndexArray, 0);
   SetLength(FItemIndexArray, LCount);
 
@@ -685,6 +689,8 @@ begin
     begin
       if cpoShowShadow in FCompletionProposal.Options then
         ActivateDropShadow(Handle);
+
+      FBorderWidth := IfThen(cpoShowBorder in FCompletionProposal.Options, 1, 0);
 
       UpdateScrollBar;
       Show(LPoint);
@@ -945,6 +951,38 @@ begin
 
   if Visible then
     SendMessage(Handle, WM_SETREDRAW, -1, 0);
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.WMNCCalcSize(var Message: TWMNCCalcSize);
+begin
+  inherited;
+
+  InflateRect(Message.CalcSize_Params.rgrc[0], -FBorderWidth, -FBorderWidth);
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.WMNCPaint(var Message: TWMNCPaint);
+var
+  LDC: HDC;
+  LRect: TRect;
+  LBrush: HBrush;
+begin
+  inherited;
+
+  LDC := GetWindowDC(Handle);
+  try
+    GetWindowRect(Handle, LRect);
+    OffsetRect(LRect, -LRect.Left, -LRect.Top);
+    ExcludeClipRect(LDC, FBorderWidth, FBorderWidth, LRect.Right - FBorderWidth, LRect.Bottom - FBorderWidth);
+
+    LBrush := CreateSolidBrush(ColorToRGB(FBorderColor));
+    try
+      FillRect(LDC, LRect, LBrush);
+    finally
+      DeleteObject(LBrush);
+    end;
+  finally
+    ReleaseDC(Handle, LDC);
+  end;
 end;
 
 procedure TTextEditorCompletionProposalPopupWindow.WMVScroll(var AMessage: TWMScroll);

@@ -22,6 +22,7 @@
       "CodeFoldingIndent": "clGray",
       "CodeFoldingIndentHighlight": "clWhite",
       "CompletionProposalBackground": "clBlack",
+      "CompletionProposalBorder": "clLime",
       "CompletionProposalForeground": "clWhite",
       "CompletionProposalSelectedBackground": "clBlue",
       "CompletionProposalSelectedText": "clWhite",

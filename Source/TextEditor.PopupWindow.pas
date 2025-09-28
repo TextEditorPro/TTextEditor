@@ -5,7 +5,7 @@
 interface
 
 uses
-  Winapi.Messages, System.Classes, System.Types, Vcl.Controls
+  Winapi.Messages, System.Classes, System.Types, Vcl.Controls, Vcl.Forms
 {$IFDEF ALPHASKINS}
   , acSBUtils, sCommonData, sStyleSimply
 {$ENDIF};
@@ -22,7 +22,6 @@ type
   protected
     FActiveControl: TWinControl;
     procedure CreateParams(var Params: TCreateParams); override;
-    procedure Hide; virtual;
     procedure Show(const AOrigin: TPoint); virtual;
   public
     constructor Create(AOwner: TComponent); override;
@@ -47,28 +46,23 @@ constructor TTextEditorPopupWindow.Create(AOwner: TComponent);
 begin
 {$IFDEF ALPHASKINS}
   FSkinData := TsScrollWndData.Create(Self, True);
-  FSkinData.COC := COC_TsListBox;
+  FSkinData.COC := COC_TsEdit;
 {$ENDIF}
 
   inherited Create(AOwner);
 
-  ControlStyle := ControlStyle + [csNoDesignVisible, csReplicatable];
+  ControlStyle := ControlStyle + [csNoDesignVisible, csOpaque];
 
-{$IFDEF ALPHASKINS}
-  DoubleBuffered := False;
-{$ELSE}
-  DoubleBuffered := True;
-{$ENDIF}
   Ctl3D := False;
   ParentCtl3D := False;
-  Parent := AOwner as TWinControl;
   Visible := False;
+  DoubleBuffered := True;
+
+  Parent := AOwner as TWinControl;
 end;
 
 destructor TTextEditorPopupWindow.Destroy;
 begin
-  inherited Destroy;
-
 {$IFDEF ALPHASKINS}
   if Assigned(FScrollWnd) then
     FreeAndNil(FScrollWnd);
@@ -76,6 +70,8 @@ begin
   if Assigned(FSkinData) then
     FreeAndNil(FSkinData);
 {$ENDIF}
+
+  inherited Destroy;
 end;
 
 procedure TTextEditorPopupWindow.CreateWnd;
@@ -85,34 +81,30 @@ var
 {$ENDIF}
 begin
   inherited;
+
 {$IFDEF ALPHASKINS}
   FSkinData.Loaded(False);
 
   if Assigned(FScrollWnd) and FScrollWnd.Destroyed then
     FreeAndNil(FScrollWnd);
 
-  if not Assigned(FScrollWnd) then
+  if not Assigned(FScrollWnd) and FSkinData.SkinManager.Active then
     FScrollWnd := TacEditWnd.Create(Handle, SkinData, SkinData.SkinManager, LSkinParams, False);
 {$ENDIF}
-end;
-
-procedure TTextEditorPopupWindow.Hide;
-begin
-  SetWindowPos(Handle, 0, 0, 0, 0, 0, SWP_NOZORDER or SWP_NOMOVE or SWP_NOSIZE or SWP_NOACTIVATE or SWP_HIDEWINDOW);
-  Visible := False;
 end;
 
 procedure TTextEditorPopupWindow.CreateParams(var Params: TCreateParams);
 begin
   inherited CreateParams(Params);
 
-  Params.Style := WS_POPUP or WS_BORDER;
+  Params.Style := WS_POPUP;
+  Params.ExStyle := WS_EX_TOPMOST or WS_EX_NOACTIVATE;
 end;
 
 procedure TTextEditorPopupWindow.Show(const AOrigin: TPoint);
 begin
-  SetWindowPos(Handle, HWND_TOPMOST, AOrigin.X, AOrigin.Y, Width, Height, SWP_NOSIZE or SWP_NOACTIVATE or SWP_SHOWWINDOW or
-    SWP_NOSENDCHANGING or SWP_NOOWNERZORDER);
+  Left := AOrigin.X;
+  Top := AOrigin.Y;
 
   Visible := True;
 end;
@@ -130,6 +122,9 @@ end;
 procedure TTextEditorPopupWindow.WndProc(var AMessage: TMessage);
 begin
 {$IFDEF ALPHASKINS}
+  if csDestroying in ComponentState then
+    Exit;
+
   if AMessage.Msg = SM_ALPHACMD then
   case AMessage.WParamHi of
     AC_CTRLHANDLED:
@@ -145,9 +140,9 @@ begin
         Exit;
       end;
     AC_REFRESH:
-      if RefreshNeeded(SkinData, AMessage) then
+      if RefreshNeeded(FSkinData, AMessage) then
       begin
-        RefreshEditScrolls(SkinData, FScrollWnd);
+        RefreshEditScrolls(FSkinData, FScrollWnd);
         CommonMessage(AMessage, FSkinData);
 
         if HandleAllocated and Visible then

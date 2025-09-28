@@ -1,10 +1,8 @@
 # TTextEditor [![License](https://img.shields.io/badge/License-MIT-yellowgreen.svg)](https://opensource.org/licenses/MIT) [![File count](https://tokei.rs/b1/github/TextEditorPro/TTextEditor?category=files)](https://github.com/TextEditorPro/TTextEditor/tree/main/Source) [![Lines of code](https://tokei.rs/b1/github/TextEditorPro/TTextEditor?category=code)](https://github.com/TextEditorPro/TTextEditor/tree/main/Source)
 
 The latest stable release of TTextEditor control for C++ Builder/Delphi. 
-The development environment is RAD Studio 12.3 Athens, but may also work with older versions (and newer, not tested). 
+The development environment is RAD Studio 13 Florence, but may also work with older versions (not tested). 
 The use of record helpers requires at least XE3.
-
-RAD Studio 13 is skipped - regression and glitches in projects.
 
 ## Updates
 

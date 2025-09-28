@@ -16,6 +16,7 @@ type
     FAttributes: TStringList;
     FBeforePrepare: TTextEditorHighlighterPrepare;
     FBeginningOfLine: Boolean;
+    FBythonPreprocessor: Boolean;
     FChanged: Boolean;
     FCodeFoldingRangeCount: Integer;
     FCodeFoldingRegions: TTextEditorCodeFoldingRegions;
@@ -94,6 +95,7 @@ type
     property Attribute[const AIndex: Integer]: TTextEditorHighlighterAttribute read GetAttribute;
     property Attributes: TStringList read FAttributes;
     property BeforePrepare: TTextEditorHighlighterPrepare read FBeforePrepare write FBeforePrepare;
+    property BythonPreprocessor: Boolean read FBythonPreprocessor write FBythonPreprocessor default False;
     property Changed: Boolean read FChanged write FChanged default False;
     property CodeFoldingRangeCount: Integer read FCodeFoldingRangeCount write SetCodeFoldingRangeCount;
     property CodeFoldingRegions: TTextEditorCodeFoldingRegions read FCodeFoldingRegions write FCodeFoldingRegions;
@@ -604,6 +606,7 @@ var
   LIndex: Integer;
   LEditor: TCustomTextEditor;
 begin
+  FBythonPreprocessor := False;
   FFoldTags := False;
   FMatchingPairHighlight := True;
   FFoldKeyChars := [#0];

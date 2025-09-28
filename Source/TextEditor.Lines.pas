@@ -1390,11 +1390,11 @@ end;
 procedure TTextEditorLines.SetCapacity(AValue: Integer);
 begin
   if AValue < Count then
-    EListError.Create(STextEditorInvalidCapacity);
+    raise EListError.Create(STextEditorInvalidCapacity);
 
   if AValue <> FCapacity then
   begin
-    ReallocMem(FItems, AValue * TEXT_EDITOR_STRING_RECORD_SIZE);
+    ReallocMem(FItems, NativeInt(AValue) * NativeInt(TEXT_EDITOR_STRING_RECORD_SIZE));
     FCapacity := AValue;
   end;
 

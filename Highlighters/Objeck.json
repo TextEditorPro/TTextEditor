@@ -183,6 +183,20 @@
             }
           },
           {
+            "Type": "Number",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Term"
+            }
+          },
+          {
             "Type": "HexNumber",
             "CaseSensitive": true,
             "Attributes": {

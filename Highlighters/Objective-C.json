@@ -1,26 +1,15 @@
 {
   "Highlighter": {
     "Sample": [
+      "// Hello, World! in Object-C\r\n",
+      "\r\n",
       "#import <Foundation/Foundation.h>\r\n",
       "\r\n",
-      "@interface SampleClass:NSObject\r\n",
-      "- (void)sampleMethod;\r\n",
-      "@end\r\n",
-      "\r\n",
-      "@implementation SampleClass\r\n",
-      "\r\n",
-      "- (void)sampleMethod{\r\n",
-      "  NSLog(@\"Hello, World! \\n\");\r\n",
-      "}\r\n",
-      "\r\n",
-      "@end\r\n",
-      "\r\n",
-      "int main()\r\n",
-      "{\r\n",
-      "   /* my first program in Objective-C */\r\n",
-      "   SampleClass *sampleClass = [[SampleClass alloc]init];\r\n",
-      "   [sampleClass sampleMethod];\r\n",
-      "   return 0;\r\n",
+      "int main(int argc, const char * argv[]) {\r\n",
+      "    @autoreleasepool {\r\n",
+      "        NSLog(@\"Hello, World!\");\r\n",
+      "    }\r\n",
+      "    return 0;\r\n",
       "}"
     ],
     "MainRules": {
@@ -142,6 +131,20 @@
             }
           },
           {
+            "Type": "Number",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Term"
+            }
+          },
+          {
             "Type": "HexNumber",
             "Attributes": {
               "Element": "HexNumber"
@@ -167,31 +170,33 @@
             "TokenRange": {
               "Open": "#"
             }
-          },
-          {
-            "Type": "Method",
-            "Attributes": {
-              "Element": "Method"
-            },
-            "Properties": {
-              "CloseOnTerm": true,
-              "CloseOnEndOfLine": true
-            },
-            "TokenRange": {
-              "Open": "NS"
-            }
           }
         ],
         "KeyList": [
           {
             "Type": "ReservedWord",
             "Words": [
+              "__autoreleasing",
+              "__bridge",
+              "__bridge_retained",
+              "__bridge_transfer",
+              "__kindof",
+              "__strong ",
+              "__unsafe_unretained ",
+              "__weak ",
+              "_bool",
+              "_complex",
+              "_imaginary",
+              "_nonnull",
+              "_null_unspecified",
+              "_nullable",
               "_packed",
+              "_pragma",
               "auto",
               "break",
               "case",
-              "char",
               "cgfloat",
+              "char",
               "const",
               "continue",
               "default",
@@ -204,14 +209,19 @@
               "for",
               "goto",
               "if",
+              "inline",
               "int",
               "long",
               "nonatomic",
+              "nsinteger",
+              "nsnumber",
+              "nsobject",
               "property",
               "protocol",
               "readonly",
               "readwrite",
               "register",
+              "restrict",
               "retain",
               "return",
               "short",
@@ -234,14 +244,38 @@
           {
             "Type": "Method",
             "Words": [
-              "@interface",
-              "@implementation",
+              "@autoreleasepool",
+              "@available",
+              "@catch",
+              "@class",
+              "@compatibility_alias",
+              "@defs",
+              "@dynamic",
+              "@encode",
               "@end",
+              "@finally",
+              "@implementation",
+              "@interface",
+              "@objc",
+              "@optional",
+              "@package",
+              "@private",
+              "@property",
+              "@protected",
+              "@protocol",
+              "@public",
+              "@required",
+              "@selector",
+              "@synchronized",
+              "@synthesize",
+              "@throw",
+              "@try",
               "alloc",
               "count",
               "id",
               "index",
               "init",
+              "nslog",
               "signed",
               "unsigned",
               "void"

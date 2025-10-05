@@ -612,7 +612,6 @@ type
     procedure ScanTagMatchingPair;
     procedure ScrollTimerHandler(ASender: TObject);
     procedure ScrollingChanged(ASender: TObject);
-    procedure SearchAll(const ASearchText: string = '');
     procedure SearchChanged(const AEvent: TTextEditorSearchChanges);
     procedure SelectionChanged(ASender: TObject);
     procedure SetActiveLine(const AValue: TTextEditorActiveLine);
@@ -709,6 +708,7 @@ type
     function GetReadOnly: Boolean; virtual;
     function PixelAndRowToViewPosition(const X, ARow: Integer; const ALineText: string = ''): TTextEditorViewPosition;
     function PixelsToViewPosition(const X, Y: Integer): TTextEditorViewPosition;
+    function SearchAll(const ASearchText: string = ''): Boolean;
     function TextPositionToCharIndex(const ATextPosition: TTextEditorTextPosition): Integer;
     procedure ChangeScale(AMultiplier, ADivider: Integer{$IF CompilerVersion >= 35}; AIsDpiChange: Boolean{$IFEND}); override;
     procedure CreateParams(var AParams: TCreateParams); override;
@@ -3716,11 +3716,10 @@ begin
 
   if FSimpleMode then
   begin
-    if FScrollHelper.HorizontalPosition = 0 then
-      Result.X := FLeftMarginWidth + (AViewPosition.Column - 1) * FPaintHelper.CharWidth
-    else
-      Result.X := FLeftMarginWidth + AViewPosition.Column * FPaintHelper.CharWidth - FScrollHelper.HorizontalPosition +
-        FScrollHelper.HorizontalPosition mod FPaintHelper.CharWidth;
+    Result.X := FLeftMarginWidth + (AViewPosition.Column - 1) * FPaintHelper.CharWidth;
+
+    if FScrollHelper.HorizontalPosition <> 0 then
+      Result.X := Result.X - FScrollHelper.HorizontalPosition + FScrollHelper.HorizontalPosition mod FPaintHelper.CharWidth;
 
     Exit;
   end;
@@ -7387,7 +7386,7 @@ begin
       ((ATextPosition.Line <= LSelectionEndPosition.Line) and (ATextPosition.Char < LSelectionEndPosition.Char));
 end;
 
-procedure TCustomTextEditor.SearchAll(const ASearchText: string = '');
+function TCustomTextEditor.SearchAll(const ASearchText: string = ''): Boolean;
 type
   TCommentPositionsRec = record
     BeginTextPosition: TTextEditorTextPosition;
@@ -7526,6 +7525,8 @@ var
   LPosition: Integer;
   LMaxDistance: Integer;
 begin
+  Result := False;
+
   FSearch.ClearItems;
 
   if not FSearch.Enabled then
@@ -7654,6 +7655,8 @@ begin
     if soIgnoreComments in FSearch.Options then
       LCommentPositions.Free;
   end;
+
+  Result := True;
 end;
 
 procedure TCustomTextEditor.FindWords(const AWord: string; const AList: TList; const ACaseSensitive: Boolean;
@@ -9161,10 +9164,11 @@ var
           end;
         end;
       end;
+
       { Check the last not empty line }
       LLine := FLines.Count - 1;
 
-      while (LLine >= 0) and System.SysUtils.Trim(FLines[LLine]).IsEmpty do
+      while (LLine >= 0) and FLines[LLine].Trim.IsEmpty do
         Dec(LLine);
 
       if LLine >= 0 then
@@ -9575,10 +9579,8 @@ begin
           FEvents.OnSearchEngineChanged(Self);
       end;
     scSearch:
-      if FSearch.Enabled then
+      if FSearch.Enabled and SearchAll then
       begin
-        SearchAll;
-
         if not Assigned(Parent) then
           Exit;
 
@@ -9787,8 +9789,6 @@ begin
 end;
 
 procedure TCustomTextEditor.SetModified(const AValue: Boolean);
-var
-  LIndex: Integer;
 begin
   if FState.Modified <> AValue then
   begin
@@ -9802,9 +9802,7 @@ begin
 
     if not FState.Modified then
     begin
-      for LIndex := 0 to FLines.Count - 1 do
-      if FLines.LineState[LIndex] = lsModified then
-        FLines.LineState[LIndex] := lsNormal;
+      FLines.SetLineStates(0, FLines.Count - 1, lsNormal);
 
       Invalidate;
     end;
@@ -17442,6 +17440,10 @@ begin
 
   LCharsBefore := FScrollHelper.HorizontalPosition div FPaintHelper.CharWidth;
   LStartChar := Max(1, LCharsBefore);
+
+  if FScrollHelper.HorizontalPosition <> 0 then
+    Inc(LStartChar);
+
   LEndChar := LStartChar + ((Width - FLeftMarginWidth) div FPaintHelper.CharWidth);
   LTabSpace := StringOfChar(TCharacters.Space, FTabs.Width);
 
@@ -22433,7 +22435,6 @@ var
   LSelectionAvailable: Boolean;
   LTextPosition, LTempTextPosition: TTextEditorTextPosition;
   LLines: TTextEditorLines;
-  LIndex: Integer;
 begin
   LTextPosition := TextPosition;
   FLines.SortOptions := AOptions;
@@ -22469,6 +22470,7 @@ begin
         FUndoList.AddChange(crSelection, LTextPosition, LTextPosition, LTextPosition, '', FSelection.ActiveMode);
 
       AddUndoDelete(LTextPosition, LBeginPosition, LEndPosition, LText, FSelection.ActiveMode);
+
       FLines.Sort(LBeginPosition.Line, LEndPosition.Line)
     end
     else
@@ -22505,8 +22507,7 @@ begin
     FUndoList.EndBlock;
   end;
 
-  for LIndex := LBeginPosition.Line to LEndPosition.Line do
-    FLines.LineState[LIndex] := lsModified;
+  FLines.SetLineStates(LBeginPosition.Line, LEndPosition.Line, lsModified);
 
   RescanCodeFoldingRanges;
 
@@ -22603,7 +22604,7 @@ begin
       LTextPosition.Char := 1;
 
       for LIndex := FLines.Count - 1 downto 0 do
-      if Trim(FLines[LIndex]).IsEmpty then
+      if FLines[LIndex].Trim.IsEmpty then
       begin
         FLines.Delete(LIndex);
         LTextPosition.Line := LIndex;

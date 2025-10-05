@@ -111,6 +111,7 @@ type
     procedure LoadFromStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil); override;
     procedure LoadFromStrings(var AStrings: TStringList);
     procedure SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil); override;
+    procedure SetLineStates(const AIndexFrom: Integer; const AIndexTo: Integer; const ALineState: TTextEditorLineState);
     procedure Sort(const ABeginLine: Integer; const AEndLine: Integer); virtual;
     procedure Trim(const ATrimStyle: TTextEditorTrimStyle; const ABeginLine: Integer; const AEndLine: Integer);
     property BufferSize: Integer read FBufferSize write FBufferSize;
@@ -522,15 +523,16 @@ procedure TTextEditorLines.SetLineState(const AIndex: Integer; const AValue: TTe
 begin
   if IsValidIndex(AIndex) then
   with FItems^[AIndex] do
+  if AValue = lsNormal then
+  begin
+    Exclude(Flags, sfLineStateModified);
+    Include(Flags, sfLineStateNormal);
+  end
+  else
+  if AValue = lsModified then
   begin
     Exclude(Flags, sfLineStateNormal);
-    Exclude(Flags, sfLineStateModified);
-
-    if AValue = lsNormal then
-      Include(Flags, sfLineStateNormal)
-    else
-    if AValue = lsModified then
-      Include(Flags, sfLineStateModified)
+    Include(Flags, sfLineStateModified);
   end;
 end;
 
@@ -915,6 +917,27 @@ end;
 function StringListCompareStrings(const AList: TTextEditorLines; const ALeft, ARight: Integer): Integer;
 begin
   Result := AList.CompareStrings(AList[ALeft], AList[ARight]);
+end;
+
+procedure TTextEditorLines.SetLineStates(const AIndexFrom: Integer; const AIndexTo: Integer; const ALineState: TTextEditorLineState);
+var
+  LIndex: Integer;
+begin
+  for LIndex := AIndexFrom to AIndexTo do
+  with FItems^[LIndex] do
+  case ALineState of
+    lsNormal:
+      if sfLineStateModified in Flags then
+      begin
+        Exclude(Flags, sfLineStateModified);
+        Include(Flags, sfLineStateNormal);
+      end;
+    lsModified:
+      begin
+        Exclude(Flags, sfLineStateNormal);
+        Include(Flags, sfLineStateModified);
+      end;
+  end;
 end;
 
 procedure TTextEditorLines.Sort(const ABeginLine: Integer; const AEndLine: Integer);

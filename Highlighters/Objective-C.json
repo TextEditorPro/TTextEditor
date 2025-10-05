@@ -149,7 +149,7 @@
             "Attributes": {
               "Element": "HexNumber"
             },
-            "AllowedCharacters": "0123456789abcdefABCDEF",
+            "AllowedCharacters": "0123456789abcdefulABCDEFUL",
             "Properties": {
               "CloseOnTerm": true,
               "CloseOnEndOfLine": true
@@ -275,7 +275,6 @@
               "id",
               "index",
               "init",
-              "nslog",
               "signed",
               "unsigned",
               "void"
@@ -285,26 +284,48 @@
             }
           },
           {
+            "Type": "Number",
+            "Words": [
+              "bool",
+              "main",
+              "no",
+              "nslog",
+              "self",
+              "super",
+              "yes"
+            ],
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
             "Type": "Symbol",
             "Words": [
-              ":",
-              ";",
-              "<",
-              ">",
-              "=",
-              "/",
-              "*",
-              ".",
-              ",",
+              "!",
               "-",
-              "+",
+              "%",
+              "&",
               "(",
               ")",
+              "*",
+              ",",
+              ".",
+              "/",
+              ":",
+              ";",
+              "?",
+              "@",
               "[",
               "]",
+              "^",
               "{",
+              "|",
               "}",
-              "@"
+              "~",
+              "+",
+              "<",
+              "=",
+              ">"
             ],
             "Attributes": {
               "Element": "Symbol"
@@ -314,7 +335,7 @@
         "Set": [
           {
             "Type": "Numbers",
-            "Symbols": ".0123456789",
+            "Symbols": ".0123456789eulEUL-",
             "Attributes": {
               "Element": "Number"
             }

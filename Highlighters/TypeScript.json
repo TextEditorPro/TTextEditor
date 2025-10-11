@@ -1,7 +1,7 @@
 {
   "Highlighter": {
     "Sample": [
-      "// // Hello, World! in TypeScript\r\n",
+      "// Hello, World! in TypeScript\r\n",
       "class Greeter {\r\n",
       "	    constructor(public greeting: string) { }\r\n",
       "	    greet() {\r\n",

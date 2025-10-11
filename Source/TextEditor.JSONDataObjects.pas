@@ -278,7 +278,6 @@ type
     destructor Destroy; override;
     function AddArray: TJSONArray;
     function AddObject: TJSONObject; overload;
-    function GetEnumerator: TJSONArrayEnumerator;
     function InsertArray(const AIndex: Integer): TJSONArray;
     function InsertObject(const AIndex: Integer): TJSONObject; overload;
     procedure Add(const AValue: Boolean); overload;
@@ -288,7 +287,6 @@ type
     procedure AddObject(const AValue: TJSONObject); overload;
     procedure Assign(const ASource: TJSONArray);
     procedure Clear;
-    procedure Delete(const AIndex: Integer);
     procedure Insert(const AIndex: Integer; const AValue: Boolean); overload;
     procedure Insert(const AIndex: Integer; const AValue: string); overload;
     procedure Insert(const AIndex: Integer; const AValue: TJSONArray); overload;
@@ -325,65 +323,65 @@ type
   private type
     PJSONStringArray = ^TJSONStringArray;
     TJSONStringArray = array [0 .. MaxInt div SizeOf(string) - 1] of string;
+    PJsonStringSortIndexArray = ^TJsonStringSortIndexArray;
+    TJsonStringSortIndexArray = array[0..MaxInt div SizeOf(Integer) - 1] of Integer;
   private
     FCapacity: Integer;
     FCount: Integer;
     FItems: PJSONDataValueArray;
     FNames: PJSONStringArray;
+    FSortedNames: PJsonStringSortIndexArray;
+    FFirstUnsortedNameIndex: Integer;
     function AddItem(const AName: string): PJSONDataValue;
+    function CompareSortedName(const AIndex1, AIndex2: Integer): Integer;
     function FindItem(const AName: string; var Item: PJSONDataValue): Boolean;
     function GetItem(const AIndex: Integer): PJSONDataValue;
     function GetName(const AIndex: Integer): string;
     function GetPath(const ANamePath: string): TJSONDataValueHelper;
-    function GetType(const AName: string): TJSONDataType;
     function GetValue(const AName: string): TJSONDataValueHelper;
     function GetValueArray(const AName: string): TJSONArray;
     function GetValueBoolean(const AName: string): Boolean;
-    function GetValueObject(const AName: string): TJSONObject;
     function GetValueString(const AName: string): string;
     function IndexOfPChar(const AValue: PChar; const ALength: Integer): Integer;
     function InternAddArray(var AName: string): TJSONArray;
     function InternAddItem(var AName: string): PJSONDataValue;
     function InternAddObject(var AName: string): TJSONObject;
+    function InternFindSortedNameInsertIndex(const AIndex: Integer): Integer;
+    function InternIndexOfSortedName(const AName: string): Integer;
     function RequireItem(const AName: string): PJSONDataValue;
     procedure Grow;
     procedure InternAdd(var AName: string; const AValue: Boolean); overload;
     procedure InternAdd(var AName: string; const AValue: TJSONArray); overload;
     procedure InternAdd(var AName: string; const AValue: TJSONObject); overload;
     procedure InternApplyCapacity;
+    procedure InternDeleteSortedName(const AIndex: Integer);
     procedure PathError(const AValue, AValueEnd: PChar);
     procedure PathIndexError(const AValue, AValueEnd: PChar; const ACount: Integer);
     procedure PathNullError(const AValue, AValueEnd: PChar);
+    procedure QuickSortNames(ALeft, ARight: Integer);
     procedure SetCapacity(const AValue: Integer);
     procedure SetPath(const ANamePath: string; const AValue: TJSONDataValueHelper);
     procedure SetValue(const AName: string; const AValue: TJSONDataValueHelper);
     procedure SetValueArray(const AName: string; const AValue: TJSONArray);
     procedure SetValueBoolean(const AName: string; const AValue: Boolean);
-    procedure SetValueObject(const AName: string; const AValue: TJSONObject);
     procedure SetValueString(const AName, AValue: string);
+    procedure SortUnsortedNames;
   protected
     procedure InternToJSON(var Writer: TJSONOutputWriter); override;
   public
     destructor Destroy; override;
     function Contains(const AName: string): Boolean;
-    function Extract(const AName: string): TJSONBaseObject;
-    function ExtractArray(const AName: string): TJSONArray;
-    function ExtractObject(const AName: string): TJSONObject;
-    function GetEnumerator: TJSONObjectEnumerator;
     function IndexOf(const AName: string): Integer;
     procedure Assign(const ASource: TJSONObject);
     procedure Clear;
     procedure Delete(const AIndex: Integer);
-    procedure Remove(const AName: string);
     property Capacity: Integer read FCapacity write SetCapacity;
     property Count: Integer read FCount;
     property Items[const AIndex: Integer]: PJSONDataValue read GetItem;
     property Names[const AIndex: Integer]: string read GetName;
     property Path[const ANamePath: string]: TJSONDataValueHelper read GetPath write SetPath;
-    property Types[const AName: string]: TJSONDataType read GetType;
     property ValueArray[const AName: string]: TJSONArray read GetValueArray write SetValueArray;
     property ValueBoolean[const AName: string]: Boolean read GetValueBoolean write SetValueBoolean;
-    property ValueObject[const AName: string]: TJSONObject read GetValueObject write SetValueObject;
     property Values[const AName: string]: TJSONDataValueHelper read GetValue write SetValue; default;
     property ValueString[const AName: string]: string read GetValueString write SetValueString;
   end;
@@ -1699,18 +1697,6 @@ begin
   FCount := 0;
 end;
 
-procedure TJSONArray.Delete(const AIndex: Integer);
-begin
-  if (AIndex < 0) or (AIndex >= FCount) then
-    ListError(@SListIndexError, AIndex);
-
-  FItems[AIndex].Clear;
-  Dec(FCount);
-
-  if AIndex < FCount then
-    Move(FItems[AIndex + 1], FItems[AIndex], (FCount - AIndex) * SizeOf(TJSONDataValue));
-end;
-
 function TJSONArray.AddItem: PJSONDataValue;
 begin
   if FCount = FCapacity then
@@ -1919,11 +1905,6 @@ begin
   Insert(AIndex, AValue);
 end;
 
-function TJSONArray.GetEnumerator: TJSONArrayEnumerator;
-begin
-  Result := TJSONArrayEnumerator.Create(Self);
-end;
-
 procedure TJSONArray.SetValueString(const AIndex: Integer; const AValue: string);
 begin
   FItems[AIndex].Value := AValue;
@@ -2062,6 +2043,7 @@ begin
   Clear;
   FreeMem(FItems);
   FreeMem(FNames);
+  FreeMem(FSortedNames);
 
   // inherited Destroy;
 end;
@@ -2089,6 +2071,13 @@ procedure TJSONObject.InternApplyCapacity;
 begin
   ReallocMem(Pointer(FItems), FCapacity * SizeOf(FItems[0]));
   ReallocMem(Pointer(FNames), FCapacity * SizeOf(FNames[0]));
+  ReallocMem(Pointer(FSortedNames), FCapacity * SizeOf(FSortedNames[0]));
+end;
+
+procedure TJsonObject.InternDeleteSortedName(const AIndex: Integer);
+begin
+  if AIndex < FCount - 1 then
+    Move(FSortedNames[AIndex + 1], FSortedNames[AIndex], (FCount - AIndex) * SizeOf(FSortedNames[0]));
 end;
 
 procedure TJSONObject.SetCapacity(const AValue: Integer);
@@ -2124,53 +2113,7 @@ begin
   end;
 
   FCount := 0;
-end;
-
-procedure TJSONObject.Remove(const AName: string);
-var
-  LIndex: Integer;
-begin
-  LIndex := IndexOf(AName);
-
-  if LIndex <> -1 then
-    Delete(LIndex);
-end;
-
-function TJSONObject.Extract(const AName: string): TJSONBaseObject;
-var
-  LIndex: Integer;
-begin
-  LIndex := IndexOf(AName);
-
-  if LIndex = -1 then
-    Result := nil
-  else
-  begin
-    if FItems[LIndex].FDataType in [jdtNone, jdtArray, jdtObject] then
-    begin
-      Result := TJSONBaseObject(FItems[LIndex].FValue.ValueObject);
-      TJSONBaseObject(FItems[LIndex].FValue.ValueObject) := nil;
-    end
-    else
-      Result := nil;
-
-    Delete(LIndex);
-  end
-end;
-
-function TJSONObject.ExtractArray(const AName: string): TJSONArray;
-begin
-  Result := Extract(AName) as TJSONArray;
-end;
-
-function TJSONObject.ExtractObject(const AName: string): TJSONObject;
-begin
-  Result := Extract(AName) as TJSONObject;
-end;
-
-function TJSONObject.GetEnumerator: TJSONObjectEnumerator;
-begin
-  Result := TJSONObjectEnumerator.Create(Self);
+  FFirstUnsortedNameIndex := -1;
 end;
 
 function TJSONObject.AddItem(const AName: string): PJSONDataValue;
@@ -2182,12 +2125,29 @@ begin
 
   Result := @FItems[FCount];
   LPName := @FNames[FCount];
-  Inc(FCount);
   Pointer(LPName^) := nil;
   LPName^ := AName;
 
+  if FFirstUnsortedNameIndex = -1 then
+    FFirstUnsortedNameIndex := FCount;
+
+  Inc(FCount);
+
   Result.FValue.ValuePChar := nil;
   Result.FDataType := jdtNone;
+end;
+
+function TJsonObject.CompareSortedName(const AIndex1, AIndex2: Integer): Integer;
+var
+  P1, P2: PString;
+begin
+  P1 := @FNames[FSortedNames[AIndex1]];
+  P2 := @FNames[FSortedNames[AIndex2]];
+
+  Result := Length(P1^) - Length(P2^);
+
+  if Result = 0 then
+    Result := CompareStr(P1^, P2^);
 end;
 
 function TJSONObject.InternAddItem(var AName: string): PJSONDataValue;
@@ -2200,10 +2160,13 @@ begin
   Result := @FItems[FCount];
   LPName := @FNames[FCount];
 
-  Inc(FCount);
-
   Pointer(LPName^) := Pointer(AName);
   Pointer(AName) := nil;
+
+  if FFirstUnsortedNameIndex = -1 then
+    FFirstUnsortedNameIndex := FCount;
+
+  Inc(FCount);
 
   Result.FValue.ValuePChar := nil;
   Result.FDataType := jdtNone;
@@ -2232,19 +2195,6 @@ begin
     Result := False;
 end;
 
-function TJSONObject.GetValueObject(const AName: string): TJSONObject;
-var
-  LItem: PJSONDataValue;
-begin
-  if FindItem(AName, LItem) then
-    Result := LItem.ObjectValue
-  else
-  begin
-    Result := TJSONObject.Create;
-    AddItem(AName).ObjectValue := Result;
-  end;
-end;
-
 function TJSONObject.GetValueString(const AName: string): string;
 var
   LItem: PJSONDataValue;
@@ -2265,24 +2215,39 @@ begin
   RequireItem(AName).BoolValue := AValue;
 end;
 
-procedure TJSONObject.SetValueObject(const AName: string; const AValue: TJSONObject);
-begin
-  RequireItem(AName).ObjectValue := AValue;
-end;
-
 procedure TJSONObject.SetValueString(const AName, AValue: string);
 begin
   RequireItem(AName).Value := AValue;
 end;
 
-function TJSONObject.GetType(const AName: string): TJSONDataType;
+procedure TJsonObject.SortUnsortedNames;
 var
-  LItem: PJSONDataValue;
+  LIndex: Integer;
 begin
-  if FindItem(AName, LItem) then
-    Result := LItem.DataType
-  else
-    Result := jdtNone;
+  if FFirstUnsortedNameIndex <> -1 then
+  begin
+    if FCount <> 0 then
+    begin
+      if FCount - FFirstUnsortedNameIndex = 1 then
+      begin
+        LIndex := InternFindSortedNameInsertIndex(FFirstUnsortedNameIndex);
+
+        if LIndex < FFirstUnsortedNameIndex then
+          Move(FSortedNames[LIndex], FSortedNames[LIndex + 1], (FFirstUnsortedNameIndex - LIndex) * SizeOf(FSortedNames[0]));
+
+        FSortedNames[LIndex] := FFirstUnsortedNameIndex;
+      end
+      else
+      begin
+        for LIndex := 0 to FCount - 1 do
+          FSortedNames[LIndex] := LIndex;
+
+        QuickSortNames(0, FCount - 1);
+      end;
+    end;
+
+    FFirstUnsortedNameIndex := -1;
+  end;
 end;
 
 function TJSONObject.Contains(const AName: string): Boolean;
@@ -2311,16 +2276,14 @@ begin
 end;
 
 function TJSONObject.IndexOf(const AName: string): Integer;
-var
-  LPArray: PJSONStringArray;
 begin
-  LPArray := FNames;
+  if FFirstUnsortedNameIndex <> -1 then
+    SortUnsortedNames;
 
-  for Result := 0 to FCount - 1 do
-  if AName = LPArray[Result] then
-    Exit;
+  Result := InternIndexOfSortedName(AName);
 
-  Result := -1;
+  if Result <> -1 then
+    Result := FSortedNames[Result];
 end;
 
 function TJSONObject.FindItem(const AName: string; var Item: PJSONDataValue): Boolean;
@@ -2377,9 +2340,30 @@ begin
 end;
 
 procedure TJSONObject.Delete(const AIndex: Integer);
+var
+  LSortIndex, LNameIndex, LSortCount: Integer;
 begin
   if (AIndex < 0) or (AIndex >= FCount) then
     ListError(@SListIndexError, AIndex);
+
+  LSortCount := FFirstUnsortedNameIndex;
+
+  if LSortCount = -1 then
+    LSortCount := FCount;
+
+  for LSortIndex := LSortCount - 1 downto 0 do
+  begin
+    LNameIndex := FSortedNames[LSortIndex];
+
+    if LNameIndex = AIndex then
+      InternDeleteSortedName(LSortIndex)
+    else
+    if LNameIndex > AIndex then
+      Dec(FSortedNames[LSortIndex]);
+  end;
+
+  if (FFirstUnsortedNameIndex <> -1) and (FFirstUnsortedNameIndex < AIndex) then
+    Dec(FFirstUnsortedNameIndex);
 
   FNames[AIndex] := '';
   FItems[AIndex].Clear;
@@ -2448,6 +2432,73 @@ begin
   InternAdd(AName, Result);
 end;
 
+function TJsonObject.InternFindSortedNameInsertIndex(const AIndex: Integer): Integer;
+var
+  LCount, LMiddle, LValue, LLength: Integer;
+  LName: string;
+begin
+  Result := 0;
+
+  LName := FNames[AIndex];
+  LLength := LName.Length;;
+
+  if FFirstUnsortedNameIndex <> -1 then
+    LCount := FFirstUnsortedNameIndex - 1
+  else
+    LCount := FCount - 1;
+
+  while Result <= LCount do
+  begin
+    LMiddle := (Result + LCount) shr 1;
+    LValue := FNames[FSortedNames[LMiddle]].Length - LLength;
+
+    if LValue = 0 then
+      LValue := CompareStr(FNames[FSortedNames[LMiddle]], LName);
+
+    if LValue < 0 then
+      Result := LMiddle + 1
+    else
+    begin
+      LCount := LMiddle - 1;
+
+      if LCount = 0 then
+        Exit(LMiddle);
+    end;
+  end;
+end;
+
+function TJsonObject.InternIndexOfSortedName(const AName: string): Integer;
+var
+  LCount, LMiddle, LValue: Integer;
+  LLength: Integer;
+begin
+  Result := 0;
+
+  LLength := AName.Length;
+  LCount := FCount - 1;
+
+  while Result <= LCount do
+  begin
+    LMiddle := (Result + LCount) shr 1;
+    LValue := FNames[FSortedNames[LMiddle]].Length - LLength;
+
+    if LValue = 0 then
+      LValue := CompareStr(FNames[FSortedNames[LMiddle]], AName);
+
+    if LValue < 0 then
+      Result := LMiddle + 1
+    else
+    begin
+      LCount := LMiddle - 1;
+
+      if LValue = 0 then
+        Exit(LMiddle);
+    end;
+  end;
+
+  Result := -1;
+end;
+
 procedure TJSONObject.Assign(const ASource: TJSONObject);
 var
   LIndex: Integer;
@@ -2466,6 +2517,8 @@ begin
     begin
       Pointer(FNames[LIndex]) := nil;
       FNames[LIndex] := ASource.FNames[LIndex];
+      FSortedNames[LIndex] := ASource.FSortedNames[LIndex];
+      FFirstUnsortedNameIndex := ASource.FFirstUnsortedNameIndex;
       InternInitAndAssignItem(@FItems[LIndex], @ASource.FItems[LIndex]);
     end;
   end
@@ -2473,6 +2526,7 @@ begin
   begin
     FreeMem(FItems);
     FreeMem(FNames);
+    FreeMem(FSortedNames);
 
     FCapacity := 0;
   end;
@@ -2494,6 +2548,64 @@ begin
   System.SetString(LValue, AValue, AValueEnd - AValue);
 
   raise EJSONPathException.CreateResFmt(@STextEditorJSONPathContainsNullValue, [LValue]);
+end;
+
+procedure TJsonObject.QuickSortNames(ALeft, ARight: Integer);
+var
+  LIndex, LRight, LMiddle, LValue: Integer;
+begin
+  repeat
+    LIndex := ALeft;
+    LRight := ARight;
+    LMiddle := (ALeft + ARight) shr 1;
+
+    repeat
+      while CompareSortedName(LIndex, LMiddle) < 0 do
+        Inc(LIndex);
+
+      while CompareSortedName(LRight, LMiddle) > 0 do
+        Dec(LRight);
+
+      if LIndex <= LRight then
+      begin
+        if LIndex <> LRight then
+        begin
+          LValue := FSortedNames[LRight];
+
+          FSortedNames[LRight] := FSortedNames[LIndex];
+          FSortedNames[LIndex] := LValue
+        end;
+
+        if LMiddle = LIndex then
+          LMiddle := LRight
+        else
+        if LMiddle = LRight then
+          LMiddle := LIndex;
+
+        Inc(LIndex);
+        Dec(LRight);
+      end;
+    until LIndex > LRight;
+
+    if ALeft < LRight then
+    begin
+      if LRight - ALeft <= ARight - LIndex then
+      begin
+        QuickSortNames(ALeft, LRight);
+
+        ALeft := LIndex;
+      end
+      else
+      begin
+        QuickSortNames(LIndex, ARight);
+
+        ARight := LRight;
+        LIndex := ALeft;
+      end;
+    end
+    else
+      ALeft := LIndex;
+  until LIndex >= ARight;
 end;
 
 procedure TJSONObject.PathIndexError(const AValue, AValueEnd: PChar; const ACount: Integer);
@@ -2518,10 +2630,7 @@ begin
   LPChar := PChar(ANamePath);
 
   if LPChar^ = #0 then
-  begin
-    Result := Self;
-    Exit;
-  end;
+    Exit(Self);
 
   Result.FData.Intern := nil;
   Result.FData.DataType := jdtNone;
@@ -2716,50 +2825,53 @@ begin
 end;
 
 class function TStringIntern.GetHash(const AName: string): Integer;
+label
+  Pad2, Pad1;
+const
+  FNV_PRIME = $01000193;
+  FNV_SEED  = $811C9DC5;
 var
-  LPChar: PChar;
-  LChar: Word;
+  LLength: NativeInt;
+  LPChar: PWideChar;
 begin
   Result := 0;
 
-  LPChar := PChar(Pointer(AName));
+  LPChar := PWideChar(Pointer(AName));
 
   if LPChar <> nil then
   begin
-    Result := PInteger(@PByte(AName)[-4])^;
+    LLength := PStrRec(@PByte(AName)[-SizeOf(TStrRec)]).Length;
+    LPChar := @LPChar[LLength];
+    LLength := -LLength + 4;
 
-    while True do
+    Result := Integer(FNV_SEED);
+
+    while LLength <= 0 do
     begin
-      LChar := Word(LPChar[0]);
+      Result := (Result xor Word(LPChar[LLength - 4])) * FNV_PRIME;
+      Result := (Result xor Word(LPChar[LLength - 3])) * FNV_PRIME;
+      Result := (Result xor Word(LPChar[LLength - 2])) * FNV_PRIME;
+      Result := (Result xor Word(LPChar[LLength - 1])) * FNV_PRIME;
+      Inc(LLength, 4);
+    end;
 
-      if LChar = 0 then
-        Break;
-
-      Result := Result + LChar;
-
-      LChar := Word(LPChar[1]);
-
-      if LChar = 0 then
-        Break;
-
-      Result := Result + LChar;
-
-      LChar := Word(LPChar[2]);
-
-      if LChar = 0 then
-        Break;
-
-      Result := Result + LChar;
-
-      LChar := Word(LPChar[3]);
-
-      if LChar = 0 then
-        Break;
-
-      Result := Result + LChar;
-      Result := (Result shl 6) or ((Result shr 26) and $3F);
-
-      Inc(LPChar, 4);
+    case 4 - LLength of
+      3:
+        begin
+          Result := (Result xor Word(LPChar[-3])) * FNV_PRIME;
+          goto Pad2;
+        end;
+      2:
+        begin
+Pad2:
+          Result := (Result xor Word(LPChar[-2])) * FNV_PRIME;
+          goto Pad1;
+        end;
+      1:
+        begin
+Pad1:
+          Result := (Result xor Word(LPChar[-1])) * FNV_PRIME;
+        end;
     end;
   end;
 end;

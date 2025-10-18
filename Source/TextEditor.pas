@@ -118,7 +118,7 @@ type
       OnLinesInserted: TStringListChangeEvent;
       OnLinesPutted: TStringListChangeEvent;
       OnLinkClick: TTextEditorLinkClickEvent;
-      OnLoadingProgress: TNotifyEvent;
+      OnLoadingProgress: TTextEditorLoadingProgressEvent;
       OnMarkPanelLinePaint: TTextEditorMarkPanelLinePaintEvent;
       OnModified: TNotifyEvent;
       OnMultiCaretChanged: TNotifyEvent;
@@ -1033,7 +1033,7 @@ type
     property OnLinesInserted: TStringListChangeEvent read FEvents.OnLinesInserted write FEvents.OnLinesInserted;
     property OnLinesPutted: TStringListChangeEvent read FEvents.OnLinesPutted write FEvents.OnLinesPutted;
     property OnLinkClick: TTextEditorLinkClickEvent read FEvents.OnLinkClick write FEvents.OnLinkClick;
-    property OnLoadingProgress: TNotifyEvent read FEvents.OnLoadingProgress write FEvents.OnLoadingProgress;
+    property OnLoadingProgress: TTextEditorLoadingProgressEvent read FEvents.OnLoadingProgress write FEvents.OnLoadingProgress;
     property OnMarkPanelLinePaint: TTextEditorMarkPanelLinePaintEvent read FEvents.OnMarkPanelLinePaint write FEvents.OnMarkPanelLinePaint;
     property OnModified: TNotifyEvent read FEvents.OnModified write FEvents.OnModified;
     property OnMultiCaretChanged: TNotifyEvent read FEvents.OnMultiCaretChanged write FEvents.OnMultiCaretChanged;
@@ -4614,6 +4614,7 @@ var
   LRange: TTextEditorRange;
   LProgress, LProgressInc: Int64;
   LProgressPositionInc: Integer;
+  LCancelled: Boolean;
 begin
   Result := AIndex;
 
@@ -4628,6 +4629,7 @@ begin
   LProgress := 0;
   LProgressInc := 0;
   LProgressPositionInc := 1;
+  LCancelled := False;
 
   if FLines.ShowProgress then
   begin
@@ -4660,9 +4662,12 @@ begin
       FLines.ProgressPosition := FLines.ProgressPosition + LProgressPositionInc;
 
       if Assigned(FEvents.OnLoadingProgress) then
-        FEvents.OnLoadingProgress(Self)
+        FEvents.OnLoadingProgress(Self, LCancelled)
       else
         Paint;
+
+      if LCancelled then
+        Exit;
 
       Inc(LProgress, LProgressInc);
     end;
@@ -9048,6 +9053,7 @@ var
     LCodeFoldingRange: TTextEditorCodeFoldingRange;
     LProgressPosition, LProgress, LProgressInc, LLength: Int64;
     LProgressPositionInc: Integer;
+    LCancelled: Boolean;
   begin
     LFoldCount := 0;
     LOpenTokenSkipFoldRangeList := TList.Create;
@@ -9069,6 +9075,7 @@ var
       LProgressPosition := 0;
       LProgressInc := 0;
       LProgressPositionInc := 1;
+      LCancelled := False;
 
       if FLines.ShowProgress then
       begin
@@ -9156,9 +9163,12 @@ var
             FLines.ProgressPosition := FLines.ProgressPosition + LProgressPositionInc;
 
             if Assigned(FEvents.OnLoadingProgress) then
-              FEvents.OnLoadingProgress(Self)
+              FEvents.OnLoadingProgress(Self, LCancelled)
             else
               Paint;
+
+            if LCancelled then
+              Exit;
 
             Inc(LProgress, LProgressInc);
           end;
@@ -9211,6 +9221,7 @@ var
     LCommentIndex, LBlockCommentIndex, LLength: Integer;
     LCommentFound, LInsideBlockComment: Boolean;
     LProgressPosition, LProgress, LProgressInc: Int64;
+    LCancelled: Boolean;
 
     function LeftCharCount(const ALine: string; const AChar: Char): Integer;
     var
@@ -9235,6 +9246,7 @@ var
       LProgress := 0;
       LProgressPosition := 0;
       LProgressInc := 0;
+      LCancelled := False;
 
       if FLines.ShowProgress then
       begin
@@ -9379,9 +9391,12 @@ var
             FLines.ProgressPosition := FLines.ProgressPosition + 1;
 
             if Assigned(FEvents.OnLoadingProgress) then
-              FEvents.OnLoadingProgress(Self)
+              FEvents.OnLoadingProgress(Self, LCancelled)
             else
               Paint;
+
+            if LCancelled then
+              Exit;
 
             Inc(LProgress, LProgressInc);
           end;
@@ -13470,14 +13485,19 @@ var
   LDrawRect: TRect;
   LLine1, LLine2, LLine3: Integer;
   LSelectionAvailable: Boolean;
+  LCancelled: Boolean;
 begin
   if FLines.ShowProgress then
   begin
+    LCancelled := False;
+
     if Assigned(FEvents.OnLoadingProgress) then
-      FEvents.OnLoadingProgress(Self)
+      FEvents.OnLoadingProgress(Self, LCancelled)
     else
     if Assigned(Parent) then
       PaintProgressBar;
+
+    FLines.LoadingCancelled := LCancelled;
 
     Exit;
   end;

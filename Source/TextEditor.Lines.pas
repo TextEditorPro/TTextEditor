@@ -29,6 +29,7 @@ type
     FItems: PEditorStringRecordItems;
     FLengthOfLongestLine: Integer;
     FLineBreak: TTextEditorLineBreak;
+    FLoadingCancelled: Boolean;
     FLongestLineNeedsUpdate: Boolean;
     FOnAfterSetText: TNotifyEvent;
     FOnBeforePutted: TStringListChangeEvent;
@@ -124,6 +125,7 @@ type
     property Items: PEditorStringRecordItems read FItems;
     property LineBreak: TTextEditorLineBreak read FLineBreak write FLineBreak default lbCRLF;
     property LineState[const AIndex: Integer]: TTextEditorLineState read GetLineState write SetLineState;
+    property LoadingCancelled: Boolean read FLoadingCancelled write FLoadingCancelled;
     property OnAfterSetText: TNotifyEvent read FOnAfterSetText write FOnAfterSetText;
     property OnBeforePutted: TStringListChangeEvent read FOnBeforePutted write FOnBeforePutted;
     property OnBeforeSetText: TNotifyEvent read FOnBeforeSetText write FOnBeforeSetText;
@@ -1114,6 +1116,7 @@ var
   LTempLine: string;
 begin
   FStreaming := True;
+  FLoadingCancelled := False;
 
   if AStream.Size > FBufferSize then
     LBufferSize := FBufferSize
@@ -1159,7 +1162,7 @@ begin
       try
         SetLength(LCharBuffer, LBufferSize);
 
-        while not LStreamReader.EndOfStream do
+        while not LStreamReader.EndOfStream and not FLoadingCancelled do
         begin
           LReadCount := LStreamReader.ReadBlock(LCharBuffer, 0, LBufferSize);
 

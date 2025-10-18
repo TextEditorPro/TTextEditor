@@ -354,6 +354,7 @@ type
     const ALineNumber: Integer; const AIsMinimapLine: Boolean) of object;
   TTextEditorLinkClickEvent = procedure(const ASender: TObject; const ALink: string) of object;
   TTextEditorLoadFromStreamEvent = procedure(const ASender: TObject; const AStream: TStream; const AEncoding: System.SysUtils.TEncoding) of object;
+  TTextEditorLoadingProgressEvent = procedure(const ASender: TObject; var ACancelled: Boolean) of object;
   TTextEditorMarkPanelLinePaintEvent = procedure(const ASender: TObject; const ACanvas: TCanvas; const ARect: TRect;
     const ALineNumber: Integer) of object;
   TTextEditorMarkPanelPaintEvent = procedure(const ASender: TObject; const ACanvas: TCanvas; const ARect: TRect;

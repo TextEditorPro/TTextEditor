@@ -1,4 +1,5 @@
-﻿unit TextEditor.Lines;
+﻿{$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
+unit TextEditor.Lines;
 
 {$I TextEditor.Defines.inc}
 
@@ -18,7 +19,7 @@ type
   PEditorStringRecordItems = ^TTextEditorStringRecordItems;
   TTextEditorStringRecordItems = array [0 .. TEXT_EDITOR_MAX_STRING_COUNT - 1] of TTextEditorStringRecord;
 
-  TTextEditorLines = class(TStrings)
+  TTextEditorLines = class(TPersistent)
   strict private
     FBufferSize: Integer;
     FCapacity: Integer;
@@ -51,10 +52,13 @@ type
     FStreaming: Boolean;
     FTabWidth: Integer;
     FTextLength: Integer;
+    FTrailingLineBreak: Boolean;
     FTrimTrailingSpaces: Boolean;
     FUnknownCharHigh: Byte;
     FUnknownCharsVisible: Boolean;
+    FUpdateCount: Integer;
     function ExpandString(const AIndex: Integer): string;
+    function GetCommaText: string;
     function GetExpandedString(const AIndex: Integer): string;
     function GetExpandedStringLength(const AIndex: Integer): Integer;
     function GetFlags(const AIndex: Integer): TTextEditorStringFlags; inline;
@@ -72,22 +76,23 @@ type
     procedure SetRanges(const AIndex: Integer; const ARange: TTextEditorLinesRange);
     procedure SetUnknownCharHigh;
   protected
-    function CompareStrings(const S1, S2: string): Integer; override;
-    function Get(AIndex: Integer): string; override;
-    function GetCapacity: Integer; override;
-    function GetCount: Integer; override;
-    function GetTextStr: string; override;
+    function CompareStrings(const S1, S2: string): Integer;
+    function GetCapacity: Integer;
+    function GetCount: Integer;
+    function GetStrings(const AIndex: Integer): string;
+    function GetText: string;
     procedure InsertItem(const AIndex: Integer; const AValue: string);
-    procedure Put(AIndex: Integer; const AValue: string); override;
-    procedure SetCapacity(AValue: Integer); override;
-    procedure SetEncoding(const AValue: System.SysUtils.TEncoding); override;
+    procedure SetCapacity(AValue: Integer);
+    procedure SetCommaText(const AValue: string);
+    procedure SetEncoding(const AValue: System.SysUtils.TEncoding);
+    procedure SetStrings(const AIndex: Integer; const AValue: string);
     procedure SetTabWidth(const AValue: Integer);
-    procedure SetTextStr(const AValue: string); override;
-    procedure SetUpdateState(AUpdating: Boolean); override;
+    procedure SetText(const AValue: string);
+    procedure SetUpdateState(AUpdating: Boolean);
   public
     constructor Create(AOwner: TObject);
     destructor Destroy; override;
-    function Add(const AValue: string): Integer; override;
+    function Add(const AValue: string): Integer;
     function DefaultLineBreak: string;
     function GetLengthOfLongestLine: Integer;
     function GetLineBreak(const AIndex: Integer): string;
@@ -95,28 +100,32 @@ type
     function InternationalCharacterFound(var AChar, ALine: Integer): Boolean;
     function LineBreakLength(const AIndex: Integer): Integer;
     function StringLength(const AIndex: Integer): Integer;
+    function Updating: Boolean;
     procedure AddLine(const AValue: string);
-    procedure Clear; override;
+    procedure BeginUpdate;
+    procedure Clear;
     procedure ClearCompareFlags;
     procedure CustomSort(const ABeginLine: Integer; const AEndLine: Integer; ACompare: TTextEditorStringListSortCompare); virtual;
-    procedure Delete(AIndex: Integer); override;
+    procedure Delete(AIndex: Integer);
     procedure DeleteLines(const AIndex: Integer; const ACount: Integer);
     procedure DoTrimTrailingSpaces(const AIndex: Integer);
+    procedure EndUpdate;
     procedure ExcludeFlag(const AIndex: Integer; const AFlag: TTextEditorStringFlag);
     procedure IncludeFlag(const AIndex: Integer; const AFlag: TTextEditorStringFlag);
-    procedure Insert(AIndex: Integer; const AValue: string); override;
+    procedure Insert(AIndex: Integer; const AValue: string);
     procedure InsertLine(const AIndex: Integer; const AFlag: TTextEditorStringFlag);
     procedure InsertLines(const AIndex, ACount: Integer; const AModified: Boolean; const AStrings: TStrings = nil);
     procedure InsertText(const AIndex: Integer; const AText: string);
-    procedure LoadFromFile(const AFileName: string; AEncoding: System.SysUtils.TEncoding); override;
-    procedure LoadFromStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil); override;
+    procedure LoadFromFile(const AFileName: string; const AEncoding: System.SysUtils.TEncoding);
+    procedure LoadFromStream(AStream: TStream; const AEncoding: System.SysUtils.TEncoding = nil);
     procedure LoadFromStrings(var AStrings: TStringList);
-    procedure SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil); override;
+    procedure SaveToStream(AStream: TStream; const AEncoding: System.SysUtils.TEncoding = nil);
     procedure SetLineStates(const AIndexFrom: Integer; const AIndexTo: Integer; const ALineState: TTextEditorLineState);
     procedure Sort(const ABeginLine: Integer; const AEndLine: Integer); virtual;
     procedure Trim(const ATrimStyle: TTextEditorTrimStyle; const ABeginLine: Integer; const AEndLine: Integer);
     property BufferSize: Integer read FBufferSize write FBufferSize;
     property Columns: Boolean read FColumns write FColumns;
+    property CommaText: string read GetCommaText write SetCommaText;
     property Count: Integer read FCount;
     property Encoding: TEncoding read FEncoding write SetEncoding;
     property ExpandedStringLengths[const AIndex: Integer]: Integer read GetExpandedStringLength;
@@ -144,10 +153,11 @@ type
     property ShowProgress: Boolean read FShowProgress write FShowProgress;
     property SortOptions: TTextEditorSortOptions read FSortOptions write FSortOptions;
     property Streaming: Boolean read FStreaming write FStreaming;
-    property Strings[AIndex: Integer]: string read Get write Put; default; //FI:C110 Getter or setter name is different from property declaration
+    property Strings[const AIndex: Integer]: string read GetStrings write SetStrings; default;
     property TabWidth: Integer read FTabWidth write SetTabWidth;
-    property Text: string read GetTextStr write SetTextStr; //FI:C110 Getter or setter name is different from property declaration
+    property Text: string read GetText write SetText;
     property TextLines[const AIndex: Integer]: string read GetTextLines;
+    property TrailingLineBreak: Boolean read FTrailingLineBreak write FTrailingLineBreak;
     property TrimTrailingSpaces: Boolean read FTrimTrailingSpaces write FTrimTrailingSpaces;
     property UnknownCharHigh: Byte read FUnknownCharHigh;
     property UnknownCharsVisible: Boolean write FUnknownCharsVisible;
@@ -158,7 +168,7 @@ type
 implementation
 
 uses
-  System.Math, TextEditor.Encoding, TextEditor.Language;
+  System.Character, System.Math, TextEditor.Encoding, TextEditor.Language;
 
 { TTextEditorLines }
 
@@ -175,6 +185,7 @@ begin
 
   FCount := 0;
   FOwner := AOwner;
+  FUpdateCount := 0;
   FIndexOfLongestLine := -1;
   FLengthOfLongestLine := 0;
   FLongestLineNeedsUpdate := False;
@@ -182,7 +193,7 @@ begin
   FShowProgress := False;
   FTextLength := 0;
   TabWidth := 4;
-  TrailingLineBreak := False;
+  FTrailingLineBreak := False;
   FLineBreak := lbCRLF;
   FEncoding := TEncoding.Default;
   Add(EmptyStr);
@@ -314,7 +325,7 @@ begin
   if (AIndex < 0) or (AIndex > FCount - 1) then
     Exit(0);
 
-  if (AIndex = FCount - 1) and not TrailingLineBreak then
+  if (AIndex = FCount - 1) and not FTrailingLineBreak then
     Result := 0
   else
   begin
@@ -330,6 +341,19 @@ begin
     Result := 0
   else
     Result := FItems^[AIndex].TextLine.Length;
+end;
+
+function TTextEditorLines.Updating: Boolean;
+begin
+  Result := FUpdateCount > 0;
+end;
+
+procedure TTextEditorLines.BeginUpdate;
+begin
+  if FUpdateCount = 0 then
+    SetUpdateState(True);
+
+  Inc(FUpdateCount);
 end;
 
 procedure TTextEditorLines.Clear;
@@ -432,12 +456,101 @@ begin
   end;
 end;
 
+function NextChar(APChar: PChar): PChar;
+begin
+  Result := APChar;
+
+  if (Result <> nil) and (Result^ <> #0) then
+  begin
+    Inc(Result);
+
+    if Result^.IsLowSurrogate then
+      Inc(Result);
+
+    while Result^.GetUnicodeCategory = TUnicodeCategory.ucNonSpacingMark do
+      Inc(Result);
+  end;
+end;
+
+function TTextEditorLines.GetCommaText: string;
+var
+  LText: string;
+  LPChar: PChar;
+  LIndex, LCount: Integer;
+  LDelimiters: set of Char;
+  LStringBuilder: TStringBuilder;
+  LUniDelimiters: Boolean;
+  LDelimiter, LQuoteChar: Char;
+begin
+  LCount := GetCount;
+
+  LDelimiter := ',';
+  LQuoteChar := '"';
+
+  if (LCount = 1) and (GetTextLines(0) = '') then
+  begin
+    if LQuoteChar = #0 then
+      Result := ''
+    else
+      Result := LQuoteChar + LQuoteChar
+  end
+  else
+  begin
+    Result := '';
+
+    LDelimiters := [];
+    LUniDelimiters := False;
+
+    if LQuoteChar <> #0 then
+    begin
+      LDelimiters := [Char(#0)];
+      LUniDelimiters := (LQuoteChar >= #256) or (LDelimiter >= #256);
+
+      if not LUniDelimiters then
+        LDelimiters := LDelimiters + [Char(LQuoteChar), Char(LDelimiter)];
+
+      LDelimiters := LDelimiters + [Char(#1)..Char(' ')];
+    end;
+
+    LStringBuilder := TStringBuilder.Create;
+    try
+      for LIndex := 0 to LCount - 1 do
+      begin
+        LText := GetTextLines(LIndex);
+
+        if LQuoteChar <> #0 then
+        begin
+          LPChar := PChar(LText);
+
+          while not ((LPChar^ in LDelimiters) or LUniDelimiters and ((LPChar^ = LQuoteChar) or (LPChar^ = LDelimiter))) do
+            LPChar := NextChar(LPChar);
+
+          if (LPChar^ <> #0) then
+            LText := AnsiQuotedStr(LText, LQuoteChar);
+        end;
+
+        LStringBuilder.Append(LText);
+        LStringBuilder.Append(LDelimiter);
+      end;
+
+      if LStringBuilder.Length > 0 then
+      begin
+        LStringBuilder.Length := LStringBuilder.Length - 1;
+
+        Result := LStringBuilder.ToString(True);
+      end;
+    finally
+      LStringBuilder.Free;
+    end;
+  end;
+end;
+
 function TTextEditorLines.IsValidIndex(const AIndex: Integer): Boolean;
 begin
   Result := (AIndex >= 0) and (AIndex < FCount);
 end;
 
-function TTextEditorLines.Get(AIndex: Integer): string;
+function TTextEditorLines.GetStrings(const AIndex: Integer): string;
 begin
   if IsValidIndex(AIndex) then
     Result := FItems^[AIndex].TextLine
@@ -470,7 +583,7 @@ begin
   if IsValidIndex(AIndex) then
   begin
     if sfHasNoTabs in FItems^[AIndex].Flags then
-      Result := Get(AIndex)
+      Result := GetStrings(AIndex)
     else
       Result := ExpandString(AIndex);
   end
@@ -587,10 +700,11 @@ begin
 
       while LPValue <= LPLastChar do
       begin
-        if Ord(LPValue^) > 255 then
+        if Ord(LPValue^) > TCharacters.AnsiCharHigh then
         begin
           ALine := LIndex;
           AChar := LPValue - LPStart + 1;
+
           Exit;
         end;
 
@@ -695,7 +809,7 @@ begin
       end;
     end;
 
-    if TrailingLineBreak or (LIndex < Count - 1) then
+    if FTrailingLineBreak or (LIndex < Count - 1) then
     begin
       System.Move(Pointer(LLineBreak)^, LPValue^, LLineBreakLength * SizeOf(Char));
       Inc(LPValue, LLineBreakLength);
@@ -703,7 +817,7 @@ begin
   end;
 end;
 
-function TTextEditorLines.GetTextStr: string;
+function TTextEditorLines.GetText: string;
 var
   LIndex, LIndex2, LLength, LSize, LLineBreakLength: Integer;
   LPValue: PChar;
@@ -746,7 +860,7 @@ begin
       end;
     end;
 
-    if TrailingLineBreak or (LIndex < Count - 1) then
+    if FTrailingLineBreak or (LIndex < Count - 1) then
     begin
       System.Move(Pointer(LLineBreak)^, LPValue^, LLineBreakLength * SizeOf(Char));
       Inc(LPValue, LLineBreakLength);
@@ -909,10 +1023,10 @@ begin
   if FUnknownCharsVisible then
   begin
     if Encoding = System.SysUtils.TEncoding.ANSI then
-      FUnknownCharHigh := 255
+      FUnknownCharHigh := TCharacters.ANSICharHigh
     else
     if Encoding = System.SysUtils.TEncoding.ASCII then
-      FUnknownCharHigh := 127
+      FUnknownCharHigh := TCharacters.ASCIICharHigh;
   end;
 end;
 
@@ -1066,8 +1180,6 @@ begin
         OriginalLineNumber := LIndex;
       end;
     end;
-
-    AStrings.Clear; // TODO: ???
   finally
     EndUpdate;
   end;
@@ -1084,7 +1196,7 @@ begin
   FStreaming := False;
 end;
 
-procedure TTextEditorLines.LoadFromFile(const AFileName: string; AEncoding: System.SysUtils.TEncoding);
+procedure TTextEditorLines.LoadFromFile(const AFileName: string; const AEncoding: System.SysUtils.TEncoding);
 var
   LStream: TStream;
 begin
@@ -1099,7 +1211,7 @@ begin
   end;
 end;
 
-procedure TTextEditorLines.LoadFromStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding = nil);
+procedure TTextEditorLines.LoadFromStream(AStream: TStream; const AEncoding: System.SysUtils.TEncoding = nil);
 var
   LBuffer: TBytes;
   LBufferSize: Integer;
@@ -1295,7 +1407,7 @@ begin
   FStreaming := False;
 end;
 
-procedure TTextEditorLines.SaveToStream(AStream: TStream; AEncoding: System.SysUtils.TEncoding);
+procedure TTextEditorLines.SaveToStream(AStream: TStream; const AEncoding: System.SysUtils.TEncoding);
 var
   LBuffer, LPreamble: TBytes;
   LStart, LPreviousStart, LEnd, LLineInc: Integer;
@@ -1303,8 +1415,6 @@ var
 begin
   if Assigned(AEncoding) then
     Encoding := AEncoding;
-
-  WriteBOM := FEncoding <> TEncoding.UTF8WithoutBOM;
 
   FStreaming := True;
   FSavingToStream := True;
@@ -1346,7 +1456,7 @@ begin
     else
     if FTextLength > 0 then
     begin
-      LText := GetTextStr;
+      LText := GetText;
       LBuffer := FEncoding.GetBytes(LText);
       SetLength(LText, 0);
       AStream.WriteBuffer(LBuffer[0], Length(LBuffer));
@@ -1357,7 +1467,7 @@ begin
   end;
 end;
 
-procedure TTextEditorLines.Put(AIndex: Integer; const AValue: string);
+procedure TTextEditorLines.SetStrings(const AIndex: Integer; const AValue: string);
 var
   LHasTabs: Boolean;
 begin
@@ -1403,6 +1513,14 @@ begin
   TextLine := TextEditor.Utils.TrimRight(TextLine);
 end;
 
+procedure TTextEditorLines.EndUpdate;
+begin
+  Dec(FUpdateCount);
+
+  if FUpdateCount = 0 then
+    SetUpdateState(False);
+end;
+
 procedure TTextEditorLines.SetRanges(const AIndex: Integer; const ARange: TTextEditorLinesRange);
 begin
 {$IFDEF TEXT_EDITOR_RANGE_CHECKS}
@@ -1426,6 +1544,59 @@ begin
 
   if (FCapacity > 0) and not Assigned(FItems) then
     OutOfMemoryError;
+end;
+
+procedure TTextEditorLines.SetCommaText(const AValue: string);
+var
+  LPValue, LPStart: PChar;
+  LText: string;
+  LDelimiter, LQuoteChar: Char;
+begin
+  BeginUpdate;
+  try
+    Clear;
+    LPValue := PChar(AValue);
+
+    while (LPValue^ in [#1..' ']) do
+      LPValue := NextChar(LPValue);
+
+    LDelimiter := ',';
+    LQuoteChar := '"';
+
+    while LPValue^ <> #0 do
+    begin
+      if (LPValue^ = LQuoteChar) and (LQuoteChar <> #0) then
+        LText := AnsiExtractQuotedStr(LPValue, LQuoteChar)
+      else
+      begin
+        LPStart := LPValue;
+
+        while (LPValue^ > ' ') and (LPValue^ <> LDelimiter) do
+          LPValue := NextChar(LPValue);
+
+        SetString(LText, LPStart, LPValue - LPStart);
+      end;
+
+      Add(LText);
+
+      while (LPValue^ in [#1..' ']) do
+        LPValue := NextChar(LPValue);
+
+      if LPValue^ = LDelimiter then
+      begin
+        LPStart := LPValue;
+
+        if NextChar(LPStart)^ = #0 then
+          Add('');
+
+        repeat
+          LPValue := NextChar(LPValue);
+        until not (LPValue^ in [#1..' ']);
+      end;
+    end;
+  finally
+    EndUpdate;
+  end;
 end;
 
 procedure TTextEditorLines.SetEncoding(const AValue: System.SysUtils.TEncoding);
@@ -1454,7 +1625,7 @@ begin
   end;
 end;
 
-procedure TTextEditorLines.SetTextStr(const AValue: string);
+procedure TTextEditorLines.SetText(const AValue: string);
 var
   LLength: Integer;
   LPValue, LPStartValue, LPLastChar: PChar;

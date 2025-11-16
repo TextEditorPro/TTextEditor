@@ -16,6 +16,7 @@ type
     FAttributes: TStringList;
     FBeforePrepare: TTextEditorHighlighterPrepare;
     FBeginningOfLine: Boolean;
+    FBreakTokenOnCharsetChange: Boolean;
     FBythonPreprocessor: Boolean;
     FChanged: Boolean;
     FCodeFoldingRangeCount: Integer;
@@ -95,6 +96,7 @@ type
     property Attribute[const AIndex: Integer]: TTextEditorHighlighterAttribute read GetAttribute;
     property Attributes: TStringList read FAttributes;
     property BeforePrepare: TTextEditorHighlighterPrepare read FBeforePrepare write FBeforePrepare;
+    property BreakTokenOnCharsetChange: Boolean read FBreakTokenOnCharsetChange write FBreakTokenOnCharsetChange default True;
     property BythonPreprocessor: Boolean read FBythonPreprocessor write FBythonPreprocessor default False;
     property Changed: Boolean read FChanged write FChanged default False;
     property CodeFoldingRangeCount: Integer read FCodeFoldingRangeCount write SetCodeFoldingRangeCount;
@@ -158,6 +160,7 @@ begin
 
   FAllDelimiters := TCharacterSets.DefaultDelimiters + TCharacterSets.AbsoluteDelimiters;
   FBeginningOfLine := True;
+  FBreakTokenOnCharsetChange := True;
   FChanged := False;
   FCodeFoldingRangeCount := 0;
   FEditor := AOwner;
@@ -330,6 +333,7 @@ begin
   for LIndex := FTemporaryTokens.Count - 1 downto 0 do
   begin
     LToken := TTextEditorToken(FTemporaryTokens[LIndex]);
+
     FreeAndNil(LToken);
     FTemporaryTokens.Delete(LIndex);
   end;
@@ -397,7 +401,7 @@ begin
         FRange := FRange.Parent;
     end;
 
-    if Ord(LChar) < TCharacters.AnsiCharCount then
+    if Ord(LChar) <= TCharacters.AnsiCharHigh then
       LParser := FRange.SymbolList[AnsiChar(FRange.CaseFunct(LChar))]
     else
     case LChar of
@@ -448,8 +452,8 @@ begin
         begin
           LChar := FLine[FRunPosition];
 
-          if (LChar in LDelimiters) or (LChar <= TControlCharacters.UnitSeparator) or
-             ((Ord(FLine[FRunPosition - 1]) < TCharacters.AnsiCharCount) <> (Ord(LChar) < TCharacters.AnsiCharCount)) then
+          if (LChar in LDelimiters) or (LChar <= TControlCharacters.UnitSeparator) or FBreakTokenOnCharsetChange and
+             ((Ord(FLine[FRunPosition - 1]) <= TCharacters.AnsiCharHigh) <> (Ord(LChar) <= TCharacters.AnsiCharHigh)) then
             Break;
 
           Inc(FRunPosition);

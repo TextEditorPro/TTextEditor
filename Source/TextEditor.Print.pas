@@ -5,8 +5,8 @@ interface
 
 uses
   Winapi.Windows, System.Classes, System.SysUtils, Vcl.Graphics, Vcl.Printers, TextEditor, TextEditor.Highlighter,
-  TextEditor.PaintHelper, TextEditor.Print.HeaderFooter, TextEditor.Print.Margins, TextEditor.Print.PrinterInfo,
-  TextEditor.Selection, TextEditor.Types, TextEditor.Utils;
+  TextEditor.Lines, TextEditor.PaintHelper, TextEditor.Print.HeaderFooter, TextEditor.Print.Margins,
+  TextEditor.Print.PrinterInfo, TextEditor.Selection, TextEditor.Types, TextEditor.Utils;
 
 type
   TTextEditorPageLine = class
@@ -80,7 +80,7 @@ type
     procedure SetFooter(const AValue: TTextEditorPrintFooter);
     procedure SetHeader(const AValue: TTextEditorPrintHeader);
     procedure SetHighlighter(const AValue: TTextEditorHighlighter);
-    procedure SetLines(const AValue: TStrings);
+    procedure SetLines(const AValue: TTextEditorLines);
     procedure SetMargins(const AValue: TTextEditorPrintMargins);
     procedure SetMaxLeftChar(const aValue: Integer);
     procedure SetPixelsPerInch;
@@ -193,7 +193,7 @@ begin
   inherited;
 end;
 
-procedure TTextEditorPrint.SetLines(const AValue: TStrings);
+procedure TTextEditorPrint.SetLines(const AValue: TTextEditorLines);
 var
   LIndex, LPosition: Integer;
   LLine: string;

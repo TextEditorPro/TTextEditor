@@ -28,6 +28,9 @@
             "Attributes": {
               "Element": "String"
             },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
             "TokenRange": {
               "Open": "\"",
               "Close": "\""
@@ -37,6 +40,9 @@
             "Type": "String",
             "Attributes": {
               "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
             },
             "TokenRange": {
               "Open": "'",

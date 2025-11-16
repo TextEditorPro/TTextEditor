@@ -222,7 +222,7 @@ begin
   end;
 end;
 
-function CharInString(const AChar: Char; const AString: string): Boolean; inline;
+function CharInString(const AChar: Char; const AString: string): Boolean;
 var
   LIndex: Integer;
   LLength: Integer;
@@ -387,7 +387,7 @@ begin
   Result := LSize.cy;
 end;
 
-function GetBOFPosition: TTextEditorTextPosition; inline;
+function GetBOFPosition: TTextEditorTextPosition;
 begin
   Result.Char := 1;
   Result.Line := 0;

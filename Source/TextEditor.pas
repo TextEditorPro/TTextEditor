@@ -5,8 +5,8 @@ unit TextEditor;
 
 interface
 
-{$IF CompilerVersion < 23}
-  {$MESSAGE FATAL 'Only RAD Studio XE2 and later supported.'}
+{$IF CompilerVersion < 24}
+  {$MESSAGE FATAL 'Only RAD Studio XE3 and later supported.'}
 {$IFEND}
 
 uses
@@ -3283,9 +3283,9 @@ function TCustomTextEditor.GetTokenWidth(const AToken: string; const ALength: In
 var
   LChar: Char;
   LRect: TRect;
-  LPToken: PChar;
   LToken: string;
   LIsFixedSizeFont: Boolean;
+  LCharWidth: Integer;
 
   function GetTokenWidth(const AToken: string; const ATokenLength: Integer = -1): Integer;
   var
@@ -3315,11 +3315,30 @@ var
     LLength := LToken.Length;
 
     if LIsFixedSizeFont or AMinimap then
-      Result := FPaintHelper.FontStock.CharWidth * LLength
+      Result := LCharWidth * LLength
     else
       Result := GetTokenWidth(LToken, LLength);
 
     Result := (Result + 3) * ALength;
+  end;
+
+  function IsASCII(const AValue: string): Boolean;
+  var
+    LPChar: PChar;
+  begin
+    Result := False;
+
+    LPChar := PChar(AValue);
+
+    while LPChar^ <> TControlCharacters.Null do
+    begin
+      if Ord(LPChar^) > TCharacters.AnsiCharHigh then
+        Exit;
+
+      Inc(LPChar);
+    end;
+
+    Result := True;
   end;
 
 begin
@@ -3329,73 +3348,55 @@ begin
     Exit;
 
   LChar := AToken[1];
-
-  LIsFixedSizeFont := FPaintHelper.FixedSizeFont and (Ord(LChar) <= 255);
+  LCharWidth := FPaintHelper.FontStock.CharWidth;
+  LIsFixedSizeFont := FPaintHelper.FixedSizeFont and (Ord(LChar) <= TCharacters.AnsiCharHigh);
 
   if ARTLReading then
   begin
-    LPToken := PChar(AToken);
-
-    while LPToken^ <> TControlCharacters.Null do
-    begin
-      if Ord(LPToken^) > TCharacters.AnsiCharCount then
-        Exit(GetTokenWidth(AToken));
-
-      Inc(LPToken);
-    end;
-
-    Result := FPaintHelper.FontStock.CharWidth * ALength;
-  end
-  else
-  if LChar <= TCharacters.Space then
-  case LChar of
-    TCharacters.Space:
-      Result := FPaintHelper.FontStock.CharWidth * ALength;
-    TControlCharacters.Substitute:
-      if eoShowNullCharacters in Options then
-        Result := GetControlCharacterWidth
-      else
-        Result := 0;
-    TControlCharacters.Tab:
-      begin
-        if FLines.Columns then
-          Result := FTabs.Width - ACharsBefore mod FTabs.Width
-        else
-          Result := FTabs.Width;
-
-        Result := Result * FPaintHelper.FontStock.CharWidth + (ALength - 1) * FPaintHelper.FontStock.CharWidth * FTabs.Width;
-      end;
-    TCharacters.ZeroWidthSpace:
-      if eoShowZeroWidthSpaces in Options then
-        Result := GetControlCharacterWidth
-      else
-        Result := 0;
-  else
-    if (eoShowControlCharacters in Options) and (LChar in TControlCharacters.AsSet) then
-      Result := GetControlCharacterWidth
+    if IsASCII(AToken) then
+      Exit(LCharWidth * ALength)
     else
-      Result := 0;
-  end
-  else
-  if LIsFixedSizeFont or AMinimap then
-    Result := FPaintHelper.FontStock.CharWidth * ALength
-  else
-  if not FPaintHelper.FixedSizeFont then
-    Result := GetTokenWidth(AToken)
-  else
+      Exit(GetTokenWidth(AToken));
+  end;
+
+  if LChar <= TCharacters.Space then
   begin
-    LPToken := PChar(AToken);
+    case LChar of
+      TCharacters.Space:
+        Result := LCharWidth * ALength;
+      TControlCharacters.Substitute:
+        if eoShowNullCharacters in Options then
+          Result := GetControlCharacterWidth;
+      TControlCharacters.Tab:
+        begin
+          if FLines.Columns then
+            Result := FTabs.Width - ACharsBefore mod FTabs.Width
+          else
+            Result := FTabs.Width;
 
-    while LPToken^ <> TControlCharacters.Null do
-    begin
-      if Ord(LPToken^) > TCharacters.AnsiCharCount then
-        Exit(GetTokenWidth(AToken));
-
-      Inc(LPToken);
+          Result := Result * LCharWidth + (ALength - 1) * LCharWidth * FTabs.Width;
+        end;
+      TCharacters.ZeroWidthSpace:
+        if eoShowZeroWidthSpaces in Options then
+          Result := GetControlCharacterWidth;
+    else
+      if (eoShowControlCharacters in Options) and (LChar in TControlCharacters.AsSet) then
+        Result := GetControlCharacterWidth;
     end;
 
-    Result := FPaintHelper.FontStock.CharWidth * ALength;
+    Exit;
   end;
+
+  if LIsFixedSizeFont or AMinimap then
+    Exit(LCharWidth * ALength);
+
+  if not FPaintHelper.FixedSizeFont then
+    Exit(GetTokenWidth(AToken));
+
+  if IsASCII(AToken) then
+    Result := LCharWidth * ALength
+  else
+    Result := GetTokenWidth(AToken);
 end;
 
 procedure TCustomTextEditor.CreateLineNumbersCache(const AReset: Boolean = False);
@@ -3403,7 +3404,7 @@ var
   LIndex, LCurrentLine, LCacheLength: Integer;
   LCodeFoldingRange: TTextEditorCodeFoldingRange;
   LCollapsedCodeFolding: array of Boolean;
-  LLineNumbersCacheLength: Integer;
+  LLineNumbersCacheLength: Int64;
   LCompareMode: Boolean;
   LCompareOffset: Integer;
 
@@ -3411,7 +3412,7 @@ var
   begin
     if FWordWrap.Active and (LCacheLength >= LLineNumbersCacheLength) then
     begin
-      Inc(LLineNumbersCacheLength, 256);
+      Inc(LLineNumbersCacheLength, Max(LLineNumbersCacheLength * 2, LLineNumbersCacheLength + 256));
 
       SetLength(FLineNumbers.Cache, LLineNumbersCacheLength);
       SetLength(FWordWrapLine.Length, LLineNumbersCacheLength);
@@ -3431,7 +3432,7 @@ var
 
   procedure AddWrappedLineNumberIntoCache;
   var
-    LTokenText, LNextTokenText, LFirstPartOfToken, LSecondPartOfToken: string;
+    LToken, LTokenText, LNextTokenText, LFirstPartOfToken, LSecondPartOfToken: string;
     LHighlighterAttribute: TTextEditorHighlighterAttribute;
     LLength, LViewLength, LTokenWidth, LWidth, LMaxWidth: Integer;
     LCharsBefore: Integer;
@@ -3494,11 +3495,12 @@ var
               Break;
           end;
 
-          LTokenWidth := GetTokenWidth(LFirstPartOfToken + LSecondPartOfToken, Length(LFirstPartOfToken +
-            LSecondPartOfToken), LCharsBefore);
+          LToken := LFirstPartOfToken + LSecondPartOfToken;
+
+          LTokenWidth := GetTokenWidth(LToken, LToken.Length, LCharsBefore);
 
           if LWidth + LTokenWidth < LMaxWidth then
-            LFirstPartOfToken := LFirstPartOfToken + LSecondPartOfToken;
+            LFirstPartOfToken := LToken;
         end;
 
         if (LLength = 0) and LFirstPartOfToken.IsEmpty then
@@ -3517,7 +3519,7 @@ var
         LLength := 0;
         LViewLength := 0;
         LWidth := 0;
-        LNextTokenText := Copy(LTokenText, LFirstPartOfToken.Length + 1, LTokenText.Length);
+        LNextTokenText := Copy(LTokenText, LFirstPartOfToken.Length + 1);
 
         if LNextTokenText.IsEmpty then
           FHighlighter.Next;
@@ -3530,18 +3532,21 @@ var
         FWordWrapLine.Length[LCacheLength] := LLength;
         FWordWrapLine.ViewLength[LCacheLength] := LViewLength;
         FWordWrapLine.Width[LCacheLength] := LWidth;
+
         AddLineNumberIntoCache;
+
         LLength := 0;
         LViewLength := 0;
         LWidth := 0;
+
         Continue;
       end;
 
       Inc(LCharsBefore, GetTokenCharCount(LTokenText, LCharsBefore));
       Inc(LLength, LTokenText.Length);
       Inc(LViewLength, GetTokenCharCount(LTokenText, LViewLength));
-
       Inc(LWidth, LTokenWidth);
+
       FHighlighter.Next;
     end;
 
@@ -3550,6 +3555,7 @@ var
       FWordWrapLine.Length[LCacheLength] := LLength;
       FWordWrapLine.ViewLength[LCacheLength] := LViewLength;
       FWordWrapLine.Width[LCacheLength] := LWidth;
+
       AddLineNumberIntoCache;
     end;
   end;
@@ -3561,15 +3567,19 @@ begin
   if FLineNumbers.ResetCache or AReset then
   begin
     FLineNumbers.ResetCache := False;
-    SetLength(LCollapsedCodeFolding, FLines.Count + 1);
 
-    for LIndex := 0 to FCodeFoldings.AllRanges.AllCount - 1 do
+    if FCodeFolding.Visible then
     begin
-      LCodeFoldingRange := FCodeFoldings.AllRanges[LIndex];
+      SetLength(LCollapsedCodeFolding, FLines.Count + 1);
 
-      if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
-      for LCurrentLine := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine do
-        LCollapsedCodeFolding[LCurrentLine] := True;
+      for LIndex := 0 to FCodeFoldings.AllRanges.AllCount - 1 do
+      begin
+        LCodeFoldingRange := FCodeFoldings.AllRanges[LIndex];
+
+        if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
+        for LCurrentLine := LCodeFoldingRange.FromLine + 1 to LCodeFoldingRange.ToLine do
+          LCollapsedCodeFolding[LCurrentLine] := True;
+      end;
     end;
 
     LCompareMode := lnoCompareMode in FLeftMargin.LineNumbers.Options;
@@ -3604,6 +3614,7 @@ begin
 
     for LIndex := 1 to FLines.Count do
     begin
+      if FCodeFolding.Visible then
       while (LCurrentLine <= FLines.Count) and LCollapsedCodeFolding[LCurrentLine] do { Skip collapsed lines }
         Inc(LCurrentLine);
 
@@ -3611,7 +3622,11 @@ begin
         Break;
 
       if FWordWrap.Active then
-        AddWrappedLineNumberIntoCache
+      begin
+        FHighlighter.BreakTokenOnCharsetChange := False;
+        AddWrappedLineNumberIntoCache;
+        FHighlighter.BreakTokenOnCharsetChange := True;
+      end
       else
         AddLineNumberIntoCache;
 
@@ -3638,7 +3653,9 @@ begin
       end;
     end;
 
-    SetLength(LCollapsedCodeFolding, 0);
+    if FCodeFolding.Visible then
+      SetLength(LCollapsedCodeFolding, 0);
+
     FLineNumbers.Count := Length(FLineNumbers.Cache) - 1;
   end;
 end;
@@ -3999,7 +4016,7 @@ var
   LFoldRegionItem: TTextEditorCodeFoldingRegionItem;
   LCaretPosition: TTextEditorTextPosition;
   LLineText: string;
-  LPLine: PChar;
+  LPLine, LPLineStart: PChar;
   LLength: Integer;
 
   function CheckToken(const AKeyword: string; const ABeginWithBreakChar: Boolean): Boolean;
@@ -4023,7 +4040,7 @@ var
 
     LPWordAtCursor := LPLine;
 
-    if ABeginWithBreakChar then
+    if ABeginWithBreakChar and (LPWordAtCursor > LPLineStart) then
       Dec(LPWordAtCursor);
 
     if AreKeywordsSame(PChar(AKeyword)) then
@@ -4048,6 +4065,8 @@ begin
       Exit;
 
     LPLine := PChar(LLineText);
+    LPLineStart := LPLine;
+
     Inc(LPLine, LCaretPosition.Char - 2);
 
     if FHighlighter.FoldTags then
@@ -5235,7 +5254,7 @@ begin
     if Assigned(FEvents.OnAfterDeleteLine) then
       FEvents.OnAfterDeleteLine(Self);
   finally
-   EndUpdate;
+    EndUpdate;
   end;
 end;
 
@@ -5813,6 +5832,7 @@ var
   LToken: string;
   LTokenCount: Integer;
   LCharAtCursor: Char;
+  LSelectionAvailable: Boolean;
 
   procedure InitializeCurrentLine;
   begin
@@ -5835,9 +5855,14 @@ begin
 
   LCharAtCursor := GetCharAtTextPosition(LTextPosition);
 
+  LSelectionAvailable := GetSelectionAvailable or FMultiEdit.SelectionAvailable;
+
+  if LSelectionAvailable then
+    BeginUpdate;
+
   FUndoList.BeginBlock(3);
   try
-    if GetSelectionAvailable or FMultiEdit.SelectionAvailable then
+    if LSelectionAvailable then
     begin
       if FSyncEdit.Visible then
         FSyncEdit.MoveEndPositionChar(-FPosition.SelectionEnd.Char + FPosition.SelectionStart.Char + 1);
@@ -5987,6 +6012,7 @@ begin
       end;
 
       if FWordWrap.Active then
+      begin
         if FViewPosition.Row < Length(FWordWrapLine.ViewLength) then
         begin
           LWidth := GetTokenWidth(LSpaceBuffer, LSpaceBuffer.Length, 0) + GetTokenWidth(AChar, 1, 0);
@@ -6002,18 +6028,24 @@ begin
             FWordWrapLine.Width[FViewPosition.Row] := FWordWrapLine.Width[FViewPosition.Row] + LWidth;
           end;
         end;
+      end;
 
       TextPosition := LTextPosition;
     end;
   finally
     FUndoList.EndBlock;
+
+    if LSelectionAvailable then
+      EndUpdate
+    else
+    begin
+      if FSearch.Enabled and not FSearch.SearchText.IsEmpty and (Pos(FSearch.SearchText, LLineText) > 0) then
+        SearchAll;
+
+      if FSyncEdit.Visible then
+        DoSyncEdit;
+    end;
   end;
-
-  if FSearch.Enabled and not FSearch.SearchText.IsEmpty and (Pos(FSearch.SearchText, LLineText) > 0) then
-    SearchAll;
-
-  if FSyncEdit.Visible then
-    DoSyncEdit;
 end;
 
 procedure TCustomTextEditor.DoCutToClipboard;
@@ -6024,6 +6056,7 @@ begin
   begin
     AutoCursor;
 
+    BeginUpdate;
     FUndoList.BeginBlock;
     try
       if FMultiEdit.SelectionAvailable then
@@ -6035,6 +6068,7 @@ begin
       SetSelectedTextEmpty;
     finally
       FUndoList.EndBlock;
+      EndUpdate;
     end;
   end;
 end;
@@ -6090,8 +6124,8 @@ var
     FReplace.Options := [roReplaceAll, roWholeWordsOnly];
     FReplace.Engine := seNormal;
 
-    IncPaintLock;
     FUndoList.BeginBlock(7);
+
     LStringList := TStringList.Create;
     try
       FHighlighter.GetKeywords(LStringList);
@@ -6111,19 +6145,14 @@ var
 
         SearchAll(LOldPattern);
 
-        BeginUpdate;
-        try
-          for LItemIndex := FSearch.Items.Count - 1 downto 0 do
-          begin
-            LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LItemIndex]);
+        for LItemIndex := FSearch.Items.Count - 1 downto 0 do
+        begin
+          LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LItemIndex]);
 
-            SelectionStartPosition := LSearchItem.BeginTextPosition;
-            SelectionEndPosition := LSearchItem.EndTextPosition;
+          SelectionStartPosition := LSearchItem.BeginTextPosition;
+          SelectionEndPosition := LSearchItem.EndTextPosition;
 
-            ReplaceSelectedText(LNewPattern, LOldPattern);
-          end;
-        finally
-          EndUpdate;
+          ReplaceSelectedText(LNewPattern, LOldPattern);
         end;
       end;
     finally
@@ -6131,7 +6160,6 @@ var
 
       FSearch.ClearItems;
       FUndoList.EndBlock;
-      DecPaintLock;
     end;
   end;
 
@@ -7162,6 +7190,7 @@ begin
     FLines[LTextPosition.Line] := LTextLine;
 
     if FWordWrap.Active then
+    begin
       if FViewPosition.Row < Length(FWordWrapLine.ViewLength) then
       begin
         LWidth := GetTokenWidth(LTabText, 1, 0);
@@ -7182,6 +7211,7 @@ begin
           FWordWrapLine.Width[FViewPosition.Row] := FWordWrapLine.Width[FViewPosition.Row] + LWidth;
         end;
       end;
+    end;
 
     LChangeScrollPastEndOfLine := soPastEndOfLine in FScroll.Options;
 
@@ -9867,29 +9897,30 @@ end;
 
 procedure TCustomTextEditor.SetSelectedText(const AValue: string);
 var
-  LTextPosition, LBlockStartPosition, LBlockEndPosition: TTextEditorTextPosition;
+  LTextPosition: TTextEditorTextPosition;
+  LUpdating: Boolean;
 begin
-  ClearCodeFolding;
-  try
-    LTextPosition := TextPosition;
+  LUpdating := FLines.Updating or FUndoList.InsideUndoBlock;
 
-    LBlockStartPosition := SelectionStartPosition;
-    LBlockEndPosition := SelectionEndPosition;
+  if not LUpdating then
+    ClearCodeFolding;
 
-    if GetSelectionAvailable then
-      AddUndoDelete(LTextPosition, LBlockStartPosition, LBlockEndPosition, GetSelectedText, FSelection.ActiveMode)
-    else
-      FSelection.ActiveMode := FSelection.Mode;
+  LTextPosition := TextPosition;
 
-    DoSelectedText(AValue);
+  if GetSelectionAvailable then
+    AddUndoDelete(LTextPosition, SelectionStartPosition, SelectionEndPosition, GetSelectedText, FSelection.ActiveMode)
+  else
+    FSelection.ActiveMode := FSelection.Mode;
 
-    if not AValue.IsEmpty and (FSelection.ActiveMode <> smColumn) then
-      AddUndoInsert(TextPosition, SelectionStartPosition, SelectionEndPosition, '', FSelection.ActiveMode);
+  DoSelectedText(AValue);
 
-    if not FLines.Updating then
-      SearchAll;
-  finally
+  if not AValue.IsEmpty and (FSelection.ActiveMode <> smColumn) then
+    AddUndoInsert(TextPosition, SelectionStartPosition, SelectionEndPosition, '', FSelection.ActiveMode);
+
+  if not LUpdating then
+  begin
     InitCodeFolding;
+    SearchAll;
   end;
 end;
 
@@ -16011,7 +16042,7 @@ var
           LLastChar := AToken[ATokenLength];
           LAnsiChar := TControlCharacters.Null;
 
-          if Word(LLastChar) < TCharacters.AnsiCharCount then
+          if Word(LLastChar) <= TCharacters.AnsiCharHigh then
             LAnsiChar := AnsiChar(LLastChar);
 
           if FItalic.OffsetCache[LAnsiChar] <> 0 then
@@ -16528,8 +16559,8 @@ var
         LCanAppend := LCanAppend and (LTokenHelper.FontStyle = AFontStyle)
       else
       begin
-        LAppendAnsiChars := (LTokenHelper.Length > 0) and (Ord(LTokenHelper.Text[1]) < TCharacters.AnsiCharCount) and
-          (Ord(LPToken^) < TCharacters.AnsiCharCount);
+        LAppendAnsiChars := (LTokenHelper.Length > 0) and (Ord(LTokenHelper.Text[1]) <= TCharacters.AnsiCharHigh) and
+          (Ord(LPToken^) <= TCharacters.AnsiCharHigh);
         LAppendTabs := not FLines.Columns or FLines.Columns and (LEmptySpace <> esTab);
         LAppendEmptySpace := (LEmptySpace = LTokenHelper.EmptySpace) and (LEmptySpace <> esControlCharacter);
         LCanAppend := LCanAppend and
@@ -18367,6 +18398,9 @@ var
         FLines[LTextPosition.Line] := LLine;
       end;
 
+      if FWordWrap.Active then
+        FWordWrapLine.ViewLength[LTextPosition.Line + 1] := LLine.Length;
+
       { Insert left lines of Value }
       LTextLineStart := LTextPosition.Line;
       LTextLine := LTextLineStart + 1;
@@ -18479,6 +18513,9 @@ var
           end;
 
           FLines[LCurrentLine] := LTempString;
+
+          if FWordWrap.Active then
+            FWordWrapLine.ViewLength[LCurrentLine + 1] := LTempString.Length;
 
           if AAddToUndoList then
             AddUndoInsert(LTextPosition, GetPosition(LTextPosition.Char, LCurrentLine),
@@ -19443,16 +19480,17 @@ begin
             begin
               LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LItemIndex]);
 
-              if not (roEntireScope in FReplace.Options) or LReplaceTextParams.Prompt then
-                if LReplaceTextParams.Backwards and
-                  ( (LSearchItem.BeginTextPosition.Line > LOriginalTextPosition.Line) or
-                    (LSearchItem.BeginTextPosition.Line = LOriginalTextPosition.Line) and
-                    (LSearchItem.BeginTextPosition.Char > LOriginalTextPosition.Char) )
-                  or not LReplaceTextParams.Backwards and
-                  ( (LSearchItem.BeginTextPosition.Line < LOriginalTextPosition.Line) or
-                    (LSearchItem.BeginTextPosition.Line = LOriginalTextPosition.Line) and
-                    (LSearchItem.BeginTextPosition.Char < LOriginalTextPosition.Char) ) then
-                  Continue;
+              if not (roReplaceAll in FReplace.Options) then
+                if not (roEntireScope in FReplace.Options) or LReplaceTextParams.Prompt then
+                  if LReplaceTextParams.Backwards and
+                    ( (LSearchItem.BeginTextPosition.Line > LOriginalTextPosition.Line) or
+                      (LSearchItem.BeginTextPosition.Line = LOriginalTextPosition.Line) and
+                      (LSearchItem.BeginTextPosition.Char > LOriginalTextPosition.Char) )
+                    or not LReplaceTextParams.Backwards and
+                    ( (LSearchItem.BeginTextPosition.Line < LOriginalTextPosition.Line) or
+                      (LSearchItem.BeginTextPosition.Line = LOriginalTextPosition.Line) and
+                      (LSearchItem.BeginTextPosition.Char < LOriginalTextPosition.Char) ) then
+                    Continue;
 
               SelectionStartPosition := LSearchItem.BeginTextPosition;
               SelectionEndPosition := LSearchItem.EndTextPosition;
@@ -20629,6 +20667,7 @@ begin
   for LIndex := LFromLine to LToLine do
   begin
     LCodeFoldingRange := FCodeFoldings.RangeFromLine[LIndex];
+
     if Assigned(LCodeFoldingRange) then
     begin
       if LLevel = -1 then
@@ -20636,8 +20675,8 @@ begin
 
       LRangeLevel := LCodeFoldingRange.FoldRangeLevel - LLevel;
 
-      if (LRangeLevel >= AFromLevel) and (LRangeLevel <= AToLevel) and LCodeFoldingRange.Collapsed and
-        LCodeFoldingRange.Collapsable then
+      if LCodeFoldingRange.Collapsed and LCodeFoldingRange.Collapsable and
+        (LRangeLevel >= AFromLevel) and (LRangeLevel <= AToLevel) then
       begin
         LCodeFoldingRange.Collapsed := False;
         LCodeFoldingRange.SetParentCollapsedOfSubCodeFoldingRanges(False, LCodeFoldingRange.FoldRangeLevel);
@@ -21243,7 +21282,7 @@ begin
 
   DecPaintLock;
 
-  if not FLines.Updating then
+  if not FLines.Updating and not FUndoList.InsideUndoBlock then
   begin
     if FSyncEdit.Visible then
       DoSyncEdit;
@@ -21384,8 +21423,8 @@ begin
       if not ReadOnly then
         DeleteChar;
     TKeyCommands.DeleteWord, TKeyCommands.DeleteWhitespaceBackward, TKeyCommands.DeleteWhitespaceForward,
-      TKeyCommands.DeleteWordBackward, TKeyCommands.DeleteWordForward, TKeyCommands.DeleteBeginningOfLine,
-      TKeyCommands.DeleteEndOfLine:
+    TKeyCommands.DeleteWordBackward, TKeyCommands.DeleteWordForward, TKeyCommands.DeleteBeginningOfLine,
+    TKeyCommands.DeleteEndOfLine:
       if not ReadOnly then
         DeleteText(ACommand);
     TKeyCommands.DeleteLine:
@@ -21418,8 +21457,8 @@ begin
       if not ReadOnly and (AChar >= TCharacters.Space) and (AChar <> TCharacters.CtrlBackspace) then
         DoChar(AChar);
     TKeyCommands.UpperCase, TKeyCommands.LowerCase, TKeyCommands.AlternatingCase, TKeyCommands.SentenceCase,
-      TKeyCommands.TitleCase, TKeyCommands.UpperCaseBlock, TKeyCommands.LowerCaseBlock, TKeyCommands.AlternatingCaseBlock,
-      TKeyCommands.KeywordsUpperCase, TKeyCommands.KeywordsLowerCase, TKeyCommands.KeywordsTitleCase:
+    TKeyCommands.TitleCase, TKeyCommands.UpperCaseBlock, TKeyCommands.LowerCaseBlock, TKeyCommands.AlternatingCaseBlock,
+    TKeyCommands.KeywordsUpperCase, TKeyCommands.KeywordsLowerCase, TKeyCommands.KeywordsTitleCase:
       if not ReadOnly then
         DoToggleSelectedCase(ACommand);
     TKeyCommands.Undo:
@@ -21693,19 +21732,25 @@ begin
 
   FEvents.OnChainLinesCleared := ALines.OnCleared;
   ALines.OnCleared := ChainLinesCleared;
+
   FEvents.OnChainLinesDeleted := ALines.OnDeleted;
   ALines.OnDeleted := ChainLinesDeleted;
+
   FEvents.OnChainLinesInserted := ALines.OnInserted;
   ALines.OnInserted := ChainLinesInserted;
+
   FEvents.OnChainLinesPutted := ALines.OnPutted;
   ALines.OnPutted := ChainLinesPutted;
+
   FEvents.OnChainLinesChanging := ALines.OnChanging;
   ALines.OnChanging := ChainLinesChanging;
+
   FEvents.OnChainLinesChanged := ALines.OnChange;
   ALines.OnChange := ChainLinesChanged;
 
   FEvents.OnChainUndoAdded := AUndo.OnAddedUndo;
   AUndo.OnAddedUndo := ChainUndoRedoAdded;
+
   FEvents.OnChainRedoAdded := ARedo.OnAddedUndo;
   ARedo.OnAddedUndo := ChainUndoRedoAdded;
 
@@ -21962,7 +22007,6 @@ begin
 
     InitCodeFolding;
 
-    { TODO: Word wrap is too slow for large files. Optimize. }
     if LWordWrapEnabled and not FLines.ShowProgress and not FSimpleMode then
       FWordWrap.Active := LWordWrapEnabled;
 

@@ -43,7 +43,7 @@ begin
 
     LStringList := TStringList.Create;
     try
-      LStringList.Text := LJSONObject.ToJSON(False);
+      LStringList.Text := LJSONObject.ToJSON;
       LStringList.SaveToFile(AFileName);
     finally
       LStringList.Free;

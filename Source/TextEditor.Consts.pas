@@ -29,7 +29,8 @@ type
 
   TCharacters = record
   const
-    AnsiCharCount = 256;
+    ASCIICharHigh = 127;
+    ANSICharHigh = 255;
     Arrows = [37..40];
     CloseTagOpen = '</';
     CtrlBackspace = #127;

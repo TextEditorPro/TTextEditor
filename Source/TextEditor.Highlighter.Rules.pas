@@ -730,7 +730,7 @@ begin
 
     LChar := CaseFunct(LFirstChar);
 
-    if Ord(LChar) < TCharacters.AnsiCharCount then
+    if Ord(LChar) <= TCharacters.AnsiCharHigh then
     begin
       LAnsiChar := AnsiChar(LChar);
 
@@ -754,7 +754,7 @@ begin
   end;
 
   if Assigned(FSets) and (FSets.Count > 0) then
-  for LIndex := 0 to 255 do
+  for LIndex := 0 to TCharacters.AnsiCharHigh do
   begin
     LAnsiChar := AnsiChar(CaseFunct(Char(LIndex)));
 
@@ -770,7 +770,7 @@ begin
     end;
   end;
 
-  for LIndex := 0 to 255 do
+  for LIndex := 0 to TCharacters.AnsiCharHigh do
   begin
     LAnsiChar := AnsiChar(LIndex);
 
@@ -794,7 +794,7 @@ begin
   if not FPrepared then
     Exit;
 
-  for LIndex := 0 to 255 do
+  for LIndex := 0 to TCharacters.AnsiCharHigh do
   begin
     LAnsiChar := AnsiChar(LIndex);
 

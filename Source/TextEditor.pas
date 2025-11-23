@@ -628,7 +628,6 @@ type
     procedure SetKeyCommands(const AValue: TTextEditorKeyCommands);
     procedure SetLeftMargin(const AValue: TTextEditorLeftMargin);
     procedure SetLine(const ALine: Integer; const ALineText: string); inline;
-    procedure SetLines(const AValue: TTextEditorLines);
     procedure SetModified(const AValue: Boolean);
     procedure SetMouseScrollCursors(const AIndex: Integer; const AValue: HCursor);
     procedure SetOppositeColors;
@@ -993,7 +992,7 @@ type
     property LineHeight: Integer read GetLineHeight;
     property LineNumbersCount: Integer read FLineNumbers.Count;
     property LineSpacing: Integer read FLineSpacing write FLineSpacing default TTextEditorDefaults.LineSpacing;
-    property Lines: TTextEditorLines read FLines write SetLines;
+    property Lines: TTextEditorLines read FLines;
     property MacroRecorder: TTextEditorMacroRecorder read FMacroRecorder write FMacroRecorder;
     property Marks: TTextEditorMarkList read FMarkList;
     property MatchingPairs: TTextEditorMatchingPairs read FMatchingPairs write FMatchingPairs;
@@ -3863,7 +3862,7 @@ end;
 function TCustomTextEditor.IsWordBreakChar(const AChar: Char): Boolean;
 begin
   Result := AChar in [TControlCharacters.Null .. TCharacters.Space] + TCharacterSets.WordBreak -
-    FHighlighter.ExludedWordBreakCharacters;
+    FHighlighter.ExcludedWordBreakCharacters;
 end;
 
 function TCustomTextEditor.WordAtTextPosition(const ATextPosition: TTextEditorTextPosition;
@@ -9815,22 +9814,6 @@ end;
 procedure TCustomTextEditor.SetLeftMargin(const AValue: TTextEditorLeftMargin);
 begin
   FLeftMargin.Assign(AValue);
-end;
-
-procedure TCustomTextEditor.SetLines(const AValue: TTextEditorLines);
-begin
-  ClearBookmarks;
-  ClearCodeFolding;
-
-  BeginUpdate;
-  try
-    FLines.Assign(AValue);
-  finally
-    EndUpdate;
-  end;
-
-  SizeOrFontChanged;
-  InitCodeFolding;
 end;
 
 procedure TCustomTextEditor.SetModified(const AValue: Boolean);
@@ -21797,6 +21780,7 @@ begin
       FUndoList.EndBlock;
     end;
   finally
+    RescanHighlighterRanges;
     EndUpdate;
   end;
 end;

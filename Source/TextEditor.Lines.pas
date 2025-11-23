@@ -19,7 +19,7 @@ type
   PEditorStringRecordItems = ^TTextEditorStringRecordItems;
   TTextEditorStringRecordItems = array [0 .. TEXT_EDITOR_MAX_STRING_COUNT - 1] of TTextEditorStringRecord;
 
-  TTextEditorLines = class(TPersistent)
+  TTextEditorLines = class(TObject)
   strict private
     FBufferSize: Integer;
     FCapacity: Integer;

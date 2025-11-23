@@ -18,6 +18,7 @@
     "Editor": {
       "URIOpener": true
     },
+    "ExcludedWordBreakCharacters": "*_~`",
     "MainRules": {
       "Attributes": {
         "Element": "Editor"
@@ -180,7 +181,6 @@
               "Element": "String"
             },
             "Properties": {
-              "CloseOnTerm": true,
               "CloseOnEndOfLine": true
             },
             "TokenRange": {
@@ -286,11 +286,37 @@
               "Element": "String"
             },
             "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "***"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
               "CloseOnEndOfLine": true
             },
             "TokenRange": {
               "Open": "**",
               "Close": "**"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "~~",
+              "Close": "~~"
             }
           },
           {
@@ -304,6 +330,19 @@
             "TokenRange": {
               "Open": "(#",
               "Close": ")"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "___"
             }
           },
           {

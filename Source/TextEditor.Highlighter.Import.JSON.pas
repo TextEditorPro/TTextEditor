@@ -1028,7 +1028,7 @@ begin
   LHighlighterObject := AJSONObject['Highlighter'];
 
   FHighlighter.SetOption(hoMultiHighlighter, LHighlighterObject.ValueBoolean['MultiHighlighter']);
-  FHighlighter.ExludedWordBreakCharacters := LHighlighterObject.Values['ExcludedWordBreakCharacters'].ToSet;
+  FHighlighter.ExcludedWordBreakCharacters := LHighlighterObject.Values['ExcludedWordBreakCharacters'].ToSet;
 
   if LHighlighterObject.ValueBoolean['YAML'] then
     FHighlighter.BeforePrepare := FHighlighter.PrepareYAMLHighlighter

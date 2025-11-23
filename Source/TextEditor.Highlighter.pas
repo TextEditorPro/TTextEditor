@@ -27,7 +27,7 @@ type
     FCompletionProposalSkipRegions: TTextEditorSkipRegions;
     FEditor: TWinControl;
     FEndOfLine: Boolean;
-    FExludedWordBreakCharacters: TTextEditorCharSet;
+    FExcludedWordBreakCharacters: TTextEditorCharSet;
     FFoldCloseKeyChars: TTextEditorCharSet;
     FFoldKeyChars: TTextEditorCharSet;
     FFoldOpenKeyChars: TTextEditorCharSet;
@@ -107,7 +107,7 @@ type
     property CompletionProposalSkipRegions: TTextEditorSkipRegions read FCompletionProposalSkipRegions write FCompletionProposalSkipRegions;
     property Editor: TWinControl read FEditor;
     property EndOfLine: Boolean read FEndOfLine;
-    property ExludedWordBreakCharacters: TTextEditorCharSet read FExludedWordBreakCharacters write FExludedWordBreakCharacters;
+    property ExcludedWordBreakCharacters: TTextEditorCharSet read FExcludedWordBreakCharacters write FExcludedWordBreakCharacters;
     property FoldCloseKeyChars: TTextEditorCharSet read FFoldCloseKeyChars write FFoldCloseKeyChars;
     property FoldKeyChars: TTextEditorCharSet read FFoldKeyChars write FFoldKeyChars;
     property FoldOpenKeyChars: TTextEditorCharSet read FFoldOpenKeyChars write FFoldOpenKeyChars;
@@ -165,7 +165,7 @@ begin
   FCodeFoldingRangeCount := 0;
   FEditor := AOwner;
   FEndOfLine := False;
-  FExludedWordBreakCharacters := [];
+  FExcludedWordBreakCharacters := [];
   FLoaded := False;
   FLoading := False;
   FMaxLengthOfContinuousString := 500;

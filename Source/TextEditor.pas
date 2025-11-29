@@ -443,6 +443,7 @@ type
     function GetHighlighterAttributeAtRowColumn(const ATextPosition: TTextEditorTextPosition; var AToken: string; var ATokenType: TTextEditorRangeType; var AStart: Integer; var AHighlighterAttribute: TTextEditorHighlighterAttribute): Boolean;
     function GetHookedCommandHandlersCount: Integer;
     function GetHorizontalScrollMax: Integer;
+    function GetInlineSelectionAvailable: Boolean;
     function GetLastWordFromCursor: string;
     function GetLeadingExpandedLength(const AText: string; const ABorder: Integer = 0): Integer;
     function GetLeftMarginWidth: Integer;
@@ -986,6 +987,7 @@ type
     property Highlighter: TTextEditorHighlighter read FHighlighter write FHighlighter;
     property HorizontalScrollPosition: Integer read FScrollHelper.HorizontalPosition write SetHorizontalScrollPosition;
     property HotFilename: string read FFile.HotName write FFile.HotName;
+    property InlineSelectionAvailable: Boolean read GetInlineSelectionAvailable;
     property IsScrolling: Boolean read FScrollHelper.IsScrolling;
     property KeyCommands: TTextEditorKeyCommands read FKeyCommands write SetKeyCommands stored False;
     property LeftMargin: TTextEditorLeftMargin read FLeftMargin write SetLeftMargin;
@@ -2411,6 +2413,12 @@ begin
 
   if soPastEndOfLine in FScroll.Options then
     Result := Result + FScrollHelper.PageWidth;
+end;
+
+function TCustomTextEditor.GetInlineSelectionAvailable: Boolean;
+begin
+  Result := FSelection.Visible and (FPosition.SelectionStart.Char <> FPosition.SelectionEnd.Char) and
+    (FPosition.SelectionStart.Line = FPosition.SelectionEnd.Line);
 end;
 
 function TCustomTextEditor.GetTextPosition: TTextEditorTextPosition;
@@ -19238,7 +19246,7 @@ end;
 
 function TCustomTextEditor.IsEmpty: Boolean;
 begin
-  Result := (FLines.Count = 0) or (FLines.Count > 0) and FLines[0].Trim.IsEmpty;
+  Result := (FLines.Count = 0) or (FLines.Count = 1) and FLines[0].Trim.IsEmpty;
 end;
 
 function TCustomTextEditor.IsTextPositionInSelection(const ATextPosition: TTextEditorTextPosition): Boolean;
@@ -19264,8 +19272,7 @@ begin
     end
     else
       Result := ((ATextPosition.Line > LBeginTextPosition.Line) or
-        (ATextPosition.Line = LBeginTextPosition.Line) and (ATextPosition.Char >= LBeginTextPosition.Char))
-        and
+        (ATextPosition.Line = LBeginTextPosition.Line) and (ATextPosition.Char >= LBeginTextPosition.Char)) and
         ((ATextPosition.Line < LEndTextPosition.Line) or
         (ATextPosition.Line = LEndTextPosition.Line) and (ATextPosition.Char < LEndTextPosition.Char));
   end;

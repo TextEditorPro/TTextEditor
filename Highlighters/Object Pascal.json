@@ -564,6 +564,7 @@
               "near",
               "nil",
               "nodefault",
+              "noreturn",
               "not",
               "object",
               "of",

@@ -69,7 +69,6 @@ type
     function GetRanges(const AIndex: Integer): TTextEditorLinesRange;
     function GetTextLines(const AIndex: Integer): string; inline;
     function IsValidIndex(const AIndex: Integer): Boolean; inline;
-    procedure ExchangeItems(const AIndex1, AIndex2: Integer);
     procedure Grow;
     procedure QuickSort(const ALeft, ARight: Integer; const ACompare: TTextEditorStringListSortCompare);
     procedure SetLineState(const AIndex: Integer; const AValue: TTextEditorLineState);
@@ -106,7 +105,7 @@ type
     procedure Clear;
     procedure ClearCompareFlags;
     procedure CustomSort(const ABeginLine: Integer; const AEndLine: Integer; ACompare: TTextEditorStringListSortCompare); virtual;
-    procedure Delete(AIndex: Integer);
+    procedure Delete(const AIndex: Integer);
     procedure DeleteLines(const AIndex: Integer; const ACount: Integer);
     procedure DoTrimTrailingSpaces(const AIndex: Integer);
     procedure EndUpdate;
@@ -122,6 +121,7 @@ type
     procedure SaveToStream(AStream: TStream; const AEncoding: System.SysUtils.TEncoding = nil);
     procedure SetLineStates(const AIndexFrom: Integer; const AIndexTo: Integer; const ALineState: TTextEditorLineState);
     procedure Sort(const ABeginLine: Integer; const AEndLine: Integer); virtual;
+    procedure SwapLines(const AIndex1, AIndex2: Integer);
     procedure Trim(const ATrimStyle: TTextEditorTrimStyle; const ABeginLine: Integer; const AEndLine: Integer);
     property BufferSize: Integer read FBufferSize write FBufferSize;
     property Columns: Boolean read FColumns write FColumns;
@@ -372,7 +372,7 @@ begin
   FLengthOfLongestLine := 0;
 end;
 
-procedure TTextEditorLines.Delete(AIndex: Integer);
+procedure TTextEditorLines.Delete(const AIndex: Integer);
 begin
 {$IFDEF TEXT_EDITOR_RANGE_CHECKS}
   if (AIndex < 0) or (AIndex > FCount) then
@@ -437,13 +437,13 @@ begin
       Exclude(Flags, sfExpandedLengthUnknown);
       Exclude(Flags, sfHasTabs);
       Include(Flags, sfHasNoTabs);
+
       ExpandedLength := 0;
     end
     else
     begin
       Result := ConvertTabs(TextLine, FTabWidth, LHasTabs, FColumns);
 
-      ExpandedLength := Result.Length;
       Exclude(Flags, sfExpandedLengthUnknown);
       Exclude(Flags, sfHasTabs);
       Exclude(Flags, sfHasNoTabs);
@@ -452,6 +452,8 @@ begin
         Include(Flags, sfHasTabs)
       else
         Include(Flags, sfHasNoTabs);
+
+      ExpandedLength := Result.Length;
     end;
   end;
 end;
@@ -1084,32 +1086,17 @@ begin
     QuickSort(ABeginLine, AEndLine, ACompare);
 end;
 
-procedure TTextEditorLines.ExchangeItems(const AIndex1, AIndex2: Integer);
+procedure TTextEditorLines.SwapLines(const AIndex1, AIndex2: Integer);
 var
-  Item1, Item2: PTextEditorStringRecord;
-  LFlags: TTextEditorStringFlags;
-  LExpandedLength: Integer;
-  LRange: TTextEditorLinesRange;
-  LValue: Pointer;
+  LItem1, LItem2: PTextEditorStringRecord;
+  LTemp: TTextEditorStringRecord;
 begin
-  Item1 := @FItems[AIndex1];
-  Item2 := @FItems[AIndex2];
+  LItem1 := @FItems[AIndex1];
+  LItem2 := @FItems[AIndex2];
 
-  LFlags := Item1^.Flags;
-  Item1^.Flags := Item2^.Flags;
-  Item2^.Flags := LFlags;
-
-  LExpandedLength := Item1^.ExpandedLength;
-  Item1^.ExpandedLength := Item2^.ExpandedLength;
-  Item2^.ExpandedLength := LExpandedLength;
-
-  LRange := Pointer(Item1^.Range);
-  Pointer(Item1^.Range) := Pointer(Item2^.Range);
-  Pointer(Item2^.Range) := LRange;
-
-  LValue := Pointer(Item1^.TextLine);
-  Pointer(Item1^.TextLine) := Pointer(Item2^.TextLine);
-  Pointer(Item2^.TextLine) := LValue;
+  LTemp := LItem1^;
+  LItem1^ := LItem2^;
+  LItem2^ := LTemp;
 end;
 
 procedure TTextEditorLines.QuickSort(const ALeft, ARight: Integer; const ACompare: TTextEditorStringListSortCompare);
@@ -1130,7 +1117,7 @@ begin
     if LLeft <= LRight then
     begin
       if LLeft <> LRight then
-        ExchangeItems(LLeft, LRight);
+        SwapLines(LLeft, LRight);
 
       if LMiddle = LLeft then
         LMiddle := LRight

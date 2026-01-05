@@ -123,8 +123,8 @@ type
     KeywordsLowerCase = 629;
     KeywordsTitleCase = 630;
     { Move }
-    MoveLineUp = 701;
-    MoveLineDown = 702;
+    MoveLinesUp = 701;
+    MoveLinesDown = 702;
     { Search }
     SearchNext = 800;
     SearchPrevious = 801;
@@ -319,8 +319,8 @@ const
     (Value: TKeyCommands.GoToNextBookmark; Name: 'TKeyCommands.GoToNextBookmark'),
     (Value: TKeyCommands.GoToPreviousBookmark; Name: 'TKeyCommands.GoToPreviousBookmark'),
     (Value: TKeyCommands.Text; Name: 'TKeyCommands.Text'),
-    (Value: TKeyCommands.MoveLineUp; Name: 'TKeyCommands.MoveLineUp'),
-    (Value: TKeyCommands.MoveLineDown; Name: 'TKeyCommands.MoveLineDown'),
+    (Value: TKeyCommands.MoveLinesUp; Name: 'TKeyCommands.MoveLinesUp'),
+    (Value: TKeyCommands.MoveLinesDown; Name: 'TKeyCommands.MoveLinesDown'),
     (Value: TKeyCommands.UpperCase; Name: 'TKeyCommands.UpperCase'),
     (Value: TKeyCommands.LowerCase; Name: 'TKeyCommands.LowerCase'),
     (Value: TKeyCommands.AlternatingCase; Name: 'TKeyCommands.AlternatingCase'),
@@ -717,8 +717,8 @@ begin
   Add(TKeyCommands.DeleteWordForward, [ssCtrl], vkDelete);
   { Line operations }
   Add(TKeyCommands.InsertLine, [ssCtrl], Ord('M'));
-  Add(TKeyCommands.MoveLineUp, [ssCtrl, ssAlt, ssShift], vkUp);
-  Add(TKeyCommands.MoveLineDown, [ssCtrl, ssAlt, ssShift], vkDown);
+  Add(TKeyCommands.MoveLinesUp, [ssCtrl, ssAlt, ssShift], vkUp);
+  Add(TKeyCommands.MoveLinesDown, [ssCtrl, ssAlt, ssShift], vkDown);
   Add(TKeyCommands.DeleteLine, [ssCtrl], Ord('Y'));
   Add(TKeyCommands.DeleteEndOfLine, [ssCtrl, ssShift], Ord('Y'));
   { Bookmarks }

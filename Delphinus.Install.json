@@ -40,7 +40,7 @@
 	"projects": [
 		{
 			"project": "Packages\\TextEditor.Delphi.groupproj",
-			"compiler_min": 30
+			"compiler_min": 24
 		}
 	]
 }

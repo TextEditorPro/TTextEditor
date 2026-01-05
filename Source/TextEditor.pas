@@ -593,8 +593,8 @@ type
     procedure MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TTextEditorTextPosition; const ASelectionCommand: Boolean);
     procedure MoveCaretHorizontally(const X: Integer; const ASelectionCommand: Boolean);
     procedure MoveCaretVertically(const Y: Integer; const ASelectionCommand: Boolean);
-    procedure MoveLineDown;
-    procedure MoveLineUp;
+    procedure MoveLinesDown;
+    procedure MoveLinesUp;
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
     procedure MoveSpellCheckItems(const ALine: Integer; const ACount: Integer);
 {$ENDIF}
@@ -8222,87 +8222,131 @@ begin
   MoveCaretAndSelection(FPosition.SelectionStart, LDestinationLineChar, ASelectionCommand);
 end;
 
-procedure TCustomTextEditor.MoveLineDown;
+procedure TCustomTextEditor.MoveLinesDown;
 var
   LTextPosition: TTextEditorTextPosition;
   LSelectionStartPosition, LSelectionEndPosition: TTextEditorTextPosition;
-  LLineText: string;
+  LLine: Integer;
+  LSelectionAvailable: Boolean;
 begin
-  LTextPosition := TextPosition;
+  LSelectionAvailable := SelectionAvailable;
 
-  if LTextPosition.Line < FLines.Count - 1 then
-  begin
-    LSelectionStartPosition := SelectionStartPosition;
-    LSelectionEndPosition := SelectionEndPosition;
+  BeginUpdate;
+  try
+    LTextPosition := TextPosition;
 
-    FUndoList.BeginBlock;
-    try
-      LLineText := FLines[LTextPosition.Line];
+    if LSelectionAvailable then
+    begin
+      LSelectionStartPosition := SelectionStartPosition;
+      LSelectionEndPosition := SelectionEndPosition;
 
-      DeleteLine;
+      SelectionStartPosition := GetPosition(1, LSelectionStartPosition.Line);
+      SelectionEndPosition := GetPosition(FLines[LSelectionEndPosition.Line + 1].Length + 1, LSelectionEndPosition.Line + 1);
+    end
+    else
+    begin
+      LSelectionStartPosition := LTextPosition;
+      LSelectionEndPosition := LTextPosition;
 
-      Inc(LTextPosition.Line);
-
-      InsertLine(Min(LTextPosition.Line + 1, FLines.Count + 1), LLineText);
-
-      if LSelectionStartPosition.Line = LTextPosition.Line - 1 then
-      begin
-        Inc(LSelectionStartPosition.Line);
-        Inc(LSelectionEndPosition.Line);
-      end
-      else
-      if LSelectionStartPosition.Line = LTextPosition.Line then
-      begin
-        Dec(LSelectionStartPosition.Line);
-        Dec(LSelectionEndPosition.Line);
-      end;
-
-      SetTextPositionAndSelection(LTextPosition, LSelectionStartPosition, LSelectionEndPosition);
-    finally
-      FUndoList.EndBlock;
+      SelectionStartPosition := GetPosition(1, LTextPosition.Line);
+      SelectionEndPosition := GetPosition(FLines[LTextPosition.Line + 1].Length + 1, LTextPosition.Line + 1);
     end;
+
+    if LSelectionEndPosition.Line + 1 < FLines.Count  then
+    begin
+      FUndoList.BeginBlock;
+      try
+        FUndoList.AddChange(crSelection, LTextPosition, LTextPosition, LTextPosition, '', FSelection.ActiveMode);
+        FUndoList.AddChange(crDelete, LTextPosition, SelectionStartPosition, SelectionEndPosition, SelectedText, FSelection.ActiveMode);
+
+        for LLine := SelectionEndPosition.Line - 1 downto SelectionStartPosition.Line do
+          FLines.SwapLines(LLine, LLine + 1);
+
+        SelectionEndPosition := GetPosition(FLines[LSelectionEndPosition.Line + 1].Length + 1, LSelectionEndPosition.Line + 1);
+
+        FUndoList.AddChange(crInsert, LTextPosition, SelectionStartPosition, SelectionEndPosition, '', FSelection.ActiveMode);
+
+        FLines.SetLineStates(SelectionStartPosition.Line, SelectionEndPosition.Line, lsModified);
+      finally
+        FUndoList.EndBlock;
+      end;
+    end;
+  finally
+    EndUpdate;
+
+    if LSelectionAvailable then
+    begin
+      SelectionStartPosition := GetPosition(1, LSelectionStartPosition.Line + 1);
+      SelectionEndPosition := GetPosition(FLines[LSelectionEndPosition.Line + 1].Length + 1, LSelectionEndPosition.Line + 1);
+    end
+    else
+      ClearSelection;
+
+    Inc(LTextPosition.Line);
+    TextPosition := LTextPosition;
   end;
 end;
 
-procedure TCustomTextEditor.MoveLineUp;
+procedure TCustomTextEditor.MoveLinesUp;
 var
   LTextPosition: TTextEditorTextPosition;
   LSelectionStartPosition, LSelectionEndPosition: TTextEditorTextPosition;
-  LLineText: string;
+  LLine: Integer;
+  LSelectionAvailable: Boolean;
 begin
-  LTextPosition := TextPosition;
+  LSelectionAvailable := SelectionAvailable;
 
-  if LTextPosition.Line > 0 then
-  begin
-    LSelectionStartPosition := SelectionStartPosition;
-    LSelectionEndPosition := SelectionEndPosition;
+  BeginUpdate;
+  try
+    LTextPosition := TextPosition;
 
-    FUndoList.BeginBlock;
-    try
-      LLineText := FLines.TextLines[LTextPosition.Line];
-
-      DeleteLine;
-
-      Dec(LTextPosition.Line);
-
-      InsertLine(LTextPosition.Line + 1, LLineText);
-
-      if LSelectionStartPosition.Line = LTextPosition.Line + 1 then
-      begin
-        Dec(LSelectionStartPosition.Line);
-        Dec(LSelectionEndPosition.Line);
-      end
-      else
-      if LSelectionStartPosition.Line = LTextPosition.Line then
-      begin
-        Inc(LSelectionStartPosition.Line);
-        Inc(LSelectionEndPosition.Line);
-      end;
-
-      SetTextPositionAndSelection(LTextPosition, LSelectionStartPosition, LSelectionEndPosition);
-    finally
-      FUndoList.EndBlock;
+    if LSelectionAvailable then
+    begin
+      LSelectionStartPosition := SelectionStartPosition;
+      LSelectionEndPosition := SelectionEndPosition;
+      SelectionStartPosition := GetPosition(1, LSelectionStartPosition.Line - 1);
+      SelectionEndPosition := GetPosition(FLines[LSelectionEndPosition.Line].Length + 1, LSelectionEndPosition.Line);
+    end
+    else
+    begin
+      LSelectionStartPosition := LTextPosition;
+      LSelectionEndPosition := LTextPosition;
+      SelectionStartPosition := GetPosition(1, LTextPosition.Line - 1);
+      SelectionEndPosition := GetPosition(FLines[LTextPosition.Line].Length + 1, LTextPosition.Line);
     end;
+
+    if LSelectionStartPosition.Line - 1 >= 0 then
+    begin
+      FUndoList.BeginBlock;
+      try
+        FUndoList.AddChange(crSelection, LTextPosition, LTextPosition, LTextPosition, '', FSelection.ActiveMode);
+        FUndoList.AddChange(crDelete, LTextPosition, SelectionStartPosition, SelectionEndPosition, SelectedText, FSelection.ActiveMode);
+
+        for LLine := SelectionStartPosition.Line to SelectionEndPosition.Line - 1 do
+          FLines.SwapLines(LLine, LLine + 1);
+
+        SelectionEndPosition := GetPosition(FLines[LSelectionEndPosition.Line].Length + 1, LSelectionEndPosition.Line);
+
+        FUndoList.AddChange(crInsert, LTextPosition, SelectionStartPosition, SelectionEndPosition, '', FSelection.ActiveMode);
+
+        FLines.SetLineStates(SelectionStartPosition.Line, SelectionEndPosition.Line, lsModified);
+      finally
+        FUndoList.EndBlock;
+      end;
+    end;
+  finally
+    EndUpdate;
+
+    if LSelectionAvailable then
+    begin
+      SelectionStartPosition := GetPosition(1, LSelectionStartPosition.Line - 1);
+      SelectionEndPosition := GetPosition(FLines[LSelectionEndPosition.Line - 1].Length + 1, LSelectionEndPosition.Line - 1);
+    end
+    else
+      ClearSelection;
+
+    Dec(LTextPosition.Line);
+    TextPosition := LTextPosition;
   end;
 end;
 
@@ -17046,7 +17090,7 @@ var
                   LCurrentLineText := LCurrentLineText + '..' + TextEditor.Utils.TrimLeft(LToLineText);
 
                   if LIsSelectionInsideLine then
-                    LLineSelectionEnd := LCurrentLineText.Length;
+                    LLineSelectionEnd := LCurrentLineText.Length + 1;
                 end;
 
               if LCurrentLine = FMatchingPair.CurrentMatch.OpenTokenPos.Line then
@@ -20977,7 +21021,7 @@ begin
     TKeyCommands.BlockUnindent, TKeyCommands.Tab, TKeyCommands.ShiftTab, TKeyCommands.UpperCase, TKeyCommands.LowerCase,
     TKeyCommands.AlternatingCase, TKeyCommands.SentenceCase, TKeyCommands.TitleCase, TKeyCommands.KeywordsUpperCase,
     TKeyCommands.KeywordsLowerCase, TKeyCommands.KeywordsTitleCase, TKeyCommands.UpperCaseBlock,
-    TKeyCommands.LowerCaseBlock, TKeyCommands.AlternatingCaseBlock, TKeyCommands.MoveLineUp, TKeyCommands.MoveLineDown,
+    TKeyCommands.LowerCaseBlock, TKeyCommands.AlternatingCaseBlock, TKeyCommands.MoveLinesUp, TKeyCommands.MoveLinesDown,
     TKeyCommands.LineComment, TKeyCommands.BlockComment:
       DoChange;
   end;
@@ -21029,17 +21073,12 @@ var
   LLineBreak: string;
   LIndex: Integer;
   LLineNumber: Integer;
-
-  procedure SetEndPosition(const ACodeFoldingRange: TTextEditorCodeFoldingRange);
-  begin
-    if Assigned(ACodeFoldingRange) and ACodeFoldingRange.Collapsed then
-      FPosition.SelectionEnd := ViewToTextPosition(GetViewPosition(1, SelectionEndPosition.Line + 2));
-  end;
-
+  LCodeFoldingRange: TTextEditorCodeFoldingRange;
 begin
   if FMultiEdit.SelectionAvailable then
   begin
     LText := GetMultiCaretSelectedText;
+
     DoCopyToClipboard(LText);
   end
   else
@@ -21048,6 +21087,7 @@ begin
     AutoCursor;
 
     LChangeTrim := (FSelection.ActiveMode = smColumn) and (eoTrimTrailingSpaces in Options);
+
     LSelectionStartPosition := SelectionStartPosition;
     LSelectionEndPosition := SelectionEndPosition;
     try
@@ -21058,10 +21098,10 @@ begin
 
       if IsCodeFoldingVisible then
       begin
-        if LSelectionStartPosition.Line = LSelectionEndPosition.Line then
-          SetEndPosition(FCodeFoldings.RangeFromLine[LSelectionStartPosition.Line + 1])
-        else
-          SetEndPosition(FCodeFoldings.RangeFromLine[LSelectionEndPosition.Line + 1]);
+        LCodeFoldingRange := FCodeFoldings.RangeFromLine[LSelectionEndPosition.Line + 1];
+
+        if Assigned(LCodeFoldingRange) and LCodeFoldingRange.Collapsed then
+          FPosition.SelectionEnd := GetPosition(FLines[LCodeFoldingRange.ToLine - 1].Length + 1, LCodeFoldingRange.ToLine - 1);
 
         LSelectionEndPosition := FPosition.SelectionEnd;
       end;
@@ -21420,10 +21460,10 @@ begin
     TKeyCommands.DeleteLine:
       if not ReadOnly and (FLines.Count > 0) then
         DeleteLine;
-    TKeyCommands.MoveLineUp:
-      MoveLineUp;
-    TKeyCommands.MoveLineDown:
-      MoveLineDown;
+    TKeyCommands.MoveLinesUp:
+      MoveLinesUp;
+    TKeyCommands.MoveLinesDown:
+      MoveLinesDown;
     TKeyCommands.SearchNext:
       FindNext;
     TKeyCommands.SearchPrevious:
@@ -22491,83 +22531,83 @@ var
   LTextPosition, LTempTextPosition: TTextEditorTextPosition;
   LLines: TTextEditorLines;
 begin
-  LTextPosition := TextPosition;
-  FLines.SortOptions := AOptions;
-
-  if soRandom in AOptions then
-    Randomize;
-
-  LBeginPosition.Line := 0;
-  LEndPosition.Line := FLines.Count - 1;
-  LText := FLines.Text;
-
-  LSelectionAvailable := GetSelectionAvailable;
-
-  if LSelectionAvailable then
-  begin
-    LBeginPosition.Line := GetSelectionStartPosition.Line;
-    LEndPosition := GetSelectionEndPosition;
-
-    if LEndPosition.Char = 1 then
-      Dec(LEndPosition.Line);
-
-    LText := SelectedText;
-  end;
-
-  LBeginPosition.Char := 1;
-  LEndPosition.Char := FLines.StringLength(LEndPosition.Line) + 1;
-
-  FUndoList.BeginBlock;
+  BeginUpdate;
   try
-    if FSelection.ActiveMode = smNormal then
+    LTextPosition := TextPosition;
+    FLines.SortOptions := AOptions;
+
+    if soRandom in AOptions then
+      Randomize;
+
+    LBeginPosition.Line := 0;
+    LEndPosition.Line := FLines.Count - 1;
+    LText := FLines.Text;
+
+    LSelectionAvailable := GetSelectionAvailable;
+
+    if LSelectionAvailable then
     begin
-      if not LSelectionAvailable then
-        FUndoList.AddChange(crSelection, LTextPosition, LTextPosition, LTextPosition, '', FSelection.ActiveMode);
+      LBeginPosition.Line := GetSelectionStartPosition.Line;
+      LEndPosition := GetSelectionEndPosition;
 
-      AddUndoDelete(LTextPosition, LBeginPosition, LEndPosition, LText, FSelection.ActiveMode);
+      if LEndPosition.Char = 1 then
+        Dec(LEndPosition.Line);
 
-      FLines.Sort(LBeginPosition.Line, LEndPosition.Line)
-    end
-    else
-    begin
-      if not LSelectionAvailable then
-        SelectAll;
-
-      LLines := TTextEditorLines.Create(nil);
-      try
-        LLines.SortOptions := AOptions;
-        LLines.Text := SelectedText;
-        LLines.Sort(0, LLines.Count - 1);
-        SelectedText := LLines.Text;
-      finally
-        LLines.Free;
-      end;
+      LText := SelectedText;
     end;
 
+    LBeginPosition.Char := 1;
     LEndPosition.Char := FLines.StringLength(LEndPosition.Line) + 1;
 
-    if FSelection.ActiveMode = smNormal then
-    begin
-      AddUndoInsert(LTextPosition, LBeginPosition, LEndPosition, '', FSelection.ActiveMode);
-
-      if LSelectionAvailable then
+    FUndoList.BeginBlock;
+    try
+      if FSelection.ActiveMode = smNormal then
       begin
-        LTempTextPosition := GetSelectionStartPosition;
-        LTempTextPosition.Char := 1;
-        SelectionStartPosition := LTempTextPosition;
-        SelectionEndPosition := LEndPosition;
+        if not LSelectionAvailable then
+          FUndoList.AddChange(crSelection, LTextPosition, LTextPosition, LTextPosition, '', FSelection.ActiveMode);
+
+        AddUndoDelete(LTextPosition, LBeginPosition, LEndPosition, LText, FSelection.ActiveMode);
+
+        FLines.Sort(LBeginPosition.Line, LEndPosition.Line)
+      end
+      else
+      begin
+        if not LSelectionAvailable then
+          SelectAll;
+
+        LLines := TTextEditorLines.Create(nil);
+        try
+          LLines.SortOptions := AOptions;
+          LLines.Text := SelectedText;
+          LLines.Sort(0, LLines.Count - 1);
+          SelectedText := LLines.Text;
+        finally
+          LLines.Free;
+        end;
       end;
+
+      LEndPosition.Char := FLines.StringLength(LEndPosition.Line) + 1;
+
+      if FSelection.ActiveMode = smNormal then
+      begin
+        AddUndoInsert(LTextPosition, LBeginPosition, LEndPosition, '', FSelection.ActiveMode);
+
+        if LSelectionAvailable then
+        begin
+          LTempTextPosition := GetSelectionStartPosition;
+          LTempTextPosition.Char := 1;
+          SelectionStartPosition := LTempTextPosition;
+          SelectionEndPosition := LEndPosition;
+        end;
+      end;
+    finally
+      FUndoList.EndBlock;
     end;
+
+    FLines.SetLineStates(LBeginPosition.Line, LEndPosition.Line, lsModified);
   finally
-    FUndoList.EndBlock;
+    EndUpdate;
   end;
-
-  FLines.SetLineStates(LBeginPosition.Line, LEndPosition.Line, lsModified);
-
-  RescanCodeFoldingRanges;
-
-  DoChange;
-  Invalidate;
 end;
 
 procedure TCustomTextEditor.DeleteComments;

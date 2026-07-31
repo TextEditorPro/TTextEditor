@@ -3,67 +3,68 @@
 interface
 
 uses
-  Winapi.Messages, Winapi.Windows, System.Actions, System.Classes, System.ImageList, System.SysUtils, Vcl.ActnList, Vcl.BaseImageCollection,
-  Vcl.Buttons, Vcl.ComCtrls, Vcl.Controls, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Forms, Vcl.ImageCollection, Vcl.ImgList, Vcl.Menus,
-  Vcl.VirtualImageList, MyControl.ObjectInspector, TextEditor, TextEditor.Compare.ScrollBar, TextEditor.Print, TextEditor.Print.Preview,
-  TextEditor.Types, TTextEditorDemo.Frame.PrintPreview, TTextEditorDemo.Frame.TextCompare, TTextEditorDemo.Frame.TextEditor;
+  Winapi.Messages, Winapi.Windows, System.Actions, System.Classes, System.ImageList, System.SysUtils, Vcl.ActnCtrls, Vcl.ActnList,
+  Vcl.ActnMan, Vcl.ActnMenus, Vcl.BaseImageCollection, Vcl.Buttons, Vcl.ComCtrls, Vcl.Controls, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Forms,
+  Vcl.ImageCollection, Vcl.ImgList, Vcl.Menus, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ToolWin, Vcl.VirtualImageList,
+  MyControl.ObjectInspector, TextEditor, TextEditor.Compare.ScrollBar, TextEditor.Print, TextEditor.Print.Preview, TextEditor.Types,
+  TTextEditorDemo.Frame.PrintPreview, TTextEditorDemo.Frame.TextCompare, TTextEditorDemo.Frame.TextEditor;
 
 type
   { TMainForm }
 
   TMainForm = class(TForm)
+    ActionBookmarksNextBookmark: TAction;
+    ActionBookmarksPreviousBookmark: TAction;
+    ActionBookmarksToggleBookmark: TAction;
+    ActionFileExit: TAction;
+    ActionFileExportToHTML: TAction;
+    ActionFileLoadHighlighterSample: TAction;
+    ActionFileOpen: TAction;
+    ActionFileSave: TAction;
+    ActionFileSaveAs: TAction;
     ActionList: TActionList;
+    ActionMainMenuBar: TActionMainMenuBar;
+    ActionManager: TActionManager;
+    ActionSearchGoToLine: TAction;
+    ActionToolBar1: TActionToolBar;
     ActionViewDarkTheme: TAction;
     ActionViewPrintPreview: TAction;
     ActionViewTextCompare: TAction;
     ActionViewTextEditor: TAction;
     ImageCollection: TImageCollection;
-    MainMenu: TMainMenu;
-    MenuItemBookmarkNext: TMenuItem;
-    MenuItemBookmarkPrevious: TMenuItem;
-    MenuItemBookmarkToggle: TMenuItem;
-    MenuItemBookmarks: TMenuItem;
-    MenuItemExit: TMenuItem;
-    MenuItemExportToHTML: TMenuItem;
-    MenuItemFile: TMenuItem;
-    MenuItemFileSeparator: TMenuItem;
-    MenuItemGoToLine: TMenuItem;
-    MenuItemOpen: TMenuItem;
-    MenuItemSample: TMenuItem;
-    MenuItemSave: TMenuItem;
-    MenuItemSaveAs: TMenuItem;
-    MenuItemSearch: TMenuItem;
     MenuItemZoom100: TMenuItem;
     MenuItemZoom125: TMenuItem;
     MenuItemZoom150: TMenuItem;
     MenuItemZoom200: TMenuItem;
     MenuItemZoom300: TMenuItem;
     OpenDialog: TOpenDialog;
+    PanelMain: TPanel;
     PanelSidebar: TPanel;
     PopupMenuHighlighters: TPopupMenu;
     PopupMenuThemes: TPopupMenu;
     PopupMenuZoom: TPopupMenu;
     SaveDialog: TSaveDialog;
     SaveDialogHTML: TSaveDialog;
-    SpeedButton1: TSpeedButton;
-    SpeedButton2: TSpeedButton;
-    SpeedButton3: TSpeedButton;
+    SpeedButtonDarkTheme: TSpeedButton;
+    SpeedButtonPrintPreview: TSpeedButton;
+    SpeedButtonTextCompare: TSpeedButton;
     SpeedButtonTextEditor: TSpeedButton;
     StatusBar: TStatusBar;
     VirtualImageList: TVirtualImageList;
+    procedure ActionBookmarksNextBookmarkExecute(Sender: TObject);
+    procedure ActionBookmarksPreviousBookmarkExecute(Sender: TObject);
+    procedure ActionBookmarksToggleBookmarkExecute(Sender: TObject);
+    procedure ActionFileExitExecute(Sender: TObject);
+    procedure ActionFileExportToHTMLExecute(Sender: TObject);
+    procedure ActionFileLoadHighlighterSampleExecute(Sender: TObject);
+    procedure ActionFileOpenExecute(Sender: TObject);
+    procedure ActionFileSaveAsExecute(Sender: TObject);
+    procedure ActionFileSaveExecute(Sender: TObject);
+    procedure ActionSearchGoToLineExecute(Sender: TObject);
     procedure ActionViewDarkThemeExecute(Sender: TObject);
     procedure ActionViewExecute(Sender: TObject);
+    procedure FileOpen1BeforeExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure MenuItemBookmarkNextClick(Sender: TObject);
-    procedure MenuItemBookmarkPreviousClick(Sender: TObject);
-    procedure MenuItemBookmarkToggleClick(Sender: TObject);
-    procedure MenuItemExitClick(Sender: TObject);
-    procedure MenuItemExportToHTMLClick(Sender: TObject);
-    procedure MenuItemGoToLineClick(Sender: TObject);
-    procedure MenuItemOpenClick(Sender: TObject);
-    procedure MenuItemSampleClick(Sender: TObject);
-    procedure MenuItemSaveAsClick(Sender: TObject);
-    procedure MenuItemSaveClick(Sender: TObject);
     procedure MenuItemZoomClick(Sender: TObject);
     procedure SelectHighlighter(Sender: TObject);
     procedure SelectTheme(Sender: TObject);
@@ -103,7 +104,6 @@ procedure ToggleDarkStyle(const AValue: Boolean);
 implementation
 
 {$R *.dfm}
-{$R DarkStyle.res}
 
 uses
   System.Generics.Collections, System.Math, System.Types, System.UITypes, Vcl.Themes, TextEditor.Lines;
@@ -118,6 +118,11 @@ type
 var
   FDarkStyleEnabled: Boolean;
   FStyleLoaded: Boolean;
+
+procedure TMainForm.FileOpen1BeforeExecute(Sender: TObject);
+begin
+  //
+end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
@@ -267,17 +272,17 @@ begin
   FFrameTextEditor := TFrameTextEditor.Create(Self);
   FFrameTextEditor.TextEditor.OnCaretChanged := TextEditorCaretChanged;
   FFrameTextEditor.TextEditor.OnChange := TextEditorChange;
-  FFrameTextEditor.Parent := Self;
+  FFrameTextEditor.Parent := PanelMain;
 
   { Text compare }
   FFrameTextCompare := TFrameTextCompare.Create(Self);
   FFrameTextCompare.Visible := False;
-  FFrameTextCompare.Parent := Self;
+  FFrameTextCompare.Parent := PanelMain;
 
   { Print preview }
   FFramePrintPreview := TFramePrintPreview.Create(Self);
   FFramePrintPreview.Visible := False;
-  FFramePrintPreview.Parent := Self;
+  FFramePrintPreview.Parent := PanelMain;
 end;
 
 procedure TMainForm.InitializeHighlightersAndThemes;
@@ -289,7 +294,7 @@ end;
 procedure TMainForm.CreateInspector;
 begin
   FObjectInspector := TMyObjectInspector.Create(Self);
-  FObjectInspector.Parent := Self;
+  FObjectInspector.Parent := PanelMain;
   FObjectInspector.Align := alRight;
   FObjectInspector.Width := 350;
   FObjectInspector.AddUnlistedProperties(['JSON']);
@@ -298,7 +303,7 @@ end;
 procedure TMainForm.CreateRightSplitter;
 begin
   FSplitterRight := TSplitter.Create(Self);
-  FSplitterRight.Parent := Self;
+  FSplitterRight.Parent := PanelMain;
   FSplitterRight.Align := alRight;
   FSplitterRight.Left := FObjectInspector.Left - FSplitterRight.Width;
 end;
@@ -316,70 +321,11 @@ begin
     Caption := Caption + ' - ' + FFileName;
 end;
 
-procedure TMainForm.MenuItemOpenClick(Sender: TObject);
-begin
-  if OpenDialog.Execute then
-  begin
-    FFileName := OpenDialog.FileName;
-
-    FFrameTextEditor.TextEditor.LoadFromFile(FFileName);
-
-    UpdateCaption;
-    UpdateModifiedState;
-  end;
-end;
-
-procedure TMainForm.MenuItemSaveClick(Sender: TObject);
-begin
-  if FFileName = '' then
-    MenuItemSaveAsClick(Sender)
-  else
-  begin
-    FFrameTextEditor.TextEditor.SaveToFile(FFileName);
-
-    UpdateModifiedState;
-  end;
-end;
-
 procedure TMainForm.MenuItemZoomClick(Sender: TObject);
 begin
   FFrameTextEditor.TextEditor.ZoomPercentage := TMenuItem(Sender).Tag;
 
   StatusBar.Panels[3].Text := 'Zoom: ' + TMenuItem(Sender).Caption;
-end;
-
-procedure TMainForm.MenuItemSaveAsClick(Sender: TObject);
-begin
-  if SaveDialog.Execute then
-  begin
-    FFileName := SaveDialog.FileName;
-
-    FFrameTextEditor.TextEditor.SaveToFile(FFileName);
-
-    UpdateCaption;
-    UpdateModifiedState;
-  end;
-end;
-
-procedure TMainForm.MenuItemExportToHTMLClick(Sender: TObject);
-begin
-  if SaveDialogHTML.Execute then
-    FFrameTextEditor.TextEditor.ExportToHTML(SaveDialogHTML.FileName);
-end;
-
-procedure TMainForm.MenuItemSampleClick(Sender: TObject);
-begin
-  FFileName := '';
-
-  FFrameTextEditor.TextEditor.Lines.Text := FFrameTextEditor.TextEditor.Highlighter.Sample;
-
-  UpdateCaption;
-  UpdateModifiedState;
-end;
-
-procedure TMainForm.MenuItemExitClick(Sender: TObject);
-begin
-  Close;
 end;
 
 procedure ToggleDarkStyle(const AValue: Boolean);
@@ -400,38 +346,81 @@ begin
   TStyleManager.TrySetStyle(if AValue then 'Windows11 Modern Dark' else 'Windows');
 end;
 
-procedure TMainForm.ActionViewDarkThemeExecute(Sender: TObject);
+procedure TMainForm.ActionBookmarksNextBookmarkExecute(Sender: TObject);
 begin
-  ToggleDarkStyle(not FDarkStyleEnabled);
+  FFrameTextEditor.TextEditor.GoToNextBookmark;
 end;
 
-procedure TMainForm.ActionViewExecute(Sender: TObject);
+procedure TMainForm.ActionBookmarksPreviousBookmarkExecute(Sender: TObject);
 begin
-  var LTag := TAction(Sender).Tag;
+  FFrameTextEditor.TextEditor.GoToPreviousBookmark;
+end;
 
-  case LTag of
-    0:
-      InspectObject(FFrameTextEditor.TextEditor);
-    1:
-      begin
-        FFrameTextCompare.CompareEditors;
-        FFrameTextCompare.CompareScrollBar.Invalidate;
-        InspectObject(FFrameTextCompare.CompareScrollBar);
-      end;
-    2:
-      begin
-        FFramePrintPreview.UpdatePrintPreview(FFileName);
-        FFramePrintPreview.PrintPreview.EditorPrint.Editor := FFrameTextEditor.TextEditor;
-        InspectObject(FFramePrintPreview.PrintPreview)
-      end;
+procedure TMainForm.ActionBookmarksToggleBookmarkExecute(Sender: TObject);
+begin
+  FFrameTextEditor.TextEditor.ToggleBookmark;
+end;
+
+procedure TMainForm.ActionFileExitExecute(Sender: TObject);
+begin
+  Close;
+end;
+
+procedure TMainForm.ActionFileExportToHTMLExecute(Sender: TObject);
+begin
+  if SaveDialogHTML.Execute then
+    FFrameTextEditor.TextEditor.ExportToHTML(SaveDialogHTML.FileName);
+end;
+
+procedure TMainForm.ActionFileLoadHighlighterSampleExecute(Sender: TObject);
+begin
+  FFileName := '';
+
+  FFrameTextEditor.TextEditor.Lines.Text := FFrameTextEditor.TextEditor.Highlighter.Sample;
+
+  UpdateCaption;
+  UpdateModifiedState;
+end;
+
+procedure TMainForm.ActionFileOpenExecute(Sender: TObject);
+begin
+  if OpenDialog.Execute then
+  begin
+    FFileName := OpenDialog.FileName;
+
+    FFrameTextEditor.TextEditor.LoadFromFile(FFileName);
+
+    UpdateCaption;
+    UpdateModifiedState;
   end;
-
-  FFrameTextEditor.Visible := LTag = 0;
-  FFrameTextCompare.Visible := LTag = 1;
-  FFramePrintPreview.Visible := LTag = 2;
 end;
 
-procedure TMainForm.MenuItemGoToLineClick(Sender: TObject);
+procedure TMainForm.ActionFileSaveAsExecute(Sender: TObject);
+begin
+  if SaveDialog.Execute then
+  begin
+    FFileName := SaveDialog.FileName;
+
+    FFrameTextEditor.TextEditor.SaveToFile(FFileName);
+
+    UpdateCaption;
+    UpdateModifiedState;
+  end;
+end;
+
+procedure TMainForm.ActionFileSaveExecute(Sender: TObject);
+begin
+  if FFileName.IsEmpty then
+    ActionFileSaveAs.Execute
+  else
+  begin
+    FFrameTextEditor.TextEditor.SaveToFile(FFileName);
+
+    UpdateModifiedState;
+  end;
+end;
+
+procedure TMainForm.ActionSearchGoToLineExecute(Sender: TObject);
 var
   LValue: string;
   LLine: Integer;
@@ -440,19 +429,49 @@ begin
     FFrameTextEditor.TextEditor.GoToLineAndSetPosition(LLine);
 end;
 
-procedure TMainForm.MenuItemBookmarkToggleClick(Sender: TObject);
+procedure TMainForm.ActionViewDarkThemeExecute(Sender: TObject);
 begin
-  FFrameTextEditor.TextEditor.ToggleBookmark;
+  ToggleDarkStyle(not FDarkStyleEnabled);
+
+  if FDarkStyleEnabled then
+    SetSelectedTheme('Visual Studio Dark')
+  else
+    SetSelectedTheme('Default');
+
+  Application.ProcessMessages;
+
+  FObjectInspector.InspectedObject := FObjectInspector.InspectedObject;
 end;
 
-procedure TMainForm.MenuItemBookmarkNextClick(Sender: TObject);
+procedure TMainForm.ActionViewExecute(Sender: TObject);
 begin
-  FFrameTextEditor.TextEditor.GoToNextBookmark;
-end;
+  var LTag := TAction(Sender).Tag;
 
-procedure TMainForm.MenuItemBookmarkPreviousClick(Sender: TObject);
-begin
-  FFrameTextEditor.TextEditor.GoToPreviousBookmark;
+  case LTag of
+    0:
+      begin
+        InspectObject(FFrameTextEditor.TextEditor);
+        SpeedButtonTextEditor.Down := True;
+      end;
+    1:
+      begin
+        FFrameTextCompare.CompareEditors;
+        FFrameTextCompare.CompareScrollBar.Invalidate;
+        InspectObject(FFrameTextCompare.CompareScrollBar);
+        SpeedButtonTextCompare.Down := True;
+      end;
+    2:
+      begin
+        FFramePrintPreview.UpdatePrintPreview(FFileName);
+        FFramePrintPreview.PrintPreview.EditorPrint.Editor := FFrameTextEditor.TextEditor;
+        InspectObject(FFramePrintPreview.PrintPreview);
+        SpeedButtonPrintPreview.Down := True;
+      end;
+  end;
+
+  FFrameTextEditor.Visible := LTag = 0;
+  FFrameTextCompare.Visible := LTag = 1;
+  FFramePrintPreview.Visible := LTag = 2;
 end;
 
 procedure TMainForm.UpdatePosition;

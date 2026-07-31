@@ -2,15 +2,16 @@ program TTextEditorDemo;
 
 uses
   Vcl.Forms,
-  TTextEditorDemo.Form.Main in 'TTextEditorDemo.Form.Main.pas' {MainForm},
-  MyControl.ObjectInspector in 'MyControl.ObjectInspector.pas',
-  Vcl.Themes,
   Vcl.Styles,
-  TTextEditorDemo.Frame.TextEditor in 'TTextEditorDemo.Frame.TextEditor.pas' {FrameTextEditor: TFrame},
+  Vcl.Themes,
+  MyControl.ObjectInspector in 'MyControl.ObjectInspector.pas',
+  TTextEditorDemo.Form.Main in 'TTextEditorDemo.Form.Main.pas' {MainForm},
+  TTextEditorDemo.Frame.PrintPreview in 'TTextEditorDemo.Frame.PrintPreview.pas' {FramePrintPreview: TFrame},
   TTextEditorDemo.Frame.TextCompare in 'TTextEditorDemo.Frame.TextCompare.pas' {FrameTextCompare: TFrame},
-  TTextEditorDemo.Frame.PrintPreview in 'TTextEditorDemo.Frame.PrintPreview.pas' {FramePrintPreview: TFrame};
+  TTextEditorDemo.Frame.TextEditor in 'TTextEditorDemo.Frame.TextEditor.pas' {FrameTextEditor: TFrame};
 
 {$R *.res}
+{$R DarkStyle.res}
 
 begin
   ToggleDarkStyle(True);

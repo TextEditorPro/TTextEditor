@@ -175,7 +175,7 @@ end;
 
 procedure TMyObjectInspector.SetInspectedObject(const AValue: TObject);
 begin
-  if AValue <> FInspectedObject then
+ // if AValue <> FInspectedObject then
   begin
     FInspectedObject := AValue;
 

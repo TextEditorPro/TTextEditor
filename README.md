@@ -54,7 +54,8 @@ The old version can be found at https://github.com/TextEditorPro/TTextEditor-Leg
 
 ## Defines
 
-[TextEditor.Defines.inc](https://codeberg.com/TextEditorPro/TTextEditor/blob/main/Source/TextEditor.Defines.inc)
+VCL: [TextEditor.Defines.inc](https://https://github.com/TextEditorPro/TTextEditor/blob/main/Source/TextEditor.Defines.inc)
+FMX: [TextEditor.Defines.inc](https://github.com/TextEditorPro/TTextEditor/blob/main/Source/FMX/FMX.TextEditor.Defines.inc)
 
 ## Job offers
 

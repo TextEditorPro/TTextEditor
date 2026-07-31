@@ -1,0 +1,457 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "# Hello, World!\r\n",
+      "\r\n",
+      "FileNew\r\n",
+      "InsertText(\"Hello, World!\")"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "//"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "about",
+              "charactermap",
+              "checkforupdates",
+              "clear",
+              "clearbookmarks",
+              "clickbutton",
+              "clipboardcopy",
+              "clipboardcopywithlinenumbers",
+              "clipboardcut",
+              "clipboardpaste",
+              "commandpromptproperties",
+              "convert",
+              "decode",
+              "decreaseindent",
+              "decryptaes",
+              "deletebeginningofline",
+              "deletecharforward",
+              "deletecomments",
+              "deleteduplicatelines",
+              "deleteemptylines",
+              "deleteendofline",
+              "deleteline",
+              "deletewhitespace",
+              "deletewhitespacebackward",
+              "deletewhitespaceforward",
+              "deleteword",
+              "deletewordbackward",
+              "deletewordforward",
+              "directoryclose",
+              "directorydeleteselected",
+              "directoryedit",
+              "directoryfileproperties",
+              "directoryfindinfiles",
+              "directorynewfolder",
+              "directoryopen",
+              "directoryrefresh",
+              "directoryrename",
+              "directoryshowcontextmenu",
+              "easteregg",
+              "encode",
+              "encryptaes",
+              "exit",
+              "favouriteproperties",
+              "fileclose",
+              "fileclosemodified",
+              "filecloseselected",
+              "filecloseunmodified",
+              "filecloseäll",
+              "filecloseällother",
+              "fileinfo",
+              "filenew",
+              "filenext",
+              "fileopen",
+              "fileopeninbrowser",
+              "fileprevious",
+              "fileproperties",
+              "filereload",
+              "filesave",
+              "filesaveall",
+              "filesaveas",
+              "filesearchclose",
+              "filetogglecanclose",
+              "filetogglereadonly",
+              "filetogglesearch",
+              "findall",
+              "findduplicates",
+              "findinfiles",
+              "findnext",
+              "findprevious",
+              "foldingcollapseall",
+              "foldingcollapsealldownfromselectedline",
+              "foldingcollapseallupfromselectedline",
+              "foldingcollapseline",
+              "foldingexpandall",
+              "foldingexpandalldownfromselectedline",
+              "foldingexpandallupfromselectedline",
+              "foldingexpandline",
+              "foldingnext",
+              "foldingprevious",
+              "formatfile",
+              "gotobookmark",
+              "gotoline",
+              "gotonextbookmark",
+              "gotopreviousbookmark",
+              "htmlexport",
+              "imageviewrotateclockwise",
+              "imageviewrotatecounterclockwise",
+              "imageviewzoomin",
+              "imageviewzoomout",
+              "increaseindent",
+              "insertbackspace",
+              "insertchar",
+              "insertcontrolcharacter",
+              "insertdatetime",
+              "insertguid",
+              "inserthexcolor",
+              "insertline",
+              "insertlinebreak",
+              "insertmode",
+              "insertnull",
+              "inserttab",
+              "inserttag",
+              "inserttext",
+              "jointext",
+              "languageeditor",
+              "linewrap",
+              "macroopen",
+              "macropause",
+              "macroplayback",
+              "macroplaybackuntilendoffile",
+              "macrorecord",
+              "macrosave",
+              "macrostop",
+              "movecaretbottom",
+              "movecaretdown",
+              "movecaretleft",
+              "movecaretlinebegin",
+              "movecaretlineend",
+              "movecaretpagebottom",
+              "movecaretpagedown",
+              "movecaretpageleft",
+              "movecaretpageright",
+              "movecaretpagetop",
+              "movecaretpageup",
+              "movecaretright",
+              "movecarettop",
+              "movecaretup",
+              "movecaretx",
+              "movecarety",
+              "movelinedown",
+              "movelineup",
+              "movenextword",
+              "movepreviousword",
+              "moveselection",
+              "openclipboardhistory",
+              "options",
+              "outputclose",
+              "outputcloseall",
+              "outputcloseallother",
+              "outputcloseselected",
+              "outputcollapseall",
+              "outputcopyselectedtoclipboard",
+              "outputcopytoclipboard",
+              "outputexpandall",
+              "outputopenfiles",
+              "outputopenselectedfiles",
+              "outputrefresh",
+              "outputselectall",
+              "outputunselectall",
+              "overwritemode",
+              "pdffindnext",
+              "pdffindprevious",
+              "pdfnextpage",
+              "pdfpreviouspage",
+              "pdfrotatepageclockwise",
+              "pdfrotatepagecounterclockwise",
+              "pdfsearchclose",
+              "pdftogglesearch",
+              "pdfzoomin",
+              "pdfzoomout",
+              "powershellproperties",
+              "print",
+              "printpreview",
+              "redo",
+              "refreshxmltree",
+              "reopenproperties",
+              "replace",
+              "sftpconnect",
+              "sftpdisconnect",
+              "sftpdownloadfile",
+              "sftpedit",
+              "sftpuploadfile",
+              "scrolldown",
+              "scrollleft",
+              "scrollright",
+              "scrollup",
+              "selectactivefilefortextcompare",
+              "selectactivefilefromdirectory",
+              "selectactivemenupage",
+              "selectall",
+              "selectioncaretx",
+              "selectioncarety",
+              "selectiondown",
+              "selectioneditorbottom",
+              "selectioneditortop",
+              "selectionleft",
+              "selectionlinebegin",
+              "selectionlineend",
+              "selectionpagebottom",
+              "selectionpagedown",
+              "selectionpageleft",
+              "selectionpageright",
+              "selectionpagetop",
+              "selectionpageup",
+              "selectionright",
+              "selectionup",
+              "selectionword",
+              "selectionwordleft",
+              "selectionwordright",
+              "sendfeedback",
+              "shortcuts",
+              "showoutputbookmarks",
+              "sleep",
+              "sortasc",
+              "sortdesc",
+              "sortrandom",
+              "spacestotabs",
+              "speakingpause",
+              "speakingstart",
+              "speakingstop",
+              "spellcheckfindnexterror",
+              "spellcheckfindpreviouserror",
+              "splittext",
+              "tabstospaces",
+              "textcompare",
+              "toggleblockcomment",
+              "togglebookmark",
+              "togglebookmarklist",
+              "togglecase",
+              "togglecolorselection",
+              "toggledirectory",
+              "toggleencodingselection",
+              "togglefullscreen",
+              "togglehexeditor",
+              "togglehighlighterselection",
+              "togglelayout",
+              "togglelinecomment",
+              "togglelinenumbers",
+              "togglemainmenu",
+              "togglemenubar",
+              "toggleminimap",
+              "togglemovecaretattheendafterreload",
+              "toggleoutput",
+              "togglereloadautomatically",
+              "togglerolloutmenu",
+              "toggleruler",
+              "toggleselectionmode",
+              "toggleskinselector",
+              "togglespecialchars",
+              "togglespellcheck",
+              "togglesplit",
+              "togglestatusbar",
+              "togglesyncedit",
+              "toggletitlebarapplicationname",
+              "toggletitlebarfavourite",
+              "toggletitlebarfavouritelist",
+              "toggletitlebarfilelist",
+              "toggletitlebarfilename",
+              "toggletitlebarmagnifier",
+              "toggletitlebaroptions",
+              "toggletoolbar",
+              "toggletrimtrailingspaces",
+              "togglewordwrap",
+              "togglexmltree",
+              "translate",
+              "trimboth",
+              "trimleft",
+              "trimright",
+              "undo",
+              "validatexml",
+              "viewfiles",
+              "visithomepage",
+              "zoomeditor"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Words": [
+              "alternating",
+              "asciidecimal",
+              "base32",
+              "base64",
+              "base64withlinebreaks",
+              "base85",
+              "base91",
+              "base128",
+              "base256",
+              "base1024",
+              "base4096",
+              "binary",
+              "down",
+              "hex",
+              "hexwithoutspaces",
+              "html",
+              "json",
+              "json2",
+              "json3",
+              "json4",
+              "keywordslower",
+              "keywordstitle",
+              "keywordsupper",
+              "left",
+              "lower",
+              "octal",
+              "original",
+              "right",
+              "rotate5",
+              "rotate13",
+              "rotate18",
+              "rotate47",
+              "sentence",
+              "sql",
+              "title",
+              "up",
+              "upper",
+              "url",
+              "xml",
+              "xmlminify"
+            ],
+            "Attributes": {
+              "Element": "MethodName"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "(",
+              ")"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "//",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "#",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

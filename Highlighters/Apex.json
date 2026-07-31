@@ -1,0 +1,368 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "// Hello, World! in Apex\r\n",
+      "\r\n",
+      "System.debug('Hello, World!');"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "//"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "abstract",
+              "activate",
+              "after",
+              "and",
+              "any",
+              "array",
+              "as",
+              "asc",
+              "autonomous",
+              "before",
+              "begin",
+              "bigdecimal",
+              "break",
+              "bulk",
+              "by",
+              "byte",
+              "case",
+              "cast",
+              "catch",
+              "char",
+              "class",
+              "collect",
+              "commit",
+              "const",
+              "continue",
+              "count",
+              "currency",
+              "default",
+              "delete",
+              "desc",
+              "do",
+              "else",
+              "end",
+              "enum",
+              "exception",
+              "excludes",
+              "exit",
+              "export",
+              "extends",
+              "false",
+              "final",
+              "finally",
+              "first",
+              "float",
+              "for",
+              "from",
+              "global",
+              "goto",
+              "group",
+              "having",
+              "hint",
+              "if",
+              "implements",
+              "import",
+              "in",
+              "includes",
+              "inner",
+              "insert",
+              "instanceof",
+              "int",
+              "interface",
+              "into",
+              "join",
+              "last",
+              "like",
+              "limit",
+              "list",
+              "loop",
+              "map",
+              "merge",
+              "not",
+              "nulls",
+              "number",
+              "of",
+              "on",
+              "or",
+              "order",
+              "outer",
+              "override",
+              "package",
+              "parallel",
+              "pragma",
+              "private",
+              "protected",
+              "public",
+              "retrieve",
+              "return",
+              "rollback",
+              "select",
+              "set",
+              "sharing",
+              "short",
+              "sobject",
+              "sort",
+              "static",
+              "super",
+              "switch",
+              "synchronized",
+              "system",
+              "testmethod",
+              "then",
+              "this",
+              "throw",
+              "transaction",
+              "trigger",
+              "true",
+              "try",
+              "undelete",
+              "update",
+              "upsert",
+              "using",
+              "virtual",
+              "void",
+              "webservice",
+              "when",
+              "where",
+              "while",
+              "with"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+					{
+            "Type": "Method",
+            "Words": [
+							"blob",
+							"boolean",
+							"date",
+							"datetime",
+							"decimal",
+							"double",
+							"id",
+							"integer",
+							"long",
+							"object",
+							"string",
+							"time"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+					{
+            "Type": "MethodName",
+            "Words": [
+              "new",
+              "null"
+            ],
+            "Attributes": {
+              "Element": "MethodName"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "!",
+              "-",
+              "&",
+              "(",
+              ")",
+              "*",
+              ",",
+              ".",
+              "/",
+              ":",
+              ";",
+              "?",
+              "[",
+              "]",
+              "^",
+              "{",
+              "|",
+              "}",
+              "~",
+              "+",
+              "<",
+              "=",
+              ">"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\",
+          "HideGuideLineAtFirstColumn": true
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "//",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "//",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

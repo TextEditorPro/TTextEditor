@@ -1,0 +1,951 @@
+﻿unit TextEditor.CompletionProposal.PopupWindow;
+
+interface
+
+uses
+  Winapi.Messages, Winapi.Windows, System.Classes, System.Types, Vcl.Controls, Vcl.Forms, Vcl.Graphics, TextEditor.CompletionProposal,
+  TextEditor.Lines, TextEditor.PopupWindow, TextEditor.Types, TextEditor.Utils;
+
+type
+  TTextEditorValidateEvent = procedure(ASender: TObject; const AEndToken: Char) of object;
+
+  TTextEditorCompletionProposalPopupWindow = class(TTextEditorPopupWindow)
+  strict private
+    FBitmapBuffer: Vcl.Graphics.TBitmap;
+    FCaseSensitive: Boolean;
+    FCodeInsight: Boolean;
+    FCompletionProposal: TTextEditorCompletionProposal;
+    FCurrentString: string;
+    FFiltered: Boolean;
+    FFormWidth: Integer;
+    FItemDescriptionWidth: Integer;
+    FItemHeight: Integer;
+    FItemIndexArray: array of Integer;
+    FItemWidth: Integer;
+    FItems: TTextEditorCompletionProposalItems;
+    FLines: TTextEditorLines;
+    FMargin: Integer;
+    FOnValidate: TTextEditorValidateEvent;
+    FSelectedLine: Integer;
+    FShowDescription: Boolean;
+    FTopLine: Integer;
+    FValueSet: Boolean;
+    function GetItemHeight: Integer;
+    procedure ActivateDropShadow(const AHandle: THandle);
+    procedure AddKeyHandlers;
+    procedure EditorKeyDown(ASender: TObject; var AKey: Word; AShift: TShiftState);
+    procedure EditorKeyPress(const ASender: TObject; var AKey: Char);
+    procedure HandleDblClick(ASender: TObject);
+    procedure HandleOnValidate(ASender: TObject; const AEndToken: Char);
+    procedure MoveSelectedLine(const ALineCount: Integer);
+    procedure RemoveKeyHandlers;
+    procedure SetCurrentString(const AValue: string);
+    procedure SetTopLine(const AValue: Integer);
+    procedure UpdateScrollBar;
+    procedure WMVScroll(var AMessage: TWMScroll); message WM_VSCROLL;
+  protected
+    procedure Paint; override;
+    procedure MouseDown(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer); override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
+    function GetCurrentInput: string;
+    procedure Assign(ASource: TPersistent); override;
+    procedure Execute(const ACurrentString: string; const APoint: TPoint; const AOptions: TCompletionProposalOptions);
+    procedure MouseWheel(AShift: TShiftState; AWheelDelta: Integer);
+    property CodeInsight: Boolean read FCodeInsight write FCodeInsight;
+    property CurrentString: string read FCurrentString write SetCurrentString;
+    property Items: TTextEditorCompletionProposalItems read FItems write FItems;
+    property Lines: TTextEditorLines read FLines write FLines;
+    property OnValidate: TTextEditorValidateEvent read FOnValidate write FOnValidate;
+    property ShowDescription: Boolean read FShowDescription write FShowDescription;
+    property TopLine: Integer read FTopLine write SetTopLine;
+  end;
+
+implementation
+
+uses
+  System.Generics.Defaults, System.Math, System.SysUtils, System.UITypes, TextEditor, TextEditor.CompletionProposal.Snippets,
+  TextEditor.Consts, TextEditor.Highlighter, TextEditor.KeyCommands, TextEditor.PaintHelper;
+
+constructor TTextEditorCompletionProposalPopupWindow.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  FCaseSensitive := False;
+  FFiltered := False;
+  FItemHeight := 0;
+  FBorderColor := (Owner as TCustomTextEditor).Colors.CompletionProposalBorder;
+  FMargin := 2;
+  FValueSet := False;
+  Visible := False;
+
+  AddKeyHandlers;
+
+  FItems := TTextEditorCompletionProposalItems.Create;
+
+  FBitmapBuffer := Vcl.Graphics.TBitmap.Create;
+
+  OnValidate := HandleOnValidate;
+  OnDblClick := HandleDblClick;
+end;
+
+destructor TTextEditorCompletionProposalPopupWindow.Destroy;
+begin
+  RemoveKeyHandlers;
+
+  FBitmapBuffer.Free;
+
+  SetLength(FItemIndexArray, 0);
+  FItems.Free;
+
+  inherited Destroy;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.Assign(ASource: TPersistent);
+begin
+  if Assigned(ASource) and (ASource is TTextEditorCompletionProposal) then
+  begin
+    FCompletionProposal := ASource as TTextEditorCompletionProposal;
+
+    with FCompletionProposal do
+    begin
+      Self.FCaseSensitive := cpoCaseSensitive in Options;
+      Self.FFiltered := cpoFiltered in Options;
+      Self.FFormWidth := Width;
+      Self.Font.Assign(Font);
+      Self.Constraints.Assign(Constraints);
+    end
+  end
+  else
+    inherited Assign(ASource);
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.AddKeyHandlers;
+var
+  LTextEditor: TCustomTextEditor;
+begin
+  LTextEditor := if Assigned(Owner) then Owner as TCustomTextEditor else nil;
+
+  if Assigned(LTextEditor) then
+  begin
+    LTextEditor.AddKeyPressHandler(EditorKeyPress);
+    LTextEditor.AddKeyDownHandler(EditorKeyDown);
+  end;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.RemoveKeyHandlers;
+var
+  LTextEditor: TCustomTextEditor;
+begin
+  LTextEditor := if Assigned(Owner) then Owner as TCustomTextEditor else nil;
+
+  if Assigned(LTextEditor) then
+  begin
+    LTextEditor.RemoveKeyPressHandler(EditorKeyPress);
+    LTextEditor.RemoveKeyDownHandler(EditorKeyDown);
+
+    if not (csDestroying in ComponentState) then
+      LTextEditor.SetFocus;
+  end;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.ActivateDropShadow(const AHandle: THandle);
+
+  function IsXP: Boolean;
+  begin
+    Result := (Win32Platform = VER_PLATFORM_WIN32_NT) and CheckWin32Version(5, 1);
+  end;
+
+const
+  SPI_SETDROPSHADOW = $1025;
+  CS_DROPSHADOW = $00020000;
+var
+  LParam: Boolean;
+  LClassLong: UInt64;
+begin
+  LParam := True;
+
+  if IsXP and SystemParametersInfo(SPI_SETDROPSHADOW, 0, @LParam, 0) then
+  begin
+    LClassLong := GetClassLong(AHandle, GCL_STYLE);
+    LClassLong := LClassLong or CS_DROPSHADOW;
+
+    if SetClassLong(AHandle, GCL_STYLE, LClassLong) <> 0 then
+      SendMessage(AHandle, CM_RECREATEWND, 0, 0);
+  end;
+end;
+
+function TTextEditorCompletionProposalPopupWindow.GetItemHeight: Integer;
+var
+  LTextEditor: TCustomTextEditor;
+begin
+  LTextEditor := if Assigned(Owner) then Owner as TCustomTextEditor else nil;
+
+  if Assigned(LTextEditor) then
+  begin
+    FBitmapBuffer.Canvas.Font.Assign(LTextEditor.Fonts.CompletionProposal);
+
+    Result := TextHeight(FBitmapBuffer.Canvas, 'X');
+  end
+  else
+    Result := 0;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.EditorKeyDown(ASender: TObject; var AKey: Word; AShift: TShiftState); //FI:O804 Method parameter is declared but never used
+var
+  LTextEditor: TCustomTextEditor;
+  LTextPosition: TTextEditorTextPosition;
+  LChar: Char;
+begin
+  LTextEditor := if Assigned(Owner) then Owner as TCustomTextEditor else nil;
+
+  case AKey of
+    vkReturn, vkTab:
+      if Assigned(FOnValidate) then
+        FOnValidate(Self, TControlCharacters.Null);
+    vkEscape:
+      Hide;
+    vkLeft:
+      if FCurrentString.Length > 0 then
+      begin
+        CurrentString := Copy(FCurrentString, 1, FCurrentString.Length - 1);
+
+        if Assigned(LTextEditor) then
+          LTextEditor.CommandProcessor(TKeyCommands.Left, TControlCharacters.Null, nil);
+      end
+      else
+      begin
+        if Assigned(LTextEditor) then
+          LTextEditor.CommandProcessor(TKeyCommands.Left, TControlCharacters.Null, nil);
+
+        Hide;
+      end;
+    vkRight:
+      if Assigned(LTextEditor) then
+      begin
+        LTextPosition := LTextEditor.TextPosition;
+        LChar :=
+          if LTextPosition.Char <= FLines[LTextPosition.Line].Length then
+            FLines[LTextPosition.Line][LTextPosition.Char]
+          else
+            TCharacters.Space;
+
+        if LTextEditor.IsWordBreakChar(LChar) then
+          Hide
+        else
+          CurrentString := FCurrentString + LChar;
+
+        LTextEditor.CommandProcessor(TKeyCommands.Right, TControlCharacters.Null, nil);
+      end;
+    vkPrior:
+      MoveSelectedLine(-FCompletionProposal.VisibleLines);
+    vkNext:
+      MoveSelectedLine(FCompletionProposal.VisibleLines);
+    vkEnd:
+      TopLine := Length(FItemIndexArray) - 1;
+    vkHome:
+      TopLine := 0;
+    vkUp:
+      if ssCtrl in AShift then
+        FSelectedLine := 0
+      else
+        MoveSelectedLine(-1);
+    vkDown:
+      if ssCtrl in AShift then
+        FSelectedLine := Length(FItemIndexArray) - 1
+      else
+        MoveSelectedLine(1);
+    vkBack:
+      if AShift = [] then
+      begin
+        if FCurrentString.Length > 0 then
+        begin
+          CurrentString := Copy(FCurrentString, 1, FCurrentString.Length - 1);
+
+          if Assigned(LTextEditor) then
+            LTextEditor.CommandProcessor(TKeyCommands.Backspace, TControlCharacters.Null, nil);
+        end
+        else
+        begin
+          if Assigned(LTextEditor) then
+            LTextEditor.CommandProcessor(TKeyCommands.Backspace, TControlCharacters.Null, nil);
+
+          Hide;
+        end;
+      end;
+  end;
+
+  AKey := 0;
+
+  Invalidate;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.EditorKeyPress(const ASender: TObject; var AKey: Char); //FI:O804 Method parameter is declared but never used
+begin
+  case AKey of
+    TControlCharacters.CarriageReturn, TControlCharacters.Tab:
+      Hide;
+    TCharacters.Space .. High(Char):
+      begin
+        if not CodeInsight then
+        begin
+          if not (cpoAutoInvoke in FCompletionProposal.Options) then
+            if (Owner as TCustomTextEditor).IsWordBreakChar(AKey) and Assigned(FOnValidate) then
+              if AKey = TCharacters.Space then
+                FOnValidate(Self, TControlCharacters.Null);
+
+          CurrentString := FCurrentString + AKey;
+        end;
+
+        if (cpoAutoInvoke in FCompletionProposal.Options) and (Length(FItemIndexArray) = 0) or
+          (Pos(AKey, FCompletionProposal.CloseChars) <> 0) then
+          Hide
+        else
+        if Assigned(OnKeyPress) and not CodeInsight then
+          OnKeyPress(Self, AKey);
+      end;
+    TControlCharacters.Backspace:
+      if not CodeInsight then
+      with Owner as TCustomTextEditor do
+        CommandProcessor(TKeyCommands.Char, AKey, nil);
+  end;
+
+  Invalidate;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.Paint;
+var
+  LTextEditor: TCustomTextEditor;
+  LTop: Integer;
+  LItemIndex: Integer;
+  LItem: TTextEditorCompletionProposalItem;
+  LText, LTemp, LDescription: string;
+  LPosition, LWidth: Integer;
+begin
+  LTextEditor := if Assigned(Owner) then Owner as TCustomTextEditor else nil;
+
+  if not Assigned(LTextEditor) then
+    Exit;
+
+  with FBitmapBuffer do
+  begin
+    Canvas.Brush.Color := LTextEditor.Colors.CompletionProposalBackground;
+
+    Height := 0;
+    Width := ClientWidth;
+    Height := ClientHeight;
+    LTop := 0;
+
+    for var LIndex := 0 to Min(FCompletionProposal.VisibleLines, Length(FItemIndexArray) - 1) do
+    begin
+      if LIndex + TopLine >= Length(FItemIndexArray) then
+        Break;
+
+      if (LIndex + TopLine = FSelectedLine) and not CodeInsight then
+      begin
+        Canvas.Font.Color := LTextEditor.Colors.CompletionProposalSelectedText;
+        Canvas.Brush.Color := LTextEditor.Colors.CompletionProposalSelectedBackground;
+        Canvas.Pen.Color := LTextEditor.Colors.CompletionProposalSelectedBackground;
+        Canvas.Rectangle(0, FItemHeight * LIndex, ClientWidth, FItemHeight * (LIndex + 1));
+      end
+      else
+      begin
+        Canvas.Font.Color := LTextEditor.Colors.CompletionProposalForeground;
+        Canvas.Brush.Color := LTextEditor.Colors.CompletionProposalBackground;
+      end;
+
+      LItemIndex := FItemIndexArray[TopLine + LIndex];
+
+      LItem := FItems[LItemIndex];
+      LText := LItem.Keyword;
+      LDescription := LItem.Description;
+      LPosition := if FCaseSensitive then Pos(FCurrentString, LText) else Pos(AnsiUpperCase(FCurrentString), AnsiUpperCase(LText));
+
+      if LPosition > 0 then
+      begin
+        LWidth := 0;
+
+        if LPosition > 1 then
+        begin
+          LTemp := Copy(LText, 1, LPosition - 1);
+          Canvas.TextOut(FMargin, LTop, LTemp);
+          Inc(LWidth, Canvas.TextWidth(LTemp));
+        end;
+
+        Canvas.Font.Style := Canvas.Font.Style + [fsUnderline];
+        LTemp := Copy(LText, LPosition, FCurrentString.Length);
+        Canvas.TextOut(FMargin + LWidth, LTop, LTemp);
+        Inc(LWidth, Canvas.TextWidth(LTemp));
+        Canvas.Font.Style := Canvas.Font.Style - [fsUnderline];
+        LTemp := Copy(LText, LPosition + FCurrentString.Length);
+
+        if not LTemp.IsEmpty then
+          Canvas.TextOut(FMargin + LWidth, LTop, LTemp);
+      end
+      else
+        Canvas.TextOut(FMargin, LTop, LText);
+
+      if ShowDescription then
+        Canvas.TextOut(FMargin + FItemWidth, LTop, LDescription);
+
+      Inc(LTop, FItemHeight);
+    end;
+  end;
+
+  Canvas.Draw(0, 0, FBitmapBuffer);
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.MoveSelectedLine(const ALineCount: Integer);
+begin
+  FSelectedLine := EnsureRange(FSelectedLine + ALineCount, 0, Max(Length(FItemIndexArray) - 1, 0));
+
+  if FSelectedLine >= TopLine + FCompletionProposal.VisibleLines then
+    TopLine := FSelectedLine - FCompletionProposal.VisibleLines + 1;
+
+  if FSelectedLine < TopLine then
+    TopLine := FSelectedLine;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.SetCurrentString(const AValue: string);
+
+  function MatchItem1(const AIndex: Integer): Boolean;
+  var
+    LCompareString: string;
+  begin
+    LCompareString := FItems[AIndex].Keyword;
+
+    Result :=
+      if FCaseSensitive then
+        Pos(AValue, LCompareString) = 1
+      else
+        Pos(AnsiUpperCase(AValue), AnsiUpperCase(LCompareString)) = 1;
+  end;
+
+  function MatchItem2(const AIndex: Integer): Boolean;
+  var
+    LCompareString: string;
+  begin
+    LCompareString := FItems[AIndex].Keyword;
+
+    Result :=
+      if FCaseSensitive then
+        Pos(AValue, LCompareString) > 1
+      else
+        Pos(AnsiUpperCase(AValue), AnsiUpperCase(LCompareString)) > 1;
+  end;
+
+  function RecalcList(const AShowAllItems: Boolean): Integer;
+  var
+    LItemsCount: Integer;
+  begin
+    Result := 0;
+
+    LItemsCount := FItems.Count;
+
+    SetLength(FItemIndexArray, 0);
+    SetLength(FItemIndexArray, LItemsCount);
+
+    for var LIndex := 0 to LItemsCount - 1 do
+    if AShowAllItems or MatchItem1(LIndex) then
+    begin
+      FItemIndexArray[Result] := LIndex;
+      Inc(Result);
+    end;
+
+    for var LIndex := 0 to LItemsCount - 1 do
+    if MatchItem2(LIndex) then
+    begin
+      FItemIndexArray[Result] := LIndex;
+      Inc(Result);
+    end;
+
+    SetLength(FItemIndexArray, Result);
+  end;
+
+var
+  LCount: Integer;
+  LHeight: Integer;
+  LIndex: Integer;
+begin
+  FCurrentString := AValue;
+
+  if FFiltered then
+  begin
+    LCount := RecalcList(AValue.IsEmpty);
+    LHeight := FItemHeight * Min(LCount, FCompletionProposal.VisibleLines) + 2;
+
+    if cpoAutoConstraints in FCompletionProposal.Options then
+      Constraints.MinHeight := LHeight;
+
+    Height := LHeight;
+    TopLine := 0;
+    Repaint;
+  end
+  else
+  begin
+    LIndex := 0;
+
+    while (LIndex < FItems.Count) and not MatchItem1(LIndex) do
+      Inc(LIndex);
+
+    TopLine := if LIndex < FItems.Count then LIndex else 0;
+  end;
+
+  if Visible then
+  begin
+    UpdateScrollBar;
+    Invalidate;
+  end;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.SetTopLine(const AValue: Integer);
+begin
+  if TopLine <> AValue then
+  begin
+    FTopLine := AValue;
+    UpdateScrollBar;
+    Invalidate;
+  end;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.MouseWheel(AShift: TShiftState; AWheelDelta: Integer);
+var
+  LLinesToScroll: Integer;
+begin
+  if csDesigning in ComponentState then
+    Exit;
+
+  LLinesToScroll := if ssCtrl in aShift then FCompletionProposal.VisibleLines else 1;
+
+  TopLine :=
+    if AWheelDelta > 0 then
+      Max(0, TopLine - LLinesToScroll)
+    else
+      Min(FItems.Count - FCompletionProposal.VisibleLines, TopLine + LLinesToScroll);
+
+  Invalidate;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.Execute(const ACurrentString: string; const APoint: TPoint;
+  const AOptions: TCompletionProposalOptions);
+var
+  LPoint: TPoint;
+
+  procedure CalculateFormPlacement;
+  var
+    LMaxIndex: Integer;
+    LMaxDescriptionIndex: Integer;
+    LMaxLength: Integer;
+    LMaxDescriptionLength: Integer;
+    LLength: Integer;
+    LText, LDescription: string;
+    LItem: TTextEditorCompletionProposalItem;
+    LWidth: Integer;
+    LHeight: Integer;
+  begin
+    LPoint.X := APoint.X - TextWidth(FBitmapBuffer.Canvas, ACurrentString);
+    LPoint.Y := APoint.Y;
+
+    LMaxIndex := 0;
+    LMaxDescriptionIndex := -1;
+    LMaxLength := 0;
+    LMaxDescriptionLength := 0;
+
+    for var LIndex := 0 to FItems.Count - 1 do
+    begin
+      LItem := FItems[LIndex];
+      LText := LItem.Keyword;
+      LDescription := LItem.Description;
+
+      LLength := LText.Length;
+
+      if LLength > LMaxLength then
+      begin
+        LMaxLength := LLength;
+        LMaxIndex := LIndex;
+      end;
+
+      if ShowDescription then
+      begin
+        LLength := LDescription.Length;
+
+        if LLength > LMaxDescriptionLength then
+        begin
+          LMaxDescriptionLength := LLength;
+          LMaxDescriptionIndex := LIndex;
+        end;
+      end;
+    end;
+
+    LText := FItems[LMaxIndex].Keyword;
+
+    FItemWidth := TextWidth(FBitmapBuffer.Canvas, LText);
+
+    LWidth := FItemWidth + 2 * GetSystemMetrics(SM_CXVSCROLL);
+
+    FItemDescriptionWidth := 0;
+
+    if LMaxDescriptionIndex > -1 then
+    begin
+      LText := FItems[LMaxDescriptionIndex].Description;
+
+      Inc(FItemWidth, TextWidth(FBitmapBuffer.Canvas, 'X'));
+      FItemDescriptionWidth := TextWidth(FBitmapBuffer.Canvas, LText);
+      Inc(LWidth, FItemDescriptionWidth);
+    end;
+
+    LHeight := FItemHeight * Min(FItems.Count, FCompletionProposal.VisibleLines) + 2;
+
+    if LPoint.X + LWidth > Screen.DesktopWidth then
+    begin
+      LPoint.X := Screen.DesktopWidth - LWidth - 5;
+
+      if LPoint.X < 0 then
+        LPoint.X := 0;
+    end;
+
+    if LPoint.Y + LHeight > Screen.DesktopHeight then
+    begin
+      LPoint.Y := LPoint.Y - LHeight - (Owner as TCustomTextEditor).LineHeight - 2;
+
+      if LPoint.Y < 0 then
+        LPoint.Y := 0;
+    end;
+
+    Width := LWidth;
+    Height := LHeight;
+  end;
+
+  procedure SetAutoConstraints;
+  begin
+    if cpoAutoConstraints in FCompletionProposal.Options then
+    begin
+      Constraints.MinHeight := Height;
+      Constraints.MinWidth := Width;
+    end;
+  end;
+
+var
+  LCount: Integer;
+begin
+  if AOptions.SortByDescription then
+    FItems.Sort(TComparer<TTextEditorCompletionProposalItem>.Construct(
+      function(const ALeft, ARight: TTextEditorCompletionProposalItem): Integer
+      begin
+        Result := CompareStr(ALeft.Description, ARight.Description);
+
+        if Result = 0 then
+          Result := CompareStr(ALeft.Keyword, ARight.Keyword);
+      end))
+  else
+  if AOptions.SortByKeyword then
+    FItems.Sort(TComparer<TTextEditorCompletionProposalItem>.Construct(
+      function(const ALeft, ARight: TTextEditorCompletionProposalItem): Integer
+      begin
+        Result := CompareStr(ALeft.Keyword, ARight.Keyword);
+      end));
+
+  LCount := FItems.Count;
+
+  SetLength(FItemIndexArray, 0);
+  SetLength(FItemIndexArray, LCount);
+
+  for var LIndex := 0 to LCount - 1 do
+    FItemIndexArray[LIndex] := LIndex;
+
+  if Length(FItemIndexArray) > 0 then
+  begin
+    FItemHeight := GetItemHeight;
+    CalculateFormPlacement;
+    SetAutoConstraints;
+    CurrentString := ACurrentString;
+
+    if Length(FItemIndexArray) > 0 then
+    begin
+      if cpoShowShadow in FCompletionProposal.Options then
+        ActivateDropShadow(Handle);
+
+      FBorderWidth := if cpoShowBorder in FCompletionProposal.Options then 1 else 0;
+
+      UpdateScrollBar;
+      Invalidate;
+      Show(LPoint);
+    end;
+  end;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.HandleOnValidate(ASender: TObject; const AEndToken: Char); //FI:O804 Method parameter is declared but never used
+var
+  LTextEditor: TCustomTextEditor;
+
+  function GetBeginChar(const ARow: Integer; const ACharCount: Integer): Integer;
+  begin
+    Result := if ARow = 1 then LTextEditor.SelectionStartPosition.Char else ACharCount + 1;
+  end;
+
+var
+  LTextPosition: TTextEditorTextPosition;
+  LLineText: string;
+  LIndex: Integer;
+  LLine: string;
+  LAddedSnippet: Boolean;
+  LSnippetItem: TTextEditorCompletionProposalSnippetItem;
+  LValue: string;
+  LSnippetPosition, LSnippetSelectionStartPosition, LSnippetSelectionEndPosition: TTextEditorTextPosition;
+  LItem: TTextEditorCompletionProposalItem;
+  LStringList: TStringList;
+  LCharCount: Integer;
+  LPLineText: PChar;
+  LSpaces: string;
+  LBeginChar: Integer;
+begin
+  if CodeInsight then
+    Exit;
+
+  LTextEditor := if Assigned(Owner) then Owner as TCustomTextEditor else nil;
+
+  if Assigned(LTextEditor) then
+  with LTextEditor do
+  begin
+    BeginUpdate;
+    BeginUndoBlock;
+    try
+      LTextPosition := TextPosition;
+      LLineText := FLines[LTextPosition.Line];
+
+      if not SelectionAvailable then
+      begin
+        LIndex := LTextPosition.Char - 1;
+
+        if LIndex <= LLineText.Length then
+        while (LIndex > 0) and (LLineText[LIndex] > TCharacters.Space) and not LTextEditor.IsWordBreakChar(LLineText[LIndex]) do
+          Dec(LIndex);
+
+        SelectionStartPosition := GetPosition(LIndex + 1, LTextPosition.Line);
+
+        if AEndToken = TControlCharacters.Null then
+        begin
+          LLine := Lines[LTextPosition.Line];
+
+          SelectionEndPosition :=
+            if (Length(LLine) >= LTextPosition.Char) and IsWordBreakChar(LLine[LTextPosition.Char]) then
+              LTextPosition
+            else
+              GetPosition(WordEnd.Char, LTextPosition.Line)
+        end
+        else
+          SelectionEndPosition := LTextPosition;
+      end;
+
+      LAddedSnippet := False;
+      LSnippetItem := nil;
+
+      if FSelectedLine < Length(FItemIndexArray) then
+      begin
+        LItem := FItems[FItemIndexArray[FSelectedLine]];
+
+        if LItem.SnippetIndex = -1 then
+          LValue := LItem.Keyword
+        else
+        begin
+          LAddedSnippet := True;
+
+          LStringList := TStringList.Create;
+          try
+            LStringList.TrailingLineBreak := False;
+            LSnippetItem := CompletionProposal.Snippets.Item[LItem.SnippetIndex];
+
+            LStringList.Text := LSnippetItem.Snippet.Text;
+
+            LCharCount := 0;
+            LPLineText := PChar(LLineText);
+
+            for LIndex := 0 to SelectionStartPosition.Char - 1 do //FI:W528 Variable 'LIndex' not used in FOR-loop
+            begin
+              Inc(LCharCount, if LPLineText^ = TControlCharacters.Tab then Tabs.Width else 1);
+
+              if LPLineText^ <> TControlCharacters.Null then
+                Inc(LPLineText);
+            end;
+
+            Dec(LCharCount);
+
+            LSpaces :=
+              if toTabsToSpaces in Tabs.Options then
+                StringOfChar(TCharacters.Space, LCharCount)
+              else
+                StringOfChar(TControlCharacters.Tab, LCharCount div Tabs.Width) + StringOfChar(TCharacters.Space, LCharCount mod Tabs.Width);
+
+            for LIndex := 1 to LStringList.Count - 1 do
+              LStringList[LIndex] := LSpaces + LStringList[LIndex];
+
+            if LSnippetItem.Position.Active then
+            begin
+              LBeginChar := GetBeginChar(LSnippetItem.Position.Row, LCharCount);
+              LSnippetPosition := GetPosition(LBeginChar + LSnippetItem.Position.Column - 1, SelectionStartPosition.Line + LSnippetItem.Position.Row - 1);
+            end;
+
+            if LSnippetItem.Selection.Active then
+            begin
+              LBeginChar := GetBeginChar(LSnippetItem.Selection.FromRow, LCharCount);
+              LSnippetSelectionStartPosition := GetPosition(LBeginChar + LSnippetItem.Selection.FromColumn - 1, SelectionStartPosition.Line + LSnippetItem.Selection.FromRow - 1);
+              LBeginChar := GetBeginChar(LSnippetItem.Selection.ToRow, LCharCount);
+              LSnippetSelectionEndPosition := GetPosition(LBeginChar + LSnippetItem.Selection.ToColumn - 1, SelectionStartPosition.Line + LSnippetItem.Selection.ToRow - 1);
+            end;
+
+            LValue := LStringList.Text
+          finally
+            LStringList.Free;
+          end;
+        end;
+      end
+      else
+        LValue := SelectedText;
+
+      FValueSet := SelectedText <> LValue;
+
+      if FValueSet then
+        SelectedText := LValue;
+
+      if CanFocus then
+        SetFocus;
+
+      EnsureCursorPositionVisible;
+
+      if LAddedSnippet then
+      begin
+        if Assigned(LSnippetItem) and LSnippetItem.Position.Active then
+          TextPosition := LSnippetPosition
+        else
+        if Assigned(LSnippetItem) and LSnippetItem.Selection.Active then
+          TextPosition := LSnippetSelectionEndPosition
+        else
+          TextPosition := SelectionEndPosition;
+
+        if Assigned(LSnippetItem) and LSnippetItem.Selection.Active then
+        begin
+          SelectionStartPosition := LSnippetSelectionStartPosition;
+          SelectionEndPosition := LSnippetSelectionEndPosition;
+        end
+        else
+        begin
+          SelectionStartPosition := TextPosition;
+          SelectionEndPosition := SelectionStartPosition;
+        end;
+      end
+      else
+      begin
+        TextPosition := SelectionEndPosition;
+        SelectionStartPosition := TextPosition;
+      end;
+    finally
+      EndUndoBlock;
+      EndUpdate;
+    end;
+  end;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.HandleDblClick(ASender: TObject); //FI:O804 Method parameter is declared but never used
+begin
+  if Assigned(FOnValidate) then
+    FOnValidate(Self, TControlCharacters.Null);
+
+  Hide;
+end;
+
+function TTextEditorCompletionProposalPopupWindow.GetCurrentInput: string;
+var
+  LTextEditor: TCustomTextEditor;
+  LTextPosition: TTextEditorTextPosition;
+  LLineText: string;
+  LIndex: Integer;
+begin
+  Result := '';
+
+  LTextEditor := if Assigned(Owner) then Owner as TCustomTextEditor else nil;
+
+  if Assigned(LTextEditor) then
+  begin
+    LTextPosition := LTextEditor.TextPosition;
+    LLineText := FLines[LTextPosition.Line];
+    LIndex := LTextPosition.Char - 1;
+
+    if LIndex <= LLineText.Length then
+    begin
+      while (LIndex > 0) and (LLineText[LIndex] > TCharacters.Space) and not LTextEditor.IsWordBreakChar(LLineText[LIndex]) do
+        Dec(LIndex);
+
+      Result := Copy(LLineText, LIndex + 1, LTextPosition.Char - LIndex - 1);
+    end;
+  end;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.UpdateScrollBar;
+var
+  LScrollInfo: TScrollInfo;
+  LItemCount: Integer;
+begin
+  LItemCount := Length(FItemIndexArray);
+
+  LScrollInfo.cbSize := SizeOf(ScrollInfo);
+  LScrollInfo.fMask := SIF_DISABLENOSCROLL;
+  LScrollInfo.nMin := 0;
+  LScrollInfo.nMax := Max(0, LItemCount - 1);
+  LScrollInfo.nPage := FCompletionProposal.VisibleLines;
+  LScrollInfo.nPos := TopLine;
+
+  ShowScrollBar(Handle, SB_VERT, LItemCount > FCompletionProposal.VisibleLines);
+  SetScrollInfo(Handle, SB_VERT, LScrollInfo, True);
+
+  if LItemCount <= FCompletionProposal.VisibleLines then
+    EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_BOTH)
+  else
+  begin
+    EnableScrollBar(Handle, SB_VERT, ESB_ENABLE_BOTH);
+
+    if TopLine <= 0 then
+      EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_UP)
+    else
+    if TopLine + FCompletionProposal.VisibleLines >= LItemCount then
+      EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_DOWN);
+  end;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.WMVScroll(var AMessage: TWMScroll);
+begin
+  AMessage.Result := 0;
+
+  case AMessage.ScrollCode of
+    SB_TOP:
+      TopLine := 0;
+    SB_BOTTOM:
+      TopLine := FItems.Count - 1;
+    SB_LINEDOWN:
+      TopLine := Min(FItems.Count - FCompletionProposal.VisibleLines, TopLine + 1);
+    SB_LINEUP:
+      TopLine := Max(0, TopLine - 1);
+    SB_PAGEDOWN:
+      TopLine := Min(FItems.Count - FCompletionProposal.VisibleLines, TopLine + FCompletionProposal.VisibleLines);
+    SB_PAGEUP:
+      TopLine := Max(0, TopLine - FCompletionProposal.VisibleLines);
+    SB_THUMBPOSITION, SB_THUMBTRACK:
+      TopLine := AMessage.Pos;
+  end;
+
+  Invalidate;
+end;
+
+procedure TTextEditorCompletionProposalPopupWindow.MouseDown(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer);
+begin
+  if not CodeInsight then
+  begin
+    FSelectedLine := Max(0, TopLine + (Y div FItemHeight));
+
+    inherited MouseDown(AButton, AShift, X, Y);
+
+    Refresh;
+  end;
+end;
+
+end.

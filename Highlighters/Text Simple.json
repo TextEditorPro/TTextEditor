@@ -1,0 +1,12 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "Simple text file"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      }
+    }
+  }
+}

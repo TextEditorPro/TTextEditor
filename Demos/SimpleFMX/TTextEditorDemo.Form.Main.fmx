@@ -1,0 +1,158 @@
+object MainForm: TMainForm
+  Left = 0
+  Top = 0
+  Caption = 'TTextEditor FMX Demo'
+  ClientHeight = 766
+  ClientWidth = 918
+  Fill.Kind = Solid
+  Position = ScreenCenter
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object RectangleLeft: TRectangle
+    Align = Left
+    Fill.Color = claWhite
+    Size.Width = 207.000000000000000000
+    Size.Height = 744.000000000000000000
+    Size.PlatformDefault = False
+    Stroke.Kind = None
+    object ListBoxHighlighters: TListBox
+      Align = Client
+      Margins.Left = 3.000000000000000000
+      Margins.Top = 3.000000000000000000
+      Size.Width = 204.000000000000000000
+      Size.Height = 438.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 0
+      DisableFocusEffect = True
+      DefaultItemStyles.ItemStyle = ''
+      DefaultItemStyles.GroupHeaderStyle = ''
+      DefaultItemStyles.GroupFooterStyle = ''
+      OnChange = ListBoxHighlightersChange
+      Viewport.Width = 200.000000000000000000
+      Viewport.Height = 434.000000000000000000
+    end
+    object SplitterHorizontal: TSplitter
+      Align = Bottom
+      Cursor = crVSplit
+      MinSize = 20.000000000000000000
+      Position.Y = 441.000000000000000000
+      ShowGrip = False
+      Size.Width = 207.000000000000000000
+      Size.Height = 3.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object RectangleThemes: TRectangle
+      Align = Bottom
+      Fill.Color = claWhite
+      Position.Y = 444.000000000000000000
+      Size.Width = 207.000000000000000000
+      Size.Height = 300.000000000000000000
+      Size.PlatformDefault = False
+      Stroke.Kind = None
+      object ListBoxThemes: TListBox
+        Align = Client
+        Margins.Left = 3.000000000000000000
+        Margins.Bottom = 3.000000000000000000
+        Size.Width = 204.000000000000000000
+        Size.Height = 297.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+        DisableFocusEffect = True
+        DefaultItemStyles.ItemStyle = ''
+        DefaultItemStyles.GroupHeaderStyle = ''
+        DefaultItemStyles.GroupFooterStyle = ''
+        OnChange = ListBoxThemesChange
+        Viewport.Width = 200.000000000000000000
+        Viewport.Height = 293.000000000000000000
+      end
+    end
+  end
+  object SplitterVertical: TSplitter
+    Align = Left
+    Cursor = crHSplit
+    MinSize = 20.000000000000000000
+    Position.X = 207.000000000000000000
+    ShowGrip = False
+    Size.Width = 5.000000000000000000
+    Size.Height = 744.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object TextEditor: TTextEditor
+    Align = Client
+    Border.Color = xFF808690
+    Border.ColoredEdges = [ebLeft, ebTop, ebRight, ebBottom]
+    CodeFolding.Visible = True
+    Fonts.CodeFoldingHint.Family = 'Courier New'
+    Fonts.CodeFoldingHint.Size = 10.666666984558110000
+    Fonts.LineNumbers.Family = 'Courier New'
+    Fonts.LineNumbers.Size = 10.666666984558110000
+    Fonts.Minimap.Family = 'Courier New'
+    Fonts.Minimap.Size = 1.333333373069763000
+    Fonts.Ruler.Family = 'Courier New'
+    Fonts.Ruler.Size = 10.666666984558110000
+    HighlightLine.Active = True
+    LeftMargin.Width = 55
+    OnCompletionProposalExecute = TextEditorCompletionProposalExecute
+    OnCreateHighlighterStream = TextEditorCreateHighlighterStream
+    PartialLoad.Rows = 100
+    Margins.Top = 3.000000000000000000
+    Margins.Right = 3.000000000000000000
+    Margins.Bottom = 3.000000000000000000
+    Size.Width = 703.000000000000000000
+    Size.Height = 738.000000000000000000
+    Size.PlatformDefault = False
+    Selection.Options = [soALTSetsColumnMode, soHighlightSimilarTerms, soTermsCaseSensitive]
+    TabOrder = 1
+  end
+  object StatusBar: TStatusBar
+    PopupMenu = PopupMenuZoom
+    Position.Y = 744.000000000000000000
+    ShowSizeGrip = True
+    Size.Width = 918.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 3
+    OnClick = StatusBarClick
+    object LabelZoom: TLabel
+      Align = Center
+      Size.Width = 100.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Center
+      Text = 'Zoom: 100 %'
+    end
+  end
+  object PopupMenuZoom: TPopupMenu
+    Left = 94
+    Top = 154
+    object MenuItemZoom100: TMenuItem
+      Tag = 100
+      IsChecked = True
+      Text = '100 %'
+      OnClick = MenuItemZoomClick
+    end
+    object MenuItemZoom125: TMenuItem
+      Tag = 125
+      Text = '125 %'
+      OnClick = MenuItemZoomClick
+    end
+    object MenuItemZoom150: TMenuItem
+      Tag = 150
+      Text = '150 %'
+      OnClick = MenuItemZoomClick
+    end
+    object MenuItemZoom200: TMenuItem
+      Tag = 200
+      Text = '200 %'
+      OnClick = MenuItemZoomClick
+    end
+    object MenuItemZoom300: TMenuItem
+      Tag = 300
+      Text = '300 %'
+      OnClick = MenuItemZoomClick
+    end
+  end
+end

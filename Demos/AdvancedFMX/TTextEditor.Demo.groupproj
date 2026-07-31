@@ -1,0 +1,60 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{B4B8C4A2-24DC-4E41-8FC5-38F12E8C1CFF}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="..\..\Packages\FMX.TextEditor.Delphi.Runtime.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="..\..\Packages\FMX.TextEditor.Delphi.Designtime.dproj">
+            <Dependencies/>
+        </Projects>
+        <Projects Include="TTextEditorDemo.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="FMX_TextEditor_Delphi_Runtime">
+        <MSBuild Projects="..\..\Packages\FMX.TextEditor.Delphi.Runtime.dproj"/>
+    </Target>
+    <Target Name="FMX_TextEditor_Delphi_Runtime:Clean">
+        <MSBuild Projects="..\..\Packages\FMX.TextEditor.Delphi.Runtime.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="FMX_TextEditor_Delphi_Runtime:Make">
+        <MSBuild Projects="..\..\Packages\FMX.TextEditor.Delphi.Runtime.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="FMX_TextEditor_Delphi_Designtime">
+        <MSBuild Projects="..\..\Packages\FMX.TextEditor.Delphi.Designtime.dproj"/>
+    </Target>
+    <Target Name="FMX_TextEditor_Delphi_Designtime:Clean">
+        <MSBuild Projects="..\..\Packages\FMX.TextEditor.Delphi.Designtime.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="FMX_TextEditor_Delphi_Designtime:Make">
+        <MSBuild Projects="..\..\Packages\FMX.TextEditor.Delphi.Designtime.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="TTextEditorDemo">
+        <MSBuild Projects="TTextEditorDemo.dproj"/>
+    </Target>
+    <Target Name="TTextEditorDemo:Clean">
+        <MSBuild Projects="TTextEditorDemo.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TTextEditorDemo:Make">
+        <MSBuild Projects="TTextEditorDemo.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="FMX_TextEditor_Delphi_Runtime;FMX_TextEditor_Delphi_Designtime;TTextEditorDemo"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="FMX_TextEditor_Delphi_Runtime:Clean;FMX_TextEditor_Delphi_Designtime:Clean;TTextEditorDemo:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="FMX_TextEditor_Delphi_Runtime:Make;FMX_TextEditor_Delphi_Designtime:Make;TTextEditorDemo:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

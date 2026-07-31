@@ -1,0 +1,133 @@
+package FMX.TextEditor.Delphi.Runtime;
+
+{$R *.res}
+{$IFDEF IMPLICITBUILDING This IFDEF should not be used by users}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO OFF}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION OFF}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST ON}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DEFINE DEBUG}
+{$ENDIF IMPLICITBUILDING}
+{$DESCRIPTION 'TTextEditor FMX control package - runtime'}
+{$LIBSUFFIX AUTO}
+{$RUNONLY}
+{$IMPLICITBUILD ON}
+
+requires
+  rtl,
+  fmx,
+  dbrtl;
+
+contains
+  FMX.TextEditor in '..\Source\FMX\FMX.TextEditor.pas',
+  FMX.TextEditor.ActiveLine in '..\Source\FMX\FMX.TextEditor.ActiveLine.pas',
+  FMX.TextEditor.Border in '..\Source\FMX\FMX.TextEditor.Border.pas',
+  FMX.TextEditor.Caret in '..\Source\FMX\FMX.TextEditor.Caret.pas',
+  FMX.TextEditor.Caret.MultiEdit in '..\Source\FMX\FMX.TextEditor.Caret.MultiEdit.pas',
+  FMX.TextEditor.Caret.NonBlinking in '..\Source\FMX\FMX.TextEditor.Caret.NonBlinking.pas',
+  FMX.TextEditor.Caret.Offsets in '..\Source\FMX\FMX.TextEditor.Caret.Offsets.pas',
+  FMX.TextEditor.Caret.Styles in '..\Source\FMX\FMX.TextEditor.Caret.Styles.pas',
+  FMX.TextEditor.CodeFolding in '..\Source\FMX\FMX.TextEditor.CodeFolding.pas',
+  FMX.TextEditor.CodeFolding.GuideLines in '..\Source\FMX\FMX.TextEditor.CodeFolding.GuideLines.pas',
+  FMX.TextEditor.CodeFolding.Hint in '..\Source\FMX\FMX.TextEditor.CodeFolding.Hint.pas',
+  FMX.TextEditor.CodeFolding.Hint.Form in '..\Source\FMX\FMX.TextEditor.CodeFolding.Hint.Form.pas',
+  FMX.TextEditor.CodeFolding.Hint.Indicator in '..\Source\FMX\FMX.TextEditor.CodeFolding.Hint.Indicator.pas',
+  FMX.TextEditor.CodeFolding.Ranges in '..\Source\FMX\FMX.TextEditor.CodeFolding.Ranges.pas',
+  FMX.TextEditor.CodeFolding.Regions in '..\Source\FMX\FMX.TextEditor.CodeFolding.Regions.pas',
+  FMX.TextEditor.Colors in '..\Source\FMX\FMX.TextEditor.Colors.pas',
+  FMX.TextEditor.Compare.ScrollBar in '..\Source\FMX\FMX.TextEditor.Compare.ScrollBar.pas',
+  FMX.TextEditor.CompletionProposal in '..\Source\FMX\FMX.TextEditor.CompletionProposal.pas',
+  FMX.TextEditor.CompletionProposal.PopupWindow in '..\Source\FMX\FMX.TextEditor.CompletionProposal.PopupWindow.pas',
+  FMX.TextEditor.CompletionProposal.Snippets in '..\Source\FMX\FMX.TextEditor.CompletionProposal.Snippets.pas',
+  FMX.TextEditor.CompletionProposal.Trigger in '..\Source\FMX\FMX.TextEditor.CompletionProposal.Trigger.pas',
+  FMX.TextEditor.Consts in '..\Source\FMX\FMX.TextEditor.Consts.pas',
+  FMX.TextEditor.DB in '..\Source\FMX\FMX.TextEditor.DB.pas',
+  FMX.TextEditor.Encoding in '..\Source\FMX\FMX.TextEditor.Encoding.pas',
+  FMX.TextEditor.Export.HTML in '..\Source\FMX\FMX.TextEditor.Export.HTML.pas',
+  FMX.TextEditor.Fonts in '..\Source\FMX\FMX.TextEditor.Fonts.pas',
+  FMX.TextEditor.Glyph in '..\Source\FMX\FMX.TextEditor.Glyph.pas',
+  FMX.TextEditor.HighlightLine in '..\Source\FMX\FMX.TextEditor.HighlightLine.pas',
+  FMX.TextEditor.Highlighter in '..\Source\FMX\FMX.TextEditor.Highlighter.pas',
+  FMX.TextEditor.Highlighter.Attributes in '..\Source\FMX\FMX.TextEditor.Highlighter.Attributes.pas',
+  FMX.TextEditor.Highlighter.Colors in '..\Source\FMX\FMX.TextEditor.Highlighter.Colors.pas',
+  FMX.TextEditor.Highlighter.Comments in '..\Source\FMX\FMX.TextEditor.Highlighter.Comments.pas',
+  FMX.TextEditor.Highlighter.Export.JSON in '..\Source\FMX\FMX.TextEditor.Highlighter.Export.JSON.pas',
+  FMX.TextEditor.Highlighter.Import.JSON in '..\Source\FMX\FMX.TextEditor.Highlighter.Import.JSON.pas',
+  FMX.TextEditor.Highlighter.Rules in '..\Source\FMX\FMX.TextEditor.Highlighter.Rules.pas',
+  FMX.TextEditor.Highlighter.Token in '..\Source\FMX\FMX.TextEditor.Highlighter.Token.pas',
+  FMX.TextEditor.InternalImage in '..\Source\FMX\FMX.TextEditor.InternalImage.pas',
+  FMX.TextEditor.JSONDataObjects in '..\Source\FMX\FMX.TextEditor.JSONDataObjects.pas',
+  FMX.TextEditor.KeyCommands in '..\Source\FMX\FMX.TextEditor.KeyCommands.pas',
+  FMX.TextEditor.KeyboardHandler in '..\Source\FMX\FMX.TextEditor.KeyboardHandler.pas',
+  FMX.TextEditor.Language in '..\Source\FMX\FMX.TextEditor.Language.pas',
+  FMX.TextEditor.LeftMargin in '..\Source\FMX\FMX.TextEditor.LeftMargin.pas',
+  FMX.TextEditor.LeftMargin.Bookmarks in '..\Source\FMX\FMX.TextEditor.LeftMargin.Bookmarks.pas',
+  FMX.TextEditor.LeftMargin.Border in '..\Source\FMX\FMX.TextEditor.LeftMargin.Border.pas',
+  FMX.TextEditor.LeftMargin.LineNumbers in '..\Source\FMX\FMX.TextEditor.LeftMargin.LineNumbers.pas',
+  FMX.TextEditor.LeftMargin.LineState in '..\Source\FMX\FMX.TextEditor.LeftMargin.LineState.pas',
+  FMX.TextEditor.LeftMargin.Marks in '..\Source\FMX\FMX.TextEditor.LeftMargin.Marks.pas',
+  FMX.TextEditor.LeftMargin.MarksPanel in '..\Source\FMX\FMX.TextEditor.LeftMargin.MarksPanel.pas',
+  FMX.TextEditor.Lines in '..\Source\FMX\FMX.TextEditor.Lines.pas',
+  FMX.TextEditor.MacroRecorder in '..\Source\FMX\FMX.TextEditor.MacroRecorder.pas',
+  FMX.TextEditor.Marks in '..\Source\FMX\FMX.TextEditor.Marks.pas',
+  FMX.TextEditor.MatchingPairs in '..\Source\FMX\FMX.TextEditor.MatchingPairs.pas',
+  FMX.TextEditor.Minimap in '..\Source\FMX\FMX.TextEditor.Minimap.pas',
+  FMX.TextEditor.Minimap.Indicator in '..\Source\FMX\FMX.TextEditor.Minimap.Indicator.pas',
+  FMX.TextEditor.Minimap.Shadow in '..\Source\FMX\FMX.TextEditor.Minimap.Shadow.pas',
+  FMX.TextEditor.PaintHelper in '..\Source\FMX\FMX.TextEditor.PaintHelper.pas',
+  FMX.TextEditor.PartialLoad in '..\Source\FMX\FMX.TextEditor.PartialLoad.pas',
+  FMX.TextEditor.PopupWindow in '..\Source\FMX\FMX.TextEditor.PopupWindow.pas',
+  FMX.TextEditor.Print in '..\Source\FMX\FMX.TextEditor.Print.pas',
+  FMX.TextEditor.Print.HeaderFooter in '..\Source\FMX\FMX.TextEditor.Print.HeaderFooter.pas',
+  FMX.TextEditor.Print.Margins in '..\Source\FMX\FMX.TextEditor.Print.Margins.pas',
+  FMX.TextEditor.Print.Preview in '..\Source\FMX\FMX.TextEditor.Print.Preview.pas',
+  FMX.TextEditor.Print.PrinterInfo in '..\Source\FMX\FMX.TextEditor.Print.PrinterInfo.pas',
+  FMX.TextEditor.Replace in '..\Source\FMX\FMX.TextEditor.Replace.pas',
+  FMX.TextEditor.RightMargin in '..\Source\FMX\FMX.TextEditor.RightMargin.pas',
+  FMX.TextEditor.Ruler in '..\Source\FMX\FMX.TextEditor.Ruler.pas',
+  FMX.TextEditor.Scroll in '..\Source\FMX\FMX.TextEditor.Scroll.pas',
+  FMX.TextEditor.Scroll.Hint in '..\Source\FMX\FMX.TextEditor.Scroll.Hint.pas',
+  FMX.TextEditor.Scroll.Shadow in '..\Source\FMX\FMX.TextEditor.Scroll.Shadow.pas',
+  FMX.TextEditor.Search in '..\Source\FMX\FMX.TextEditor.Search.pas',
+  FMX.TextEditor.Search.Base in '..\Source\FMX\FMX.TextEditor.Search.Base.pas',
+  FMX.TextEditor.Search.InSelection in '..\Source\FMX\FMX.TextEditor.Search.InSelection.pas',
+  FMX.TextEditor.Search.Map in '..\Source\FMX\FMX.TextEditor.Search.Map.pas',
+  FMX.TextEditor.Search.NearOperator in '..\Source\FMX\FMX.TextEditor.Search.NearOperator.pas',
+  FMX.TextEditor.Search.Normal in '..\Source\FMX\FMX.TextEditor.Search.Normal.pas',
+  FMX.TextEditor.Search.RegularExpressions in '..\Source\FMX\FMX.TextEditor.Search.RegularExpressions.pas',
+  FMX.TextEditor.Search.Wildcard in '..\Source\FMX\FMX.TextEditor.Search.Wildcard.pas',
+  FMX.TextEditor.Selection in '..\Source\FMX\FMX.TextEditor.Selection.pas',
+  FMX.TextEditor.SkipRegions in '..\Source\FMX\FMX.TextEditor.SkipRegions.pas',
+  FMX.TextEditor.SpecialChars in '..\Source\FMX\FMX.TextEditor.SpecialChars.pas',
+  FMX.TextEditor.SpecialChars.LineBreak in '..\Source\FMX\FMX.TextEditor.SpecialChars.LineBreak.pas',
+  FMX.TextEditor.SpecialChars.Selection in '..\Source\FMX\FMX.TextEditor.SpecialChars.Selection.pas',
+  FMX.TextEditor.SyncEdit in '..\Source\FMX\FMX.TextEditor.SyncEdit.pas',
+  FMX.TextEditor.Tabs in '..\Source\FMX\FMX.TextEditor.Tabs.pas',
+  FMX.TextEditor.TextFolding in '..\Source\FMX\FMX.TextEditor.TextFolding.pas',
+  FMX.TextEditor.Types in '..\Source\FMX\FMX.TextEditor.Types.pas',
+  FMX.TextEditor.Undo in '..\Source\FMX\FMX.TextEditor.Undo.pas',
+  FMX.TextEditor.Undo.Item in '..\Source\FMX\FMX.TextEditor.Undo.Item.pas',
+  FMX.TextEditor.Undo.List in '..\Source\FMX\FMX.TextEditor.Undo.List.pas',
+  FMX.TextEditor.UnknownChars in '..\Source\FMX\FMX.TextEditor.UnknownChars.pas',
+  FMX.TextEditor.Utils in '..\Source\FMX\FMX.TextEditor.Utils.pas',
+  FMX.TextEditor.WordWrap in '..\Source\FMX\FMX.TextEditor.WordWrap.pas';
+
+end.
+

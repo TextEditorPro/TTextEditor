@@ -1,0 +1,406 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "#!/path/to/python\r\n",
+      "\r\n",
+      "print (\"Hello, World!\")"
+    ],
+    "MainRules": {
+      "Name": "Python",
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "\"\"\"",
+              "Close": "\"\"\""
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "TokenRange": {
+              "Open": "def",
+              "Close": "("
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "("
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abcdefABCDEF",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "$"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "/py-script",
+              "py-script",
+              "and",
+              "assert",
+              "async",
+              "await",
+              "break",
+              "class",
+              "continue",
+              "def",
+              "del",
+              "elif",
+              "else",
+              "except",
+              "finally",
+              "for",
+              "from",
+              "global",
+              "if",
+              "in",
+              "is",
+              "lambda",
+              "not",
+              "or",
+              "pass",
+              "raise",
+              "return",
+              "try",
+              "while",
+              "with",
+              "yield"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "_",
+              "__debug__",
+              "__doc__",
+              "__future__",
+              "__import__",
+              "__name__",
+              "abs",
+              "all",
+              "any",
+              "apply",
+              "arithmeticerror",
+              "as",
+              "assertionerror",
+              "attributeerror",
+              "baseexception",
+              "basestring",
+              "bool",
+              "buffer",
+              "callable",
+              "chr",
+              "classmethod",
+              "cmp",
+              "coerce",
+              "compile",
+              "complex",
+              "copyright",
+              "credits",
+              "delattr",
+              "deprecationwarning",
+              "dict",
+              "dir",
+              "divmod",
+              "ellipsis",
+              "enumerate",
+              "environmenterror",
+              "eoferror",
+              "eval",
+              "exception",
+              "exec",
+              "execfile",
+              "exit",
+              "false",
+              "file",
+              "filter",
+              "float",
+              "floatingpointerror",
+              "frozenset",
+              "futurewarning",
+              "generatorexit",
+              "getattr",
+              "globals",
+              "hasattr",
+              "hash",
+              "help",
+              "hex",
+              "id",
+              "import",
+              "importerror",
+              "importwarning",
+              "indentationerror",
+              "indexerror",
+              "input",
+              "int",
+              "intern",
+              "ioerror",
+              "isinstance",
+              "issubclass",
+              "iter",
+              "keyboardinterrupt",
+              "keyerror",
+              "len",
+              "license",
+              "list",
+              "locals",
+              "long",
+              "lookuperror",
+              "map",
+              "max",
+              "memoryerror",
+              "min",
+              "nameerror",
+              "none",
+              "notimplemented",
+              "notimplementederror",
+              "object",
+              "oct",
+              "open",
+              "ord",
+              "oserror",
+              "overflowerror",
+              "pendingdeprecationwarning",
+              "pow",
+              "print",
+              "property",
+              "quit",
+              "range",
+              "raw_input",
+              "reduce",
+              "referenceerror",
+              "reload",
+              "repr",
+              "reversed",
+              "round",
+              "runtimeerror",
+              "runtimewarning",
+              "self",
+              "set",
+              "setattr",
+              "slice",
+              "sorted",
+              "standarderror",
+              "staticmethod",
+              "stopiteration",
+              "str",
+              "sum",
+              "super",
+              "syntaxerror",
+              "syntaxwarning",
+              "systemerror",
+              "systemexit",
+              "taberror",
+              "true",
+              "tuple",
+              "type",
+              "typeerror",
+              "unboundlocalerror",
+              "unichr",
+              "unicode",
+              "unicodedecodeerror",
+              "unicodeencodeerror",
+              "unicodeerror",
+              "unicodetranslateerror",
+              "unicodewarning",
+              "userwarning",
+              "valueerror",
+              "vars",
+              "warning",
+              "windowserror",
+              "xrange",
+              "zerodivisionerror",
+              "zip"
+            ],
+            "Attributes": {
+              "Element": "Attribute"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "<",
+              ">",
+              "=",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}",
+              "%"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "BythonPreprocessor": false,
+          "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "#",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "\"\"\"",
+            "CloseToken": "\"\"\"",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "#",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

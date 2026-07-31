@@ -1,0 +1,36 @@
+﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ProjectGuid>{E522DB5B-D6BB-495E-A6AD-CC5861B82EC6}</ProjectGuid>
+    </PropertyGroup>
+    <ItemGroup>
+        <Projects Include="TTextEditorDemo.dproj">
+            <Dependencies/>
+        </Projects>
+    </ItemGroup>
+    <ProjectExtensions>
+        <Borland.Personality>Default.Personality.12</Borland.Personality>
+        <Borland.ProjectType/>
+        <BorlandProject>
+            <Default.Personality/>
+        </BorlandProject>
+    </ProjectExtensions>
+    <Target Name="TTextEditorDemo">
+        <MSBuild Projects="TTextEditorDemo.dproj"/>
+    </Target>
+    <Target Name="TTextEditorDemo:Clean">
+        <MSBuild Projects="TTextEditorDemo.dproj" Targets="Clean"/>
+    </Target>
+    <Target Name="TTextEditorDemo:Make">
+        <MSBuild Projects="TTextEditorDemo.dproj" Targets="Make"/>
+    </Target>
+    <Target Name="Build">
+        <CallTarget Targets="TTextEditorDemo"/>
+    </Target>
+    <Target Name="Clean">
+        <CallTarget Targets="TTextEditorDemo:Clean"/>
+    </Target>
+    <Target Name="Make">
+        <CallTarget Targets="TTextEditorDemo:Make"/>
+    </Target>
+    <Import Project="$(BDS)\Bin\CodeGear.Group.Targets" Condition="Exists('$(BDS)\Bin\CodeGear.Group.Targets')"/>
+</Project>

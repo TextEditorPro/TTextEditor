@@ -1,0 +1,584 @@
+﻿object MainForm: TMainForm
+  Left = 0
+  Top = 0
+  Caption = 'TTextEditor FMX Advanced Demo'
+  ClientHeight = 800
+  ClientWidth = 1200
+  Fill.Kind = Solid
+  Position = ScreenCenter
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object MenuBar: TMenuBar
+    Size.Width = 1200.000000000000000000
+    Size.Height = 24.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object MenuItemFile: TMenuItem
+      Text = 'File'
+      object MenuItemOpen: TMenuItem
+        Locked = True
+        ShortCut = 16463
+        Text = 'Open...'
+        OnClick = MenuItemOpenClick
+      end
+      object MenuItemSave: TMenuItem
+        Locked = True
+        ShortCut = 16467
+        Text = 'Save'
+        OnClick = MenuItemSaveClick
+      end
+      object MenuItemSaveAs: TMenuItem
+        Locked = True
+        Text = 'Save as...'
+        OnClick = MenuItemSaveAsClick
+      end
+      object MenuItemExportToHTML: TMenuItem
+        Locked = True
+        Text = 'Export to HTML...'
+        OnClick = MenuItemExportToHTMLClick
+      end
+      object MenuItemSample: TMenuItem
+        Locked = True
+        Text = 'Load highlighter sample'
+        OnClick = MenuItemSampleClick
+      end
+      object MenuItemFileSeparator: TMenuItem
+        Locked = True
+        Text = '-'
+      end
+      object MenuItemExit: TMenuItem
+        Locked = True
+        Text = 'Exit'
+        OnClick = MenuItemExitClick
+      end
+    end
+    object MenuItemSearch: TMenuItem
+      Text = 'Search'
+      object MenuItemGoToLine: TMenuItem
+        Locked = True
+        Text = 'Go to line...'
+        OnClick = MenuItemGoToLineClick
+      end
+    end
+    object MenuItemBookmarks: TMenuItem
+      Text = 'Bookmarks'
+      object MenuItemBookmarkToggle: TMenuItem
+        Locked = True
+        Text = 'Toggle bookmark'
+        OnClick = MenuItemBookmarkToggleClick
+      end
+      object MenuItemBookmarkNext: TMenuItem
+        Locked = True
+        Text = 'Next bookmark'
+        OnClick = MenuItemBookmarkNextClick
+      end
+      object MenuItemBookmarkPrevious: TMenuItem
+        Locked = True
+        Text = 'Previous bookmark'
+        OnClick = MenuItemBookmarkPreviousClick
+      end
+    end
+  end
+  object RectangleSearch: TRectangle
+    Align = Top
+    Fill.Color = claWhite
+    Position.Y = 24.000000000000000000
+    Size.Width = 1200.000000000000000000
+    Size.Height = 32.000000000000000000
+    Size.PlatformDefault = False
+    Stroke.Kind = None
+    object LabelSearch: TLabel
+      Align = Left
+      Margins.Left = 8.000000000000000000
+      Position.X = 8.000000000000000000
+      Size.Width = 48.000000000000000000
+      Size.Height = 32.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Search'
+    end
+    object EditSearch: TEdit
+      Touch.InteractiveGestures = [LongTap, DoubleTap]
+      Align = Left
+      TabOrder = 0
+      Position.X = 60.000000000000000000
+      Position.Y = 4.000000000000000000
+      Margins.Left = 4.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Size.Width = 220.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      OnChangeTracking = EditSearchChangeTracking
+    end
+    object ButtonFindPrevious: TButton
+      Align = Left
+      Margins.Left = 4.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 284.000000000000000000
+      Position.Y = 4.000000000000000000
+      Size.Width = 28.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Text = '<'
+      OnClick = ButtonFindPreviousClick
+    end
+    object ButtonFindNext: TButton
+      Align = Left
+      Margins.Left = 2.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 314.000000000000000000
+      Position.Y = 4.000000000000000000
+      Size.Width = 28.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Text = '>'
+      OnClick = ButtonFindNextClick
+    end
+    object LabelHighlighter: TLabel
+      Align = Left
+      Margins.Left = 20.000000000000000000
+      Position.X = 362.000000000000000000
+      Size.Width = 68.000000000000000000
+      Size.Height = 32.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Trailing
+      Text = 'Highlighter'
+    end
+    object ComboBoxHighlighters: TComboBox
+      Align = Left
+      DropDownCount = 24
+      Margins.Left = 6.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 436.000000000000000000
+      Position.Y = 4.000000000000000000
+      Size.Width = 190.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 3
+      OnChange = ComboBoxHighlightersChange
+    end
+    object LabelTheme: TLabel
+      Align = Left
+      Margins.Left = 16.000000000000000000
+      Position.X = 642.000000000000000000
+      Size.Width = 44.000000000000000000
+      Size.Height = 32.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Trailing
+      Text = 'Theme'
+    end
+    object ComboBoxThemes: TComboBox
+      Align = Left
+      DropDownCount = 24
+      Margins.Left = 6.000000000000000000
+      Margins.Top = 4.000000000000000000
+      Margins.Bottom = 4.000000000000000000
+      Position.X = 692.000000000000000000
+      Position.Y = 4.000000000000000000
+      Size.Width = 170.000000000000000000
+      Size.Height = 24.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 4
+      OnChange = ComboBoxThemesChange
+    end
+  end
+  object TabControl: TTabControl
+    Align = Client
+    Margins.Left = 3.000000000000000000
+    Margins.Top = 3.000000000000000000
+    Margins.Bottom = 3.000000000000000000
+    Size.Width = 1197.000000000000000000
+    Size.Height = 716.000000000000000000
+    Size.PlatformDefault = False
+    TabIndex = 0
+    TabOrder = 1
+    TabPosition = Top
+    OnChange = TabControlChange
+    Sizes = (
+      1197s
+      690s
+      1197s
+      690s
+      1197s
+      690s)
+    object TabItemEditor: TTabItem
+      CustomIcon = <
+        item
+        end>
+      IsSelected = True
+      Size.Width = 52.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'Editor'
+      ExplicitSize.cx = 50.000000000000000000
+      ExplicitSize.cy = 50.000000000000000000
+      object TextEditor: TTextEditor
+        Align = Client
+        Border.Color = xFF808690
+        Border.ColoredEdges = [ebLeft, ebTop, ebRight, ebBottom]
+        CodeFolding.Visible = True
+        Fonts.CodeFoldingHint.Family = 'Courier New'
+        Fonts.CodeFoldingHint.Size = 10.666666984558110000
+        Fonts.Hint.Family = 'Courier New'
+        Fonts.Hint.Size = 10.666666984558110000
+        Fonts.LineNumbers.Family = 'Courier New'
+        Fonts.LineNumbers.Size = 10.666666984558110000
+        Fonts.Minimap.Family = 'Courier New'
+        Fonts.Minimap.Size = 1.333333373069763000
+        Fonts.Ruler.Family = 'Courier New'
+        Fonts.Ruler.Size = 10.666666984558110000
+        HighlightLine.Active = True
+        LeftMargin.MarksPanel.Options = [bpoToggleBookmarkByClick, bpoShowBookmarkColorsPopup]
+        LeftMargin.Width = 55
+        OnCaretChanged = TextEditorCaretChanged
+        OnChange = TextEditorChange
+        OnCreateHighlighterStream = TextEditorCreateHighlighterStream
+        PartialLoad.Rows = 100
+        Margins.Top = 2.000000000000000000
+        Size.Width = 1197.000000000000000000
+        Size.Height = 688.000000000000000000
+        Size.PlatformDefault = False
+        Selection.Options = [soALTSetsColumnMode, soHighlightSimilarTerms, soTermsCaseSensitive]
+        TabOrder = 0
+      end
+    end
+    object TabItemPrintPreview: TTabItem
+      CustomIcon = <
+        item
+        end>
+      IsSelected = False
+      Size.Width = 90.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'Print preview'
+      ExplicitSize.cx = 50.000000000000000000
+      ExplicitSize.cy = 50.000000000000000000
+      object RectanglePreviewBar: TRectangle
+        Align = Top
+        Fill.Color = claWhite
+        Margins.Top = 2.000000000000000000
+        Position.Y = 2.000000000000000000
+        Size.Width = 1197.000000000000000000
+        Size.Height = 32.000000000000000000
+        Size.PlatformDefault = False
+        Stroke.Kind = None
+        object ButtonPageFirst: TButton
+          Align = Left
+          Margins.Left = 8.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Position.X = 8.000000000000000000
+          Position.Y = 4.000000000000000000
+          Size.Width = 28.000000000000000000
+          Size.Height = 24.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 0
+          Text = '|<'
+          OnClick = ButtonPageFirstClick
+        end
+        object ButtonPagePrevious: TButton
+          Align = Left
+          Margins.Left = 2.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Position.X = 38.000000000000000000
+          Position.Y = 4.000000000000000000
+          Size.Width = 28.000000000000000000
+          Size.Height = 24.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 1
+          Text = '<'
+          OnClick = ButtonPagePreviousClick
+        end
+        object LabelPage: TLabel
+          Align = Left
+          Margins.Left = 4.000000000000000000
+          Position.X = 70.000000000000000000
+          Size.Width = 100.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TextSettings.HorzAlign = Center
+          Text = 'Page 1 / 1'
+        end
+        object ButtonPageNext: TButton
+          Align = Left
+          Margins.Left = 4.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Position.X = 174.000000000000000000
+          Position.Y = 4.000000000000000000
+          Size.Width = 28.000000000000000000
+          Size.Height = 24.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 2
+          Text = '>'
+          OnClick = ButtonPageNextClick
+        end
+        object ButtonPageLast: TButton
+          Align = Left
+          Margins.Left = 2.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Position.X = 204.000000000000000000
+          Position.Y = 4.000000000000000000
+          Size.Width = 28.000000000000000000
+          Size.Height = 24.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 3
+          Text = '>|'
+          OnClick = ButtonPageLastClick
+        end
+        object LabelPreviewScale: TLabel
+          Align = Left
+          Margins.Left = 20.000000000000000000
+          Position.X = 252.000000000000000000
+          Size.Width = 36.000000000000000000
+          Size.Height = 32.000000000000000000
+          Size.PlatformDefault = False
+          TextSettings.HorzAlign = Trailing
+          Text = 'Scale'
+        end
+        object ComboBoxPreviewScale: TComboBox
+          Align = Left
+          DropDownCount = 12
+          Items.Strings = (
+            'Whole page'
+            'Page width'
+            '50 %'
+            '75 %'
+            '100 %'
+            '150 %'
+            '200 %')
+          Margins.Left = 6.000000000000000000
+          Margins.Top = 4.000000000000000000
+          Margins.Bottom = 4.000000000000000000
+          Position.X = 294.000000000000000000
+          Position.Y = 4.000000000000000000
+          Size.Width = 130.000000000000000000
+          Size.Height = 24.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 4
+          OnChange = ComboBoxPreviewScaleChange
+        end
+        object CheckBoxColors: TCheckBox
+          Align = Left
+          Margins.Left = 20.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Position.X = 444.000000000000000000
+          Position.Y = 5.000000000000000000
+          Size.Width = 66.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 5
+          Text = 'Colors'
+          OnChange = CheckBoxPreviewOptionChange
+        end
+        object CheckBoxLineNumbers: TCheckBox
+          Align = Left
+          Margins.Left = 10.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Position.X = 520.000000000000000000
+          Position.Y = 5.000000000000000000
+          Size.Width = 102.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 6
+          Text = 'Line numbers'
+          OnChange = CheckBoxPreviewOptionChange
+        end
+        object CheckBoxWordWrap: TCheckBox
+          Align = Left
+          IsChecked = True
+          Margins.Left = 10.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Position.X = 632.000000000000000000
+          Position.Y = 5.000000000000000000
+          Size.Width = 90.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 7
+          Text = 'Word wrap'
+          OnChange = CheckBoxPreviewOptionChange
+        end
+        object CheckBoxHighlight: TCheckBox
+          Align = Left
+          IsChecked = True
+          Margins.Left = 10.000000000000000000
+          Margins.Top = 5.000000000000000000
+          Margins.Bottom = 5.000000000000000000
+          Position.X = 732.000000000000000000
+          Position.Y = 5.000000000000000000
+          Size.Width = 80.000000000000000000
+          Size.Height = 22.000000000000000000
+          Size.PlatformDefault = False
+          TabOrder = 8
+          Text = 'Highlight'
+          OnChange = CheckBoxPreviewOptionChange
+        end
+      end
+      object PrintPreview: TTextEditorPrintPreview
+        Margins.Top = 2.000000000000000000
+        OnPreviewPage = PrintPreviewPreviewPage
+        Size.Width = 1197.000000000000000000
+        Size.Height = 654.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+      end
+    end
+    object TabItemCompare: TTabItem
+      CustomIcon = <
+        item
+        end>
+      IsSelected = False
+      Size.Width = 70.000000000000000000
+      Size.Height = 26.000000000000000000
+      Size.PlatformDefault = False
+      StyleLookup = ''
+      TabOrder = 0
+      Text = 'Compare'
+      ExplicitSize.cx = 50.000000000000000000
+      ExplicitSize.cy = 50.000000000000000000
+      object EditorCompareLeft: TTextEditor
+        Align = Left
+        Border.Color = xFF808690
+        Border.ColoredEdges = [ebLeft, ebTop, ebRight, ebBottom]
+        Fonts.LineNumbers.Family = 'Courier New'
+        Fonts.LineNumbers.Size = 10.666666984558110000
+        LeftMargin.Width = 55
+        OnAfterLinePaint = CompareEditorAfterLinePaint
+        OnChange = CompareEditorChange
+        OnCustomLineColors = CompareEditorCustomLineColors
+        OnScroll = CompareEditorScroll
+        Margins.Top = 2.000000000000000000
+        Size.Width = 578.000000000000000000
+        Size.Height = 688.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 0
+      end
+      object CompareScrollBar: TTextEditorCompareScrollBar
+        Align = Left
+        EditorLeft = EditorCompareLeft
+        EditorRight = EditorCompareRight
+        Margins.Top = 2.000000000000000000
+        Position.X = 578.000000000000000000
+        ScrollBarVisible = True
+        Size.Width = 40.000000000000000000
+        Size.Height = 688.000000000000000000
+        Size.PlatformDefault = False
+      end
+      object EditorCompareRight: TTextEditor
+        Align = Client
+        Border.Color = xFF808690
+        Border.ColoredEdges = [ebLeft, ebTop, ebRight, ebBottom]
+        Fonts.LineNumbers.Family = 'Courier New'
+        Fonts.LineNumbers.Size = 10.666666984558110000
+        LeftMargin.Width = 55
+        OnAfterLinePaint = CompareEditorAfterLinePaint
+        OnChange = CompareEditorChange
+        OnCustomLineColors = CompareEditorCustomLineColors
+        OnScroll = CompareEditorScroll
+        Margins.Top = 2.000000000000000000
+        Position.X = 618.000000000000000000
+        Size.Width = 579.000000000000000000
+        Size.Height = 688.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 1
+      end
+    end
+  end
+  object StatusBar: TStatusBar
+    Position.Y = 778.000000000000000000
+    ShowSizeGrip = True
+    Size.Width = 1200.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 3
+    OnClick = StatusBarClick
+    object LabelPosition: TLabel
+      Align = Left
+      Margins.Left = 8.000000000000000000
+      Position.X = 8.000000000000000000
+      Size.Width = 130.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      Text = 'Ln 1 : Col 1'
+    end
+    object LabelModifiedState: TLabel
+      Align = Left
+      Position.X = 138.000000000000000000
+      Size.Width = 90.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object LabelZoom: TLabel
+      Align = Left
+      Position.X = 228.000000000000000000
+      Size.Width = 100.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Center
+      Text = 'Zoom: 100 %'
+    end
+  end
+  object PopupMenuZoom: TPopupMenu
+    Left = 94
+    Top = 154
+    object MenuItemZoom100: TMenuItem
+      Tag = 100
+      IsChecked = True
+      Text = '100 %'
+      OnClick = MenuItemZoomClick
+    end
+    object MenuItemZoom125: TMenuItem
+      Tag = 125
+      Text = '125 %'
+      OnClick = MenuItemZoomClick
+    end
+    object MenuItemZoom150: TMenuItem
+      Tag = 150
+      Text = '150 %'
+      OnClick = MenuItemZoomClick
+    end
+    object MenuItemZoom200: TMenuItem
+      Tag = 200
+      Text = '200 %'
+      OnClick = MenuItemZoomClick
+    end
+    object MenuItemZoom300: TMenuItem
+      Tag = 300
+      Text = '300 %'
+      OnClick = MenuItemZoomClick
+    end
+  end
+  object OpenDialog: TOpenDialog
+    Filter = 'All files (*.*)|*.*'
+    Left = 94
+    Top = 218
+  end
+  object SaveDialog: TSaveDialog
+    Filter = 'All files (*.*)|*.*'
+    Left = 94
+    Top = 282
+  end
+  object SaveDialogHTML: TSaveDialog
+    DefaultExt = 'html'
+    Filter = 'HTML files (*.htm;*.html)|*.htm;*.html'
+    Left = 94
+    Top = 346
+  end
+end

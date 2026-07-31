@@ -1,0 +1,463 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "// Hello, World! in VRCalc++\r\n",
+      "\r\n",
+      "@VRStd.Out << \"Hello, World!\""
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "//"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "ReservedWord",
+            "Attributes": {
+              "Element": "ReservedWord"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "@"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "."
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "Number",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Term"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abcdefABCDEF",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0x",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "abstract",
+              "access",
+              "and",
+              "args",
+              "array",
+              "as",
+              "assign",
+              "bplfileext",
+              "bplfilename",
+              "break",
+              "capture",
+              "catch",
+              "class",
+              "classmodule",
+              "classvar",
+              "continue",
+              "cycle",
+              "defclass",
+              "defineclass",
+              "defined",
+              "delete",
+              "descr",
+              "description",
+              "div",
+              "dllfileext",
+              "dllfilename",
+              "do",
+              "else",
+              "endl",
+              "evalstr",
+              "evalstring",
+              "except",
+              "exit",
+              "extends",
+              "false",
+              "finally",
+              "float",
+              "for",
+              "foreach",
+              "foreachfloat",
+              "foreachint",
+              "free",
+              "freelibrary",
+              "from",
+              "func",
+              "function",
+              "get",
+              "getenvvarvalue",
+              "global",
+              "globalvar",
+              "hex",
+              "hexstr",
+              "if",
+              "in",
+              "inhargs",
+              "inheritedargs",
+              "instance",
+              "instancevar",
+              "int",
+              "integer",
+              "internal",
+              "into",
+              "is",
+              "isthisclassreginto",
+              "label",
+              "libraryfunction",
+              "loadlibrary",
+              "loadmodule",
+              "loadpackage",
+              "local",
+              "localenv",
+              "localvar",
+              "mod",
+              "name",
+              "namespace",
+              "new",
+              "nil",
+              "noname",
+              "noreg",
+              "null",
+              "on",
+              "or",
+              "out",
+              "private",
+              "proc",
+              "procedure",
+              "prop",
+              "property",
+              "public",
+              "pure",
+              "raise",
+              "reg",
+              "regthisclassinto",
+              "repeat",
+              "return",
+              "root",
+              "self",
+              "selfvar",
+              "set",
+              "static",
+              "std",
+              "step",
+              "strong",
+              "strongref",
+              "switch",
+              "sync",
+              "synchronized",
+              "system",
+              "then",
+              "this",
+              "thisclass",
+              "thisclassextends",
+              "thisclassname",
+              "thisvar",
+              "threadvar",
+              "throw",
+              "to",
+              "true",
+              "try",
+              "type",
+              "unloadpackage",
+              "until",
+              "using",
+              "var",
+              "weak",
+              "weakref",
+              "while",
+              "with",
+              "write",
+              "writeargs"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "!",
+              "$",
+              "%",
+              "&",
+              "\\",
+              "|",
+              "(",
+              ")",
+              "*",
+              "+",
+              ",",
+              "-",
+              ".",
+              "/",
+              ":",
+              ";",
+              "<",
+              "=",
+              ">",
+              "[",
+              "]",
+              "{",
+              "}"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "StringEscapeChar": "\\"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "//",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "//",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

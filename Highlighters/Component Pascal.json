@@ -1,0 +1,313 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "(* Hello, World! in Component Pascal *)\r\n",
+      "\r\n",
+      "MODULE HelloWorld;\r\n",
+      "  IMPORT\r\n",
+      "    StdLog;\r\n",
+      "  PROCEDURE World*;\r\n",
+      "  BEGIN\r\n",
+      "    StdLog.Strung(\"Hello, World!\"); StdLog.Ln\r\n",
+      "  END World;\r\n",
+      "END HelloWorld."
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "CaseSensitive": true,
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "(*",
+              "Close": "*)"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "BlockComment",
+                  "Attributes": {
+                    "Element": "Comment"
+                  },
+                  "TokenRange": {
+                    "Open": "(*",
+                    "Close": "*)"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "AlternativeClose": [
+                "("
+              ]
+            },
+            "TokenRange": {
+              "Open": "procedure",
+              "Close": ";"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    ";",
+                    "("
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "ABSTRACT",
+              "ARRAY",
+              "BEGIN",
+              "BY",
+              "CASE",
+              "CLOSE",
+              "CONST",
+              "DIV",
+              "DO",
+              "ELSE",
+              "ELSIF",
+              "EMPTY",
+              "END",
+              "EXIT",
+              "EXTENSIBLE",
+              "FOR",
+              "IF",
+              "IMPORT",
+              "IN",
+              "IS",
+              "LIMITED",
+              "LOOP",
+              "MOD",
+              "MODULE",
+              "NIL",
+              "OF",
+              "OR",
+              "OUT",
+              "POINTER",
+              "PROCEDURE",
+              "RECORD",
+              "REPEAT",
+              "RETURN",
+              "THEN",
+              "TO",
+              "TYPE",
+              "UNTIL",
+              "VAR",
+              "WHILE",
+              "WITH"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord",
+              "EscapeChar": "&"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "-",
+              "$",
+              "&",
+              "(",
+              ")",
+              "*",
+              ",",
+              ".",
+              "/",
+              ":",
+              ";",
+              "[",
+              "]",
+              "^",
+              "{",
+              "|",
+              "}",
+              "~",
+              "+",
+              "<",
+              "=",
+              ">"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789E",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "EscapeChar": "&"
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "(*",
+            "CloseToken": "*)",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "BEGIN",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "REPEAT",
+            "CloseToken": "UNTIL"
+          },
+          {
+            "OpenToken": "CASE",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "IF",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "FOR",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "WHILE",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "RECORD",
+            "CloseToken": "END",
+            "Properties": {
+              "NoSubs": true
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      },
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "for",
+        "CloseToken": "do"
+      },
+      {
+        "OpenToken": "repeat",
+        "CloseToken": "until"
+      },
+      {
+        "OpenToken": "while",
+        "CloseToken": "do"
+      },
+      {
+        "OpenToken": "if",
+        "CloseToken": "then"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "(*",
+        "CloseToken": "*)",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

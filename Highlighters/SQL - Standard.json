@@ -1,0 +1,595 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "CREATE TABLE DUAL\r\n",
+      "(\r\n",
+      "  DUMMY VARCHAR(1)\r\n",
+      ");\r\n",
+      "\r\n",
+      "INSERT INTO DUAL (DUMMY) VALUES ('X');\r\n",
+      "\r\n",
+      "SELECT \"Hello, World!\" FROM DUAL;"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "--"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Attributes": {
+              "Element": "Symbol"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": ":"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "absolute",
+              "action",
+              "add",
+              "after",
+              "all",
+              "allocate",
+              "alter",
+              "any",
+              "are",
+              "array",
+              "asc",
+              "asensitive",
+              "assertion",
+              "asymmetric",
+              "at",
+              "atomic",
+              "authorization",
+              "before",
+              "begin",
+              "between",
+              "binary",
+              "bitit",
+              "bit_length",
+              "both",
+              "breadth",
+              "by",
+              "call",
+              "called",
+              "cascade",
+              "cascaded",
+              "case",
+              "cast",
+              "catalog",
+              "char_length",
+              "character_length",
+              "clob",
+              "close",
+              "coalesce",
+              "collate",
+              "collation",
+              "column",
+              "commit",
+              "condition",
+              "connect",
+              "connection",
+              "constraints",
+              "constructor",
+              "contains",
+              "continue",
+              "convert",
+              "corresponding",
+              "create",
+              "cross",
+              "cube",
+              "current",
+              "current_date",
+              "current_default_transform_group",
+              "current_path",
+              "current_role",
+              "current_time",
+              "current_timestamp",
+              "current_transform_group_for_type",
+              "current_user",
+              "cursor",
+              "cycle",
+              "data",
+              "day",
+              "deallocate",
+              "dec",
+              "declare",
+              "deferrable",
+              "deferred",
+              "delete",
+              "depth",
+              "deref",
+              "desc",
+              "describe",
+              "descriptor",
+              "deterministic",
+              "diagnostics",
+              "disconnect",
+              "distinct",
+              "do",
+              "domain",
+              "drop",
+              "dynamic",
+              "each",
+              "element",
+              "else",
+              "elseif",
+              "end",
+              "equals",
+              "escape",
+              "except",
+              "exception",
+              "exec",
+              "execute",
+              "exit",
+              "external",
+              "extract",
+              "false",
+              "fetch",
+              "filter",
+              "for",
+              "found",
+              "free",
+              "from",
+              "full",
+              "function",
+              "general",
+              "get",
+              "global",
+              "go",
+              "goto",
+              "grant",
+              "group",
+              "grouping",
+              "handler",
+              "having",
+              "hold",
+              "hour",
+              "identity",
+              "if",
+              "immediate",
+              "in",
+              "indicator",
+              "initially",
+              "inner",
+              "inout",
+              "input",
+              "insensitive",
+              "insert",
+              "intersect",
+              "interval",
+              "into",
+              "is",
+              "isolation",
+              "iterate",
+              "join",
+              "key",
+              "language",
+              "large",
+              "lateral",
+              "leading",
+              "leave",
+              "left",
+              "level",
+              "like",
+              "local",
+              "localtime",
+              "localtimestamp",
+              "locator",
+              "loop",
+              "lower",
+              "map",
+              "match",
+              "member",
+              "merge",
+              "method",
+              "minute",
+              "modifies",
+              "module",
+              "month",
+              "multiset",
+              "names",
+              "national",
+              "natural",
+              "nclob",
+              "next",
+              "no",
+              "none",
+              "nullif",
+              "object",
+              "octet_length",
+              "of",
+              "on",
+              "only",
+              "open",
+              "option",
+              "order",
+              "ordinality",
+              "out",
+              "outer",
+              "output",
+              "over",
+              "overlaps",
+              "pad",
+              "parameter",
+              "partial",
+              "partition",
+              "path",
+              "position",
+              "prepare",
+              "preserve",
+              "prior",
+              "privileges",
+              "procedure",
+              "public",
+              "range",
+              "read",
+              "reads",
+              "real",
+              "recursive",
+              "ref",
+              "references",
+              "referencing",
+              "relative",
+              "release",
+              "repeat",
+              "resignal",
+              "restrict",
+              "result",
+              "return",
+              "returns",
+              "revoke",
+              "right",
+              "role",
+              "rollback",
+              "rollup",
+              "routine",
+              "row",
+              "rows",
+              "savepoint",
+              "schema",
+              "scope",
+              "scroll",
+              "search",
+              "second",
+              "section",
+              "select",
+              "sensitive",
+              "session",
+              "session_user",
+              "set",
+              "sets",
+              "signal",
+              "similar",
+              "size",
+              "some",
+              "space",
+              "specific",
+              "specifictype",
+              "sql",
+              "sqlcode",
+              "sqlerror",
+              "sqlexception",
+              "sqlstate",
+              "sqlwarning",
+              "start",
+              "state",
+              "static",
+              "submultiset",
+              "substring",
+              "symmetric",
+              "system",
+              "system_user",
+              "table",
+              "tablesample",
+              "temporary",
+              "then",
+              "timezone_hour",
+              "timezone_minute",
+              "to",
+              "trailing",
+              "transaction",
+              "translate",
+              "translation",
+              "treat",
+              "trigger",
+              "true",
+              "under",
+              "undo",
+              "union",
+              "unknown",
+              "unnest",
+              "until",
+              "update",
+              "upper",
+              "usage",
+              "user",
+              "using",
+              "value",
+              "values",
+              "view",
+              "when",
+              "whenever",
+              "where",
+              "while",
+              "window",
+              "with",
+              "within",
+              "without",
+              "work",
+              "write",
+              "year",
+              "zone"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "MethodItalic",
+            "Words": [
+              "blob",
+              "boolean",
+              "bigint",
+              "char",
+              "character",
+              "date",
+              "decimal",
+              "double",
+              "float",
+              "int",
+              "integer",
+              "nchar",
+              "numeric",
+              "precision",
+              "smallint",
+              "time",
+              "timestamp",
+              "varchar",
+              "varying"
+            ],
+            "Attributes": {
+              "Element": "MethodItalic"
+            }
+          },
+          {
+            "Type": "Number",
+            "Words": [
+              "new",
+              "null",
+              "old"
+            ],
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Value",
+            "Words": [
+              "as",
+              "check",
+              "constraint",
+              "default",
+              "foreign key",
+              "primary key",
+              "unique"
+            ],
+            "Attributes": {
+              "Element": "Value"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "avg",
+              "count",
+              "first",
+              "last",
+              "max",
+              "min",
+              "sum",
+              "trim"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              ":",
+              ";",
+              "/",
+              "*",
+              ".",
+              ",",
+              "-",
+              "+",
+              "(",
+              ")",
+              "[",
+              "]",
+              "{",
+              "}",
+              "|"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          },
+          {
+            "Type": "LogicalOperator",
+            "Words": [
+              "<",
+              "=",
+              ">",
+              "and",
+              "exists",
+              "not",
+              "or"
+            ],
+            "Attributes": {
+              "Element": "LogicalOperator"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "HideGuideLineAtFirstColumn": true
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "--",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "BEGIN",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "CASE",
+            "CloseToken": "END",
+            "Properties": {
+              "SkipIfFoundAfterOpenToken": [
+                "INSENSITIVE",
+                "SENSITIVE"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "--",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

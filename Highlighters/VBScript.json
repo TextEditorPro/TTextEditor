@@ -1,0 +1,322 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "' Hello, World! in VBScript\r\n",
+      "\r\n",
+      "MsgBox \"Hello, World!\""
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#",
+              "Close": "#"
+            }
+          },
+          {
+            "Type": "Number",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Term"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abcdefABCDEF",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0x",
+              "OpenBreakType": "Any"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "and",
+              "as",
+              "boolean",
+              "byref",
+              "byte",
+              "byval",
+              "call",
+              "case",
+              "class",
+              "const",
+              "currency",
+              "debug",
+              "dim",
+              "do",
+              "double",
+              "each",
+              "else",
+              "elseif",
+              "empty",
+              "end",
+              "endif",
+              "enum",
+              "eqv",
+              "erase",
+              "eval",
+              "event",
+              "execute",
+              "executeglobal",
+              "exit",
+              "false",
+              "for",
+              "function",
+              "get",
+              "goto",
+              "if",
+              "imp",
+              "implements",
+              "in",
+              "integer",
+              "is",
+              "let",
+              "like",
+              "long",
+              "loop",
+              "lset",
+              "me",
+              "mod",
+              "msgbox",
+              "new",
+              "next",
+              "not",
+              "nothing",
+              "null",
+              "on",
+              "option",
+              "option explicit",
+              "optional",
+              "or",
+              "paramarray",
+              "preserve",
+              "private",
+              "public",
+              "raiseevent",
+              "randomize",
+              "redim",
+              "rem",
+              "resume",
+              "rset",
+              "select",
+              "sendkeys",
+              "set",
+              "shared",
+              "single",
+              "static",
+              "stop",
+              "sub",
+              "then",
+              "to",
+              "true",
+              "type",
+              "typeof",
+              "until",
+              "variant",
+              "wend",
+              "while",
+              "with",
+              "xor"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "-",
+              "%",
+              "&",
+              "(",
+              ")",
+              "*",
+              ",",
+              ".",
+              "/",
+              ":",
+              ";",
+              "[",
+              "]",
+              "^",
+              "{",
+              "}",
+              "+",
+              "<",
+              "=",
+              ">"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "HideGuideLineAtFirstColumn": true
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "'",
+            "RegionType": "SingleLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "CLASS",
+            "CloseToken": "END CLASS"
+          },
+          {
+            "OpenToken": "PROPERTY",
+            "CloseToken": "END PROPERTY"
+          },
+          {
+            "OpenToken": "SUB",
+            "CloseToken": "END SUB"
+          },
+          {
+            "OpenToken": "FUNCTION",
+            "CloseToken": "END FUNCTION"
+          },
+          {
+            "OpenToken": "FOR",
+            "CloseToken": "NEXT",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true
+            }
+          },
+          {
+            "OpenToken": "IF",
+            "CloseToken": "END IF",
+            "Properties": {
+              "CheckIfThenOneLiner": true
+            }
+          },
+          {
+            "OpenToken": "EXIT",
+            "Properties": {
+              "OpenTokenBreaksLine": true,
+              "RemoveRange": true
+            }
+          },
+          {
+            "OpenToken": "DO",
+            "CloseToken": "LOOP",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true
+            }
+          },
+          {
+            "OpenToken": "SELECT CASE",
+            "CloseToken": "END SELECT"
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "'",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

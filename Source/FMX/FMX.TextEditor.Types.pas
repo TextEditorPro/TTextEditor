@@ -1,0 +1,487 @@
+﻿unit FMX.TextEditor.Types;
+
+interface
+
+uses
+  System.Classes, System.Generics.Collections, System.SysUtils, System.Types, System.UITypes, FMX.Controls, FMX.Forms, FMX.Graphics,
+  FMX.Types, FMX.TextEditor.Consts, FMX.TextEditor.Marks;
+
+type
+  IAutoCursor = interface(IInterface)
+    ['{B291F81E-29FB-453E-B3AF-51D4EC1352CF}']
+    procedure BeginCursor(const ACursor: TCursor);
+    procedure EndCursor;
+  end;
+
+  { Lines }
+  TTextEditorLinesRange = Pointer;
+
+  TTextEditorStringFlag = (sfHasTabs, sfHasNoTabs, sfExpandedLengthUnknown, sfEmptyLine, sfModify,
+    sfLineBreakCR, sfLineBreakLF, sfLineStateNormal, sfLineStateModified);
+  TTextEditorStringFlags = set of TTextEditorStringFlag;
+
+  TTextEditorSortOption = (soAsc, soDesc, soIgnoreCase, soNatural, soRandom);
+  TTextEditorSortOptions = set of TTextEditorSortOption;
+
+  TTextEditorLineState = (lsNone, lsNormal, lsModified);
+  TTextEditorLineBreak = (lbCRLF, lbLF, lbCR);
+
+  PTextEditorStringRecord = ^TTextEditorStringRecord;
+  TTextEditorStringRecord = record
+    ExpandedLength: Integer;
+    Flags: TTextEditorStringFlags;
+    OriginalLineNumber: Integer;
+    Range: TTextEditorLinesRange;
+    TextLine: string;
+  end;
+
+  TTextEditorArrayOfString = array of string;
+  TTextEditorArrayOfSingle = array of Single;
+
+  TStringListChangeEvent = procedure(ASender: TObject; const AIndex: Integer; const ACount: Integer) of object;
+
+  { Editor painting }
+  TRGBTriple = record
+    Blue, Green, Red: Byte;
+  end;
+  PRGBTripleArray = ^TRGBTripleArray;
+  TRGBTripleArray = array[0..100] of TRGBTriple;
+
+  TTextEditorStateFlag = (sfCaretChanged, sfLinesChanging, sfCaretVisible, sfDblClicked,
+    sfWaitForDragging, sfCodeFoldingCollapseMarkClicked, sfInSelection, sfDragging);
+  TTextEditorStateFlags = set of TTextEditorStateFlag;
+
+  PTextEditorTextPosition = ^TTextEditorTextPosition;
+  TTextEditorTextPosition = record
+    Char: Integer;
+    Line: Integer;
+  end;
+
+  PTextEditorViewPosition = ^TTextEditorViewPosition;
+  TTextEditorViewPosition = record
+    Column: Integer;
+    Row: Integer;
+  end;
+
+  PTextEditorMultiCaretRecord = ^TTextEditorMultiCaretRecord;
+  TTextEditorMultiCaretRecord = record
+    ViewPosition: TTextEditorViewPosition;
+    SelectionStart: TTextEditorTextPosition;
+  end;
+
+  TTextEditorEmptySpace = (esNone, esControlCharacter, esNonBreakingSpace, esSpace, esNull, esTab, esZeroWidthSpace);
+
+  TTextEditorUnderline = (ulNone, ulDoubleUnderline, ulUnderline, ulWaveLine, ulWavyZigzag);
+
+  TTextEditorMoveDirection = (mdNone, mdUp, mdDown, mdLeft, mdRight);
+  TTextEditorProgressType = (ptNone, ptProcessing, ptLoading);
+
+  PTextEditorQuadColor = ^TTextEditorQuadColor;
+  TTextEditorQuadColor = record
+  case Boolean of
+    True: (Blue, Green, Red, Alpha: Byte);
+    False: (Quad: Cardinal);
+  end;
+
+  { Caret }
+  TTextEditorCaretStyle = (csVerticalLine, csThinVerticalLine, csHorizontalLine, csThinHorizontalLine, csHalfBlock, csBlock);
+
+  TTextEditorCaretOption = (coRightMouseClickMove);
+  TTextEditorCaretOptions = set of TTextEditorCaretOption;
+
+  TTextEditorCaretMultiEditOption = (meoShowActiveLine, meoShowGhost);
+  TTextEditorCaretMultiEditOptions = set of TTextEditorCaretMultiEditOption;
+
+  { Replace }
+  TTextEditorReplaceAction = (raCancel, raSkip, raReplace, raReplaceAll);
+  TTextEditorReplaceChanges = (rcEngineUpdate);
+  TTextEditorReplaceOption = (roBackwards, roCaseSensitive, roEntireScope, roPrompt, roReplaceAll, roSelectedOnly,
+    roWholeWordsOnly);
+  TTextEditorReplaceOptions = set of TTextEditorReplaceOption;
+  TTextEditorReplaceTextAction = (rtaAddLineBreak, rtaDeleteLine, rtaReplace);
+
+  TTextEditorReplaceTextParams = record
+    AddLineBreak: Boolean;
+    Backwards: Boolean;
+    Char: Integer;
+    DeleteLine: Boolean;
+    Line: Integer;
+    Prompt: Boolean;
+    ReplaceAll: Boolean;
+    ReplaceText: string;
+    ReplaceTextAction: TTextEditorReplaceTextAction;
+    SearchText: string;
+  end;
+
+  { Completion proposal }
+  TCompletionProposalOptions = record
+    AddHighlighterKeywords: Boolean;
+    AddSnippets: Boolean;
+    CodeInsight: Boolean;
+    ParseItemsFromText: Boolean;
+    ShowDescription: Boolean;
+    SortByDescription: Boolean;
+    SortByKeyword: Boolean;
+    Triggered: Boolean;
+  end;
+
+  TTextEditorCompletionProposalOption = (cpoAddHighlighterKeywords, cpoAutoConstraints, cpoAutoInvoke, cpoCaseSensitive,
+    cpoFiltered, cpoParseItemsFromText, cpoShowBorder, cpoShowShadow);
+  TTextEditorCompletionProposalOptions = set of TTextEditorCompletionProposalOption;
+
+  TTextEditorCompletionProposalKeywordCase = (kcUpperCase, kcLowerCase, kcSentenceCase);
+
+  TTextEditorCompletionProposalItem = record
+    Keyword: string;
+    Description: string;
+    SnippetIndex: Integer;
+  end;
+  TTextEditorCompletionProposalItems = TList<TTextEditorCompletionProposalItem>;
+
+  { Editor options }
+  TTextEditorOption = (eoAddHTMLCodeToClipboard, eoAutoIndent, eoDragDropEditing, eoDropFiles, eoLoadColors, eoLoadFontNames,
+    eoLoadFontSizes, eoLoadFontStyles, eoShowControlCharacters, eoShowLineNumbersInHTMLExport, eoShowNonBreakingSpaces,
+    eoShowNullCharacters, eoShowZeroWidthSpaces, eoTrimTrailingSpaces, eoTrailingLineBreak);
+  TTextEditorOptions = set of TTextEditorOption;
+
+  TTextEditorOvertypeMode = (omInsert, omOverwrite);
+
+  PTextEditorSelectionMode = ^TTextEditorSelectionMode;
+  TTextEditorSelectionMode = (smColumn, smNormal);
+
+  { Scroll }
+  TTextEditorScrollOption = (soAutoDisableScrollButtons, soHalfPage, soHintFollows, soPastEndOfFileMarker,
+    soPastEndOfLine, soShowVerticalScrollHint, soWheelClickMove);
+  TTextEditorScrollOptions = set of TTextEditorScrollOption;
+
+  TTextEditorScrollHintFormat = (shfTopLineOnly, shfTopToBottom);
+
+  { Tabs }
+  TTextEditorTabOption = (toColumns, toPreviousLineIndent, toSelectedBlockIndent, toTabsToSpaces);
+  TTextEditorTabOptions = set of TTextEditorTabOption;
+
+  { Selection }
+  TTextEditorSelectionOption = (soALTSetsColumnMode, soAutoCopyToClipboard, soExpandPrefix, soExpandRealNumbers, soHighlightSimilarTerms,
+    soTermsCaseSensitive, soToEndOfLine, soTripleClickRowSelect);
+  TTextEditorSelectionOptions = set of TTextEditorSelectionOption;
+
+  { Search }
+  TTextEditorResultPosition = (rpBottom, rpMiddle, rpTop);
+  TTextEditorSearchChanges = (scRefresh, scSearch, scEngineUpdate, scInSelectionActive, scVisible);
+
+  TTextEditorSearchOption = (soBeepIfStringNotFound, soCaseSensitive, soEntireScope, soHighlightResults,
+    soIgnoreComments, soSearchOnTyping, soShowSearchStringNotFound, soShowSearchMatchNotFound, soWholeWordsOnly,
+    soWrapAround);
+  TTextEditorSearchOptions = set of TTextEditorSearchOption;
+
+  TTextEditorSearchEngine = (seNormal, seExtended, seRegularExpression, seWildcard);
+
+  PTextEditorSearchItem = ^TTextEditorSearchItem;
+  TTextEditorSearchItem = record
+    BeginTextPosition: TTextEditorTextPosition;
+    EndTextPosition: TTextEditorTextPosition;
+  end;
+
+  TTextEditorSearchMapAlign = (saLeft, saRight);
+
+  { Internal glyphs }
+  TTextEditorInternalGlyph = (igNone, igActiveLine, igMouseMoveScroll, igSyncEdit, igWordWrap);
+
+  { Sync edit }
+  TTextEditorSyncEditOption = (seCaseSensitive);
+  TTextEditorSyncEditOptions = set of TTextEditorSyncEditOption;
+
+  { Ruler }
+  TTextEditorRulerOption = (roShowGuideLine, roShowSelection);
+  TTextEditorRulerOptions = set of TTextEditorRulerOption;
+
+  { Search map }
+  TTextEditorSearchMapOption = (moShowActiveLine);
+  TTextEditorSearchMapOptions = set of TTextEditorSearchMapOption;
+
+  { Left margin }
+  TTextEditorLeftMarginBookmarkPanelOption = (bpoToggleBookmarkByClick, bpoToggleMarkByClick, bpoShowBookmarkColorsPopup);
+  TTextEditorLeftMarginBookmarkPanelOptions = set of TTextEditorLeftMarginBookmarkPanelOption;
+
+  TTextEditorLeftMarginLineNumberOption = (lnoIntens, lnoLeadingZeros, lnoAfterLastLine, lnoCompareMode);
+  TTextEditorLeftMarginLineNumberOptions = set of TTextEditorLeftMarginLineNumberOption;
+
+  TTextEditorLeftMarginBorderStyle = (mbsNone, mbsMiddle, mbsRight);
+  TTextEditorLeftMarginLineStateAlign = (lsLeft, lsRight);
+
+  { Right margin }
+  TTextEditorRightMarginOption = (rmoAutoLineBreak, rmoMouseMove, rmoShowMovingHint);
+  TTextEditorRightMarginOptions = set of TTextEditorRightMarginOption;
+
+  { Matching pair }
+  PTextEditorMatchingPairToken = ^TTextEditorMatchingPairToken;
+  TTextEditorMatchingPairToken = record
+    OpenToken: string;
+    CloseToken: string;
+  end;
+
+  TTextEditorMatchingTokenResult = (trCloseAndOpenTokenFound, trCloseTokenFound, trNotFound, trOpenTokenFound,
+    trOpenAndCloseTokenFound);
+
+  TTextEditorMatchingPairOption = (mpoHighlightAfterToken, mpoHighlightUnmatched, mpoUnderline, mpoUseMatchedColor);
+  TTextEditorMatchingPairOptions = set of TTextEditorMatchingPairOption;
+
+  { Highlighter }
+  TTextEditorBreakType = (btUnspecified, btAny, btTerm);
+
+  TTextEditorRangeType = (ttUnspecified, ttAddress, ttAssemblerComment, ttAssemblerReservedWord, ttAttribute,
+    ttBlockComment, ttCharacter, ttDirective, ttHexNumber, ttHighlightedBlock, ttHighlightedBlockSymbol, ttLineComment,
+    ttMailtoLink, ttMethod, ttMethodName, ttNumber, ttReservedWord, ttString, ttSymbol, ttWebLink);
+
+  TTextEditorKeyCharType = (ctFoldOpen, ctFoldClose, ctSkipOpen, ctSkipClose);
+
+  TTextEditorHighlighterOption = (hoExecuteBeforePrepare, hoMultiHighlighter);
+  TTextEditorHighlighterOptions = set of TTextEditorHighlighterOption;
+
+  TTextEditorHighlightLineItemOption = (hlIgnoreCase, hlMultiline, hlDeleteOnHighlighterLoad);
+  TTextEditorHighlightLineItemOptions = set of TTextEditorHighlightLineItemOption;
+  { Special chars }
+  TTextEditorSpecialCharsLineBreakStyle = (eolArrow, eolCRLF, eolEnter, eolPilcrow);
+
+  TTextEditorSpecialCharsOption = (scoTextColor, scoMiddleColor, scoShowOnlyInSelection);
+  TTextEditorSpecialCharsOptions = set of TTextEditorSpecialCharsOption;
+  TTextEditorSpecialCharsStyle = (scsDot, scsSolid);
+
+  { Minimap }
+  TTextEditorMinimapOption = (moMinimapDragsScrollBar, moShowBookmarks, moShowSearchResults, moShowSelection, moShowSpecialChars);
+  TTextEditorMinimapOptions = set of TTextEditorMinimapOption;
+  TTextEditorMinimapAlign = (maLeft, maRight);
+  TTextEditorMinimapIndicatorOption = (ioInvertBlending, ioShowBorder, ioUseBlending);
+  TTextEditorMinimapIndicatorOptions = set of TTextEditorMinimapIndicatorOption;
+
+  { Undo }
+  TTextEditorUndoOption = (
+    uoGroupUndo,
+    uoUndoAfterSave
+  );
+  TTextEditorUndoOptions = set of TTextEditorUndoOption;
+
+  TTextEditorChangeReason = (crInsert, crPaste, crDragDropInsert, crDelete, crLineBreak, crIndent, crUnindent, crCaret,
+    crMultiCaret, crSelection, crNothing, crGroupBreak);
+
+  { Case }
+  TTextEditorCase = (cNone=-1, cUpper=0, cLower=1, cAlternating=2, cSentence=3, cTitle=4, cOriginal=5, cKeywordsUpper=6,
+    cKeywordsLower=7, cKeywordsTitle=8);
+
+  { Trim }
+  TTextEditorTrimStyle = (tsBoth, tsLeft, tsRight);
+
+  { Coding }
+  TTextEditorCoding = (eASCIIDecimal, eBase32, eBase64, eBase85, eBase91, eBase128, eBase256, eBase1024,
+    eBase4096, eBase64WithLineBreaks, eBinary, eHex, eHexWithoutSpaces, eHTML, eOctal, eRotate5, eRotate13, eRotate18,
+    eRotate47, eURL, eNone);
+
+  { Word wrap }
+  TTextEditorWordWrapWidth = (wwwPage, wwwRightMargin);
+
+  { Code folding }
+  TTextEditorCodeFoldingGuideLineStyle = (lsDash, lsDot, lsSolid);
+  TTextEditorCodeFoldingMarkStyle = (msCircle, msSquare, msTriangle);
+  TTextEditorCodeFoldingHintIndicatorMarkStyle = (imsThreeDots, imsTriangle);
+  TTextEditorCodeFoldingChanges = (fcRefresh, fcVisible);
+  TTextEditorCodeFoldingHintIndicatorOption = (hioShowBorder, hioShowMark);
+  TTextEditorCodeFoldingHintIndicatorOptions = set of TTextEditorCodeFoldingHintIndicatorOption;
+
+  TTextEditorCodeFoldingOption = (cfoAutoWidth, cfoFoldMultilineComments, cfoHighlightFoldingLine, cfoHighlightMatchingPair,
+    cfoShowCollapsedLine, cfoShowTreeLine, cfoShowCollapseMarkAtTheEnd, cfoExpandByHintClick);
+  TTextEditorCodeFoldingOptions = set of TTextEditorCodeFoldingOption;
+
+  TTextEditorCodeFoldingGuideLineOption = (cfgHideAtFirstColumn, cfgHideOverText, cgfHideInActiveRow, cfgHighlightIndentGuides);
+  TTextEditorCodeFoldingGuideLineOptions = set of TTextEditorCodeFoldingGuideLineOption;
+
+  TScrollBarKind = (sbHorizontal, sbVertical);
+
+  TTextEditorCodeFoldingHintIndicatorPadding = class(TBounds)
+  public
+    constructor Create(AOwner: TPersistent); reintroduce;
+  end;
+
+  { Completion proposal }
+  TCompletionProposalParams = record
+    Items: TTextEditorCompletionProposalItems;
+    LastWord: string;
+    Options: TCompletionProposalOptions;
+    PreviousCharAtCursor: string;
+  end;
+
+  { Snippets }
+  TTextEditorSnippetExecuteWith = (seListOnly = -1, seEnter = 0, seSpace = 1);
+
+  { Partial load }
+  TTextEditorPartialLoadFrom = (plfHead, plfTail);
+
+  { Print }
+  TTextEditorFrameType = (ftLine, ftBox, ftShaded);
+  TTextEditorFrameTypes = set of TTextEditorFrameType;
+  TTextEditorUnitSystem = (usMM, usCm, usInch, muThousandthsOfInches);
+  TTextEditorPrintStatus = (psBegin, psNewPage, psEnd);
+  TTextEditorPrintStatusEvent = procedure(ASender: TObject; const AStatus: TTextEditorPrintStatus; const APageNumber: Integer; var AAbort: Boolean) of object;
+  TTextEditorPrintLineEvent = procedure(ASender: TObject; const ALineNumber: Integer; const APageNumber: Integer) of object;
+
+  TTextEditorWrapPosition = class
+  public
+    Index: Integer;
+  end;
+
+  { Events }
+  TOnCompletionProposalExecute = procedure(const ASender: TObject; var AParams: TCompletionProposalParams) of object;
+
+  TTextEditorAdditionalKeywordsEvent = procedure(const ASender: TObject; const AHighlighterName: string; const AKeyword: TStrings) of object;
+  TTextEditorBookmarkDeletedEvent = procedure(const ASender: TObject; const ABookmark: TTextEditorMark) of object;
+  TTextEditorBookmarkPlacedEvent = procedure(const ASender: TObject; const AIndex: Integer; const AImageIndex: Integer; const ATextPosition: TTextEditorTextPosition) of object;
+  TTextEditorCaretChangedEvent = procedure(const ASender: TObject; const X, Y: Single; const AOffset: Integer) of object;
+  TTextEditorCodeFoldingChangeEvent = procedure(const AEvent: TTextEditorCodeFoldingChanges) of object;
+  TTexteditorChangeScaleEvent = procedure(const ASender: TObject; const AMultiplier, ADivider: Integer; const AIsDpiChange: Boolean) of object;
+  TTextEditorContextHelpEvent = procedure(const ASender: TObject; const AWord: string) of object;
+  TTextEditorCreateHighlighterStreamEvent = procedure(const ASender: TObject; const AName: string; var AStream: TStream) of object;
+  TTextEditorCustomLineColorsEvent = procedure(const ASender: TObject; const ALine: Integer; var AUseColors: Boolean; var AForeground: TAlphaColor; var ABackground: TAlphaColor) of object;
+  TTextEditorCustomTokenAttributeEvent = procedure(const ASender: TObject; const AText: string; const ALine: Integer; const AChar: Integer; var AForegroundColor: TAlphaColor; var ABackgroundColor: TAlphaColor; var AStyles: TFontStyles; var AUnderline: TTextEditorUnderline; var AUnderlineColor: TAlphaColor) of object;
+  TTextEditorDropFilesEvent = procedure(const ASender: TObject; const APos: TPoint; const AFiles: TStrings) of object;
+  TTextEditorHighlighterPrepare = procedure of object;
+  TTextEditorKeyPressWEvent = procedure(const ASender: TObject; var AKey: Char) of object;
+  TTextEditorLinePaintEvent = procedure(const ASender: TObject; const ACanvas: TCanvas; const ARect: TRectF; const ALineNumber: Integer; const AIsMinimapLine: Boolean) of object;
+  TTextEditorLinkClickEvent = procedure(const ASender: TObject; const ALink: string) of object;
+  TTextEditorLoadFromStreamEvent = procedure(const ASender: TObject; const AStream: TStream; const AEncoding: System.SysUtils.TEncoding) of object;
+  TTextEditorLoadingProgressEvent = procedure(const ASender: TObject; var ACancelled: Boolean) of object;
+  TTextEditorMarkPanelLinePaintEvent = procedure(const ASender: TObject; const ACanvas: TCanvas; const ARect: TRectF; const ALineNumber: Integer) of object;
+  TTextEditorMarkPanelPaintEvent = procedure(const ASender: TObject; const ACanvas: TCanvas; const ARect: TRectF; const AFirstLine: Integer; const ALastLine: Integer) of object;
+  TTextEditorMouseCursorEvent = procedure(const ASender: TObject; const ALineCharPos: TTextEditorTextPosition; var ACursor: TCursor) of object;
+  TTextEditorPaintEvent = procedure(const ASender: TObject; const ACanvas: TCanvas) of object;
+  TTextEditorReplaceChangeEvent = procedure(const AEvent: TTextEditorReplaceChanges) of object;
+  TTextEditorReplaceSearchCountEvent = procedure(const ASender: TObject; const ACount: Integer; const APageIndex: Integer) of object;
+  TTextEditorReplaceTextEvent = procedure(const ASender: TObject; const AParams: TTextEditorReplaceTextParams; var AAction: TTextEditorReplaceAction) of object;
+  TTextEditorSaveToFileEvent = procedure(const ASender: TObject; const AFilename: string; var AEncoding: TEncoding; var ACancel: Boolean) of object;
+  TTextEditorScrollEvent = procedure(const ASender: TObject; const AScrollBar: TScrollBarKind) of object;
+  TTextEditorSearchChangeEvent = procedure(const AEvent: TTextEditorSearchChanges) of object;
+
+  { Defaults options }
+  TTextEditorDefaultOptions = record
+  const
+    CodeFolding = [cfoAutoWidth, cfoHighlightMatchingPair, cfoShowTreeLine, cfoExpandByHintClick];
+    CodeFoldingGuideLines = [cfgHideOverText];
+    CodeFoldingHint = [hioShowBorder, hioShowMark];
+    CompletionProposal = [cpoAutoConstraints, cpoAddHighlighterKeywords, cpoFiltered, cpoParseItemsFromText, cpoShowBorder, cpoShowShadow];
+    HighlightLine = [hlIgnoreCase, hlDeleteOnHighlighterLoad];
+    MultiEdit = [meoShowActiveLine, meoShowGhost];
+  end;
+
+  TTextEditorTimer = class(TTimer)
+  public
+    procedure Restart;
+  end;
+
+  { Highlighter color elements }
+  TElement = record
+  const
+    AssemblerComment = 'AssemblerComment';
+    AssemblerReservedWord = 'AssemblerReservedWord';
+    Attribute = 'Attribute';
+    Character = 'Character';
+    Comment = 'Comment';
+    Directive = 'Directive';
+    Editor = 'Editor';
+    HexNumber = 'HexNumber';
+    HighlightedBlock = 'HighlightedBlock';
+    HighlightedBlockSymbol = 'HighlightedBlockSymbol';
+    LogicalOperator = 'LogicalOperator';
+    Method = 'Method';
+    MethodItalic = 'MethodItalic';
+    NameOfMethod = 'MethodName';
+    Number = 'Number';
+    ReservedWord = 'ReservedWord';
+    StringOfCharacters = 'String';
+    Symbol = 'Symbol';
+    Value = 'Value';
+    WebLink = 'WebLink';
+  end;
+
+  function MulDiv(const ANumber, ANumerator, ADenominator: Integer): Integer;
+  function SearchEngineAsText(const ASearchEngine: TTextEditorSearchEngine): string;
+  function TextAsSearchEngine(const ASearchEngineName: string): TTextEditorSearchEngine;
+  function CompletionProposalItemFound(const AItems: TTextEditorCompletionProposalItems; const AItem: TTextEditorCompletionProposalItem): Boolean;
+
+implementation
+
+{ Platform-neutral replacement for Winapi.Windows.MulDiv - rounds half away from zero like the Windows API. }
+function MulDiv(const ANumber, ANumerator, ADenominator: Integer): Integer;
+var
+  LValue: Int64;
+begin
+  if ADenominator = 0 then
+    Exit(-1);
+
+  LValue := Int64(ANumber) * ANumerator;
+
+  if LValue >= 0 then
+    Result := (LValue + ADenominator div 2) div ADenominator
+  else
+    Result := (LValue - ADenominator div 2) div ADenominator;
+end;
+
+function SearchEngineAsText(const ASearchEngine: TTextEditorSearchEngine): string;
+begin
+  case ASearchEngine of
+    seNormal:
+      Result := TSearchEngine.Normal;
+    seExtended:
+      Result := TSearchEngine.Extended;
+    seRegularExpression:
+      Result := TSearchEngine.RegularExpression;
+    seWildcard:
+      Result := TSearchEngine.Wildcard;
+  end;
+end;
+
+function TextAsSearchEngine(const ASearchEngineName: string): TTextEditorSearchEngine;
+begin
+  if ASearchEngineName = TSearchEngine.Extended then
+    Result := seExtended
+  else
+  if ASearchEngineName = TSearchEngine.RegularExpression then
+    Result := seRegularExpression
+  else
+  if ASearchEngineName = TSearchEngine.Wildcard then
+    Result := seWildcard
+  else
+    Result := seNormal;
+end;
+
+function CompletionProposalItemFound(const AItems: TTextEditorCompletionProposalItems; const AItem: TTextEditorCompletionProposalItem): Boolean;
+var
+  LItem: TTextEditorCompletionProposalItem;
+begin
+  Result := True;
+
+  for var LIndex := 0 to AItems.Count - 1 do
+  begin
+    LItem := AItems[LIndex];
+
+    if LItem.Keyword.Trim = AItem.Keyword.Trim then
+      if LItem.Description.Trim = AItem.Description.Trim then
+        Exit;
+  end;
+
+  Result := False;
+end;
+
+{ TTextEditorCodeFoldingHintIndicatorPadding }
+
+constructor TTextEditorCodeFoldingHintIndicatorPadding.Create(AOwner: TPersistent);
+begin
+  inherited Create(RectF(0, 1, 0, 1));
+end;
+
+{ TTextEditorTimer }
+
+procedure TTextEditorTimer.Restart;
+begin
+  Enabled := False;
+  Enabled := True;
+end;
+
+end.

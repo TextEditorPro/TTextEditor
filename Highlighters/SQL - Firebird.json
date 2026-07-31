@@ -1,0 +1,1685 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "SELECT \"Hello, World!\" FROM RDB$DATABASE;"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "--"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "MethodItalic",
+            "Attributes": {
+              "Element": "MethodItalic"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"boolean",
+              "Close": "\""
+            }
+          },
+          {
+            "Type": "Number",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "TokenRange": {
+              "Open": "[",
+              "Close": "]"
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "]"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "collation"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,%^?:;'\".><#_ ",
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "table"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "view"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "insert into",
+              "Close": ":"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ],
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    ":"
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,%^?:;'\".><#_ ",
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "procedure"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,%^?:;'\".><#_ ",
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "function"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "package"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Delimiters": "*/+-=\\|&()[]{}`~!@,%^?:;'\".><#_ ",
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true,
+              "AlternativeClose": [
+                "\"",
+                "'"
+              ]
+            },
+            "TokenRange": {
+              "Open": "from",
+              "Close": "("
+            },
+            "SubRules": {
+              "KeyList": [
+                {
+                  "Type": "Symbol",
+                  "Words": [
+                    "("
+                  ],
+                  "Attributes": {
+                    "Element": "Symbol"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true,
+              "AlternativeClose": [
+                "\"",
+                "'"
+              ]
+            },
+            "TokenRange": {
+              "Open": "join",
+              "Close": "("
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "Method",
+                  "Attributes": {
+                    "Element": "MethodName"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true,
+                    "CloseParent": true
+                  },
+                  "TokenRange": {
+                    "Open": "rdb$"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "trigger"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "for"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "select"
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "delete"
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "insert"
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "update"
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "references"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true,
+              "AlternativeClose": [
+                "no",
+                "cascade",
+                "set"
+              ]
+            },
+            "TokenRange": {
+              "Open": "update"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "on"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "sequence"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "exception"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "domain"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "index"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true,
+              "SkipWhitespaceOnce": true
+            },
+            "TokenRange": {
+              "Open": "references"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "'",
+                    "Close": "'"
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                },
+                {
+                  "Type": "Symbol",
+                  "Attributes": {
+                    "Element": "Symbol"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": ","
+                  }
+                },
+                {
+                  "Type": "ReservedWord",
+                  "Attributes": {
+                    "Element": "ReservedWord"
+                  },
+                  "Properties": {
+                    "CloseParent": true,
+                    "CloseOnTerm": true,
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "on"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "rdb$"
+            }
+          },
+          {
+            "Type": "Method",
+            "Attributes": {
+              "Element": "MethodName"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": "mon$"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Attributes": {
+              "Element": "Symbol"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "CloseOnTerm": true
+            },
+            "TokenRange": {
+              "Open": ":"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "absolute",
+              "accent",
+              "active",
+              "add",
+              "admin",
+              "after",
+              "all",
+              "alter",
+              "always",
+              "and",
+              "any",
+              "array",
+              "asc",
+              "ascending",
+              "at",
+              "auto",
+              "autonomous",
+              "avg",
+              "backup",
+              "base64_decode",
+              "base64_encode",
+              "before",
+              "begin",
+              "between",
+              "binary",
+              "bind",
+              "bit_length",
+              "blob_append",
+              "block",
+              "body",
+              "both",
+              "break",
+              "by",
+              "caller",
+              "case",
+              "check",
+              "clear",
+              "close",
+              "collate",
+              "collation",
+              "column",
+              "comment",
+              "commit",
+              "committed",
+              "common",
+              "compare_decfloat",
+              "computed",
+              "conditional",
+              "connect",
+              "connections",
+              "consistency",
+              "containing",
+              "continue",
+              "corr",
+              "count",
+              "counter",
+              "corr",
+              "covar_pop",
+              "covar_samp",
+              "create",
+              "cross",
+              "crypt_hash",
+              "cstring",
+              "ctr_big_endian",
+              "ctr_length",
+              "ctr_little_endian",
+              "cume_dist",
+              "cursor",
+              "data",
+              "database",
+              "day",
+              "ddl",
+              "debug",
+              "dec",
+              "decfloat",
+              "declare",
+              "decrypt",
+              "definer",
+              "delete",
+              "deleting",
+              "dense_rank",
+              "desc",
+              "descending",
+              "descriptor",
+              "deterministic",
+              "difference",
+              "disable",
+              "disconnect",
+              "distinct",
+              "do",
+              "domain",
+              "drop",
+              "else",
+              "enable",
+              "encrypt",
+              "end",
+              "engine",
+              "entry_point",
+              "escape",
+              "exception",
+              "excess",
+              "exclude",
+              "execute",
+              "exit",
+              "extended",
+              "external",
+              "external name",
+              "false",
+              "fetch",
+              "file",
+              "filter",
+              "first",
+              "first_day",
+              "first_value",
+              "following",
+              "for",
+              "free_it",
+              "from",
+              "full",
+              "function",
+              "gdscode",
+              "generated",
+              "generator",
+              "global",
+              "grant",
+              "granted",
+              "group",
+              "having",
+              "hex_decode",
+              "hex_encode",
+              "hour",
+              "identity",
+              "idle",
+              "if",
+              "ignore",
+              "in",
+              "inactive",
+              "include",
+              "increment",
+              "index",
+              "inner",
+              "input_type",
+              "insensitive",
+              "insert into",
+              "insert",
+              "inserting",
+              "into",
+              "invoker",
+              "is",
+              "isolation",
+              "iv",
+              "join",
+              "key",
+              "lag",
+              "last",
+              "last_day",
+              "last_value",
+              "lateral",
+              "lead",
+              "leading",
+              "leave",
+              "left",
+              "legacy",
+              "length",
+              "level",
+              "lifetime",
+              "like",
+              "limbo",
+              "linger",
+              "list",
+              "local",
+              "localtime",
+              "localtimestamp",
+              "lock",
+              "locked",
+              "long",
+              "lparam",
+              "make_dbkey",
+              "manual",
+              "mapping",
+              "matched",
+              "matching",
+              "max",
+              "maximum_segment",
+              "merge",
+              "message",
+              "middlename",
+              "millisecond",
+              "min",
+              "minute",
+              "mode",
+              "module_name",
+              "month",
+              "names",
+              "national",
+              "native",
+              "natural",
+              "next",
+              "normalize_decfloat",
+              "not",
+              "now",
+              "nth_value",
+              "ntile",
+              "nulls",
+              "number",
+              "of",
+              "offset",
+              "oldest",
+              "on",
+              "only",
+              "open",
+              "option",
+              "or",
+              "order",
+              "os_name",
+              "others",
+              "outer",
+              "output_type",
+              "over",
+              "overflow",
+              "overriding",
+              "package",
+              "pad",
+              "page",
+              "page_size",
+              "pages",
+              "parameter",
+              "partition",
+              "password",
+              "percent_rank",
+              "pkcs_1_5",
+              "placing",
+              "plan",
+              "plugin",
+              "pool",
+              "post_event",
+              "preceding",
+              "preserve",
+              "prior",
+              "privilege",
+              "privileges",
+              "procedure",
+              "protected",
+              "publication",
+              "quantize",
+              "range",
+              "rank",
+              "rdb$db_key",
+              "rdb$error",
+              "rdb$get_transaction_cn",
+              "rdb$record_version",
+              "read",
+              "real",
+              "record_version",
+              "recreate",
+              "recursive",
+              "references",
+              "regr_avgx",
+              "regr_avgy",
+              "regr_count",
+              "regr_intercept",
+              "regr_r2",
+              "regr_slope",
+              "regr_sxx",
+              "regr_sxy",
+              "regr_syy",
+              "relative",
+              "release",
+              "requests",
+              "reserv",
+              "reserving",
+              "reset",
+              "resetting",
+              "restart",
+              "restrict",
+              "retain",
+              "return",
+              "returning",
+              "returning_values",
+              "returns",
+              "revoke",
+              "role",
+              "rollback",
+              "row",
+              "rows",
+              "row_count",
+              "row_number",
+              "rsa_decrypt",
+              "rsa_encrypt",
+              "rsa_private",
+              "rsa_public",
+              "rsa_sign_hash",
+              "rsa_verify_hash",
+              "salt_length",
+              "savepoint",
+              "scalar_array",
+              "schema",
+              "scroll",
+              "second",
+              "security",
+              "segment",
+              "select",
+              "sensitive",
+              "sequence",
+              "serverwide",
+              "session",
+              "set",
+              "shadow",
+              "shared",
+              "signature",
+              "similar",
+              "singular",
+              "size",
+              "skip",
+              "smallint",
+              "snapshot",
+              "some",
+              "sort",
+              "source",
+              "space",
+              "sql",
+              "sqlcode",
+              "sqlstate",
+              "stability",
+              "start",
+              "starting",
+              "starts",
+              "statement",
+              "statistics",
+              "stddev_pop",
+              "stddev_samp",
+              "sum",
+              "suspend",
+              "system",
+              "table",
+              "tags",
+              "target",
+              "temporary",
+              "term",
+              "then",
+              "ties",
+              "timeout",
+              "timezone_hour",
+              "timezone_minute",
+              "timezone_name",
+              "to",
+              "totalorder",
+              "trailing",
+              "transaction",
+              "traps",
+              "trigger",
+              "true",
+              "trusted",
+              "two_phase",
+              "type",
+              "unbounded",
+              "uncommitted",
+              "undo",
+              "unicode_char",
+              "unicode_val",
+              "union",
+              "unknown",
+              "update",
+              "updating",
+              "usage",
+              "user",
+              "using",
+              "uuid_to_char",
+              "value",
+              "values",
+              "varbinary",
+              "variable",
+              "var_pop",
+              "var_samp",
+              "view",
+              "wait",
+              "week",
+              "weekday",
+              "when",
+              "where",
+              "while",
+              "window",
+              "with",
+              "without",
+              "work",
+              "write",
+              "year",
+              "yearday",
+              "zone"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "MethodItalic",
+            "Words": [
+              "bigint",
+              "blob",
+              "boolean",
+              "char",
+              "character",
+              "date",
+              "decimal",
+              "double",
+              "float",
+              "int",
+              "int64",
+              "int128",
+              "integer",
+              "nchar",
+              "numeric",
+              "precision",
+              "smallint",
+              "sub_type",
+              "text",
+              "time",
+              "timestamp",
+              "varchar",
+              "varying"
+            ],
+            "Attributes": {
+              "Element": "MethodItalic"
+            }
+          },
+          {
+            "Type": "Number",
+            "Words": [
+              "new",
+              "null",
+              "old"
+            ],
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Value",
+            "Words": [
+              "as",
+              "check",
+              "constraint",
+              "default",
+              "foreign key",
+              "primary key",
+              "unique"
+            ],
+            "Attributes": {
+              "Element": "Value"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "abs",
+              "acos",
+              "acosh",
+              "ascii_char",
+              "ascii_val",
+              "asin",
+              "asinh",
+              "atan",
+              "atan2",
+              "atanh",
+              "avg",
+              "base64_decode",
+              "base64_encode",
+              "bin_and",
+              "bin_not",
+              "bin_or",
+              "bin_shl",
+              "bin_shr",
+              "bin_shl_rot",
+              "bin_shr_rot",
+              "bin_xor",
+              "cast",
+              "ceil",
+              "ceiling",
+              "char_length",
+              "char_to_uuid",
+              "character_length",
+              "coalesce",
+              "compare_decfloat",
+              "cos",
+              "cosh",
+              "cot",
+              "count",
+              "crypt_hash",
+              "current",
+              "current_connection",
+              "current_date",
+              "current_role",
+              "current_time",
+              "current_timestamp",
+              "current_transaction",
+              "current_user",
+              "dateadd",
+              "datediff",
+              "decode",
+              "decrypt",
+              "encrypt",
+              "exp",
+              "extract",
+              "first",
+              "first_day",
+              "floor",
+              "gen_id",
+              "gen_uuid",
+              "hash",
+              "hex_decode",
+              "hex_encode",
+              "iif",
+              "last",
+              "last_day",
+              "left",
+              "ln",
+              "log",
+              "log10",
+              "lower",
+              "lpad",
+              "make_dbkey",
+              "max",
+              "maxvalue",
+              "min",
+              "minvalue",
+              "mod",
+              "normalize_decfloat",
+              "nullif",
+              "octet_length",
+              "overlay",
+              "pi",
+              "position",
+              "power",
+              "quantize",
+              "rand",
+              "rdb$get_context",
+              "rdb$get_transaction_cn",
+              "rdb$role_in_us",
+              "rdb$set_context",
+              "rdb$system_privilege",
+              "replace",
+              "reverse",
+              "right",
+              "round",
+              "rpad",
+              "rsa_decrypt",
+              "rsa_encrypt",
+              "rsa_private",
+              "rsa_public",
+              "rsa_sign_hash",
+              "rsa_verify_hash",
+              "sign",
+              "sin",
+              "sinh",
+              "sqrt",
+              "substring",
+              "sum",
+              "tan",
+              "tanh",
+              "totalorder",
+              "trim",
+              "trim",
+              "trunc",
+              "unicode_char",
+              "unicode_val",
+              "upper",
+              "uuid_to_char"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "MethodName",
+            "Words": [
+              "action",
+              "cascade",
+              "no"
+            ],
+            "Attributes": {
+              "Element": "MethodName"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "-",
+              "#",
+              "$",
+              "(",
+              ")",
+              "*",
+              ",",
+              ".",
+              "/",
+              ":",
+              ";",
+              "[",
+              "]",
+              "{",
+              "|",
+              "}",
+              "+"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          },
+          {
+            "Type": "LogicalOperator",
+            "Words": [
+              "<",
+              "=",
+              ">",
+              "and",
+              "exists",
+              "not",
+              "or"
+            ],
+            "Attributes": {
+              "Element": "LogicalOperator"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "HideGuideLineAtFirstColumn": true
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "MultiLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "MultiLineString"
+          },
+          {
+            "OpenToken": "--",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "BEGIN",
+            "CloseToken": "END"
+          },
+          {
+            "OpenToken": "CASE",
+            "CloseToken": "END",
+            "Properties": {
+              "SkipIfFoundAfterOpenToken": [
+                "INSENSITIVE",
+                "SENSITIVE"
+              ]
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "--",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

@@ -1,0 +1,14 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <Transactions>
+    <Transaction>2026.07.31 15.42.34.164,=C:\Delphi\Components\TextEditor\Demos\Advanced\Unit1.pas</Transaction>
+    <Transaction>2026.07.31 15.42.39.932,=C:\Delphi\Components\TextEditor\Demos\Advanced\Unit2.pas</Transaction>
+    <Transaction>2026.07.31 15.42.44.623,=C:\Delphi\Components\TextEditor\Demos\Advanced\Unit3.pas</Transaction>
+    <Transaction>2026.07.31 15.42.58.699,C:\Delphi\Components\TextEditor\Demos\Advanced\TTextEditorDemo.Frame.TextEditor.dfm=C:\Delphi\Components\TextEditor\Demos\Advanced\Unit1.dfm</Transaction>
+    <Transaction>2026.07.31 15.42.58.699,C:\Delphi\Components\TextEditor\Demos\Advanced\TTextEditorDemo.Frame.TextEditor.pas=C:\Delphi\Components\TextEditor\Demos\Advanced\Unit1.pas</Transaction>
+    <Transaction>2026.07.31 15.43.10.356,C:\Delphi\Components\TextEditor\Demos\Advanced\TTextEditorDemo.Frame.PrintPreview.dfm=C:\Delphi\Components\TextEditor\Demos\Advanced\Unit3.dfm</Transaction>
+    <Transaction>2026.07.31 15.43.10.356,C:\Delphi\Components\TextEditor\Demos\Advanced\TTextEditorDemo.Frame.PrintPreview.pas=C:\Delphi\Components\TextEditor\Demos\Advanced\Unit3.pas</Transaction>
+    <Transaction>2026.07.31 15.43.21.515,C:\Delphi\Components\TextEditor\Demos\Advanced\TTextEditorDemo.Frame.TextCompare.dfm=C:\Delphi\Components\TextEditor\Demos\Advanced\Unit2.dfm</Transaction>
+    <Transaction>2026.07.31 15.43.21.515,C:\Delphi\Components\TextEditor\Demos\Advanced\TTextEditorDemo.Frame.TextCompare.pas=C:\Delphi\Components\TextEditor\Demos\Advanced\Unit2.pas</Transaction>
+  </Transactions>
+</BorlandProject>

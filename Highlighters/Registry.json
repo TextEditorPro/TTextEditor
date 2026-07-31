@@ -1,0 +1,116 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "Windows Registry Editor Version 5.00\r\n",
+      "\r\n",
+      "[HKEY_CURRENT_USER\Software\Sample]\r\n",
+      "\"Sample\"=dword:00000001"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": ";"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "ReservedWord"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true,
+              "OpenBeginningOfLine": true
+            },
+            "TokenRange": {
+              "Open": "[",
+              "Close": "]"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "="
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "Symbol",
+            "Words": [
+              "="
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "Options": {
+          "MatchingPairHighlight": false,
+          "HideGuideLineAtFirstColumn": true
+        },
+        "SkipRegion": [
+          {
+            "OpenToken": ";",
+            "RegionType": "SingleLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "[",
+            "CloseToken": "[",
+            "Properties": {
+              "OpenTokenBeginningOfLine": true,
+              "CloseTokenBeginningOfLine": true,
+              "OpenIsClose": true,
+              "ShowGuideLine": false,
+              "TokenEndIsPreviousLine": true,
+              "OpenTokenEnd": "]",
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": ";",
+        "RegionType": "SingleLine"
+      }
+    ]
+  }
+}

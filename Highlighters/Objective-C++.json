@@ -1,0 +1,505 @@
+{
+  "Highlighter": {
+    "Sample": [
+      "// Hello, World! in Object-C++\r\n",
+      "\r\n",
+      "#import <Foundation/Foundation.h>\r\n",
+      "#include <print>\r\n",
+      "\r\n",
+      "int main(int argc, const char * argv[]) {\r\n",
+      "    @autoreleasepool {\r\n",
+      "        NSLog(@\"Hello, World!\");\r\n",
+      "        std::println(\"Hello, C++ world!\");\r\n",
+      "    }\r\n",
+      "    return 0;\r\n",
+      "}"
+    ],
+    "MainRules": {
+      "Attributes": {
+        "Element": "Editor"
+      },
+      "SubRules": {
+        "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
+          {
+            "Type": "LineComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "//"
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "'",
+              "Close": "'"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\'",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "String",
+            "Attributes": {
+              "Element": "String"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "\"",
+              "Close": "\""
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\"",
+                    "Close": ""
+                  }
+                },
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true,
+                    "CloseOnTerm": true
+                  },
+                  "TokenRange": {
+                    "Open": "\\\\",
+                    "Close": ""
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "Type": "Number",
+            "Attributes": {
+              "Element": "Number"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0",
+              "OpenBreakType": "Term"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abcdefulABCDEFUL",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0x",
+              "OpenBreakType": "Any"
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          }
+        ],
+        "KeyList": [
+          {
+            "Type": "ReservedWord",
+            "Words": [
+              "__autoreleasing",
+              "__bridge",
+              "__bridge_retained",
+              "__bridge_transfer",
+              "__kindof",
+              "__strong ",
+              "__unsafe_unretained ",
+              "__weak ",
+              "_bool",
+              "_complex",
+              "_imaginary",
+              "_nonnull",
+              "_null_unspecified",
+              "_nullable",
+              "_packed",
+              "_pragma",
+              "alignas",
+              "alignof",
+              "and",
+              "and_eq",
+              "asm",
+              "auto",
+              "autorelease",
+              "bitand",
+              "bitor",
+              "bool",
+              "break",
+              "case",
+              "catch",
+              "cgfloat",
+              "char",
+              "char16_t",
+              "char32_t",
+              "compl",
+              "const",
+              "const_cast",
+              "constexpr",
+              "continue",
+              "decltype",
+              "default",
+              "delete",
+              "do",
+              "double",
+              "dynamic_cast",
+              "else",
+              "enum",
+              "explicit",
+              "export",
+              "extern",
+              "false",
+              "float",
+              "for",
+              "friend",
+              "goto",
+              "if",
+              "inline",
+              "instancetype",
+              "int",
+              "long",
+              "mutable",
+              "namespace",
+              "new",
+              "noexcept",
+              "nonatomic",
+              "not",
+              "not_eq",
+              "nsapplication",
+              "nsarray",
+              "nsautoreleasepool",
+              "nsdictionary",
+              "nsinteger",
+              "nsnumber",
+              "nsobject",
+              "nsstring",
+              "nsview",
+              "nullptr",
+              "operator",
+              "or",
+              "or_eq",
+              "private",
+              "property",
+              "protected",
+              "protocol",
+              "public",
+              "readonly",
+              "readwrite",
+              "register",
+              "reinterpret_cast",
+              "release",
+              "restrict",
+              "retain",
+              "return",
+              "short",
+              "sizeof",
+              "static",
+              "static_assert",
+              "static_cast",
+              "strong",
+              "struct",
+              "switch",
+              "template",
+              "this",
+              "thread_local",
+              "throw",
+              "true",
+              "try",
+              "typedef",
+              "typeid",
+              "typename",
+              "union",
+              "unsafe_unretained",
+              "using",
+              "virtual",
+              "volatile",
+              "wchar_t",
+              "weak",
+              "while",
+              "xor",
+              "xor_eq"
+            ],
+            "Attributes": {
+              "Element": "ReservedWord"
+            }
+          },
+          {
+            "Type": "Method",
+            "Words": [
+              "@autoreleasepool",
+              "@available",
+              "@catch",
+              "@class",
+              "@compatibility_alias",
+              "@defs",
+              "@dynamic",
+              "@encode",
+              "@end",
+              "@finally",
+              "@implementation",
+              "@interface",
+              "@objc",
+              "@optional",
+              "@package",
+              "@private",
+              "@property",
+              "@protected",
+              "@protocol",
+              "@public",
+              "@required",
+              "@selector",
+              "@synchronized",
+              "@synthesize",
+              "@throw",
+              "@try",
+              "alloc",
+              "allocwithzone",
+              "copy",
+              "copywithzone",
+              "count",
+              "dealloc",
+              "id",
+              "index",
+              "init",
+              "mutablecopy",
+              "mutablecopywithzone",
+              "signed",
+              "sprintf",
+              "unsigned",
+              "void"
+            ],
+            "Attributes": {
+              "Element": "Method"
+            }
+          },
+          {
+            "Type": "Number",
+            "Words": [
+              "bool",
+              "class",
+              "main",
+              "nil",
+              "no",
+              "nslog",
+              "null",
+              "object",
+              "retaincount",
+              "sel",
+              "self",
+              "super",
+              "superclass",
+              "yes"
+            ],
+            "Attributes": {
+              "Element": "Number"
+            }
+          },
+          {
+            "Type": "Symbol",
+            "Words": [
+              "!",
+              "-",
+              "%",
+              "&",
+              "(",
+              ")",
+              "*",
+              ",",
+              ".",
+              "/",
+              ":",
+              ";",
+              "?",
+              "@",
+              "[",
+              "]",
+              "^",
+              "{",
+              "|",
+              "}",
+              "~",
+              "+",
+              "<",
+              "=",
+              ">"
+            ],
+            "Attributes": {
+              "Element": "Symbol"
+            }
+          }
+        ],
+        "Set": [
+          {
+            "Type": "Numbers",
+            "Symbols": ".0123456789eulEUL-",
+            "Attributes": {
+              "Element": "Number"
+            }
+          }
+        ]
+      }
+    }
+  },
+  "CodeFolding": {
+    "Ranges": [
+      {
+        "SkipRegion": [
+          {
+            "OpenToken": "'",
+            "CloseToken": "'",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "\"",
+            "CloseToken": "\"",
+            "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "//",
+            "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
+          }
+        ],
+        "FoldRegion": [
+          {
+            "OpenToken": "{",
+            "CloseToken": "}",
+            "Properties": {
+              "BreakCharFollows": false
+            }
+          }
+        ]
+      }
+    ]
+  },
+  "MatchingPair": {
+    "Pairs": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\""
+      },
+      {
+        "OpenToken": "(",
+        "CloseToken": ")"
+      },
+      {
+        "OpenToken": "[",
+        "CloseToken": "]"
+      },
+      {
+        "OpenToken": "{",
+        "CloseToken": "}"
+      }
+    ]
+  },
+  "CompletionProposal": {
+    "SkipRegion": [
+      {
+        "OpenToken": "'",
+        "CloseToken": "'",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "\"",
+        "CloseToken": "\"",
+        "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "//",
+        "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
+      }
+    ]
+  }
+}

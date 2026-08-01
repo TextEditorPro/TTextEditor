@@ -140,8 +140,8 @@ type
 
   { Editor options }
   TTextEditorOption = (eoAddHTMLCodeToClipboard, eoAutoIndent, eoDragDropEditing, eoDropFiles, eoLoadColors, eoLoadFontNames,
-    eoLoadFontSizes, eoLoadFontStyles, eoShowControlCharacters, eoShowLineNumbersInHTMLExport, eoShowNonBreakingSpaces,
-    eoShowNullCharacters, eoShowZeroWidthSpaces, eoTrimTrailingSpaces, eoTrailingLineBreak);
+    eoLoadFontSizes, eoLoadFontStyles, eoShowControlCharacters, eoShowLineNumbersInHTMLExport, eoShowMacroState,
+    eoShowNonBreakingSpaces, eoShowNullCharacters, eoShowZeroWidthSpaces, eoTrimTrailingSpaces, eoTrailingLineBreak);
   TTextEditorOptions = set of TTextEditorOption;
 
   TTextEditorOvertypeMode = (omInsert, omOverwrite);

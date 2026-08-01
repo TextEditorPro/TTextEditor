@@ -143,7 +143,7 @@ type
   { Editor options }
   TTextEditorOption = (eoAddHTMLCodeToClipboard, eoAutoIndent, eoDragDropEditing, eoDropFiles,
     eoLoadColors, eoLoadFontNames, eoLoadFontSizes, eoLoadFontStyles, eoNativeHintWindow, eoShowControlCharacters,
-    eoShowLineNumbersInHTMLExport, eoShowNonBreakingSpaces, eoShowNullCharacters
+    eoShowLineNumbersInHTMLExport, eoShowMacroState, eoShowNonBreakingSpaces, eoShowNullCharacters
     {$IFDEF TEXT_EDITOR_SPELL_CHECK}, eoSpellCheck{$ENDIF}, eoShowZeroWidthSpaces, eoTrimTrailingSpaces,
     eoTrailingLineBreak);
   TTextEditorOptions = set of TTextEditorOption;

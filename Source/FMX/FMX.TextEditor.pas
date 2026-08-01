@@ -29,7 +29,7 @@ type
     Height = 150;
     LineSpacing = 0;
     MaxLength = 0;
-    Options = [eoAutoIndent, eoDragDropEditing, eoLoadColors, eoLoadFontNames, eoLoadFontSizes, eoLoadFontStyles, eoShowNullCharacters, eoShowControlCharacters];
+    Options = [eoAutoIndent, eoDragDropEditing, eoLoadColors, eoLoadFontNames, eoLoadFontSizes, eoLoadFontStyles, eoShowMacroState, eoShowNullCharacters, eoShowControlCharacters];
     OvertypeMode = omInsert;
     ParentColor = False;
     ParentFont = False;
@@ -353,6 +353,9 @@ type
     FLineSpacing: Integer;
     FLines: TTextEditorLines;
     FMacroRecorder: TTextEditorMacroRecorder;
+    FMacroState: TTextEditorMacroState;
+    FMacroStateFlash: Boolean;
+    FMacroStateTimer: TTextEditorTimer;
     FMarkList: TTextEditorMarkList;
     FMatchingPair: TTextEditorMatchingPair;
     FMatchingPairs: TTextEditorMatchingPairs;
@@ -567,6 +570,7 @@ type
     procedure LinesInserted(ASender: TObject; const AIndex: Integer; const ACount: Integer);
     procedure LinesPutted(ASender: TObject; const AIndex: Integer; const ACount: Integer);
     procedure MinimapChanged(ASender: TObject);
+    procedure MacroStateTimerHandler(ASender: TObject);
     procedure MouseScrollTimerHandler(ASender: TObject);
     procedure MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TTextEditorTextPosition; const ASelectionCommand: Boolean);
     procedure MoveCaretHorizontally(const X: Integer; const ASelectionCommand: Boolean);
@@ -602,6 +606,7 @@ type
     procedure SetHorizontalScrollPosition(const AValue: Single);
     procedure SetKeyCommands(const AValue: TTextEditorKeyCommands);
     procedure SetLeftMargin(const AValue: TTextEditorLeftMargin);
+    procedure SetMacroState(const AValue: TTextEditorMacroState);
     procedure SetLine(const ALine: Integer; const ALineText: string); inline;
     procedure SetModified(const AValue: Boolean);
     procedure SetMouseScrollCursors(const AIndex: Integer; const AValue: TCursor);
@@ -713,6 +718,7 @@ type
     procedure PaintCodeFoldingLine(const AClipRect: TRectF; const ALine: Integer);
     procedure PaintHint(const AHint: string; const ATop: Single);
     procedure PaintLeftMargin(const AClipRect: TRectF; const AFirstLine, ALastTextLine, ALastLine: Integer);
+    procedure PaintMacroState;
     procedure PaintMinimap(const AClipRect: TRectF; const AFirstLine, ALastLine: Integer);
     procedure PaintMinimapIndicator(const AClipRect: TRectF);
     procedure PaintMinimapShadow(const ACanvas: TCanvas; const AClipRect: TRectF);
@@ -952,6 +958,7 @@ type
     property LineSpacing: Integer read FLineSpacing write FLineSpacing default TTextEditorDefaults.LineSpacing;
     property Lines: TTextEditorLines read FLines;
     property MacroRecorder: TTextEditorMacroRecorder read FMacroRecorder write FMacroRecorder;
+    property MacroState: TTextEditorMacroState read FMacroState write SetMacroState;
     property Marks: TTextEditorMarkList read FMarkList;
     property MatchingPairs: TTextEditorMatchingPairs read FMatchingPairs write FMatchingPairs;
     property MaxLength: Integer read FMaxLength write FMaxLength default TTextEditorDefaults.MaxLength;
@@ -9450,6 +9457,42 @@ begin
     FMouse.ScrollCursors[AIndex] := AValue;
 end;
 
+procedure TCustomTextEditor.SetMacroState(const AValue: TTextEditorMacroState);
+begin
+  if FMacroState <> AValue then
+  begin
+    { Flash the stop icon briefly when recording or playback ends }
+    FMacroStateFlash := (AValue = msStopped) and not (csDesigning in ComponentState);
+
+    if FMacroStateFlash then
+    begin
+      if not Assigned(FMacroStateTimer) then
+      begin
+        FMacroStateTimer := TTextEditorTimer.Create(Self);
+        FMacroStateTimer.Enabled := False;
+        FMacroStateTimer.Interval := 2000;
+        FMacroStateTimer.OnTimer := MacroStateTimerHandler;
+      end;
+
+      FMacroStateTimer.Restart;
+    end;
+
+    FMacroState := AValue;
+
+    if (eoShowMacroState in FOptions) and Assigned(Parent) then
+      Repaint;
+  end;
+end;
+
+procedure TCustomTextEditor.MacroStateTimerHandler(ASender: TObject);
+begin
+  FMacroStateTimer.Enabled := False;
+  FMacroStateFlash := False;
+
+  if (eoShowMacroState in FOptions) and Assigned(Parent) then
+    Repaint;
+end;
+
 procedure TCustomTextEditor.SetOptions(const AValue: TTextEditorOptions);
 begin
   if FOptions <> AValue then
@@ -12731,6 +12774,10 @@ begin
     if FScrollHelper.IsScrolling and (soShowVerticalScrollHint in FScroll.Options) then
       PaintScrollHint;
 
+    { Macro state }
+    if (eoShowMacroState in FOptions) and ((FMacroState <> msStopped) or FMacroStateFlash) and not (csDesigning in ComponentState) then
+      PaintMacroState;
+
     PaintBorder;
     DoOnPaint;
   finally
@@ -14017,6 +14064,85 @@ begin
           0, 0, [], 0.8);
       end;
     end;
+  end;
+end;
+
+procedure TCustomTextEditor.PaintMacroState;
+const
+  CRecordingColor = TAlphaColor($FFF44336);
+  CPausedColor = TAlphaColor($FFFECB00);
+  CPlayingColor = TAlphaColor($FF66CB66);
+  CStoppedColor = TAlphaColor($FF9E9E9E);
+var
+  LRect: TRectF;
+  LScale, LSize, LMargin, LRight, LBarWidth: Single;
+  LPath: TPathData;
+
+  function Snap(const AValue: Single): Single;
+  begin
+    Result := Round(AValue * LScale) / LScale;
+  end;
+
+begin
+  LScale := 1;
+
+  if Assigned(Scene) then
+    LScale := Scene.GetSceneScale;
+
+  LSize := Snap(14 * FPixelsPerInch / 96);
+  LMargin := 10 * FPixelsPerInch / 96;
+
+  LRight := ClientWidth;
+
+  if FMinimap.Align = maRight then
+    LRight := LRight - FMinimap.GetWidth;
+
+  if FSearch.Map.Align = saRight then
+    LRight := LRight - FSearch.Map.GetWidth;
+
+  LRect.Right := Snap(LRight - LMargin);
+  LRect.Left := LRect.Right - LSize;
+  LRect.Bottom := Snap(ClientHeight - LMargin);
+  LRect.Top := LRect.Bottom - LSize;
+
+  Canvas.Fill.Kind := TBrushKind.Solid;
+
+  case FMacroState of
+    msRecording:
+      begin
+        Canvas.Fill.Color := CRecordingColor;
+        Canvas.FillEllipse(LRect, AbsoluteOpacity);
+      end;
+    msPaused:
+      begin
+        Canvas.Fill.Color := CPausedColor;
+
+        LBarWidth := Max(2 / LScale, Snap(LSize * 0.32));
+
+        Canvas.FillRect(RectF(LRect.Left, LRect.Top, LRect.Left + LBarWidth, LRect.Bottom), 0, 0, [], AbsoluteOpacity);
+        Canvas.FillRect(RectF(LRect.Right - LBarWidth, LRect.Top, LRect.Right, LRect.Bottom), 0, 0, [], AbsoluteOpacity);
+      end;
+    msPlaying:
+      begin
+        Canvas.Fill.Color := CPlayingColor;
+
+        LPath := TPathData.Create;
+        try
+          LPath.MoveTo(PointF(LRect.Left, LRect.Top));
+          LPath.LineTo(PointF(LRect.Left, LRect.Bottom));
+          LPath.LineTo(PointF(LRect.Right, (LRect.Top + LRect.Bottom) * 0.5));
+          LPath.ClosePath;
+
+          Canvas.FillPath(LPath, AbsoluteOpacity);
+        finally
+          LPath.Free;
+        end;
+      end;
+    msStopped:
+      begin
+        Canvas.Fill.Color := CStoppedColor;
+        Canvas.FillRect(LRect, 0, 0, [], AbsoluteOpacity);
+      end;
   end;
 end;
 

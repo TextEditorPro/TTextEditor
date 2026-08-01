@@ -385,12 +385,17 @@ procedure TCustomEditorMacroRecorder.DoAddEditor(const AEditor: TControl);
 begin
   HookEditor(AEditor, RecordCommandID, 0, RecordShortCut);
   HookEditor(AEditor, PlaybackCommandID, 0, PlaybackShortCut);
+
+  TCustomTextEditor(AEditor).MacroState := FState;
 end;
 
 procedure TCustomEditorMacroRecorder.DoRemoveEditor(const AEditor: TControl);
 begin
   UnHookEditor(AEditor, RecordCommandID, RecordShortCut);
   UnHookEditor(AEditor, PlaybackCommandID, PlaybackShortCut);
+
+  if not (csDestroying in AEditor.ComponentState) then
+    TCustomTextEditor(AEditor).MacroState := msStopped;
 end;
 
 procedure TCustomEditorMacroRecorder.Error(const AMessage: string);
@@ -543,6 +548,8 @@ begin
 
   LEditor := AEditor as TCustomTextEditor;
 
+  FCurrentEditor := AEditor;
+
   repeat
     LStartLine  := LEditor.TextPosition.Line;
 
@@ -567,6 +574,8 @@ begin
 
     LEndLine  := LEditor.TextPosition.Line;
   until not AUntilEndOfFile or AUntilEndOfFile and (LEndLine <= LStartLine);
+
+  FCurrentEditor := nil;
 end;
 
 procedure TCustomEditorMacroRecorder.RecordMacro(const AEditor: TControl);
@@ -664,7 +673,19 @@ begin
 end;
 
 procedure TCustomEditorMacroRecorder.StateChanged;
+
+  procedure SetEditorMacroState(const AEditor: TControl);
+  begin
+    if Assigned(AEditor) and not (csDestroying in AEditor.ComponentState) then
+      TCustomTextEditor(AEditor).MacroState := FState;
+  end;
+
 begin
+  for var LIndex := 0 to EditorCount - 1 do
+    SetEditorMacroState(Editors[LIndex]);
+
+  SetEditorMacroState(FCurrentEditor);
+
   if Assigned(OnStateChange) then
     OnStateChange(Self);
 end;
@@ -675,7 +696,6 @@ begin
     Exit;
 
   FState := msStopped;
-  FCurrentEditor := nil;
 
   if FEvents.Count = 0 then
   begin
@@ -684,6 +704,8 @@ begin
   end;
 
   StateChanged;
+
+  FCurrentEditor := nil;
 end;
 
 procedure TCustomEditorMacroRecorder.LoadFromFile(const AFilename: string);

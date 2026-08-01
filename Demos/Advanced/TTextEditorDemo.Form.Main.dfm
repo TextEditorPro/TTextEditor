@@ -45,11 +45,10 @@ object MainForm: TMainForm
     OnClick = StatusBarClick
   end
   object PanelSidebar: TPanel
-    AlignWithMargins = True
-    Left = 3
-    Top = 5
+    Left = 0
+    Top = 2
     Width = 68
-    Height = 756
+    Height = 762
     Align = alLeft
     BevelOuter = bvNone
     Caption = 'PanelSidebar'
@@ -77,7 +76,7 @@ object MainForm: TMainForm
     end
     object SpeedButtonDarkTheme: TSpeedButton
       Left = 0
-      Top = 695
+      Top = 701
       Width = 68
       Height = 61
       Action = ActionViewDarkTheme
@@ -130,20 +129,22 @@ object MainForm: TMainForm
     end
   end
   object PanelMain: TPanel
-    Left = 74
+    Left = 68
     Top = 2
-    Width = 1155
+    Width = 1161
     Height = 762
     Align = alClient
     BevelOuter = bvNone
+    Padding.Left = 3
     ParentColor = True
     ShowCaption = False
     TabOrder = 2
     object ActionMainMenuBar: TActionMainMenuBar
-      Left = 0
+      Left = 3
       Top = 0
-      Width = 1155
+      Width = 1158
       Height = 25
+      UseSystemFont = False
       ActionManager = ActionManager
       Caption = 'ActionMainMenuBar'
       Color = clMenuBar
@@ -152,7 +153,7 @@ object MainForm: TMainForm
       ColorMap.BtnSelectedFont = clBlack
       ColorMap.UnusedColor = clWhite
       Font.Charset = DEFAULT_CHARSET
-      Font.Color = clWindowText
+      Font.Color = clBlack
       Font.Height = -12
       Font.Name = 'Segoe UI'
       Font.Style = []
@@ -574,6 +575,30 @@ object MainForm: TMainForm
                 Caption = '&Previous bookmark'
               end>
             Caption = '&Bookmarks'
+          end
+          item
+            Items = <
+              item
+                Action = ActionTestUndoRedo
+                Caption = '&Test undo/redo'
+              end
+              item
+                Action = ActionTestSelectionInvariants
+                Caption = 'T&est selection invariants'
+              end
+              item
+                Action = ActionTestSaveLoad
+                Caption = 'Test &save/load round-trip'
+              end
+              item
+                Action = ActionTestClipboardRoundTrip
+                Caption = 'Test &clipboard round-trip'
+              end
+              item
+                Action = ActionTestHighlighterSweep
+                Caption = 'Test &highlighters and themes'
+              end>
+            Caption = '&Test'
           end>
         ActionBar = ActionMainMenuBar
       end>
@@ -631,6 +656,31 @@ object MainForm: TMainForm
       Category = 'Bookmarks'
       Caption = 'Previous bookmark'
       OnExecute = ActionBookmarksPreviousBookmarkExecute
+    end
+    object ActionTestUndoRedo: TAction
+      Category = 'Test'
+      Caption = 'Test undo/redo'
+      OnExecute = ActionTestUndoRedoExecute
+    end
+    object ActionTestSelectionInvariants: TAction
+      Category = 'Test'
+      Caption = 'Test selection invariants'
+      OnExecute = ActionTestSelectionInvariantsExecute
+    end
+    object ActionTestSaveLoad: TAction
+      Category = 'Test'
+      Caption = 'Test save/load round-trip'
+      OnExecute = ActionTestSaveLoadExecute
+    end
+    object ActionTestClipboardRoundTrip: TAction
+      Category = 'Test'
+      Caption = 'Test clipboard round-trip'
+      OnExecute = ActionTestClipboardRoundTripExecute
+    end
+    object ActionTestHighlighterSweep: TAction
+      Category = 'Test'
+      Caption = 'Test highlighters and themes'
+      OnExecute = ActionTestHighlighterSweepExecute
     end
   end
 end

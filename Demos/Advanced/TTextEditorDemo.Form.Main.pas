@@ -10,8 +10,6 @@ uses
   TTextEditorDemo.Frame.PrintPreview, TTextEditorDemo.Frame.TextCompare, TTextEditorDemo.Frame.TextEditor;
 
 type
-  { TMainForm }
-
   TMainForm = class(TForm)
     ActionBookmarksNextBookmark: TAction;
     ActionBookmarksPreviousBookmark: TAction;
@@ -26,6 +24,11 @@ type
     ActionMainMenuBar: TActionMainMenuBar;
     ActionManager: TActionManager;
     ActionSearchGoToLine: TAction;
+    ActionTestClipboardRoundTrip: TAction;
+    ActionTestHighlighterSweep: TAction;
+    ActionTestSaveLoad: TAction;
+    ActionTestSelectionInvariants: TAction;
+    ActionTestUndoRedo: TAction;
     ActionToolBar1: TActionToolBar;
     ActionViewDarkTheme: TAction;
     ActionViewPrintPreview: TAction;
@@ -61,9 +64,13 @@ type
     procedure ActionFileSaveAsExecute(Sender: TObject);
     procedure ActionFileSaveExecute(Sender: TObject);
     procedure ActionSearchGoToLineExecute(Sender: TObject);
+    procedure ActionTestClipboardRoundTripExecute(Sender: TObject);
+    procedure ActionTestHighlighterSweepExecute(Sender: TObject);
+    procedure ActionTestSaveLoadExecute(Sender: TObject);
+    procedure ActionTestSelectionInvariantsExecute(Sender: TObject);
+    procedure ActionTestUndoRedoExecute(Sender: TObject);
     procedure ActionViewDarkThemeExecute(Sender: TObject);
     procedure ActionViewExecute(Sender: TObject);
-    procedure FileOpen1BeforeExecute(Sender: TObject);
     procedure FormCreate(Sender: TObject);
     procedure MenuItemZoomClick(Sender: TObject);
     procedure SelectHighlighter(Sender: TObject);
@@ -118,11 +125,6 @@ type
 var
   FDarkStyleEnabled: Boolean;
   FStyleLoaded: Boolean;
-
-procedure TMainForm.FileOpen1BeforeExecute(Sender: TObject);
-begin
-  //
-end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
@@ -343,6 +345,8 @@ begin
 
   FDarkStyleEnabled := AValue;
 
+
+
   TStyleManager.TrySetStyle(if AValue then 'Windows11 Modern Dark' else 'Windows');
 end;
 
@@ -427,6 +431,31 @@ var
 begin
   if InputQuery('Go to line', 'Line number', LValue) and TryStrToInt(LValue, LLine) then
     FFrameTextEditor.TextEditor.GoToLineAndSetPosition(LLine);
+end;
+
+procedure TMainForm.ActionTestUndoRedoExecute(Sender: TObject);
+begin
+  FFrameTextEditor.RunUndoRedoTest;
+end;
+
+procedure TMainForm.ActionTestSelectionInvariantsExecute(Sender: TObject);
+begin
+  FFrameTextEditor.RunSelectionInvariantsTest;
+end;
+
+procedure TMainForm.ActionTestSaveLoadExecute(Sender: TObject);
+begin
+  FFrameTextEditor.RunSaveLoadTest;
+end;
+
+procedure TMainForm.ActionTestClipboardRoundTripExecute(Sender: TObject);
+begin
+  FFrameTextEditor.RunClipboardRoundTripTest;
+end;
+
+procedure TMainForm.ActionTestHighlighterSweepExecute(Sender: TObject);
+begin
+  FFrameTextEditor.RunHighlighterSweepTest;
 end;
 
 procedure TMainForm.ActionViewDarkThemeExecute(Sender: TObject);

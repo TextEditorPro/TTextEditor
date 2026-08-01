@@ -49,8 +49,8 @@ object FrameTextCompare: TFrameTextCompare
     object EditorCompareLeft: TTextEditor
       Left = 0
       Top = 0
-      Width = 543
-      Height = 858
+      Width = 544
+      Height = 860
       Align = alClient
       Border.Color = 9471874
       Border.ColoredEdges = [ebLeft, ebTop, ebRight, ebBottom]
@@ -63,10 +63,10 @@ object FrameTextCompare: TFrameTextCompare
       TabOrder = 0
     end
     object EditorCompareRight: TTextEditor
-      Left = 603
+      Left = 604
       Top = 0
-      Width = 543
-      Height = 858
+      Width = 544
+      Height = 860
       Align = alClient
       Border.Color = 9471874
       Border.ColoredEdges = [ebLeft, ebTop, ebRight, ebBottom]
@@ -79,10 +79,10 @@ object FrameTextCompare: TFrameTextCompare
       TabOrder = 1
     end
     object CompareScrollBar: TTextEditorCompareScrollBar
-      Left = 543
+      Left = 544
       Top = 0
       Width = 60
-      Height = 858
+      Height = 860
       Align = alClient
       EditorLeft = EditorCompareLeft
       EditorRight = EditorCompareRight

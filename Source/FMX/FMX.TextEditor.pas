@@ -4981,7 +4981,7 @@ end;
 
 procedure TCustomTextEditor.CodeFoldingOnChange(const AEvent: TTextEditorCodeFoldingChanges);
 begin
-  if AEvent = fcVisible then
+  if AEvent in [fcRescan, fcVisible] then
   begin
     if IsCodeFoldingVisible then
       InitCodeFolding
@@ -8736,6 +8736,9 @@ const
     LCodeFoldingRange: TTextEditorCodeFoldingRange;
     LCharSet: TTextEditorCharSet;
   begin
+    if Highlighter.CodeFoldingRangeCount = 0 then
+      Exit;
+
     LFoldCount := 0;
     LOpenTokenSkipFoldRangeList := TList.Create;
     LOpenTokenFoldRangeList := TList.Create;

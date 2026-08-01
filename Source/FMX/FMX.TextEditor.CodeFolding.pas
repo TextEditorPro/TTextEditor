@@ -22,6 +22,7 @@ type
     FVisible: Boolean;
     FWidth: Integer;
     procedure DoChange;
+    procedure GuideLinesChanged(ASender: TObject);
     procedure SetAutoHide(const AValue: Boolean);
     procedure SetGuideLines(const AValue: TTextEditorCodeFoldingGuideLines);
     procedure SetHint(const AValue: TTextEditorCodeFoldingHint);
@@ -30,6 +31,7 @@ type
     procedure SetTextFolding(const AValue: TTextEditorTextFolding);
     procedure SetVisible(const AValue: Boolean);
     procedure SetWidth(const AValue: Integer);
+    procedure TextFoldingChanged(ASender: TObject);
   public
     constructor Create;
     destructor Destroy; override;
@@ -66,12 +68,14 @@ begin
   FCollapsedRowCharacterCount := 20;
   FDelayInterval := 300;
   FGuideLines := TTextEditorCodeFoldingGuideLines.Create;
+  FGuideLines.OnChange := GuideLinesChanged;
   FHint := TTextEditorCodeFoldingHint.Create;
   FMarkStyle := msSquare;
   FMouseOverHint := False;
   FOptions := TTextEditorDefaultOptions.CodeFolding;
   FOutlining := False;
   FTextFolding := TTextEditorTextFolding.Create;
+  FTextFolding.OnChange := TextFoldingChanged;
   FVisible := False;
   FWidth := 14;
 end;
@@ -110,6 +114,17 @@ procedure TTextEditorCodeFolding.DoChange;
 begin
   if Assigned(FOnChange) then
     FOnChange(fcRefresh);
+end;
+
+procedure TTextEditorCodeFolding.GuideLinesChanged(ASender: TObject);
+begin
+  DoChange;
+end;
+
+procedure TTextEditorCodeFolding.TextFoldingChanged(ASender: TObject);
+begin
+  if Assigned(FOnChange) then
+    FOnChange(fcRescan);
 end;
 
 procedure TTextEditorCodeFolding.ChangeScale(const AMultiplier, ADivider: Integer);

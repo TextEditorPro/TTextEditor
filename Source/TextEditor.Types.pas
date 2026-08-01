@@ -287,7 +287,7 @@ type
   TTextEditorCodeFoldingGuideLineStyle = (lsDash, lsDot, lsSolid);
   TTextEditorCodeFoldingMarkStyle = (msCircle, msSquare, msTriangle);
   TTextEditorCodeFoldingHintIndicatorMarkStyle = (imsThreeDots, imsTriangle);
-  TTextEditorCodeFoldingChanges = (fcRefresh, fcVisible);
+  TTextEditorCodeFoldingChanges = (fcRefresh, fcRescan, fcVisible);
   TTextEditorCodeFoldingHintIndicatorOption = (hioShowBorder, hioShowMark);
   TTextEditorCodeFoldingHintIndicatorOptions = set of TTextEditorCodeFoldingHintIndicatorOption;
 

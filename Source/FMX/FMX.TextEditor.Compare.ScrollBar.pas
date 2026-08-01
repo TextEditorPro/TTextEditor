@@ -39,6 +39,7 @@ type
     procedure SetScrollBarVisible(const AValue: Boolean);
     procedure SetTopLine(const AValue: Integer);
   protected
+    procedure Loaded; override;
     procedure MouseDown(AButton: TMouseButton; AShift: TShiftState; X, Y: Single); override;
     procedure MouseMove(AShift: TShiftState; X, Y: Single); override;
     procedure MouseUp(AButton: TMouseButton; AShift: TShiftState; X, Y: Single); override;
@@ -77,6 +78,8 @@ begin
 
   FBorderStyle := bsSingle;
   FScrollBarVisible := False;
+  FScrollBarTopLine := 1;
+  FTopLine := 1;
 
   FScrollBar := TScrollBar.Create(Self);
   FScrollBar.Stored := False;
@@ -165,7 +168,7 @@ begin
   LClientWidth := ClientWidth;
   LHalfWidth := LClientWidth shr 1;
 
-  for var LIndex := FScrollBarTopLine to Min(FScrollBarTopLine + ClientHeight - 1, FEditorLeft.Lines.Count) do
+  for var LIndex := Max(1, FScrollBarTopLine) to Min(FScrollBarTopLine + ClientHeight - 1, FEditorLeft.Lines.Count) do
   begin
     Canvas.Stroke.Color :=
       if (LIndex >= FTopLine) and (LIndex < FTopLine + FVisibleLines) then
@@ -206,7 +209,7 @@ end;
 
 procedure TTextEditorCompareScrollBar.Invalidate;
 begin
-  if csDesigning in ComponentState then
+  if ComponentState * [csLoading, csDesigning] <> [] then
     Exit;
 
   if Assigned(FEditorLeft) then
@@ -214,6 +217,13 @@ begin
 
   UpdateScrollBars;
   Repaint;
+end;
+
+procedure TTextEditorCompareScrollBar.Loaded;
+begin
+  inherited Loaded;
+
+  Invalidate;
 end;
 
 procedure TTextEditorCompareScrollBar.Resize;

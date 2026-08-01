@@ -43,6 +43,8 @@ type
     procedure WMVScroll(var AMessage: TWMScroll); message WM_VSCROLL;
   protected
     procedure CreateParams(var AParams: TCreateParams); override;
+    procedure CreateWnd; override;
+    procedure Loaded; override;
     procedure MouseDown(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer); override;
     procedure MouseMove(AShift: TShiftState; X, Y: Integer); override;
     procedure MouseUp(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer); override;
@@ -90,6 +92,8 @@ begin
 
   FBorderStyle := bsSingle;
   FScrollBarVisible := False;
+  FScrollBarTopLine := 1;
+  FTopLine := 1;
   Color := TColors.SysWindow;
   DoubleBuffered := False;
   ControlStyle := ControlStyle + [csOpaque, csSetCaption, csNeedsBorderPaint];
@@ -225,7 +229,7 @@ begin
   LLine := 0;
   LHalfWidth := ClientWidth shr 1;
 
-  for var LIndex := FScrollBarTopLine to Min(FScrollBarTopLine + ClientHeight - 1, FEditorLeft.Lines.Count) do
+  for var LIndex := Max(1, FScrollBarTopLine) to Min(FScrollBarTopLine + ClientHeight - 1, FEditorLeft.Lines.Count) do
   begin
     Canvas.Pen.Color :=
       if (LIndex >= FTopLine) and (LIndex < FTopLine + FVisibleLines) then
@@ -281,7 +285,7 @@ end;
 
 procedure TTextEditorCompareScrollBar.Invalidate;
 begin
-  if csDesigning in ComponentState then
+  if ComponentState * [csLoading, csDesigning] <> [] then
     Exit;
 
   if Assigned(FEditorLeft) then
@@ -290,6 +294,20 @@ begin
   UpdateScrollBars;
 
   inherited Invalidate;
+end;
+
+procedure TTextEditorCompareScrollBar.Loaded;
+begin
+  inherited Loaded;
+
+  Invalidate;
+end;
+
+procedure TTextEditorCompareScrollBar.CreateWnd;
+begin
+  inherited CreateWnd;
+
+  UpdateScrollBars;
 end;
 
 procedure TTextEditorCompareScrollBar.WMSize(var AMessage: TWMSize);
@@ -328,6 +346,9 @@ var
   LScrollInfo: TScrollInfo;
   LVerticalMaxScroll: Integer;
 begin
+  if not HandleAllocated then
+    Exit;
+
   if ScrollBarVisible and not (csDesigning in ComponentState) then
   begin
     LScrollInfo.cbSize := SizeOf(ScrollInfo);

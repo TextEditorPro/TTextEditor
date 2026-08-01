@@ -6,8 +6,9 @@ uses
   Winapi.Messages, Winapi.Windows, System.Actions, System.Classes, System.ImageList, System.SysUtils, Vcl.ActnCtrls, Vcl.ActnList,
   Vcl.ActnMan, Vcl.ActnMenus, Vcl.BaseImageCollection, Vcl.Buttons, Vcl.ComCtrls, Vcl.Controls, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.Forms,
   Vcl.ImageCollection, Vcl.ImgList, Vcl.Menus, Vcl.PlatformDefaultStyleActnCtrls, Vcl.ToolWin, Vcl.VirtualImageList,
-  MyControl.ObjectInspector, TextEditor, TextEditor.Compare.ScrollBar, TextEditor.Print, TextEditor.Print.Preview, TextEditor.Types,
-  TTextEditorDemo.Frame.PrintPreview, TTextEditorDemo.Frame.TextCompare, TTextEditorDemo.Frame.TextEditor;
+  MyControl.ObjectInspector, TextEditor, TextEditor.Compare.ScrollBar, TextEditor.MacroRecorder, TextEditor.Print,
+  TextEditor.Print.Preview, TextEditor.Types, TTextEditorDemo.Frame.PrintPreview, TTextEditorDemo.Frame.TextCompare,
+  TTextEditorDemo.Frame.TextEditor;
 
 type
   TMainForm = class(TForm)
@@ -21,11 +22,16 @@ type
     ActionFileSave: TAction;
     ActionFileSaveAs: TAction;
     ActionList: TActionList;
+    ActionMacroPause: TAction;
+    ActionMacroPlay: TAction;
+    ActionMacroRecord: TAction;
+    ActionMacroStop: TAction;
     ActionMainMenuBar: TActionMainMenuBar;
     ActionManager: TActionManager;
     ActionSearchGoToLine: TAction;
     ActionTestClipboardRoundTrip: TAction;
     ActionTestHighlighterSweep: TAction;
+    ActionTestMacro: TAction;
     ActionTestSaveLoad: TAction;
     ActionTestSelectionInvariants: TAction;
     ActionTestUndoRedo: TAction;
@@ -63,9 +69,14 @@ type
     procedure ActionFileOpenExecute(Sender: TObject);
     procedure ActionFileSaveAsExecute(Sender: TObject);
     procedure ActionFileSaveExecute(Sender: TObject);
+    procedure ActionMacroPauseExecute(Sender: TObject);
+    procedure ActionMacroPlayExecute(Sender: TObject);
+    procedure ActionMacroRecordExecute(Sender: TObject);
+    procedure ActionMacroStopExecute(Sender: TObject);
     procedure ActionSearchGoToLineExecute(Sender: TObject);
     procedure ActionTestClipboardRoundTripExecute(Sender: TObject);
     procedure ActionTestHighlighterSweepExecute(Sender: TObject);
+    procedure ActionTestMacroExecute(Sender: TObject);
     procedure ActionTestSaveLoadExecute(Sender: TObject);
     procedure ActionTestSelectionInvariantsExecute(Sender: TObject);
     procedure ActionTestUndoRedoExecute(Sender: TObject);
@@ -84,6 +95,7 @@ type
     FFrameTextCompare: TFrameTextCompare;
     FFrameTextEditor: TFrameTextEditor;
     FIsCustomStyleActive: Boolean;
+    FMacroRecorder: TTextEditorMacroRecorder;
     FObjectInspector: TMyObjectInspector;
     FSplitterRight: TSplitter;
     FWndProcGuardActive: Boolean;
@@ -91,12 +103,15 @@ type
     procedure AddFileNamesFromPathIntoSubPopupMenu(const APath: string; const APopupMenu: TPopupMenu);
     procedure CreateFrames;
     procedure CreateInspector;
+    procedure CreateMacroRecorder;
     procedure CreateRightSplitter;
     procedure InitializeHighlightersAndThemes;
     procedure InspectObject(const AObject: TComponent);
+    procedure MacroRecorderStateChange(Sender: TObject);
     procedure SetSelectedHighlighter(const AValue: string);
     procedure SetSelectedTheme(const AValue: string);
     procedure UpdateCaption;
+    procedure UpdateMacroActions;
     procedure UpdateModifiedState;
     procedure UpdatePosition;
   public
@@ -131,6 +146,7 @@ begin
   FIsCustomStyleActive := IsCustomStyleActive;
 
   CreateFrames;
+  CreateMacroRecorder;
 
   InitializeHighlightersAndThemes;
 
@@ -302,6 +318,15 @@ begin
   FObjectInspector.AddUnlistedProperties(['JSON']);
 end;
 
+procedure TMainForm.CreateMacroRecorder;
+begin
+  FMacroRecorder := TTextEditorMacroRecorder.Create(Self);
+  FMacroRecorder.Editor := FFrameTextEditor.TextEditor;
+  FMacroRecorder.OnStateChange := MacroRecorderStateChange;
+
+  UpdateMacroActions;
+end;
+
 procedure TMainForm.CreateRightSplitter;
 begin
   FSplitterRight := TSplitter.Create(Self);
@@ -433,6 +458,64 @@ begin
     FFrameTextEditor.TextEditor.GoToLineAndSetPosition(LLine);
 end;
 
+{ Macro }
+
+procedure TMainForm.ActionMacroRecordExecute(Sender: TObject);
+begin
+  if not FFrameTextEditor.Visible then
+    ActionViewTextEditor.Execute;
+
+  FMacroRecorder.RecordMacro(FFrameTextEditor.TextEditor);
+
+  FFrameTextEditor.TextEditor.SetFocus;
+end;
+
+procedure TMainForm.ActionMacroPauseExecute(Sender: TObject);
+begin
+  if FMacroRecorder.State = msPaused then
+    FMacroRecorder.Resume
+  else
+    FMacroRecorder.Pause;
+end;
+
+procedure TMainForm.ActionMacroStopExecute(Sender: TObject);
+begin
+  FMacroRecorder.Stop;
+end;
+
+procedure TMainForm.ActionMacroPlayExecute(Sender: TObject);
+begin
+  if not FFrameTextEditor.Visible then
+    ActionViewTextEditor.Execute;
+
+  FMacroRecorder.PlaybackMacro(FFrameTextEditor.TextEditor);
+
+  FFrameTextEditor.TextEditor.SetFocus;
+end;
+
+procedure TMainForm.MacroRecorderStateChange(Sender: TObject);
+begin
+  UpdateMacroActions;
+end;
+
+procedure TMainForm.UpdateMacroActions;
+begin
+  ActionMacroRecord.Enabled := FMacroRecorder.State = msStopped;
+  ActionMacroPause.Enabled := FMacroRecorder.State in [msRecording, msPaused];
+  ActionMacroPause.Checked := FMacroRecorder.State = msPaused;
+  ActionMacroStop.Enabled := FMacroRecorder.State in [msRecording, msPaused];
+  ActionMacroPlay.Enabled := (FMacroRecorder.State = msStopped) and not FMacroRecorder.IsEmpty;
+
+  case FMacroRecorder.State of
+    msRecording:
+      StatusBar.Panels[0].Text := 'Recording';
+    msPaused:
+      StatusBar.Panels[0].Text := 'Paused';
+  else
+    StatusBar.Panels[0].Text := '';
+  end;
+end;
+
 procedure TMainForm.ActionTestUndoRedoExecute(Sender: TObject);
 begin
   FFrameTextEditor.RunUndoRedoTest;
@@ -456,6 +539,13 @@ end;
 procedure TMainForm.ActionTestHighlighterSweepExecute(Sender: TObject);
 begin
   FFrameTextEditor.RunHighlighterSweepTest;
+end;
+
+procedure TMainForm.ActionTestMacroExecute(Sender: TObject);
+begin
+  FFrameTextEditor.RunMacroTest(FMacroRecorder);
+
+  UpdateMacroActions;
 end;
 
 procedure TMainForm.ActionViewDarkThemeExecute(Sender: TObject);

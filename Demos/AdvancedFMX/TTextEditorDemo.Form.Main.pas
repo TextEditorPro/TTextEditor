@@ -5,8 +5,8 @@ interface
 uses
   System.Classes, System.SysUtils, System.Types, System.UITypes, FMX.Controls, FMX.Controls.Presentation, FMX.Dialogs, FMX.Edit, FMX.Forms,
   FMX.Graphics, FMX.Layouts, FMX.ListBox, FMX.Menus, FMX.Objects, FMX.StdCtrls, FMX.TabControl, FMX.TextEditor,
-  FMX.TextEditor.Compare.ScrollBar, FMX.TextEditor.Print, FMX.TextEditor.Print.Preview, FMX.TextEditor.Types, FMX.Types,
-  MyControl.ObjectInspector;
+  FMX.TextEditor.Compare.ScrollBar, FMX.TextEditor.MacroRecorder, FMX.TextEditor.Print, FMX.TextEditor.Print.Preview,
+  FMX.TextEditor.Types, FMX.Types, MyControl.ObjectInspector;
 
 type
   TMainForm = class(TForm)
@@ -28,6 +28,7 @@ type
     EditorCompareLeft: TTextEditor;
     EditorCompareRight: TTextEditor;
     LabelHighlighter: TLabel;
+    LabelMacroState: TLabel;
     LabelModifiedState: TLabel;
     LabelPage: TLabel;
     LabelPosition: TLabel;
@@ -47,6 +48,11 @@ type
     MenuItemFileSeparator1: TMenuItem;
     MenuItemFileSeparator2: TMenuItem;
     MenuItemGoToLine: TMenuItem;
+    MenuItemMacro: TMenuItem;
+    MenuItemMacroPause: TMenuItem;
+    MenuItemMacroPlay: TMenuItem;
+    MenuItemMacroRecord: TMenuItem;
+    MenuItemMacroStop: TMenuItem;
     MenuItemOpen: TMenuItem;
     MenuItemSample: TMenuItem;
     MenuItemSave: TMenuItem;
@@ -55,6 +61,7 @@ type
     MenuItemTest: TMenuItem;
     MenuItemTestClipboardRoundTrip: TMenuItem;
     MenuItemTestHighlighterSweep: TMenuItem;
+    MenuItemTestMacro: TMenuItem;
     MenuItemTestSaveLoad: TMenuItem;
     MenuItemTestSelectionInvariants: TMenuItem;
     MenuItemTestUndoRedo: TMenuItem;
@@ -98,12 +105,17 @@ type
     procedure MenuItemExitClick(Sender: TObject);
     procedure MenuItemExportToHTMLClick(Sender: TObject);
     procedure MenuItemGoToLineClick(Sender: TObject);
+    procedure MenuItemMacroPauseClick(Sender: TObject);
+    procedure MenuItemMacroPlayClick(Sender: TObject);
+    procedure MenuItemMacroRecordClick(Sender: TObject);
+    procedure MenuItemMacroStopClick(Sender: TObject);
     procedure MenuItemOpenClick(Sender: TObject);
     procedure MenuItemSampleClick(Sender: TObject);
     procedure MenuItemSaveAsClick(Sender: TObject);
     procedure MenuItemSaveClick(Sender: TObject);
     procedure MenuItemTestClipboardRoundTripClick(Sender: TObject);
     procedure MenuItemTestHighlighterSweepClick(Sender: TObject);
+    procedure MenuItemTestMacroClick(Sender: TObject);
     procedure MenuItemTestSaveLoadClick(Sender: TObject);
     procedure MenuItemTestSelectionInvariantsClick(Sender: TObject);
     procedure MenuItemTestUndoRedoClick(Sender: TObject);
@@ -119,25 +131,29 @@ type
     FFileName: string;
     FInspectorHeader: TLabel;
     FInspectorLayout: TLayout;
+    FMacroRecorder: TTextEditorMacroRecorder;
     FObjectInspector: TMyObjectInspector;
     FSplitterRight: TSplitter;
     FUpdating: Boolean;
     FCompareTimer: TTimer;
     function RunClipboardRoundTripSeed(ASeed: Integer): string;
+    function RunMacroSeed(ASeed: Integer): string;
     function RunSaveLoadSeed(ASeed: Integer): string;
     function RunSelectionInvariantsSeed(ASeed: Integer): string;
     function RunUndoRedoSeed(ASeed: Integer): string;
     function TestCommandNames(const ASeed, ACount: Integer): string;
-    procedure ExecuteTestCommand(const ACommand: Integer);
+    procedure ExecuteTestCommand(const ACommand: Integer; const AViaCommandProcessor: Boolean = False);
     procedure LoadTestDocument;
     procedure RunTestLoop(const ASeeds: Integer; const ARun: TFunc<Integer, string>);
     procedure CompareEditors;
     procedure CompareTabResize(Sender: TObject);
     procedure CompareTimerTimer(Sender: TObject);
     procedure InspectObject(const AObject: TComponent);
+    procedure MacroRecorderStateChange(Sender: TObject);
     procedure SetSelectedColor;
     procedure SetSelectedHighlighter;
     procedure UpdateCaption;
+    procedure UpdateMacroMenu;
     procedure UpdateModifiedState;
     procedure UpdatePageLabel;
     procedure UpdatePosition;
@@ -290,6 +306,12 @@ begin
   FCompareTimer.Interval := 300;
   FCompareTimer.OnTimer := CompareTimerTimer;
 
+  FMacroRecorder := TTextEditorMacroRecorder.Create(Self);
+  FMacroRecorder.Editor := TextEditor;
+  FMacroRecorder.OnStateChange := MacroRecorderStateChange;
+
+  UpdateMacroMenu;
+
   FInspectorLayout := TLayout.Create(Self);
   FInspectorLayout.Parent := Self;
   FInspectorLayout.Align := TAlignLayout.Right;
@@ -432,6 +454,62 @@ end;
 procedure TMainForm.MenuItemBookmarkPreviousClick(Sender: TObject);
 begin
   TextEditor.GoToPreviousBookmark;
+end;
+
+{ Macro }
+
+procedure TMainForm.MenuItemMacroRecordClick(Sender: TObject);
+begin
+  TabControl.ActiveTab := TabItemEditor;
+
+  FMacroRecorder.RecordMacro(TextEditor);
+
+  TextEditor.SetFocus;
+end;
+
+procedure TMainForm.MenuItemMacroPauseClick(Sender: TObject);
+begin
+  if FMacroRecorder.State = msPaused then
+    FMacroRecorder.Resume
+  else
+    FMacroRecorder.Pause;
+end;
+
+procedure TMainForm.MenuItemMacroStopClick(Sender: TObject);
+begin
+  FMacroRecorder.Stop;
+end;
+
+procedure TMainForm.MenuItemMacroPlayClick(Sender: TObject);
+begin
+  TabControl.ActiveTab := TabItemEditor;
+
+  FMacroRecorder.PlaybackMacro(TextEditor);
+
+  TextEditor.SetFocus;
+end;
+
+procedure TMainForm.MacroRecorderStateChange(Sender: TObject);
+begin
+  UpdateMacroMenu;
+end;
+
+procedure TMainForm.UpdateMacroMenu;
+begin
+  MenuItemMacroRecord.Enabled := FMacroRecorder.State = msStopped;
+  MenuItemMacroPause.Enabled := FMacroRecorder.State in [msRecording, msPaused];
+  MenuItemMacroPause.IsChecked := FMacroRecorder.State = msPaused;
+  MenuItemMacroStop.Enabled := FMacroRecorder.State in [msRecording, msPaused];
+  MenuItemMacroPlay.Enabled := (FMacroRecorder.State = msStopped) and not FMacroRecorder.IsEmpty;
+
+  case FMacroRecorder.State of
+    msRecording:
+      LabelMacroState.Text := 'Recording';
+    msPaused:
+      LabelMacroState.Text := 'Paused';
+  else
+    LabelMacroState.Text := '';
+  end;
 end;
 
 { Compare }
@@ -902,14 +980,25 @@ begin
   end;
 end;
 
-procedure TMainForm.ExecuteTestCommand(const ACommand: Integer);
+procedure TMainForm.ExecuteTestCommand(const ACommand: Integer; const AViaCommandProcessor: Boolean = False);
+
+  { CommandProcessor is the full input path - it notifies hooked command handlers (the macro recorder records through
+    them), ExecuteCommand bypasses them }
+  procedure Execute(const ACommand: Integer; const AChar: Char);
+  begin
+    if AViaCommandProcessor then
+      TextEditor.CommandProcessor(ACommand, AChar, nil)
+    else
+      TextEditor.ExecuteCommand(ACommand, AChar, nil);
+  end;
+
 begin
   case ACommand of
     TKeyCommands.Text:
       for var LIndex := 1 to Random(10) + 1 do
-        TextEditor.ExecuteCommand(TKeyCommands.Char, 'c', nil);
+        Execute(TKeyCommands.Char, 'c');
   else
-    TextEditor.ExecuteCommand(ACommand, 'a', nil);
+    Execute(ACommand, 'a');
   end;
 end;
 
@@ -917,12 +1006,14 @@ function TMainForm.TestCommandNames(const ASeed, ACount: Integer): string;
 var
   LIdent: string;
 begin
-  RandSeed := ASeed;
   Result := '';
+
+  RandSeed := ASeed;
 
   for var LIndex := 1 to ACount do
   begin
     EditorCommandToIdent(cTestCommands[Random(Length(cTestCommands))], LIdent);
+
     Result := Result + ', ' + LIdent;
   end;
 end;
@@ -1013,6 +1104,7 @@ var
   LError: string;
 begin
   Result := '';
+
   LoadTestDocument;
   SetTestClipboardText('b');
 
@@ -1050,6 +1142,7 @@ var
   LText: string;
 begin
   Result := '';
+
   LoadTestDocument;
   SetTestClipboardText('b');
 
@@ -1088,6 +1181,7 @@ var
   function Run: string;
   begin
     Result := '';
+
     LoadTestDocument;
 
     RandSeed := ASeed;
@@ -1134,6 +1228,7 @@ begin
       Break;
 
     Sleep(10);
+
     Result := Run;
   end;
 end;
@@ -1141,6 +1236,89 @@ end;
 procedure TMainForm.MenuItemTestClipboardRoundTripClick(Sender: TObject);
 begin
   RunTestLoop(2000, RunClipboardRoundTripSeed);
+end;
+
+function TMainForm.RunMacroSeed(ASeed: Integer): string;
+const
+  cActionsCount = 4;
+var
+  LFinalText: string;
+  LFinalPosition: TTextEditorTextPosition;
+
+  procedure Playback;
+  begin
+    LoadTestDocument;
+    SetTestClipboardText('b');
+
+    FMacroRecorder.PlaybackMacro(TextEditor);
+  end;
+
+  function Run: string;
+  begin
+    Result := '';
+
+    LoadTestDocument;
+    SetTestClipboardText('b');
+
+    RandSeed := ASeed;
+
+    FMacroRecorder.RecordMacro(TextEditor);
+    try
+      for var LIndex := 1 to cActionsCount do
+        ExecuteTestCommand(cTestCommands[Random(Length(cTestCommands))], True);
+    finally
+      FMacroRecorder.Stop;
+    end;
+
+    LFinalText := TextEditor.Text;
+    LFinalPosition := TextEditor.TextPosition;
+
+    Playback;
+
+    if TextEditor.Text <> LFinalText then
+      Exit('Failed playback for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount));
+
+    if (TextEditor.TextPosition.Line <> LFinalPosition.Line) or (TextEditor.TextPosition.Char <> LFinalPosition.Char) then
+      Exit('Failed playback caret for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount));
+
+    { The macro must survive its own stream format }
+    var LStream := TMemoryStream.Create;
+    try
+      FMacroRecorder.SaveToStream(LStream);
+      LStream.Position := 0;
+      FMacroRecorder.LoadFromStream(LStream);
+    finally
+      LStream.Free;
+    end;
+
+    Playback;
+
+    if TextEditor.Text <> LFinalText then
+      Exit('Failed playback after macro save/load for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount));
+  end;
+
+begin
+  Result := Run;
+
+  { Windows clipboard contention makes FMX clipboard writes fail silently - retry the whole seed like the clipboard test }
+  for var LAttempt := 1 to 2 do
+  begin
+    if Result.IsEmpty then
+      Break;
+
+    Sleep(10);
+
+    Result := Run;
+  end;
+end;
+
+procedure TMainForm.MenuItemTestMacroClick(Sender: TObject);
+begin
+  FMacroRecorder.Stop;
+
+  RunTestLoop(2000, RunMacroSeed);
+
+  UpdateMacroMenu;
 end;
 
 procedure TMainForm.MenuItemTestHighlighterSweepClick(Sender: TObject);

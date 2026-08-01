@@ -85,6 +85,36 @@ object MainForm: TMainForm
         OnClick = MenuItemBookmarkPreviousClick
       end
     end
+    object MenuItemMacro: TMenuItem
+      Text = 'Macro'
+      object MenuItemMacroRecord: TMenuItem
+        Locked = True
+        ShortCut = 24658
+        Text = 'Record'
+        OnClick = MenuItemMacroRecordClick
+      end
+      object MenuItemMacroPause: TMenuItem
+        Enabled = False
+        Locked = True
+        ShortCut = 49232
+        Text = 'Pause'
+        OnClick = MenuItemMacroPauseClick
+      end
+      object MenuItemMacroStop: TMenuItem
+        Enabled = False
+        Locked = True
+        ShortCut = 49234
+        Text = 'Stop'
+        OnClick = MenuItemMacroStopClick
+      end
+      object MenuItemMacroPlay: TMenuItem
+        Enabled = False
+        Locked = True
+        ShortCut = 24656
+        Text = 'Play'
+        OnClick = MenuItemMacroPlayClick
+      end
+    end
     object MenuItemTest: TMenuItem
       Text = 'Test'
       object MenuItemTestUndoRedo: TMenuItem
@@ -106,6 +136,11 @@ object MainForm: TMainForm
         Locked = True
         Text = 'Test clipboard round-trip'
         OnClick = MenuItemTestClipboardRoundTripClick
+      end
+      object MenuItemTestMacro: TMenuItem
+        Locked = True
+        Text = 'Test macro record/playback'
+        OnClick = MenuItemTestMacroClick
       end
       object MenuItemTestHighlighterSweep: TMenuItem
         Locked = True
@@ -584,6 +619,14 @@ object MainForm: TMainForm
       Size.PlatformDefault = False
       TextSettings.HorzAlign = Center
       Text = 'Zoom: 100 %'
+    end
+    object LabelMacroState: TLabel
+      Align = Left
+      Position.X = 328.000000000000000000
+      Size.Width = 90.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TextSettings.HorzAlign = Center
     end
     object LabelTestRun: TLabel
       Align = Client

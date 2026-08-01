@@ -1319,6 +1319,7 @@ begin
   Height := TTextEditorDefaults.Height;
   Width := TTextEditorDefaults.Width;
   Cursor := TTextEditorDefaults.Cursor;
+  AutoCapture := True;
   CanFocus := True;
   HitTest := True;
   TabStop := True;
@@ -1955,7 +1956,15 @@ end;
 procedure TCustomTextEditor.BeginDrag(AImmediate: Boolean);
 begin
   if Assigned(Root) then
-    Root.BeginInternalDrag(Self, nil);
+  begin
+    var LBitmap := TBitmap.Create(1, 1);
+    try
+      LBitmap.Clear(TAlphaColors.Null);
+      Root.BeginInternalDrag(Self, LBitmap);
+    finally
+      LBitmap.Free;
+    end;
+  end;
 end;
 
 procedure TCustomTextEditor.TrimTrailingSpaces;

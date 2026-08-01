@@ -391,7 +391,7 @@ begin
       begin
         LNode := CreateChildNode(ANode, GetEnumName(GetTypeData(ANode.PropTypeInfo)^.CompType^, LIndex));
         LNode.PropertyInfo := ANode.PropertyInfo;
-        LNode.PropertyValue := BooleanIdents[LIndex in TIntegerSet(LSetAsIntValue)];
+        LNode.PropertyValue := BooleanIdents[LIndex in TIntegerSet(Integer(LSetAsIntValue))];
         LNode.PropTypeInfo := nil;
         LNode.IsBooleanValue := True;
         LNode.IsSetValue := True;

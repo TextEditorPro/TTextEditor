@@ -583,7 +583,7 @@ begin
         LItem := TMyInspectorItem.Create(Self);
         LItem.PropertyInfo := AItem.PropertyInfo;
         LItem.PropertyName := GetEnumName(GetTypeData(AItem.PropTypeInfo)^.CompType^, LIndex);
-        LItem.PropertyValue := BooleanIdents[LIndex in TIntegerSet(LSetAsIntValue)];
+        LItem.PropertyValue := BooleanIdents[LIndex in TIntegerSet(Integer(LSetAsIntValue))];
         LItem.PropTypeInfo := nil;
         LItem.IsBooleanValue := True;
         LItem.IsSetValue := True;

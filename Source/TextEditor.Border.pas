@@ -50,6 +50,7 @@ begin
   with ASource as TTextEditorBorder do
   begin
     Self.FColor := FColor;
+    Self.FColoredEdges := FColoredEdges;
     Self.FStyle := FStyle;
     Self.FWidth := FWidth;
 

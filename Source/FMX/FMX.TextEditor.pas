@@ -416,6 +416,7 @@ type
     FSystemMetrics: TTextEditorSystemMetrics;
     FTabs: TTextEditorTabs;
     FTextLayout: TTextLayout;
+    FTextLayoutCache: TObjectDictionary<string, TTextLayout>;
     FTheme: TTextEditorTheme;
     FToggleCase: TTextEditorToggleCase;
     FTripleClickInterval: Cardinal;
@@ -1574,6 +1575,7 @@ begin
   { The display controls themselves are owned components; only the list is freed here. }
   FMultiCaretDisplays.Free;
   FTextLayout.Free;
+  FTextLayoutCache.Free;
 
   FBorder.Free;
 
@@ -10243,7 +10245,48 @@ begin
 end;
 
 procedure TCustomTextEditor.DrawText(const ARect: TRectF; const AText: string; const AHorizontalAlign: TTextAlign = TTextAlign.Leading; const AVerticalAlign: TTextAlign = TTextAlign.Center);
+const
+  MaxCachedTextLength = 256;
+  MaxCacheEntries = 4096;
+var
+  LLayout: TTextLayout;
+  LKey: string;
 begin
+  if (AHorizontalAlign = TTextAlign.Leading) and (AVerticalAlign = TTextAlign.Center) and (AText.Length <= MaxCachedTextLength) then
+  begin
+    if not Assigned(FTextLayoutCache) then
+      FTextLayoutCache := TObjectDictionary<string, TTextLayout>.Create([doOwnsValues]);
+
+    LKey := AText + #1 + Canvas.Font.Family + FloatToStr(Canvas.Font.Size) + IntToStr(Byte(Canvas.Font.Style)) + IntToStr(Round(ARect.Height * 8));
+
+    if not FTextLayoutCache.TryGetValue(LKey, LLayout) then
+    begin
+      if FTextLayoutCache.Count >= MaxCacheEntries then
+        FTextLayoutCache.Clear;
+
+      LLayout := TTextLayoutManager.TextLayoutByCanvas(Canvas.ClassType).Create(Canvas);
+      LLayout.BeginUpdate;
+      try
+        LLayout.Font := Canvas.Font;
+        LLayout.HorizontalAlign := AHorizontalAlign;
+        LLayout.VerticalAlign := AVerticalAlign;
+        LLayout.WordWrap := False;
+        LLayout.Text := AText;
+        LLayout.MaxSize := PointF(High(Word), Max(ARect.Height, 1));
+      finally
+        LLayout.EndUpdate;
+      end;
+
+      FTextLayoutCache.Add(LKey, LLayout);
+    end;
+
+    LLayout.Color := Canvas.Fill.Color;
+    LLayout.TopLeft := ARect.TopLeft;
+    LLayout.RenderLayout(Canvas);
+
+    Exit;
+  end;
+
   if not Assigned(FTextLayout) then
     FTextLayout := TTextLayoutManager.TextLayoutByCanvas(Canvas.ClassType).Create(Canvas);
 
@@ -12698,7 +12741,6 @@ var
   LMinimapRect: TRectF;
   LTextCanvasState: TCanvasSaveState;
   LTextTopOffset: Single;
-
 begin
   LCanvasState := Canvas.SaveState;
   try
@@ -12738,8 +12780,9 @@ begin
     LTextCanvasState := Canvas.SaveState;
     try
       Canvas.IntersectClipRect(RectF(FLeftMarginWidth, LTextTopOffset, ClientWidth, ClientHeight));
-      PaintTextLines(RectF(FLeftMarginWidth - FScrollHelper.HorizontalPosition, LTextTopOffset, Width, Height),
-        FLineNumbers.TopLine, Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1), False);
+
+      PaintTextLines(RectF(FLeftMarginWidth - FScrollHelper.HorizontalPosition, LTextTopOffset, Width, Height), FLineNumbers.TopLine,
+        Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1), False);
     finally
       Canvas.RestoreState(LTextCanvasState);
     end;

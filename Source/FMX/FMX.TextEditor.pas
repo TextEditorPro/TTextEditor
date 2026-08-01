@@ -5858,8 +5858,7 @@ begin
       if (rmoAutoLineBreak in FRightMargin.Options) and (FViewPosition.Column > FRightMargin.Position) then
       begin
         DoLineBreak;
-        LTextPosition.Char := 1;
-        Inc(LTextPosition.Line);
+        LTextPosition := TextPosition;
       end;
 
       if FSyncEdit.Visible then
@@ -6415,10 +6414,10 @@ begin
 
     FUndoList.AddChange(crCaret, LTextPosition, LTextPosition, LTextPosition, '', smNormal);
 
+    DoTrimTrailingSpaces(LTextPosition.Line);
+
     LLineText := FLines[LTextPosition.Line];
     LLength := LLineText.Length;
-
-    DoTrimTrailingSpaces(LTextPosition.Line);
 
     if LLength > 0 then
     begin
@@ -6470,8 +6469,8 @@ begin
           { A line break at the first char. }
           FLines.Insert(LTextPosition.Line, '');
           FUndoList.AddChange(crLineBreak, LTextPosition, LTextPosition, LTextPosition, '', smNormal);
-          Inc(LTextPosition.Line);
           FLines.LineState[LTextPosition.Line] := lsModified;
+          Inc(LTextPosition.Line);
         end;
       end
       else

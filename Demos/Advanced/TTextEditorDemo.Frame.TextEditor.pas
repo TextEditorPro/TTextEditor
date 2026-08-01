@@ -1,4 +1,4 @@
-unit TTextEditorDemo.Frame.TextEditor;
+﻿unit TTextEditorDemo.Frame.TextEditor;
 
 interface
 

@@ -12693,6 +12693,7 @@ begin
 
   CreateLineNumbersCache(True);
   CodeFoldingResetCaches;
+  UpdateScrollBars;
   EnsureCursorPositionVisible;
   SearchAll;
 
@@ -12766,6 +12767,7 @@ begin
     UpdateSpellCheckItems(AIndex, ACount);
 {$ENDIF}
 
+  UpdateScrollBars;
   Invalidate;
 end;
 
@@ -12797,6 +12799,7 @@ begin
     UpdateSpellCheckItems(AIndex, 0);
 {$ENDIF}
 
+  UpdateScrollBars;
   Invalidate;
 end;
 

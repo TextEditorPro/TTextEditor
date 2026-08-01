@@ -11815,6 +11815,7 @@ begin
 
   CreateLineNumbersCache(True);
   CodeFoldingResetCaches;
+  UpdateScrollBars;
   EnsureCursorPositionVisible;
   SearchAll;
 
@@ -11877,6 +11878,7 @@ begin
 
   CreateLineNumbersCache(True);
   CodeFoldingResetCaches;
+  UpdateScrollBars;
   SearchAll;
 
   Repaint;
@@ -11908,6 +11910,7 @@ begin
   if Assigned(FHighlighter.BeforePrepare) then
     FHighlighter.SetOption(hoExecuteBeforePrepare, True);
 
+  UpdateScrollBars;
   Repaint;
 end;
 

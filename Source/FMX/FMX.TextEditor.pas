@@ -5380,7 +5380,8 @@ begin
     TKeyCommands.DeleteWhitespaceBackward:
       begin
         LBeginCaretPosition := LTextPosition;
-        LIndex := LBeginCaretPosition.Char - 1;
+        LIndex := Min(LBeginCaretPosition.Char - 1, LLineText.Length);
+        LBeginCaretPosition.Char := LIndex + 1;
 
         while (LIndex > 0) and LLineText[LIndex].IsWhiteSpace do
         begin

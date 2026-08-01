@@ -46,7 +46,7 @@ end;
 { Tests }
 
 const
-  cTestCommands: array [0..43] of Integer = (
+  cTestCommands: array [0..70] of Integer = (
     TKeyCommands.Char, TKeyCommands.Text, TKeyCommands.Char, TKeyCommands.Text, TKeyCommands.Char, TKeyCommands.Tab, TKeyCommands.ShiftTab,
     TKeyCommands.InsertLine, TKeyCommands.LineBreak, TKeyCommands.DeleteChar, TKeyCommands.Backspace, TKeyCommands.DeleteLine,
     TKeyCommands.DeleteWord, TKeyCommands.Left, TKeyCommands.Right, TKeyCommands.Up, TKeyCommands.Down, TKeyCommands.PageUp,
@@ -55,7 +55,18 @@ const
     TKeyCommands.SelectionLineEnd, TKeyCommands.SelectionWordLeft, TKeyCommands.SelectionWordRight, TKeyCommands.PageUp,
     TKeyCommands.PageDown, TKeyCommands.SelectionPageUp, TKeyCommands.SelectionPageDown, TKeyCommands.LineComment,
     TKeyCommands.BlockComment, TKeyCommands.BlockIndent, TKeyCommands.BlockUnindent, TKeyCommands.Copy, TKeyCommands.Cut,
-    TKeyCommands.Paste, TKeyCommands.MoveLinesUp, TKeyCommands.MoveLinesDown);
+    TKeyCommands.Paste, TKeyCommands.MoveLinesUp, TKeyCommands.MoveLinesDown,
+    TKeyCommands.DeleteBeginningOfLine, TKeyCommands.DeleteEndOfLine, TKeyCommands.DeleteWhitespaceBackward,
+    TKeyCommands.DeleteWhitespaceForward, TKeyCommands.DeleteWordBackward, TKeyCommands.DeleteWordForward,
+    TKeyCommands.EditorTop, TKeyCommands.EditorBottom, TKeyCommands.SelectionEditorTop, TKeyCommands.SelectionEditorBottom,
+    TKeyCommands.PageTop, TKeyCommands.PageBottom, TKeyCommands.SelectionPageTop, TKeyCommands.SelectionPageBottom,
+    TKeyCommands.SelectAll, TKeyCommands.SelectionWord,
+    TKeyCommands.UpperCase, TKeyCommands.LowerCase, TKeyCommands.AlternatingCase, TKeyCommands.SentenceCase, TKeyCommands.TitleCase,
+    TKeyCommands.UpperCaseBlock, TKeyCommands.LowerCaseBlock, TKeyCommands.AlternatingCaseBlock,
+    TKeyCommands.KeywordsUpperCase, TKeyCommands.KeywordsLowerCase, TKeyCommands.KeywordsTitleCase);
+
+  cTestDocumentText = 'a1'#13#10'b2'#13#10'c3'#13#10'd4'#13#10'e5'#13#10;
+  cTestDocumentState = 'a1,b2,c3,d4,e5,';
 
 type
   TTestClipboard = class(TPersistent)
@@ -84,7 +95,7 @@ procedure TFrameTextEditor.LoadTestDocument;
 begin
   TextEditor.Clear;
 
-  var LStringStream := TStringStream.Create('1'#13#10'2'#13#10'3'#13#10'4'#13#10'5'#13#10);
+  var LStringStream := TStringStream.Create(cTestDocumentText);
   try
     TextEditor.LoadFromStream(LStringStream);
   finally
@@ -204,7 +215,7 @@ begin
   for var LIndex := 1 to cActionsCount do
      TextEditor.ExecuteCommand(TKeyCommands.Undo, #0, nil);
 
-  if TextEditor.Lines.CommaText <> '1,2,3,4,5,' then
+  if TextEditor.Lines.CommaText <> cTestDocumentState then
     Exit('Failed for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cSkipCount, cActionsCount));
 
   for var LIndex := 1 to cActionsCount do

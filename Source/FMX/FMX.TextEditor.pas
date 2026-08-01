@@ -6101,6 +6101,7 @@ procedure TCustomTextEditor.DoToggleSelectedCase(const ACommand: TTextEditorComm
     LStringList: TStringList;
     LOldPattern, LNewPattern: string;
     LSearchItem: PTextEditorSearchItem;
+    LBeginPositions, LEndPositions: TArray<TTextEditorTextPosition>;
   begin
     FReplace.Options := [roReplaceAll, roWholeWordsOnly];
     FReplace.Engine := seNormal;
@@ -6126,12 +6127,20 @@ procedure TCustomTextEditor.DoToggleSelectedCase(const ACommand: TTextEditorComm
 
         SearchAll(LOldPattern);
 
-        for var LItemIndex := FSearch.Items.Count - 1 downto 0 do
+        SetLength(LBeginPositions, FSearch.Items.Count);
+        SetLength(LEndPositions, FSearch.Items.Count);
+
+        for var LItemIndex := 0 to FSearch.Items.Count - 1 do
         begin
           LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LItemIndex]);
+          LBeginPositions[LItemIndex] := LSearchItem.BeginTextPosition;
+          LEndPositions[LItemIndex] := LSearchItem.EndTextPosition;
+        end;
 
-          SelectionStartPosition := LSearchItem.BeginTextPosition;
-          SelectionEndPosition := LSearchItem.EndTextPosition;
+        for var LItemIndex := High(LBeginPositions) downto 0 do
+        begin
+          SelectionStartPosition := LBeginPositions[LItemIndex];
+          SelectionEndPosition := LEndPositions[LItemIndex];
 
           ReplaceSelectedText(LNewPattern, LOldPattern);
         end;

@@ -24,15 +24,16 @@ type
     ComboBoxPreviewScale: TComboBox;
     ComboBoxThemes: TComboBox;
     CompareScrollBar: TTextEditorCompareScrollBar;
+    EditSearch: TEdit;
     EditorCompareLeft: TTextEditor;
     EditorCompareRight: TTextEditor;
-    EditSearch: TEdit;
     LabelHighlighter: TLabel;
     LabelModifiedState: TLabel;
     LabelPage: TLabel;
     LabelPosition: TLabel;
     LabelPreviewScale: TLabel;
     LabelSearch: TLabel;
+    LabelTestRun: TLabel;
     LabelTheme: TLabel;
     LabelZoom: TLabel;
     MenuBar: TMenuBar;
@@ -43,13 +44,20 @@ type
     MenuItemExit: TMenuItem;
     MenuItemExportToHTML: TMenuItem;
     MenuItemFile: TMenuItem;
-    MenuItemFileSeparator: TMenuItem;
+    MenuItemFileSeparator1: TMenuItem;
+    MenuItemFileSeparator2: TMenuItem;
     MenuItemGoToLine: TMenuItem;
     MenuItemOpen: TMenuItem;
     MenuItemSample: TMenuItem;
     MenuItemSave: TMenuItem;
     MenuItemSaveAs: TMenuItem;
     MenuItemSearch: TMenuItem;
+    MenuItemTest: TMenuItem;
+    MenuItemTestClipboardRoundTrip: TMenuItem;
+    MenuItemTestHighlighterSweep: TMenuItem;
+    MenuItemTestSaveLoad: TMenuItem;
+    MenuItemTestSelectionInvariants: TMenuItem;
+    MenuItemTestUndoRedo: TMenuItem;
     MenuItemZoom100: TMenuItem;
     MenuItemZoom125: TMenuItem;
     MenuItemZoom150: TMenuItem;
@@ -94,6 +102,11 @@ type
     procedure MenuItemSampleClick(Sender: TObject);
     procedure MenuItemSaveAsClick(Sender: TObject);
     procedure MenuItemSaveClick(Sender: TObject);
+    procedure MenuItemTestClipboardRoundTripClick(Sender: TObject);
+    procedure MenuItemTestHighlighterSweepClick(Sender: TObject);
+    procedure MenuItemTestSaveLoadClick(Sender: TObject);
+    procedure MenuItemTestSelectionInvariantsClick(Sender: TObject);
+    procedure MenuItemTestUndoRedoClick(Sender: TObject);
     procedure MenuItemZoomClick(Sender: TObject);
     procedure PrintPreviewPreviewPage(ASender: TObject; APageNumber: Integer);
     procedure StatusBarClick(Sender: TObject);
@@ -110,6 +123,14 @@ type
     FSplitterRight: TSplitter;
     FUpdating: Boolean;
     FCompareTimer: TTimer;
+    function RunClipboardRoundTripSeed(ASeed: Integer): string;
+    function RunSaveLoadSeed(ASeed: Integer): string;
+    function RunSelectionInvariantsSeed(ASeed: Integer): string;
+    function RunUndoRedoSeed(ASeed: Integer): string;
+    function TestCommandNames(const ASeed, ACount: Integer): string;
+    procedure ExecuteTestCommand(const ACommand: Integer);
+    procedure LoadTestDocument;
+    procedure RunTestLoop(const ASeeds: Integer; const ARun: TFunc<Integer, string>);
     procedure CompareEditors;
     procedure CompareTabResize(Sender: TObject);
     procedure CompareTimerTimer(Sender: TObject);
@@ -131,7 +152,8 @@ implementation
 {$R *.fmx}
 
 uses
-  System.Generics.Collections, System.Math, FMX.DialogService.Sync, FMX.TextEditor.Consts, FMX.TextEditor.Lines;
+  System.Generics.Collections, System.IOUtils, System.Math, FMX.DialogService.Sync, FMX.Platform, FMX.TextEditor.Consts,
+  FMX.TextEditor.KeyCommands, FMX.TextEditor.Lines;
 
 type
   TDemoPaths = record
@@ -823,6 +845,343 @@ end;
 procedure TMainForm.StatusBarClick(Sender: TObject);
 begin
   PopupMenuZoom.Popup(Screen.MousePos.X, Screen.MousePos.Y);
+end;
+
+{ Tests }
+
+const
+  cTestCommands: array [0..70] of Integer = (
+    TKeyCommands.Char, TKeyCommands.Text, TKeyCommands.Char, TKeyCommands.Text, TKeyCommands.Char, TKeyCommands.Tab, TKeyCommands.ShiftTab,
+    TKeyCommands.InsertLine, TKeyCommands.LineBreak, TKeyCommands.DeleteChar, TKeyCommands.Backspace, TKeyCommands.DeleteLine,
+    TKeyCommands.DeleteWord, TKeyCommands.Left, TKeyCommands.Right, TKeyCommands.Up, TKeyCommands.Down, TKeyCommands.PageUp,
+    TKeyCommands.PageDown, TKeyCommands.SelectionLeft, TKeyCommands.SelectionRight, TKeyCommands.SelectionUp, TKeyCommands.SelectionDown,
+    TKeyCommands.LineBegin, TKeyCommands.LineEnd, TKeyCommands.WordLeft, TKeyCommands.WordRight, TKeyCommands.SelectionLineBegin,
+    TKeyCommands.SelectionLineEnd, TKeyCommands.SelectionWordLeft, TKeyCommands.SelectionWordRight, TKeyCommands.PageUp,
+    TKeyCommands.PageDown, TKeyCommands.SelectionPageUp, TKeyCommands.SelectionPageDown, TKeyCommands.LineComment,
+    TKeyCommands.BlockComment, TKeyCommands.BlockIndent, TKeyCommands.BlockUnindent, TKeyCommands.Copy, TKeyCommands.Cut,
+    TKeyCommands.Paste, TKeyCommands.MoveLinesUp, TKeyCommands.MoveLinesDown,
+    TKeyCommands.DeleteBeginningOfLine, TKeyCommands.DeleteEndOfLine, TKeyCommands.DeleteWhitespaceBackward,
+    TKeyCommands.DeleteWhitespaceForward, TKeyCommands.DeleteWordBackward, TKeyCommands.DeleteWordForward,
+    TKeyCommands.EditorTop, TKeyCommands.EditorBottom, TKeyCommands.SelectionEditorTop, TKeyCommands.SelectionEditorBottom,
+    TKeyCommands.PageTop, TKeyCommands.PageBottom, TKeyCommands.SelectionPageTop, TKeyCommands.SelectionPageBottom,
+    TKeyCommands.SelectAll, TKeyCommands.SelectionWord,
+    TKeyCommands.UpperCase, TKeyCommands.LowerCase, TKeyCommands.AlternatingCase, TKeyCommands.SentenceCase, TKeyCommands.TitleCase,
+    TKeyCommands.UpperCaseBlock, TKeyCommands.LowerCaseBlock, TKeyCommands.AlternatingCaseBlock,
+    TKeyCommands.KeywordsUpperCase, TKeyCommands.KeywordsLowerCase, TKeyCommands.KeywordsTitleCase);
+
+  cTestDocumentText = 'a1'#13#10'b2'#13#10'c3'#13#10'd4'#13#10'e5'#13#10;
+  cTestDocumentState = 'a1,b2,c3,d4,e5,';
+
+procedure SetTestClipboardText(const AText: string);
+var
+  LService: IFMXClipboardService;
+begin
+  if TPlatformServices.Current.SupportsPlatformService(IFMXClipboardService, LService) then
+    LService.SetClipboard(AText);
+end;
+
+function GetTestClipboardText: string;
+var
+  LService: IFMXClipboardService;
+begin
+  Result := '';
+
+  if TPlatformServices.Current.SupportsPlatformService(IFMXClipboardService, LService) then
+    Result := LService.GetClipboard.ToString;
+end;
+
+procedure TMainForm.LoadTestDocument;
+begin
+  TextEditor.Clear;
+
+  var LStringStream := TStringStream.Create(cTestDocumentText);
+  try
+    TextEditor.LoadFromStream(LStringStream);
+  finally
+    LStringStream.Free;
+  end;
+end;
+
+procedure TMainForm.ExecuteTestCommand(const ACommand: Integer);
+begin
+  case ACommand of
+    TKeyCommands.Text:
+      for var LIndex := 1 to Random(10) + 1 do
+        TextEditor.ExecuteCommand(TKeyCommands.Char, 'c', nil);
+  else
+    TextEditor.ExecuteCommand(ACommand, 'a', nil);
+  end;
+end;
+
+function TMainForm.TestCommandNames(const ASeed, ACount: Integer): string;
+var
+  LIdent: string;
+begin
+  RandSeed := ASeed;
+  Result := '';
+
+  for var LIndex := 1 to ACount do
+  begin
+    EditorCommandToIdent(cTestCommands[Random(Length(cTestCommands))], LIdent);
+    Result := Result + ', ' + LIdent;
+  end;
+end;
+
+procedure TMainForm.RunTestLoop(const ASeeds: Integer; const ARun: TFunc<Integer, string>);
+var
+  LRun: string;
+begin
+  LabelTestRun.Visible := True;
+
+  for var LIndex := 0 to ASeeds do
+  begin
+    if LIndex and 127 = 0 then
+    begin
+      LabelTestRun.Text := LIndex.ToString;
+      Application.ProcessMessages;
+    end;
+
+    LRun := ARun(LIndex);
+
+    if not LRun.IsEmpty then
+    begin
+      LabelTestRun.Text := LIndex.ToString + ': ' + LRun;
+      SetTestClipboardText(LRun);
+      Exit;
+    end;
+  end;
+
+  ShowMessage('Done.');
+  LabelTestRun.Visible := False;
+end;
+
+function TMainForm.RunUndoRedoSeed(ASeed: Integer): string;
+const
+  cActionsCount = 4;
+begin
+  LoadTestDocument;
+  SetTestClipboardText('b');
+
+  RandSeed := ASeed;
+
+  for var LIndex := 1 to cActionsCount do
+    ExecuteTestCommand(cTestCommands[Random(Length(cTestCommands))]);
+
+  var LFinalState := TextEditor.Lines.CommaText;
+
+  for var LIndex := 1 to cActionsCount do
+    TextEditor.ExecuteCommand(TKeyCommands.Undo, #0, nil);
+
+  if TextEditor.Lines.CommaText <> cTestDocumentState then
+    Exit('Failed for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount));
+
+  for var LIndex := 1 to cActionsCount do
+    TextEditor.ExecuteCommand(TKeyCommands.Redo, #0, nil);
+
+  if (TextEditor.Lines.CommaText <> LFinalState) and (TextEditor.Lines.CommaText <> '""') then
+    Exit('Failed Redo for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount));
+
+  Result := '';
+
+  for var LIndex := 1 to cActionsCount do
+    TextEditor.ExecuteCommand(TKeyCommands.Undo, #0, nil);
+end;
+
+procedure TMainForm.MenuItemTestUndoRedoClick(Sender: TObject);
+begin
+  RunTestLoop(10000, RunUndoRedoSeed);
+end;
+
+function TMainForm.RunSelectionInvariantsSeed(ASeed: Integer): string;
+const
+  cActionsCount = 6;
+
+  function CheckPosition(const AName: string; const APosition: TTextEditorTextPosition): string;
+  begin
+    Result := '';
+
+    var LMaxLine := Max(TextEditor.Lines.Count - 1, 0);
+
+    if (APosition.Line < 0) or (APosition.Line > LMaxLine) then
+      Result := AName + '.Line = ' + APosition.Line.ToString + ' out of [0, ' + LMaxLine.ToString + ']'
+    else
+    if APosition.Char < 1 then
+      Result := AName + '.Char = ' + APosition.Char.ToString + ' < 1';
+  end;
+
+var
+  LError: string;
+begin
+  Result := '';
+  LoadTestDocument;
+  SetTestClipboardText('b');
+
+  RandSeed := ASeed;
+
+  for var LIndex := 1 to cActionsCount do
+  begin
+    ExecuteTestCommand(cTestCommands[Random(Length(cTestCommands))]);
+
+    LError := CheckPosition('TextPosition', TextEditor.TextPosition);
+
+    if LError.IsEmpty and TextEditor.SelectionAvailable then
+    begin
+      LError := CheckPosition('SelectionStart', TextEditor.SelectionStartPosition);
+
+      if LError.IsEmpty then
+        LError := CheckPosition('SelectionEnd', TextEditor.SelectionEndPosition);
+    end;
+
+    if not LError.IsEmpty then
+      Exit('Failed for RandSeed = ' + ASeed.ToString + ' after command ' + LIndex.ToString + ' (' + LError + ')' +
+        TestCommandNames(ASeed, cActionsCount));
+  end;
+end;
+
+procedure TMainForm.MenuItemTestSelectionInvariantsClick(Sender: TObject);
+begin
+  RunTestLoop(10000, RunSelectionInvariantsSeed);
+end;
+
+function TMainForm.RunSaveLoadSeed(ASeed: Integer): string;
+const
+  cActionsCount = 4;
+var
+  LText: string;
+begin
+  Result := '';
+  LoadTestDocument;
+  SetTestClipboardText('b');
+
+  RandSeed := ASeed;
+
+  for var LIndex := 1 to cActionsCount do
+    ExecuteTestCommand(cTestCommands[Random(Length(cTestCommands))]);
+
+  LText := TextEditor.Text;
+
+  var LStream := TMemoryStream.Create;
+  try
+    TextEditor.SaveToStream(LStream);
+    LStream.Position := 0;
+    TextEditor.Clear;
+    TextEditor.LoadFromStream(LStream);
+  finally
+    LStream.Free;
+  end;
+
+  if TextEditor.Text <> LText then
+    Result := 'Failed for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount);
+end;
+
+procedure TMainForm.MenuItemTestSaveLoadClick(Sender: TObject);
+begin
+  RunTestLoop(10000, RunSaveLoadSeed);
+end;
+
+function TMainForm.RunClipboardRoundTripSeed(ASeed: Integer): string;
+var
+  LPosition: TTextEditorTextPosition;
+  LSelectedText: string;
+  LOriginalText: string;
+
+  function Run: string;
+  begin
+    Result := '';
+    LoadTestDocument;
+
+    RandSeed := ASeed;
+
+    LOriginalText := TextEditor.Text;
+
+    LPosition.Char := Random(5) + 1;
+    LPosition.Line := Random(TextEditor.Lines.Count);
+    TextEditor.TextPosition := LPosition;
+    TextEditor.SelectionStartPosition := LPosition;
+    LPosition.Char := Random(5) + 1;
+    LPosition.Line := Random(TextEditor.Lines.Count);
+    TextEditor.SelectionEndPosition := LPosition;
+
+    LSelectedText := TextEditor.SelectedText;
+
+    if LSelectedText.IsEmpty then
+      Exit;
+
+    TextEditor.ExecuteCommand(TKeyCommands.Copy, #0, nil);
+
+    if GetTestClipboardText <> LSelectedText then
+      Exit('Failed Copy for RandSeed = ' + ASeed.ToString + ', clipboard [' + GetTestClipboardText + '] selected [' + LSelectedText + ']');
+
+    TextEditor.ExecuteCommand(TKeyCommands.Cut, #0, nil);
+    TextEditor.ExecuteCommand(TKeyCommands.Paste, #0, nil);
+
+    if TextEditor.Text <> LOriginalText then
+      Exit('Failed Cut+Paste for RandSeed = ' + ASeed.ToString);
+
+    TextEditor.ExecuteCommand(TKeyCommands.Undo, #0, nil);
+    TextEditor.ExecuteCommand(TKeyCommands.Undo, #0, nil);
+
+    if TextEditor.Text <> LOriginalText then
+      Exit('Failed Undo after Cut+Paste for RandSeed = ' + ASeed.ToString);
+  end;
+
+begin
+  Result := Run;
+
+  for var LAttempt := 1 to 2 do
+  begin
+    if Result.IsEmpty then
+      Break;
+
+    Sleep(10);
+    Result := Run;
+  end;
+end;
+
+procedure TMainForm.MenuItemTestClipboardRoundTripClick(Sender: TObject);
+begin
+  RunTestLoop(2000, RunClipboardRoundTripSeed);
+end;
+
+procedure TMainForm.MenuItemTestHighlighterSweepClick(Sender: TObject);
+var
+  LHighlighters, LThemes: TArray<string>;
+  LCurrentFile: string;
+begin
+  LabelTestRun.Visible := True;
+
+  LHighlighters := TDirectory.GetFiles(TDemoPaths.Highlighters, '*.json');
+  LThemes := TDirectory.GetFiles(TDemoPaths.Themes, '*.json');
+
+  try
+    for var LIndex := 0 to High(LHighlighters) do
+    begin
+      LabelTestRun.Text := Format('%d / %d: %s', [LIndex + 1, Length(LHighlighters), TPath.GetFileName(LHighlighters[LIndex])]);
+      Application.ProcessMessages;
+
+      LCurrentFile := LHighlighters[LIndex];
+      TextEditor.Highlighter.LoadFromFile(LCurrentFile);
+      TextEditor.Lines.Text := TextEditor.Highlighter.Sample;
+
+      for var LTheme in LThemes do
+      begin
+        LCurrentFile := LTheme;
+        TextEditor.Highlighter.Colors.LoadFromFile(LTheme);
+        TextEditor.Repaint;
+      end;
+    end;
+  except
+    on E: Exception do
+    begin
+      var LError := 'Failed loading ' + LCurrentFile + ': ' + E.ClassName + ' ' + E.Message;
+      LabelTestRun.Text := LError;
+      SetTestClipboardText(LError);
+      Exit;
+    end;
+  end;
+
+  ShowMessage('Done.');
+  LabelTestRun.Visible := False;
 end;
 
 end.

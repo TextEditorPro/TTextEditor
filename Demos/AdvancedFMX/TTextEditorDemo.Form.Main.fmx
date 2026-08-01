@@ -1,4 +1,4 @@
-﻿object MainForm: TMainForm
+object MainForm: TMainForm
   Left = 0
   Top = 0
   Caption = 'TTextEditor FMX Advanced Demo'
@@ -35,6 +35,10 @@
         Text = 'Save as...'
         OnClick = MenuItemSaveAsClick
       end
+      object MenuItemFileSeparator1: TMenuItem
+        Locked = True
+        Text = '-'
+      end
       object MenuItemExportToHTML: TMenuItem
         Locked = True
         Text = 'Export to HTML...'
@@ -45,7 +49,7 @@
         Text = 'Load highlighter sample'
         OnClick = MenuItemSampleClick
       end
-      object MenuItemFileSeparator: TMenuItem
+      object MenuItemFileSeparator2: TMenuItem
         Locked = True
         Text = '-'
       end
@@ -79,6 +83,34 @@
         Locked = True
         Text = 'Previous bookmark'
         OnClick = MenuItemBookmarkPreviousClick
+      end
+    end
+    object MenuItemTest: TMenuItem
+      Text = 'Test'
+      object MenuItemTestUndoRedo: TMenuItem
+        Locked = True
+        Text = 'Test undo/redo'
+        OnClick = MenuItemTestUndoRedoClick
+      end
+      object MenuItemTestSelectionInvariants: TMenuItem
+        Locked = True
+        Text = 'Test selection invariants'
+        OnClick = MenuItemTestSelectionInvariantsClick
+      end
+      object MenuItemTestSaveLoad: TMenuItem
+        Locked = True
+        Text = 'Test save/load round-trip'
+        OnClick = MenuItemTestSaveLoadClick
+      end
+      object MenuItemTestClipboardRoundTrip: TMenuItem
+        Locked = True
+        Text = 'Test clipboard round-trip'
+        OnClick = MenuItemTestClipboardRoundTripClick
+      end
+      object MenuItemTestHighlighterSweep: TMenuItem
+        Locked = True
+        Text = 'Test highlighters and themes'
+        OnClick = MenuItemTestHighlighterSweepClick
       end
     end
   end
@@ -445,7 +477,7 @@
         item
         end>
       IsSelected = False
-      Size.Width = 70.000000000000000000
+      Size.Width = 69.000000000000000000
       Size.Height = 26.000000000000000000
       Size.PlatformDefault = False
       StyleLookup = ''
@@ -457,14 +489,24 @@
         Align = Left
         Border.Color = xFF808690
         Border.ColoredEdges = [ebLeft, ebTop, ebRight, ebBottom]
+        Fonts.CodeFoldingHint.Family = 'Courier New'
+        Fonts.CodeFoldingHint.Size = 10.666666984558110000
+        Fonts.Hint.Family = 'Courier New'
+        Fonts.Hint.Size = 10.666666984558110000
         Fonts.LineNumbers.Family = 'Courier New'
         Fonts.LineNumbers.Size = 10.666666984558110000
+        Fonts.Minimap.Family = 'Courier New'
+        Fonts.Minimap.Size = 1.333333373069763000
+        Fonts.Ruler.Family = 'Courier New'
+        Fonts.Ruler.Size = 10.666666984558110000
         LeftMargin.Width = 55
         OnAfterLinePaint = CompareEditorAfterLinePaint
         OnChange = CompareEditorChange
         OnCustomLineColors = CompareEditorCustomLineColors
         OnScroll = CompareEditorScroll
+        PartialLoad.Rows = 100
         Margins.Top = 2.000000000000000000
+        Position.Y = 2.000000000000000000
         Size.Width = 578.000000000000000000
         Size.Height = 688.000000000000000000
         Size.PlatformDefault = False
@@ -476,6 +518,7 @@
         EditorRight = EditorCompareRight
         Margins.Top = 2.000000000000000000
         Position.X = 578.000000000000000000
+        Position.Y = 2.000000000000000000
         ScrollBarVisible = True
         Size.Width = 40.000000000000000000
         Size.Height = 688.000000000000000000
@@ -485,15 +528,23 @@
         Align = Client
         Border.Color = xFF808690
         Border.ColoredEdges = [ebLeft, ebTop, ebRight, ebBottom]
+        Fonts.CodeFoldingHint.Family = 'Courier New'
+        Fonts.CodeFoldingHint.Size = 10.666666984558110000
+        Fonts.Hint.Family = 'Courier New'
+        Fonts.Hint.Size = 10.666666984558110000
         Fonts.LineNumbers.Family = 'Courier New'
         Fonts.LineNumbers.Size = 10.666666984558110000
+        Fonts.Minimap.Family = 'Courier New'
+        Fonts.Minimap.Size = 1.333333373069763000
+        Fonts.Ruler.Family = 'Courier New'
+        Fonts.Ruler.Size = 10.666666984558110000
         LeftMargin.Width = 55
         OnAfterLinePaint = CompareEditorAfterLinePaint
         OnChange = CompareEditorChange
         OnCustomLineColors = CompareEditorCustomLineColors
         OnScroll = CompareEditorScroll
+        PartialLoad.Rows = 100
         Margins.Top = 2.000000000000000000
-        Position.X = 618.000000000000000000
         Size.Width = 579.000000000000000000
         Size.Height = 688.000000000000000000
         Size.PlatformDefault = False
@@ -533,6 +584,14 @@
       Size.PlatformDefault = False
       TextSettings.HorzAlign = Center
       Text = 'Zoom: 100 %'
+    end
+    object LabelTestRun: TLabel
+      Align = Client
+      Margins.Left = 8.000000000000000000
+      Size.Width = 120.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      Visible = False
     end
   end
   object PopupMenuZoom: TPopupMenu

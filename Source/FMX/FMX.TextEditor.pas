@@ -5740,7 +5740,7 @@ begin
       LIndex := 0;
       LCommentIndex := -2;
       LLineText := FLines.TextLines[LBeginLine];
-      LSpaceCount := LeftSpaceCount(LLineText);
+      LSpaceCount := LLineText.Length - FMX.TextEditor.Utils.TrimLeft(LLineText).Length;
       LSpaces := Copy(LLineText, 1, LSpaceCount);
 
       LLineText := FMX.TextEditor.Utils.TrimLeft(LLineText);
@@ -5790,7 +5790,7 @@ begin
         Inc(LCommentIndex);
 
         LLineText := FLines.TextLines[LEndLine];
-        LSpaceCount := LeftSpaceCount(LLineText);
+        LSpaceCount := LLineText.Length - FMX.TextEditor.Utils.TrimLeft(LLineText).Length;
         LSpaces := Copy(LLineText, 1, LSpaceCount);
         LLineText := FMX.TextEditor.Utils.TrimLeft(LLineText);
 
@@ -5815,7 +5815,7 @@ begin
         FLines.Strings[LEndLine] := LLineText;
 
         AddUndoInsert(LTextPosition, GetPosition(LLineText.Length - LComment.Length + 1, LEndLine),
-          GetPosition(LLineText.Length + LComment.Length + 1, LEndLine), '', FSelection.ActiveMode);
+          GetPosition(LLineText.Length + 1, LEndLine), '', FSelection.ActiveMode);
       finally
         FUndoList.EndBlock;
       end;
@@ -6595,7 +6595,7 @@ begin
           LIndex2 := 0;
           LCommentIndex := -1;
           LLineText := FLines.TextLines[LIndex1];
-          LSpaceCount := LeftSpaceCount(LLineText);
+          LSpaceCount := LLineText.Length - FMX.TextEditor.Utils.TrimLeft(LLineText).Length;
           LSpaces := Copy(LLineText, 1, LSpaceCount);
           LLineText := FMX.TextEditor.Utils.TrimLeft(LLineText);
 

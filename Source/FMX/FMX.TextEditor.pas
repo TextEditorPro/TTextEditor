@@ -4351,6 +4351,12 @@ var
 
   function NextWord(var ATextPosition: TTextEditorTextPosition): Boolean;
   begin
+    if ATextPosition.Line >= FLines.Count - 1 then
+    begin
+      ATextPosition.Char := FLines.StringLength(ATextPosition.Line) + 1;
+      Exit(False);
+    end;
+
     Inc(ATextPosition.Line);
     ATextPosition.Char := 1;
 
@@ -6636,7 +6642,9 @@ begin
 
           if not GetSelectionAvailable then
           begin
-            Inc(LTextPosition.Line);
+            if LTextPosition.Line < FLines.Count - 1 then
+              Inc(LTextPosition.Line);
+
             TextPosition := LTextPosition;
           end;
         end;
@@ -7897,6 +7905,12 @@ begin
 
   LDestinationLineChar := ViewToTextPosition(LDestinationPosition);
 
+  if LDestinationLineChar.Line > Max(FLines.Count - 1, 0) then
+  begin
+    LDestinationLineChar.Line := Max(FLines.Count - 1, 0);
+    LDestinationLineChar.Char := FLines.StringLength(LDestinationLineChar.Line) + 1;
+  end;
+
   if not ASelectionCommand and (LDestinationLineChar.Line <> FPosition.SelectionStart.Line) then
   begin
     DoTrimTrailingSpaces(FPosition.SelectionStart.Line);
@@ -7964,7 +7978,9 @@ begin
     else
       ClearSelection;
 
-    Inc(LTextPosition.Line);
+    if LSelectionEndPosition.Line + 1 < FLines.Count then
+      Inc(LTextPosition.Line);
+
     TextPosition := LTextPosition;
   end;
 end;
@@ -8025,7 +8041,9 @@ begin
     else
       ClearSelection;
 
-    Dec(LTextPosition.Line);
+    if LSelectionStartPosition.Line - 1 >= 0 then
+      Dec(LTextPosition.Line);
+
     TextPosition := LTextPosition;
   end;
 end;

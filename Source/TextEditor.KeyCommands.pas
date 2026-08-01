@@ -141,6 +141,10 @@ type
     FoldingExpandLine = 911;
     FoldingGoToNext = 912;
     FoldingGoToPrevious = 913;
+    { Zoom }
+    ZoomIn = 920;
+    ZoomOut = 921;
+    ZoomReset = 922;
 
     UserFirst = 1001;
   end;
@@ -232,7 +236,7 @@ type
   end;
 
 const
-  EditorCommandStrings: array [0 .. 113] of TTextEditorCommandString = (
+  EditorCommandStrings: array [0 .. 116] of TTextEditorCommandString = (
     (Value: TKeyCommands.None; Name: 'TKeyCommands.None'),
     (Value: TKeyCommands.Left; Name: 'TKeyCommands.Left'),
     (Value: TKeyCommands.Right; Name: 'TKeyCommands.Right'),
@@ -346,7 +350,10 @@ const
     (Value: TKeyCommands.FoldingCollapseLine; Name: 'TKeyCommands.FoldingCollapseLine'),
     (Value: TKeyCommands.FoldingExpandLine; Name: 'TKeyCommands.FoldingExpandLine'),
     (Value: TKeyCommands.FoldingGoToNext; Name: 'TKeyCommands.FoldingGoToNext'),
-    (Value: TKeyCommands.FoldingGoToPrevious; Name: 'TKeyCommands.FoldingGoToPrevious')
+    (Value: TKeyCommands.FoldingGoToPrevious; Name: 'TKeyCommands.FoldingGoToPrevious'),
+    (Value: TKeyCommands.ZoomIn; Name: 'TKeyCommands.ZoomIn'),
+    (Value: TKeyCommands.ZoomOut; Name: 'TKeyCommands.ZoomOut'),
+    (Value: TKeyCommands.ZoomReset; Name: 'TKeyCommands.ZoomReset')
   );
 
 function IdentToEditorCommand(const AIdent: string; var ACommand: Integer): Boolean;
@@ -756,6 +763,13 @@ begin
   Add(TKeyCommands.FoldingExpandLine, [ssCtrl, ssAlt], vkRight);
   Add(TKeyCommands.FoldingGoToNext, [ssCtrl, ssAlt], vkDown);
   Add(TKeyCommands.FoldingGoToPrevious, [ssCtrl, ssAlt], vkUp);
+  { Zoom }
+  Add(TKeyCommands.ZoomIn, [ssCtrl], vkEqual);
+  Add(TKeyCommands.ZoomIn, [ssCtrl], vkAdd);
+  Add(TKeyCommands.ZoomOut, [ssCtrl], vkMinus);
+  Add(TKeyCommands.ZoomOut, [ssCtrl], vkSubtract);
+  Add(TKeyCommands.ZoomReset, [ssCtrl], Ord('0'));
+  Add(TKeyCommands.ZoomReset, [ssCtrl], vkNumpad0);
 end;
 
 procedure TTextEditorKeyCommands.SetItem(const AIndex: Integer; AValue: TTextEditorKeyCommand);

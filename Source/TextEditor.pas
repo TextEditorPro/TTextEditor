@@ -43,7 +43,10 @@ type
     WantReturns = True;
     Width = 200;
     ZoomDivider = 0;
+    ZoomMaximum = 400;
+    ZoomMinimum = 25;
     ZoomPercentage = 100;
+    ZoomStep = 10;
   end;
 
   TCustomTextEditor = class abstract(TCustomControl)
@@ -953,6 +956,9 @@ type
     procedure UpdateCaret;
     procedure UpdateColors;
     procedure WndProc(var AMessage: TMessage); override;
+    procedure ZoomIn;
+    procedure ZoomOut;
+    procedure ZoomReset;
     property Action;
     property ActiveLine: TTextEditorActiveLine read FActiveLine write SetActiveLine;
     property AllCodeFoldingRanges: TTextEditorAllCodeFoldingRanges read FCodeFoldings.AllRanges;
@@ -21323,6 +21329,12 @@ begin
       ReturnToCaretBookmark;
     TKeyCommands.SwapCaretBookmark:
       SwapCaretBookmark;
+    TKeyCommands.ZoomIn:
+      ZoomIn;
+    TKeyCommands.ZoomOut:
+      ZoomOut;
+    TKeyCommands.ZoomReset:
+      ZoomReset;
     TKeyCommands.GoToBookmark1 .. TKeyCommands.GoToBookmark9:
       if FLeftMargin.Bookmarks.ShortCuts then
         GoToBookmark(ACommand - TKeyCommands.GoToBookmark1);
@@ -23061,6 +23073,24 @@ begin
 
     ResetCaret;
   end;
+end;
+
+procedure TCustomTextEditor.ZoomIn;
+begin
+  if FZoom.Percentage < TTextEditorDefaults.ZoomMaximum then
+    ZoomPercentage := Min(FZoom.Percentage + TTextEditorDefaults.ZoomStep, TTextEditorDefaults.ZoomMaximum);
+end;
+
+procedure TCustomTextEditor.ZoomOut;
+begin
+  if FZoom.Percentage > TTextEditorDefaults.ZoomMinimum then
+    ZoomPercentage := Max(FZoom.Percentage - TTextEditorDefaults.ZoomStep, TTextEditorDefaults.ZoomMinimum);
+end;
+
+procedure TCustomTextEditor.ZoomReset;
+begin
+  if FZoom.Percentage <> TTextEditorDefaults.ZoomPercentage then
+    ZoomPercentage := TTextEditorDefaults.ZoomPercentage;
 end;
 
 procedure TCustomTextEditor.SetFullFilename(const AName: string);

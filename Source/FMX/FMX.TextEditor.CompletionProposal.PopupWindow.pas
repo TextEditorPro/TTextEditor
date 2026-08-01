@@ -25,6 +25,7 @@ type
     FItems: TTextEditorCompletionProposalItems;
     FLines: TTextEditorLines;
     FMargin: Integer;
+    FOnKeyPress: TTextEditorKeyPressWEvent;
     FOnValidate: TTextEditorValidateEvent;
     FPopupCaretPoint: TPointF;
     FPopupOrigin: TPointF;
@@ -43,7 +44,6 @@ type
     procedure RemoveKeyHandlers;
     procedure SetCurrentString(const AValue: string);
     procedure SetTopLine(const AValue: Integer);
-    procedure UpdateScrollBar;
   protected
     procedure Paint; override;
     procedure MouseDown(AButton: TMouseButton; AShift: TShiftState; X, Y: Single); override;
@@ -60,6 +60,7 @@ type
     property CurrentString: string read FCurrentString write SetCurrentString;
     property Items: TTextEditorCompletionProposalItems read FItems write FItems;
     property Lines: TTextEditorLines read FLines write FLines;
+    property OnKeyPress: TTextEditorKeyPressWEvent read FOnKeyPress write FOnKeyPress;
     property OnValidate: TTextEditorValidateEvent read FOnValidate write FOnValidate;
     property ShowDescription: Boolean read FShowDescription write FShowDescription;
     property TopLine: Integer read FTopLine write SetTopLine;
@@ -285,9 +286,9 @@ begin
         if (cpoAutoInvoke in FCompletionProposal.Options) and (Length(FItemIndexArray) = 0) or
           (Pos(AKey, FCompletionProposal.CloseChars) <> 0) then
           Hide
-        // else TODO
-        // if Assigned(OnKeyPress) and not CodeInsight then
-        //  OnKeyPress(Self, AKey);
+        else
+        if Assigned(FOnKeyPress) and not CodeInsight then
+          FOnKeyPress(Self, AKey);
       end;
     TControlCharacters.Backspace:
       if not CodeInsight then
@@ -475,74 +476,6 @@ begin
     Canvas.Stroke.Color := LBorderColor;
     DrawPixelRect(RectF(0, 0, Width, Height));
   end;
-(* TODO
-  with FBitmapBuffer do
-  begin
-    Canvas.Brush.Color := LTextEditor.Colors.CompletionProposalBackground;
-
-    Height := 0;
-    Width := ClientWidth;
-    Height := ClientHeight;
-    LTop := 0;
-
-    for var LIndex := 0 to Min(FCompletionProposal.VisibleLines, Length(FItemIndexArray) - 1) do
-    begin
-      if LIndex + TopLine >= Length(FItemIndexArray) then
-        Break;
-
-      if (LIndex + TopLine = FSelectedLine) and not CodeInsight then
-      begin
-        Canvas.Font.Color := LTextEditor.Colors.CompletionProposalSelectedText;
-        Canvas.Brush.Color := LTextEditor.Colors.CompletionProposalSelectedBackground;
-        Canvas.Pen.Color := LTextEditor.Colors.CompletionProposalSelectedBackground;
-        Canvas.Rectangle(0, FItemHeight * LIndex, ClientWidth, FItemHeight * (LIndex + 1));
-      end
-      else
-      begin
-        Canvas.Font.Color := LTextEditor.Colors.CompletionProposalForeground;
-        Canvas.Brush.Color := LTextEditor.Colors.CompletionProposalBackground;
-      end;
-
-      LItemIndex := FItemIndexArray[TopLine + LIndex];
-
-      LItem := FItems[LItemIndex];
-      LText := LItem.Keyword;
-      LDescription := LItem.Description;
-      LPosition := if FCaseSensitive then Pos(FCurrentString, LText) else Pos(AnsiUpperCase(FCurrentString), AnsiUpperCase(LText));
-
-      if LPosition > 0 then
-      begin
-        LWidth := 0;
-
-        if LPosition > 1 then
-        begin
-          LTemp := Copy(LText, 1, LPosition - 1);
-          Canvas.TextOut(FMargin, LTop, LTemp);
-          Inc(LWidth, Canvas.TextWidth(LTemp));
-        end;
-
-        Canvas.Font.Style := Canvas.Font.Style + [fsUnderline];
-        LTemp := Copy(LText, LPosition, FCurrentString.Length);
-        Canvas.TextOut(FMargin + LWidth, LTop, LTemp);
-        Inc(LWidth, Canvas.TextWidth(LTemp));
-        Canvas.Font.Style := Canvas.Font.Style - [fsUnderline];
-        LTemp := Copy(LText, LPosition + FCurrentString.Length);
-
-        if not LTemp.IsEmpty then
-          Canvas.TextOut(FMargin + LWidth, LTop, LTemp);
-      end
-      else
-        Canvas.TextOut(FMargin, LTop, LText);
-
-      if ShowDescription then
-        Canvas.TextOut(FMargin + FItemWidth, LTop, LDescription);
-
-      Inc(LTop, FItemHeight);
-    end;
-  end;
-
-  Canvas.Draw(0, 0, FBitmapBuffer);
-*)
 end;
 
 procedure TTextEditorCompletionProposalPopupWindow.MoveSelectedLine(const ALineCount: Integer);
@@ -641,10 +574,6 @@ begin
 
     LHeight := FItemHeight * Min(LCount, FCompletionProposal.VisibleLines) + 2;
 
-    // TODO
-    // if cpoAutoConstraints in FCompletionProposal.Options then
-    //   Constraints.MinHeight := LHeight;
-
     Height := LHeight;
 
     if FPopupShownAboveCaret then
@@ -672,10 +601,7 @@ begin
   end;
 
   if Visible then
-  begin
-    UpdateScrollBar;
     Repaint;
-  end;
 end;
 
 procedure TTextEditorCompletionProposalPopupWindow.SetTopLine(const AValue: Integer);
@@ -689,7 +615,6 @@ begin
   if TopLine <> LTopLine then
   begin
     FTopLine := LTopLine;
-    UpdateScrollBar;
     Repaint;
   end;
 end;
@@ -719,7 +644,7 @@ var
 
   function GetScrollBarWidth: Single;
   begin
-    Result := 16; // TODO GetSystemMetrics(SM_CXVSCROLL);
+    Result := 16;
   end;
 
   function GetWorkAreaWidth: Integer;
@@ -825,16 +750,6 @@ var
     FPopupShownAboveCaret := LShownAboveCaret;
   end;
 
-  procedure SetAutoConstraints;
-  begin
-    if cpoAutoConstraints in FCompletionProposal.Options then
-    begin
-      // TODO
-      // Constraints.MinHeight := Height;
-      // Constraints.MinWidth := Width;
-    end;
-  end;
-
 var
   LCount: Integer;
 begin
@@ -877,14 +792,12 @@ begin
       FBitmapBuffer.Canvas.EndScene;
     end;
 
-    SetAutoConstraints;
     CurrentString := ACurrentString;
 
     if Length(FItemIndexArray) > 0 then
     begin
       FBorderWidth := if cpoShowBorder in FCompletionProposal.Options then 1 else 0;
 
-      UpdateScrollBar;
       Repaint;
       Show(FPopupOrigin);
     end;
@@ -1146,11 +1059,6 @@ begin
       Result := Copy(LLineText, LIndex + 1, LTextPosition.Char - LIndex - 1);
     end;
   end;
-end;
-
-procedure TTextEditorCompletionProposalPopupWindow.UpdateScrollBar;
-begin
-  // TODO
 end;
 
 procedure TTextEditorCompletionProposalPopupWindow.MouseDown(AButton: TMouseButton; AShift: TShiftState; X, Y: Single);

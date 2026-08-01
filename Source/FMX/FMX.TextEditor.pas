@@ -1,8 +1,6 @@
 {$WARN WIDECHAR_REDUCED OFF} // CharInSet is slow in loops
 unit FMX.TextEditor;
 
-{$MESSAGE WARN 'THIS IS A DEVELOPMENT VERSION. DO NOT USE UNTIL THIS WARNING IS REMOVED.'}
-
 {$I FMX.TextEditor.Defines.inc}
 
 interface
@@ -208,24 +206,10 @@ type
       CurrentMatch: TTextEditorMatchingPairMatch;
     end;
 
-    TTextEditorMinimapShadowHelper = record
-      AlphaArray: TTextEditorArrayOfSingle;
-      AlphaByteArray: PByteArray;
-      AlphaByteArrayLength: Integer;
-      Bitmap: TBitmap;
-    end;
-
-    TTextEditorMinimapIndicatorHelper = record
-      Bitmap: TBitmap;
-    end;
-
     TTextEditorMinimapHelper = record
-      BufferBitmap: TBitmap;
       ClickOffsetY: Single;
-      Indicator: TTextEditorMinimapIndicatorHelper;
       Left: Single;
       Right: Single;
-      Shadow: TTextEditorMinimapShadowHelper;
     end;
 
     TTextEditorMouse = record
@@ -260,13 +244,6 @@ type
       Text: TTextEditorTextPosition;
     end;
 
-    TTextEditorScrollShadowHelper = record
-      AlphaArray: TTextEditorArrayOfSingle;
-      AlphaByteArray: PByteArray;
-      AlphaByteArrayLength: Integer;
-      Bitmap: TBitmap;
-    end;
-
     TTextEditorScrollHelper = record
       Delta: TPointF;
       HintTimer: TTextEditorTimer;
@@ -279,7 +256,6 @@ type
       LastVerticalMax: Single;
       LastVerticalPosition: Single;
       PageWidth: Integer;
-      Shadow: TTextEditorScrollShadowHelper;
       Timer: TTextEditorTimer;
       VerticalVisible: Boolean;
     end;
@@ -442,7 +418,6 @@ type
     function CodeFoldingTreeLineForLine(const ALine: Integer): Boolean; inline;
     function DoOnCodeFoldingHintClick(const APoint: TPointF): Boolean;
     function FindHookedCommandEvent(const AHookedCommandEvent: TTextEditorHookedCommandEvent): Integer;
-    function FreeMinimapBitmaps: Boolean;
     function GetCanPaste: Boolean;
     function GetCanRedo: Boolean;
     function GetCanUndo: Boolean;
@@ -580,11 +555,9 @@ type
     procedure FindWords(const AWord: string; const AList: TList; const ACaseSensitive: Boolean; const AWholeWordsOnly: Boolean);
     procedure FontChanged(ASender: TObject);
     procedure FreeMultiCarets;
-    procedure FreeScrollShadowBitmap;
     procedure GetCommentAtTextPosition(const ATextPosition: TTextEditorTextPosition; var AComment: string);
     procedure GetMinimapLeftRight(var ALeft: Single; var ARight: Single);
     procedure IncCharacterCount(const AText: string);
-    procedure InitializeScrollShadow;
     procedure InsertLine; overload;
     procedure LinesChanged(ASender: TObject);
     procedure LinesChanging(ASender: TObject);
@@ -841,7 +814,6 @@ type
     procedure ClearHighlightLine;
     procedure ClearMarks;
     procedure ClearMatchingPair;
-    procedure ClearMinimapBuffer;
     procedure ClearSelection;
     procedure ClearUndo;
     procedure CollapseAll(const AFromLineNumber: Integer = -1; const AToLineNumber: Integer = -1);
@@ -1496,7 +1468,6 @@ begin
   { Scroll }
   FScroll := TTextEditorScroll.Create;
   FScroll.OnChange := ScrollingChanged;
-  InitializeScrollShadow;
 
   FVerticalScrollBar := TScrollBar.Create(nil);
   FVerticalScrollBar.Stored := False;
@@ -1616,8 +1587,6 @@ begin
   FRuler.Free;
   FWordWrap.Free;
   FOriginal.Lines.Free;
-  FreeScrollShadowBitmap;
-  FreeMinimapBitmaps;
   FActiveLine.Free;
   FRightMargin.Free;
 
@@ -1649,18 +1618,6 @@ begin
   FCompletionProposal.Free;
   FSyncEdit.Free;
   FItalic.Bitmap.Free;
-
-  if Assigned(FMinimapHelper.Shadow.AlphaByteArray) then
-  begin
-    FreeMem(FMinimapHelper.Shadow.AlphaByteArray);
-    FMinimapHelper.Shadow.AlphaByteArray := nil;
-  end;
-
-  if Assigned(FScrollHelper.Shadow.AlphaByteArray) then
-  begin
-    FreeMem(FScrollHelper.Shadow.AlphaByteArray);
-    FScrollHelper.Shadow.AlphaByteArray := nil;
-  end;
 
   if Assigned(FSearchEngine) then
     FSearchEngine.Free;
@@ -7507,39 +7464,6 @@ begin
   end;
 end;
 
-procedure TCustomTextEditor.FreeScrollShadowBitmap;
-begin
-  if Assigned(FScrollHelper.Shadow.Bitmap) then
-  begin
-    FScrollHelper.Shadow.Bitmap.Free;
-    FScrollHelper.Shadow.Bitmap := nil;
-  end;
-end;
-
-function TCustomTextEditor.FreeMinimapBitmaps: Boolean;
-begin
-  Result := Assigned(FMinimapHelper.BufferBitmap) or Assigned(FMinimapHelper.Shadow.Bitmap) or
-    Assigned(FMinimapHelper.Indicator.Bitmap);
-
-  if Assigned(FMinimapHelper.BufferBitmap) then
-  begin
-    FMinimapHelper.BufferBitmap.Free;
-    FMinimapHelper.BufferBitmap := nil;
-  end;
-
-  if Assigned(FMinimapHelper.Shadow.Bitmap) then
-  begin
-    FMinimapHelper.Shadow.Bitmap.Free;
-    FMinimapHelper.Shadow.Bitmap := nil;
-  end;
-
-  if Assigned(FMinimapHelper.Indicator.Bitmap) then
-  begin
-    FMinimapHelper.Indicator.Bitmap.Free;
-    FMinimapHelper.Indicator.Bitmap := nil;
-  end;
-end;
-
 procedure TCustomTextEditor.FreeMultiCarets;
 begin
   FMultiEdit.SelectionAvailable := False;
@@ -7659,79 +7583,12 @@ begin
   Include(FState.Flags, sfLinesChanging);
 end;
 
-procedure TCustomTextEditor.ClearMinimapBuffer;
-begin
-  if Assigned(FMinimapHelper.BufferBitmap) then
-    FMinimapHelper.BufferBitmap.Height := 0;
-end;
-
 procedure TCustomTextEditor.MinimapChanged(ASender: TObject);
-
-  procedure Validate;
-  begin
-    FLeftMarginWidth := GetLeftMarginWidth;
-    SizeOrFontChanged;
-
-    Repaint;
-  end;
-
-var
-  LIndex: Integer;
 begin
-  if FMinimap.Visible then
-  begin
-    if not Assigned(FMinimapHelper.BufferBitmap) then
-      FMinimapHelper.BufferBitmap := TBitmap.Create;
+  FLeftMarginWidth := GetLeftMarginWidth;
+  SizeOrFontChanged;
 
-    ClearMinimapBuffer;
-
-    if (ioUseBlending in FMinimap.Indicator.Options) and not Assigned(FMinimapHelper.Indicator.Bitmap) then
-      FMinimapHelper.Indicator.Bitmap := TBitmap.Create;
-
-    if FMinimap.Shadow.Visible then
-    begin
-      if not Assigned(FMinimapHelper.Shadow.Bitmap) then
-        FMinimapHelper.Shadow.Bitmap := TBitmap.Create;
-
-      if FMinimapHelper.Shadow.Bitmap.Canvas.BeginScene then
-      try
-        FMinimapHelper.Shadow.Bitmap.Canvas.Clear(FMinimap.Shadow.Color);
-      finally
-        FMinimapHelper.Shadow.Bitmap.Canvas.EndScene;
-      end;
-
-      FMinimapHelper.Shadow.Bitmap.Height := 0;
-      FMinimapHelper.Shadow.Bitmap.Width := Max(FMinimap.Shadow.Width, 1);
-
-      SetLength(FMinimapHelper.Shadow.AlphaArray, FMinimapHelper.Shadow.Bitmap.Width);
-
-      if FMinimapHelper.Shadow.AlphaByteArrayLength <> FMinimapHelper.Shadow.Bitmap.Width then
-      begin
-        FMinimapHelper.Shadow.AlphaByteArrayLength := FMinimapHelper.Shadow.Bitmap.Width;
-        ReallocMem(FMinimapHelper.Shadow.AlphaByteArray, FMinimapHelper.Shadow.AlphaByteArrayLength * SizeOf(Byte));
-      end;
-
-      LIndex := 0;
-
-      while LIndex < FMinimapHelper.Shadow.Bitmap.Width do
-      begin
-        FMinimapHelper.Shadow.AlphaArray[LIndex] :=
-          if FMinimap.Align = maLeft then
-            (FMinimapHelper.Shadow.Bitmap.Width - LIndex) / FMinimapHelper.Shadow.Bitmap.Width
-          else
-            LIndex / FMinimapHelper.Shadow.Bitmap.Width;
-
-        FMinimapHelper.Shadow.AlphaByteArray[LIndex] := Min(Round(Power(FMinimapHelper.Shadow.AlphaArray[LIndex], 4) * 255.0), 255);
-
-        Inc(LIndex);
-      end;
-    end;
-
-    Validate;
-  end
-  else
-  if FreeMinimapBitmaps then
-    Validate;
+  Repaint;
 end;
 
 procedure TCustomTextEditor.MouseScrollTimerHandler(ASender: TObject);
@@ -9249,46 +9106,10 @@ begin
     ScanCodeFolds;
 end;
 
-procedure TCustomTextEditor.InitializeScrollShadow;
-begin
-  with FScrollHelper.Shadow do
-  begin
-    if not Assigned(Bitmap) then
-      Bitmap := TBitmap.Create;
-
-    if Bitmap.Canvas.BeginScene then
-    try
-      Bitmap.Canvas.Clear(FScroll.Shadow.Color);
-    finally
-      Bitmap.Canvas.EndScene;
-    end;
-
-    Bitmap.Width := Max(FScroll.Shadow.Width, 1);
-
-    SetLength(AlphaArray, Bitmap.Width);
-
-    if AlphaByteArrayLength <> Bitmap.Width then
-    begin
-      AlphaByteArrayLength := Bitmap.Width;
-      ReallocMem(AlphaByteArray, AlphaByteArrayLength * SizeOf(Byte));
-    end;
-
-    for var LIndex := 0 to Bitmap.Width - 1 do
-    begin
-      AlphaArray[LIndex] := (Bitmap.Width - LIndex) / Bitmap.Width;
-      AlphaByteArray[LIndex] := Min(Round(Power(AlphaArray[LIndex], 4) * 255.0), 255);
-    end;
-  end;
-end;
-
 procedure TCustomTextEditor.ScrollingChanged(ASender: TObject);
 begin
-  if FScroll.Shadow.Visible then
-    InitializeScrollShadow
-  else
-    FreeScrollShadowBitmap;
-
   UpdateScrollBars;
+  Repaint;
 end;
 
 procedure TCustomTextEditor.ScrollTimerHandler(ASender: TObject);
@@ -9446,7 +9267,6 @@ begin
   end;
 
   FLeftMarginWidth := GetLeftMarginWidth;
-  ClearMinimapBuffer;
 
   Repaint;
 end;
@@ -12135,9 +11955,6 @@ begin
     if not FRuler.Visible or IsRulerVisible and (Y > FRuler.Height) then
       FMouse.Down.Y := Y;
 
-    if FMinimap.Visible then
-      ClearMinimapBuffer;
-
     if not ReadOnly and FCaret.MultiEdit.Active and not FMouse.OverURI then
     begin
       if (ssCtrl in AShift) and not (ssAlt in AShift) then
@@ -12730,7 +12547,6 @@ begin
       SetSelectionStartPosition(LTextPosition);
 
     SetSelectionEndPosition(LTextPosition);
-    ClearMinimapBuffer;
 
     Exclude(FState.Flags, sfWaitForDragging);
   end;
@@ -14245,7 +14061,6 @@ begin
   ACanvas.Fill.Kind := TBrushKind.Solid;
   ACanvas.Fill.Color := FMinimap.Shadow.Color;
 
-  // TODO
   for LIndex := 0 to LWidth - 1 do
   begin
     LAlpha := Power(
@@ -14323,10 +14138,10 @@ begin
     DrawPixelLine(LLeft, 0, LLeft, FRuler.Height - 1);
   end;
 
-  LLeft := FLeftMarginWidth {- FScrollHelper.HorizontalPosition mod LCharWidth}; // TODO
+  LCharsBeforeView := Trunc(FScrollHelper.HorizontalPosition / LCharWidth);
+  LLeft := FLeftMarginWidth - (FScrollHelper.HorizontalPosition - LCharsBeforeView * LCharWidth);
   LLongLineY := FRuler.Height - 5;
   LShortLineY := FRuler.Height - 3;
-  LCharsBeforeView := Round(FScrollHelper.HorizontalPosition / LCharWidth);
   Canvas.Stroke.Color := FColors.RulerLines;
 
   for var LIndex := LCharsBeforeView to FScrollHelper.PageWidth div Round(LCharWidth) + LCharsBeforeView + 10 do
@@ -15110,8 +14925,10 @@ var
         begin
           LLeft := LRect.Left + 1;
 
-          //if Odd(LLeft) then TODO
-          //  Inc(LLeft);
+          var LScale: Single := if Assigned(Scene) then Scene.GetSceneScale else 1;
+
+          if Odd(Round(LLeft * LScale)) then
+            LLeft := LLeft + 1 / LScale;
 
           while LLeft < LRect.Right - 2 do
           begin
@@ -16827,7 +16644,6 @@ begin
   end;
 end;
 
-// TODO Caret needs refactoring
 procedure TCustomTextEditor.ResetCaret;
 var
   LCaretStyle: TTextEditorCaretStyle;
@@ -16847,10 +16663,6 @@ begin
       FCaretHelper.Offset.Y := FCaretHelper.Offset.Y + GetLineHeight;
     csHalfBlock:
       FCaretHelper.Offset.Y := FCaretHelper.Offset.Y + (GetLineHeight / 2);
-    csBlock:
-      ; // TODO
-    csVerticalLine, csThinVerticalLine:
-      ; // TODO
   end;
 
   Exclude(FState.Flags, sfCaretVisible);
@@ -20388,7 +20200,6 @@ begin
   end;
 end;
 
-// TODO
 procedure TCustomTextEditor.DragDrop(const AData: TDragObject; const APoint: TPointF);
 var
   ASource: TObject;

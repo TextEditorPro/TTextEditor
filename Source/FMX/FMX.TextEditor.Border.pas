@@ -6,7 +6,6 @@ uses
   System.Classes, System.UITypes, FMX.TextEditor.Consts, FMX.TextEditor.Glyph;
 
 type
-  // TODO: Needed?
   TBorderStyle = (bsNone, bsSingle);
   TEdgeBorder = (ebLeft, ebTop, ebRight, ebBottom);
   TEdgeBorders = set of TEdgeBorder;
@@ -55,6 +54,7 @@ begin
   with ASource as TTextEditorBorder do
   begin
     Self.FColor := FColor;
+    Self.FColoredEdges := FColoredEdges;
     Self.FStyle := FStyle;
     Self.FWidth := FWidth;
 

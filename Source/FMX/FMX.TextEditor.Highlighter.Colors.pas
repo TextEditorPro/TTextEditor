@@ -84,11 +84,7 @@ begin
   LHighlighter.UpdateAttributes;
   LHighlighter.Loading := False;
 
-  with TCustomTextEditor(LHighlighter.Editor) do
-  begin
-    ClearMinimapBuffer;
-    SizeOrFontChanged;
-  end;
+  TCustomTextEditor(LHighlighter.Editor).SizeOrFontChanged;
 
   LHighlighter.Editor.Repaint;
 end;

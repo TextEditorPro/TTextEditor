@@ -160,31 +160,31 @@
         <DCCReference Include="..\Source\FMX\FMX.TextEditor.Register.pas"/>
         <RcItem Include="Images\TDBTextEditor.bmp">
             <ResourceType>BITMAP</ResourceType>
-            <ResourceId>Bitmap_1</ResourceId>
+            <ResourceId>TDBTextEditor</ResourceId>
         </RcItem>
         <RcItem Include="Images\TTextEditor.bmp">
             <ResourceType>BITMAP</ResourceType>
-            <ResourceId>Bitmap_2</ResourceId>
+            <ResourceId>TTextEditor</ResourceId>
         </RcItem>
         <RcItem Include="Images\TTextEditorCompareScrollBar.bmp">
             <ResourceType>BITMAP</ResourceType>
-            <ResourceId>Bitmap_3</ResourceId>
+            <ResourceId>TTextEditorCompareScrollBar</ResourceId>
         </RcItem>
         <RcItem Include="Images\TTextEditorMacroRecorder.bmp">
             <ResourceType>BITMAP</ResourceType>
-            <ResourceId>Bitmap_4</ResourceId>
+            <ResourceId>TTextEditorMacroRecorder</ResourceId>
         </RcItem>
         <RcItem Include="Images\TTextEditorPrint.bmp">
             <ResourceType>BITMAP</ResourceType>
-            <ResourceId>Bitmap_5</ResourceId>
+            <ResourceId>TTextEditorPrint</ResourceId>
         </RcItem>
         <RcItem Include="Images\TTextEditorPrintPreview.bmp">
             <ResourceType>BITMAP</ResourceType>
-            <ResourceId>Bitmap_6</ResourceId>
+            <ResourceId>TTextEditorPrintPreview</ResourceId>
         </RcItem>
         <RcItem Include="Images\TTextEditorSpellCheck.bmp">
             <ResourceType>BITMAP</ResourceType>
-            <ResourceId>Bitmap_7</ResourceId>
+            <ResourceId>TTextEditorSpellCheck</ResourceId>
         </RcItem>
         <BuildConfiguration Include="Base">
             <Key>Base</Key>

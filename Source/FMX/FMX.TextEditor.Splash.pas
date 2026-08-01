@@ -12,7 +12,9 @@ const
 
 procedure Init;
 begin
-  // TODO: The TTEXTEDITOR splash bitmap was removed along with FMX.TextEditor.res - draw or embed a new one when this unit is ported
+  { NOTE: This unit is not part of FMX.TextEditor.Delphi.Designtime - the VCL designtime package already adds the
+    IDE splash entry, and both packages installed together would show it twice. Kept only in case an FMX-only
+    installation ever wants its own entry. }
   SplashScreenServices.AddPluginBitmap('Text Editor ' + TEXT_EDITOR_VERSION,
     LoadBitmap(FindResourceHInstance(HInstance), 'TTEXTEDITOR'), False, '');
 end;

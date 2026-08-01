@@ -236,7 +236,7 @@ type
   end;
 
 const
-  EditorCommandStrings: array [0 .. 116] of TTextEditorCommandString = (
+  EditorCommandStrings: array [0 .. 119] of TTextEditorCommandString = (
     (Value: TKeyCommands.None; Name: 'TKeyCommands.None'),
     (Value: TKeyCommands.Left; Name: 'TKeyCommands.Left'),
     (Value: TKeyCommands.Right; Name: 'TKeyCommands.Right'),
@@ -343,6 +343,9 @@ const
     (Value: TKeyCommands.UpperCaseBlock; Name: 'TKeyCommands.UpperCaseBlock'),
     (Value: TKeyCommands.LowerCaseBlock; Name: 'TKeyCommands.LowerCaseBlock'),
     (Value: TKeyCommands.AlternatingCaseBlock; Name: 'TKeyCommands.AlternatingCaseBlock'),
+    (Value: TKeyCommands.KeywordsUpperCase; Name: 'TKeyCommands.KeywordsUpperCase'),
+    (Value: TKeyCommands.KeywordsLowerCase; Name: 'TKeyCommands.KeywordsLowerCase'),
+    (Value: TKeyCommands.KeywordsTitleCase; Name: 'TKeyCommands.KeywordsTitleCase'),
     (Value: TKeyCommands.SearchNext; Name: 'TKeyCommands.SearchNext'),
     (Value: TKeyCommands.SearchPrevious; Name: 'TKeyCommands.SearchPrevious'),
     (Value: TKeyCommands.LineComment; Name: 'TKeyCommands.LineComment'),

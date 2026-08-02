@@ -606,6 +606,7 @@ type
     procedure SetFileMaxReadBufferSize(const AValue: Integer);
     procedure SetFileMinShowProgressSize(const AValue: Int64);
     procedure SetFullFilename(const AName: string);
+    procedure SetHighlighterRange(const ALine: Integer);
     procedure SetHighlightLine(const AValue: TTextEditorHighlightLine);
     procedure SetHorizontalScrollPosition(const AValue: Single);
     procedure SetKeyCommands(const AValue: TTextEditorKeyCommands);
@@ -2320,10 +2321,7 @@ begin
   begin
     LTextLine := FLines.TextLines[LPositionY];
 
-    if LPositionY = 0 then
-      FHighlighter.ResetRange
-    else
-      FHighlighter.SetRange(FLines.Ranges[LPositionY - 1]);
+    SetHighlighterRange(LPositionY);
 
     FHighlighter.SetLine(LTextLine);
 
@@ -2652,10 +2650,7 @@ var
 
   procedure InitializeCurrentLine;
   begin
-    if LTextPosition.Line = 0 then
-      FHighlighter.ResetRange
-    else
-      FHighlighter.SetRange(FLines.Ranges[LTextPosition.Line - 1]);
+    SetHighlighterRange(LTextPosition.Line);
 
     FHighlighter.SetLine(FLines[LTextPosition.Line]);
   end;
@@ -3458,10 +3453,7 @@ var
 
     LMaxWidth := WordWrapWidth;
 
-    if LCurrentLine = 1 then
-      FHighlighter.ResetRange
-    else
-      FHighlighter.SetRange(FLines.Ranges[LCurrentLine - 2]);
+    SetHighlighterRange(LCurrentLine - 1);
 
     LTextLine := FLines.TextLines[LCurrentLine - 1];
 
@@ -3744,10 +3736,7 @@ begin
 
   Result.X := 0;
 
-  if LRow = 1 then
-    FHighlighter.ResetRange
-  else
-    FHighlighter.SetRange(FLines.Ranges[LRow - 2]);
+  SetHighlighterRange(LRow - 1);
 
   FHighlighter.SetLine(LLineText);
 
@@ -4417,10 +4406,7 @@ begin
 
   LLineText := if ALineText.IsEmpty then FLines.ExpandedStrings[LRow - 1] else ALineText;
 
-  if LRow = 1 then
-    FHighlighter.ResetRange
-  else
-    FHighlighter.SetRange(FLines.Ranges[LRow - 2]);
+  SetHighlighterRange(LRow - 1);
 
   FHighlighter.SetLine(LLineText);
 
@@ -4616,10 +4602,7 @@ begin
   if Result > FLines.Count then
     Exit;
 
-  if Result = 0 then
-    FHighlighter.ResetRange
-  else
-    FHighlighter.SetRange(FLines.Ranges[Result - 1]);
+  SetHighlighterRange(Result);
 
   LProgress := 0;
   LProgressInc := 0;
@@ -4645,10 +4628,11 @@ begin
 
         LRange := FHighlighter.Range;
 
-        if Range = LRange then
+        if (Range = LRange) and (RangeDepth = FHighlighter.NestedRangeDepth) then
           Exit;
 
         Range := LRange;
+        RangeDepth := FHighlighter.NestedRangeDepth;
       end;
 
       Inc(Result);
@@ -4671,6 +4655,19 @@ begin
   end;
 
   Dec(Result);
+end;
+
+procedure TCustomTextEditor.SetHighlighterRange(const ALine: Integer);
+begin
+  if ALine <= 0 then
+    FHighlighter.ResetRange
+  else
+  begin
+    FHighlighter.SetRange(FLines.Ranges[ALine - 1]);
+
+    if ALine <= FLines.Count then
+      FHighlighter.NestedRangeDepth := FLines.Items^[ALine - 1].RangeDepth;
+  end;
 end;
 
 procedure TCustomTextEditor.RescanHighlighterRanges;
@@ -5819,10 +5816,7 @@ var
 
   procedure InitializeCurrentLine;
   begin
-    if LTextPosition.Line = 0 then
-      FHighlighter.ResetRange
-    else
-      FHighlighter.SetRange(FLines.Ranges[LTextPosition.Line - 1]);
+    SetHighlighterRange(LTextPosition.Line);
 
     FHighlighter.SetLine(FLines[LTextPosition.Line]);
   end;
@@ -7170,10 +7164,7 @@ var
 
     for var LLine := 0 to FLines.Count - 1 do
     begin
-      if LLine = 0 then
-        FHighlighter.ResetRange
-      else
-        FHighlighter.SetRange(FLines.Ranges[LLine - 1]);
+      SetHighlighterRange(LLine);
 
       LText := FLines.TextLines[LLine];
 
@@ -8154,16 +8145,33 @@ const
   var
     LIndex: Integer;
     LSkipRegionItem: TTextEditorSkipRegionItem;
+    LNestedRegionItem: TTextEditorSkipRegionItem;
   begin
     Result := False;
 
-    if (LPText^ in FHighlighter.SkipOpenKeyChars) and (LOpenTokenSkipFoldRangeList.Count = 0) then
+    LNestedRegionItem := nil;
+
+    if LOpenTokenSkipFoldRangeList.Count > 0 then
+    begin
+      LNestedRegionItem := TTextEditorSkipRegionItem(LOpenTokenSkipFoldRangeList.Last);
+
+      if not LNestedRegionItem.Nested then
+        Exit;
+    end;
+
+    if LPText^ in FHighlighter.SkipOpenKeyChars then
     begin
       LIndex := 0;
 
       while LIndex < LCurrentCodeFoldingRegion.SkipRegions.Count do
       begin
         LSkipRegionItem := LCurrentCodeFoldingRegion.SkipRegions[LIndex];
+
+        if Assigned(LNestedRegionItem) and (LSkipRegionItem <> LNestedRegionItem) then
+        begin
+          Inc(LIndex);
+          Continue;
+        end;
 
         if (LPText^ = PChar(LSkipRegionItem.OpenToken)^) and not OddCountOfStringEscapeChars(LPText) and
           not IsNextSkipChar(LPText + LSkipRegionItem.OpenToken.Length, LSkipRegionItem) then
@@ -11152,9 +11160,10 @@ begin
   begin
     LTextPosition := FPosition.Text;
 
-    if ((ACommand = TKeyCommands.Char) or (ACommand = TKeyCommands.DeleteChar) or
-      (ACommand = TKeyCommands.LineBreak)) and IsKeywordAtCaretPositionOrAfter(TextPosition) or
-      FHighlighter.FoldTags and (ACommand = TKeyCommands.Char) and (AChar = '>') then
+    if ((ACommand = TKeyCommands.Char) or (ACommand = TKeyCommands.DeleteChar) or (ACommand = TKeyCommands.LineBreak)) and 
+      IsKeywordAtCaretPositionOrAfter(TextPosition) or
+      FHighlighter.FoldTags and (ACommand = TKeyCommands.Char) and (AChar = '>') or
+      IsCommentAtCaretPosition then
       FCodeFoldings.Rescan := True;
   end;
 
@@ -16124,10 +16133,7 @@ var
 
             if LOpenTokenEndPos > 0 then
             begin
-              if LCurrentLine = 0 then
-                FHighlighter.ResetRange
-              else
-                FHighlighter.SetRange(FLines.Ranges[LCurrentLine - 1]);
+              SetHighlighterRange(LCurrentLine);
 
               FHighlighter.SetLine(LFromLineText);
 
@@ -16185,10 +16191,7 @@ var
         end;
       end;
 
-      if LCurrentLine = 0 then
-        FHighlighter.ResetRange
-      else
-        FHighlighter.SetRange(FLines.Ranges[LCurrentLine - 1]);
+      SetHighlighterRange(LCurrentLine);
 
       FHighlighter.SetLine(LCurrentLineText);
 
@@ -21877,10 +21880,7 @@ begin
 
       for var LLine := LBeginPosition.Line to LEndPosition.Line do
       begin
-        if LLine = 0 then
-          FHighlighter.ResetRange
-        else
-          FHighlighter.SetRange(FLines.Ranges[LLine - 1]);
+        SetHighlighterRange(LLine);
 
         FHighlighter.SetLine(FLines.TextLines[LLine]);
 

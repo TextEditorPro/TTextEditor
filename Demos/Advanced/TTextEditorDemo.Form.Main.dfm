@@ -14,47 +14,17 @@ object MainForm: TMainForm
   Position = poScreenCenter
   OnCreate = FormCreate
   TextHeight = 13
-  object StatusBar: TStatusBar
-    Left = 0
-    Top = 764
-    Width = 1229
-    Height = 22
-    Panels = <
-      item
-        Width = 74
-      end
-      item
-        Text = 'Ln 1 : Col 1'
-        Width = 150
-      end
-      item
-        Width = 120
-      end
-      item
-        Text = 'Zoom: 100%'
-        Width = 120
-      end
-      item
-        Text = 'Object Pascal'
-        Width = 120
-      end
-      item
-        Text = 'Visual Studio Dark'
-        Width = 120
-      end>
-    OnClick = StatusBarClick
-  end
   object PanelSidebar: TPanel
     Left = 0
     Top = 2
     Width = 68
-    Height = 762
+    Height = 784
     Align = alLeft
     BevelOuter = bvNone
     Caption = 'PanelSidebar'
     ParentColor = True
     ShowCaption = False
-    TabOrder = 1
+    TabOrder = 0
     object SpeedButtonTextEditor: TSpeedButton
       Left = 0
       Top = 0
@@ -76,7 +46,7 @@ object MainForm: TMainForm
     end
     object SpeedButtonDarkTheme: TSpeedButton
       Left = 0
-      Top = 701
+      Top = 723
       Width = 68
       Height = 61
       Action = ActionViewDarkTheme
@@ -132,13 +102,13 @@ object MainForm: TMainForm
     Left = 68
     Top = 2
     Width = 1161
-    Height = 762
+    Height = 784
     Align = alClient
     BevelOuter = bvNone
     Padding.Left = 3
     ParentColor = True
     ShowCaption = False
-    TabOrder = 2
+    TabOrder = 1
     object ActionMainMenuBar: TActionMainMenuBar
       Left = 3
       Top = 0
@@ -159,6 +129,37 @@ object MainForm: TMainForm
       Font.Style = []
       ParentBackground = True
       Spacing = 0
+    end
+    object StatusBar: TStatusBar
+      AlignWithMargins = True
+      Left = 6
+      Top = 762
+      Width = 1155
+      Height = 22
+      Margins.Top = 0
+      Margins.Right = 0
+      Margins.Bottom = 0
+      Panels = <
+        item
+          Text = 'Ln 1 : Col 1'
+          Width = 150
+        end
+        item
+          Width = 120
+        end
+        item
+          Text = 'Zoom: 100%'
+          Width = 120
+        end
+        item
+          Text = 'Object Pascal'
+          Width = 120
+        end
+        item
+          Text = 'Visual Studio Dark'
+          Width = 120
+        end>
+      OnClick = StatusBarClick
     end
   end
   object ActionToolBar1: TActionToolBar

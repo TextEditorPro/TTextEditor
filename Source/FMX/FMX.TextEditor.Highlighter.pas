@@ -43,6 +43,8 @@ type
     FMatchingPairs: TList;
     FMaxLengthOfContinuousString: Integer;
     FName: string;
+    FNestedComments: Boolean;
+    FNestedRangeDepth: Integer;
     FOptions: TTextEditorHighlighterOptions;
     FPreviousEndOfLine: Boolean;
     FRange: TTextEditorRange;
@@ -121,6 +123,8 @@ type
     property MatchingPairs: TList read FMatchingPairs write FMatchingPairs;
     property MaxLengthOfContinuousString: Integer read FMaxLengthOfContinuousString write FMaxLengthOfContinuousString default 500;
     property Name: string read FName write FName;
+    property NestedComments: Boolean read FNestedComments write FNestedComments;
+    property NestedRangeDepth: Integer read FNestedRangeDepth write FNestedRangeDepth;
     property Options: TTextEditorHighlighterOptions read FOptions write FOptions;
     property Range: TTextEditorRange read FRange;
     property RightToLeftToken: Boolean read FRightToLeftToken write FRightToLeftToken;
@@ -457,27 +461,40 @@ begin
     end
     else
     if FRange.ClosingToken = FToken then
-      FRange := FRange.Parent
+    begin
+      if FRange.Nested and (FNestedRangeDepth > 0) then
+        Dec(FNestedRangeDepth)
+      else
+        FRange := FRange.Parent;
+    end
     else
     if Assigned(FToken) and Assigned(FToken.OpenRule) and (FToken.OpenRule is TTextEditorRange) then
     begin
-      FRange := TTextEditorRange(FToken.OpenRule);
-      FRange.ClosingToken := FToken.ClosingToken;
-      FSkipWhitespace := FRange.SkipWhitespaceOnce;
-
-      if FRange.AllowedCharacters <> [] then
-      begin
-        while FLine[FRunPosition] in FRange.AllowedCharacters do
-          Inc(FRunPosition);
-
-        FRange := FRange.Parent;
-      end
+      if (FToken.OpenRule = FRange) and FRange.Nested then
+        Inc(FNestedRangeDepth)
       else
-      if FRange.OpenBeginningOfLine and not FBeginningOfLine or
-        FRange.OpenEndOfLine and (FLine[FRunPosition] <> TControlCharacters.Null) then
       begin
-        FRange := FRange.Parent;
-        FToken := FRange.DefaultToken;
+        FRange := TTextEditorRange(FToken.OpenRule);
+        FRange.ClosingToken := FToken.ClosingToken;
+        FSkipWhitespace := FRange.SkipWhitespaceOnce;
+
+        if FRange.Nested then
+          FNestedRangeDepth := 0;
+
+        if FRange.AllowedCharacters <> [] then
+        begin
+          while FLine[FRunPosition] in FRange.AllowedCharacters do
+            Inc(FRunPosition);
+
+          FRange := FRange.Parent;
+        end
+        else
+        if FRange.OpenBeginningOfLine and not FBeginningOfLine or
+          FRange.OpenEndOfLine and (FLine[FRunPosition] <> TControlCharacters.Null) then
+        begin
+          FRange := FRange.Parent;
+          FToken := FRange.DefaultToken;
+        end;
       end;
     end;
 
@@ -511,6 +528,7 @@ end;
 procedure TTextEditorHighlighter.ResetRange;
 begin
   FRange := MainRules;
+  FNestedRangeDepth := 0;
 end;
 
 procedure TTextEditorHighlighter.SetCodeFoldingRangeCount(const AValue: Integer);
@@ -525,6 +543,8 @@ end;
 procedure TTextEditorHighlighter.SetRange(const AValue: Pointer);
 begin
   FRange := TTextEditorRange(AValue);
+
+  FNestedRangeDepth := 0;
 end;
 
 procedure TTextEditorHighlighter.GetKeywords(var AStringList: TStringList);
@@ -603,6 +623,8 @@ begin
   FBythonPreprocessor := False;
   FFoldTags := False;
   FMatchingPairHighlight := True;
+  FNestedComments := False;
+  FNestedRangeDepth := 0;
   FFoldKeyChars := [#0];
   FFoldOpenKeyChars := [];
   FFoldCloseKeyChars := [];

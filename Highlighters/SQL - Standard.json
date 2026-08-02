@@ -14,6 +14,9 @@
       "Attributes": {
         "Element": "Editor"
       },
+      "Properties": {
+        "NestedComments": true
+      },
       "SubRules": {
         "Range": [
           {

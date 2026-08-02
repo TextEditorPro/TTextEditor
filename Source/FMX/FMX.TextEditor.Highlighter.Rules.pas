@@ -105,6 +105,7 @@ type
     FDelimiters: TTextEditorCharSet;
     FHereDocument: Boolean;
     FKeyList: TList;
+    FNested: Boolean;
     FOpenBeginningOfLine: Boolean;
     FOpenEndOfLine: Boolean;
     FOpenToken: TTextEditorMultiToken;
@@ -157,6 +158,7 @@ type
     property HereDocument: Boolean read FHereDocument write FHereDocument;
     property KeyListCount: Integer read GetKeyListCount;
     property KeyList[const AIndex: Integer]: TTextEditorKeyList read GetKeyList;
+    property Nested: Boolean read FNested write FNested;
     property OpenBeginningOfLine: Boolean read FOpenBeginningOfLine write FOpenBeginningOfLine;
     property OpenEndOfLine: Boolean read FOpenEndOfLine write FOpenEndOfLine;
     property OpenToken: TTextEditorMultiToken read FOpenToken write FOpenToken;
@@ -638,6 +640,7 @@ var
   LTempToken: TTextEditorToken;
   LRange: TTextEditorRange;
   LToken: TTextEditorToken;
+  LNestedToken: TTextEditorToken;
   LKeyList: TTextEditorKeyList;
   LAnsiChar: AnsiChar;
   LLength: Integer;
@@ -678,6 +681,15 @@ begin
         LTempToken := TTextEditorToken.Create(LRange.CloseToken, LIndex2);
 
         LToken.ClosingToken := InsertTokenDefault(LTempToken, LRange, LRange.Attribute);
+
+        if LRange.Nested then
+        begin
+          LTempToken := TTextEditorToken.Create(LRange.OpenToken, LIndex2);
+
+          LNestedToken := InsertTokenDefault(LTempToken, LRange, LRange.Attribute);
+          LNestedToken.OpenRule := LRange;
+          LNestedToken.ClosingToken := LToken.ClosingToken;
+        end;
       end;
 
       LRange.Prepare;
@@ -816,6 +828,7 @@ begin
   FCloseOnEndOfLine := False;
   FCloseParent := False;
   FHereDocument := False;
+  FNested := False;
 
   Reset;
 

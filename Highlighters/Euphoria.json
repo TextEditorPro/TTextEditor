@@ -9,8 +9,21 @@
       "Attributes": {
         "Element": "Editor"
       },
+      "Properties": {
+        "NestedComments": true
+      },
       "SubRules": {
         "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "/*",
+              "Close": "*/"
+            }
+          },
           {
             "Type": "LineComment",
             "Attributes": {
@@ -383,6 +396,11 @@
           {
             "OpenToken": "--",
             "RegionType": "SingleLine"
+          },
+          {
+            "OpenToken": "/*",
+            "CloseToken": "*/",
+            "RegionType": "MultiLine"
           }
         ],
         "FoldRegion": [
@@ -457,6 +475,11 @@
       {
         "OpenToken": "--",
         "RegionType": "SingleLine"
+      },
+      {
+        "OpenToken": "/*",
+        "CloseToken": "*/",
+        "RegionType": "MultiLine"
       }
     ]
   }

@@ -34,6 +34,7 @@ type
     Flags: TTextEditorStringFlags;
     OriginalLineNumber: Integer;
     Range: TTextEditorLinesRange;
+    RangeDepth: Integer;
     TextLine: string;
   end;
 

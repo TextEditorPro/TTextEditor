@@ -179,7 +179,7 @@ begin
   if FFileName.IsEmpty then
     FFrameTextEditor.TextEditor.Lines.Text := FFrameTextEditor.TextEditor.Highlighter.Sample;
 
-  StatusBar.Panels[4].Text := AValue;
+  StatusBar.Panels[3].Text := AValue;
 end;
 
 procedure TMainForm.SetSelectedTheme(const AValue: string);
@@ -194,7 +194,7 @@ begin
 
   FFrameTextCompare.CompareScrollBar.Invalidate;
 
-  StatusBar.Panels[5].Text := AValue;
+  StatusBar.Panels[4].Text := AValue;
 end;
 
 procedure TMainForm.SelectHighlighter(Sender: TObject);
@@ -348,7 +348,7 @@ procedure TMainForm.MenuItemZoomClick(Sender: TObject);
 begin
   FFrameTextEditor.TextEditor.ZoomPercentage := TMenuItem(Sender).Tag;
 
-  StatusBar.Panels[3].Text := 'Zoom: ' + TMenuItem(Sender).Caption;
+  StatusBar.Panels[2].Text := 'Zoom: ' + TMenuItem(Sender).Caption;
 end;
 
 procedure ToggleDarkStyle(const AValue: Boolean);
@@ -516,15 +516,6 @@ begin
   ActionMacroPause.Checked := FMacroRecorder.State = msPaused;
   ActionMacroStop.Enabled := FMacroRecorder.State in [msRecording, msPaused];
   ActionMacroPlay.Enabled := (FMacroRecorder.State = msStopped) and not FMacroRecorder.IsEmpty;
-
-  case FMacroRecorder.State of
-    msRecording:
-      StatusBar.Panels[0].Text := 'Recording';
-    msPaused:
-      StatusBar.Panels[0].Text := 'Paused';
-  else
-    StatusBar.Panels[0].Text := '';
-  end;
 end;
 
 procedure TMainForm.ActionTestUndoRedoExecute(Sender: TObject);
@@ -606,12 +597,12 @@ end;
 
 procedure TMainForm.UpdatePosition;
 begin
-  StatusBar.Panels[1].Text := Format('Ln %d : Col %d', [FFrameTextEditor.TextEditor.TextPosition.Line + 1, FFrameTextEditor.TextEditor.TextPosition.Char]);
+  StatusBar.Panels[0].Text := Format('Ln %d : Col %d', [FFrameTextEditor.TextEditor.TextPosition.Line + 1, FFrameTextEditor.TextEditor.TextPosition.Char]);
 end;
 
 procedure TMainForm.UpdateModifiedState;
 begin
-  StatusBar.Panels[2].Text := if FFrameTextEditor.TextEditor.Modified then 'Modified' else '';
+  StatusBar.Panels[1].Text := if FFrameTextEditor.TextEditor.Modified then 'Modified' else '';
 end;
 
 procedure TMainForm.TextEditorCaretChanged(const ASender: TObject; const X, Y: Integer; const AOffset: Integer);
@@ -651,9 +642,9 @@ var
 begin
   if GetCursorPos(LPoint) then
   case GetPanelIndex of
-    3: PopupMenuZoom.Popup(LPoint.X, LPoint.Y);
-    4: PopupMenuHighlighters.Popup(LPoint.X, LPoint.Y);
-    5: PopupMenuThemes.Popup(LPoint.X, LPoint.Y);
+    2: PopupMenuZoom.Popup(LPoint.X, LPoint.Y);
+    3: PopupMenuHighlighters.Popup(LPoint.X, LPoint.Y);
+    4: PopupMenuThemes.Popup(LPoint.X, LPoint.Y);
   end;
 end;
 

@@ -1,7 +1,7 @@
 {
   "Highlighter": {
     "Sample": [
-      "// Hello, World! in Elm\r\n",
+      "-- Hello, World! in Elm\r\n",
       "\r\n",
       "import Html exposing (text)\r\n",
       "\r\n",
@@ -12,8 +12,21 @@
       "Attributes": {
         "Element": "Editor"
       },
+      "Properties": {
+        "NestedComments": true
+      },
       "SubRules": {
         "Range": [
+          {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "TokenRange": {
+              "Open": "{-",
+              "Close": "-}"
+            }
+          },
           {
             "Type": "LineComment",
             "Attributes": {
@@ -250,6 +263,11 @@
         "OpenToken": "\"",
         "CloseToken": "\"",
         "RegionType": "SingleLineString"
+      },
+      {
+        "OpenToken": "{-",
+        "CloseToken": "-}",
+        "RegionType": "MultiLine"
       },
       {
         "OpenToken": "--",

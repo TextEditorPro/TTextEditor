@@ -27,6 +27,19 @@
             }
           },
           {
+            "Type": "BlockComment",
+            "Attributes": {
+              "Element": "Comment"
+            },
+            "Properties": {
+              "Nested": true
+            },
+            "TokenRange": {
+              "Open": "/+",
+              "Close": "+/"
+            }
+          },
+          {
             "Type": "LineComment",
             "Attributes": {
               "Element": "Comment"
@@ -359,6 +372,12 @@
             "OpenToken": "/*",
             "CloseToken": "*/",
             "RegionType": "MultiLine"
+          },
+          {
+            "OpenToken": "/+",
+            "CloseToken": "+/",
+            "RegionType": "MultiLine",
+            "Nested": true
           }
         ],
         "FoldRegion": [
@@ -417,6 +436,12 @@
         "OpenToken": "/*",
         "CloseToken": "*/",
         "RegionType": "MultiLine"
+      },
+      {
+        "OpenToken": "/+",
+        "CloseToken": "+/",
+        "RegionType": "MultiLine",
+        "Nested": true
       }
     ]
   }

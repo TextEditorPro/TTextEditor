@@ -876,6 +876,7 @@ begin
     Pointer(TextLine) := nil;
     TextLine := AValue;
     Range := nil;
+    RangeDepth := 0;
     ExpandedLength := -1;
     Flags := [sfExpandedLengthUnknown];
   end;
@@ -901,6 +902,7 @@ begin
     Pointer(TextLine) := nil;
     TextLine := '';
     Range := nil;
+    RangeDepth := 0;
     ExpandedLength := -1;
     Flags := [AFlag];
   end;
@@ -940,6 +942,7 @@ begin
 
       Inc(LIndex);
       Range := nil;
+      RangeDepth := 0;
       ExpandedLength := -1;
       Flags := if AModified then [sfExpandedLengthUnknown, sfLineStateModified] else [sfExpandedLengthUnknown];
     end;
@@ -1129,6 +1132,7 @@ begin
         Pointer(TextLine) := nil;
         TextLine := AStrings[LIndex];
         Range := nil;
+        RangeDepth := 0;
         ExpandedLength := -1;
         Flags := [sfExpandedLengthUnknown];
         OriginalLineNumber := LIndex;
@@ -1271,6 +1275,8 @@ begin
                   TextLine := LTempLine + TextLine;
 
                 Range := nil;
+
+                RangeDepth := 0;
                 ExpandedLength := -1;
                 Flags := [sfExpandedLengthUnknown];
                 OriginalLineNumber := FCount;
@@ -1328,6 +1334,7 @@ begin
               Pointer(TextLine) := nil;
               TextLine := '';
               Range := nil;
+              RangeDepth := 0;
               ExpandedLength := -1;
               Flags := [sfExpandedLengthUnknown];
               OriginalLineNumber := FCount;
@@ -1750,6 +1757,8 @@ begin
             SetString(TextLine, LPStartValue, LPValue - LPStartValue);
 
           Range := nil;
+
+          RangeDepth := 0;
           ExpandedLength := -1;
           Flags := [sfExpandedLengthUnknown];
           OriginalLineNumber := FCount;

@@ -520,11 +520,18 @@ begin
           ARange.Delimiters := ARangeObject['Delimiters'].ToSet;
 
         ARange.TokenType := StrToRangeType(ARangeObject['Type'].Value);
+        ARange.Nested := FHighlighter.NestedComments and (ARange.TokenType = ttBlockComment);
 
         LPropertiesObject := ARangeObject['Properties'].ObjectValue;
 
         if Assigned(LPropertiesObject) then
         begin
+          if ARange = FHighlighter.MainRules then
+            FHighlighter.NestedComments := LPropertiesObject.ValueBoolean['NestedComments'];
+
+          if LPropertiesObject.Contains('Nested') then
+            ARange.Nested := LPropertiesObject.ValueBoolean['Nested'];
+
           with ARange do
           begin
             CloseOnAnyTerm := LPropertiesObject.ValueBoolean['CloseOnAnyTerm'];
@@ -770,6 +777,11 @@ begin
 
           if LJSONDataValue.ObjectValue.Contains('NextCharIsNot') then
             SkipIfNextCharIsNot := LJSONDataValue.ObjectValue['NextCharIsNot'].Value[1];
+
+          Nested := FHighlighter.NestedComments and (LSkipRegionType = ritMultiLineComment);
+
+          if LJSONDataValue.ObjectValue.Contains('Nested') then
+            Nested := LJSONDataValue.ObjectValue.ValueBoolean['Nested'];
         end;
 
         if not LOpenToken.IsEmpty then

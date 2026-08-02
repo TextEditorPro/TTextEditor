@@ -29,6 +29,7 @@ type
     procedure PrintPreviewPreviewPage(ASender: TObject; APageNumber: Integer);
   public
     constructor Create(AOwner: TComponent); override;
+    procedure SetEditorPrintOptions;
     procedure UpdatePageLabel;
     procedure UpdatePrintPreview(const AFileName: string);
   end;
@@ -48,6 +49,8 @@ end;
 
 procedure TFramePrintPreview.UpdatePrintPreview(const AFileName: string);
 begin
+  SetEditorPrintOptions;
+
   PrintPreview.EditorPrint.Title := if AFileName.IsEmpty then 'TTextEditor' else ExtractFileName(AFileName);
   PrintPreview.UpdatePreview;
 
@@ -57,6 +60,14 @@ end;
 procedure TFramePrintPreview.UpdatePageLabel;
 begin
   LabelPage.Caption := Format('Page %d / %d', [PrintPreview.PageNumber, PrintPreview.PageCount]);
+end;
+
+procedure TFramePrintPreview.SetEditorPrintOptions;
+begin
+  PrintPreview.EditorPrint.Colors := CheckBoxColors.Checked;
+  PrintPreview.EditorPrint.LineNumbers := CheckBoxLineNumbers.Checked;
+  PrintPreview.EditorPrint.WordWrap := CheckBoxWordWrap.Checked;
+  PrintPreview.EditorPrint.Highlight := CheckBoxHighlight.Checked;
 end;
 
 procedure TFramePrintPreview.ButtonPageFirstClick(Sender: TObject);
@@ -98,10 +109,7 @@ end;
 
 procedure TFramePrintPreview.CheckBoxPreviewOptionClick(Sender: TObject);
 begin
-  PrintPreview.EditorPrint.Colors := CheckBoxColors.Checked;
-  PrintPreview.EditorPrint.LineNumbers := CheckBoxLineNumbers.Checked;
-  PrintPreview.EditorPrint.Wrap := CheckBoxWordWrap.Checked;
-  PrintPreview.EditorPrint.Highlight := CheckBoxHighlight.Checked;
+  SetEditorPrintOptions;
 
   PrintPreview.UpdatePreview;
 end;

@@ -19,6 +19,7 @@ type
     ActionFileExportToHTML: TAction;
     ActionFileLoadHighlighterSample: TAction;
     ActionFileOpen: TAction;
+    ActionFilePrint: TAction;
     ActionFileSave: TAction;
     ActionFileSaveAs: TAction;
     ActionList: TActionList;
@@ -52,6 +53,7 @@ type
     PopupMenuHighlighters: TPopupMenu;
     PopupMenuThemes: TPopupMenu;
     PopupMenuZoom: TPopupMenu;
+    PrintDialog: TPrintDialog;
     SaveDialog: TSaveDialog;
     SaveDialogHTML: TSaveDialog;
     SpeedButtonDarkTheme: TSpeedButton;
@@ -67,6 +69,7 @@ type
     procedure ActionFileExportToHTMLExecute(Sender: TObject);
     procedure ActionFileLoadHighlighterSampleExecute(Sender: TObject);
     procedure ActionFileOpenExecute(Sender: TObject);
+    procedure ActionFilePrintExecute(Sender: TObject);
     procedure ActionFileSaveAsExecute(Sender: TObject);
     procedure ActionFileSaveExecute(Sender: TObject);
     procedure ActionMacroPauseExecute(Sender: TObject);
@@ -424,6 +427,23 @@ begin
   end;
 end;
 
+procedure TMainForm.ActionFilePrintExecute(Sender: TObject);
+begin
+  ActionViewExecute(ActionViewPrintPreview);
+
+  if PrintDialog.Execute(Handle) then
+  with FFramePrintPreview.PrintPreview.EditorPrint do
+  begin
+    Copies := PrintDialog.Copies;
+    SelectedOnly := PrintDialog.PrintRange = prSelection;
+
+    if PrintDialog.PrintRange = prPageNums then
+      Print(PrintDialog.FromPage, PrintDialog.ToPage)
+    else
+      Print;
+  end;
+end;
+
 procedure TMainForm.ActionFileSaveAsExecute(Sender: TObject);
 begin
   if SaveDialog.Execute then
@@ -581,8 +601,8 @@ begin
       end;
     2:
       begin
-        FFramePrintPreview.UpdatePrintPreview(FFileName);
         FFramePrintPreview.PrintPreview.EditorPrint.Editor := FFrameTextEditor.TextEditor;
+        FFramePrintPreview.UpdatePrintPreview(FFileName);
         InspectObject(FFramePrintPreview.PrintPreview);
         SpeedButtonPrintPreview.Down := True;
       end;

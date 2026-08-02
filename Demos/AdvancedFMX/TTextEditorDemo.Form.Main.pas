@@ -4,9 +4,9 @@ interface
 
 uses
   System.Classes, System.SysUtils, System.Types, System.UITypes, FMX.Controls, FMX.Controls.Presentation, FMX.Dialogs, FMX.Edit, FMX.Forms,
-  FMX.Graphics, FMX.Layouts, FMX.ListBox, FMX.Menus, FMX.Objects, FMX.StdCtrls, FMX.TabControl, FMX.TextEditor,
-  FMX.TextEditor.Compare.ScrollBar, FMX.TextEditor.MacroRecorder, FMX.TextEditor.Print, FMX.TextEditor.Print.Preview,
-  FMX.TextEditor.Types, FMX.Types, MyControl.ObjectInspector;
+  FMX.Graphics, FMX.Layouts, FMX.ListBox, FMX.Menus, FMX.Objects, FMX.Printer, FMX.StdCtrls, FMX.TabControl, FMX.TextEditor,
+  FMX.TextEditor.Compare.ScrollBar, FMX.TextEditor.MacroRecorder, FMX.TextEditor.Print, FMX.TextEditor.Print.Preview, FMX.TextEditor.Types,
+  FMX.Types, MyControl.ObjectInspector;
 
 type
   TMainForm = class(TForm)
@@ -54,6 +54,7 @@ type
     MenuItemMacroRecord: TMenuItem;
     MenuItemMacroStop: TMenuItem;
     MenuItemOpen: TMenuItem;
+    MenuItemPrint: TMenuItem;
     MenuItemSample: TMenuItem;
     MenuItemSave: TMenuItem;
     MenuItemSaveAs: TMenuItem;
@@ -83,6 +84,7 @@ type
     TabItemEditor: TTabItem;
     TabItemPrintPreview: TTabItem;
     TextEditor: TTextEditor;
+    PrintDialog: TPrintDialog;
     procedure ButtonFindNextClick(Sender: TObject);
     procedure ButtonFindPreviousClick(Sender: TObject);
     procedure ButtonPageFirstClick(Sender: TObject);
@@ -110,6 +112,7 @@ type
     procedure MenuItemMacroRecordClick(Sender: TObject);
     procedure MenuItemMacroStopClick(Sender: TObject);
     procedure MenuItemOpenClick(Sender: TObject);
+    procedure MenuItemPrintClick(Sender: TObject);
     procedure MenuItemSampleClick(Sender: TObject);
     procedure MenuItemSaveAsClick(Sender: TObject);
     procedure MenuItemSaveClick(Sender: TObject);
@@ -178,7 +181,6 @@ type
     Themes = '..\..\Themes\';
   end;
 
-  { One row of the aligned compare result }
   TCompareRow = (crSame, crModify, crLeftOnly, crRightOnly);
 
 const
@@ -296,11 +298,9 @@ begin
 
   CompareEditors;
 
-  { Keep the compare editors evenly split around the middle scroll bar }
   TabControl.OnResize := CompareTabResize;
   CompareTabResize(nil);
 
-  { Recompare is deferred - mutating the line lists inside OnChange crashes the editor's own change processing }
   FCompareTimer := TTimer.Create(Self);
   FCompareTimer.Enabled := False;
   FCompareTimer.Interval := 300;
@@ -364,6 +364,23 @@ begin
 
     UpdateCaption;
     UpdateModifiedState;
+  end;
+end;
+
+procedure TMainForm.MenuItemPrintClick(Sender: TObject);
+begin
+  TabControl.TabIndex := 1;
+
+  if PrintDialog.Execute then
+  with PrintPreview.EditorPrint do
+  begin
+    Copies := PrintDialog.Copies;
+    SelectedOnly := PrintDialog.PrintRange = TPrintRange.prSelection;
+
+    if PrintDialog.PrintRange = TPrintRange.prPageNums then
+      Print(PrintDialog.FromPage, PrintDialog.ToPage)
+    else
+      Print;
   end;
 end;
 
@@ -576,7 +593,6 @@ begin
     for var LIndex := 0 to LCountRight - 1 do
       LHashesRight[LIndex] := HashLine(EditorCompareRight.Lines[LIndex]);
 
-    { Longest common subsequence lengths for line suffixes }
     SetLength(LLcs, LCountLeft + 1, LCountRight + 1);
 
     for var LLeft := LCountLeft - 1 downto 0 do
@@ -679,7 +695,6 @@ begin
   LEditor := ASender as TTextEditor;
   LOther := if LEditor = EditorCompareLeft then EditorCompareRight else EditorCompareLeft;
 
-  { Modified lines and lines missing from the other file - the placeholder rows themselves get a hatch instead }
   if (ALine < LEditor.Lines.Count) and (sfModify in LEditor.Lines.Flags[ALine]) or
     (ALine < LOther.Lines.Count) and (sfEmptyLine in LOther.Lines.Flags[ALine]) then
   begin
@@ -700,7 +715,6 @@ begin
 
   if (ALineNumber < LEditor.Lines.Count) and (sfEmptyLine in LEditor.Lines.Flags[ALineNumber]) then
   begin
-    { FMX has no hatch brushes - draw the placeholder row's diagonal pattern by hand }
     LCanvasState := ACanvas.SaveState;
     try
       ACanvas.IntersectClipRect(ARect);
@@ -708,8 +722,6 @@ begin
       ACanvas.Stroke.Thickness := 1;
       ACanvas.Stroke.Color := LEditor.Colors.CodeFoldingCollapsedLine;
 
-      { Anchor the diagonals to absolute coordinates (lines x + y = 8n) so the pattern continues seamlessly
-        across the rows of a multi-line block at any line height }
       LX := 8 * Floor((ARect.Left - ARect.Height + ARect.Bottom) / 8) - ARect.Bottom;
 
       while LX < ARect.Right do
@@ -759,7 +771,6 @@ begin
   if TabControl.ActiveTab = TabItemPrintPreview then
     UpdatePrintPreview;
 
-  { The editors have no size until the tab is shown - refresh the visible line count }
   if TabControl.ActiveTab = TabItemCompare then
     CompareScrollBar.Invalidate;
 
@@ -822,7 +833,7 @@ begin
 
   PrintPreview.EditorPrint.Colors := CheckBoxColors.IsChecked;
   PrintPreview.EditorPrint.LineNumbers := CheckBoxLineNumbers.IsChecked;
-  PrintPreview.EditorPrint.Wrap := CheckBoxWordWrap.IsChecked;
+  PrintPreview.EditorPrint.WordWrap := CheckBoxWordWrap.IsChecked;
   PrintPreview.EditorPrint.Highlight := CheckBoxHighlight.IsChecked;
 
   UpdatePrintPreview;
@@ -982,8 +993,6 @@ end;
 
 procedure TMainForm.ExecuteTestCommand(const ACommand: Integer; const AViaCommandProcessor: Boolean = False);
 
-  { CommandProcessor is the full input path - it notifies hooked command handlers (the macro recorder records through
-    them), ExecuteCommand bypasses them }
   procedure Execute(const ACommand: Integer; const AChar: Char);
   begin
     if AViaCommandProcessor then
@@ -1281,7 +1290,6 @@ var
     if (TextEditor.TextPosition.Line <> LFinalPosition.Line) or (TextEditor.TextPosition.Char <> LFinalPosition.Char) then
       Exit('Failed playback caret for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount));
 
-    { The macro must survive its own stream format }
     var LStream := TMemoryStream.Create;
     try
       FMacroRecorder.SaveToStream(LStream);
@@ -1300,7 +1308,6 @@ var
 begin
   Result := Run;
 
-  { Windows clipboard contention makes FMX clipboard writes fail silently - retry the whole seed like the clipboard test }
   for var LAttempt := 1 to 2 do
   begin
     if Result.IsEmpty then
@@ -1352,13 +1359,16 @@ begin
     on E: Exception do
     begin
       var LError := 'Failed loading ' + LCurrentFile + ': ' + E.ClassName + ' ' + E.Message;
+
       LabelTestRun.Text := LError;
       SetTestClipboardText(LError);
+
       Exit;
     end;
   end;
 
   ShowMessage('Done.');
+
   LabelTestRun.Visible := False;
 end;
 

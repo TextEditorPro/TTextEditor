@@ -62,7 +62,7 @@ type
     FSelectionMode: TTextEditorSelectionMode;
     FTabWidth: Integer;
     FTitle: string;
-    FWrap: Boolean;
+    FWordWrap: Boolean;
     FYPos: Integer;
     function ClipLineToRect(var ALine: string): string;
     function GetPageCount: Integer;
@@ -84,7 +84,7 @@ type
     procedure SetMargins(const AValue: TTextEditorPrintMargins);
     procedure SetMaxLeftChar(const aValue: Integer);
     procedure SetPixelsPerInch;
-    procedure SetWrap(const AValue: Boolean);
+    procedure SetWordWrap(const AValue: Boolean);
     procedure TextOut(const AText: string; const AList: TList);
     procedure WriteLine(const AText: string);
     procedure WriteLineNumber;
@@ -122,7 +122,7 @@ type
     property PageOffset: Integer read FPageOffset write FPageOffset default 0;
     property SelectedOnly: Boolean read FSelectedOnly write FSelectedOnly default False;
     property Title: string read FTitle write FTitle;
-    property Wrap: Boolean read FWrap write SetWrap default True;
+    property WordWrap: Boolean read FWordWrap write SetWordWrap default True;
   end;
 
 implementation
@@ -148,7 +148,7 @@ begin
 
   FCopies := 1;
   FMaxLeftChar := 1024;
-  FWrap := True;
+  FWordWrap := True;
   FHighlight := True;
   FColors := False;
   FLineNumbers := False;
@@ -247,11 +247,11 @@ begin
   FPagesCounted := False;
 end;
 
-procedure TTextEditorPrint.SetWrap(const AValue: Boolean);
+procedure TTextEditorPrint.SetWordWrap(const AValue: Boolean);
 begin
-  if AValue <> FWrap then
+  if AValue <> FWordWrap then
   begin
-    FWrap := AValue;
+    FWordWrap := AValue;
 
     if FPages.Count > 0 then
     begin
@@ -385,7 +385,7 @@ begin
       FPages.Add(LPageLine);
     end;
 
-    if Wrap then
+    if FWordWrap then
     begin
       if not FSelectedOnly then
         LText := FLines[LIndex]
@@ -640,7 +640,7 @@ begin
 
         if not LHandled then
         begin
-          if not Wrap and (LLeft + TextWidth(FCanvas, LToken) > LClipRect.Right) then
+          if not FWordWrap and (LLeft + TextWidth(FCanvas, LToken) > LClipRect.Right) then
             Break;
 
           ClippedTextOut(LLeft, FYPos, LToken);
@@ -693,7 +693,7 @@ begin
   if FLineNumbers then
     WriteLineNumber;
 
-  if Wrap and (FCanvas.TextWidth(AText) > FMaxWidth) then
+  if FWordWrap and (FCanvas.TextWidth(AText) > FMaxWidth) then
     HandleWrap(AText)
   else
     TextOut(AText, nil);
@@ -948,7 +948,7 @@ begin
       FreeMem(LBuffer);
     end;
 
-    Read(FWrap, SizeOf(FWrap));
+    Read(FWordWrap, SizeOf(FWordWrap));
     Read(FHighlight, SizeOf(FHighlight));
     Read(FColors, SizeOf(FColors));
     Read(FLineNumbers, SizeOf(FLineNumbers));
@@ -974,7 +974,7 @@ begin
     LLength := FDocumentTitle.Length;
     Write(LLength, SizeOf(LLength));
     Write(PChar(FDocumentTitle)^, LLength * SizeOf(Char));
-    Write(FWrap, SizeOf(FWrap));
+    Write(FWordWrap, SizeOf(FWordWrap));
     Write(FHighlight, SizeOf(FHighlight));
     Write(FColors, SizeOf(FColors));
     Write(FLineNumbers, SizeOf(FLineNumbers));

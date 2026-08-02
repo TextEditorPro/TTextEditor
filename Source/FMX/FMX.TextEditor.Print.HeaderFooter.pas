@@ -713,7 +713,7 @@ begin
         LAlignment := taRightJustify;
     end;
 
-    LTextWidth := TextWidth(ACanvas, LText);
+    LTextWidth := TextAdvance(ACanvas, LText);
 
     with FMargins do
     begin
@@ -731,8 +731,7 @@ begin
     LLineHeight := TTextEditorLineInfo(FLineInfo[LCurrentLine - 1]).LineHeight;
     ACanvas.Fill.Kind := TBrushKind.Solid;
     ACanvas.Fill.Color := TAlphaColors.Black;
-    ACanvas.FillText(RectF(LX, LY, LX + LTextWidth + 2, LY + LLineHeight), LText, False, 1, [], TTextAlign.Leading,
-      TTextAlign.Trailing);
+    ACanvas.FillText(RectF(LX, LY, LX + TextWidth(ACanvas, LText) + 2, LY + LLineHeight), LText, False, 1, [], TTextAlign.Leading, TTextAlign.Trailing);
   end;
 
   RestoreFontPenBrush(ACanvas);

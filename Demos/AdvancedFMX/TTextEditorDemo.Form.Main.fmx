@@ -39,6 +39,11 @@ object MainForm: TMainForm
         Locked = True
         Text = '-'
       end
+      object MenuItemPrint: TMenuItem
+        Locked = True
+        Text = 'Print...'
+        OnClick = MenuItemPrintClick
+      end
       object MenuItemExportToHTML: TMenuItem
         Locked = True
         Text = 'Export to HTML...'
@@ -682,5 +687,9 @@ object MainForm: TMainForm
     Filter = 'HTML files (*.htm;*.html)|*.htm;*.html'
     Left = 94
     Top = 346
+  end
+  object PrintDialog: TPrintDialog
+    Left = 91
+    Top = 409
   end
 end

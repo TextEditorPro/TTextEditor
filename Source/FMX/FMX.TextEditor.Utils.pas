@@ -26,6 +26,7 @@ function IsUTF8Buffer(const ABuffer: TBytes; out AWithBOM: Boolean): Boolean;
 function MiddleColor(const AColor1, AColor2: TAlphaColor): TAlphaColor; inline;
 function TextEditorAlphaColorToColor(const AColor: TAlphaColor): TColor;
 function TextEditorColorToAlphaColor(const AColor: TColor): TAlphaColor;
+function TextAdvance(const ACanvas: TCanvas; const AText: string): Single;
 function TextHeight(const ACanvas: TCanvas; const AText: string): Single; inline;
 function TextWidth(const ACanvas: TCanvas; const AText: string): Single; inline;
 function TitleCase(const AValue: string): string;
@@ -373,6 +374,17 @@ end;
 function TextWidth(const ACanvas: TCanvas; const AText: string): Single;
 begin
   Result := ACanvas.TextWidth(AText);
+end;
+
+{ The GDI+ canvas (the only printer canvas on Windows) measures text with a constant ~1/3 em padding per call, so
+  accumulating TextWidth results spreads tokens apart. Doubling the text cancels the padding, leaving the true advance.
+  On tight-measuring canvases (D2D) the result equals TextWidth. }
+function TextAdvance(const ACanvas: TCanvas; const AText: string): Single;
+begin
+  if AText.IsEmpty then
+    Exit(0);
+
+  Result := ACanvas.TextWidth(AText + AText) - ACanvas.TextWidth(AText);
 end;
 
 function TextHeight(const ACanvas: TCanvas; const AText: string): Single;

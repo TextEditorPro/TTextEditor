@@ -515,6 +515,10 @@ object MainForm: TMainForm
                 Caption = '-'
               end
               item
+                Action = ActionFilePrint
+                Caption = '&Print...'
+              end
+              item
                 Action = ActionFileExportToHTML
                 Caption = '&Export to HTML...'
               end
@@ -629,6 +633,11 @@ object MainForm: TMainForm
       Caption = 'Save as...'
       OnExecute = ActionFileSaveAsExecute
     end
+    object ActionFilePrint: TAction
+      Category = 'File'
+      Caption = 'Print...'
+      OnExecute = ActionFilePrintExecute
+    end
     object ActionFileExportToHTML: TAction
       Category = 'File'
       Caption = 'Export to HTML...'
@@ -718,5 +727,9 @@ object MainForm: TMainForm
       Caption = 'Test highlighters and themes'
       OnExecute = ActionTestHighlighterSweepExecute
     end
+  end
+  object PrintDialog: TPrintDialog
+    Left = 242
+    Top = 238
   end
 end

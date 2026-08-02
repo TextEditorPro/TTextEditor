@@ -3,8 +3,7 @@
 interface
 
 uses
-  Winapi.Windows, System.Classes, System.SysUtils, Vcl.Controls, Vcl.ExtCtrls, Vcl.Forms, Vcl.StdCtrls, TextEditor,
-  TextEditor.MacroRecorder;
+  Winapi.Windows, System.Classes, System.SysUtils, Vcl.Controls, Vcl.ExtCtrls, Vcl.Forms, Vcl.StdCtrls, TextEditor, TextEditor.MacroRecorder;
 
 type
   TFrameTextEditor = class(TFrame)

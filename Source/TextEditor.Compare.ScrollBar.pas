@@ -35,6 +35,7 @@ type
     procedure FillRect(const ARect: TRect);
     procedure SetBorderStyle(const AValue: TBorderStyle);
     procedure SetEditorLeft(const AEditor: TTextEditor);
+    procedure SetEditorRight(const AEditor: TTextEditor);
     procedure SetScrollBarVisible(const AValue: Boolean);
     procedure SetTopLine(const AValue: Integer);
     procedure WMEraseBkgnd(var AMessage: TWMEraseBkgnd); message WM_ERASEBKGND;
@@ -66,7 +67,7 @@ type
     property BorderStyle: TBorderStyle read FBorderStyle write SetBorderStyle default bsSingle;
     property BorderWidth;
     property EditorLeft: TTextEditor read FEditorLeft write SetEditorLeft;
-    property EditorRight: TTextEditor read FEditorRight write FEditorRight;
+    property EditorRight: TTextEditor read FEditorRight write SetEditorRight;
     property ScrollBarVisible: Boolean read FScrollBarVisible write SetScrollBarVisible default False;
   end;
 
@@ -328,6 +329,20 @@ end;
 procedure TTextEditorCompareScrollBar.SetEditorLeft(const AEditor: TTextEditor);
 begin
   FEditorLeft := AEditor;
+
+  if Assigned(FEditorLeft) then
+    FEditorLeft.EditorMode := emCompare;
+
+  Invalidate;
+end;
+
+procedure TTextEditorCompareScrollBar.SetEditorRight(const AEditor: TTextEditor);
+begin
+  FEditorRight := AEditor;
+
+  if Assigned(FEditorRight) then
+    FEditorRight.EditorMode := emCompare;
+
   Invalidate;
 end;
 

@@ -148,6 +148,9 @@ type
     eoTrailingLineBreak);
   TTextEditorOptions = set of TTextEditorOption;
 
+  { Editor mode }
+  TTextEditorMode = (emNormal, emSimple, emCompare);
+
   TTextEditorOvertypeMode = (omInsert, omOverwrite);
 
   PTextEditorSelectionMode = ^TTextEditorSelectionMode;

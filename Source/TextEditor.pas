@@ -256,6 +256,7 @@ type
       Delta: TPoint;
       HorizontalPosition: Integer;
       HorizontalScrollMax: Integer;
+      HorizontalShown: Boolean;
       HorizontalVisible: Boolean;
       IsScrolling: Boolean;
       LastHorizontalMax: Integer;
@@ -265,6 +266,7 @@ type
       PageWidth: Integer;
       Shadow: TTextEditorScrollShadowHelper;
       Timer: TTextEditorTimer;
+      VerticalShown: Boolean;
       VerticalVisible: Boolean;
 {$IFDEF ALPHASKINS}
       Wnd: TacScrollWnd;
@@ -345,6 +347,7 @@ type
     FCompletionProposalPopupWindow: TTextEditorCompletionProposalPopupWindow;
     FCompletionProposalTimer: TTextEditorTimer;
     FDoubleClickTime: Cardinal;
+    FEditorMode: TTextEditorMode;
     FEvents: TTextEditorEvents;
     FFile: TTextEditorFile;
     FFonts: TTextEditorFonts;
@@ -397,7 +400,6 @@ type
     FSearchEngine: TTextEditorSearchBase;
     FSearchString: string;
     FSelection: TTextEditorSelection;
-    FSimpleMode: Boolean;
 {$IFDEF ALPHASKINS}
     FSkinData: TsScrollWndData;
 {$ENDIF}
@@ -448,6 +450,7 @@ type
     function GetHighlighterAttributeAtRowColumn(const ATextPosition: TTextEditorTextPosition; var AToken: string; var ATokenType: TTextEditorRangeType; var AStart: Integer; var AHighlighterAttribute: TTextEditorHighlighterAttribute): Boolean;
     function GetHookedCommandHandlersCount: Integer;
     function GetHorizontalScrollMax: Integer;
+    function GetCodeFoldingWidth: Integer; inline;
     function GetInlineSelectionAvailable: Boolean;
     function GetLastWordFromCursor: string;
     function GetLeadingExpandedLength(const AText: string; const ABorder: Integer = 0): Integer;
@@ -480,6 +483,7 @@ type
     function GetViewTextLineNumber(const AViewLineNumber: Integer): Integer;
     function GetVisibleChars(const ARow: Integer; const ALineText: string = ''): Integer;
     function IsAnyFoldingCollapsed: Boolean;
+    function IsCodeFoldingRangesNeeded: Boolean; inline;
     function IsCodeFoldingVisible: Boolean; inline;
     function IsRulerVisible: Boolean; inline;
     function IsTextPositionInSearchBlock(const ATextPosition: TTextEditorTextPosition): Boolean;
@@ -589,6 +593,7 @@ type
     procedure LinesHookChanged;
     procedure LinesInserted(ASender: TObject; const AIndex: Integer; const ACount: Integer);
     procedure LinesPutted(ASender: TObject; const AIndex: Integer; const ACount: Integer);
+    procedure MatchingPairsChanged(ASender: TObject);
     procedure MinimapChanged(ASender: TObject);
     procedure MacroStateTimerHandler(ASender: TObject);
     procedure MouseScrollTimerHandler(ASender: TObject);
@@ -622,6 +627,7 @@ type
     procedure SetCodeFolding(const AValue: TTextEditorCodeFolding);
     procedure SetCompletionProposalPopupWindowLocation;
     procedure SetDefaultKeyCommands;
+    procedure SetEditorMode(const AValue: TTextEditorMode);
     procedure SetFileMaxReadBufferSize(const AValue: Integer);
     procedure SetFileMinShowProgressSize(const AValue: Int64);
     procedure SetFullFilename(const AName: string);
@@ -646,7 +652,6 @@ type
     procedure SetSelectionLength(const AValue: Integer);
     procedure SetSelectionStart(const AValue: Integer);
     procedure SetSelectionStartPosition(const AValue: TTextEditorTextPosition);
-    procedure SetSimpleMode(const AValue: Boolean);
     procedure SetSpecialChars(const AValue: TTextEditorSpecialChars);
     procedure SetSyncEdit(const AValue: TTextEditorSyncEdit);
     procedure SetTabs(const AValue: TTextEditorTabs);
@@ -988,6 +993,7 @@ type
     property Colors: TTextEditorColors read FColors write FColors;
     property CompletionProposal: TTextEditorCompletionProposal read FCompletionProposal write FCompletionProposal;
     property Cursor default TTextEditorDefaults.Cursor;
+    property EditorMode: TTextEditorMode read FEditorMode write SetEditorMode default emNormal;
     property FileDateTime: TDateTime read FFile.DateTime write FFile.DateTime;
     property FileMaxReadBufferSize: Integer read FFile.MaxReadBufferSize write SetFileMaxReadBufferSize default TTextEditorDefaults.FileMaxReadBufferSize;
     property FileMinShowProgressSize: Int64 read FFile.MinShowProgressSize write SetFileMinShowProgressSize default TTextEditorDefaults.FileMinShowProgressSize;
@@ -1088,7 +1094,6 @@ type
     property SelectionLength: Integer read GetSelectionLength write SetSelectionLength;
     property SelectionLineCount: Integer read GetSelectionLineCount;
     property SelectionStart: Integer read GetSelectionStart write SetSelectionStart;
-    property SimpleMode: Boolean read FSimpleMode write SetSimpleMode default False;
 {$IFDEF ALPHASKINS}
     property SkinData: TsScrollWndData read FSkinData write FSkinData;
 {$ENDIF}
@@ -1134,6 +1139,7 @@ type
     property Constraints;
     property Ctl3D;
     property Cursor;
+    property EditorMode;
     property Enabled;
     property FileMaxReadBufferSize;
     property FileMinShowProgressSize;
@@ -1223,7 +1229,6 @@ type
     property Search;
     property Selection;
     property ShowHint;
-    property SimpleMode;
 {$IFDEF ALPHASKINS}
     property SkinData;
 {$ENDIF}
@@ -1431,7 +1436,7 @@ begin
   FState.URIOpener := False;
   FState.ReadOnly := TTextEditorDefaults.ReadOnly;
   FMultiEdit.Position.Row := -1;
-  FSimpleMode := False;
+  FEditorMode := emNormal;
   { Zoom }
   FZoom.Divider := TTextEditorDefaults.ZoomDivider;
   FZoom.Percentage := TTextEditorDefaults.ZoomPercentage;
@@ -1456,6 +1461,7 @@ begin
   FColors.InDesign := csDesigning in ComponentState;
   { Matching pair }
   FMatchingPairs := TTextEditorMatchingPairs.Create;
+  FMatchingPairs.OnChange := MatchingPairsChanged;
   { Line spacing }
   FLineSpacing := TTextEditorDefaults.LineSpacing;
   { Special chars }
@@ -2347,7 +2353,7 @@ var
 begin
   Result := False;
 
-  if FSimpleMode then
+  if FEditorMode = emSimple then
     Exit;
 
   LPositionY := ATextPosition.Line;
@@ -2450,12 +2456,14 @@ begin
   end;
 end;
 
+function TCustomTextEditor.GetCodeFoldingWidth: Integer;
+begin
+  Result := if IsCodeFoldingVisible then FCodeFolding.GetWidth else 0;
+end;
+
 function TCustomTextEditor.GetLeftMarginWidth: Integer;
 begin
-  Result := FLeftMargin.GetWidth;
-
-  if not FSimpleMode then
-    Inc(Result, FCodeFolding.GetWidth);
+  Result := FLeftMargin.GetWidth + GetCodeFoldingWidth;
 
   if FMinimap.Align = maLeft then
     Inc(Result, FMinimap.GetWidth);
@@ -2958,7 +2966,7 @@ end;
 
 function TCustomTextEditor.GetScrollPageWidth: Integer;
 begin
-  Result := Max(ClientRect.Right - FLeftMargin.GetWidth - FCodeFolding.GetWidth - 2 - FMinimap.GetWidth - FSearch.Map.GetWidth, 0);
+  Result := Max(ClientRect.Right - FLeftMargin.GetWidth - GetCodeFoldingWidth - 2 - FMinimap.GetWidth - FSearch.Map.GetWidth, 0);
 end;
 
 function TCustomTextEditor.GetSelectionAvailable: Boolean;
@@ -3210,7 +3218,7 @@ end;
 
 function TCustomTextEditor.IsRulerVisible: Boolean;
 begin
-  Result := FRuler.Visible and not FSimpleMode;
+  Result := FRuler.Visible and (FEditorMode <> emSimple);
 end;
 
 function TCustomTextEditor.GetRowCountFromPixel(const AY: Integer): Integer;
@@ -3422,7 +3430,7 @@ var
     LHighlighterAttribute: TTextEditorHighlighterAttribute;
     LPToken: PChar;
   begin
-    if not Visible or FSimpleMode then
+    if not Visible or (FEditorMode = emSimple) then
       Exit;
 
     LMaxWidth := WordWrapWidth;
@@ -3555,7 +3563,7 @@ begin
   begin
     FLineNumbers.ResetCache := False;
 
-    if FCodeFolding.Visible then
+    if IsCodeFoldingVisible then
     begin
       SetLength(LCollapsedCodeFolding, FLines.Count + 1);
 
@@ -3601,7 +3609,7 @@ begin
 
     for var LIndex := 1 to FLines.Count do
     begin
-      if FCodeFolding.Visible then
+      if IsCodeFoldingVisible then
       while (LCurrentLine <= FLines.Count) and LCollapsedCodeFolding[LCurrentLine] do { Skip collapsed lines }
         Inc(LCurrentLine);
 
@@ -3640,7 +3648,7 @@ begin
       end;
     end;
 
-    if FCodeFolding.Visible then
+    if IsCodeFoldingVisible then
       SetLength(LCollapsedCodeFolding, 0);
 
     FLineNumbers.Count := Length(FLineNumbers.Cache) - 1;
@@ -3720,7 +3728,7 @@ begin
 
   LLineText := if ALineText.IsEmpty then FLines.ExpandedStrings[LRow - 1] else ALineText;
 
-  if FSimpleMode then
+  if FEditorMode = emSimple then
   begin
     Result.X := FLeftMarginWidth + (AViewPosition.Column - 1) * FPaintHelper.CharWidth;
 
@@ -3899,7 +3907,12 @@ end;
 
 function TCustomTextEditor.IsCodeFoldingVisible: Boolean;
 begin
-  Result := not FSimpleMode and FCodeFolding.Visible;
+  Result := (FEditorMode = emNormal) and FCodeFolding.Visible;
+end;
+
+function TCustomTextEditor.IsCodeFoldingRangesNeeded: Boolean;
+begin
+  Result := IsCodeFoldingVisible or (FEditorMode = emNormal) and FMatchingPairs.Active and (cfoHighlightMatchingPair in FCodeFolding.Options) and not FCodeFolding.TextFolding.Active;
 end;
 
 function TCustomTextEditor.GetVisibleChars(const ARow: Integer; const ALineText: string = ''): Integer;
@@ -4032,7 +4045,7 @@ var
 begin
   Result := False;
 
-  if not IsCodeFoldingVisible or FCodeFolding.TextFolding.Active or (Length(FHighlighter.CodeFoldingRegions) = 0) then
+  if not IsCodeFoldingRangesNeeded or FCodeFolding.TextFolding.Active or (Length(FHighlighter.CodeFoldingRegions) = 0) then
     Exit;
 
   if FHighlighter.Loaded then
@@ -4116,7 +4129,7 @@ var
 begin
   Result := False;
 
-  if not IsCodeFoldingVisible or FCodeFolding.TextFolding.Active or (Length(FHighlighter.CodeFoldingRegions) = 0) then
+  if not IsCodeFoldingRangesNeeded or FCodeFolding.TextFolding.Active or (Length(FHighlighter.CodeFoldingRegions) = 0) then
     Exit;
 
   LCaretPosition := ATextPosition;
@@ -4409,7 +4422,7 @@ begin
   LRow := ARow;
   LXInEditor := X + FScrollHelper.HorizontalPosition - FLeftMarginWidth + FPaintHelper.CharWidth shr 1 + 1;
 
-  if FSimpleMode then
+  if FEditorMode = emSimple then
   begin
     Result.Column := LXInEditor div FPaintHelper.CharWidth + 1;
     Result.Row := ARow;
@@ -4681,7 +4694,7 @@ procedure TCustomTextEditor.RescanHighlighterRanges;
 var
   LLastScan: Integer;
 begin
-  if FSimpleMode then
+  if FEditorMode = emSimple then
     Exit;
 
   LLastScan := 0;
@@ -4900,7 +4913,7 @@ var
   LIndex: Integer;
   LCodeFoldingRange: TTextEditorCodeFoldingRange;
 begin
-  if not IsCodeFoldingVisible then
+  if not IsCodeFoldingRangesNeeded then
     Exit;
 
   FCodeFoldings.Exists := False;
@@ -7383,7 +7396,7 @@ var
     LText: string;
     LCommentPosition, LBlockCommentPosition: TCommentPositionsRec;
   begin
-    if not FHighlighter.Loaded or FSimpleMode then
+    if not FHighlighter.Loaded or (FEditorMode = emSimple) then
       Exit;
 
     LInBlockComment := False;
@@ -7802,7 +7815,7 @@ begin
   if Visible then
     CreateLineNumbersCache(True);
 
-  if IsCodeFoldingVisible then
+  if IsCodeFoldingRangesNeeded then
   begin
     ScanCodeFoldingRanges;
     CodeFoldingResetCaches;
@@ -7888,7 +7901,7 @@ begin
   begin
     FCodeFoldings.MouseOverGutter := False;
 
-    if FCodeFolding.Visible and FCodeFolding.AutoHide then
+    if IsCodeFoldingVisible and FCodeFolding.AutoHide then
       Invalidate;
   end;
 end;
@@ -7905,6 +7918,22 @@ begin
 
     Invalidate;
   end;
+end;
+
+procedure TCustomTextEditor.MatchingPairsChanged(ASender: TObject); //FI:O804 Method parameter is declared but never used
+begin
+  if csLoading in ComponentState then
+    Exit;
+
+  if IsCodeFoldingRangesNeeded and not IsCodeFoldingVisible and (FCodeFoldings.AllRanges.AllCount = 0) then
+    InitCodeFolding;
+
+  if FMatchingPairs.Active then
+    ScanMatchingPair
+  else
+    ClearMatchingPair;
+
+  Invalidate;
 end;
 
 procedure TCustomTextEditor.MinimapChanged(ASender: TObject); //FI:O804 Method parameter is declared but never used
@@ -9478,7 +9507,7 @@ const
   end;
 
 begin
-  if FSimpleMode or not Assigned(FLineNumbers.Cache) or not IsCodeFoldingVisible or (FLines.Count <= 1) or FHighlighter.Loading then
+  if (FEditorMode = emSimple) or not Assigned(FLineNumbers.Cache) or not IsCodeFoldingRangesNeeded or (FLines.Count <= 1) or FHighlighter.Loading then
     Exit;
 
   if FCodeFolding.TextFolding.Active then
@@ -9975,23 +10004,39 @@ begin
   Invalidate;
 end;
 
-procedure TCustomTextEditor.SetSimpleMode(const AValue: Boolean);
+procedure TCustomTextEditor.SetEditorMode(const AValue: TTextEditorMode);
+var
+  LOldMode: TTextEditorMode;
 begin
-  if FSimpleMode <> AValue then
+  if FEditorMode <> AValue then
   begin
-    FSimpleMode := AValue;
+    LOldMode := FEditorMode;
+    FEditorMode := AValue;
 
-    if FFile.Loaded then
-    begin
-      if FSimpleMode then
-        ClearCodeFolding
-      else
-      if FHighlighter.Loaded then
-      begin
-        RescanHighlighterRanges;
-        InitCodeFolding;
-      end;
+    if csLoading in ComponentState then
+      Exit;
+
+    case FEditorMode of
+      emSimple, emCompare:
+        begin
+          ClearCodeFolding;
+          ClearMatchingPair;
+        end;
+      emNormal:
+        if FHighlighter.Loaded then
+        begin
+          if LOldMode = emSimple then
+            RescanHighlighterRanges;
+
+          InitCodeFolding;
+        end;
     end;
+
+    FLeftMarginWidth := GetLeftMarginWidth;
+    FScrollHelper.PageWidth := GetScrollPageWidth;
+
+    if HandleAllocated then
+      UpdateScrollBars;
 
     Invalidate;
   end;
@@ -10483,7 +10528,12 @@ begin
     if FWordWrap.Active then
     begin
       FScrollHelper.HorizontalPosition := 0;
-      ShowScrollBar(Handle, SB_HORZ, False);
+
+      if FScrollHelper.HorizontalShown then
+      begin
+        ShowScrollBar(Handle, SB_HORZ, False);
+        FScrollHelper.HorizontalShown := False;
+      end;
     end
     else
     begin
@@ -10520,20 +10570,25 @@ begin
 
         LVisible := FScrollHelper.HorizontalVisible and (FScroll.Bars in [ssBoth, ssHorizontal]);
 
-        ShowScrollBar(Handle, SB_HORZ, LVisible);
+        if LVisible <> FScrollHelper.HorizontalShown then
+        begin
+          ShowScrollBar(Handle, SB_HORZ, LVisible);
+          FScrollHelper.HorizontalShown := LVisible;
+        end;
 
         if LVisible then
-          SetScrollInfo(Handle, SB_HORZ, LScrollInfo, True);
-
-        EnableScrollBar(Handle, SB_HORZ, ESB_ENABLE_BOTH);
-
-        if soAutoDisableScrollButtons in FScroll.Options then
         begin
-          if LScrollInfo.nPos = 0 then
-            EnableScrollBar(Handle, SB_HORZ, ESB_DISABLE_LEFT)
-          else
-          if LScrollInfo.nPos + Integer(LScrollInfo.nPage) >= LScrollInfo.nMax then
-            EnableScrollBar(Handle, SB_HORZ, ESB_DISABLE_RIGHT);
+          SetScrollInfo(Handle, SB_HORZ, LScrollInfo, True);
+          EnableScrollBar(Handle, SB_HORZ, ESB_ENABLE_BOTH);
+
+          if soAutoDisableScrollButtons in FScroll.Options then
+          begin
+            if LScrollInfo.nPos = 0 then
+              EnableScrollBar(Handle, SB_HORZ, ESB_DISABLE_LEFT)
+            else
+            if LScrollInfo.nPos + Integer(LScrollInfo.nPage) >= LScrollInfo.nMax then
+              EnableScrollBar(Handle, SB_HORZ, ESB_DISABLE_RIGHT);
+          end;
         end;
       end;
     end;
@@ -10574,25 +10629,41 @@ begin
 
       LVisible := FScrollHelper.VerticalVisible and (FScroll.Bars in [ssBoth, ssVertical]);
 
-      ShowScrollBar(Handle, SB_VERT, LVisible);
+      if LVisible <> FScrollHelper.VerticalShown then
+      begin
+        ShowScrollBar(Handle, SB_VERT, LVisible);
+        FScrollHelper.VerticalShown := LVisible;
+      end;
 
       if LVisible then
-        SetScrollInfo(Handle, SB_VERT, LScrollInfo, True);
-
-      EnableScrollBar(Handle, SB_VERT, ESB_ENABLE_BOTH);
-
-      if soAutoDisableScrollButtons in FScroll.Options then
       begin
-        if LScrollInfo.nPos = 0 then
-          EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_UP)
-        else
-        if LScrollInfo.nPos + Integer(LScrollInfo.nPage) >= LScrollInfo.nMax then
-          EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_DOWN);
+        SetScrollInfo(Handle, SB_VERT, LScrollInfo, True);
+        EnableScrollBar(Handle, SB_VERT, ESB_ENABLE_BOTH);
+
+        if soAutoDisableScrollButtons in FScroll.Options then
+        begin
+          if LScrollInfo.nPos = 0 then
+            EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_UP)
+          else
+          if LScrollInfo.nPos + Integer(LScrollInfo.nPage) >= LScrollInfo.nMax then
+            EnableScrollBar(Handle, SB_VERT, ESB_DISABLE_DOWN);
+        end;
       end;
     end;
   end
   else
+  if FScrollHelper.HorizontalShown or FScrollHelper.VerticalShown then
+  begin
     ShowScrollBar(Handle, SB_BOTH, False);
+    FScrollHelper.HorizontalShown := False;
+    FScrollHelper.VerticalShown := False;
+
+    { Force a full reapply when content returns }
+    FScrollHelper.LastHorizontalMax := -1;
+    FScrollHelper.LastHorizontalPosition := -1;
+    FScrollHelper.LastVerticalMax := -1;
+    FScrollHelper.LastVerticalPosition := -1;
+  end;
 end;
 
 procedure TCustomTextEditor.UpdateWordWrap(const AValue: Boolean);
@@ -11336,6 +11407,13 @@ procedure TCustomTextEditor.CreateWnd;
 begin
   inherited;
 
+  FScrollHelper.HorizontalShown := False;
+  FScrollHelper.VerticalShown := False;
+  FScrollHelper.LastHorizontalMax := -1;
+  FScrollHelper.LastHorizontalPosition := -1;
+  FScrollHelper.LastVerticalMax := -1;
+  FScrollHelper.LastVerticalPosition := -1;
+
   if (eoDropFiles in FOptions) and not (csDesigning in ComponentState) then
     DragAcceptFiles(Handle, True);
 end;
@@ -11348,7 +11426,7 @@ begin
   Winapi.Windows.GetCursorPos(LCursorPoint);
   LCursorPoint := ScreenToClient(LCursorPoint);
 
-  LTextLinesLeft := FLeftMargin.GetWidth + FCodeFolding.GetWidth;
+  LTextLinesLeft := FLeftMargin.GetWidth + GetCodeFoldingWidth;
   LTextLinesRight := Width;
 
   if FMinimap.Align = maLeft then
@@ -11767,8 +11845,6 @@ begin
 
     if Assigned(LUndoItem) then
     begin
-      AutoCursor;
-
       repeat
         UndoItem;
 
@@ -11861,7 +11937,7 @@ procedure TCustomTextEditor.DoOnCommandProcessed(ACommand: TTextEditorCommand; c
 var
   LTextPosition: TTextEditorTextPosition;
 begin
-  if IsCodeFoldingVisible then
+  if IsCodeFoldingRangesNeeded then
   begin
     LTextPosition := FPosition.Text;
 
@@ -12005,7 +12081,7 @@ begin
         ShowBookmarkColorsPopup;
   end;
 
-  LCodeFoldingRegion := (X >= FLeftMarginWidth - FCodeFolding.GetWidth) and (X <= FLeftMarginWidth);
+  LCodeFoldingRegion := (X >= FLeftMarginWidth - GetCodeFoldingWidth) and (X <= FLeftMarginWidth);
 
   if IsCodeFoldingVisible and LCodeFoldingRegion and (FLines.Count > 0) then
   begin
@@ -12419,7 +12495,7 @@ begin
       Exit;
   end;
 
-  if IsCodeFoldingVisible and FCodeFoldings.Rescan then
+  if IsCodeFoldingRangesNeeded and FCodeFoldings.Rescan then
     FCodeFoldings.DelayTimer.Restart;
 end;
 
@@ -12453,7 +12529,7 @@ begin
     Invalidate;
   end;
 
-  if IsCodeFoldingVisible and FCodeFoldings.Rescan then
+  if IsCodeFoldingRangesNeeded and FCodeFoldings.Rescan then
     FCodeFoldings.DelayTimer.Restart;
 end;
 
@@ -12568,7 +12644,7 @@ var
   LIsWord: Boolean;
   LPTextPosition: PTextEditorTextPosition;
 begin
-  if FSimpleMode then
+  if FEditorMode = emSimple then
     Exit;
 
   LCommentsFound := FHighlighter.Comments.BlockCommentsFound or FHighlighter.Comments.LineCommentsFound;
@@ -12675,7 +12751,7 @@ begin
   if Assigned(FEvents.OnLinesDeleted) then
     FEvents.OnLinesDeleted(Self, LIndex, ACount);
 
-  if IsCodeFoldingVisible then
+  if IsCodeFoldingRangesNeeded then
     CodeFoldingLinesDeleted(LIndex + 1, ACount);
 
   UpdateMarks(FBookmarkList);
@@ -12740,14 +12816,14 @@ begin
 
   if not FLines.Streaming then
   begin
-    if IsCodeFoldingVisible then
+    if IsCodeFoldingRangesNeeded then
       UpdateFoldingRanges(AIndex + 1, ACount);
 
     if Assigned(FHighlighter.BeforePrepare) then
       FHighlighter.SetOption(hoExecuteBeforePrepare, True);
   end;
 
-  if not FSimpleMode and FHighlighter.Loaded and (FLines.Count > 0) then
+  if (FEditorMode <> emSimple) and FHighlighter.Loaded and (FLines.Count > 0) then
   begin
     LLastScan := AIndex;
 
@@ -12778,7 +12854,7 @@ begin
   if FLines.Updating then
     Exit;
 
-  if not FSimpleMode and FHighlighter.Loaded and (FLines.Count > 0) then
+  if (FEditorMode <> emSimple) and FHighlighter.Loaded and (FLines.Count > 0) then
   begin
     LIndex := AIndex;
 
@@ -12965,10 +13041,10 @@ begin
     end;
   end;
 
-  if not FSimpleMode and not ReadOnly and FSyncEdit.Active or (X + 4 > FLeftMarginWidth) and ((AButton = mbLeft) or (AButton = mbRight)) then
+  if (FEditorMode <> emSimple) and not ReadOnly and FSyncEdit.Active or (X + 4 > FLeftMarginWidth) and ((AButton = mbLeft) or (AButton = mbRight)) then
     LTextPosition := PixelsToTextPosition(X, Y);
 
-  if not FSimpleMode and not ReadOnly and FSyncEdit.Active then
+  if (FEditorMode <> emSimple) and not ReadOnly and FSyncEdit.Active then
   begin
     if FSyncEdit.BlockSelected and not FSyncEdit.IsTextPositionInBlock(LTextPosition) then
       FSyncEdit.Visible := False;
@@ -13285,7 +13361,7 @@ var
   LViewPosition: TTextEditorViewPosition;
   LRowCount, LRow: Integer;
 begin
-  if FCodeFolding.Visible and FCodeFolding.AutoHide then
+  if IsCodeFoldingVisible and FCodeFolding.AutoHide then
     UpdateCodeFoldingGutterHover(X);
 
   if Dragging then
@@ -13600,7 +13676,7 @@ begin
     LDrawRect.Right := Width;
     LDrawRect.Bottom := ClientRect.Height;
 
-    if FSimpleMode then
+    if FEditorMode = emSimple then
     begin
       LDrawRect.Left := FLeftMarginWidth;
       PaintSimpleTextLines(LDrawRect, LLine1, LLine2, False);
@@ -13633,7 +13709,7 @@ begin
       if FRightMargin.Moving then
         PaintRightMarginMove;
 
-      if FRuler.Moving and not FSimpleMode then
+      if FRuler.Moving and (FEditorMode <> emSimple) then
         PaintRulerMove;
 
       if FMouse.IsScrolling then
@@ -13698,7 +13774,7 @@ begin
 
       LSelectionAvailable := GetSelectionAvailable;
 
-      if not FSimpleMode and not FScroll.Dragging and (LDrawRect.Height = FMinimapHelper.BufferBitmap.Height) and
+      if (FEditorMode <> emSimple) and not FScroll.Dragging and (LDrawRect.Height = FMinimapHelper.BufferBitmap.Height) and
         (FLast.TopLine = FLineNumbers.TopLine) and (FLast.LineNumberCount = FLineNumbers.Count) and
         (not LSelectionAvailable or LSelectionAvailable and (FPosition.SelectionStart.Line >= FLineNumbers.TopLine) and
         (FPosition.SelectionEnd.Line <= FLineNumbers.TopLine + FLineNumbers.VisibleCount)) then
@@ -13720,7 +13796,7 @@ begin
         LLine2 := Min(FLineNumbers.Count, LLine1 + ClientRect.Height div Max(FMinimap.CharHeight - 1, 1));
       end;
 
-      if FSimpleMode then
+      if FEditorMode = emSimple then
         PaintSimpleTextLines(LDrawRect, LLine1, LLine2, True)
       else
         PaintTextLines(LDrawRect, LLine1, LLine2, True);
@@ -13758,7 +13834,7 @@ begin
     begin
       LDrawRect := ClientRect;
 
-      LDrawRect.Left := FLeftMarginWidth - FLeftMargin.GetWidth - FCodeFolding.GetWidth;
+      LDrawRect.Left := FLeftMarginWidth - FLeftMargin.GetWidth - GetCodeFoldingWidth;
       LDrawRect.Right := Width - FMinimap.GetWidth - FSearch.Map.GetWidth - 2;
 
       PaintMinimapShadow(Canvas, LDrawRect);
@@ -18183,7 +18259,7 @@ procedure TCustomTextEditor.ScanMatchingPair;
 var
   LViewPosition: TTextEditorViewPosition;
 begin
-  if not FHighlighter.MatchingPairHighlight or FSimpleMode then
+  if not FHighlighter.MatchingPairHighlight or (FEditorMode = emSimple) then
     Exit;
 
   LViewPosition := ViewPosition;
@@ -18895,7 +18971,7 @@ begin
     SetCursor(if LCursorIndex = -1 then 0 else FMouse.ScrollCursors[LCursorIndex])
   end
   else
-  if (LCursorPoint.X > LWidth) and (LCursorPoint.X < LWidth + FLeftMargin.GetWidth + FCodeFolding.GetWidth) then
+  if (LCursorPoint.X > LWidth) and (LCursorPoint.X < LWidth + FLeftMargin.GetWidth + GetCodeFoldingWidth) then
     SetCursor(Screen.Cursors[FLeftMargin.Cursor])
   else
   if FMinimap.Visible and (LCursorPoint.X > LMinimapLeft) and (LCursorPoint.X < LMinimapRight) then
@@ -20797,7 +20873,7 @@ begin
     { Notify hooked command handlers before the command is executed inside of the class }
     NotifyHookedCommandHandlers(False, LCommand, LChar, AData);
 
-    if IsCodeFoldingVisible then
+    if IsCodeFoldingRangesNeeded then
     begin
       FCodeFoldings.Rescan := (LCommand = TKeyCommands.Cut) or (LCommand = TKeyCommands.Paste) or (LCommand = TKeyCommands.DeleteLine) or
         GetSelectionAvailable and (LCommand = TKeyCommands.LineBreak) or
@@ -22163,7 +22239,7 @@ begin
 
     InitCodeFolding;
 
-    if LWordWrapEnabled and not FLines.ShowProgress and not FSimpleMode then
+    if LWordWrapEnabled and not FLines.ShowProgress and (FEditorMode <> emSimple) then
       FWordWrap.Active := LWordWrapEnabled;
 
     SizeOrFontChanged;
@@ -22254,8 +22330,6 @@ begin
 
     if Assigned(LRedoItem) then
     begin
-      AutoCursor;
-
       repeat
         RedoItem;
         LRedoItem := FRedoList.PeekItem;
@@ -22368,7 +22442,7 @@ var
   LLengthCodeFoldingRangeFromLine, LLengthCodeFoldingRangeToLine: Integer;
   LCodeFoldingRange: TTextEditorCodeFoldingRange;
 begin
-  if not IsCodeFoldingVisible then
+  if not IsCodeFoldingRangesNeeded then
     Exit;
 
   FCodeFoldings.Rescan := False;
@@ -23021,10 +23095,7 @@ begin
 
     DeflateMinimapAndSearchMapRect(LRect);
 
-    Inc(LRect.Left, FLeftMargin.GetWidth);
-
-    if not FSimpleMode then
-      Inc(LRect.Left, FCodeFolding.GetWidth);
+    Inc(LRect.Left, FLeftMargin.GetWidth + GetCodeFoldingWidth);
 
     SetCaretPos(LCaretPoint.X, LCaretPoint.Y);
 

@@ -176,13 +176,6 @@ begin
   FFrameTextCompare.EditorCompareLeft.Highlighter.LoadFromFile(LFileName);
   FFrameTextCompare.EditorCompareRight.Highlighter.LoadFromFile(LFileName);
 
-  { The import turns code folding on when the highlighter defines fold regions.
-
-    Folding cannot be active in the compare editors - the aligned view inserts placeholder lines behind the editor's back, which would
-    desync the fold ranges. }
-  FFrameTextCompare.EditorCompareLeft.CodeFolding.Visible := False;
-  FFrameTextCompare.EditorCompareRight.CodeFolding.Visible := False;
-
   if FFileName.IsEmpty then
     FFrameTextEditor.TextEditor.Lines.Text := FFrameTextEditor.TextEditor.Highlighter.Sample;
 
@@ -372,8 +365,6 @@ begin
   end;
 
   FDarkStyleEnabled := AValue;
-
-
 
   TStyleManager.TrySetStyle(if AValue then 'Windows11 Modern Dark' else 'Windows');
 end;

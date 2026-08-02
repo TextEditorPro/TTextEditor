@@ -96,6 +96,7 @@ type
     property Cursor;
     property DataField;
     property DataSource;
+    property EditorMode;
     property Enabled;
     property Field;
     property FileMaxReadBufferSize;
@@ -179,7 +180,6 @@ type
     property Search;
     property Selection;
     property ShowHint;
-    property SimpleMode;
     property SpecialChars;
     property SyncEdit;
     property TabOrder;

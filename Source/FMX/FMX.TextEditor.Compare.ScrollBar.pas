@@ -248,7 +248,11 @@ begin
   FEditorLeft := AEditor;
 
   if Assigned(FEditorLeft) then
+  begin
     FEditorLeft.FreeNotification(Self);
+
+    FEditorLeft.EditorMode := emCompare;
+  end;
 
   Invalidate;
 end;
@@ -258,7 +262,11 @@ begin
   FEditorRight := AEditor;
 
   if Assigned(FEditorRight) then
+  begin
     FEditorRight.FreeNotification(Self);
+
+    FEditorRight.EditorMode := emCompare;
+  end;
 
   Invalidate;
 end;

@@ -866,12 +866,6 @@ begin
     TextEditor.Highlighter.LoadFromFile(LFileName);
     EditorCompareLeft.Highlighter.LoadFromFile(LFileName);
     EditorCompareRight.Highlighter.LoadFromFile(LFileName);
-
-    { The import turns code folding on when the highlighter defines fold regions. Folding cannot be active in the
-      compare editors - the aligned view inserts placeholder lines behind the editor's back, which would desync the
-      fold ranges. }
-    EditorCompareLeft.CodeFolding.Visible := False;
-    EditorCompareRight.CodeFolding.Visible := False;
   end;
 
   if FFileName.IsEmpty then

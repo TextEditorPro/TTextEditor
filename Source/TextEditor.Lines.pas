@@ -890,7 +890,8 @@ begin
   if (AIndex < 0) or (AIndex > FCount) then
     ListIndexOutOfBounds(AIndex);
 {$ENDIF}
-  SetCapacity(FCount + 1);
+  if FCount = FCapacity then
+    Grow;
 
   if AIndex < FCount then
     System.Move(FItems^[AIndex], FItems^[AIndex + 1], (FCount - AIndex) * TEXT_EDITOR_STRING_RECORD_SIZE);

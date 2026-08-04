@@ -13995,11 +13995,22 @@ procedure TCustomTextEditor.PaintMinimap(const AClipRect: TRectF; const AFirstLi
 var
   LRow, LTextLine, LIndex: Integer;
   LCharWidth, LCharHeight, LTop, LLeft: Single;
+  LBackgroundColor, LBarColor: TAlphaColor;
   LRowRect: TRectF;
   LSelectionStartPosition, LSelectionEndPosition: TTextEditorTextPosition;
   LSearchItem: TTextEditorSearchItem;
   LShowBookmarks: Boolean;
   LMaxColumns: Integer;
+
+  function BlendedBarColor(const AForeground, ABackground: TAlphaColor): TAlphaColor;
+  const
+    CBlend = 150;
+  begin
+    Result := MakeColor(
+      (TAlphaColorRec(AForeground).R * CBlend + TAlphaColorRec(ABackground).R * (255 - CBlend)) div 255,
+      (TAlphaColorRec(AForeground).G * CBlend + TAlphaColorRec(ABackground).G * (255 - CBlend)) div 255,
+      (TAlphaColorRec(AForeground).B * CBlend + TAlphaColorRec(ABackground).B * (255 - CBlend)) div 255);
+  end;
 
   procedure PaintRowBars(const AText: string; const ATop: Single);
   var
@@ -14047,8 +14058,11 @@ var
   end;
 
 begin
+  LBackgroundColor := if FColors.MinimapBackground <> TAlphaColors.Null then FColors.MinimapBackground else FColors.EditorBackground;
+  LBarColor := BlendedBarColor(FColors.EditorForeground, LBackgroundColor);
+
   Canvas.Fill.Kind := TBrushKind.Solid;
-  Canvas.Fill.Color := if FColors.MinimapBackground <> TAlphaColors.Null then FColors.MinimapBackground else FColors.EditorBackground;
+  Canvas.Fill.Color := LBackgroundColor;
   Canvas.FillRect(AClipRect, 0, 0, [], 1);
 
   LCharWidth := Max(FPaintHelper.CharWidth, 0.5);
@@ -14094,7 +14108,7 @@ begin
       Break;
     end;
 
-    Canvas.Fill.Color := FColors.EditorForeground;
+    Canvas.Fill.Color := LBarColor;
 
     PaintRowBars(FLines[LTextLine - 1], LTop);
   end;

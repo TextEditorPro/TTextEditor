@@ -16,6 +16,7 @@ type
     FOnChange: TNotifyEvent;
     FOptions: TTextEditorMinimapOptions;
     FShadow: TTextEditorMinimapShadow;
+    FStyle: TTextEditorMinimapStyle;
     FTopLine: Integer;
     FVisible: Boolean;
     FVisibleLineCount: Integer;
@@ -23,6 +24,7 @@ type
     procedure DoChange;
     procedure SetAlign(const AValue: TTextEditorMinimapAlign);
     procedure SetOnChange(const AValue: TNotifyEvent);
+    procedure SetStyle(const AValue: TTextEditorMinimapStyle);
     procedure SetVisible(const AValue: Boolean);
     procedure SetWidth(const AValue: Integer);
   public
@@ -43,6 +45,7 @@ type
     property Indicator: TTextEditorMinimapIndicator read FIndicator write FIndicator;
     property Options: TTextEditorMinimapOptions read FOptions write FOptions default [moMinimapDragsScrollBar];
     property Shadow: TTextEditorMinimapShadow read FShadow write FShadow;
+    property Style: TTextEditorMinimapStyle read FStyle write SetStyle default msText;
     property Visible: Boolean read FVisible write SetVisible default False;
     property Width: Integer read FWidth write SetWidth default 140;
   end;
@@ -60,6 +63,7 @@ begin
   FClicked := False;
   FCursor := crArrow;
   FOptions := [moMinimapDragsScrollBar];
+  FStyle := msText;
   FTopLine := 1;
   FVisible := False;
   FWidth := 140;
@@ -83,6 +87,7 @@ begin
   begin
     Self.FAlign := FAlign;
     Self.FShadow.Assign(FShadow);
+    Self.FStyle := FStyle;
     Self.FOptions := FOptions;
     Self.FVisible := FVisible;
     Self.FWidth := FWidth;
@@ -126,6 +131,16 @@ begin
   if FAlign <> AValue then
   begin
     FAlign := AValue;
+
+    DoChange;
+  end;
+end;
+
+procedure TTextEditorMinimap.SetStyle(const AValue: TTextEditorMinimapStyle);
+begin
+  if FStyle <> AValue then
+  begin
+    FStyle := AValue;
 
     DoChange;
   end;

@@ -31,6 +31,7 @@ The old version can be found at https://github.com/TextEditorPro/TTextEditor-Leg
 - Macro recorder
 - Matching pairs
 - Minimap
+  - Text or simple style
 - Multi edit
 - Non-blinking caret
 - Partial load

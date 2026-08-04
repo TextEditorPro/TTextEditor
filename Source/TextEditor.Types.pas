@@ -259,6 +259,7 @@ type
   TTextEditorMinimapOption = (moMinimapDragsScrollBar, moShowBookmarks, moShowSearchResults, moShowSelection, moShowSpecialChars);
   TTextEditorMinimapOptions = set of TTextEditorMinimapOption;
   TTextEditorMinimapAlign = (maLeft, maRight);
+  TTextEditorMinimapStyle = (msText, msSimple);
   TTextEditorMinimapIndicatorOption = (ioInvertBlending, ioShowBorder, ioUseBlending);
   TTextEditorMinimapIndicatorOptions = set of TTextEditorMinimapIndicatorOption;
 

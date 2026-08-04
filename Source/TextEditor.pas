@@ -767,6 +767,7 @@ type
     procedure PaintMacroState;
     procedure PaintMinimapIndicator(const AClipRect: TRect);
     procedure PaintMinimapShadow(const ACanvas: TCanvas; const AClipRect: TRect);
+    procedure PaintMinimapSimple(const AClipRect: TRect; const AFirstLine, ALastLine: Integer);
     procedure PaintMouseScrollPoint;
     procedure PaintProgress(Sender: TObject);
     procedure PaintProgressBar;
@@ -13779,41 +13780,56 @@ begin
 
       LSelectionAvailable := GetSelectionAvailable;
 
-      if (FEditorMode <> emSimple) and not FScroll.Dragging and (LDrawRect.Height = FMinimapHelper.BufferBitmap.Height) and
-        (FLast.TopLine = FLineNumbers.TopLine) and (FLast.LineNumberCount = FLineNumbers.Count) and
-        (not LSelectionAvailable or LSelectionAvailable and (FPosition.SelectionStart.Line >= FLineNumbers.TopLine) and
-        (FPosition.SelectionEnd.Line <= FLineNumbers.TopLine + FLineNumbers.VisibleCount)) then
-      begin
-        LLine1 := FLineNumbers.TopLine;
-        LLine2 := Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount);
-
-        BitBlt(Canvas.Handle, LDrawRect.Left, LDrawRect.Top, LDrawRect.Width, LDrawRect.Height,
-          FMinimapHelper.BufferBitmap.Canvas.Handle, 0, 0, SRCCOPY);
-
-        LDrawRect.Top := (FLineNumbers.TopLine - FMinimap.TopLine) * FMinimap.CharHeight;
-
-        if IsRulerVisible then
-          Inc(LDrawRect.Top, FRuler.Height);
-      end
-      else
+      if FMinimap.Style = msSimple then
       begin
         LLine1 := Max(FMinimap.TopLine, 1);
         LLine2 := Min(FLineNumbers.Count, LLine1 + ClientRect.Height div Max(FMinimap.CharHeight - 1, 1));
-      end;
 
-      if FEditorMode = emSimple then
-        PaintSimpleTextLines(LDrawRect, LLine1, LLine2, True)
+        PaintMinimapSimple(LDrawRect, LLine1, LLine2);
+
+        if ioUseBlending in FMinimap.Indicator.Options then
+          PaintMinimapIndicator(LDrawRect);
+
+        FMinimapHelper.BufferBitmap.Height := 0;
+      end
       else
-        PaintTextLines(LDrawRect, LLine1, LLine2, True);
+      begin
+        if (FEditorMode <> emSimple) and not FScroll.Dragging and (LDrawRect.Height = FMinimapHelper.BufferBitmap.Height) and
+          (FLast.TopLine = FLineNumbers.TopLine) and (FLast.LineNumberCount = FLineNumbers.Count) and
+          (not LSelectionAvailable or LSelectionAvailable and (FPosition.SelectionStart.Line >= FLineNumbers.TopLine) and
+          (FPosition.SelectionEnd.Line <= FLineNumbers.TopLine + FLineNumbers.VisibleCount)) then
+        begin
+          LLine1 := FLineNumbers.TopLine;
+          LLine2 := Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount);
 
-      if ioUseBlending in FMinimap.Indicator.Options then
-        PaintMinimapIndicator(LDrawRect);
+          BitBlt(Canvas.Handle, LDrawRect.Left, LDrawRect.Top, LDrawRect.Width, LDrawRect.Height,
+            FMinimapHelper.BufferBitmap.Canvas.Handle, 0, 0, SRCCOPY);
 
-      FMinimapHelper.BufferBitmap.Width := LDrawRect.Width;
-      FMinimapHelper.BufferBitmap.Height := LDrawRect.Height;
+          LDrawRect.Top := (FLineNumbers.TopLine - FMinimap.TopLine) * FMinimap.CharHeight;
 
-      BitBlt(FMinimapHelper.BufferBitmap.Canvas.Handle, 0, 0, LDrawRect.Width, LDrawRect.Height, Canvas.Handle,
-        LDrawRect.Left, LDrawRect.Top, SRCCOPY);
+          if IsRulerVisible then
+            Inc(LDrawRect.Top, FRuler.Height);
+        end
+        else
+        begin
+          LLine1 := Max(FMinimap.TopLine, 1);
+          LLine2 := Min(FLineNumbers.Count, LLine1 + ClientRect.Height div Max(FMinimap.CharHeight - 1, 1));
+        end;
+
+        if FEditorMode = emSimple then
+          PaintSimpleTextLines(LDrawRect, LLine1, LLine2, True)
+        else
+          PaintTextLines(LDrawRect, LLine1, LLine2, True);
+
+        if ioUseBlending in FMinimap.Indicator.Options then
+          PaintMinimapIndicator(LDrawRect);
+
+        FMinimapHelper.BufferBitmap.Width := LDrawRect.Width;
+        FMinimapHelper.BufferBitmap.Height := LDrawRect.Height;
+
+        BitBlt(FMinimapHelper.BufferBitmap.Canvas.Handle, 0, 0, LDrawRect.Width, LDrawRect.Height, Canvas.Handle,
+          LDrawRect.Left, LDrawRect.Top, SRCCOPY);
+      end;
 
       FPaintHelper.SetBaseFont(FFonts.Text);
     end;
@@ -15212,6 +15228,151 @@ begin
 
   with FMinimapHelper.Shadow.Bitmap do
   AlphaBlend(ACanvas.Handle, LLeft, 0, Width, Height, Canvas.Handle, 0, 0, Width, Height, FMinimapHelper.Shadow.BlendFunction);
+end;
+
+procedure TCustomTextEditor.PaintMinimapSimple(const AClipRect: TRect; const AFirstLine, ALastLine: Integer);
+var
+  LRow, LTextLine, LIndex: Integer;
+  LCharWidth, LCharHeight, LTop, LLeft: Integer;
+  LBackgroundColor, LBarColor: TColor;
+  LSelectionStartPosition, LSelectionEndPosition: TTextEditorTextPosition;
+  LSearchItem: TTextEditorSearchItem;
+  LShowBookmarks: Boolean;
+  LMaxColumns: Integer;
+
+  function BlendedBarColor(const AForeground, ABackground: TColor): TColor;
+  const
+    CBlend = 150;
+  var
+    LForeground, LBackground: Longint;
+  begin
+    LForeground := ColorToRGB(AForeground);
+    LBackground := ColorToRGB(ABackground);
+
+    Result := RGB(
+      (GetRValue(LForeground) * CBlend + GetRValue(LBackground) * (255 - CBlend)) div 255,
+      (GetGValue(LForeground) * CBlend + GetGValue(LBackground) * (255 - CBlend)) div 255,
+      (GetBValue(LForeground) * CBlend + GetBValue(LBackground) * (255 - CBlend)) div 255);
+  end;
+
+  procedure PaintRowBars(const AText: string; const ATop: Integer);
+  var
+    LColumn, LRunStartColumn: Integer;
+    LBottom: Integer;
+
+    procedure PaintRun;
+    begin
+      if LRunStartColumn >= 0 then
+        Canvas.FillRect(Rect(LLeft + LRunStartColumn * LCharWidth, ATop, Min(LLeft + LColumn * LCharWidth, AClipRect.Right - 2), LBottom));
+
+      LRunStartColumn := -1;
+    end;
+
+  begin
+    LBottom := ATop + Max(LCharHeight - 1, 1);
+    LColumn := 0;
+    LRunStartColumn := -1;
+
+    for var LCharIndex := 1 to AText.Length do
+    begin
+      case AText[LCharIndex] of
+        TControlCharacters.Tab:
+          begin
+            PaintRun;
+            LColumn := (LColumn div FTabs.Width + 1) * FTabs.Width;
+          end;
+        TCharacters.Space:
+          begin
+            PaintRun;
+            Inc(LColumn);
+          end;
+      else
+        if LRunStartColumn < 0 then
+          LRunStartColumn := LColumn;
+
+        Inc(LColumn);
+      end;
+
+      if LColumn > LMaxColumns then
+        Break;
+    end;
+
+    PaintRun;
+  end;
+
+begin
+  LBackgroundColor := if FColors.MinimapBackground <> TColors.SysNone then FColors.MinimapBackground else FColors.EditorBackground;
+  LBarColor := BlendedBarColor(FColors.EditorForeground, LBackgroundColor);
+
+  Canvas.Brush.Color := LBackgroundColor;
+  Canvas.FillRect(AClipRect);
+
+  LCharWidth := Max(FPaintHelper.CharWidth, 1);
+  LCharHeight := Max(FMinimap.CharHeight, 1);
+  LLeft := AClipRect.Left + 2;
+  LMaxColumns := (AClipRect.Width - 4) div LCharWidth;
+  LShowBookmarks := (moShowBookmarks in FMinimap.Options) and (FBookmarkList.Count > 0);
+
+  if not (ioUseBlending in FMinimap.Indicator.Options) and (FColors.MinimapVisibleRows <> TColors.SysNone) then
+  begin
+    LTop := AClipRect.Top + (FLineNumbers.TopLine - AFirstLine) * LCharHeight;
+
+    Canvas.Brush.Color := FColors.MinimapVisibleRows;
+    Canvas.FillRect(Rect(AClipRect.Left, LTop, AClipRect.Right, LTop + FLineNumbers.VisibleCount * LCharHeight));
+  end;
+
+  if (moShowSelection in FMinimap.Options) and GetSelectionAvailable then
+  begin
+    LSelectionStartPosition := GetSelectionStartPosition;
+    LSelectionEndPosition := GetSelectionEndPosition;
+
+    LTop := AClipRect.Top + (LSelectionStartPosition.Line + 1 - AFirstLine) * LCharHeight;
+
+    Canvas.Brush.Color := if Focused then FColors.SelectionBackground else FColors.SelectionBackgroundUnfocused;
+    Canvas.FillRect(Rect(AClipRect.Left, Max(LTop, AClipRect.Top), AClipRect.Right,
+      Min(AClipRect.Top + (LSelectionEndPosition.Line + 2 - AFirstLine) * LCharHeight, AClipRect.Bottom)));
+  end;
+
+  for LRow := AFirstLine to ALastLine do
+  begin
+    LTextLine := GetViewTextLineNumber(LRow);
+    LTop := AClipRect.Top + (LRow - AFirstLine) * LCharHeight;
+
+    if LShowBookmarks then
+    for LIndex := 0 to FBookmarkList.Count - 1 do
+    if FBookmarkList.Items[LIndex].Line = LTextLine - 1 then
+    begin
+      Canvas.Brush.Color := FColors.MinimapBookmark;
+      Canvas.FillRect(Rect(AClipRect.Left, LTop, AClipRect.Right, LTop + LCharHeight));
+
+      Break;
+    end;
+
+    Canvas.Brush.Color := LBarColor;
+
+    PaintRowBars(FLines[LTextLine - 1], LTop);
+  end;
+
+  if (moShowSearchResults in FMinimap.Options) and (FSearch.Items.Count > 0) and (FColors.SearchHighlighterBackground <> TColors.SysNone) then
+  begin
+    Canvas.Brush.Color := FColors.SearchHighlighterBackground;
+
+    for LIndex := 0 to FSearch.Items.Count - 1 do
+    begin
+      LSearchItem := PTextEditorSearchItem(FSearch.Items.Items[LIndex])^;
+
+      if LSearchItem.BeginTextPosition.Line + 1 > ALastLine then
+        Break;
+
+      if LSearchItem.BeginTextPosition.Line + 1 >= AFirstLine then
+      begin
+        LTop := AClipRect.Top + (LSearchItem.BeginTextPosition.Line + 1 - AFirstLine) * LCharHeight;
+
+        Canvas.FillRect(Rect(LLeft + (LSearchItem.BeginTextPosition.Char - 1) * LCharWidth, LTop,
+          Min(LLeft + (LSearchItem.EndTextPosition.Char - 1) * LCharWidth, AClipRect.Right - 2), LTop + Max(LCharHeight - 1, 1)));
+      end;
+    end;
+  end;
 end;
 
 procedure TCustomTextEditor.PaintMouseScrollPoint;

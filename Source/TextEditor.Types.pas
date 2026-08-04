@@ -32,9 +32,9 @@ type
   TTextEditorStringRecord = record
     ExpandedLength: Integer;
     Flags: TTextEditorStringFlags;
+    RangeDepth: Word;
     OriginalLineNumber: Integer;
     Range: TTextEditorLinesRange;
-    RangeDepth: Integer;
     TextLine: string;
   end;
 

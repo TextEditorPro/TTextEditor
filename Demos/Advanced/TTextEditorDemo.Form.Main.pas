@@ -664,16 +664,6 @@ begin
       if HandleAllocated then
         RedrawWindow(Handle, nil, 0, RDW_ALLCHILDREN or RDW_INVALIDATE or RDW_UPDATENOW);
 
-      AlphaBlendValue := 0;
-
-      for var LIndex := 1 to 3 do
-      begin
-        Sleep(8);
-        Application.ProcessMessages;
-
-        AlphaBlendValue := AlphaBlendValue + 85;
-      end;
-
       AlphaBlend := False;
     finally
       FWndProcGuardActive := False;

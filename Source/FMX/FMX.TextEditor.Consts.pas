@@ -148,6 +148,7 @@ type
     SysDefault = TAlphaColor($00000001);
     ActiveLineBackground = TAlphaColor($FFFFFAE6);
     ActiveLineBackgroundUnfocused = TAlphaColor($FFF0F0F0);
+    ActiveLineBorder = TAlphaColor($FFB4B4B4);
     ActiveLineForeground = TAlphaColors.Null;
     ActiveLineForegroundUnfocused = TAlphaColors.Null;
     BlockBackground = TAlphaColor($FFFFFFEE);

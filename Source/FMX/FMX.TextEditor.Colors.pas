@@ -1,4 +1,4 @@
-unit FMX.TextEditor.Colors;
+﻿unit FMX.TextEditor.Colors;
 
 interface
 
@@ -10,6 +10,7 @@ type
   strict private
     FActiveLineBackground: TAlphaColor;
     FActiveLineBackgroundUnfocused: TAlphaColor;
+    FActiveLineBorder: TAlphaColor;
     FActiveLineForeground: TAlphaColor;
     FActiveLineForegroundUnfocused: TAlphaColor;
     FBookmarkBlue: TAlphaColor;
@@ -132,6 +133,7 @@ type
     procedure DoChange;
     procedure SetActiveLineBackground(const AValue: TAlphaColor);
     procedure SetActiveLineBackgroundUnfocused(const AValue: TAlphaColor);
+    procedure SetActiveLineBorder(const AValue: TAlphaColor);
     procedure SetActiveLineForeground(const AValue: TAlphaColor);
     procedure SetActiveLineForegroundUnfocused(const AValue: TAlphaColor);
     procedure SetBookmarkBlue(const AValue: TAlphaColor);
@@ -256,6 +258,7 @@ type
   published
     property ActiveLineBackground: TAlphaColor read FActiveLineBackground write SetActiveLineBackground default TDefaultColors.ActiveLineBackground;
     property ActiveLineBackgroundUnfocused: TAlphaColor read FActiveLineBackgroundUnfocused write SetActiveLineBackgroundUnfocused default TDefaultColors.ActiveLineBackgroundUnfocused;
+    property ActiveLineBorder: TAlphaColor read FActiveLineBorder write SetActiveLineBorder default TDefaultColors.ActiveLineBorder;
     property ActiveLineForeground: TAlphaColor read FActiveLineForeground write SetActiveLineForeground default TDefaultColors.ActiveLineForeground;
     property ActiveLineForegroundUnfocused: TAlphaColor read FActiveLineForegroundUnfocused write SetActiveLineForegroundUnfocused default TDefaultColors.ActiveLineForegroundUnfocused;
     property BookmarkBlue: TAlphaColor read FBookmarkBlue write SetBookmarkBlue default TDefaultColors.BookmarkBlue;
@@ -392,6 +395,7 @@ begin
   { Active line }
   FActiveLineBackground := TDefaultColors.ActiveLineBackground;
   FActiveLineBackgroundUnfocused := TDefaultColors.ActiveLineBackgroundUnfocused;
+  FActiveLineBorder := TDefaultColors.ActiveLineBorder;
   FActiveLineForeground := TDefaultColors.ActiveLineForeground;
   FActiveLineForegroundUnfocused := TDefaultColors.ActiveLineForegroundUnfocused;
   { Bookmarks }
@@ -539,6 +543,7 @@ begin
     { Active line }
     Self.FActiveLineBackground := FActiveLineBackground;
     Self.FActiveLineBackgroundUnfocused := FActiveLineBackgroundUnfocused;
+    Self.FActiveLineBorder := FActiveLineBorder;
     Self.FActiveLineForeground := FActiveLineForeground;
     Self.FActiveLineForegroundUnfocused := FActiveLineForegroundUnfocused;
     { Bookmarks }
@@ -701,6 +706,13 @@ end;
 procedure TTextEditorColors.SetActiveLineBackgroundUnfocused(const AValue: TAlphaColor);
 begin
   FActiveLineBackgroundUnfocused := SetColorDef(AValue, TDefaultColors.ActiveLineBackgroundUnfocused);
+
+  DoChange;
+end;
+
+procedure TTextEditorColors.SetActiveLineBorder(const AValue: TAlphaColor);
+begin
+  FActiveLineBorder := SetColorDef(AValue, TDefaultColors.ActiveLineBorder);
 
   DoChange;
 end;

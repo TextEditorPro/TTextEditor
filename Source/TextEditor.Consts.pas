@@ -145,6 +145,7 @@ type
   const
     ActiveLineBackground = $00E6FAFF;
     ActiveLineBackgroundUnfocused = $00F0F0F0;
+    ActiveLineBorder = $00B4B4B4;
     ActiveLineForeground = TColors.SysNone;
     ActiveLineForegroundUnfocused = TColors.SysNone;
     BlockBackground = $00EEFFFF;

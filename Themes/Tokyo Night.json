@@ -3,6 +3,7 @@
     "Colors": {
       "ActiveLineBackground": "$002E201E",
       "ActiveLineBackgroundUnfocused": "$002E201E",
+      "ActiveLineBorder": "$00464646",
       "ActiveLineForeground": "clNone",
       "ActiveLineForegroundUnfocused": "clNone",
       "BookmarkYellow": "$004FD5FF",

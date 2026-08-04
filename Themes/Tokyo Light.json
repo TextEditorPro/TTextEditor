@@ -3,6 +3,7 @@
     "Colors": {
       "ActiveLineBackground": "$00E3DEDC",
       "ActiveLineBackgroundUnfocused": "$00E8E2E1",
+      "ActiveLineBorder": "$00B4B4B4",
       "ActiveLineForeground": "clNone",
       "ActiveLineForegroundUnfocused": "clNone",
       "CaretMultiEditBackground": "$004D3C36",

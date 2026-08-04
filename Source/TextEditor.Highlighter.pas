@@ -543,7 +543,6 @@ procedure TTextEditorHighlighter.SetRange(const AValue: Pointer);
 begin
   FRange := TTextEditorRange(AValue);
 
-  { The caller restores NestedRangeDepth from the line state afterwards when needed }
   FNestedRangeDepth := 0;
 end;
 
@@ -602,7 +601,6 @@ begin
   if LTokenType <> ttUnspecified then
     Result := LTokenType
   else
-  { keyword token type }
   begin
     GetToken(LToken);
 

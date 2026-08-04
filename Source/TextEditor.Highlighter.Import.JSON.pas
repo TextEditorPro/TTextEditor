@@ -160,6 +160,7 @@ begin
       begin
         ActiveLineBackground := LColorsObject['ActiveLineBackground'].ToColor;
         ActiveLineBackgroundUnfocused := LColorsObject['ActiveLineBackgroundUnfocused'].ToColor;
+        ActiveLineBorder := LColorsObject['ActiveLineBorder'].ToColor;
         ActiveLineForeground := LColorsObject['ActiveLineForeground'].ToColor;
         ActiveLineForegroundUnfocused := LColorsObject['ActiveLineForegroundUnfocused'].ToColor;
         BookmarkBlue := LColorsObject['BookmarkBlue'].ToColor;

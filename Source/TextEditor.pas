@@ -468,11 +468,11 @@ type
     function GetSelectedRow(const AY: Integer): Integer;
     function GetSelectedText: string;
     function GetSelectionAvailable: Boolean;
-    function GetSelectionStartPosition: TTextEditorTextPosition;
     function GetSelectionEndPosition: TTextEditorTextPosition;
     function GetSelectionLength: Integer;
     function GetSelectionLineCount: Integer;
     function GetSelectionStart: Integer;
+    function GetSelectionStartPosition: TTextEditorTextPosition;
     function GetTabText(var ATextPosition: TTextEditorTextPosition): string;
     function GetText: string;
     function GetTextBetween(const ATextBeginPosition: TTextEditorTextPosition; const ATextEndPosition: TTextEditorTextPosition): string;
@@ -631,13 +631,14 @@ type
     procedure SetFileMaxReadBufferSize(const AValue: Integer);
     procedure SetFileMinShowProgressSize(const AValue: Int64);
     procedure SetFullFilename(const AName: string);
-    procedure SetHighlighterRange(const ALine: Integer);
     procedure SetHighlightLine(const AValue: TTextEditorHighlightLine);
+    procedure SetHighlighterRange(const ALine: Integer);
     procedure SetHorizontalScrollPosition(const AValue: Integer);
     procedure SetKeyCommands(const AValue: TTextEditorKeyCommands);
     procedure SetLeftMargin(const AValue: TTextEditorLeftMargin);
-    procedure SetMacroState(const AValue: TTextEditorMacroState);
     procedure SetLine(const ALine: Integer; const ALineText: string); inline;
+    procedure SetLineSpacing(const AValue: Integer);
+    procedure SetMacroState(const AValue: TTextEditorMacroState);
     procedure SetModified(const AValue: Boolean);
     procedure SetMouseScrollCursors(const AIndex: Integer; const AValue: HCursor);
     procedure SetOppositeColors;
@@ -755,6 +756,7 @@ type
     procedure MouseUp(AButton: TMouseButton; AShift: TShiftState; X, Y: Integer); override;
     procedure NotifyHookedCommandHandlers(const AAfterProcessing: Boolean; var ACommand: TTextEditorCommand; var AChar: Char; const AData: Pointer);
     procedure Paint; override;
+    procedure PaintActiveLineBorder(const AClipRect: TRect);
     procedure PaintBorder;
     procedure PaintCaret;
     procedure PaintCaretBlock(const AViewPosition: TTextEditorViewPosition);
@@ -1016,7 +1018,7 @@ type
     property LeftMargin: TTextEditorLeftMargin read FLeftMargin write SetLeftMargin;
     property LineHeight: Integer read GetLineHeight;
     property LineNumbersCount: Integer read FLineNumbers.Count;
-    property LineSpacing: Integer read FLineSpacing write FLineSpacing default TTextEditorDefaults.LineSpacing;
+    property LineSpacing: Integer read FLineSpacing write SetLineSpacing default TTextEditorDefaults.LineSpacing;
     property Lines: TTextEditorLines read FLines;
     property MacroRecorder: TTextEditorMacroRecorder read FMacroRecorder write FMacroRecorder;
     property MacroState: TTextEditorMacroState read FMacroState write SetMacroState;
@@ -2062,6 +2064,58 @@ begin
       (FLineNumbers.TopLine / Max(Max(FLineNumbers.Count, 1) - FLineNumbers.VisibleCount, 1)))), 1);
 
     Repaint;
+  end;
+end;
+
+procedure TCustomTextEditor.PaintActiveLineBorder(const AClipRect: TRect);
+var
+  LColor: TColor;
+  LLine, LFirstRow, LLastRow, LLastVisibleRow, LLineHeight, LTop, LRight, LThickness, LIndex: Integer;
+  LRect: TRect;
+begin
+  LColor := FColors.ActiveLineBorder;
+
+  if LColor = TColors.SysNone then
+    Exit;
+
+  LLine := FPosition.Text.Line;
+  LFirstRow := FViewPosition.Row;
+  LLastRow := LFirstRow;
+  LLastVisibleRow := FLineNumbers.TopLine + FLineNumbers.VisibleCount;
+
+  if FWordWrap.Active then
+  begin
+    while (LFirstRow > FLineNumbers.TopLine) and (GetViewTextLineNumber(LFirstRow - 1) - 1 = LLine) do
+      Dec(LFirstRow);
+
+    while (LLastRow < LLastVisibleRow) and (GetViewTextLineNumber(LLastRow + 1) - 1 = LLine) do
+      Inc(LLastRow);
+  end;
+
+  LLineHeight := GetLineHeight;
+  LTop := (LFirstRow - FLineNumbers.TopLine) * LLineHeight;
+
+  if IsRulerVisible then
+    Inc(LTop, FRuler.Height);
+
+  LRight := ClientRect.Right;
+
+  if FMinimap.Align = maRight then
+    Dec(LRight, FMinimap.GetWidth);
+
+  if FSearch.Map.Align = saRight then
+    Dec(LRight, FSearch.Map.GetWidth);
+
+  LRect := Rect(FLeftMarginWidth, LTop, LRight, LTop + (LLastRow - LFirstRow + 1) * LLineHeight);
+
+  Canvas.Brush.Color := LColor;
+
+  LThickness := Max(1, FPixelsPerInch div 96);
+
+  for LIndex := 1 to LThickness do
+  begin
+    Canvas.FrameRect(LRect);
+    InflateRect(LRect, -1, -1);
   end;
 end;
 
@@ -9886,6 +9940,16 @@ begin
     FMouse.ScrollCursors[AIndex] := AValue;
 end;
 
+procedure TCustomTextEditor.SetLineSpacing(const AValue: Integer);
+begin
+  if FLineSpacing <> AValue then
+  begin
+    FLineSpacing := AValue;
+
+    Invalidate;
+  end;
+end;
+
 procedure TCustomTextEditor.SetMacroState(const AValue: TTextEditorMacroState);
 begin
   if FMacroState <> AValue then
@@ -13926,7 +13990,8 @@ begin
 
     LRect.Bottom := LRect.Top + LLineHeight;
 
-    if FActiveLine.Visible and (FColors.CodeFoldingActiveLineBackground <> TColors.SysNone) and
+    if FActiveLine.Visible and (aloHighlightLeftMargin in FActiveLine.Options) and
+      (FColors.CodeFoldingActiveLineBackground <> TColors.SysNone) and
       (not Assigned(FMultiEdit.Carets) and (FPosition.Text.Line + 1 = LLine) or Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine)) then
     begin
       Canvas.Brush.Color := if Focused then FColors.CodeFoldingActiveLineBackground else FColors.CodeFoldingActiveLineBackgroundUnfocused;
@@ -14668,7 +14733,8 @@ var
 
         FPaintHelper.SetBackgroundColor(FColors.LeftMarginBackground);
 
-        if FActiveLine.Visible and (not Assigned(FMultiEdit.Carets) and (LLine = LCaretY) or
+        if FActiveLine.Visible and (aloHighlightLeftMargin in FActiveLine.Options) and
+          (not Assigned(FMultiEdit.Carets) and (LLine = LCaretY) or
           Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine)) and (FColors.LeftMarginActiveLineBackground <> TColors.SysNone) then
         begin
           if Focused then
@@ -14840,9 +14906,10 @@ var
       begin
         LLine := GetViewTextLineNumber(LIndex);
 
-        if FActiveLine.Visible and (FColors.LeftMarginActiveLineBackground <> TColors.SysNone) and
+        if FActiveLine.Visible and (aloHighlightLeftMargin in FActiveLine.Options) and
+          ((FColors.LeftMarginActiveLineBackground <> TColors.SysNone) and
           not Assigned(FMultiEdit.Carets) and (LLine = FPosition.Text.Line + 1) or
-          Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine) then
+          Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine)) then
         begin
           SetPanelActiveLineRect;
 
@@ -15263,7 +15330,8 @@ var
     procedure PaintRun;
     begin
       if LRunStartColumn >= 0 then
-        Canvas.FillRect(Rect(LLeft + LRunStartColumn * LCharWidth, ATop, Min(LLeft + LColumn * LCharWidth, AClipRect.Right - 2), LBottom));
+        Canvas.FillRect(Rect(LLeft + LRunStartColumn * LCharWidth, ATop,
+          Min(LLeft + LColumn * LCharWidth, AClipRect.Right - 2), LBottom));
 
       LRunStartColumn := -1;
     end;
@@ -15353,7 +15421,8 @@ begin
     PaintRowBars(FLines[LTextLine - 1], LTop);
   end;
 
-  if (moShowSearchResults in FMinimap.Options) and (FSearch.Items.Count > 0) and (FColors.SearchHighlighterBackground <> TColors.SysNone) then
+  if (moShowSearchResults in FMinimap.Options) and (FSearch.Items.Count > 0) and
+    (FColors.SearchHighlighterBackground <> TColors.SysNone) then
   begin
     Canvas.Brush.Color := FColors.SearchHighlighterBackground;
 
@@ -15369,7 +15438,8 @@ begin
         LTop := AClipRect.Top + (LSearchItem.BeginTextPosition.Line + 1 - AFirstLine) * LCharHeight;
 
         Canvas.FillRect(Rect(LLeft + (LSearchItem.BeginTextPosition.Char - 1) * LCharWidth, LTop,
-          Min(LLeft + (LSearchItem.EndTextPosition.Char - 1) * LCharWidth, AClipRect.Right - 2), LTop + Max(LCharHeight - 1, 1)));
+          Min(LLeft + (LSearchItem.EndTextPosition.Char - 1) * LCharWidth, AClipRect.Right - 2),
+          LTop + Max(LCharHeight - 1, 1)));
       end;
     end;
   end;
@@ -15746,8 +15816,8 @@ begin
 
               SetBkMode(Canvas.Handle, TRANSPARENT);
 
-              Winapi.Windows.ExtTextOut(Canvas.Handle, LCharRect.Left + 1, LCharRect.Top - 2, ETO_OPTIONS, @LCharRect,
-                PChar(LPilcrow), LPilcrow.Length, nil);
+              Winapi.Windows.ExtTextOut(Canvas.Handle, LCharRect.Left + 1, LCharRect.Top - 2 + FLineSpacing shr 1,
+                ETO_OPTIONS, @LCharRect, PChar(LPilcrow), LPilcrow.Length, nil);
             end;
           eolPilcrow:
             begin
@@ -15758,11 +15828,12 @@ begin
 
               SetBkMode(Canvas.Handle, TRANSPARENT);
 
-              Winapi.Windows.ExtTextOut(Canvas.Handle, LCharRect.Left, LCharRect.Top, ETO_OPTIONS, @LCharRect, PChar(LPilcrow), 1, nil);
+              Winapi.Windows.ExtTextOut(Canvas.Handle, LCharRect.Left, LCharRect.Top + FLineSpacing shr 1, ETO_OPTIONS,
+                @LCharRect, PChar(LPilcrow), 1, nil);
             end;
           eolArrow:
             begin
-              LY := LCharRect.Top + 2;
+              LY := LCharRect.Top + 2 + FLineSpacing shr 1;
 
               if FSpecialChars.Style = scsDot then
               while LY < LCharRect.Bottom do
@@ -15941,10 +16012,12 @@ var
     if AMinimap and (moShowBookmarks in FMinimap.Options) and LBookmarkOnCurrentLine then
       Result := FColors.MinimapBookmark
     else
-    if LIsCurrentLine and FActiveLine.Visible and Focused and (FColors.ActiveLineBackground <> TColors.SysNone) then
+    if LIsCurrentLine and FActiveLine.Visible and (FActiveLine.Style = alsFill) and Focused and
+      (FColors.ActiveLineBackground <> TColors.SysNone) then
       Result := FColors.ActiveLineBackground
     else
-    if LIsCurrentLine and FActiveLine.Visible and not Focused and (FColors.ActiveLineBackgroundUnfocused <> TColors.SysNone) then
+    if LIsCurrentLine and FActiveLine.Visible and (FActiveLine.Style = alsFill) and not Focused and
+      (FColors.ActiveLineBackgroundUnfocused <> TColors.SysNone) then
       Result := FColors.ActiveLineBackgroundUnfocused
     else
     if LMarkColor <> TColors.SysNone then
@@ -16132,8 +16205,8 @@ var
           Inc(LSearchRect.Right, FItalic.Offset);
 
         if not LToken.IsEmpty then
-          Winapi.Windows.ExtTextOut(Canvas.Handle, LSearchRect.Left, LSearchRect.Top, ETO_OPTIONS, @LSearchRect,
-            PChar(LToken), LToken.Length, nil);
+          Winapi.Windows.ExtTextOut(Canvas.Handle, LSearchRect.Left, LSearchRect.Top + (if AMinimap then 0 else FLineSpacing shr 1),
+            ETO_OPTIONS, @LSearchRect, PChar(LToken), LToken.Length, nil);
 
         if LLength > LCurrentLineLength then
           Break
@@ -16392,7 +16465,8 @@ var
             LTempRect.Top := 0;
             LTempRect.Height := LTextRect.Height;
 
-            Winapi.Windows.ExtTextOut(LTempBitmap.Canvas.Handle, LTextRect.Left, 0, ETO_OPTIONS, @LTempRect, LPChar, LTokenLength, nil);
+            Winapi.Windows.ExtTextOut(LTempBitmap.Canvas.Handle, LTextRect.Left, (if AMinimap then 0 else FLineSpacing shr 1),
+              ETO_OPTIONS, @LTempRect, LPChar, LTokenLength, nil);
 
             BitBlt(Canvas.Handle, LSelectedRect.Left, LSelectedRect.Top, LSelectedRect.Width, LSelectedRect.Height, LTempBitmap.Canvas.Handle, LSelectedRect.Left, 0, SRCCOPY);
           finally
@@ -16400,7 +16474,8 @@ var
           end;
         end
         else
-          Winapi.Windows.ExtTextOut(Canvas.Handle, LTextRect.Left, LTextRect.Top, ETO_OPTIONS, @LTextRect, LPChar, LTokenLength, nil);
+          Winapi.Windows.ExtTextOut(Canvas.Handle, LTextRect.Left, LTextRect.Top + (if AMinimap then 0 else FLineSpacing shr 1),
+            ETO_OPTIONS, @LTextRect, LPChar, LTokenLength, nil);
 
         if not AMinimap and LTokenHelper.Overhang and (LPChar^ <> TCharacters.Space) and (ATokenLength <> 0) and (ATokenLength = AToken.Length) then
         begin
@@ -17146,7 +17221,7 @@ var
         end;
 
         if (LMarkColor <> TColors.SysNone) and not (LIsCurrentLine and FActiveLine.Visible and
-          (FColors.ActiveLineBackground <> TColors.SysNone)) then
+          (FActiveLine.Style = alsFill) and (FColors.ActiveLineBackground <> TColors.SysNone)) then
         begin
           LIsCustomBackgroundColor := True;
           LBackgroundColor := LMarkColor;
@@ -17614,6 +17689,9 @@ begin
     SetDrawingColors(False);
     FillRect(LTokenRect);
   end;
+
+  if not AMinimap and FActiveLine.Visible and (FActiveLine.Style = alsBorder) then
+    PaintActiveLineBorder(AClipRect);
 end;
 
 procedure TCustomTextEditor.PaintSimpleTextLines(const AClipRect: TRect; const AFirstLine, ALastLine: Integer; const AMinimap: Boolean);
@@ -17778,8 +17856,8 @@ var
       begin
         FPaintHelper.SetForegroundColor(FColors.EditorForeground);
 
-        Winapi.Windows.ExtTextOut(Canvas.Handle, LTextRect.Left, LTextRect.Top, ETO_CLIPPED, @LTextRect,
-          PChar(LUnselectedTextBefore), LUnselectedTextBefore.Length, nil);
+        Winapi.Windows.ExtTextOut(Canvas.Handle, LTextRect.Left, LTextRect.Top + (if AMinimap then 0 else FLineSpacing shr 1),
+          ETO_CLIPPED, @LTextRect, PChar(LUnselectedTextBefore), LUnselectedTextBefore.Length, nil);
 
         LTextRect.Left := LTextRect.Left + LUnselectedTextBefore.Length * FPaintHelper.CharWidth;
       end;
@@ -17791,8 +17869,8 @@ var
 
         LTextRect.Right := LTextRect.Left + LSelectedText.Length * FPaintHelper.CharWidth;
 
-        Winapi.Windows.ExtTextOut(Canvas.Handle, LTextRect.Left, LTextRect.Top, ETO_OPAQUE or ETO_CLIPPED, @LTextRect,
-          PChar(LSelectedText), LSelectedText.Length, nil);
+        Winapi.Windows.ExtTextOut(Canvas.Handle, LTextRect.Left, LTextRect.Top + (if AMinimap then 0 else FLineSpacing shr 1),
+          ETO_OPAQUE or ETO_CLIPPED, @LTextRect, PChar(LSelectedText), LSelectedText.Length, nil);
 
         LTextRect.Right := LLineRect.Right;
         LTextRect.Left := LTextRect.Left + LSelectedText.Length * FPaintHelper.CharWidth;
@@ -17805,8 +17883,8 @@ var
         Canvas.Brush.Color := FColors.ActiveLineBackground;
         FPaintHelper.SetForegroundColor(FColors.EditorForeground);
 
-        Winapi.Windows.ExtTextOut(Canvas.Handle, LTextRect.Left, LTextRect.Top, ETO_OPAQUE or ETO_CLIPPED, @LTextRect,
-          PChar(LUnselectedTextAfter), LUnselectedTextAfter.Length, nil);
+        Winapi.Windows.ExtTextOut(Canvas.Handle, LTextRect.Left, LTextRect.Top + (if AMinimap then 0 else FLineSpacing shr 1),
+          ETO_OPAQUE or ETO_CLIPPED, @LTextRect, PChar(LUnselectedTextAfter), LUnselectedTextAfter.Length, nil);
       end;
     end
     else
@@ -17815,8 +17893,8 @@ var
 
       FPaintHelper.SetForegroundColor(FColors.EditorForeground);
 
-      Winapi.Windows.ExtTextOut(Canvas.Handle, LLineRect.Left, LLineRect.Top, ETO_CLIPPED, @LLineRect, PChar(LText),
-        LText.Length, nil);
+      Winapi.Windows.ExtTextOut(Canvas.Handle, LLineRect.Left, LLineRect.Top + (if AMinimap then 0 else FLineSpacing shr 1),
+        ETO_CLIPPED, @LLineRect, PChar(LText), LText.Length, nil);
     end;
   end;
 
@@ -17852,11 +17930,14 @@ begin
     if AMinimap then
       PaintVisibleTextBackground
     else
-    if FPosition.Text.Line = LLine then
+    if (FPosition.Text.Line = LLine) and (FActiveLine.Style = alsFill) then
       PaintActiveLineBackground;
 
     PaintLine;
   end;
+
+  if not AMinimap and FActiveLine.Visible and (FActiveLine.Style = alsBorder) then
+    PaintActiveLineBorder(AClipRect);
 end;
 
 procedure TCustomTextEditor.RedoItem;

@@ -10,6 +10,7 @@ type
   strict private
     FActiveLineBackground: TColor;
     FActiveLineBackgroundUnfocused: TColor;
+    FActiveLineBorder: TColor;
     FActiveLineForeground: TColor;
     FActiveLineForegroundUnfocused: TColor;
     FBookmarkBlue: TColor;
@@ -132,6 +133,7 @@ type
     procedure DoChange;
     procedure SetActiveLineBackground(const AValue: TColor);
     procedure SetActiveLineBackgroundUnfocused(const AValue: TColor);
+    procedure SetActiveLineBorder(const AValue: TColor);
     procedure SetActiveLineForeground(const AValue: TColor);
     procedure SetActiveLineForegroundUnfocused(const AValue: TColor);
     procedure SetBookmarkBlue(const AValue: TColor);
@@ -256,6 +258,7 @@ type
   published
     property ActiveLineBackground: TColor read FActiveLineBackground write SetActiveLineBackground default TDefaultColors.ActiveLineBackground;
     property ActiveLineBackgroundUnfocused: TColor read FActiveLineBackgroundUnfocused write SetActiveLineBackgroundUnfocused default TDefaultColors.ActiveLineBackgroundUnfocused;
+    property ActiveLineBorder: TColor read FActiveLineBorder write SetActiveLineBorder default TDefaultColors.ActiveLineBorder;
     property ActiveLineForeground: TColor read FActiveLineForeground write SetActiveLineForeground default TDefaultColors.ActiveLineForeground;
     property ActiveLineForegroundUnfocused: TColor read FActiveLineForegroundUnfocused write SetActiveLineForegroundUnfocused default TDefaultColors.ActiveLineForegroundUnfocused;
     property BookmarkBlue: TColor read FBookmarkBlue write SetBookmarkBlue default TDefaultColors.BookmarkBlue;
@@ -392,6 +395,7 @@ begin
   { Active line }
   FActiveLineBackground := TDefaultColors.ActiveLineBackground;
   FActiveLineBackgroundUnfocused := TDefaultColors.ActiveLineBackgroundUnfocused;
+  FActiveLineBorder := TDefaultColors.ActiveLineBorder;
   FActiveLineForeground := TDefaultColors.ActiveLineForeground;
   FActiveLineForegroundUnfocused := TDefaultColors.ActiveLineForegroundUnfocused;
   { Bookmarks }
@@ -539,6 +543,7 @@ begin
     { Active line }
     Self.FActiveLineBackground := FActiveLineBackground;
     Self.FActiveLineBackgroundUnfocused := FActiveLineBackgroundUnfocused;
+    Self.FActiveLineBorder := FActiveLineBorder;
     Self.FActiveLineForeground := FActiveLineForeground;
     Self.FActiveLineForegroundUnfocused := FActiveLineForegroundUnfocused;
     { Bookmarks }
@@ -701,6 +706,13 @@ end;
 procedure TTextEditorColors.SetActiveLineBackgroundUnfocused(const AValue: TColor);
 begin
   FActiveLineBackgroundUnfocused := SetColorDef(AValue, TDefaultColors.ActiveLineBackgroundUnfocused);
+
+  DoChange;
+end;
+
+procedure TTextEditorColors.SetActiveLineBorder(const AValue: TColor);
+begin
+  FActiveLineBorder := SetColorDef(AValue, TDefaultColors.ActiveLineBorder);
 
   DoChange;
 end;

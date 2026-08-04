@@ -571,9 +571,9 @@ type
     procedure LinesHookChanged;
     procedure LinesInserted(ASender: TObject; const AIndex: Integer; const ACount: Integer);
     procedure LinesPutted(ASender: TObject; const AIndex: Integer; const ACount: Integer);
+    procedure MacroStateTimerHandler(ASender: TObject);
     procedure MatchingPairsChanged(ASender: TObject);
     procedure MinimapChanged(ASender: TObject);
-    procedure MacroStateTimerHandler(ASender: TObject);
     procedure MouseScrollTimerHandler(ASender: TObject);
     procedure MoveCaretAndSelection(const ABeforeTextPosition, AAfterTextPosition: TTextEditorTextPosition; const ASelectionCommand: Boolean);
     procedure MoveCaretHorizontally(const X: Integer; const ASelectionCommand: Boolean);
@@ -606,13 +606,14 @@ type
     procedure SetFileMaxReadBufferSize(const AValue: Integer);
     procedure SetFileMinShowProgressSize(const AValue: Int64);
     procedure SetFullFilename(const AName: string);
-    procedure SetHighlighterRange(const ALine: Integer);
     procedure SetHighlightLine(const AValue: TTextEditorHighlightLine);
+    procedure SetHighlighterRange(const ALine: Integer);
     procedure SetHorizontalScrollPosition(const AValue: Single);
     procedure SetKeyCommands(const AValue: TTextEditorKeyCommands);
     procedure SetLeftMargin(const AValue: TTextEditorLeftMargin);
-    procedure SetMacroState(const AValue: TTextEditorMacroState);
     procedure SetLine(const ALine: Integer; const ALineText: string); inline;
+    procedure SetLineSpacing(const AValue: Integer);
+    procedure SetMacroState(const AValue: TTextEditorMacroState);
     procedure SetModified(const AValue: Boolean);
     procedure SetMouseScrollCursors(const AIndex: Integer; const AValue: TCursor);
     procedure SetOppositeColors;
@@ -709,6 +710,7 @@ type
     procedure NotifyHookedCommandHandlers(const AAfterProcessing: Boolean; var ACommand: TTextEditorCommand; var AChar: Char; const AData: Pointer);
     procedure UpdateCodeFoldingGutterHover(const AX: Single);
     procedure Paint; override;
+    procedure PaintActiveLineBorder(const AClipRect: TRectF);
     procedure PaintBorder;
     function GetCaretBounds(const AViewPosition: TTextEditorViewPosition; const AMultiEdit: Boolean;
       out ACharRect: TRectF; out ABackgroundColor, AForegroundColor: TAlphaColor): TRectF;
@@ -960,7 +962,7 @@ type
     property LeftMargin: TTextEditorLeftMargin read FLeftMargin write SetLeftMargin;
     property LineHeight: Single read GetLineHeight;
     property LineNumbersCount: Integer read FLineNumbers.Count;
-    property LineSpacing: Integer read FLineSpacing write FLineSpacing default TTextEditorDefaults.LineSpacing;
+    property LineSpacing: Integer read FLineSpacing write SetLineSpacing default TTextEditorDefaults.LineSpacing;
     property Lines: TTextEditorLines read FLines;
     property MacroRecorder: TTextEditorMacroRecorder read FMacroRecorder write FMacroRecorder;
     property MacroState: TTextEditorMacroState read FMacroState write SetMacroState;
@@ -2021,6 +2023,69 @@ begin
 
     Repaint;
   end;
+end;
+
+procedure TCustomTextEditor.PaintActiveLineBorder(const AClipRect: TRectF);
+var
+  LColor: TAlphaColor;
+  LLine, LFirstRow, LLastRow, LLastVisibleRow: Integer;
+  LLineHeight, LTop, LRight, LScale, LInset: Single;
+  LRect: TRectF;
+
+  function Snap(const AValue: Single): Single;
+  begin
+    Result := Round(AValue * LScale) / LScale;
+  end;
+
+begin
+  LColor := FColors.ActiveLineBorder;
+
+  if LColor = TAlphaColors.Null then
+    Exit;
+
+  LLine := FPosition.Text.Line;
+  LFirstRow := FViewPosition.Row;
+  LLastRow := LFirstRow;
+  LLastVisibleRow := FLineNumbers.TopLine + FLineNumbers.VisibleCount;
+
+  if FWordWrap.Active then
+  begin
+    while (LFirstRow > FLineNumbers.TopLine) and (GetViewTextLineNumber(LFirstRow - 1) - 1 = LLine) do
+      Dec(LFirstRow);
+
+    while (LLastRow < LLastVisibleRow) and (GetViewTextLineNumber(LLastRow + 1) - 1 = LLine) do
+      Inc(LLastRow);
+  end;
+
+  LScale := 1;
+
+  if Assigned(Scene) then
+    LScale := Scene.GetSceneScale;
+
+  LLineHeight := GetLineHeight;
+  LTop := (LFirstRow - FLineNumbers.TopLine) * LLineHeight;
+
+  if IsRulerVisible then
+    LTop := LTop + FRuler.Height;
+
+  Canvas.Stroke.Kind := TBrushKind.Solid;
+  Canvas.Stroke.Color := LColor;
+  Canvas.Stroke.Thickness := Max(1, Round(LScale)) / LScale;
+
+  LInset := Canvas.Stroke.Thickness * 0.5;
+
+  LRight := ClientWidth;
+
+  if FMinimap.Align = maRight then
+    LRight := LRight - FMinimap.GetWidth;
+
+  if FSearch.Map.Align = saRight then
+    LRight := LRight - FSearch.Map.GetWidth;
+
+  LRect := RectF(Snap(FLeftMarginWidth) + LInset, Snap(LTop) + LInset,
+    Snap(LRight) - LInset, Snap(LTop + (LLastRow - LFirstRow + 1) * LLineHeight) - LInset);
+
+  Canvas.DrawRect(LRect, 0, 0, [], AbsoluteOpacity);
 end;
 
 procedure TCustomTextEditor.PaintBorder;
@@ -5092,6 +5157,16 @@ end;
 procedure TCustomTextEditor.SetLine(const ALine: Integer; const ALineText: string);
 begin
   FLines[ALine] := if eoTrimTrailingSpaces in Options then FMX.TextEditor.Utils.TrimRight(ALineText) else ALineText;
+end;
+
+procedure TCustomTextEditor.SetLineSpacing(const AValue: Integer);
+begin
+  if FLineSpacing <> AValue then
+  begin
+    FLineSpacing := AValue;
+
+    Repaint;
+  end;
 end;
 
 procedure TCustomTextEditor.AddUndoDelete(const ACaretPosition: TTextEditorTextPosition;
@@ -12873,7 +12948,8 @@ begin
 
     LRect.Bottom := LRect.Top + LLineHeight;
 
-    if FActiveLine.Visible and (FColors.CodeFoldingActiveLineBackground <> TAlphaColors.Null) and
+    if FActiveLine.Visible and (aloHighlightLeftMargin in FActiveLine.Options) and
+      (FColors.CodeFoldingActiveLineBackground <> TAlphaColors.Null) and
       (not Assigned(FMultiEdit.Carets) and (FPosition.Text.Line + 1 = LLine) or Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine)) then
     begin
       LBackground := if Focused then FColors.CodeFoldingActiveLineBackground else FColors.CodeFoldingActiveLineBackgroundUnfocused;
@@ -13569,7 +13645,8 @@ var
 
         FPaintHelper.SetBackgroundColor(FColors.LeftMarginBackground);
 
-        if FActiveLine.Visible and (not Assigned(FMultiEdit.Carets) and (LLine = LCaretY) or
+        if FActiveLine.Visible and (aloHighlightLeftMargin in FActiveLine.Options) and
+          (not Assigned(FMultiEdit.Carets) and (LLine = LCaretY) or
           Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine)) and (FColors.LeftMarginActiveLineBackground <> TAlphaColors.Null) then
         begin
           if Focused then
@@ -13721,9 +13798,10 @@ var
       begin
         LLine := GetViewTextLineNumber(LIndex);
 
-        if FActiveLine.Visible and (FColors.LeftMarginActiveLineBackground <> TAlphaColors.Null) and
+        if FActiveLine.Visible and (aloHighlightLeftMargin in FActiveLine.Options) and
+          ((FColors.LeftMarginActiveLineBackground <> TAlphaColors.Null) and
           not Assigned(FMultiEdit.Carets) and (LLine = FPosition.Text.Line + 1) or
-          Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine) then
+          Assigned(FMultiEdit.Carets) and IsMultiEditCaretFound(LLine)) then
         begin
           SetPanelActiveLineRect;
 
@@ -14809,10 +14887,12 @@ var
     if AMinimap and (moShowBookmarks in FMinimap.Options) and LBookmarkOnCurrentLine then
       Result := FColors.MinimapBookmark
     else
-    if LIsCurrentLine and FActiveLine.Visible and Focused and (FColors.ActiveLineBackground <> TAlphaColors.Null) then
+    if LIsCurrentLine and FActiveLine.Visible and (FActiveLine.Style = alsFill) and Focused and
+      (FColors.ActiveLineBackground <> TAlphaColors.Null) then
       Result := FColors.ActiveLineBackground
     else
-    if LIsCurrentLine and FActiveLine.Visible and not Focused and (FColors.ActiveLineBackgroundUnfocused <> TAlphaColors.Null) then
+    if LIsCurrentLine and FActiveLine.Visible and (FActiveLine.Style = alsFill) and not Focused and
+      (FColors.ActiveLineBackgroundUnfocused <> TAlphaColors.Null) then
       Result := FColors.ActiveLineBackgroundUnfocused
     else
     if LMarkColor <> TAlphaColors.Null then
@@ -15951,7 +16031,7 @@ var
         end;
 
         if (LMarkColor <> TAlphaColors.Null) and not (LIsCurrentLine and FActiveLine.Visible and
-          (FColors.ActiveLineBackground <> TAlphaColors.Null)) then
+          (FActiveLine.Style = alsFill) and (FColors.ActiveLineBackground <> TAlphaColors.Null)) then
         begin
           LIsCustomBackgroundColor := True;
           LBackgroundColor := LMarkColor;
@@ -16395,6 +16475,9 @@ begin
     SetDrawingColors(False);
     FillRect(LTokenRect);
   end;
+
+  if not AMinimap and FActiveLine.Visible and (FActiveLine.Style = alsBorder) then
+    PaintActiveLineBorder(AClipRect);
 end;
 
 procedure TCustomTextEditor.PaintSimpleTextLines(const AClipRect: TRectF; const AFirstLine, ALastLine: Integer; const AMinimap: Boolean);
@@ -16634,11 +16717,14 @@ begin
     if AMinimap then
       PaintVisibleTextBackground
     else
-    if FPosition.Text.Line = LLine then
+    if (FPosition.Text.Line = LLine) and (FActiveLine.Style = alsFill) then
       PaintActiveLineBackground;
 
     PaintLine;
-  end; 
+  end;
+
+  if not AMinimap and FActiveLine.Visible and (FActiveLine.Style = alsBorder) then
+    PaintActiveLineBorder(AClipRect);
 end;
 
 procedure TCustomTextEditor.RedoItem;

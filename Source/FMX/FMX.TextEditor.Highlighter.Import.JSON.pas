@@ -1,4 +1,4 @@
-unit FMX.TextEditor.Highlighter.Import.JSON;
+﻿unit FMX.TextEditor.Highlighter.Import.JSON;
 
 {$I FMX.TextEditor.Defines.inc}
 
@@ -187,6 +187,7 @@ begin
       begin
         ActiveLineBackground := LColorsObject['ActiveLineBackground'].ToAlphaColor;
         ActiveLineBackgroundUnfocused := LColorsObject['ActiveLineBackgroundUnfocused'].ToAlphaColor;
+        ActiveLineBorder := LColorsObject['ActiveLineBorder'].ToAlphaColor;
         ActiveLineForeground := LColorsObject['ActiveLineForeground'].ToAlphaColor;
         ActiveLineForegroundUnfocused := LColorsObject['ActiveLineForegroundUnfocused'].ToAlphaColor;
         BookmarkBlue := LColorsObject['BookmarkBlue'].ToAlphaColor;

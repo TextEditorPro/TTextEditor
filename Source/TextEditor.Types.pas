@@ -86,6 +86,11 @@ type
     False: (Quad: Cardinal);
   end;
 
+  { Active line }
+  TTextEditorActiveLineOption = (aloHighlightLeftMargin);
+  TTextEditorActiveLineOptions = set of TTextEditorActiveLineOption;
+  TTextEditorActiveLineStyle = (alsFill, alsBorder);
+
   { Caret }
   TTextEditorCaretStyle = (csVerticalLine, csThinVerticalLine, csHorizontalLine, csThinHorizontalLine, csHalfBlock, csBlock);
 

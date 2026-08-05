@@ -5165,7 +5165,7 @@ var
   LTextPosition: TTextEditorTextPosition;
   LCharAtCursor: Char;
   LLineText, LOriginalLineText, LHelper, LSpaceBuffer: string;
-  LLength, LWidth, LSpaceCount: Integer;
+  LLength, LWidth, LSpaceCount, LCharCount: Integer;
 begin
   LTextPosition := TextPosition;
   LCharAtCursor := GetCharAtTextPosition(GetPosition(LTextPosition.Char + 1, LTextPosition.Line));
@@ -5183,19 +5183,24 @@ begin
 
     if LTextPosition.Char <= LLength then
     begin
-      LHelper := Copy(LLineText, LTextPosition.Char, 1);
+      LCharCount := 1;
 
-      Delete(LLineText, LTextPosition.Char, 1);
+      if (LTextPosition.Char < LLength) and LLineText[LTextPosition.Char].IsHighSurrogate and LLineText[LTextPosition.Char + 1].IsLowSurrogate then
+        LCharCount := 2;
+
+      LHelper := Copy(LLineText, LTextPosition.Char, LCharCount);
+
+      Delete(LLineText, LTextPosition.Char, LCharCount);
       SetLine(LTextPosition.Line, LLineText);
 
-      AddUndoDelete(LTextPosition, LTextPosition, GetPosition(LTextPosition.Char + 1, LTextPosition.Line), LHelper, smNormal);
+      AddUndoDelete(LTextPosition, LTextPosition, GetPosition(LTextPosition.Char + LCharCount, LTextPosition.Line), LHelper, smNormal);
 
       if FWordWrap.Active then
       begin
         LWidth := GetTokenWidth(LHelper, 1, 0);
 
-        FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] - 1;
-        FWordWrapLine.ViewLength[FViewPosition.Row] := FWordWrapLine.ViewLength[FViewPosition.Row] - 1;
+        FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] - LCharCount;
+        FWordWrapLine.ViewLength[FViewPosition.Row] := FWordWrapLine.ViewLength[FViewPosition.Row] - LCharCount;
         FWordWrapLine.Width[FViewPosition.Row] := FWordWrapLine.Width[FViewPosition.Row] - LWidth;
 
         if (LCharAtCursor = TControlCharacters.Tab) or (FWordWrapLine.Length[FViewPosition.Row] <= 0) then
@@ -5661,7 +5666,7 @@ begin
             LChar := LLineText[LTextPosition.Char - 1];
             LCharPosition := 1;
 
-            if LChar.IsSurrogate then
+            if (LTextPosition.Char > 2) and LChar.IsLowSurrogate and LLineText[LTextPosition.Char - 2].IsHighSurrogate then
               LCharPosition := 2;
 
             LText := Copy(LLineText, LTextPosition.Char - LCharPosition, LCharPosition);
@@ -5676,7 +5681,7 @@ begin
             begin
               LWidth := GetTokenWidth(LText, 1, 0);
 
-              FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] - 1;
+              FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] - LCharPosition;
               FWordWrapLine.ViewLength[FViewPosition.Row] := FWordWrapLine.ViewLength[FViewPosition.Row] -
                 GetTokenCharCount(LChar, FViewPosition.Row);
               FWordWrapLine.Width[FViewPosition.Row] := FWordWrapLine.Width[FViewPosition.Row] - LWidth;
@@ -8157,14 +8162,13 @@ begin
     if (X > 0) and LChangeY then
       LDestinationPosition.Char := Min(LDestinationPosition.Char, LCurrentLineLength + 1);
 
-    { Skip combined and non-spacing marks }
     if LDestinationPosition.Char <= FLines.StringLength(LDestinationPosition.Line) then
     begin
       LPLine := PChar(FLines.TextLines[LDestinationPosition.Line]);
 
       Inc(LPLine, LDestinationPosition.Char - 1);
 
-      while (LPLine^ <> TControlCharacters.Null) and (IsCombiningCharacter(LPLine) or
+      while (LPLine^ <> TControlCharacters.Null) and (LPLine^.IsLowSurrogate or IsCombiningCharacter(LPLine) or
         not (eoShowNullCharacters in Options) and (LPLine^ = TControlCharacters.Substitute) or
         not (eoShowControlCharacters in Options) and (LPLine^ < TCharacters.Space) and (LPLine^ in TControlCharacters.AsSet) or
         not (eoShowZeroWidthSpaces in Options) and (LPLine^ = TControlCharacters.ZeroWidthSpace) or
@@ -12540,7 +12544,7 @@ begin
     not (ssAlt in AShift) and (AKey in [VK_UP, VK_DOWN]) then
   begin
     AddCaret(ViewPosition);
-    MoveCaretVertically(IfThen(AKey = VK_DOWN, 1, -1), False);
+    MoveCaretVertically(if AKey = VK_DOWN then 1 else -1, False);
     AddCaret(ViewPosition);
     Invalidate;
     Exit;
@@ -19347,7 +19351,7 @@ begin
       Inc(LResultChar);
     end;
 
-    while (LPLine^ <> TControlCharacters.Null) and IsCombiningCharacter(LPLine) do
+    while (LPLine^ <> TControlCharacters.Null) and (LPLine^.IsLowSurrogate or IsCombiningCharacter(LPLine)) do
     begin
       Inc(LResultChar);
       Inc(LPLine);

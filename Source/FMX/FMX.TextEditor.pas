@@ -7,7 +7,7 @@ interface
 
 uses
   System.Classes, System.Contnrs, System.Generics.Collections, System.Math, System.Math.Vectors, System.SysUtils, System.Types,
-  System.UITypes, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.StdCtrls, FMX.TextEditor.ActiveLine, FMX.TextEditor.Border,
+  System.UITypes, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.StdCtrls, FMX.Text, FMX.TextEditor.ActiveLine, FMX.TextEditor.Border,
   FMX.TextEditor.Caret, FMX.TextEditor.CodeFolding, FMX.TextEditor.CodeFolding.Hint.Form, FMX.TextEditor.CodeFolding.Ranges,
   FMX.TextEditor.CodeFolding.Regions, FMX.TextEditor.Colors, FMX.TextEditor.CompletionProposal,
   FMX.TextEditor.CompletionProposal.PopupWindow, FMX.TextEditor.CompletionProposal.Snippets, FMX.TextEditor.Consts, FMX.TextEditor.Fonts,
@@ -65,7 +65,7 @@ type
     procedure ShowCaret(const ABlinking: Boolean; const ABlinkingInterval: Integer);
   end;
 
-  TCustomTextEditor = class abstract(TControl)
+  TCustomTextEditor = class abstract(TControl, ITextInput)
   strict private type
     TTextEditorCaretHelper = record
       ShowAlways: Boolean;
@@ -396,6 +396,7 @@ type
     FTabs: TTextEditorTabs;
     FTextLayout: TTextLayout;
     FTextLayoutCache: TObjectDictionary<string, TTextLayout>;
+    FTextService: TTextService;
     FTheme: TTextEditorTheme;
     FToggleCase: TTextEditorToggleCase;
     FTripleClickInterval: Cardinal;
@@ -428,13 +429,13 @@ type
     function GetCharAtCursor: Char;
     function GetCharAtTextPosition(const ATextPosition: TTextEditorTextPosition; const ASelect: Boolean = False): Char;
     function GetCharWidth: Single;
+    function GetCodeFoldingWidth: Integer; inline;
     function GetEndOfLine(const ALine: PChar): PChar;
     function GetFirstSearchIndex(const AMinimap: Boolean): Integer;
     function GetFoldingOnCurrentLine: Boolean;
     function GetHighlighterAttributeAtRowColumn(const ATextPosition: TTextEditorTextPosition; var AToken: string; var ATokenType: TTextEditorRangeType; var AStart: Integer; var AHighlighterAttribute: TTextEditorHighlighterAttribute): Boolean;
     function GetHookedCommandHandlersCount: Integer;
     function GetHorizontalScrollMax: Single;
-    function GetCodeFoldingWidth: Integer; inline;
     function GetInlineSelectionAvailable: Boolean;
     function GetItalicOffset(const AChar: Char): Byte;
     function GetLastWordFromCursor: string;
@@ -463,10 +464,10 @@ type
     function GetTextBetween(const ATextBeginPosition: TTextEditorTextPosition; const ATextEndPosition: TTextEditorTextPosition): string;
     function GetTokenCharCount(const AToken: string; const ACharsBefore: Integer): Integer; inline;
     function GetTokenWidth(const AToken: string; const ALength: Integer; const ACharsBefore: Integer; const AMinimap: Boolean = False; const ARTLReading: Boolean = False): Single;
+    function GetVerticalScrollBarThumb: TThumb;
     function GetViewLineNumber(const AViewLineNumber: Integer): Integer;
     function GetViewTextLineNumber(const AViewLineNumber: Integer): Integer;
     function GetVisibleChars(const ARow: Integer; const ALineText: string = ''): Integer;
-    function GetVerticalScrollBarThumb: TThumb;
     function IsAnyFoldingCollapsed: Boolean;
     function IsCodeFoldingRangesNeeded: Boolean; inline;
     function IsCodeFoldingVisible: Boolean; inline;
@@ -668,20 +669,33 @@ type
     function DoSearchMatchNotFoundWraparoundDialog: Boolean; virtual;
     function Dragging: Boolean;
     function Focused: Boolean;
+    function GetCaretBounds(const AViewPosition: TTextEditorViewPosition; const AMultiEdit: Boolean; out ACharRect: TRectF; out ABackgroundColor, AForegroundColor: TAlphaColor): TRectF;
+    function GetIMECursorOffset: Integer;
     function GetReadOnly: Boolean; virtual;
+    function GetSelection: string;
+    function GetSelectionBounds: TRect;
+    function GetSelectionPointSize: TSizeF;
+    function GetSelectionRect: TRectF;
+    function GetTargetClausePointF: TPointF;
+    function GetTextService: TTextService;
     function HandleAllocated: Boolean;
+    function HasText: Boolean;
+    function IsIMEComposing: Boolean; inline;
     function PixelAndRowToViewPosition(const X: Single; const ARow: Integer; const ALineText: string = ''): TTextEditorViewPosition;
     function PixelsToViewPosition(const X, Y: Single): TTextEditorViewPosition;
     function SearchAll(const ASearchText: string = ''): Boolean;
     function TextPositionToCharIndex(const ATextPosition: TTextEditorTextPosition): Integer;
+    procedure ApplyCaretDisplay(const ADisplay: TTextEditorCaretDisplay; const AViewPosition: TTextEditorViewPosition; const AMultiEdit, ABlinking: Boolean);
     procedure BeginDrag(AImmediate: Boolean);
     procedure DblClick; override;
+    procedure DialogKey(var Key: Word; Shift: TShiftState); override;
     procedure DoBlockIndent;
     procedure DoBlockUnindent;
     procedure DoChange; virtual;
     procedure DoCopyToClipboard(const AText: string);
     procedure DoEnter; override;
     procedure DoExit; override;
+    procedure DoMouseLeave; override;
     procedure DoOnCommandProcessed(ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer);
     procedure DoOnLeftMarginClick(AButton: TMouseButton; AShift: TShiftState; X, Y: Single);
     procedure DoOnMinimapClick(const Y: Single);
@@ -690,14 +704,14 @@ type
     procedure DoOnSearchMapClick(const Y: Single);
     procedure DoSearchStringNotFoundDialog; virtual;
     procedure DoTripleClick;
-    procedure DoMouseLeave; override;
     procedure DragOver(const AData: TDragObject; const APoint: TPointF; var AOperation: TDragOperation); override;
     procedure DrawPixelLine(const AX1, AY1, AX2, AY2: Single; const AOpacity: Single = 1; const AThickness: Integer = 1);
-    procedure DialogKey(var Key: Word; Shift: TShiftState); override;
     procedure DrawText(const ARect: TRectF; const AText: string; const AHorizontalAlign: TTextAlign = TTextAlign.Leading; const AVerticalAlign: TTextAlign = TTextAlign.Center);
+    procedure EndIMEInput;
     procedure FreeCompletionProposalPopupWindow;
     procedure FreeHintForm;
     procedure HideCaret;
+    procedure IMEStateUpdated;
     procedure KeyDown(var AKey: Word; var AKeyChar: WideChar; AShift: TShiftState); override;
     procedure KeyPressW(var AKey: Char);
     procedure KeyUp(var AKey: Word; var AKeyChar: WideChar; AShift: TShiftState); override;
@@ -708,21 +722,16 @@ type
     procedure MouseUp(AButton: TMouseButton; AShift: TShiftState; X, Y: Single); override;
     procedure MouseWheel(AShift: TShiftState; AWheelDelta: Integer; var AHandled: Boolean); override;
     procedure NotifyHookedCommandHandlers(const AAfterProcessing: Boolean; var ACommand: TTextEditorCommand; var AChar: Char; const AData: Pointer);
-    procedure UpdateCodeFoldingGutterHover(const AX: Single);
     procedure Paint; override;
     procedure PaintActiveLineBorder(const AClipRect: TRectF);
     procedure PaintBorder;
-    function GetCaretBounds(const AViewPosition: TTextEditorViewPosition; const AMultiEdit: Boolean;
-      out ACharRect: TRectF; out ABackgroundColor, AForegroundColor: TAlphaColor): TRectF;
-    procedure ApplyCaretDisplay(const ADisplay: TTextEditorCaretDisplay;
-      const AViewPosition: TTextEditorViewPosition; const AMultiEdit, ABlinking: Boolean);
-    procedure UpdateMultiCaretDisplays;
     procedure PaintCodeFolding(const AClipRect: TRectF; const AFirstRow, ALastRow: Integer);
     procedure PaintCodeFoldingCollapseMark(const AFoldRange: TTextEditorCodeFoldingRange; const ACurrentLineText: string; const ATokenPosition, ATokenLength, ALine: Integer; const ALineRect: TRectF);
     procedure PaintCodeFoldingCollapsedLine(const AFoldRange: TTextEditorCodeFoldingRange; const ALineRect: TRectF);
     procedure PaintCodeFoldingGuides(const AFirstRow, ALastRow: Integer);
     procedure PaintCodeFoldingLine(const AClipRect: TRectF; const ALine: Integer);
     procedure PaintHint(const AHint: string; const ATop: Single);
+    procedure PaintIMEMarkedText;
     procedure PaintLeftMargin(const AClipRect: TRectF; const AFirstLine, ALastTextLine, ALastLine: Integer);
     procedure PaintMacroState;
     procedure PaintMinimap(const AClipRect: TRectF; const AFirstLine, ALastLine: Integer);
@@ -753,8 +762,11 @@ type
     procedure SetReadOnly(const AValue: Boolean); virtual;
     procedure SetViewPosition(const AValue: TTextEditorViewPosition);
     procedure ShowCaret;
+    procedure StartIMEInput;
     procedure UndoItem;
+    procedure UpdateCodeFoldingGutterHover(const AX: Single);
     procedure UpdateMouseCursor;
+    procedure UpdateMultiCaretDisplays;
     property MouseCapture: Boolean read FMouseCapture write FMouseCapture;
   public
     constructor Create(AOwner: TComponent); override;
@@ -1546,6 +1558,12 @@ begin
   FMouse.ScrollCursors[TMouseWheelScrollCursors.West] := crSizeWE;
   FMouse.ScrollCursors[TMouseWheelScrollCursors.NorthWest] := crSizeNWSE;
 
+  { IME }
+  var LTextServiceService: IFMXTextService;
+
+  if TPlatformServices.Current.SupportsPlatformService(IFMXTextService, LTextServiceService) then
+    FTextService := LTextServiceService.GetTextServiceClass.Create(Self, True);
+
   { Update character constraints }
   SizeOrFontChanged;
   TabsChanged(nil);
@@ -1553,11 +1571,13 @@ end;
 
 destructor TCustomTextEditor.Destroy;
 begin
+  FreeAndNil(FTextService);
+
   if Assigned(FChainedEditor) then
     RemoveChainedEditor;
 
   FreeCompletionProposalPopupWindow;
-  { The display controls themselves are owned components; only the list is freed here. }
+
   FMultiCaretDisplays.Free;
   FTextLayout.Free;
   FTextLayoutCache.Free;
@@ -1893,7 +1913,7 @@ end;
 
 function TCustomTextEditor.BorderWidth: Integer;
 begin
-  Result := IfThen(FBorder.Style = bsSingle, 1, 0);
+  Result := if FBorder.Style = bsSingle then 1 else 0;
 end;
 
 function TCustomTextEditor.ClientHeight: Integer;
@@ -5204,7 +5224,7 @@ var
   LTextPosition: TTextEditorTextPosition;
   LCharAtCursor: Char;
   LLineText, LOriginalLineText, LHelper, LSpaceBuffer: string;
-  LLength, LSpaceCount: Integer;
+  LLength, LSpaceCount, LCharCount: Integer;
   LWidth: Single;
 begin
   LTextPosition := TextPosition;
@@ -5223,19 +5243,24 @@ begin
 
     if LTextPosition.Char <= LLength then
     begin
-      LHelper := Copy(LLineText, LTextPosition.Char, 1);
+      LCharCount := 1;
 
-      Delete(LLineText, LTextPosition.Char, 1);
+      if (LTextPosition.Char < LLength) and LLineText[LTextPosition.Char].IsHighSurrogate and LLineText[LTextPosition.Char + 1].IsLowSurrogate then
+        LCharCount := 2;
+
+      LHelper := Copy(LLineText, LTextPosition.Char, LCharCount);
+
+      Delete(LLineText, LTextPosition.Char, LCharCount);
       SetLine(LTextPosition.Line, LLineText);
 
-      AddUndoDelete(LTextPosition, LTextPosition, GetPosition(LTextPosition.Char + 1, LTextPosition.Line), LHelper, smNormal);
+      AddUndoDelete(LTextPosition, LTextPosition, GetPosition(LTextPosition.Char + LCharCount, LTextPosition.Line), LHelper, smNormal);
 
       if FWordWrap.Active then
       begin
         LWidth := GetTokenWidth(LHelper, 1, 0);
 
-        FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] - 1;
-        FWordWrapLine.ViewLength[FViewPosition.Row] := FWordWrapLine.ViewLength[FViewPosition.Row] - 1;
+        FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] - LCharCount;
+        FWordWrapLine.ViewLength[FViewPosition.Row] := FWordWrapLine.ViewLength[FViewPosition.Row] - LCharCount;
         FWordWrapLine.Width[FViewPosition.Row] := FWordWrapLine.Width[FViewPosition.Row] - LWidth;
 
         if (LCharAtCursor = TControlCharacters.Tab) or (FWordWrapLine.Length[FViewPosition.Row] <= 0) then
@@ -5701,13 +5726,12 @@ begin
             LChar := LLineText[LTextPosition.Char - 1];
             LCharPosition := 1;
 
-            if LChar.IsSurrogate then
+            if (LTextPosition.Char > 2) and LChar.IsLowSurrogate and LLineText[LTextPosition.Char - 2].IsHighSurrogate then
               LCharPosition := 2;
 
             LText := Copy(LLineText, LTextPosition.Char - LCharPosition, LCharPosition);
 
-            AddUndoDelete(LTextPosition, GetPosition(LTextPosition.Char - LCharPosition, LTextPosition.Line), LTextPosition,
-              LText, smNormal);
+            AddUndoDelete(LTextPosition, GetPosition(LTextPosition.Char - LCharPosition, LTextPosition.Line), LTextPosition, LText, smNormal);
 
             Delete(LLineText, LTextPosition.Char - LCharPosition, LCharPosition);
             FLines[LTextPosition.Line] := LLineText;
@@ -5716,7 +5740,7 @@ begin
             begin
               LWidth := GetTokenWidth(LText, 1, 0);
 
-              FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] - 1;
+              FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] - LCharPosition;
               FWordWrapLine.ViewLength[FViewPosition.Row] := FWordWrapLine.ViewLength[FViewPosition.Row] -
                 GetTokenCharCount(LChar, FViewPosition.Row);
               FWordWrapLine.Width[FViewPosition.Row] := FWordWrapLine.Width[FViewPosition.Row] - LWidth;
@@ -7814,14 +7838,13 @@ begin
     if (X > 0) and LChangeY then
       LDestinationPosition.Char := Min(LDestinationPosition.Char, LCurrentLineLength + 1);
 
-    { Skip combined and non-spacing marks }
     if LDestinationPosition.Char <= FLines.StringLength(LDestinationPosition.Line) then
     begin
       LPLine := PChar(FLines.TextLines[LDestinationPosition.Line]);
 
       Inc(LPLine, LDestinationPosition.Char - 1);
 
-      while (LPLine^ <> TControlCharacters.Null) and (IsCombiningCharacter(LPLine) or
+      while (LPLine^ <> TControlCharacters.Null) and (LPLine^.IsLowSurrogate or IsCombiningCharacter(LPLine) or
         not (eoShowNullCharacters in Options) and (LPLine^ = TControlCharacters.Substitute) or
         not (eoShowControlCharacters in Options) and (LPLine^ < TCharacters.Space) and (LPLine^ in TControlCharacters.AsSet) or
         not (eoShowZeroWidthSpaces in Options) and (LPLine^ = TControlCharacters.ZeroWidthSpace) or
@@ -10491,7 +10514,7 @@ begin
     FVerticalScrollBar.Position.X := Max(0, Width - LScrollBarSize - LBorderWidth);
     FVerticalScrollBar.Position.Y := LBorderWidth;
     FVerticalScrollBar.Width := LScrollBarSize;
-    FVerticalScrollBar.Height := Height - 2 * LBorderWidth - IfThen(LHorizontalVisible, LScrollBarSize, 0);
+    FVerticalScrollBar.Height := Height - 2 * LBorderWidth - (if LHorizontalVisible then LScrollBarSize else 0);
     FVerticalScrollBar.Min := 0;
     FVerticalScrollBar.Max := Max(0, LVerticalMaxScroll);
     FVerticalScrollBar.ViewportSize := Max(1, FLineNumbers.VisibleCount);
@@ -10499,7 +10522,7 @@ begin
 
     FHorizontalScrollBar.Position.X := LBorderWidth;
     FHorizontalScrollBar.Position.Y := Max(0, Height - LScrollBarSize - LBorderWidth);
-    FHorizontalScrollBar.Width := Width - 2 * LBorderWidth - IfThen(LVerticalVisible, LScrollBarSize, 0);
+    FHorizontalScrollBar.Width := Width - 2 * LBorderWidth - (if LVerticalVisible then LScrollBarSize else 0);
     FHorizontalScrollBar.Height := LScrollBarSize;
     FHorizontalScrollBar.Min := 0;
     FHorizontalScrollBar.Max := Max(0, FScrollHelper.HorizontalScrollMax);
@@ -11660,11 +11683,20 @@ var
 begin
   inherited;
 
+  if (AKey = vkProcessKey) or IsIMEComposing then
+  begin
+    AKey := 0;
+    AKeyChar := TControlCharacters.Null;
+
+    Exit;
+  end;
+
   if (AKey = 0) and (AKeyChar <> TControlCharacters.Null) then
   begin
     if (FMaxLength > 0) and (FLines.GetTextLength > FMaxLength) then
     begin
       AKeyChar := TControlCharacters.Null;
+
       Exit;
     end;
 
@@ -11784,7 +11816,7 @@ begin
     not (ssAlt in AShift) and (AKey in [vkUp, vkDown]) then
   begin
     AddCaret(ViewPosition);
-    MoveCaretVertically(IfThen(AKey = vkDown, 1, -1), False);
+    MoveCaretVertically(if AKey = vkDown then 1 else -1, False);
     AddCaret(ViewPosition);
     Repaint;
     Exit;
@@ -12749,6 +12781,172 @@ begin
     ACommand := TKeyCommands.None;
 end;
 
+{ ITextInput }
+
+function TCustomTextEditor.GetTextService: TTextService;
+begin
+  Result := FTextService;
+end;
+
+function TCustomTextEditor.IsIMEComposing: Boolean;
+begin
+  Result := Assigned(FTextService) and FTextService.HasMarkedText;
+end;
+
+{ Number of characters the composition cursor is into the marked text }
+function TCustomTextEditor.GetIMECursorOffset: Integer;
+begin
+  Result := 0;
+
+  if Assigned(FTextService) then
+    Result := Max(FTextService.TargetClausePosition.X - FTextService.CaretPosition.X, 0);
+end;
+
+procedure TCustomTextEditor.StartIMEInput;
+begin
+  if not Assigned(FTextService) then
+    Exit;
+
+  { The marked text is painted by PaintIMEMarkedText, the document is left untouched until the input is committed. }
+  FTextService.Text := '';
+  FTextService.CaretPosition := Point(TextPosition.Char - 1, TextPosition.Line);
+
+  HideCaret;
+end;
+
+procedure TCustomTextEditor.IMEStateUpdated;
+begin
+  if not Assigned(FTextService) then
+    Exit;
+
+  FTextService.CaretPosition := Point(TextPosition.Char - 1, TextPosition.Line);
+
+  Repaint;
+end;
+
+procedure TCustomTextEditor.EndIMEInput;
+begin
+  ResetCaret;
+  Repaint;
+end;
+
+function TCustomTextEditor.GetTargetClausePointF: TPointF;
+var
+  LPoint: TPointF;
+begin
+  LPoint := ViewPositionToPixels(ViewPosition);
+  LPoint.X := LPoint.X + TextWidth(Canvas, Copy(FTextService.MarkedText, 1, GetIMECursorOffset));
+  LPoint.Y := LPoint.Y + GetLineHeight;
+
+  Result := LocalToAbsolute(LPoint);
+end;
+
+function TCustomTextEditor.GetSelectionRect: TRectF;
+var
+  LPoint: TPointF;
+begin
+  LPoint := ViewPositionToPixels(ViewPosition);
+
+  Result := RectF(LPoint.X, LPoint.Y, LPoint.X + Max(FPaintHelper.CharWidth, 1), LPoint.Y + GetLineHeight);
+
+  if GetSelectionAvailable then
+    Result := TRectF.Union(Result, RectF(FLeftMarginWidth, LPoint.Y, ClientWidth, LPoint.Y + GetLineHeight));
+end;
+
+function TCustomTextEditor.GetSelectionBounds: TRect;
+var
+  LSelectionStartPosition, LSelectionEndPosition: TTextEditorTextPosition;
+begin
+  if GetSelectionAvailable then
+  begin
+    LSelectionStartPosition := SelectionStartPosition;
+    LSelectionEndPosition := SelectionEndPosition;
+
+    Result := System.Types.Rect(LSelectionStartPosition.Char - 1, LSelectionStartPosition.Line,
+      LSelectionEndPosition.Char - 1, LSelectionEndPosition.Line);
+  end
+  else
+    Result := System.Types.Rect(TextPosition.Char - 1, TextPosition.Line, TextPosition.Char - 1, TextPosition.Line);
+end;
+
+function TCustomTextEditor.GetSelectionPointSize: TSizeF;
+begin
+  { Mobile selection pickers, not used here }
+  Result := TSizeF.Create(0, 0);
+end;
+
+function TCustomTextEditor.GetSelection: string;
+begin
+  Result := SelectedText;
+end;
+
+function TCustomTextEditor.HasText: Boolean;
+begin
+  Result := FLines.Count > 0;
+end;
+
+procedure TCustomTextEditor.PaintIMEMarkedText;
+var
+  LAttributes: TArray<TMarkedTextAttribute>;
+  LIndex: Integer;
+  LLineHeight, LThickness, LUnderlineTop, LLeft, LRight: Single;
+  LPoint: TPointF;
+  LRect: TRectF;
+  LScale: Single;
+  LText: string;
+
+  function Snap(const AValue: Single): Single;
+  begin
+    Result := Round(AValue * LScale) / LScale;
+  end;
+
+begin
+  LText := FTextService.MarkedText;
+
+  if LText.IsEmpty then
+    Exit;
+
+  LScale := if Assigned(Scene) then Scene.GetSceneScale else 1;
+
+  if LScale <= 0 then
+    LScale := 1;
+
+  LPoint := ViewPositionToPixels(ViewPosition);
+  LLineHeight := GetLineHeight;
+  LRect := RectF(LPoint.X, LPoint.Y, LPoint.X + TextWidth(Canvas, LText), LPoint.Y + LLineHeight);
+
+  Canvas.Font.Assign(FFonts.Text);
+  Canvas.Fill.Kind := TBrushKind.Solid;
+  Canvas.Fill.Color := FColors.EditorBackground;
+  FillRect(LRect);
+
+  Canvas.Fill.Color := FColors.EditorForeground;
+  DrawText(LRect, LText);
+
+  { A thick underline marks the clause the IME is converting, a thin one the rest }
+  LAttributes := FTextService.MarketTextAttributes;
+  LUnderlineTop := Snap(LRect.Bottom - 2 / LScale);
+
+  for LIndex := 0 to LText.Length - 1 do
+  begin
+    LThickness := 1 / LScale;
+
+    if (LIndex < Length(LAttributes)) and (LAttributes[LIndex] in [TMarkedTextAttribute.TargetConverted,
+      TMarkedTextAttribute.TargetNotConverted]) then
+      LThickness := 2 / LScale;
+
+    LLeft := Snap(LRect.Left + TextWidth(Canvas, Copy(LText, 1, LIndex)));
+    LRight := Snap(LRect.Left + TextWidth(Canvas, Copy(LText, 1, LIndex + 1)));
+
+    FillRect(RectF(LLeft, LUnderlineTop, LRight, LUnderlineTop + LThickness));
+  end;
+
+  { The editor caret is hidden while composing, so the composition cursor is drawn here }
+  LLeft := Snap(LRect.Left + TextWidth(Canvas, Copy(LText, 1, GetIMECursorOffset)));
+
+  FillRect(RectF(LLeft, LRect.Top, LLeft + Max(1 / LScale, 1), LRect.Bottom));
+end;
+
 procedure TCustomTextEditor.Paint;
 var
   LCanvasState: TCanvasSaveState;
@@ -12903,6 +13101,18 @@ begin
 
     if FScrollHelper.IsScrolling and (soShowVerticalScrollHint in FScroll.Options) then
       PaintScrollHint;
+
+    { IME composition }
+    if IsIMEComposing then
+    begin
+      LTextCanvasState := Canvas.SaveState;
+      try
+        Canvas.IntersectClipRect(RectF(FLeftMarginWidth, LTextTopOffset, ClientWidth, ClientHeight));
+        PaintIMEMarkedText;
+      finally
+        Canvas.RestoreState(LTextCanvasState);
+      end;
+    end;
 
     { Macro state }
     if (eoShowMacroState in FOptions) and ((FMacroState <> msStopped) or FMacroStateFlash) and not (csDesigning in ComponentState) then
@@ -18309,7 +18519,7 @@ begin
       Inc(LResultChar);
     end;
 
-    while (LPLine^ <> TControlCharacters.Null) and IsCombiningCharacter(LPLine) do
+    while (LPLine^ <> TControlCharacters.Null) and (LPLine^.IsLowSurrogate or IsCombiningCharacter(LPLine)) do
     begin
       Inc(LResultChar);
       Inc(LPLine);

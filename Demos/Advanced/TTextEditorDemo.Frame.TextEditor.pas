@@ -304,7 +304,7 @@ end;
 
 function TFrameTextEditor.RunSaveLoadSeed(ASeed: Integer): string;
 const
-  cActionsCount = 4;
+  cActionsCount = 10;
 var
   LText: string;
 begin

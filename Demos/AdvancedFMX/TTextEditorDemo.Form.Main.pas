@@ -1051,7 +1051,7 @@ end;
 
 function TMainForm.RunUndoRedoSeed(ASeed: Integer): string;
 const
-  cActionsCount = 4;
+  cActionsCount = 10;
 begin
   LoadTestDocument;
   SetTestClipboardText('b');

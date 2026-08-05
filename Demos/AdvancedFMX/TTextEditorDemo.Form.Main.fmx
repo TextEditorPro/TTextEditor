@@ -529,6 +529,7 @@ object MainForm: TMainForm
         Align = Left
         Border.Color = xFF808690
         Border.ColoredEdges = [ebLeft, ebTop, ebRight, ebBottom]
+        EditorMode = emCompare
         Fonts.CodeFoldingHint.Family = 'Courier New'
         Fonts.CodeFoldingHint.Size = 10.666666984558110000
         Fonts.Hint.Family = 'Courier New'
@@ -568,6 +569,7 @@ object MainForm: TMainForm
         Align = Client
         Border.Color = xFF808690
         Border.ColoredEdges = [ebLeft, ebTop, ebRight, ebBottom]
+        EditorMode = emCompare
         Fonts.CodeFoldingHint.Family = 'Courier New'
         Fonts.CodeFoldingHint.Size = 10.666666984558110000
         Fonts.Hint.Family = 'Courier New'

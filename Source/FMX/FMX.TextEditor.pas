@@ -317,9 +317,9 @@ type
     FActiveLine: TTextEditorActiveLine;
     FBookmarkList: TTextEditorMarkList;
     FBookmarkPopupMenu: TComponent;
-    FCaretBookmarkList: TTextEditorMarkList;
     FBorder: TTextEditorBorder;
     FCaret: TTextEditorCaret;
+    FCaretBookmarkList: TTextEditorMarkList;
     FCaretDisplay: TTextEditorCaretDisplay;
     FCaretHelper: TTextEditorCaretHelper;
     FChainedEditor: TCustomTextEditor;
@@ -402,6 +402,8 @@ type
     FTripleClickInterval: Cardinal;
     FUndo: TTextEditorUndo;
     FUndoList: TTextEditorUndoList;
+    FUndoRedoFirstLine: Integer;
+    FUndoRedoLineCount: Integer;
     FUnknownChars: TTextEditorUnknownChars;
     FUpdatingScrollBars: Boolean;
     FVerticalScrollBar: TScrollBar;
@@ -496,6 +498,7 @@ type
     procedure AfterSetText(ASender: TObject);
     procedure AssignSearchEngine(const AEngine: TTextEditorSearchEngine);
     procedure BeforeSetText(ASender: TObject);
+    procedure BeginUndoUpdate;
     procedure BookmarkListChanged(ASender: TObject);
     procedure BorderChanged(ASender: TObject);
     procedure BorderStyleChanged(ASender: TObject);
@@ -508,6 +511,7 @@ type
     procedure ChainLinesPutted(ASender: TObject; const AIndex: Integer; const ACount: Integer);
     procedure ChainUndoRedoAdded(ASender: TObject);
     procedure CheckIfAtMatchingKeywords;
+    procedure ClampPositionsToDocument;
     procedure CodeFoldingCollapse(const AFoldRange: TTextEditorCodeFoldingRange);
     procedure CodeFoldingExpand(const AFoldRange: TTextEditorCodeFoldingRange);
     procedure CodeFoldingLinesDeleted(const AFirstLine: Integer; const ACount: Integer);
@@ -557,6 +561,7 @@ type
     procedure DoWordLeft(const ACommand: TTextEditorCommand);
     procedure DoWordRight(const ACommand: TTextEditorCommand);
     procedure DragMinimap(const AY: Single);
+    procedure EndUndoUpdate;
     procedure EnsureCaretPositionInsideLines(const ATextPosition: TTextEditorTextPosition);
     procedure FindWords(const AWord: string; const AList: TList; const ACaseSensitive: Boolean; const AWholeWordsOnly: Boolean);
     procedure FontChanged(ASender: TObject);
@@ -847,7 +852,6 @@ type
     procedure CutToClipboard;
     procedure DecPaintLock;
     procedure DeleteBookmark(ABookmark: TTextEditorMark); overload;
-    procedure DropCaretBookmark;
     procedure DeleteComments;
     procedure DeleteEmptyLines;
     procedure DeleteLines(const ALineNumber: Integer; const ACount: Integer);
@@ -857,6 +861,7 @@ type
     procedure DoRedo;
     procedure DoUndo;
     procedure DragDrop(const AData: TDragObject; const APoint: TPointF); override;
+    procedure DropCaretBookmark;
     procedure EndUndoBlock;
     procedure EndUpdate; reintroduce;
     procedure EnsureCursorPositionVisible(const AForceToMiddle: Boolean = False; const AEvenIfVisible: Boolean = False);
@@ -938,7 +943,6 @@ type
     property AllCodeFoldingRanges: TTextEditorAllCodeFoldingRanges read FCodeFoldings.AllRanges;
     property AlwaysShowCaret: Boolean read FCaretHelper.ShowAlways write SetAlwaysShowCaret;
     property Bookmarks: TTextEditorMarkList read FBookmarkList;
-    property CaretBookmarks: TTextEditorMarkList read FCaretBookmarkList;
     property Border: TTextEditorBorder read FBorder write FBorder;
     property CanChangeSize: Boolean read FState.CanChangeSize write FState.CanChangeSize default TTextEditorDefaults.CanChangeSize;
     property CanPaste: Boolean read GetCanPaste;
@@ -946,6 +950,7 @@ type
     property CanUndo: Boolean read GetCanUndo;
     property Canvas;
     property Caret: TTextEditorCaret read FCaret write FCaret;
+    property CaretBookmarks: TTextEditorMarkList read FCaretBookmarkList;
     property CaretIndex: Integer read GetCaretIndex write SetCaretIndex;
     property CharAtCursor: Char read GetCharAtCursor;
     property CharWidth: Single read GetCharWidth;
@@ -1098,6 +1103,7 @@ type
     property KeyCommands;
     property LeftMargin;
     property LineSpacing;
+    property Margins;
     property MatchingPairs;
     property MaxLength;
     property Minimap;
@@ -1156,10 +1162,8 @@ type
     property OvertypeMode;
     property ParentShowHint;
     property PartialLoad;
-    property Margins;
-    property Position;
-    property Size;
     property PopupMenu;
+    property Position;
     property ReadOnly;
     property Replace;
     property RightMargin;
@@ -1168,6 +1172,7 @@ type
     property Search;
     property Selection;
     property ShowHint;
+    property Size;
     property SpecialChars;
     property SyncEdit;
     property TabOrder;
@@ -1365,6 +1370,7 @@ begin
   FCodeFoldings.AllRanges := TTextEditorAllCodeFoldingRanges.Create;
   FCodeFoldings.AnyCollapsed := False;
   FCodeFoldings.DelayTimer := TTextEditorTimer.Create(Self);
+  FCodeFoldings.DelayTimer.Interval := FCodeFolding.DelayInterval;
   FCodeFoldings.DelayTimer.OnTimer := OnCodeFoldingDelayTimer;
   { Colors }
   FColors := TTextEditorColors.Create;
@@ -3159,6 +3165,17 @@ function TCustomTextEditor.GetSelectedText: string;
     LFirstLine := SelectionStartPosition.Line;
     LColumnTo := SelectionEndPosition.Char;
     LLastLine := SelectionEndPosition.Line;
+
+    if FLines.Count = 0 then
+      Exit('');
+
+    LFirstLine := EnsureRange(LFirstLine, 0, FLines.Count - 1);
+
+    if LLastLine > FLines.Count - 1 then
+    begin
+      LLastLine := FLines.Count - 1;
+      LColumnTo := FLines.StringLength(LLastLine) + 1;
+    end;
 
     case FSelection.ActiveMode of
       smNormal:
@@ -5257,7 +5274,7 @@ begin
 
       if FWordWrap.Active then
       begin
-        LWidth := GetTokenWidth(LHelper, 1, 0);
+        LWidth := GetTokenWidth(LHelper, LCharCount, 0);
 
         FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] - LCharCount;
         FWordWrapLine.ViewLength[FViewPosition.Row] := FWordWrapLine.ViewLength[FViewPosition.Row] - LCharCount;
@@ -5738,11 +5755,11 @@ begin
 
             if FWordWrap.Active then
             begin
-              LWidth := GetTokenWidth(LText, 1, 0);
+              LWidth := GetTokenWidth(LText, LCharPosition, 0);
 
               FWordWrapLine.Length[FViewPosition.Row] := FWordWrapLine.Length[FViewPosition.Row] - LCharPosition;
               FWordWrapLine.ViewLength[FViewPosition.Row] := FWordWrapLine.ViewLength[FViewPosition.Row] -
-                GetTokenCharCount(LChar, FViewPosition.Row);
+                GetTokenCharCount(LText, FViewPosition.Row);
               FWordWrapLine.Width[FViewPosition.Row] := FWordWrapLine.Width[FViewPosition.Row] - LWidth;
 
               LCharAtCursor := GetCharAtTextPosition(GetPosition(LTextPosition.Char, LTextPosition.Line));
@@ -6760,6 +6777,12 @@ begin
   LTextPosition := TextPosition;
   LLineCount := if ACommand in [TKeyCommands.PageBottom, TKeyCommands.SelectionPageBottom] then FLineNumbers.VisibleCount - 1 else 0;
   LCaretNewPosition := ViewToTextPosition(GetViewPosition(FViewPosition.Column, TopLine + LLineCount));
+
+  if LCaretNewPosition.Line > FLines.Count - 1 then
+  begin
+    LCaretNewPosition.Line := Max(FLines.Count - 1, 0);
+    LCaretNewPosition.Char := FLines.StringLength(LCaretNewPosition.Line) + 1;
+  end;
 
   MoveCaretAndSelection(LTextPosition, LCaretNewPosition, ACommand in [TKeyCommands.SelectionPageTop, TKeyCommands.SelectionPageBottom]);
 end;
@@ -7856,6 +7879,9 @@ begin
       end
       else
       begin
+        if LDestinationPosition.Char = 1 then
+          Break;
+
         Dec(LPLine);
         Dec(LDestinationPosition.Char);
       end;
@@ -11184,7 +11210,7 @@ begin
   if LChangeTrim then
     Exclude(FOptions, eoTrimTrailingSpaces);
 
-  BeginUpdate;
+  BeginUndoUpdate;
   try
     RemoveGroupBreak;
 
@@ -11218,7 +11244,7 @@ begin
     if LChangeTrim then
       Include(FOptions, eoTrimTrailingSpaces);
 
-    EndUpdate;
+    EndUndoUpdate;
   end;
 end;
 
@@ -16958,6 +16984,8 @@ begin
   try
     FSelection.ActiveMode := LUndoItem.ChangeSelectionMode;
 
+    FUndoRedoFirstLine := Min(FUndoRedoFirstLine, Min(LUndoItem.ChangeBeginPosition.Line, LUndoItem.ChangeCaretPosition.Line));
+
     IncPaintLock;
 
     if LChangeScrollPastEndOfLine then
@@ -17125,9 +17153,6 @@ begin
         end;
     end;
   finally
-    if Assigned(FEvents.OnChange) then
-      FEvents.OnChange(Self);
-
     FUndoList.InsideRedo := False;
 
     if LChangeScrollPastEndOfLine then
@@ -18174,6 +18199,9 @@ begin
   if Assigned(LUndoItem) then
   try
     FSelection.ActiveMode := LUndoItem.ChangeSelectionMode;
+
+    FUndoRedoFirstLine := Min(FUndoRedoFirstLine, Min(LUndoItem.ChangeBeginPosition.Line, LUndoItem.ChangeCaretPosition.Line));
+
     IncPaintLock;
 
     if LChangeScrollPastEndOfLine then
@@ -18301,9 +18329,6 @@ begin
         end;
     end;
   finally
-    if Assigned(FEvents.OnChange) then
-      FEvents.OnChange(Self);
-
     if LChangeScrollPastEndOfLine then
       FScroll.SetOption(soPastEndOfLine, False);
 
@@ -19642,6 +19667,94 @@ begin
   end;
 
   FLines.BeginUpdate;
+end;
+
+procedure TCustomTextEditor.BeginUndoUpdate;
+begin
+  FUndoRedoFirstLine := MaxInt;
+  FUndoRedoLineCount := FLines.Count;
+
+  IncPaintLock;
+
+  if not FLines.Updating and not FUndoList.InsideUndoBlock then
+    CreateCollapsedBackup;
+
+  FLines.BeginUpdate;
+end;
+
+procedure TCustomTextEditor.EndUndoUpdate;
+var
+  LLineCountChanged: Boolean;
+begin
+  FLines.EndUpdate;
+
+  DecPaintLock;
+
+  if FLines.Updating or FUndoList.InsideUndoBlock then
+    Exit;
+
+  if FSyncEdit.Visible then
+    DoSyncEdit;
+
+  LLineCountChanged := FLines.Count <> FUndoRedoLineCount;
+
+  if FHighlighter.Loaded and (FUndoRedoFirstLine <> MaxInt) then
+    ScanHighlighterRangesFrom(EnsureRange(FUndoRedoFirstLine, 0, Max(FLines.Count - 1, 0)));
+
+  if LLineCountChanged then
+  begin
+    InitCodeFolding;
+    RestoreCollapsedBackup;
+  end
+  else
+  if IsCodeFoldingRangesNeeded then
+  begin
+    FCodeFoldings.Rescan := True;
+    FCodeFoldings.DelayTimer.Restart;
+  end;
+
+  CreateLineNumbersCache(True);
+  UpdateScrollBars;
+
+  ClampPositionsToDocument;
+
+  EnsureCursorPositionVisible;
+  ScanMatchingPair;
+  SearchAll;
+
+  DoChange;
+
+  Repaint;
+end;
+
+procedure TCustomTextEditor.ClampPositionsToDocument;
+var
+  LMaxLine: Integer;
+  LTextPosition: TTextEditorTextPosition;
+
+  function Clamped(const APosition: TTextEditorTextPosition): TTextEditorTextPosition;
+  begin
+    Result := APosition;
+
+    if Result.Line > LMaxLine then
+    begin
+      Result.Line := LMaxLine;
+      Result.Char := FLines.StringLength(LMaxLine) + 1;
+    end;
+  end;
+
+begin
+  LMaxLine := Max(FLines.Count - 1, 0);
+  LTextPosition := TextPosition;
+
+  if LTextPosition.Line > LMaxLine then
+    TextPosition := Clamped(LTextPosition);
+
+  if GetSelectionAvailable then
+  begin
+    FPosition.SelectionStart := Clamped(FPosition.SelectionStart);
+    FPosition.SelectionEnd := Clamped(FPosition.SelectionEnd);
+  end;
 end;
 
 procedure TCustomTextEditor.MoveCaretToBeginning;
@@ -21721,7 +21834,7 @@ begin
   if ReadOnly then
     Exit;
 
-  BeginUpdate;
+  BeginUndoUpdate;
 
   LChangeTrim := eoTrimTrailingSpaces in Options;
 
@@ -21760,7 +21873,7 @@ begin
     if LChangeTrim then
       Include(FOptions, eoTrimTrailingSpaces);
 
-    EndUpdate;
+    EndUndoUpdate;
   end;
 end;
 

@@ -605,7 +605,7 @@ begin
         LBoxRect.Bottom := LBoxRect.Top + LSize.cy;
 
         DrawThemeBackground(LHandle, Canvas.Handle, BP_CHECKBOX,
-          IfThen(CompareText(LNode.PropertyValue, BooleanIdents[True]) = 0, CBS_CHECKEDNORMAL, CBS_UNCHECKEDNORMAL), LBoxRect, nil);
+          if CompareText(LNode.PropertyValue, BooleanIdents[True]) = 0 then CBS_CHECKEDNORMAL else CBS_UNCHECKEDNORMAL, LBoxRect, nil);
       finally
         CloseThemeData(LHandle);
       end;
@@ -615,7 +615,7 @@ begin
       LBoxRect.Right := LBoxRect.Left + GetSystemMetrics(SM_CXMENUCHECK);
 
       DrawFrameControl(Canvas.Handle, LBoxRect, DFC_BUTTON,
-        IfThen(CompareText(LNode.PropertyValue, BooleanIdents[True]) = 0, DFCS_CHECKED, DFCS_BUTTONCHECK));
+        if CompareText(LNode.PropertyValue, BooleanIdents[True]) = 0 then DFCS_CHECKED else DFCS_BUTTONCHECK);
     end;
 
     Exit;

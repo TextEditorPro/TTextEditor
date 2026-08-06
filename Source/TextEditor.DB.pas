@@ -76,6 +76,7 @@ type
     property ImeMode;
     property ImeName;
     property KeyCommands;
+    property KeywordImages;
     property LeftMargin;
     property LineSpacing;
     property MatchingPairs;

@@ -12,11 +12,11 @@ uses
   TextEditor.CodeFolding.Regions, TextEditor.Colors, TextEditor.CompletionProposal, TextEditor.CompletionProposal.PopupWindow,
   TextEditor.CompletionProposal.Snippets, TextEditor.Consts, TextEditor.Fonts, TextEditor.Glyph, TextEditor.Highlighter,
   TextEditor.Highlighter.Attributes, TextEditor.HighlightLine, TextEditor.InternalImage, TextEditor.KeyboardHandler,
-  TextEditor.KeyCommands, TextEditor.LeftMargin, TextEditor.Lines, TextEditor.MacroRecorder, TextEditor.Marks, TextEditor.MatchingPairs,
-  TextEditor.Minimap, TextEditor.PaintHelper, TextEditor.PartialLoad, TextEditor.Replace, TextEditor.RightMargin, TextEditor.Ruler,
-  TextEditor.Scroll, TextEditor.Search, TextEditor.Search.Base, TextEditor.Selection, TextEditor.SkipRegions, TextEditor.SpecialChars,
-  TextEditor.SyncEdit, TextEditor.Tabs, TextEditor.Types, TextEditor.Undo, TextEditor.Undo.List, TextEditor.UnknownChars, TextEditor.Utils,
-  TextEditor.WordWrap
+  TextEditor.KeyCommands, TextEditor.KeywordImages, TextEditor.LeftMargin, TextEditor.Lines, TextEditor.MacroRecorder, TextEditor.Marks,
+  TextEditor.MatchingPairs, TextEditor.Minimap, TextEditor.PaintHelper, TextEditor.PartialLoad, TextEditor.Replace, TextEditor.RightMargin,
+  TextEditor.Ruler, TextEditor.Scroll, TextEditor.Search, TextEditor.Search.Base, TextEditor.Selection, TextEditor.SkipRegions,
+  TextEditor.SpecialChars, TextEditor.SyncEdit, TextEditor.Tabs, TextEditor.Types, TextEditor.Undo, TextEditor.Undo.List,
+  TextEditor.UnknownChars, TextEditor.Utils, TextEditor.WordWrap
 {$IFDEF ALPHASKINS}
   , acSBUtils, sCommonData
 {$ENDIF}
@@ -360,6 +360,7 @@ type
     FItalic: TTextEditorItalic;
     FKeyCommands: TTextEditorKeyCommands;
     FKeyboardHandler: TTextEditorKeyboardHandler;
+    FKeywordImages: TTextEditorKeywordImages;
     FLast: TTextEditorLast;
     FLeftMargin: TTextEditorLeftMargin;
     FLeftMarginCharWidth: Integer;
@@ -591,6 +592,7 @@ type
     procedure IncCharacterCount(const AText: string);
     procedure InitializeScrollShadow;
     procedure InsertLine; overload;
+    procedure KeywordImagesChanged(ASender: TObject);
     procedure LinesChanged(ASender: TObject);
     procedure LinesChanging(ASender: TObject);
     procedure LinesCleared(ASender: TObject);
@@ -640,6 +642,7 @@ type
     procedure SetHighlighterRange(const ALine: Integer);
     procedure SetHorizontalScrollPosition(const AValue: Integer);
     procedure SetKeyCommands(const AValue: TTextEditorKeyCommands);
+    procedure SetKeywordImages(const AValue: TTextEditorKeywordImages);
     procedure SetLeftMargin(const AValue: TTextEditorLeftMargin);
     procedure SetLine(const ALine: Integer; const ALineText: string); inline;
     procedure SetLineSpacing(const AValue: Integer);
@@ -770,6 +773,8 @@ type
     procedure PaintCodeFoldingCollapsedLine(const AFoldRange: TTextEditorCodeFoldingRange; const ALineRect: TRect);
     procedure PaintCodeFoldingGuides(const AFirstRow, ALastRow: Integer);
     procedure PaintCodeFoldingLine(const AClipRect: TRect; const ALine: Integer);
+    procedure PaintKeywordImageArrow(const AKind: TTextEditorKeywordImageKind; const ARect: TRect);
+    procedure PaintKeywordImages(const ALeft: Integer; const ALine: Integer; const ALineRect: TRect; const ADraws: array of TTextEditorKeywordImageDraw; const ACount: Integer);
     procedure PaintLeftMargin(const AClipRect: TRect; const AFirstLine, ALastTextLine, ALastLine: Integer);
     procedure PaintMacroState;
     procedure PaintMinimapIndicator(const AClipRect: TRect);
@@ -1020,6 +1025,7 @@ type
     property InlineSelectionAvailable: Boolean read GetInlineSelectionAvailable;
     property IsScrolling: Boolean read FScrollHelper.IsScrolling;
     property KeyCommands: TTextEditorKeyCommands read FKeyCommands write SetKeyCommands stored False;
+    property KeywordImages: TTextEditorKeywordImages read FKeywordImages write SetKeywordImages;
     property LeftMargin: TTextEditorLeftMargin read FLeftMargin write SetLeftMargin;
     property LineHeight: Integer read GetLineHeight;
     property LineNumbersCount: Integer read FLineNumbers.Count;
@@ -1160,6 +1166,7 @@ type
     property ImeMode;
     property ImeName;
     property KeyCommands;
+    property KeywordImages;
     property LeftMargin;
     property LineSpacing;
     property MatchingPairs;
@@ -1620,6 +1627,9 @@ begin
   { Sync edit }
   FSyncEdit := TTextEditorSyncEdit.Create;
   FSyncEdit.OnChange := SyncEditChanged;
+  { Keyword images }
+  FKeywordImages := TTextEditorKeywordImages.Create(Self);
+  FKeywordImages.OnChange := KeywordImagesChanged;
   { LeftMargin }
   FLeftMargin := TTextEditorLeftMargin.Create(Self);
   FLeftMargin.OnChange := LeftMarginChanged;
@@ -1693,6 +1703,7 @@ begin
   FCaretBookmarkList.Free;
   FMarkList.Free;
   FKeyCommands.Free;
+  FKeyCommands := nil; { MacroRecorder UnHookEditor runs from the destruction notification and has a check }
   FKeyboardHandler.Free;
   FSelection.Free;
   FOriginal.UndoList.Free;
@@ -1708,6 +1719,7 @@ begin
   FreeScrollShadowBitmap;
   FreeMinimapBitmaps;
   FActiveLine.Free;
+  FKeywordImages.Free;
   FRightMargin.Free;
   FScroll.Free;
   FSearch.Free;
@@ -4807,6 +4819,12 @@ begin
   if not (csLoading in ComponentState) then
     if (ASender is TTextEditorActiveLine) or (ASender is TTextEditorGlyph) then
       Invalidate;
+end;
+
+procedure TCustomTextEditor.KeywordImagesChanged(ASender: TObject);
+begin
+  if not (csLoading in ComponentState) then
+    Invalidate;
 end;
 
 procedure TCustomTextEditor.AssignSearchEngine(const AEngine: TTextEditorSearchEngine);
@@ -9177,11 +9195,10 @@ const
 
             if not LTokenName.IsEmpty and (LPText^ = TCharacters.TagClose) and ((LPText - 1)^ <> TCharacters.Slash) then
             begin
-              LOpenToken := TCharacters.TagOpen + LTokenName;
+              LOpenToken := TCharacters.TagOpen + LTokenName + LOpenTokenEndChar;
 
               if not LDefaultRegion.Contains(LOpenToken) then
               begin
-                LOpenToken := LOpenToken.Trim + LOpenTokenEndChar;
                 LCloseToken := TCharacters.CloseTagOpen + LTokenName + TCharacters.TagClose;
 
                 LRegionItem := LDefaultRegion.Add(LOpenToken, LCloseToken);
@@ -9928,6 +9945,11 @@ begin
 
     UpdateScrollBars;
   end;
+end;
+
+procedure TCustomTextEditor.SetKeywordImages(const AValue: TTextEditorKeywordImages);
+begin
+  FKeywordImages.Assign(AValue);
 end;
 
 procedure TCustomTextEditor.SetKeyCommands(const AValue: TTextEditorKeyCommands);
@@ -14258,6 +14280,139 @@ begin
   end;
 end;
 
+procedure TCustomTextEditor.PaintKeywordImageArrow(const AKind: TTextEditorKeywordImageKind; const ARect: TRect);
+var
+  LGraphics: TGPGraphics;
+  LBrush: TGPSolidBrush;
+  LColor: Cardinal;
+  LRGBColor: Cardinal;
+  LPoints: array [0..6] of TGPPointF;
+
+  function Px(const AValue: Single): Single;
+  begin
+    Result := ARect.Left + AValue * ARect.Width / 16;
+  end;
+
+  function Py(const AValue: Single): Single;
+  begin
+    Result := ARect.Top + AValue * ARect.Height / 16;
+  end;
+
+begin
+  LRGBColor := ColorToRGB(if AKind = kikArrowUp then FColors.KeywordImageArrowUp else FColors.KeywordImageArrowDown);
+  LColor := MakeColor(255, GetRValue(LRGBColor), GetGValue(LRGBColor), GetBValue(LRGBColor));
+
+  case AKind of
+    kikArrowUp:
+      begin
+        LPoints[0] := MakePoint(Px(8), Py(1));
+        LPoints[1] := MakePoint(Px(15), Py(8));
+        LPoints[2] := MakePoint(Px(10.5), Py(8));
+        LPoints[3] := MakePoint(Px(10.5), Py(15));
+        LPoints[4] := MakePoint(Px(5.5), Py(15));
+        LPoints[5] := MakePoint(Px(5.5), Py(8));
+        LPoints[6] := MakePoint(Px(1), Py(8));
+      end;
+  else
+    begin
+      LPoints[0] := MakePoint(Px(8), Py(15));
+      LPoints[1] := MakePoint(Px(1), Py(8));
+      LPoints[2] := MakePoint(Px(5.5), Py(8));
+      LPoints[3] := MakePoint(Px(5.5), Py(1));
+      LPoints[4] := MakePoint(Px(10.5), Py(1));
+      LPoints[5] := MakePoint(Px(10.5), Py(8));
+      LPoints[6] := MakePoint(Px(15), Py(8));
+    end;
+  end;
+
+  LGraphics := TGPGraphics.Create(Canvas.Handle);
+  LBrush := TGPSolidBrush.Create(LColor);
+  try
+    LGraphics.SetSmoothingMode(SmoothingModeAntiAlias);
+    LGraphics.SetPixelOffsetMode(PixelOffsetModeHalf);
+    LGraphics.FillPolygon(LBrush, PGPPointF(@LPoints[0]), Length(LPoints));
+  finally
+    LBrush.Free;
+    LGraphics.Free;
+  end;
+end;
+
+procedure TCustomTextEditor.PaintKeywordImages(const ALeft: Integer; const ALine: Integer; const ALineRect: TRect;
+  const ADraws: array of TTextEditorKeywordImageDraw; const ACount: Integer);
+var
+  LX, LSize, LSpacing, LTop, LPilcrowLength: Integer;
+begin
+  LX := ALeft;
+
+  if FSpecialChars.Visible and FSpecialChars.LineBreak.Visible and
+    ((eoTrailingLineBreak in FOptions) or (ALine + 1 < FLines.Count)) then
+  case FSpecialChars.LineBreak.Style of
+    eolArrow:
+      Inc(LX, 10);
+    eolEnter:
+      Inc(LX, 15);
+    eolPilcrow:
+      Inc(LX, FPaintHelper.CharWidth + 2);
+    eolCRLF:
+      begin
+        LPilcrowLength := 0;
+
+        with FLines.Items^[ALine] do
+        begin
+          if sfLineBreakCR in Flags then
+            Inc(LPilcrowLength, Length(TControlCharacterNames.CarriageReturn));
+
+          if sfLineBreakLF in Flags then
+            Inc(LPilcrowLength, Length(TControlCharacterNames.LineFeed));
+        end;
+
+        if LPilcrowLength = 0 then
+          LPilcrowLength :=
+            if FLines.LineBreak = lbCRLF then
+              Length(TControlCharacterNames.CarriageReturn) + Length(TControlCharacterNames.LineFeed)
+            else
+              Length(TControlCharacterNames.LineFeed);
+
+        Inc(LX, LPilcrowLength * FPaintHelper.CharWidth + 4);
+      end;
+  end;
+
+  Inc(LX, FPaintHelper.CharWidth);
+
+  LSize := Max(8, MulDiv(ALineRect.Height, 5, 8));
+
+  if Odd(LSize) then
+    Inc(LSize);
+
+  LSpacing := FPaintHelper.CharWidth shr 1;
+  LTop := ALineRect.Top + (ALineRect.Height - LSize) shr 1;
+
+  for var LIndex := 0 to ACount - 1 do
+  begin
+    if LX >= ClientRect.Right then
+      Break;
+
+    if ADraws[LIndex].ImageIndex >= 0 then
+    begin
+      if Assigned(FKeywordImages.Images) then
+      begin
+        if LX >= FLeftMarginWidth then
+          FKeywordImages.Images.Draw(Canvas, LX, ALineRect.Top + (ALineRect.Height - FKeywordImages.Images.Height) shr 1,
+            ADraws[LIndex].ImageIndex);
+
+        Inc(LX, FKeywordImages.Images.Width + LSpacing);
+      end;
+    end
+    else
+    begin
+      if LX >= FLeftMarginWidth then
+        PaintKeywordImageArrow(ADraws[LIndex].Kind, Rect(LX, LTop, LX + LSize, LTop + LSize));
+
+      Inc(LX, LSize + LSpacing);
+    end;
+  end;
+end;
+
 procedure TCustomTextEditor.PaintCodeFoldingCollapseMark(const AFoldRange: TTextEditorCodeFoldingRange; const ACurrentLineText: string; const ATokenPosition, ATokenLength, ALine: Integer; const ALineRect: TRect);
 var
   LOldPenColor, LOldBrushColor: TColor;
@@ -16654,6 +16809,12 @@ var
 var
   LCustomBackgroundColor, LCustomForegroundColor: TColor;
   LCustomLineColors, LIsLineSelected, LIsSelectionInsideLine: Boolean;
+  LKeywordImageAttribute: TTextEditorHighlighterAttribute;
+  LKeywordImageCount: Integer;
+  LKeywordImageDraws: array [0..15] of TTextEditorKeywordImageDraw;
+  LKeywordImageItem: TTextEditorKeywordImageItem;
+  LKeywordImageKind: TTextEditorKeywordImageKind;
+  LKeywordImagesActive: Boolean;
   LLineEndRect, LLineRect: TRect;
   LLineSelectionStart, LLineSelectionEnd: Integer;
   LSelectionStartPosition: TTextEditorTextPosition;
@@ -17386,6 +17547,10 @@ var
 
     SetSelectionVariables;
 
+    LKeywordImageCount := 0;
+    LKeywordImagesActive := not AMinimap and not FWordWrap.Active and FKeywordImages.Visible and
+      ((FHighlighter.KeywordImages.Count > 0) or (FKeywordImages.Items.Count > 0)) and not (csDesigning in ComponentState);
+
     LViewLine := AFirstLine;
     LBookmarkOnCurrentLine := False;
 
@@ -17402,6 +17567,7 @@ var
 
       LCurrentLineText := FLines[LCurrentLine];
 
+      LKeywordImageCount := 0;
       LPaintedColumn := 1;
 
       LIsCurrentLine := False;
@@ -17608,6 +17774,35 @@ var
           LNextTokenText := '';
           LTokenLength := LTokenText.Length;
 
+          if LKeywordImagesActive and (LTokenLength > 0) and (LKeywordImageCount < Length(LKeywordImageDraws)) then
+          begin
+            LKeywordImageAttribute := FHighlighter.TokenAttribute;
+
+            if Assigned(LKeywordImageAttribute) and (LKeywordImageAttribute.Element <> TElement.Comment) and
+              (LKeywordImageAttribute.Element <> TElement.StringOfCharacters) and
+              (LKeywordImageAttribute.Element <> TElement.AssemblerComment) and
+              (LKeywordImageAttribute.Element <> TElement.Character) then
+            begin
+              LKeywordImageItem := if FKeywordImages.Items.Count > 0 then FKeywordImages.Items.FindItem(LTokenText) else nil;
+
+              if Assigned(LKeywordImageItem) and (LKeywordImageItem.ImageIndex >= 0) and Assigned(FKeywordImages.Images) then
+              begin
+                LKeywordImageDraws[LKeywordImageCount].ImageIndex := LKeywordImageItem.ImageIndex;
+
+                Inc(LKeywordImageCount);
+              end
+              else
+              if FHighlighter.KeywordImages.TryGetValue(
+                if FHighlighter.MainRules.CaseSensitive then LTokenText else AnsiLowerCase(LTokenText), LKeywordImageKind) then
+              begin
+                LKeywordImageDraws[LKeywordImageCount].ImageIndex := -1;
+                LKeywordImageDraws[LKeywordImageCount].Kind := LKeywordImageKind;
+
+                Inc(LKeywordImageCount);
+              end;
+            end;
+          end;
+
           if (LTokenPosition + LTokenLength >= LFirstColumn) or (LTokenLength = 0) then
           begin
             LIsSyncEditBlock := False;
@@ -17672,6 +17867,14 @@ var
           PaintCodeFoldingCollapseMark(LFoldRange, LCurrentLineText, LTokenPosition, LTokenLength, LCurrentLine, LLineRect);
           PaintSpecialCharsEndOfLine(LCurrentLine + 1, LLineEndRect, (LCurrentLineLength + 1 >= LLineSelectionStart) and (LCurrentLineLength + 1 < LLineSelectionEnd));
           PaintCodeFoldingCollapsedLine(LFoldRange, LLineRect);
+
+          if LKeywordImageCount > 0 then
+          begin
+            if FHighlighter.EndOfLine and not (Assigned(LFoldRange) and LFoldRange.Collapsed) then
+              PaintKeywordImages(LTokenRect.Left, LCurrentLine, LLineRect, LKeywordImageDraws, LKeywordImageCount);
+
+            LKeywordImageCount := 0;
+          end;
         end;
 
         if Assigned(FEvents.OnAfterLinePaint) then
@@ -22629,6 +22832,14 @@ begin
       if (AComponent = FLeftMargin.Bookmarks.Images) then
       begin
         FLeftMargin.Bookmarks.Images := nil;
+
+        Invalidate;
+      end;
+
+    if Assigned(FKeywordImages) and Assigned(FKeywordImages.Images) then
+      if AComponent = FKeywordImages.Images then
+      begin
+        FKeywordImages.Images := nil;
 
         Invalidate;
       end;

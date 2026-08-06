@@ -196,6 +196,14 @@ type
   { Internal glyphs }
   TTextEditorInternalGlyph = (igNone, igActiveLine, igMouseMoveScroll, igSyncEdit, igWordWrap);
 
+  { Keyword images }
+  TTextEditorKeywordImageKind = (kikArrowUp, kikArrowDown);
+
+  TTextEditorKeywordImageDraw = record
+    ImageIndex: Integer;
+    Kind: TTextEditorKeywordImageKind;
+  end;
+
   { Sync edit }
   TTextEditorSyncEditOption = (seCaseSensitive);
   TTextEditorSyncEditOptions = set of TTextEditorSyncEditOption;

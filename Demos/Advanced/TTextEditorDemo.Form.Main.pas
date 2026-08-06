@@ -135,10 +135,20 @@ uses
 
 type
   TDemoPaths = record
-  const
-    Highlighters = '..\..\Highlighters\';
-    Themes = '..\..\Themes\';
+  public
+    class function Highlighters: string; static;
+    class function Themes: string; static;
   end;
+
+class function TDemoPaths.Highlighters: string;
+begin
+  Result := ExtractFilePath(ParamStr(0)) + '..\..\Highlighters\';
+end;
+
+class function TDemoPaths.Themes: string;
+begin
+  Result := ExtractFilePath(ParamStr(0)) + '..\..\Themes\';
+end;
 
 var
   FDarkStyleEnabled: Boolean;
@@ -552,6 +562,8 @@ end;
 
 procedure TMainForm.ActionViewDarkThemeExecute(Sender: TObject);
 begin
+  PanelSidebar.SetFocus;
+
   ToggleDarkStyle(not FDarkStyleEnabled);
 
   if FDarkStyleEnabled then

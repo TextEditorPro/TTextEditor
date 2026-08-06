@@ -4,10 +4,10 @@ unit FMX.TextEditor.Highlighter;
 interface
 
 uses
-  System.Classes, System.SysUtils, FMX.Controls, FMX.TextEditor.CodeFolding.Regions, FMX.TextEditor.Consts,
-  FMX.TextEditor.Highlighter.Attributes, FMX.TextEditor.Highlighter.Colors, FMX.TextEditor.Highlighter.Comments,
-  FMX.TextEditor.Highlighter.Rules, FMX.TextEditor.Highlighter.Token, FMX.TextEditor.Lines, FMX.TextEditor.SkipRegions,
-  FMX.TextEditor.Types;
+  System.Classes, System.Generics.Collections, System.SysUtils, FMX.Controls, FMX.TextEditor.CodeFolding.Regions,
+  FMX.TextEditor.Consts, FMX.TextEditor.Highlighter.Attributes, FMX.TextEditor.Highlighter.Colors,
+  FMX.TextEditor.Highlighter.Comments, FMX.TextEditor.Highlighter.Rules, FMX.TextEditor.Highlighter.Token, FMX.TextEditor.Lines,
+  FMX.TextEditor.SkipRegions, FMX.TextEditor.Types;
 
 type
   TTextEditorHighlighter = class(TPersistent)
@@ -34,6 +34,7 @@ type
     FFoldTags: Boolean;
     FIsSharedCloseFound: Boolean;
     FJSON: TStrings;
+    FKeywordImages: TDictionary<string, TTextEditorKeywordImageKind>;
     FLine: PChar;
     FLines: TTextEditorLines;
     FLoaded: Boolean;
@@ -115,6 +116,7 @@ type
     property FoldOpenKeyChars: TTextEditorCharSet read FFoldOpenKeyChars write FFoldOpenKeyChars;
     property FoldTags: Boolean read FFoldTags write FFoldTags default False;
     property IsSharedCloseFound: Boolean read FIsSharedCloseFound write FIsSharedCloseFound;
+    property KeywordImages: TDictionary<string, TTextEditorKeywordImageKind> read FKeywordImages;
     property Lines: TTextEditorLines read FLines write FLines;
     property Loaded: Boolean read FLoaded write FLoaded;
     property Loading: Boolean read FLoading write FLoading;
@@ -194,6 +196,7 @@ begin
 
   FRange := MainRules;
 
+  FKeywordImages := TDictionary<string, TTextEditorKeywordImageKind>.Create;
   FMatchingPairs := TList.Create;
   FTemporaryTokens := TList.Create;
 end;
@@ -206,6 +209,7 @@ begin
   FMainRules.Free;
   FAttributes.Free;
   FCompletionProposalSkipRegions.Free;
+  FKeywordImages.Free;
   FMatchingPairs.Free;
   FColors.Free;
 
@@ -639,6 +643,7 @@ begin
     Dispose(PTextEditorMatchingPairToken(FMatchingPairs.Items[LIndex]));
 
   FMatchingPairs.Clear;
+  FKeywordImages.Clear;
 
   for var LIndex := FCodeFoldingRangeCount - 1 downto 0 do
   begin

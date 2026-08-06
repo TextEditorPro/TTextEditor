@@ -43,7 +43,7 @@ uses
 procedure TFrameTextEditor.TextEditorCreateHighlighterStream(const ASender: TObject; const AName: string; var AStream: TStream);
 begin
   if not AName.IsEmpty then
-    AStream := TFileStream.Create('..\..\Highlighters\' + AName + '.json', fmOpenRead);
+    AStream := TFileStream.Create(ExtractFilePath(ParamStr(0)) + '..\..\Highlighters\' + AName + '.json', fmOpenRead);
 end;
 
 { Tests }
@@ -479,8 +479,8 @@ var
 begin
   PanelTests.Visible := True;
 
-  LHighlighters := TDirectory.GetFiles('..\..\Highlighters', '*.json');
-  LThemes := TDirectory.GetFiles('..\..\Themes', '*.json');
+  LHighlighters := TDirectory.GetFiles(ExtractFilePath(ParamStr(0)) + '..\..\Highlighters', '*.json');
+  LThemes := TDirectory.GetFiles(ExtractFilePath(ParamStr(0)) + '..\..\Themes', '*.json');
 
   try
     for var LIndex := 0 to High(LHighlighters) do

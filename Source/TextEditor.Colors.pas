@@ -88,6 +88,8 @@ type
     FHintBorder: TColor;
     FHintText: TColor;
     FInDesign: Boolean;
+    FKeywordImageArrowDown: TColor;
+    FKeywordImageArrowUp: TColor;
     FLeftMarginActiveLineBackground: TColor;
     FLeftMarginActiveLineBackgroundUnfocused: TColor;
     FLeftMarginActiveLineNumber: TColor;
@@ -210,6 +212,8 @@ type
     procedure SetHintBackground(const AValue: TColor);
     procedure SetHintBorder(const AValue: TColor);
     procedure SetHintText(const AValue: TColor);
+    procedure SetKeywordImageArrowDown(const AValue: TColor);
+    procedure SetKeywordImageArrowUp(const AValue: TColor);
     procedure SetLeftMarginActiveLineBackground(const AValue: TColor);
     procedure SetLeftMarginActiveLineBackgroundUnfocused(const AValue: TColor);
     procedure SetLeftMarginActiveLineNumber(const AValue: TColor);
@@ -335,6 +339,8 @@ type
     property HintBackground: TColor read FHintBackground write SetHintBackground default TColors.SysInfoBk;
     property HintBorder: TColor read FHintBorder write SetHintBorder default TDefaultColors.LineNumbers;
     property HintText: TColor read FHintText write SetHintText default TColors.SysInfoText;
+    property KeywordImageArrowDown: TColor read FKeywordImageArrowDown write SetKeywordImageArrowDown default TDefaultColors.KeywordImageArrowDown;
+    property KeywordImageArrowUp: TColor read FKeywordImageArrowUp write SetKeywordImageArrowUp default TDefaultColors.KeywordImageArrowUp;
     property LeftMarginActiveLineBackground: TColor read FLeftMarginActiveLineBackground write SetLeftMarginActiveLineBackground default TDefaultColors.ActiveLineBackground;
     property LeftMarginActiveLineBackgroundUnfocused: TColor read FLeftMarginActiveLineBackgroundUnfocused write SetLeftMarginActiveLineBackgroundUnfocused default TDefaultColors.ActiveLineBackgroundUnfocused;
     property LeftMarginActiveLineNumber: TColor read FLeftMarginActiveLineNumber write SetLeftMarginActiveLineNumber default TDefaultColors.LineNumbers;
@@ -482,6 +488,8 @@ begin
   FHintBackground := TColors.SysInfoBk;
   FHintBorder := TDefaultColors.LineNumbers;
   FHintText := TColors.SysInfoText;
+  FKeywordImageArrowDown := TDefaultColors.KeywordImageArrowDown;
+  FKeywordImageArrowUp := TDefaultColors.KeywordImageArrowUp;
   { Left margin }
   FLeftMarginActiveLineBackground := TDefaultColors.ActiveLineBackground;
   FLeftMarginActiveLineBackgroundUnfocused := TDefaultColors.ActiveLineBackgroundUnfocused;
@@ -630,6 +638,8 @@ begin
     Self.FHintBackground := FHintBackground;
     Self.FHintBorder := FHintBorder;
     Self.FHintText := FHintText;
+    Self.FKeywordImageArrowDown := FKeywordImageArrowDown;
+    Self.FKeywordImageArrowUp := FKeywordImageArrowUp;
     { Left margin }
     Self.FLeftMarginActiveLineBackground := FLeftMarginActiveLineBackground;
     Self.FLeftMarginActiveLineBackgroundUnfocused := FLeftMarginActiveLineBackgroundUnfocused;
@@ -1101,6 +1111,16 @@ end;
 procedure TTextEditorColors.SetHintText(const AValue: TColor);
 begin
   FHintText := SetColorDef(AValue, TColors.SysInfoText);
+end;
+
+procedure TTextEditorColors.SetKeywordImageArrowDown(const AValue: TColor);
+begin
+  FKeywordImageArrowDown := SetColorDef(AValue, TDefaultColors.KeywordImageArrowDown);
+end;
+
+procedure TTextEditorColors.SetKeywordImageArrowUp(const AValue: TColor);
+begin
+  FKeywordImageArrowUp := SetColorDef(AValue, TDefaultColors.KeywordImageArrowUp);
 end;
 
 procedure TTextEditorColors.SetLeftMarginActiveLineBackground(const AValue: TColor);

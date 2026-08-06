@@ -76,6 +76,7 @@ contains
   FMX.TextEditor.JSONDataObjects in '..\Source\FMX\FMX.TextEditor.JSONDataObjects.pas',
   FMX.TextEditor.KeyCommands in '..\Source\FMX\FMX.TextEditor.KeyCommands.pas',
   FMX.TextEditor.KeyboardHandler in '..\Source\FMX\FMX.TextEditor.KeyboardHandler.pas',
+  FMX.TextEditor.KeywordImages in '..\Source\FMX\FMX.TextEditor.KeywordImages.pas',
   FMX.TextEditor.Language in '..\Source\FMX\FMX.TextEditor.Language.pas',
   FMX.TextEditor.LeftMargin in '..\Source\FMX\FMX.TextEditor.LeftMargin.pas',
   FMX.TextEditor.LeftMargin.Bookmarks in '..\Source\FMX\FMX.TextEditor.LeftMargin.Bookmarks.pas',

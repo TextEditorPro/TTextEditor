@@ -159,6 +159,8 @@ type
     BookmarkYellow = TAlphaColor($FFFECB00);
     HintBackground = TAlphaColor($FFFFFFE1); { FMX has no system colors - this is the classic clInfoBk }
     HintText = TAlphaColors.Black;
+    KeywordImageArrowDown = TAlphaColor($FFE04040);
+    KeywordImageArrowUp = TAlphaColor($FF3CA53C);
     LeftMarginBackground = TAlphaColor($FFFFFFFF);
     LineNumbers = TAlphaColor($FF9999CC);
     MatchingPairUnderline = TAlphaColors.Black;

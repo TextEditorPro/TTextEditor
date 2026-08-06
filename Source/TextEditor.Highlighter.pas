@@ -4,9 +4,9 @@ unit TextEditor.Highlighter;
 interface
 
 uses
-  System.Classes, System.SysUtils, Vcl.Controls, TextEditor.CodeFolding.Regions, TextEditor.Consts, TextEditor.Highlighter.Attributes,
-  TextEditor.Highlighter.Colors, TextEditor.Highlighter.Comments, TextEditor.Highlighter.Rules, TextEditor.Highlighter.Token,
-  TextEditor.Lines, TextEditor.SkipRegions, TextEditor.Types;
+  System.Classes, System.Generics.Collections, System.SysUtils, Vcl.Controls, TextEditor.CodeFolding.Regions, TextEditor.Consts,
+  TextEditor.Highlighter.Attributes, TextEditor.Highlighter.Colors, TextEditor.Highlighter.Comments, TextEditor.Highlighter.Rules,
+  TextEditor.Highlighter.Token, TextEditor.Lines, TextEditor.SkipRegions, TextEditor.Types;
 
 type
   TTextEditorHighlighter = class(TPersistent)
@@ -33,6 +33,7 @@ type
     FFoldTags: Boolean;
     FIsSharedCloseFound: Boolean;
     FJSON: TStrings;
+    FKeywordImages: TDictionary<string, TTextEditorKeywordImageKind>;
     FLine: PChar;
     FLines: TTextEditorLines;
     FLoaded: Boolean;
@@ -114,6 +115,7 @@ type
     property FoldOpenKeyChars: TTextEditorCharSet read FFoldOpenKeyChars write FFoldOpenKeyChars;
     property FoldTags: Boolean read FFoldTags write FFoldTags default False;
     property IsSharedCloseFound: Boolean read FIsSharedCloseFound write FIsSharedCloseFound;
+    property KeywordImages: TDictionary<string, TTextEditorKeywordImageKind> read FKeywordImages;
     property Lines: TTextEditorLines read FLines write FLines;
     property Loaded: Boolean read FLoaded write FLoaded;
     property Loading: Boolean read FLoading write FLoading;
@@ -193,6 +195,7 @@ begin
 
   FRange := MainRules;
 
+  FKeywordImages := TDictionary<string, TTextEditorKeywordImageKind>.Create;
   FMatchingPairs := TList.Create;
   FTemporaryTokens := TList.Create;
 end;
@@ -205,6 +208,7 @@ begin
   FMainRules.Free;
   FAttributes.Free;
   FCompletionProposalSkipRegions.Free;
+  FKeywordImages.Free;
   FMatchingPairs.Free;
   FColors.Free;
 
@@ -637,6 +641,7 @@ begin
     Dispose(PTextEditorMatchingPairToken(FMatchingPairs.Items[LIndex]));
 
   FMatchingPairs.Clear;
+  FKeywordImages.Clear;
 
   for var LIndex := FCodeFoldingRangeCount - 1 downto 0 do
   begin

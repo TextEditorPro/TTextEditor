@@ -79,6 +79,7 @@ contains
   TextEditor.JSONDataObjects in '..\Source\TextEditor.JSONDataObjects.pas',
   TextEditor.KeyCommands in '..\Source\TextEditor.KeyCommands.pas',
   TextEditor.KeyboardHandler in '..\Source\TextEditor.KeyboardHandler.pas',
+  TextEditor.KeywordImages in '..\Source\TextEditor.KeywordImages.pas',
   TextEditor.Language in '..\Source\TextEditor.Language.pas',
   TextEditor.LeftMargin in '..\Source\TextEditor.LeftMargin.pas',
   TextEditor.LeftMargin.Bookmarks in '..\Source\TextEditor.LeftMargin.Bookmarks.pas',

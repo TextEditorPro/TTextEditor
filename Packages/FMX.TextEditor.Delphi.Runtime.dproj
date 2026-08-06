@@ -211,6 +211,7 @@
         <DCCReference Include="..\Source\FMX\FMX.TextEditor.JSONDataObjects.pas"/>
         <DCCReference Include="..\Source\FMX\FMX.TextEditor.KeyCommands.pas"/>
         <DCCReference Include="..\Source\FMX\FMX.TextEditor.KeyboardHandler.pas"/>
+        <DCCReference Include="..\Source\FMX\FMX.TextEditor.KeywordImages.pas"/>
         <DCCReference Include="..\Source\FMX\FMX.TextEditor.Language.pas"/>
         <DCCReference Include="..\Source\FMX\FMX.TextEditor.LeftMargin.pas"/>
         <DCCReference Include="..\Source\FMX\FMX.TextEditor.LeftMargin.Bookmarks.pas"/>

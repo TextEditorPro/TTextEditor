@@ -63,6 +63,7 @@ type
     function UnlistedProperty(const APropertyName: string): Boolean;
     procedure ColorComboChange(Sender: TObject);
     procedure ComboChange(Sender: TObject);
+    procedure ComboCycleValue(Sender: TObject);
     procedure DoObjectChange;
     procedure EditFileNameProperty(const AItem: TMyInspectorItem);
     procedure EditStringsProperty(const AItem: TMyInspectorItem);
@@ -136,6 +137,28 @@ const
 
 type
   TPropertyArray = array of PPropInfo;
+
+  TMyInspectorComboBox = class(TComboBox)
+  private
+    FOnCycle: TNotifyEvent;
+  protected
+    procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Single); override;
+  public
+    property OnCycle: TNotifyEvent read FOnCycle write FOnCycle;
+  end;
+
+procedure TMyInspectorComboBox.MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Single);
+begin
+  if (Button = TMouseButton.mbLeft) and (X < Width - Height) then
+  begin
+    if (ssDouble in Shift) and Assigned(FOnCycle) then
+      FOnCycle(Self);
+
+    Exit;
+  end;
+
+  inherited MouseDown(Button, Shift, X, Y);
+end;
 
 function ShortCutAsText(const AShortCut: TShortCut): string;
 var
@@ -648,6 +671,11 @@ var
     end;
   end;
 
+  function Int64AsString: string;
+  begin
+    Result := IntToStr(GetInt64Prop(AObject, APropertyInfo));
+  end;
+
   function FloatAsString: string;
   begin
     var LValue: Extended := GetFloatProp(AObject, APropertyInfo);
@@ -676,6 +704,8 @@ begin
   case LTypeKind of
     tkInteger, tkChar, tkEnumeration, tkSet:
       Result := OrdAsString;
+    tkInt64:
+      Result := Int64AsString;
     tkFloat:
       Result := FloatAsString;
     tkString, tkLString, tkWString, tkUString:
@@ -693,6 +723,9 @@ var
   LIdentToInt: TIdentToInt;
   LOrdValue: Integer;
 begin
+  if csDestroying in ComponentState then
+    Exit;
+
   LParentItem := if AItem.ParentItem is TMyInspectorItem then TMyInspectorItem(AItem.ParentItem) else nil;
   LParentObject := ParentObjectOf(AItem);
 
@@ -728,6 +761,9 @@ begin
       SetPropValue(LParentObject, AItem.PropertyName, StrToIntDef(AValue, 0));
   end
   else
+  if AItem.PropTypeInfo.Kind = tkInt64 then
+    SetInt64Prop(LParentObject, AItem.PropertyInfo, StrToInt64Def(AValue, 0))
+  else
   if AItem.PropTypeInfo.Kind = tkFloat then
     SetPropValue(LParentObject, AItem.PropertyName, StrToFloat(AValue))
   else
@@ -746,7 +782,7 @@ end;
 procedure TMyObjectInspector.BeginEdit(const AItem: TMyInspectorItem);
 var
   LEdit: TEdit;
-  LComboBox: TComboBox;
+  LComboBox: TMyInspectorComboBox;
   LColorComboBox: TComboColorBox;
   LTypeData: PTypeData;
   LValueLeft: Single;
@@ -776,7 +812,7 @@ begin
 
   if AItem.PropTypeInfo = System.TypeInfo(TAlphaColor) then
   begin
-    LColorComboBox := TComboColorBox.Create(Self);
+    LColorComboBox := TComboColorBox.Create(nil);
     FEditor := LColorComboBox;
     LColorComboBox.Parent := AItem;
     LColorComboBox.SetBounds(LValueLeft, 0, Max(AItem.Width - LValueLeft - 4, 60), ITEM_HEIGHT);
@@ -789,7 +825,7 @@ begin
   else
   if (AItem.PropTypeInfo.Kind = tkEnumeration) or (AItem.PropTypeInfo = System.TypeInfo(TShortCut)) then
   begin
-    LComboBox := TComboBox.Create(Self);
+    LComboBox := TMyInspectorComboBox.Create(nil);
     FEditor := LComboBox;
     LComboBox.Parent := AItem;
     LComboBox.SetBounds(LValueLeft, 0, Max(AItem.Width - LValueLeft - 4, 60), ITEM_HEIGHT);
@@ -816,13 +852,13 @@ begin
 
     LComboBox.Items.EndUpdate;
     LComboBox.OnChange := ComboChange;
+    LComboBox.OnCycle := ComboCycleValue;
     LComboBox.OnExit := EditorExit;
     LComboBox.SetFocus;
-    LComboBox.DropDown;
   end
   else
   begin
-    LEdit := TEdit.Create(Self);
+    LEdit := TEdit.Create(nil);
     FEditor := LEdit;
     LEdit.Parent := AItem;
     LEdit.SetBounds(LValueLeft, 0, Max(AItem.Width - LValueLeft - 4, 60), ITEM_HEIGHT);
@@ -1012,6 +1048,30 @@ end;
 procedure TMyObjectInspector.ComboChange(Sender: TObject);
 begin
   EndEdit(True);
+end;
+
+procedure TMyObjectInspector.ComboCycleValue(Sender: TObject);
+var
+  LComboBox: TComboBox;
+begin
+  LComboBox := Sender as TComboBox;
+
+  if (FEditor <> LComboBox) or (LComboBox.Count = 0) then
+    Exit;
+
+  LComboBox.OnChange := nil;
+  try
+    LComboBox.ItemIndex := (LComboBox.ItemIndex + 1) mod LComboBox.Count;
+  finally
+    LComboBox.OnChange := ComboChange;
+  end;
+
+  if Assigned(FEditItem) then
+  try
+    SetValueAsString(FEditItem, LComboBox.Items[LComboBox.ItemIndex]);
+  except
+    { Ignore }
+  end;
 end;
 
 procedure TMyObjectInspector.ColorComboChange(Sender: TObject);

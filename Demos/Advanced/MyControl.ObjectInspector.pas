@@ -42,6 +42,7 @@ type
     function ValueDisplayText(const ANode: TMyInspectorNode): string;
     procedure ColorBoxSelect(Sender: TObject);
     procedure ComboChange(Sender: TObject);
+    procedure ComboCycleValue(Sender: TObject);
     procedure DoAdvancedDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; Stage: TCustomDrawStage; var PaintImages, DefaultDraw: Boolean);
     procedure DoObjectChange;
     procedure EditFileNameProperty(const ANode: TMyInspectorNode);
@@ -118,6 +119,103 @@ const
 
 type
   TPropertyArray = array of PPropInfo;
+
+  TMyInspectorComboBox = class(TComboBox)
+  private
+    FCreatedTick: Cardinal;
+    FOnCycle: TNotifyEvent;
+    function InArrowButton(const AXPos: Integer): Boolean;
+    procedure CNDrawItem(var Message: TWMDrawItem); message CN_DRAWITEM;
+  protected
+    procedure WndProc(var Message: TMessage); override;
+  public
+    constructor Create(AOwner: TComponent); override;
+    property OnCycle: TNotifyEvent read FOnCycle write FOnCycle;
+  end;
+
+constructor TMyInspectorComboBox.Create(AOwner: TComponent);
+begin
+  inherited Create(AOwner);
+
+  FCreatedTick := GetTickCount;
+end;
+
+function TMyInspectorComboBox.InArrowButton(const AXPos: Integer): Boolean;
+begin
+  Result := AXPos >= ClientWidth - GetSystemMetrics(SM_CXVSCROLL);
+end;
+
+procedure TMyInspectorComboBox.CNDrawItem(var Message: TWMDrawItem);
+const
+  ColorStates: array[Boolean] of TStyleColor = (scComboBoxDisabled, scComboBox);
+  FontStates: array[Boolean] of TStyleFont = (sfComboBoxItemDisabled, sfComboBoxItemNormal);
+var
+  State: TOwnerDrawState;
+  LStyle: TCustomStyleServices;
+begin
+  with Message.DrawItemStruct^ do
+  begin
+    State := TOwnerDrawState(LoWord(itemState));
+
+    if itemState and ODS_COMBOBOXEDIT <> 0 then
+      Include(State, odComboBoxEdit);
+
+    if itemState and ODS_DEFAULT <> 0 then
+      Include(State, odDefault);
+
+    Canvas.Handle := hDC;
+    Canvas.Font := Font;
+
+    if IsCustomStyleActive then
+    begin
+      LStyle := StyleServices(Self);
+
+      if seClient in StyleElements then
+        Canvas.Brush.Color := LStyle.GetStyleColor(ColorStates[Enabled])
+      else
+        Canvas.Brush := Brush;
+
+      if (seFont in StyleElements) or not Enabled then
+        Canvas.Font.Color := LStyle.GetStyleFontColor(FontStates[Enabled])
+    end
+    else
+    begin
+      Canvas.Brush := Brush;
+
+      if not Enabled then
+        Canvas.Font.Color := clGrayText;
+    end;
+
+    if (Integer(itemID) >= 0) and (odSelected in State) then
+    begin
+      Canvas.Brush.Color := clHighlight;
+      Canvas.Font.Color := clHighlightText
+    end;
+
+    if Integer(itemID) >= 0 then
+      DrawItem(itemID, rcItem, State)
+    else
+      Canvas.FillRect(rcItem);
+
+    Canvas.Handle := 0;
+  end;
+end;
+
+procedure TMyInspectorComboBox.WndProc(var Message: TMessage);
+begin
+  if (Message.Msg = WM_LBUTTONDOWN) or (Message.Msg = WM_LBUTTONDBLCLK) then
+    if HandleAllocated and not InArrowButton(TWMMouse(Message).XPos) then
+    begin
+      if (Message.Msg = WM_LBUTTONDBLCLK) or (GetTickCount - FCreatedTick <= GetDoubleClickTime) then
+        if Assigned(FOnCycle) then
+          FOnCycle(Self);
+
+      Message.Result := 0;
+      Exit;
+    end;
+
+  inherited WndProc(Message);
+end;
 
 function IsBooleanIdent(const AValue: string): Boolean;
 begin
@@ -450,6 +548,11 @@ var
     end;
   end;
 
+  function Int64AsString: string;
+  begin
+    Result := IntToStr(GetInt64Prop(AObject, APropertyInfo));
+  end;
+
   function FloatAsString: string;
   begin
     var LValue: Extended := GetFloatProp(AObject, APropertyInfo);
@@ -478,6 +581,8 @@ begin
   case LTypeKind of
     tkInteger, tkChar, tkEnumeration, tkSet:
       Result := OrdAsString;
+    tkInt64:
+      Result := Int64AsString;
     tkFloat:
       Result := FloatAsString;
     tkString, tkLString, tkWString, tkUString:
@@ -495,6 +600,9 @@ var
   LIdentToInt: TIdentToInt;
   LOrdValue: Integer;
 begin
+  if csDestroying in ComponentState then
+    Exit;
+
   LParentNode := if ANode.Parent is TMyInspectorNode then TMyInspectorNode(ANode.Parent) else nil;
   LParentObject := ParentObjectOf(ANode);
 
@@ -530,6 +638,9 @@ begin
     else
       SetPropValue(LParentObject, ANode.PropertyName, StrToIntDef(AValue, 0));
   end
+  else
+  if ANode.PropTypeInfo.Kind = tkInt64 then
+    SetInt64Prop(LParentObject, ANode.PropertyInfo, StrToInt64Def(AValue, 0))
   else
   if ANode.PropTypeInfo.Kind = tkFloat then
     SetPropValue(LParentObject, ANode.PropertyName, StrToFloat(AValue))
@@ -742,7 +853,7 @@ procedure TMyObjectInspector.BeginEdit(const ANode: TMyInspectorNode);
 var
   LRect: TRect;
   LEdit: TEdit;
-  LComboBox: TComboBox;
+  LComboBox: TMyInspectorComboBox;
   LColorBox: TColorBox;
   LTypeData: PTypeData;
 begin
@@ -788,7 +899,7 @@ begin
   else
   if (ANode.PropTypeInfo.Kind = tkEnumeration) or (ANode.PropTypeInfo = System.TypeInfo(TShortCut)) then
   begin
-    LComboBox := TComboBox.Create(nil);
+    LComboBox := TMyInspectorComboBox.Create(nil);
     FEditor := LComboBox;
     LComboBox.Parent := Self;
     LComboBox.Style := csDropDownList;
@@ -815,10 +926,10 @@ begin
 
     LComboBox.Items.EndUpdate;
     LComboBox.OnChange := ComboChange;
+    LComboBox.OnCycle := ComboCycleValue;
     LComboBox.OnExit := EditorExit;
     LComboBox.Show;
     LComboBox.SetFocus;
-    LComboBox.DroppedDown := True;
   end
   else
   begin
@@ -919,6 +1030,25 @@ end;
 procedure TMyObjectInspector.ComboChange(Sender: TObject);
 begin
   EndEdit(True);
+end;
+
+procedure TMyObjectInspector.ComboCycleValue(Sender: TObject);
+var
+  LComboBox: TComboBox;
+begin
+  LComboBox := Sender as TComboBox;
+
+  if (FEditor <> LComboBox) or (LComboBox.Items.Count = 0) then
+    Exit;
+
+  LComboBox.ItemIndex := (LComboBox.ItemIndex + 1) mod LComboBox.Items.Count;
+
+  if Assigned(FEditNode) then
+  try
+    SetValueAsString(FEditNode, LComboBox.Items[LComboBox.ItemIndex]);
+  except
+    { Ignore }
+  end;
 end;
 
 procedure TMyObjectInspector.ColorBoxSelect(Sender: TObject);

@@ -107,6 +107,7 @@ type
     property HighlightLine;
     property Highlighter;
     property KeyCommands;
+    property KeywordImages;
     property LeftMargin;
     property LineSpacing;
     property MatchingPairs;

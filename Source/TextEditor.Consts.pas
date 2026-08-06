@@ -154,6 +154,8 @@ type
     BookmarkPurple = $00FE9898;
     BookmarkRed = $003643F4;
     BookmarkYellow = $0000CBFE;
+    KeywordImageArrowDown = $004040E0;
+    KeywordImageArrowUp = $003CA53C;
     LeftMarginBackground = $00FFFFFF;
     LineNumbers = $00CC9999;
     MatchingPairUnderline = TColors.Black;

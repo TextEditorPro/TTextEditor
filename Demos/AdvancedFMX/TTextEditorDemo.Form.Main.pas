@@ -176,12 +176,22 @@ uses
 
 type
   TDemoPaths = record
-  const
-    Highlighters = '..\..\Highlighters\';
-    Themes = '..\..\Themes\';
+  public
+    class function Highlighters: string; static;
+    class function Themes: string; static;
   end;
 
   TCompareRow = (crSame, crModify, crLeftOnly, crRightOnly);
+
+class function TDemoPaths.Highlighters: string;
+begin
+  Result := ExtractFilePath(ParamStr(0)) + '..\..\Highlighters\';
+end;
+
+class function TDemoPaths.Themes: string;
+begin
+  Result := ExtractFilePath(ParamStr(0)) + '..\..\Themes\';
+end;
 
 const
   CompareSampleLeft = '''

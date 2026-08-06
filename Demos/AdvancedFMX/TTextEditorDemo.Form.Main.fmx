@@ -312,15 +312,15 @@ object MainForm: TMainForm
         HighlightLine.Active = True
         LeftMargin.MarksPanel.Options = [bpoToggleBookmarkByClick, bpoShowBookmarkColorsPopup]
         LeftMargin.Width = 55
+        Margins.Top = 2.000000000000000000
         OnCaretChanged = TextEditorCaretChanged
         OnChange = TextEditorChange
         OnCreateHighlighterStream = TextEditorCreateHighlighterStream
         PartialLoad.Rows = 100
-        Margins.Top = 2.000000000000000000
+        Selection.Options = [soALTSetsColumnMode, soHighlightSimilarTerms, soTermsCaseSensitive]
         Size.Width = 1197.000000000000000000
         Size.Height = 688.000000000000000000
         Size.PlatformDefault = False
-        Selection.Options = [soALTSetsColumnMode, soHighlightSimilarTerms, soTermsCaseSensitive]
         TabOrder = 0
       end
     end
@@ -541,12 +541,12 @@ object MainForm: TMainForm
         Fonts.Ruler.Family = 'Courier New'
         Fonts.Ruler.Size = 10.666666984558110000
         LeftMargin.Width = 55
+        Margins.Top = 2.000000000000000000
         OnAfterLinePaint = CompareEditorAfterLinePaint
         OnChange = CompareEditorChange
         OnCustomLineColors = CompareEditorCustomLineColors
         OnScroll = CompareEditorScroll
         PartialLoad.Rows = 100
-        Margins.Top = 2.000000000000000000
         Position.Y = 2.000000000000000000
         Size.Width = 578.000000000000000000
         Size.Height = 688.000000000000000000
@@ -581,12 +581,12 @@ object MainForm: TMainForm
         Fonts.Ruler.Family = 'Courier New'
         Fonts.Ruler.Size = 10.666666984558110000
         LeftMargin.Width = 55
+        Margins.Top = 2.000000000000000000
         OnAfterLinePaint = CompareEditorAfterLinePaint
         OnChange = CompareEditorChange
         OnCustomLineColors = CompareEditorCustomLineColors
         OnScroll = CompareEditorScroll
         PartialLoad.Rows = 100
-        Margins.Top = 2.000000000000000000
         Size.Width = 579.000000000000000000
         Size.Height = 688.000000000000000000
         Size.PlatformDefault = False

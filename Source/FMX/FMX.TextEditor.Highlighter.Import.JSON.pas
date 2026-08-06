@@ -25,6 +25,7 @@ type
     procedure ImportHighlightLine(const AHighlightLineObject: TJSONObject);
     procedure ImportHighlighter(const AJSONObject: TJSONObject);
     procedure ImportKeyList(const AKeyList: TTextEditorKeyList; const AKeyListObject: TJSONObject; const AElementPrefix: string);
+    procedure ImportKeywordImages(const AKeywordImagesObject: TJSONObject);
     procedure ImportMatchingPair(const AMatchingPairObject: TJSONObject);
     procedure ImportRange(const ARange: TTextEditorRange; const ARangeObject: TJSONObject; const AParentRange: TTextEditorRange = nil;
       const ASkipBeforeSubRules: Boolean = False; const AElementPrefix: string = '');
@@ -261,6 +262,8 @@ begin
         HintBackground := LColorsObject['HintBackground'].ToAlphaColor;
         HintBorder := LColorsObject['HintBorder'].ToAlphaColor;
         HintText := LColorsObject['HintText'].ToAlphaColor;
+        KeywordImageArrowDown := LColorsObject['KeywordImageArrowDown'].ToAlphaColor;
+        KeywordImageArrowUp := LColorsObject['KeywordImageArrowUp'].ToAlphaColor;
         LeftMarginActiveLineBackground := LColorsObject['LeftMarginActiveLineBackground'].ToAlphaColor;
         LeftMarginActiveLineBackgroundUnfocused := LColorsObject['LeftMarginActiveLineBackgroundUnfocused'].ToAlphaColor;
         LeftMarginActiveLineNumber := LColorsObject['LeftMarginActiveLineNumber'].ToAlphaColor;
@@ -1021,6 +1024,40 @@ begin
   LEditor.CodeFolding.GuideLines.SetOption(cfgHideAtFirstColumn, LHideGuideLineAtFirstColumn);
 end;
 
+procedure TTextEditorHighlighterImportJSON.ImportKeywordImages(const AKeywordImagesObject: TJSONObject);
+var
+  LArray: TJSONArray;
+  LJSONDataValue: PJSONDataValue;
+  LKeyword, LImageName: string;
+  LKind: TTextEditorKeywordImageKind;
+begin
+  if not Assigned(AKeywordImagesObject) then
+    Exit;
+
+  LArray := AKeywordImagesObject['Items'].ArrayValue;
+
+  for var LIndex := 0 to LArray.Count - 1 do
+  begin
+    LJSONDataValue := LArray.Items[LIndex];
+
+    LKeyword := LJSONDataValue.ObjectValue['Word'].Value;
+    LImageName := LJSONDataValue.ObjectValue['Image'].Value;
+
+    if LKeyword.IsEmpty then
+      Continue;
+
+    if SameText(LImageName, 'ArrowUp') then
+      LKind := kikArrowUp
+    else
+    if SameText(LImageName, 'ArrowDown') then
+      LKind := kikArrowDown
+    else
+      Continue;
+
+    FHighlighter.KeywordImages.AddOrSetValue(if FHighlighter.MainRules.CaseSensitive then LKeyword else AnsiLowerCase(LKeyword), LKind);
+  end;
+end;
+
 procedure TTextEditorHighlighterImportJSON.ImportMatchingPair(const AMatchingPairObject: TJSONObject);
 var
   LArray: TJSONArray;
@@ -1091,6 +1128,7 @@ begin
   ImportEditorProperties(LHighlighterObject['Editor'].ObjectValue);
   ImportRange(FHighlighter.MainRules, LHighlighterObject['MainRules'].ObjectValue);
   ImportCodeFolding(AJSONObject['CodeFolding'].ObjectValue);
+  ImportKeywordImages(AJSONObject['KeywordImages'].ObjectValue);
   ImportMatchingPair(AJSONObject['MatchingPair'].ObjectValue);
   ImportCompletionProposal(AJSONObject['CompletionProposal'].ObjectValue);
 

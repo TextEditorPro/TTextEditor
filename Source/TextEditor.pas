@@ -220,6 +220,9 @@ type
       ScrollCursors: array [0 .. 7] of HCursor;
       ScrollingPoint: TPoint;
       ScrollTimer: TTextEditorTimer;
+      URIEnd: Integer;
+      URILine: Integer;
+      URIStart: Integer;
       WheelAccumulator: Integer;
     end;
 
@@ -529,6 +532,7 @@ type
     procedure ChainUndoRedoAdded(ASender: TObject);
     procedure CheckIfAtMatchingKeywords;
     procedure ClampPositionsToDocument;
+    procedure ClearMouseOverURI;
     procedure CodeFoldingCollapse(const AFoldRange: TTextEditorCodeFoldingRange);
     procedure CodeFoldingExpand(const AFoldRange: TTextEditorCodeFoldingRange);
     procedure CodeFoldingLinesDeleted(const AFirstLine: Integer; const ACount: Integer);
@@ -690,6 +694,7 @@ type
     procedure UpdateCollapsedBackup(const AIndex: Integer; const ACount: Integer);
     procedure UpdateFoldingRanges(const ACurrentLine: Integer; const ALineCount: Integer); overload;
     procedure UpdateFoldingRanges(const AFoldRanges: TTextEditorCodeFoldingRanges; const ALineCount: Integer); overload;
+    procedure UpdateMouseOverURI(const X, Y: Integer);
     procedure UpdateScrollBars;
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
     procedure UpdateSpellCheckItems(const ALine: Integer; const ACount: Integer);
@@ -7990,6 +7995,7 @@ begin
   inherited;
 
   FreeHintForm;
+  ClearMouseOverURI;
 
   if FCodeFoldings.MouseOverGutter then
   begin
@@ -11025,6 +11031,8 @@ procedure TCustomTextEditor.WMKillFocus(var AMessage: TWMKillFocus);
 begin
   inherited;
 
+  ClearMouseOverURI;
+
   if FMultiEdit.Position.Row <> -1 then
   begin
     FMultiEdit.Position.Row := -1;
@@ -12436,6 +12444,47 @@ begin
   Inc(FPaintLock);
 end;
 
+procedure TCustomTextEditor.ClearMouseOverURI;
+begin
+  if FMouse.OverURI then
+  begin
+    FMouse.OverURI := False;
+    FMouse.URILine := -1;
+    FMouse.URIStart := 0;
+    FMouse.URIEnd := 0;
+
+    Invalidate;
+  end;
+end;
+
+procedure TCustomTextEditor.UpdateMouseOverURI(const X, Y: Integer);
+var
+  LTextPosition: TTextEditorTextPosition;
+  LToken: string;
+  LRangeType: TTextEditorRangeType;
+  LStart: Integer;
+  LHighlighterAttribute: TTextEditorHighlighterAttribute;
+begin
+  LTextPosition := PixelsToTextPosition(X, Y);
+
+  if (X > FLeftMarginWidth) and
+    GetHighlighterAttributeAtRowColumn(LTextPosition, LToken, LRangeType, LStart, LHighlighterAttribute) and
+    (LRangeType in [ttWebLink, ttMailtoLink]) then
+  begin
+    if not FMouse.OverURI or (FMouse.URILine <> LTextPosition.Line) or (FMouse.URIStart <> LStart) then
+    begin
+      FMouse.OverURI := True;
+      FMouse.URILine := LTextPosition.Line;
+      FMouse.URIStart := LStart;
+      FMouse.URIEnd := LStart + LToken.Length;
+
+      Invalidate;
+    end;
+  end
+  else
+    ClearMouseOverURI;
+end;
+
 procedure TCustomTextEditor.KeyDown(var AKey: Word; AShift: TShiftState);
 var
   LShortCutKey: Word;
@@ -12481,12 +12530,7 @@ var
   end;
 
 var
-  LTextPosition: TTextEditorTextPosition;
   LCursorPoint: TPoint;
-  LToken: string;
-  LRangeType: TTextEditorRangeType;
-  LStart: Integer;
-  LHighlighterAttribute: TTextEditorHighlighterAttribute;
   LData: Pointer;
   LChar: Char;
   LEditorCommand: TTextEditorCommand;
@@ -12552,11 +12596,9 @@ begin
   begin
     Winapi.Windows.GetCursorPos(LCursorPoint);
     LCursorPoint := ScreenToClient(LCursorPoint);
-    LTextPosition := PixelsToTextPosition(LCursorPoint.X, LCursorPoint.Y);
 
-    GetHighlighterAttributeAtRowColumn(LTextPosition, LToken, LRangeType, LStart, LHighlighterAttribute);
-
-    FMouse.OverURI := LRangeType in [ttWebLink, ttMailtoLink];
+    if PtInRect(ClientRect, LCursorPoint) then
+      UpdateMouseOverURI(LCursorPoint.X, LCursorPoint.Y);
   end;
 
   LData := nil;
@@ -12642,8 +12684,7 @@ procedure TCustomTextEditor.KeyUp(var AKey: Word; AShift: TShiftState);
 begin
   inherited;
 
-  if FMouse.OverURI then
-    FMouse.OverURI := False;
+  ClearMouseOverURI;
 
   if IsCodeFoldingVisible then
     CheckIfAtMatchingKeywords;
@@ -13539,8 +13580,10 @@ begin
 
   inherited MouseMove(AShift, X, Y);
 
-  if FMouse.OverURI and not (ssCtrl in AShift) then
-    FMouse.OverURI := False;
+  if (ssCtrl in AShift) and not (ssAlt in AShift) and URIOpener then
+    UpdateMouseOverURI(X, Y)
+  else
+    ClearMouseOverURI;
 
   if FRightMargin.Visible and (rmoMouseMove in FRightMargin.Options) then
   begin
@@ -17414,6 +17457,11 @@ var
         LBackgroundColor := if AMinimap and (FColors.MinimapBackground <> TColors.SysNone) then FColors.MinimapBackground else LHighlighterAttribute.Background;
 
         LFontStyles := LHighlighterAttribute.FontStyles;
+
+        if not AMinimap and FMouse.OverURI and (LCurrentLine = FMouse.URILine) and
+          (LTokenPosition >= FMouse.URIStart - 1) and (LTokenPosition < FMouse.URIEnd - 1) then
+          Include(LFontStyles, fsUnderline);
+
         LIsCustomBackgroundColor := False;
         LUnderline := ulNone;
         LUnderlineColor := TColors.SysNone;

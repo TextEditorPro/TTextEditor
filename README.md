@@ -8,26 +8,36 @@ The old version can be found at https://github.com/TextEditorPro/TTextEditor-Leg
 
 ## Features
 
+- Active line
+  - Fill and border style
 - Arabic and Hebrew support
+- Border
+  - Colored edges
 - Code/tag/text folding
 - Color themes 
   - Colors, Fonts, and FontStyles properties
   - Theme Load and Save properties 
   - JSON file/stream import
+- Column selection mode
 - Completion proposal
   - Snippets
+- Custom key commands
 - Data-aware
+- Drag and drop text editing
 - Highlight line
 - Highlighters 
   - Highlighter Load property
   - JSON file/stream import
 - HTML export (clipboard support)
+- IME support
+- Keyword images
 - Large file support
 - Left margin
-	- Bookmarks
-	- Custom marks
-	- Line states
-	- Line numbers
+  - Bookmarks
+  - Custom marks
+  - Line states
+  - Line numbers
+- Line spacing
 - Macro recorder
 - Matching pairs
 - Minimap
@@ -39,13 +49,21 @@ The old version can be found at https://github.com/TextEditorPro/TTextEditor-Leg
 - Replace
 - Right margin
 - Ruler
+- Scroll
+  - Indicator
+  - Shadow
 - Search
+  - Normal, extended, regular expression, and wildcard engines
+  - Search map
 - Simple Mode (for large files)
 - Special chars
+- Spell check (VCL)
 - Sync edit
 - Undo/redo
 - Variable-width font support
+- Web and email links (Ctrl+click)
 - Word wrap
+- Zoom
 
 ## Supports
 

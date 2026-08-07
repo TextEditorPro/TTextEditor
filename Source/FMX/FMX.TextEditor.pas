@@ -410,6 +410,7 @@ type
     FUndoRedoFirstLine: Integer;
     FUndoRedoLastLine: Integer;
     FUndoRedoLineCount: Integer;
+    FUndoRedoStructureChange: Boolean;
     FUnknownChars: TTextEditorUnknownChars;
     FUpdatingScrollBars: Boolean;
     FVerticalScrollBar: TScrollBar;
@@ -12043,6 +12044,7 @@ var
 
 begin
   FUndoRedoFirstLine := Min(FUndoRedoFirstLine, AIndex);
+  FUndoRedoStructureChange := True;
 
   if FUndoRedoLastLine >= AIndex + ACount then
     Dec(FUndoRedoLastLine, ACount)
@@ -12101,6 +12103,7 @@ var
   LLastScan: Integer;
 begin
   FUndoRedoFirstLine := Min(FUndoRedoFirstLine, AIndex);
+  FUndoRedoStructureChange := True;
 
   if FUndoRedoLastLine >= AIndex then
     Inc(FUndoRedoLastLine, ACount);
@@ -20083,6 +20086,7 @@ begin
   FUndoRedoFirstLine := MaxInt;
   FUndoRedoLastLine := -1;
   FUndoRedoLineCount := FLines.Count;
+  FUndoRedoStructureChange := False;
 
   IncPaintLock;
 
@@ -20094,7 +20098,7 @@ end;
 
 procedure TCustomTextEditor.EndUndoUpdate;
 var
-  LLineCountChanged: Boolean;
+  LStructureChanged: Boolean;
   LFirstLine, LLastLine: Integer;
 begin
   FLines.EndUpdate;
@@ -20107,7 +20111,7 @@ begin
   if FSyncEdit.Visible then
     DoSyncEdit;
 
-  LLineCountChanged := FLines.Count <> FUndoRedoLineCount;
+  LStructureChanged := (FLines.Count <> FUndoRedoLineCount) or FUndoRedoStructureChange;
 
   if FHighlighter.Loaded and (FUndoRedoFirstLine <> MaxInt) and (FLines.Count > 0) then
   begin
@@ -20121,16 +20125,20 @@ begin
     until LFirstLine > LLastLine;
   end;
 
-  if LLineCountChanged then
+  if LStructureChanged then
   begin
     InitCodeFolding;
     RestoreCollapsedBackup;
   end
   else
-  if IsCodeFoldingRangesNeeded then
   begin
-    FCodeFoldings.Rescan := True;
-    FCodeFoldings.DelayTimer.Restart;
+    FreeAndNil(FCodeFoldings.CollapsedBackup);
+
+    if IsCodeFoldingRangesNeeded then
+    begin
+      FCodeFoldings.Rescan := True;
+      FCodeFoldings.DelayTimer.Restart;
+    end;
   end;
 
   CreateLineNumbersCache(True);

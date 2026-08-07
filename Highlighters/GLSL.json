@@ -453,6 +453,26 @@
       }
     ]
   },
+  "KeywordImages": {
+    "Items": [
+      {
+        "Word": "continue",
+        "Image": "ArrowUp"
+      },
+      {
+        "Word": "break",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "return",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "discard",
+        "Image": "ArrowDown"
+      }
+    ]
+  },
   "MatchingPair": {
     "Pairs": [
       {

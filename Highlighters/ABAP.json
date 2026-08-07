@@ -1193,6 +1193,22 @@
       }
     ]
   },
+  "KeywordImages": {
+    "Items": [
+      {
+        "Word": "CONTINUE",
+        "Image": "ArrowUp"
+      },
+      {
+        "Word": "EXIT",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "RETURN",
+        "Image": "ArrowDown"
+      }
+    ]
+  },
   "MatchingPair": {
     "Pairs": [
       {

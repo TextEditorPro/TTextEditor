@@ -689,6 +689,26 @@
       }
     ]
   },
+  "KeywordImages": {
+    "Items": [
+      {
+        "Word": "ContinueLoop",
+        "Image": "ArrowUp"
+      },
+      {
+        "Word": "ExitLoop",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "Return",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "Exit",
+        "Image": "ArrowDown"
+      }
+    ]
+  },
   "MatchingPair": {
     "Pairs": [
       {

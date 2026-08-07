@@ -371,6 +371,22 @@
       }
     ]
   },
+  "KeywordImages": {
+    "Items": [
+      {
+        "Word": "Continue",
+        "Image": "ArrowUp"
+      },
+      {
+        "Word": "Exit",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "Return",
+        "Image": "ArrowDown"
+      }
+    ]
+  },
   "MatchingPair": {
     "Pairs": [
       {

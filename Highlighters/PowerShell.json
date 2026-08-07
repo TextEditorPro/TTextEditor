@@ -288,6 +288,26 @@
       }
     ]
   },
+  "KeywordImages": {
+    "Items": [
+      {
+        "Word": "continue",
+        "Image": "ArrowUp"
+      },
+      {
+        "Word": "break",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "return",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "exit",
+        "Image": "ArrowDown"
+      }
+    ]
+  },
   "MatchingPair": {
     "Pairs": [
       {

@@ -535,6 +535,22 @@
       }
     }
   },
+  "KeywordImages": {
+    "Items": [
+      {
+        "Word": "next",
+        "Image": "ArrowUp"
+      },
+      {
+        "Word": "last",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "return",
+        "Image": "ArrowDown"
+      }
+    ]
+  },
   "MatchingPair": {
     "Pairs": [
       {

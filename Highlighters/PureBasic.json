@@ -3752,6 +3752,22 @@
       }
     ]
   },
+  "KeywordImages": {
+    "Items": [
+      {
+        "Word": "Continue",
+        "Image": "ArrowUp"
+      },
+      {
+        "Word": "Break",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "ProcedureReturn",
+        "Image": "ArrowDown"
+      }
+    ]
+  },
   "MatchingPair": {
     "Pairs": [
       {

@@ -295,6 +295,18 @@
       }
     ]
   },
+  "KeywordImages": {
+    "Items": [
+      {
+        "Word": "EXIT",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "RETURN",
+        "Image": "ArrowDown"
+      }
+    ]
+  },
   "MatchingPair": {
     "Pairs": [
       {

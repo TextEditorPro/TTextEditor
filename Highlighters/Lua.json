@@ -445,6 +445,18 @@
       }
     ]
   },
+  "KeywordImages": {
+    "Items": [
+      {
+        "Word": "break",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "return",
+        "Image": "ArrowDown"
+      }
+    ]
+  },
   "MatchingPair": {
     "Pairs": [
       {

@@ -804,6 +804,22 @@
       }
     ]
   },
+  "KeywordImages": {
+    "Items": [
+      {
+        "Word": "Continue",
+        "Image": "ArrowUp"
+      },
+      {
+        "Word": "Break",
+        "Image": "ArrowDown"
+      },
+      {
+        "Word": "Exit",
+        "Image": "ArrowDown"
+      }
+    ]
+  },
   "MatchingPair": {
     "Pairs": [
       {

@@ -408,6 +408,7 @@ type
     FUndo: TTextEditorUndo;
     FUndoList: TTextEditorUndoList;
     FUndoRedoFirstLine: Integer;
+    FUndoRedoLastLine: Integer;
     FUndoRedoLineCount: Integer;
     FUnknownChars: TTextEditorUnknownChars;
     FUpdatingScrollBars: Boolean;
@@ -12041,6 +12042,13 @@ var
   end;
 
 begin
+  FUndoRedoFirstLine := Min(FUndoRedoFirstLine, AIndex);
+
+  if FUndoRedoLastLine >= AIndex + ACount then
+    Dec(FUndoRedoLastLine, ACount)
+  else
+    FUndoRedoLastLine := AIndex;
+
   LIndex := AIndex;
 
   if Assigned(FEvents.OnLinesDeleted) then
@@ -12092,6 +12100,13 @@ procedure TCustomTextEditor.LinesInserted(ASender: TObject; const AIndex: Intege
 var
   LLastScan: Integer;
 begin
+  FUndoRedoFirstLine := Min(FUndoRedoFirstLine, AIndex);
+
+  if FUndoRedoLastLine >= AIndex then
+    Inc(FUndoRedoLastLine, ACount);
+
+  FUndoRedoLastLine := Max(FUndoRedoLastLine, AIndex + ACount - 1);
+
   if not FLines.Streaming then
   begin
     UpdateMarks(FBookmarkList);
@@ -12138,6 +12153,9 @@ procedure TCustomTextEditor.LinesPutted(ASender: TObject; const AIndex: Integer;
 var
   LIndex: Integer;
 begin
+  FUndoRedoFirstLine := Min(FUndoRedoFirstLine, AIndex);
+  FUndoRedoLastLine := Max(FUndoRedoLastLine, AIndex + ACount - 1);
+
   if FLines.Updating then
   begin
     FLineNumbers.ResetCache := True;
@@ -17369,6 +17387,8 @@ begin
     FSelection.ActiveMode := LUndoItem.ChangeSelectionMode;
 
     FUndoRedoFirstLine := Min(FUndoRedoFirstLine, Min(LUndoItem.ChangeBeginPosition.Line, LUndoItem.ChangeCaretPosition.Line));
+    FUndoRedoLastLine := Max(FUndoRedoLastLine, Max(LUndoItem.ChangeBeginPosition.Line,
+      Max(LUndoItem.ChangeEndPosition.Line, LUndoItem.ChangeCaretPosition.Line)));
 
     IncPaintLock;
 
@@ -18586,6 +18606,8 @@ begin
     FSelection.ActiveMode := LUndoItem.ChangeSelectionMode;
 
     FUndoRedoFirstLine := Min(FUndoRedoFirstLine, Min(LUndoItem.ChangeBeginPosition.Line, LUndoItem.ChangeCaretPosition.Line));
+    FUndoRedoLastLine := Max(FUndoRedoLastLine, Max(LUndoItem.ChangeBeginPosition.Line,
+      Max(LUndoItem.ChangeEndPosition.Line, LUndoItem.ChangeCaretPosition.Line)));
 
     IncPaintLock;
 
@@ -20059,6 +20081,7 @@ end;
 procedure TCustomTextEditor.BeginUndoUpdate;
 begin
   FUndoRedoFirstLine := MaxInt;
+  FUndoRedoLastLine := -1;
   FUndoRedoLineCount := FLines.Count;
 
   IncPaintLock;
@@ -20072,6 +20095,7 @@ end;
 procedure TCustomTextEditor.EndUndoUpdate;
 var
   LLineCountChanged: Boolean;
+  LFirstLine, LLastLine: Integer;
 begin
   FLines.EndUpdate;
 
@@ -20085,8 +20109,17 @@ begin
 
   LLineCountChanged := FLines.Count <> FUndoRedoLineCount;
 
-  if FHighlighter.Loaded and (FUndoRedoFirstLine <> MaxInt) then
-    ScanHighlighterRangesFrom(EnsureRange(FUndoRedoFirstLine, 0, Max(FLines.Count - 1, 0)));
+  if FHighlighter.Loaded and (FUndoRedoFirstLine <> MaxInt) and (FLines.Count > 0) then
+  begin
+    LFirstLine := EnsureRange(FUndoRedoFirstLine, 0, FLines.Count - 1);
+    LLastLine := EnsureRange(FUndoRedoLastLine, LFirstLine, FLines.Count - 1);
+
+    repeat
+      LFirstLine := ScanHighlighterRangesFrom(LFirstLine);
+
+      Inc(LFirstLine);
+    until LFirstLine > LLastLine;
+  end;
 
   if LLineCountChanged then
   begin

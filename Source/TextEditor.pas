@@ -503,6 +503,7 @@ type
     function StringWordEnd(const ALine: string; var AStart: Integer): Integer;
     function StringWordStart(const ALine: string; var AStart: Integer): Integer;
     function WordWrapWidth: Integer;
+    function ZoomScaled(const AValue: Integer): Integer; inline;
     procedure ActiveLineChanged(ASender: TObject);
     procedure AddHighlighterKeywords(const AItems: TTextEditorCompletionProposalItems; const AAddDescription: Boolean = False);
     procedure AddSnippets(const AItems: TTextEditorCompletionProposalItems; const AAddDescription: Boolean = False);
@@ -776,6 +777,8 @@ type
     procedure PaintKeywordImageArrow(const AKind: TTextEditorKeywordImageKind; const ARect: TRect);
     procedure PaintKeywordImages(const ALeft: Integer; const ALine: Integer; const ALineRect: TRect; const ADraws: array of TTextEditorKeywordImageDraw; const ACount: Integer);
     procedure PaintLeftMargin(const AClipRect: TRect; const AFirstLine, ALastTextLine, ALastLine: Integer);
+    procedure PaintLineBreakArrow(const ARect: TRect; const AColor: TColor);
+    procedure PaintLineBreakEnter(const ARect: TRect; const AColor: TColor);
     procedure PaintMacroState;
     procedure PaintMinimapIndicator(const AClipRect: TRect);
     procedure PaintMinimapShadow(const ACanvas: TCanvas; const AClipRect: TRect);
@@ -14344,15 +14347,12 @@ var
 begin
   LX := ALeft;
 
-  if FSpecialChars.Visible and FSpecialChars.LineBreak.Visible and
-    ((eoTrailingLineBreak in FOptions) or (ALine + 1 < FLines.Count)) then
+  if FSpecialChars.Visible and FSpecialChars.LineBreak.Visible and ((eoTrailingLineBreak in FOptions) or (ALine + 1 < FLines.Count)) then
   case FSpecialChars.LineBreak.Style of
-    eolArrow:
-      Inc(LX, 10);
-    eolEnter:
-      Inc(LX, 15);
+    eolArrow, eolEnter:
+      Inc(LX, MulDiv(ALineRect.Height, 13, 16));
     eolPilcrow:
-      Inc(LX, FPaintHelper.CharWidth + 2);
+      Inc(LX, FPaintHelper.CharWidth + ZoomScaled(2));
     eolCRLF:
       begin
         LPilcrowLength := 0;
@@ -14373,7 +14373,7 @@ begin
             else
               Length(TControlCharacterNames.LineFeed);
 
-        Inc(LX, LPilcrowLength * FPaintHelper.CharWidth + 4);
+        Inc(LX, LPilcrowLength * FPaintHelper.CharWidth + ZoomScaled(4));
       end;
   end;
 
@@ -15911,12 +15911,133 @@ begin
   FPaintHelper.SetStyle([]);
 end;
 
+function TCustomTextEditor.ZoomScaled(const AValue: Integer): Integer;
+begin
+  Result := MulDiv(AValue, FZoom.Percentage, 100);
+end;
+
+procedure TCustomTextEditor.PaintLineBreakArrow(const ARect: TRect; const AColor: TColor);
+const
+  CGrid = 16;
+var
+  LGraphics: TGPGraphics;
+  LBrush: TGPSolidBrush;
+  LRGBColor: Cardinal;
+  LThickness, LHeadHalf: Integer;
+  LShaftTop, LHeadTop, LHeadBottom: Integer;
+  LCenterX: Single;
+  LPoints: array [0..2] of TGPPointF;
+
+  function Py(const AValue: Single): Integer;
+  begin
+    Result := ARect.Top + Round(AValue * ARect.Height / CGrid);
+  end;
+
+  function P(const AX, AY: Single): TGPPointF;
+  begin
+    Result := MakePoint(AX, AY);
+  end;
+
+begin
+  LRGBColor := ColorToRGB(AColor);
+
+  LThickness := Max(1, 2 * Round(ARect.Height / CGrid - 0.5) + 1);
+  LCenterX := ARect.Left + Round(8 * ARect.Height / CGrid) + 0.5;
+  LShaftTop := Py(2);
+  LHeadTop := Py(9.5);
+  LHeadBottom := Py(14.5);
+  LHeadHalf := Max(2, Round(4.5 * ARect.Height / CGrid));
+
+  LGraphics := TGPGraphics.Create(Canvas.Handle);
+  LBrush := TGPSolidBrush.Create(MakeColor(255, GetRValue(LRGBColor), GetGValue(LRGBColor), GetBValue(LRGBColor)));
+  try
+    LGraphics.SetSmoothingMode(SmoothingModeAntiAlias);
+    LGraphics.SetPixelOffsetMode(PixelOffsetModeHalf);
+
+    { Shaft }
+    LGraphics.FillRectangle(LBrush, LCenterX - LThickness / 2, LShaftTop, LThickness, LHeadTop - LShaftTop);
+
+    { Head }
+    LPoints[0] := P(LCenterX - LHeadHalf, LHeadTop);
+    LPoints[1] := P(LCenterX + LHeadHalf, LHeadTop);
+    LPoints[2] := P(LCenterX, LHeadBottom);
+
+    LGraphics.FillPolygon(LBrush, PGPPointF(@LPoints[0]), Length(LPoints));
+  finally
+    LBrush.Free;
+    LGraphics.Free;
+  end;
+end;
+
+procedure TCustomTextEditor.PaintLineBreakEnter(const ARect: TRect; const AColor: TColor);
+const
+  CGrid = 16;
+var
+  LGraphics: TGPGraphics;
+  LBrush: TGPSolidBrush;
+  LRGBColor: Cardinal;
+  LThickness, LHeadHalf: Integer;
+  LStemLeft, LStemRight, LStemTop, LBarTop, LBarBottom, LHeadRight, LHeadTipX: Integer;
+  LHeadCenterY: Single;
+  LPoints: array [0..8] of TGPPointF;
+
+  function Px(const AValue: Single): Integer;
+  begin
+    Result := ARect.Left + Round(AValue * ARect.Height / CGrid);
+  end;
+
+  function Py(const AValue: Single): Integer;
+  begin
+    Result := ARect.Top + Round(AValue * ARect.Height / CGrid);
+  end;
+
+  function P(const AX, AY: Single): TGPPointF;
+  begin
+    Result := MakePoint(AX, AY);
+  end;
+
+begin
+  LRGBColor := ColorToRGB(AColor);
+
+  LThickness := Max(1, Round(2 * ARect.Height / CGrid));
+  LStemRight := Px(12);
+  LStemLeft := LStemRight - LThickness;
+  LStemTop := Py(3);
+  LBarBottom := Py(11);
+  LBarTop := LBarBottom - LThickness;
+  LHeadRight := Px(7);
+  LHeadTipX := Px(2);
+  LHeadHalf := Max(2, Round(4.5 * ARect.Height / CGrid));
+  LHeadCenterY := (LBarTop + LBarBottom) / 2;
+
+  { Stem down from the top right, bar to the left, arrowhead pointing left }
+  LPoints[0] := P(LStemLeft, LStemTop);
+  LPoints[1] := P(LStemRight, LStemTop);
+  LPoints[2] := P(LStemRight, LBarBottom);
+  LPoints[3] := P(LHeadRight, LBarBottom);
+  LPoints[4] := P(LHeadRight, LHeadCenterY + LHeadHalf);
+  LPoints[5] := P(LHeadTipX, LHeadCenterY);
+  LPoints[6] := P(LHeadRight, LHeadCenterY - LHeadHalf);
+  LPoints[7] := P(LHeadRight, LBarTop);
+  LPoints[8] := P(LStemLeft, LBarTop);
+
+  LGraphics := TGPGraphics.Create(Canvas.Handle);
+  LBrush := TGPSolidBrush.Create(MakeColor(255, GetRValue(LRGBColor), GetGValue(LRGBColor), GetBValue(LRGBColor)));
+  try
+    LGraphics.SetSmoothingMode(SmoothingModeAntiAlias);
+    LGraphics.SetPixelOffsetMode(PixelOffsetModeHalf);
+    LGraphics.FillPolygon(LBrush, PGPPointF(@LPoints[0]), Length(LPoints));
+  finally
+    LBrush.Free;
+    LGraphics.Free;
+  end;
+end;
+
 procedure TCustomTextEditor.PaintSpecialCharsEndOfLine(const ALine: Integer; const ALineEndRect: TRect; const ALineEndInsideSelection: Boolean);
 var
   LPenColor: TColor;
   LCharRect: TRect;
   LPilcrow: string;
-  LY: Integer;
 begin
   if FSpecialChars.Visible then
   begin
@@ -15927,15 +16048,18 @@ begin
       not ALineEndInsideSelection and not (scoShowOnlyInSelection in FSpecialChars.Options) then
     begin
       if FSpecialChars.Selection.Visible and ALineEndInsideSelection then
-        LPenColor := FSpecialChars.Selection.Color
+        LPenColor := if FSpecialChars.Selection.Color <> TColors.SysNone then FSpecialChars.Selection.Color else FColors.SelectionForeground
       else
       if FSpecialChars.LineBreak.Color <> TColors.SysNone then
         LPenColor := FSpecialChars.LineBreak.Color
       else
+      if FSpecialChars.Color <> TColors.SysNone then
+        LPenColor := FSpecialChars.Color
+      else
       if scoMiddleColor in FSpecialChars.Options then
         LPenColor := MiddleColor(FHighlighter.MainRules.Attribute.Background, FHighlighter.MainRules.Attribute.Foreground)
       else
-        LPenColor := if scoTextColor in FSpecialChars.Options then FHighlighter.MainRules.Attribute.Foreground else FSpecialChars.Color;
+        LPenColor := FHighlighter.MainRules.Attribute.Foreground;
 
       Canvas.Pen.Color := LPenColor;
 
@@ -15945,25 +16069,9 @@ begin
         Pen.Color := LPenColor;
 
         LCharRect.Top := ALineEndRect.Top;
-
-        LCharRect.Bottom :=
-          if (FSpecialChars.LineBreak.Style = eolPilcrow) or (FSpecialChars.LineBreak.Style = eolCRLF) then
-            ALineEndRect.Bottom
-          else
-            ALineEndRect.Bottom - 3;
-
-        LCharRect.Left := ALineEndRect.Left;
-
-        if FSpecialChars.LineBreak.Style = eolEnter then
-          LCharRect.Left := LCharRect.Left + 4;
-
-        if (FSpecialChars.LineBreak.Style = eolPilcrow) or (FSpecialChars.LineBreak.Style = eolCRLF) then
-        begin
-          LCharRect.Left := LCharRect.Left + 2;
-          LCharRect.Right := LCharRect.Left + FPaintHelper.CharWidth
-        end
-        else
-          LCharRect.Right := LCharRect.Left + FTabs.Width * FPaintHelper.CharWidth - 3;
+        LCharRect.Bottom := ALineEndRect.Bottom;
+        LCharRect.Left := ALineEndRect.Left + ZoomScaled(2);
+        LCharRect.Right := LCharRect.Left + FPaintHelper.CharWidth;
 
         case FSpecialChars.LineBreak.Style of
           eolCRLF:
@@ -15995,13 +16103,13 @@ begin
                   LPilcrow := if FLines.LineBreak = lbLF then TControlCharacterNames.LineFeed else TControlCharacterNames.CarriageReturn;
               end;
 
-              LCharRect.Width := LCharRect.Width * LPilcrow.Length + 2;
-              LCharRect.Top := LCharRect.Top + 2;
-              LCharRect.Bottom := LCharRect.Bottom - 2;
+              LCharRect.Width := LCharRect.Width * LPilcrow.Length + ZoomScaled(2);
+              LCharRect.Top := LCharRect.Top + ZoomScaled(2);
+              LCharRect.Bottom := LCharRect.Bottom - ZoomScaled(2);
 
               SetBkMode(Canvas.Handle, TRANSPARENT);
 
-              Winapi.Windows.ExtTextOut(Canvas.Handle, LCharRect.Left + 1, LCharRect.Top - 2 + FLineSpacing shr 1,
+              Winapi.Windows.ExtTextOut(Canvas.Handle, LCharRect.Left + 1, LCharRect.Top - ZoomScaled(2) + FLineSpacing shr 1,
                 ETO_OPTIONS, @LCharRect, PChar(LPilcrow), LPilcrow.Length, nil);
             end;
           eolPilcrow:
@@ -16017,42 +16125,11 @@ begin
                 @LCharRect, PChar(LPilcrow), 1, nil);
             end;
           eolArrow:
-            begin
-              LY := LCharRect.Top + 2 + FLineSpacing shr 1;
-
-              if FSpecialChars.Style = scsDot then
-              while LY < LCharRect.Bottom do
-              begin
-                MoveTo(LCharRect.Left + 6, LY);
-                LineTo(LCharRect.Left + 6, LY + 1);
-                Inc(LY, 2);
-              end;
-              { Solid }
-              if FSpecialChars.Style = scsSolid then
-              begin
-                MoveTo(LCharRect.Left + 6, LY);
-                LY := LCharRect.Bottom;
-                LineTo(LCharRect.Left + 6, LY + 1);
-              end;
-
-              MoveTo(LCharRect.Left + 6, LY);
-              LineTo(LCharRect.Left + 3, LY - 3);
-              MoveTo(LCharRect.Left + 6, LY);
-              LineTo(LCharRect.Left + 9, LY - 3);
-            end;
+            PaintLineBreakArrow(System.Types.Rect(ALineEndRect.Left, ALineEndRect.Top,
+              ALineEndRect.Left + ALineEndRect.Height, ALineEndRect.Bottom), LPenColor);
         else
-          LY := LCharRect.Top + GetLineHeight shr 1;
-
-          MoveTo(LCharRect.Left, LY);
-          LineTo(LCharRect.Left + 11, LY);
-          MoveTo(LCharRect.Left + 1, LY - 1);
-          LineTo(LCharRect.Left + 1, LY + 2);
-          MoveTo(LCharRect.Left + 2, LY - 2);
-          LineTo(LCharRect.Left + 2, LY + 3);
-          MoveTo(LCharRect.Left + 3, LY - 3);
-          LineTo(LCharRect.Left + 3, LY + 4);
-          MoveTo(LCharRect.Left + 10, LY - 3);
-          LineTo(LCharRect.Left + 10, LY);
+          PaintLineBreakEnter(System.Types.Rect(ALineEndRect.Left, ALineEndRect.Top,
+            ALineEndRect.Left + ALineEndRect.Height, ALineEndRect.Bottom), LPenColor);
         end;
       end;
     end;
@@ -16469,33 +16546,54 @@ var
 
     procedure PaintSpecialCharSpace;
     var
-      LSpaceWidth: Integer;
+      LSpaceWidth, LSize: Integer;
       LRect: TRect;
+      LOldBrushColor: TColor;
     begin
       if LTokenLength = 0 then
         Exit;
 
       LSpaceWidth := LTextRect.Width div LTokenLength;
+      LSize := Max(2, ZoomScaled(2));
 
-      LRect.Top := LTokenRect.Top + LTokenRect.Height shr 1;
-      LRect.Bottom := LRect.Top + 2;
-      LRect.Left := LTextRect.Left + LSpaceWidth shr 1;
+      LRect.Top := LTokenRect.Top + LTokenRect.Height shr 1 - LSize shr 1;
+      LRect.Bottom := LRect.Top + LSize;
+      LRect.Left := LTextRect.Left + (LSpaceWidth - LSize) shr 1;
+
+      LOldBrushColor := Canvas.Brush.Color;
+      Canvas.Brush.Color := Canvas.Pen.Color;
 
       for var LIndex := 0 to LTokenLength - 1 do
       begin
-        LRect.Right := LRect.Left + 2;
+        LRect.Right := LRect.Left + LSize;
 
-        Canvas.Rectangle(LRect);
+        Canvas.FillRect(LRect);
 
         Inc(LRect.Left, LSpaceWidth);
       end;
+
+      Canvas.Brush.Color := LOldBrushColor;
     end;
 
     procedure PaintSpecialCharSpaceTab;
+    const
+      CGrid = 16;
     var
-      LTabWidth: Integer;
+      LTabWidth, LHeight: Integer;
       LRect: TRect;
-      LLeft, LTop, LTopShr1: Integer;
+      LGraphics: TGPGraphics;
+      LBrush: TGPSolidBrush;
+      LRGBColor: Cardinal;
+      LThickness, LHeadHalf, LHeadDepth, LInset: Integer;
+      LLineLeft, LHeadTipX, LHeadLeftX: Integer;
+      LCenterY: Single;
+      LPoints: array [0..2] of TGPPointF;
+
+      function P(const AX, AY: Single): TGPPointF;
+      begin
+        Result := MakePoint(AX, AY);
+      end;
+
     begin
       LTabWidth := FTabs.Width * FPaintHelper.CharWidth;
       LRect := LTokenRect;
@@ -16507,47 +16605,45 @@ var
       if FLines.Columns then
         Dec(LRect.Right, FPaintHelper.CharWidth * (LTokenHelper.ExpandedCharsBefore mod FTabs.Width));
 
-      while LRect.Right <= LTokenRect.Right do
-      with Canvas do
-      begin
-        LTop := (LRect.Bottom - LRect.Top) shr 1;
+      LHeight := LRect.Bottom - LRect.Top;
+      LThickness := Max(1, 2 * Round(LHeight / CGrid - 0.5) + 1);
+      LHeadHalf := Max(2, Round(4.5 * LHeight / CGrid));
+      LHeadDepth := Max(3, Round(5 * LHeight / CGrid));
+      LInset := Max(1, Round(2 * LHeight / CGrid));
 
-        { Line }
-        if FSpecialChars.Style = scsDot then
+      LRGBColor := ColorToRGB(Canvas.Pen.Color);
+
+      LGraphics := TGPGraphics.Create(Canvas.Handle);
+      LBrush := TGPSolidBrush.Create(MakeColor(255, GetRValue(LRGBColor), GetGValue(LRGBColor), GetBValue(LRGBColor)));
+      try
+        LGraphics.SetSmoothingMode(SmoothingModeAntiAlias);
+        LGraphics.SetPixelOffsetMode(PixelOffsetModeHalf);
+
+        while LRect.Right <= LTokenRect.Right do
         begin
-          LLeft := LRect.Left;
-          Inc(LLeft);
+          LCenterY := LRect.Top + LHeight shr 1 + 0.5;
+          LHeadTipX := LRect.Right - LInset;
+          LHeadLeftX := LHeadTipX - LHeadDepth;
+          LLineLeft := LRect.Left + LInset;
 
-          if Odd(LLeft) then
-            Inc(LLeft);
+          { Line }
+          if LLineLeft < LHeadLeftX then
+            LGraphics.FillRectangle(LBrush, LLineLeft, LCenterY - LThickness / 2, LHeadLeftX - LLineLeft, LThickness);
 
-          while LLeft < LRect.Right - 2 do
-          begin
-            MoveTo(LLeft, LRect.Top + LTop);
-            LineTo(LLeft + 1, LRect.Top + LTop);
+          { Head }
+          LPoints[0] := P(LHeadLeftX, LCenterY - LHeadHalf);
+          LPoints[1] := P(LHeadTipX, LCenterY);
+          LPoints[2] := P(LHeadLeftX, LCenterY + LHeadHalf);
 
-            Inc(LLeft, 2);
-          end;
-        end
-        else
-        if FSpecialChars.Style = scsSolid then
-        begin
-          MoveTo(LRect.Left + 2, LRect.Top + LTop);
-          LineTo(LRect.Right - 2, LRect.Top + LTop);
+          LGraphics.FillPolygon(LBrush, PGPPointF(@LPoints[0]), Length(LPoints));
+
+          LRect.Left := LRect.Right;
+
+          Inc(LRect.Right, LTabWidth);
         end;
-
-        { Arrow }
-        LLeft := LRect.Right - 2;
-        LTopShr1 := LTop shr 1;
-
-        MoveTo(LLeft, LRect.Top + LTop);
-        LineTo(LLeft - LTopShr1, LRect.Top + LTop - LTopShr1);
-        MoveTo(LLeft, LRect.Top + LTop);
-        LineTo(LLeft - LTopShr1, LRect.Top + LTop + LTopShr1);
-
-        LRect.Left := LRect.Right;
-
-        Inc(LRect.Right, LTabWidth);
+      finally
+        LBrush.Free;
+        LGraphics.Free;
       end;
     end;
 
@@ -16616,7 +16712,10 @@ var
         (scoShowOnlyInSelection in FSpecialChars.Options) and (Canvas.Brush.Color = FColors.SelectionBackground)) and
         (not AMinimap or AMinimap and (moShowSpecialChars in FMinimap.Options)) then
       begin
-        Canvas.Pen.Color := if FSpecialChars.Selection.Visible and (Canvas.Brush.Color = FColors.SelectionBackground) then FSpecialChars.Selection.Color else LTokenHelper.Foreground;
+        if FSpecialChars.Selection.Visible and (Canvas.Brush.Color = FColors.SelectionBackground) then
+          Canvas.Pen.Color := if FSpecialChars.Selection.Color <> TColors.SysNone then FSpecialChars.Selection.Color else FColors.SelectionForeground
+        else
+          Canvas.Pen.Color := LTokenHelper.Foreground;
 
         FillRect(LTextRect);
 
@@ -17160,10 +17259,13 @@ var
 
     if (LEmptySpace <> TTextEditorEmptySpace.esNone) and FSpecialChars.Visible then
     begin
+      if FSpecialChars.Color <> TColors.SysNone then
+        LForeground := FSpecialChars.Color
+      else
       if scoMiddleColor in FSpecialChars.Options then
         LForeground := MiddleColor(FHighlighter.MainRules.Attribute.Background, FHighlighter.MainRules.Attribute.Foreground)
       else
-        LForeground := if scoTextColor in FSpecialChars.Options then FHighlighter.MainRules.Attribute.Foreground else FSpecialChars.Color;
+        LForeground := FHighlighter.MainRules.Attribute.Foreground;
     end;
 
     if LTokenHelper.Length > 0 then { Can we append the token? }

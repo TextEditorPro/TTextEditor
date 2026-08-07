@@ -21,9 +21,9 @@ type
     procedure Assign(ASource: TPersistent); override;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
-    property Color: TColor read FColor write SetColor default TColors.Black;
+    property Color: TColor read FColor write SetColor default TColors.SysNone;
     property Style: TTextEditorSpecialCharsLineBreakStyle read FStyle write SetStyle default eolArrow;
-    property Visible: Boolean read FVisible write SetVisible default False;
+    property Visible: Boolean read FVisible write SetVisible default True;
   end;
 
 implementation
@@ -32,9 +32,9 @@ constructor TTextEditorSpecialCharsLineBreak.Create;
 begin
   inherited;
 
-  FColor := TColors.Black;
+  FColor := TColors.SysNone;
   FStyle := eolArrow;
-  FVisible := False;
+  FVisible := True;
 end;
 
 procedure TTextEditorSpecialCharsLineBreak.Assign(ASource: TPersistent);

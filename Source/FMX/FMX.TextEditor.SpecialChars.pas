@@ -30,7 +30,7 @@ type
     procedure SetOption(const AOption: TTextEditorSpecialCharsOption; const AEnabled: Boolean);
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
   published
-    property Color: TAlphaColor read FColor write SetColor default TAlphaColors.Black;
+    property Color: TAlphaColor read FColor write SetColor default TAlphaColors.Null;
     property LineBreak: TTextEditorSpecialCharsLineBreak read FLineBreak write SetLineBreak;
     property Options: TTextEditorSpecialCharsOptions read FOptions write SetOptions default [scoMiddleColor];
     property Selection: TTextEditorSpecialCharsSelection read FSelection write SetSelection;
@@ -44,7 +44,7 @@ constructor TTextEditorSpecialChars.Create;
 begin
   inherited;
 
-  FColor := TAlphaColors.Black;
+  FColor := TAlphaColors.Null;
   FLineBreak := TTextEditorSpecialCharsLineBreak.Create;
   FSelection := TTextEditorSpecialCharsSelection.Create;
   FVisible := False;

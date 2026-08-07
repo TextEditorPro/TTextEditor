@@ -19,7 +19,7 @@ type
     procedure Assign(ASource: TPersistent); override;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
-    property Color: TColor read FColor write SetColor default TColors.Black;
+    property Color: TColor read FColor write SetColor default TColors.SysNone;
     property Visible: Boolean read FVisible write SetVisible default False;
   end;
 
@@ -29,7 +29,7 @@ constructor TTextEditorSpecialCharsSelection.Create;
 begin
   inherited;
 
-  FColor := TColors.Black;
+  FColor := TColors.SysNone;
   FVisible := False;
 end;
 

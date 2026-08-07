@@ -142,7 +142,7 @@ begin
       LWidth1 := FMeasureBitmap.Canvas.TextWidth('W');
       LWidth2 := FMeasureBitmap.Canvas.TextWidth('!');
       FCharWidth := FMeasureBitmap.Canvas.TextWidth(' ');
-      FCharHeight := Round(FMeasureBitmap.Canvas.TextHeight('W')) + 1;
+      FCharHeight := Round(FMeasureBitmap.Canvas.TextHeight('W'));
       FFixedSizeFont := SameValue(LWidth1, LWidth2);
     finally
       FMeasureBitmap.Canvas.EndScene;

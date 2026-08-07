@@ -19,7 +19,7 @@ type
     procedure Assign(ASource: TPersistent); override;
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
-    property Color: TAlphaColor read FColor write SetColor default TAlphaColors.Black;
+    property Color: TAlphaColor read FColor write SetColor default TAlphaColors.Null;
     property Visible: Boolean read FVisible write SetVisible default False;
   end;
 
@@ -29,7 +29,7 @@ constructor TTextEditorSpecialCharsSelection.Create;
 begin
   inherited;
 
-  FColor := TAlphaColors.Black;
+  FColor := TAlphaColors.Null;
   FVisible := False;
 end;
 

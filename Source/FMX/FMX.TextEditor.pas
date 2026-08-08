@@ -14893,7 +14893,6 @@ begin
     LLeft := FLeftMarginWidth + (FPosition.SelectionStart.Char - 1) * LCharWidth - FScrollHelper.HorizontalPosition;
     Canvas.Fill.Color := FColors.RulerSelection;
     Canvas.FillRect(RectF(LLeft, 0, LRulerCaretPosition, FRuler.Height - 1), 0, 0, [], 1);
-    Canvas.Stroke.Color := FColors.SelectionBackground;
     DrawPixelLine(LLeft, 0, LLeft, FRuler.Height - 1);
   end;
 

@@ -15768,7 +15768,6 @@ begin
         FillRect(LRect);
         Canvas.Brush.Color := FColors.RulerBackground;
         FPaintHelper.SetBackgroundColor(Canvas.Brush.Color);
-        Pen.Color := FColors.SelectionBackground;
         MoveTo(LRect.Left, 0);
         LineTo(LRect.Left, LClipRect.Bottom);
       end;

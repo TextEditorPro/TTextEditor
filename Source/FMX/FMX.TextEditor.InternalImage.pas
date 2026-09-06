@@ -35,7 +35,8 @@ type
     constructor Create(const AImageList: TCustomImageList; const APixelsPerInch: Integer = 96); overload;
     destructor Destroy; override;
     function GetBitmap(const AImageIndex: Integer; const ABackgroundColor: TAlphaColor; const AScale: Single = 1): TBitmap;
-    procedure Draw(const ACanvas: TCanvas; const ANumber: Integer; const X, Y: Single; const ALineHeight: Single; const ATransparentColor: TAlphaColor = TAlphaColors.Null);
+    procedure Draw(const ACanvas: TCanvas; const ANumber: Integer; const X, Y: Single; const ALineHeight: Single;
+      const ATransparentColor: TAlphaColor = TAlphaColors.Null);
     procedure SetColors(const AColors: TTextEditorBookmarkColors);
     property Height: Integer read FHeight write FHeight;
     property Width: Integer read FWidth write FWidth;
@@ -44,8 +45,8 @@ type
 implementation
 
 uses
-  System.Classes, System.Math, System.SysUtils, System.Types, FMX.TextLayout, FMX.TextEditor.Consts,
-  FMX.TextEditor.Types;
+  System.Classes, System.Math, System.Math.Vectors, System.SysUtils, System.Types, FMX.TextEditor.Consts, FMX.TextEditor.Types,
+  FMX.TextLayout;
 
 type
   TInternalResource = class(TObject)
@@ -56,56 +57,14 @@ type
   end;
 
 const
-  BookmarkDigitHeightFactor = 0.5;
+  BookmarkDigitHeightFactor = 0.58;
   BookmarkGlyphHeight = 14;
   BookmarkGlyphWidth = 10;
   BookmarkLineGap = 2;
-  BookmarkNotchDepthFactor = 0.18;
-  BookmarkNotchWidthFactor = 0.6;
+  BookmarkNotchDepthFactor = 0.22;
 
 var
   GInternalResources: TList;
-
-function FindInkRect(const ABitmap: TBitmap; out ARect: TRect): Boolean;
-var
-  LData: TBitmapData;
-  LMinX, LMinY, LMaxX, LMaxY: Integer;
-begin
-  Result := False;
-
-  if ABitmap.Map(TMapAccess.Read, LData) then
-  try
-    LMinX := ABitmap.Width;
-    LMinY := ABitmap.Height;
-    LMaxX := -1;
-    LMaxY := -1;
-
-    for var LY := 0 to ABitmap.Height - 1 do
-      for var LX := 0 to ABitmap.Width - 1 do
-      if TAlphaColorRec(LData.GetPixel(LX, LY)).A >= 128 then
-      begin
-        if LX < LMinX then
-          LMinX := LX;
-
-        if LX > LMaxX then
-          LMaxX := LX;
-
-        if LY < LMinY then
-          LMinY := LY;
-
-        if LY > LMaxY then
-          LMaxY := LY;
-      end;
-
-    if LMaxX >= 0 then
-    begin
-      ARect := Rect(LMinX, LMinY, LMaxX + 1, LMaxY + 1);
-      Result := True;
-    end;
-  finally
-    ABitmap.Unmap(LData);
-  end;
-end;
 
 constructor TTextEditorInternalImage.Create(const ACount: Integer = 1; const APixelsPerInch: Integer = 96);
 begin
@@ -223,7 +182,6 @@ var
   LInternalResource: TInternalResource;
   LKey: string;
 begin
-  { Cache key per imagelist instance, so editors sharing the same imagelist share one bitmap }
   LKey := IntToHex(NativeUInt(AImageList), SizeOf(Pointer) * 2);
 
   for var LIndex := 0 to GInternalResources.Count - 1 do
@@ -321,9 +279,8 @@ var
   procedure FillRibbon(const ALeft, ATop, ARibbonWidth, ARibbonHeight: Single; const AColor: TAlphaColor);
   var
     LPath: TPathData;
-    LNotchHalfWidth, LNotchDepth: Single;
+    LNotchDepth: Single;
   begin
-    LNotchHalfWidth := ARibbonWidth * BookmarkNotchWidthFactor * 0.5;
     LNotchDepth := ARibbonHeight * BookmarkNotchDepthFactor;
 
     LPath := TPathData.Create;
@@ -331,9 +288,7 @@ var
       LPath.MoveTo(PointF(ALeft, ATop));
       LPath.LineTo(PointF(ALeft + ARibbonWidth, ATop));
       LPath.LineTo(PointF(ALeft + ARibbonWidth, ATop + ARibbonHeight));
-      LPath.LineTo(PointF(ALeft + ARibbonWidth * 0.5 + LNotchHalfWidth, ATop + ARibbonHeight));
       LPath.LineTo(PointF(ALeft + ARibbonWidth * 0.5, ATop + ARibbonHeight - LNotchDepth));
-      LPath.LineTo(PointF(ALeft + ARibbonWidth * 0.5 - LNotchHalfWidth, ATop + ARibbonHeight));
       LPath.LineTo(PointF(ALeft, ATop + ARibbonHeight));
       LPath.ClosePath;
 
@@ -345,18 +300,42 @@ var
     end;
   end;
 
+  function DigitCenterX(const APath: TPathData; const ABounds: TRectF): Single;
+  var
+    LPolygon: TPolygon;
+    LBottom, LMinX, LMaxX: Single;
+  begin
+    Result := ABounds.Left + ABounds.Width * 0.5;
+
+    if ANumber <> 0 then
+      Exit;
+
+    APath.FlattenToPolygon(LPolygon);
+
+    LBottom := ABounds.Top + ABounds.Height * 0.98;
+    LMinX := ABounds.Right;
+    LMaxX := ABounds.Left;
+
+    for var LPoint in LPolygon do
+    if (LPoint.Y >= LBottom) and (LPoint.Y <= ABounds.Bottom) then
+    begin
+      LMinX := Min(LMinX, LPoint.X);
+      LMaxX := Max(LMaxX, LPoint.X);
+    end;
+
+    if LMaxX > LMinX then
+      Result := (LMinX + LMaxX) * 0.5;
+  end;
+
 var
   LLayout: TTextLayout;
   LDigitPath: TPathData;
-  LDigitBitmap: TBitmap;
-  LBounds, LDestination: TRectF;
-  LInkRect, LBlitRect: TRect;
-  LLeft, LTop, LWidth, LHeight, LCapHeight, LCenterY, LFontSize: Single;
+  LBounds: TRectF;
+  LLeft, LTop, LWidth, LHeight, LDigitHeight, LDigitScale, LCenterX: Single;
   LFillColor: TAlphaColor;
 begin
   LScale := ACanvas.Scale;
 
-  { Snap to whole device pixels so the straight edges stay crisp at every scale }
   LLeft := Snap(X);
   LTop := Snap(Y);
   LWidth := Snap(AWidth);
@@ -370,65 +349,39 @@ begin
   begin
     LLayout := TTextLayoutManager.DefaultTextLayout.Create;
     LDigitPath := TPathData.Create;
-    LDigitBitmap := TBitmap.Create;
     try
       LLayout.BeginUpdate;
       LLayout.Text := IntToStr(ANumber + 1);
       LLayout.Font.Size := 100;
       LLayout.Font.Style := [TFontStyle.fsBold];
-      LLayout.Color := TAlphaColors.Black;
       LLayout.EndUpdate;
       LLayout.ConvertToPath(LDigitPath);
 
       LBounds := LDigitPath.GetBounds;
-      LCapHeight := LHeight * BookmarkDigitHeightFactor;
+      LDigitHeight := Snap(LHeight * BookmarkDigitHeightFactor);
 
       if LBounds.Height > 0 then
       begin
-        LFontSize := 100 * LCapHeight / LBounds.Height;
+        LDigitScale := LDigitHeight / LBounds.Height;
+        LCenterX := DigitCenterX(LDigitPath, LBounds);
 
-        LLayout.BeginUpdate;
-        LLayout.Font.Size := LFontSize;
-        LLayout.TopLeft := PointF(0, 0);
-        LLayout.EndUpdate;
+        LDigitPath.Scale(LDigitScale, LDigitScale);
+        LDigitPath.Translate(LLeft + LWidth * 0.5 - LCenterX * LDigitScale,
+          LTop + Snap((LHeight * (1 - BookmarkNotchDepthFactor) - LDigitHeight) * 0.5) - LBounds.Top * LDigitScale);
 
-        LDigitBitmap.BitmapScale := LScale;
-        LDigitBitmap.SetSize(Ceil(LFontSize * LScale) + 4, Ceil(LFontSize * 1.6 * LScale) + 4);
-
-        if LDigitBitmap.Canvas.BeginScene then
-        try
-          LDigitBitmap.Canvas.Clear(TAlphaColors.Null);
-          LLayout.RenderLayout(LDigitBitmap.Canvas);
-        finally
-          LDigitBitmap.Canvas.EndScene;
-        end;
-
-        if FindInkRect(LDigitBitmap, LInkRect) then
-        begin
-          LBlitRect := LInkRect;
-          LBlitRect.Inflate(1, 1);
-          LBlitRect.Intersect(Rect(0, 0, LDigitBitmap.Width, LDigitBitmap.Height));
-
-          LCenterY := LTop + LHeight * (1 - BookmarkNotchDepthFactor) * 0.5;
-
-          LDestination.Left := Snap(LLeft + (LWidth - LLayout.TextWidth) * 0.5 + LInkRect.Left / LScale) -
-            (LInkRect.Left - LBlitRect.Left) / LScale;
-          LDestination.Top := Snap(LCenterY - LCapHeight * 0.5) - (LInkRect.Top - LBlitRect.Top) / LScale;
-          LDestination.Right := LDestination.Left + LBlitRect.Width / LScale;
-          LDestination.Bottom := LDestination.Top + LBlitRect.Height / LScale;
-
-          ACanvas.DrawBitmap(LDigitBitmap, TRectF.Create(LBlitRect), LDestination, 1);
-        end;
+        ACanvas.Fill.Kind := TBrushKind.Solid;
+        ACanvas.Fill.Color := TAlphaColors.Black;
+        ACanvas.FillPath(LDigitPath, 1);
       end;
     finally
-      LDigitBitmap.Free;
       LDigitPath.Free;
       LLayout.Free;
     end;
   end;
 end;
 
-procedure TTextEditorInternalImage.Draw(const ACanvas: TCanvas; const ANumber: Integer; const X, Y: Single; const ALineHeight: Single; const ATransparentColor: TAlphaColor = TAlphaColors.Null);
+procedure TTextEditorInternalImage.Draw(const ACanvas: TCanvas; const ANumber: Integer; const X, Y: Single; const ALineHeight: Single;
+  const ATransparentColor: TAlphaColor = TAlphaColors.Null);
 var
   LY, LHeight: Single;
   LSourceRect, LDestinationRect: TRectF;

@@ -35,7 +35,8 @@ type
     constructor Create(const ACount: Integer = 1; const APixelsPerInch: Integer = 96); overload;
     destructor Destroy; override;
     function GetBitmap(const AImageIndex: Integer; const ABackgroundColor: TColor): Vcl.Graphics.TBitmap;
-    procedure Draw(const ACanvas: TCanvas; const ANumber: Integer; const X: Integer; const Y: Integer; const ALineHeight: Integer; const ATransparentColor: TColor = TColors.SysNone);
+    procedure Draw(const ACanvas: TCanvas; const ANumber: Integer; const X: Integer; const Y: Integer; const ALineHeight: Integer;
+      const ATransparentColor: TColor = TColors.SysNone);
     procedure SetColors(const AColors: TTextEditorBookmarkColors);
     property Height: Integer read FHeight write FHeight;
     property Width: Integer read FWidth write FWidth;
@@ -44,8 +45,8 @@ type
 implementation
 
 uses
-  Winapi.GDIPAPI, Winapi.GDIPOBJ, Winapi.Windows, System.Classes, System.Math, System.SysUtils, System.Types,
-  TextEditor.Consts, TextEditor.Utils;
+  Winapi.GDIPAPI, Winapi.GDIPOBJ, Winapi.Windows, System.Classes, System.Math, System.SysUtils, System.Types, TextEditor.Consts,
+  TextEditor.Utils;
 
 type
   TInternalResource = class(TObject)
@@ -56,14 +57,13 @@ type
   end;
 
 const
-  BookmarkDigitFontCapHeight = 0.7;
-  BookmarkDigitFontName = 'Segoe UI';
-  BookmarkDigitHeightFactor = 0.5;
+  BookmarkDigitFontName = 'Arial';
+  BookmarkDigitHeightFactor = 0.58;
+  BookmarkDigitMeasureFontSize = 100;
   BookmarkGlyphHeight = 14;
   BookmarkGlyphWidth = 10;
   BookmarkLineGap = 2;
-  BookmarkNotchDepthFactor = 0.18;
-  BookmarkNotchWidthFactor = 0.6;
+  BookmarkNotchDepthFactor = 0.22;
 
 var
   GInternalResources: TList;
@@ -218,34 +218,74 @@ end;
 procedure DrawGlyphCore(const AGraphics: TGPGraphics; const ANumber, ALeft, ATop, AWidth, AHeight: Integer;
   const AFillColor: Cardinal);
 
-  procedure MakeRibbon(const ALeft, ATop, ARibbonWidth, ARibbonHeight: Single; var APoints: array of TGPPointF);
-  var
-    LNotchHalfWidth, LNotchDepth: Single;
+  procedure MakeRibbon(const ALeft, ATop, ARibbonWidth, ARibbonHeight, ANotchDepth: Single; var APoints: array of TGPPointF);
   begin
-    LNotchHalfWidth := ARibbonWidth * BookmarkNotchWidthFactor * 0.5;
-    LNotchDepth := ARibbonHeight * BookmarkNotchDepthFactor;
-
     APoints[0] := MakePoint(ALeft, ATop);
     APoints[1] := MakePoint(ALeft + ARibbonWidth, ATop);
     APoints[2] := MakePoint(ALeft + ARibbonWidth, ATop + ARibbonHeight);
-    APoints[3] := MakePoint(ALeft + ARibbonWidth * 0.5 + LNotchHalfWidth, ATop + ARibbonHeight);
-    APoints[4] := MakePoint(ALeft + ARibbonWidth * 0.5, ATop + ARibbonHeight - LNotchDepth);
-    APoints[5] := MakePoint(ALeft + ARibbonWidth * 0.5 - LNotchHalfWidth, ATop + ARibbonHeight);
-    APoints[6] := MakePoint(ALeft, ATop + ARibbonHeight);
+    APoints[3] := MakePoint(ALeft + ARibbonWidth * 0.5, ATop + ARibbonHeight - ANotchDepth);
+    APoints[4] := MakePoint(ALeft, ATop + ARibbonHeight);
+  end;
+
+  function DigitCenterX(const APath: TGPGraphicsPath; const ABounds: TGPRectF): Single;
+  var
+    LFlatPath: TGPGraphicsPath;
+    LPoints: array of TGPPointF;
+    LCount: Integer;
+    LBottom, LMinX, LMaxX: Single;
+  begin
+    Result := ABounds.X + ABounds.Width * 0.5;
+
+    if ANumber <> 0 then
+      Exit;
+
+    LFlatPath := APath.Clone;
+    try
+      LFlatPath.Flatten;
+      LCount := LFlatPath.GetPointCount;
+
+      if LCount = 0 then
+        Exit;
+
+      SetLength(LPoints, LCount);
+      LFlatPath.GetPathPoints(PGPPointF(@LPoints[0]), LCount);
+    finally
+      LFlatPath.Free;
+    end;
+
+    LBottom := ABounds.Y + ABounds.Height * 0.98;
+    LMinX := ABounds.X + ABounds.Width;
+    LMaxX := ABounds.X;
+
+    for var LIndex := 0 to LCount - 1 do
+    if LPoints[LIndex].Y >= LBottom then
+    begin
+      LMinX := Min(LMinX, LPoints[LIndex].X);
+      LMaxX := Max(LMaxX, LPoints[LIndex].X);
+    end;
+
+    if LMaxX > LMinX then
+      Result := (LMinX + LMaxX) * 0.5;
   end;
 
 var
   LBrush: TGPSolidBrush;
   LFontFamily: TGPFontFamily;
-  LFont: TGPFont;
-  LStringFormat: TGPStringFormat;
-  LPoints: array [0 .. 6] of TGPPointF;
-  LCapHeight, LFontSize, LAscent, LBaseline: Single;
+  LOwnsFontFamily: Boolean;
+  LPath: TGPGraphicsPath;
+  LMatrix: TGPMatrix;
+  LPoints: array [0 .. 4] of TGPPointF;
+  LBounds: TGPRectF;
+  LDigit: string;
+  LDigitHeight: Integer;
+  LNotchDepth, LCenterX: Single;
 begin
   AGraphics.SetSmoothingMode(SmoothingModeAntiAlias);
   AGraphics.SetPixelOffsetMode(PixelOffsetModeHalf);
 
-  MakeRibbon(ALeft, ATop, AWidth, AHeight, LPoints);
+  LNotchDepth := AHeight * BookmarkNotchDepthFactor;
+
+  MakeRibbon(ALeft, ATop, AWidth, AHeight, LNotchDepth, LPoints);
 
   LBrush := TGPSolidBrush.Create(AFillColor);
   try
@@ -256,29 +296,47 @@ begin
 
   if ANumber < 9 then
   begin
-    AGraphics.SetTextRenderingHint(TextRenderingHintAntiAliasGridFit);
+    LDigit := IntToStr(ANumber + 1);
+    LDigitHeight := Round(AHeight * BookmarkDigitHeightFactor);
 
     LFontFamily := TGPFontFamily.Create(BookmarkDigitFontName);
-    LStringFormat := TGPStringFormat.Create(StringFormatFlagsNoClip);
+    LOwnsFontFamily := LFontFamily.GetLastStatus = Ok;
+
+    if not LOwnsFontFamily then
+    begin
+      LFontFamily.Free;
+      LFontFamily := TGPFontFamily.GenericSansSerif;
+    end;
+
+    LPath := TGPGraphicsPath.Create;
     LBrush := TGPSolidBrush.Create($FF000000);
     try
-      LCapHeight := AHeight * BookmarkDigitHeightFactor;
-      LFontSize := LCapHeight / BookmarkDigitFontCapHeight;
-      LAscent := LFontFamily.GetCellAscent(FontStyleBold) * LFontSize / LFontFamily.GetEmHeight(FontStyleBold);
-      LBaseline := Round(ATop + (AHeight * (1 - BookmarkNotchDepthFactor) + LCapHeight) * 0.5);
+      LPath.AddString(LDigit, -1, LFontFamily, FontStyleBold, BookmarkDigitMeasureFontSize, MakePoint(0.0, 0.0), nil);
+      LPath.GetBounds(LBounds);
 
-      LFont := TGPFont.Create(LFontFamily, LFontSize, FontStyleBold, UnitPixel);
-      try
-        LStringFormat.SetAlignment(StringAlignmentCenter);
+      if LBounds.Height > 0 then
+      begin
+        LPath.Reset;
+        LPath.AddString(LDigit, -1, LFontFamily, FontStyleBold, BookmarkDigitMeasureFontSize * LDigitHeight / LBounds.Height, MakePoint(0.0, 0.0), nil);
+        LPath.GetBounds(LBounds);
+        LCenterX := DigitCenterX(LPath, LBounds);
 
-        AGraphics.DrawString(IntToStr(ANumber + 1), -1, LFont, MakeRect(ALeft + 0.5, LBaseline - LAscent, AWidth, 0), LStringFormat, LBrush);
-      finally
-        LFont.Free;
+        LMatrix := TGPMatrix.Create;
+        try
+          LMatrix.Translate(ALeft + AWidth * 0.5 - LCenterX, ATop + Round((AHeight - LNotchDepth - LDigitHeight) * 0.5) - LBounds.Y);
+          LPath.Transform(LMatrix);
+        finally
+          LMatrix.Free;
+        end;
+
+        AGraphics.FillPath(LBrush, LPath);
       end;
     finally
       LBrush.Free;
-      LStringFormat.Free;
-      LFontFamily.Free;
+      LPath.Free;
+
+      if LOwnsFontFamily then
+        LFontFamily.Free;
     end;
   end;
 end;
@@ -299,8 +357,7 @@ begin
 
   LRGBColor := ColorToRGB(LColor);
 
-  Result := $FF000000 or Cardinal(GetRValue(LRGBColor)) shl 16 or Cardinal(GetGValue(LRGBColor)) shl 8 or
-    GetBValue(LRGBColor);
+  Result := $FF000000 or Cardinal(GetRValue(LRGBColor)) shl 16 or Cardinal(GetGValue(LRGBColor)) shl 8 or GetBValue(LRGBColor);
 end;
 
 procedure TTextEditorInternalImage.SetColors(const AColors: TTextEditorBookmarkColors);
@@ -360,7 +417,8 @@ begin
   end;
 end;
 
-procedure TTextEditorInternalImage.Draw(const ACanvas: TCanvas; const ANumber: Integer; const X: Integer; const Y: Integer; const ALineHeight: Integer; const ATransparentColor: TColor = TColors.SysNone);
+procedure TTextEditorInternalImage.Draw(const ACanvas: TCanvas; const ANumber: Integer; const X: Integer; const Y: Integer;
+  const ALineHeight: Integer; const ATransparentColor: TColor = TColors.SysNone);
 var
   LY: Integer;
   LHeight: Single;

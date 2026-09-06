@@ -684,6 +684,7 @@ type
     function ClientHeight: Integer;
     function ClientRect: TRect;
     function ClientWidth: Integer;
+    function ContentToLocal(const APoint: TPointF): TPointF;
     function DoOnReplaceText(const AParams: TTextEditorReplaceTextParams): TTextEditorReplaceAction;
     function DoSearchMatchNotFoundWraparoundDialog: Boolean; virtual;
     function Dragging: Boolean;
@@ -700,6 +701,7 @@ type
     function HandleAllocated: Boolean;
     function HasText: Boolean;
     function IsIMEComposing: Boolean; inline;
+    function LocalToContent(const APoint: TPointF): TPointF;
     function PixelAndRowToViewPosition(const X: Single; const ARow: Integer; const ALineText: string = ''): TTextEditorViewPosition;
     function PixelsToViewPosition(const X, Y: Single): TTextEditorViewPosition;
     function SearchAll(const ASearchText: string = ''): Boolean;
@@ -1952,10 +1954,10 @@ end;
 
 function TCustomTextEditor.ClientHeight: Integer;
 begin
-  Result := Round(Height);
+  Result := Round(Height) - 2 * BorderWidth;
 
   if Assigned(FHorizontalScrollBar) and FHorizontalScrollBar.Visible then
-    Result := Result - Round(FHorizontalScrollBar.Height) - BorderWidth;
+    Result := Result - Round(FHorizontalScrollBar.Height);
 end;
 
 function TCustomTextEditor.ClientRect: TRect;
@@ -1965,10 +1967,20 @@ end;
 
 function TCustomTextEditor.ClientWidth: Integer;
 begin
-  Result := Round(Width);
+  Result := Round(Width) - 2 * BorderWidth;
 
   if Assigned(FVerticalScrollBar) and FVerticalScrollBar.Visible then
-    Result := Result - Round(FVerticalScrollBar.Width) - BorderWidth;
+    Result := Result - Round(FVerticalScrollBar.Width);
+end;
+
+function TCustomTextEditor.ContentToLocal(const APoint: TPointF): TPointF;
+begin
+  Result := PointF(APoint.X + BorderWidth, APoint.Y + BorderWidth);
+end;
+
+function TCustomTextEditor.LocalToContent(const APoint: TPointF): TPointF;
+begin
+  Result := PointF(APoint.X - BorderWidth, APoint.Y - BorderWidth);
 end;
 
 function TCustomTextEditor.Dragging: Boolean;
@@ -3048,7 +3060,7 @@ var
 begin
   Result := scNone;
 
-  LCursorPoint := ScreenToLocal(Screen.MousePos);
+  LCursorPoint := LocalToContent(ScreenToLocal(Screen.MousePos));
 
   LLeftX := FMouse.ScrollingPoint.X - FScroll.Indicator.Width;
   LRightX := FMouse.ScrollingPoint.X + 4;
@@ -3359,7 +3371,8 @@ begin
   if not Assigned(Scene) or (Scene.GetUpdateRectsCount = 0) then
     Exit;
 
-  var LAbsoluteRect: TRectF := TRectF.Create(LocalToAbsolute(ARect.TopLeft), LocalToAbsolute(ARect.BottomRight));
+  var LAbsoluteRect: TRectF := TRectF.Create(LocalToAbsolute(ContentToLocal(ARect.TopLeft)),
+    LocalToAbsolute(ContentToLocal(ARect.BottomRight)));
 
   for var LIndex := 0 to Scene.GetUpdateRectsCount - 1 do
   if LAbsoluteRect.IntersectsWith(Scene.GetUpdateRect(LIndex)) then
@@ -7813,7 +7826,7 @@ begin
 
   IncPaintLock;
   try
-    LCursorPoint := ScreenToLocal(Screen.MousePos);
+    LCursorPoint := LocalToContent(ScreenToLocal(Screen.MousePos));
 
     if FScrollHelper.Delta.X <> 0 then
       SetHorizontalScrollPosition(FScrollHelper.HorizontalPosition + FScrollHelper.Delta.X);
@@ -9358,7 +9371,7 @@ begin
 
   IncPaintLock;
   try
-    LCursorPoint := ScreenToLocal(Screen.MousePos);
+    LCursorPoint := LocalToContent(ScreenToLocal(Screen.MousePos));
 
     LViewPosition := PixelsToViewPosition(LCursorPoint.X, LCursorPoint.Y);
 
@@ -11233,7 +11246,7 @@ begin
     if Items.Count > 0 then
     begin
       FCompletionProposal.Visible := True;
-      Execute(GetCurrentInput, LPoint, LParams.Options);
+      Execute(GetCurrentInput, ContentToLocal(LPoint), LParams.Options);
     end
     else
       FreeCompletionProposalPopupWindow;
@@ -11444,7 +11457,7 @@ procedure TCustomTextEditor.DoOnLeftMarginClick(AButton: TMouseButton; AShift: T
       end;
     end;
 
-    LPoint := LocalToScreen(PointF(X, Y));
+    LPoint := LocalToScreen(ContentToLocal(PointF(X, Y)));
     LPopupMenu.Popup(LPoint.X, LPoint.Y);
   end;
 
@@ -11635,17 +11648,20 @@ begin
 end;
 
 procedure TCustomTextEditor.DragOver(const AData: TDragObject; const APoint: TPointF; var AOperation: TDragOperation);
+var
+  LPoint: TPointF;
 begin
   inherited;
 
   if (AData.Source is TCustomTextEditor) and not ReadOnly then
   begin
     AOperation := TDragOperation.Move;
+    LPoint := LocalToContent(APoint);
 
     if Dragging then
     begin
-      TextPosition := PixelsToTextPosition(Round(APoint.X), Round(APoint.Y));
-      ComputeScroll(Point(Round(APoint.X), Round(APoint.Y)));
+      TextPosition := PixelsToTextPosition(Round(LPoint.X), Round(LPoint.Y));
+      ComputeScroll(Point(Round(LPoint.X), Round(LPoint.Y)));
 
       if FCaret.NonBlinking.Active then
         Repaint
@@ -11653,7 +11669,7 @@ begin
         UpdateCaret;
     end
     else
-      TextPosition := PixelsToTextPosition(Round(APoint.X), Round(APoint.Y));
+      TextPosition := PixelsToTextPosition(Round(LPoint.X), Round(LPoint.Y));
   end;
 end;
 
@@ -11908,7 +11924,7 @@ begin
   { URI mouse over }
   if (ssCtrl in AShift) and not (ssAlt in AShift) and URIOpener then
   begin
-    LCursorPoint := ScreenToLocal(Screen.MousePos);
+    LCursorPoint := LocalToContent(ScreenToLocal(Screen.MousePos));
 
     if LocalRect.Contains(LCursorPoint) then
       UpdateMouseOverURI(LCursorPoint.X, LCursorPoint.Y);
@@ -12304,6 +12320,9 @@ var
   LRowCount, LRow: Integer;
   LMinimapLeft, LMinimapRight: Single;
 begin
+  X := X - BorderWidth;
+  Y := Y - BorderWidth;
+
   FLast.MouseMovePoint := PointF(X, Y);
   FMouse.Down := FLast.MouseMovePoint;
 
@@ -12665,6 +12684,9 @@ var
   LViewPosition: TTextEditorViewPosition;
   LRowCount, LRow: Integer;
 begin
+  X := X - BorderWidth;
+  Y := Y - BorderWidth;
+
   LMouseMovePoint := PointF(X, Y);
 
   if IsCodeFoldingVisible and FCodeFolding.AutoHide then
@@ -12845,6 +12867,9 @@ var
   LStart: Integer;
   LHighlighterAttribute: TTextEditorHighlighterAttribute;
 begin
+  X := X - BorderWidth;
+  Y := Y - BorderWidth;
+
   FLast.MouseMovePoint := PointF(X, Y);
 
   inherited;
@@ -12996,7 +13021,7 @@ begin
   LPoint.X := LPoint.X + TextWidth(Canvas, Copy(FTextService.MarkedText, 1, GetIMECursorOffset));
   LPoint.Y := LPoint.Y + GetLineHeight;
 
-  Result := LocalToAbsolute(LPoint);
+  Result := LocalToAbsolute(ContentToLocal(LPoint));
 end;
 
 function TCustomTextEditor.GetSelectionRect: TRectF;
@@ -13009,6 +13034,8 @@ begin
 
   if GetSelectionAvailable then
     Result := TRectF.Union(Result, RectF(FLeftMarginWidth, LPoint.Y, ClientWidth, LPoint.Y + GetLineHeight));
+
+  Result.Offset(BorderWidth, BorderWidth);
 end;
 
 function TCustomTextEditor.GetSelectionBounds: TRect;
@@ -13109,6 +13136,7 @@ procedure TCustomTextEditor.Paint;
 var
   LCancelled: Boolean;
   LCanvasState: TCanvasSaveState;
+  LContentCanvasState: TCanvasSaveState;
   LLeftOffset: Single;
   LMinimapFirstLine: Integer;
   LMinimapLastLine: Integer;
@@ -13138,173 +13166,182 @@ begin
     Canvas.Fill.Color := FColors.EditorBackground;
     Canvas.FillRect(LocalRect, 0, 0, [], 1);
 
-    FPaintHelper.SetBaseFont(FFonts.Text);
-    Canvas.Font.Assign(FFonts.Text);
-    LTextTopOffset := 0;
-
-    if IsRulerVisible then
-    begin
-      PaintRuler;
-      LTextTopOffset := FRuler.Height;
-    end;
-
-    LLeftOffset := 0;
-
-    if FMinimap.Align = maLeft then
-      LLeftOffset := LLeftOffset + FMinimap.GetWidth;
-
-    if FSearch.Map.Align = saLeft then
-      LLeftOffset := LLeftOffset + FSearch.Map.GetWidth;
-
-    if FLeftMargin.Visible then
-      PaintLeftMargin(RectF(LLeftOffset, LTextTopOffset, LLeftOffset + FLeftMargin.GetWidth, Height), FLineNumbers.TopLine,
-        Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1),
-        Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1));
-
-    if IsCodeFoldingVisible then
-      PaintCodeFolding(RectF(LLeftOffset + FLeftMargin.GetWidth, LTextTopOffset,
-        LLeftOffset + FLeftMargin.GetWidth + FCodeFolding.GetWidth, Height),
-        FLineNumbers.TopLine, Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1));
-
-    LTextCanvasState := Canvas.SaveState;
+    LContentCanvasState := Canvas.SaveState;
     try
-      Canvas.IntersectClipRect(RectF(FLeftMarginWidth, LTextTopOffset, ClientWidth, ClientHeight));
+      Canvas.MultiplyMatrix(TMatrix.CreateTranslation(BorderWidth, BorderWidth));
+      Canvas.IntersectClipRect(RectF(0, 0, Width - 2 * BorderWidth, Height - 2 * BorderWidth));
 
-      PaintTextLines(RectF(FLeftMarginWidth - FScrollHelper.HorizontalPosition, LTextTopOffset, Width, Height), FLineNumbers.TopLine,
-        Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1), False);
-    finally
-      Canvas.RestoreState(LTextCanvasState);
-    end;
+      FPaintHelper.SetBaseFont(FFonts.Text);
+      Canvas.Font.Assign(FFonts.Text);
+      LTextTopOffset := 0;
 
-    PaintRightMargin(RectF(FLeftMarginWidth, LTextTopOffset, Width, Height));
+      if IsRulerVisible then
+      begin
+        PaintRuler;
+        LTextTopOffset := FRuler.Height;
+      end;
 
-    if IsCodeFoldingVisible and not FCodeFolding.TextFolding.Active and FCodeFolding.GuideLines.Visible then
-      PaintCodeFoldingGuides(FLineNumbers.TopLine, Min(FLineNumbers.TopLine + FLineNumbers.VisibleCount, FLineNumbers.Count));
+      LLeftOffset := 0;
 
-    if not (csDesigning in ComponentState) and FSyncEdit.Active and FSyncEdit.Visible then
-    begin
+      if FMinimap.Align = maLeft then
+        LLeftOffset := LLeftOffset + FMinimap.GetWidth;
+
+      if FSearch.Map.Align = saLeft then
+        LLeftOffset := LLeftOffset + FSearch.Map.GetWidth;
+
+      if FLeftMargin.Visible then
+        PaintLeftMargin(RectF(LLeftOffset, LTextTopOffset, LLeftOffset + FLeftMargin.GetWidth, Height), FLineNumbers.TopLine,
+          Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1),
+          Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1));
+
+      if IsCodeFoldingVisible then
+        PaintCodeFolding(RectF(LLeftOffset + FLeftMargin.GetWidth, LTextTopOffset,
+          LLeftOffset + FLeftMargin.GetWidth + FCodeFolding.GetWidth, Height),
+          FLineNumbers.TopLine, Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1));
+
       LTextCanvasState := Canvas.SaveState;
       try
         Canvas.IntersectClipRect(RectF(FLeftMarginWidth, LTextTopOffset, ClientWidth, ClientHeight));
-        PaintSyncItems;
+
+        PaintTextLines(RectF(FLeftMarginWidth - FScrollHelper.HorizontalPosition, LTextTopOffset, Width, Height), FLineNumbers.TopLine,
+          Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1), False);
       finally
         Canvas.RestoreState(LTextCanvasState);
       end;
-    end;
 
-    if not (csDesigning in ComponentState) and (FCaretBookmarkList.Count > 0) then
-    begin
-      LTextCanvasState := Canvas.SaveState;
-      try
-        Canvas.IntersectClipRect(RectF(FLeftMarginWidth, LTextTopOffset, ClientWidth, ClientHeight));
-        PaintCaretBookmarks;
-      finally
-        Canvas.RestoreState(LTextCanvasState);
-      end;
-    end;
+      PaintRightMargin(RectF(FLeftMarginWidth, LTextTopOffset, Width, Height));
 
-    if FMinimap.Visible then
-    begin
-      if FMinimap.Align = maRight then
+      if IsCodeFoldingVisible and not FCodeFolding.TextFolding.Active and FCodeFolding.GuideLines.Visible then
+        PaintCodeFoldingGuides(FLineNumbers.TopLine, Min(FLineNumbers.TopLine + FLineNumbers.VisibleCount, FLineNumbers.Count));
+
+      if not (csDesigning in ComponentState) and FSyncEdit.Active and FSyncEdit.Visible then
       begin
-        LMinimapRect := RectF(ClientWidth - FMinimap.GetWidth - FSearch.Map.GetWidth - 2, 0, ClientWidth, ClientHeight);
-
-        if FSearch.Map.Align = saRight then
-          LMinimapRect.Right := LMinimapRect.Right - FSearch.Map.GetWidth;
-      end
-      else
-      begin
-        LMinimapRect := RectF(0, 0, FMinimap.GetWidth, ClientHeight);
-
-        if FSearch.Map.Align = saLeft then
-        begin
-          LMinimapRect.Left := LMinimapRect.Left + FSearch.Map.GetWidth;
-          LMinimapRect.Right := LMinimapRect.Right + FSearch.Map.GetWidth;
-        end;
-      end;
-
-      if IsRectInUpdateRegion(LMinimapRect) then
-      begin
-        FPaintHelper.SetBaseFont(FFonts.Minimap);
-
-        LMinimapFirstLine := Max(FMinimap.TopLine, 1);
-        LMinimapLastLine := Min(FLineNumbers.Count, LMinimapFirstLine + Trunc(ClientHeight / Max(FMinimap.CharHeight, 1)) + 1);
-
         LTextCanvasState := Canvas.SaveState;
         try
-          Canvas.IntersectClipRect(LMinimapRect);
-
-          if FEditorMode = emSimple then
-            PaintSimpleTextLines(LMinimapRect, LMinimapFirstLine, LMinimapLastLine, True)
-          else
-            PaintMinimap(LMinimapRect, LMinimapFirstLine, LMinimapLastLine);
-
-          if ioUseBlending in FMinimap.Indicator.Options then
-            PaintMinimapIndicator(LMinimapRect);
+          Canvas.IntersectClipRect(RectF(FLeftMarginWidth, LTextTopOffset, ClientWidth, ClientHeight));
+          PaintSyncItems;
         finally
           Canvas.RestoreState(LTextCanvasState);
         end;
-
-        FPaintHelper.SetBaseFont(FFonts.Text);
-        Canvas.Font.Assign(FFonts.Text);
       end;
 
-      if FMinimap.Shadow.Visible then
-        PaintMinimapShadow(Canvas, RectF(FLeftMarginWidth - FLeftMargin.GetWidth - GetCodeFoldingWidth, 0,
-          ClientWidth - FMinimap.GetWidth - FSearch.Map.GetWidth - 2, ClientHeight));
-    end;
-
-    if FSearch.Map.Visible then
-    begin
-      if FSearch.Map.Align = saRight then
-        PaintSearchMap(System.Types.Rect(Round(Width) - FSearch.Map.GetWidth, 0, Round(Width), Round(Height)))
-      else
-        PaintSearchMap(System.Types.Rect(0, 0, FSearch.Map.GetWidth, Round(Height)));
-    end;
-
-    if FScroll.Shadow.Visible and (FScrollHelper.HorizontalPosition <> 0) then
-      PaintScrollShadow(Canvas, RectF(FLeftMarginWidth, LTextTopOffset, FLeftMarginWidth + FScrollHelper.PageWidth, Height));
-
-    if FRightMargin.Moving then
-    begin
-      PaintRightMarginMove;
-
-      if rmoShowMovingHint in FRightMargin.Options then
-        PaintRightMarginMoveHint;
-    end;
-
-    if FRuler.Moving and (FEditorMode <> emSimple) then
-    begin
-      PaintRulerMove;
-
-      if FRulerMovePosition >= 0 then
-        PaintRulerMoveHint;
-    end;
-
-    if FMouse.IsScrolling then
-      PaintMouseScrollPoint;
-
-    if FScrollHelper.IsScrolling and (soShowVerticalScrollHint in FScroll.Options) then
-      PaintScrollHint;
-
-    { IME composition }
-    if IsIMEComposing then
-    begin
-      LTextCanvasState := Canvas.SaveState;
-      try
-        Canvas.IntersectClipRect(RectF(FLeftMarginWidth, LTextTopOffset, ClientWidth, ClientHeight));
-        PaintIMEMarkedText;
-      finally
-        Canvas.RestoreState(LTextCanvasState);
+      if not (csDesigning in ComponentState) and (FCaretBookmarkList.Count > 0) then
+      begin
+        LTextCanvasState := Canvas.SaveState;
+        try
+          Canvas.IntersectClipRect(RectF(FLeftMarginWidth, LTextTopOffset, ClientWidth, ClientHeight));
+          PaintCaretBookmarks;
+        finally
+          Canvas.RestoreState(LTextCanvasState);
+        end;
       end;
-    end;
 
-    { Macro state }
-    if (eoShowMacroState in FOptions) and ((FMacroState <> msStopped) or FMacroStateFlash) and not (csDesigning in ComponentState) then
-      PaintMacroState;
+      if FMinimap.Visible then
+      begin
+        if FMinimap.Align = maRight then
+        begin
+          LMinimapRect := RectF(ClientWidth - FMinimap.GetWidth - FSearch.Map.GetWidth - 2, 0, ClientWidth, ClientHeight);
+
+          if FSearch.Map.Align = saRight then
+            LMinimapRect.Right := LMinimapRect.Right - FSearch.Map.GetWidth;
+        end
+        else
+        begin
+          LMinimapRect := RectF(0, 0, FMinimap.GetWidth, ClientHeight);
+
+          if FSearch.Map.Align = saLeft then
+          begin
+            LMinimapRect.Left := LMinimapRect.Left + FSearch.Map.GetWidth;
+            LMinimapRect.Right := LMinimapRect.Right + FSearch.Map.GetWidth;
+          end;
+        end;
+
+        if IsRectInUpdateRegion(LMinimapRect) then
+        begin
+          FPaintHelper.SetBaseFont(FFonts.Minimap);
+
+          LMinimapFirstLine := Max(FMinimap.TopLine, 1);
+          LMinimapLastLine := Min(FLineNumbers.Count, LMinimapFirstLine + Trunc(ClientHeight / Max(FMinimap.CharHeight, 1)) + 1);
+
+          LTextCanvasState := Canvas.SaveState;
+          try
+            Canvas.IntersectClipRect(LMinimapRect);
+
+            if FEditorMode = emSimple then
+              PaintSimpleTextLines(LMinimapRect, LMinimapFirstLine, LMinimapLastLine, True)
+            else
+              PaintMinimap(LMinimapRect, LMinimapFirstLine, LMinimapLastLine);
+
+            if ioUseBlending in FMinimap.Indicator.Options then
+              PaintMinimapIndicator(LMinimapRect);
+          finally
+            Canvas.RestoreState(LTextCanvasState);
+          end;
+
+          FPaintHelper.SetBaseFont(FFonts.Text);
+          Canvas.Font.Assign(FFonts.Text);
+        end;
+
+        if FMinimap.Shadow.Visible then
+          PaintMinimapShadow(Canvas, RectF(FLeftMarginWidth - FLeftMargin.GetWidth - GetCodeFoldingWidth, 0,
+            ClientWidth - FMinimap.GetWidth - FSearch.Map.GetWidth - 2, ClientHeight));
+      end;
+
+      if FSearch.Map.Visible then
+      begin
+        if FSearch.Map.Align = saRight then
+          PaintSearchMap(System.Types.Rect(Round(Width) - FSearch.Map.GetWidth, 0, Round(Width), Round(Height)))
+        else
+          PaintSearchMap(System.Types.Rect(0, 0, FSearch.Map.GetWidth, Round(Height)));
+      end;
+
+      if FScroll.Shadow.Visible and (FScrollHelper.HorizontalPosition <> 0) then
+        PaintScrollShadow(Canvas, RectF(FLeftMarginWidth, LTextTopOffset, FLeftMarginWidth + FScrollHelper.PageWidth, Height));
+
+      if FRightMargin.Moving then
+      begin
+        PaintRightMarginMove;
+
+        if rmoShowMovingHint in FRightMargin.Options then
+          PaintRightMarginMoveHint;
+      end;
+
+      if FRuler.Moving and (FEditorMode <> emSimple) then
+      begin
+        PaintRulerMove;
+
+        if FRulerMovePosition >= 0 then
+          PaintRulerMoveHint;
+      end;
+
+      if FMouse.IsScrolling then
+        PaintMouseScrollPoint;
+
+      if FScrollHelper.IsScrolling and (soShowVerticalScrollHint in FScroll.Options) then
+        PaintScrollHint;
+
+      { IME composition }
+      if IsIMEComposing then
+      begin
+        LTextCanvasState := Canvas.SaveState;
+        try
+          Canvas.IntersectClipRect(RectF(FLeftMarginWidth, LTextTopOffset, ClientWidth, ClientHeight));
+          PaintIMEMarkedText;
+        finally
+          Canvas.RestoreState(LTextCanvasState);
+        end;
+      end;
+
+      { Macro state }
+      if (eoShowMacroState in FOptions) and ((FMacroState <> msStopped) or FMacroStateFlash) and not (csDesigning in ComponentState) then
+        PaintMacroState;
+
+      DoOnPaint;
+    finally
+      Canvas.RestoreState(LContentCanvasState);
+    end;
 
     PaintBorder;
-    DoOnPaint;
   finally
     Canvas.RestoreState(LCanvasState);
   end;
@@ -15115,7 +15152,7 @@ begin
     begin
       Canvas.Font.Assign(FFonts.Hint);
       LHeight := FMX.TextEditor.Utils.TextHeight(Canvas, LHint) + 2 * LPadding;
-      LThumbTop := AbsoluteToLocal(LThumb.LocalToAbsolute(TPointF.Zero)).Y + (LThumb.Height - LHeight) / 2;
+      LThumbTop := LocalToContent(AbsoluteToLocal(LThumb.LocalToAbsolute(TPointF.Zero))).Y + (LThumb.Height - LHeight) / 2;
       LMaxTop := Max(LMargin, ClientHeight - LHeight - LMargin);
       LTop := Min(Max(LThumbTop, LMargin), LMaxTop);
     end;
@@ -18722,6 +18759,8 @@ begin
       LCaretChar := LLineText[AViewPosition.Column];
   end;
 
+  LRect.Offset(BorderWidth, BorderWidth);
+
   ADisplay.SetCaretInfo(LRect, LCaretChar, LCharRect, LBackgroundColor, LForegroundColor, FFonts.Text);
   ADisplay.ShowCaret(ABlinking, FCaret.BlinkingInterval);
 end;
@@ -18994,7 +19033,7 @@ var
   LSelectionAvailable: Boolean;
   LNewCursor: TCursor;
 begin
-  LCursorPoint := ScreenToLocal(Screen.MousePos);
+  LCursorPoint := LocalToContent(ScreenToLocal(Screen.MousePos));
 
   LWidth := 0;
 
@@ -19365,7 +19404,7 @@ var
 begin
   Result := False;
 
-  LCursorPoint := ScreenToLocal(Screen.MousePos);
+  LCursorPoint := LocalToContent(ScreenToLocal(Screen.MousePos));
 
   if (LCursorPoint.X < 0) or (LCursorPoint.Y < 0) or (LCursorPoint.X > Self.Width) or (LCursorPoint.Y > Self.Height) then
     Exit;
@@ -21449,8 +21488,8 @@ var
   LChangeScrollPastEndOfLine: Boolean;
 begin
   ASource := AData.Source;
-  X := Round(APoint.X);
-  Y := Round(APoint.Y);
+  X := Round(APoint.X) - BorderWidth;
+  Y := Round(APoint.Y) - BorderWidth;
 
   if not ReadOnly and (ASource is TCustomTextEditor) and TCustomTextEditor(ASource).SelectionAvailable then
   begin

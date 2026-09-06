@@ -9,6 +9,7 @@ type
   TTextEditorLeftMarginBookmarks = class(TPersistent)
   strict private
     FAutoNumber: Boolean;
+    FBold: Boolean;
     FImages: TCustomImageList;
     FLeftMargin: Integer;
     FOnChange: TNotifyEvent;
@@ -17,6 +18,7 @@ type
     FShortCuts: Boolean;
     FVisible: Boolean;
     procedure DoChange;
+    procedure SetBold(const AValue: Boolean);
     procedure SetImages(const AValue: TCustomImageList);
     procedure SetVisible(const AValue: Boolean);
   public
@@ -26,6 +28,7 @@ type
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
     property AutoNumber: Boolean read FAutoNumber write FAutoNumber default False;
+    property Bold: Boolean read FBold write SetBold default False;
     property Images: TCustomImageList read FImages write SetImages;
     property LeftMargin: Integer read FLeftMargin write FLeftMargin default 2;
     property Scaled: Boolean read FScaled write FScaled default True;
@@ -44,6 +47,7 @@ begin
 
   FOwner := AOwner;
   FAutoNumber := False;
+  FBold := False;
   FLeftMargin := 2;
   FScaled := True;
   FShortCuts := True;
@@ -56,6 +60,7 @@ begin
   with ASource as TTextEditorLeftMarginBookmarks do
   begin
     Self.FAutoNumber := FAutoNumber;
+    Self.FBold := FBold;
     Self.FImages := FImages;
     Self.FLeftMargin := FLeftMargin;
     Self.FShortCuts := FShortCuts;
@@ -77,6 +82,16 @@ procedure TTextEditorLeftMarginBookmarks.DoChange;
 begin
   if Assigned(FOnChange) then
     FOnChange(Self);
+end;
+
+procedure TTextEditorLeftMarginBookmarks.SetBold(const AValue: Boolean);
+begin
+  if FBold <> AValue then
+  begin
+    FBold := AValue;
+
+    DoChange;
+  end;
 end;
 
 procedure TTextEditorLeftMarginBookmarks.SetImages(const AValue: TCustomImageList);

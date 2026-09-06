@@ -14062,6 +14062,7 @@ begin
   LBookmarkColors.Blue := FColors.BookmarkBlue;
   LBookmarkColors.Purple := FColors.BookmarkPurple;
   FImagesBookmark.SetColors(LBookmarkColors);
+  FImagesBookmark.SetBold(FLeftMargin.Bookmarks.Bold);
 end;
 
 procedure TCustomTextEditor.CreateCollapsedBackup;

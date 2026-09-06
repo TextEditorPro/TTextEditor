@@ -18,6 +18,7 @@ type
   public const
     DefaultImageCount = 14;
   strict private
+    FBold: Boolean;
     FColors: TTextEditorBookmarkColors;
     FCount: Integer;
     FHeight: Integer;
@@ -37,6 +38,7 @@ type
     function GetBitmap(const AImageIndex: Integer; const ABackgroundColor: TAlphaColor; const AScale: Single = 1): TBitmap;
     procedure Draw(const ACanvas: TCanvas; const ANumber: Integer; const X, Y: Single; const ALineHeight: Single;
       const ATransparentColor: TAlphaColor = TAlphaColors.Null);
+    procedure SetBold(const AValue: Boolean);
     procedure SetColors(const AColors: TTextEditorBookmarkColors);
     property Height: Integer read FHeight write FHeight;
     property Width: Integer read FWidth write FWidth;
@@ -90,6 +92,15 @@ begin
     13: Result := FColors.Purple;
   else
     Result := FColors.Yellow;
+  end;
+end;
+
+procedure TTextEditorInternalImage.SetBold(const AValue: Boolean);
+begin
+  if FBold <> AValue then
+  begin
+    FBold := AValue;
+    FreeAndNil(FSprites);
   end;
 end;
 
@@ -353,7 +364,10 @@ begin
       LLayout.BeginUpdate;
       LLayout.Text := IntToStr(ANumber + 1);
       LLayout.Font.Size := 100;
-      LLayout.Font.Style := [TFontStyle.fsBold];
+
+      if FBold then
+        LLayout.Font.Style := [TFontStyle.fsBold];
+
       LLayout.EndUpdate;
       LLayout.ConvertToPath(LDigitPath);
 

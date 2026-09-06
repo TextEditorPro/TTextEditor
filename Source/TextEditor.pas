@@ -1497,6 +1497,7 @@ begin
   FState.ReadOnly := TTextEditorDefaults.ReadOnly;
   FMultiEdit.Position.Row := -1;
   FEditorMode := emNormal;
+  FPixelsPerInch := 96;
   { Zoom }
   FZoom.Divider := TTextEditorDefaults.ZoomDivider;
   FZoom.Percentage := TTextEditorDefaults.ZoomPercentage;
@@ -11639,7 +11640,7 @@ begin
   if csDesigning in ComponentState then
     Exit;
 
-  ChangeObjectScale(AMultiplier, ADivider, AIsDpiChange);
+  ChangeObjectScale(MulDiv(AMultiplier, FZoom.Percentage, 100), MulDiv(ADivider, FZoom.Percentage, 100), AIsDpiChange);
 
   inherited ChangeScale(AMultiplier, ADivider, AIsDpiChange);
 end;
@@ -15053,6 +15054,7 @@ begin
   LBookmarkColors.Purple := FColors.BookmarkPurple;
 
   FImagesBookmark.SetColors(LBookmarkColors);
+  FImagesBookmark.SetBold(FLeftMargin.Bookmarks.Bold);
 end;
 
 procedure TCustomTextEditor.CreateCollapsedBackup;
@@ -24419,23 +24421,18 @@ procedure TCustomTextEditor.SetZoomPercentage(const APercentage: Integer);
 var
   LPixelsPerInch, LMultiplier: Integer;
 begin
-  FZoom.Percentage := APercentage;
-
   IncPaintLock;
   try
-    LPixelsPerInch := {$IFDEF ALPHASKINS}GetPPI(SkinData){$ELSE}Screen.PixelsPerInch{$ENDIF};
-
-    if FZoom.Divider = 0 then
-      FZoom.Divider := LPixelsPerInch;
-
-    LMultiplier := Round((FZoom.Percentage / 100) * LPixelsPerInch);
+    LPixelsPerInch := MulDiv(FPixelsPerInch, 100, FZoom.Percentage);
+    LMultiplier := MulDiv(LPixelsPerInch, APercentage, 100);
 
     FZoom.Return := True;
-    ChangeObjectScale(LPixelsPerInch, FZoom.Divider, True);
+    ChangeObjectScale(LPixelsPerInch, FPixelsPerInch, True);
     FZoom.Return := False;
 
     ChangeObjectScale(LMultiplier, LPixelsPerInch, True);
 
+    FZoom.Percentage := APercentage;
     FZoom.Divider := LMultiplier;
   finally
     if FWordWrap.Active then

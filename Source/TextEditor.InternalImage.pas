@@ -18,6 +18,7 @@ type
   public const
     DefaultImageCount = 14;
   strict private
+    FBold: Boolean;
     FColors: TTextEditorBookmarkColors;
     FCount: Integer;
     FHeight: Integer;
@@ -37,6 +38,7 @@ type
     function GetBitmap(const AImageIndex: Integer; const ABackgroundColor: TColor): Vcl.Graphics.TBitmap;
     procedure Draw(const ACanvas: TCanvas; const ANumber: Integer; const X: Integer; const Y: Integer; const ALineHeight: Integer;
       const ATransparentColor: TColor = TColors.SysNone);
+    procedure SetBold(const AValue: Boolean);
     procedure SetColors(const AColors: TTextEditorBookmarkColors);
     property Height: Integer read FHeight write FHeight;
     property Width: Integer read FWidth write FWidth;
@@ -216,7 +218,7 @@ begin
 end;
 
 procedure DrawGlyphCore(const AGraphics: TGPGraphics; const ANumber, ALeft, ATop, AWidth, AHeight: Integer;
-  const AFillColor: Cardinal);
+  const AFillColor: Cardinal; const ABold: Boolean);
 
   procedure MakeRibbon(const ALeft, ATop, ARibbonWidth, ARibbonHeight, ANotchDepth: Single; var APoints: array of TGPPointF);
   begin
@@ -277,7 +279,7 @@ var
   LPoints: array [0 .. 4] of TGPPointF;
   LBounds: TGPRectF;
   LDigit: string;
-  LDigitHeight: Integer;
+  LDigitHeight, LFontStyle: Integer;
   LNotchDepth, LCenterX: Single;
 begin
   AGraphics.SetSmoothingMode(SmoothingModeAntiAlias);
@@ -298,6 +300,7 @@ begin
   begin
     LDigit := IntToStr(ANumber + 1);
     LDigitHeight := Round(AHeight * BookmarkDigitHeightFactor);
+    LFontStyle := if ABold then FontStyleBold else FontStyleRegular;
 
     LFontFamily := TGPFontFamily.Create(BookmarkDigitFontName);
     LOwnsFontFamily := LFontFamily.GetLastStatus = Ok;
@@ -311,13 +314,14 @@ begin
     LPath := TGPGraphicsPath.Create;
     LBrush := TGPSolidBrush.Create($FF000000);
     try
-      LPath.AddString(LDigit, -1, LFontFamily, FontStyleBold, BookmarkDigitMeasureFontSize, MakePoint(0.0, 0.0), nil);
+      LPath.AddString(LDigit, -1, LFontFamily, LFontStyle, BookmarkDigitMeasureFontSize, MakePoint(0.0, 0.0), nil);
       LPath.GetBounds(LBounds);
 
       if LBounds.Height > 0 then
       begin
         LPath.Reset;
-        LPath.AddString(LDigit, -1, LFontFamily, FontStyleBold, BookmarkDigitMeasureFontSize * LDigitHeight / LBounds.Height, MakePoint(0.0, 0.0), nil);
+        LPath.AddString(LDigit, -1, LFontFamily, LFontStyle, BookmarkDigitMeasureFontSize * LDigitHeight / LBounds.Height,
+          MakePoint(0.0, 0.0), nil);
         LPath.GetBounds(LBounds);
         LCenterX := DigitCenterX(LPath, LBounds);
 
@@ -357,7 +361,17 @@ begin
 
   LRGBColor := ColorToRGB(LColor);
 
-  Result := $FF000000 or Cardinal(GetRValue(LRGBColor)) shl 16 or Cardinal(GetGValue(LRGBColor)) shl 8 or GetBValue(LRGBColor);
+  Result := $FF000000 or Cardinal(GetRValue(LRGBColor)) shl 16 or Cardinal(GetGValue(LRGBColor)) shl 8 or
+    GetBValue(LRGBColor);
+end;
+
+procedure TTextEditorInternalImage.SetBold(const AValue: Boolean);
+begin
+  if FBold <> AValue then
+  begin
+    FBold := AValue;
+    FreeAndNil(FSprites);
+  end;
 end;
 
 procedure TTextEditorInternalImage.SetColors(const AColors: TTextEditorBookmarkColors);
@@ -376,7 +390,7 @@ var
 begin
   LGraphics := TGPGraphics.Create(ACanvas.Handle);
   try
-    DrawGlyphCore(LGraphics, ANumber, Round(X), Round(Y), Round(AWidth), Round(AHeight), GlyphFillColor(ANumber));
+    DrawGlyphCore(LGraphics, ANumber, Round(X), Round(Y), Round(AWidth), Round(AHeight), GlyphFillColor(ANumber), FBold);
   finally
     LGraphics.Free;
   end;
@@ -396,7 +410,7 @@ begin
     LGraphics := TGPGraphics.Create(LGPBitmap);
     try
       for var LIndex := 0 to FCount - 1 do
-        DrawGlyphCore(LGraphics, LIndex, LIndex * FWidth, 0, FWidth, FHeight, GlyphFillColor(LIndex));
+        DrawGlyphCore(LGraphics, LIndex, LIndex * FWidth, 0, FWidth, FHeight, GlyphFillColor(LIndex), FBold);
     finally
       LGraphics.Free;
     end;

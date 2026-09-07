@@ -15162,7 +15162,7 @@ var
       LCaretY := FPosition.Text.Line + 1;
       LCompareMode := lnoCompareMode in FLeftMargin.LineNumbers.Options;
       LCompareEmptyLine := False;
-      LLeftMarginWidth := LLineRect.Left + FLeftMargin.GetWidth - FLeftMargin.LineState.Width - 3;
+      LLeftMarginWidth := LLineRect.Left + FLeftMargin.GetWidth - FLeftMargin.LineState.ScaledWidth - 3;
       LLongLineWidth := Round(FLeftMarginCharWidth * 0.75); { Delphi IDE dash is about 3/4 of a digit wide }
 
       for var LIndex := AFirstLine to LLastTextLine do
@@ -15533,14 +15533,14 @@ var
 
       if FLeftMargin.LineState.Align = lsLeft then
       begin
-        LLineStateRect.Left := FLeftMargin.LineState.Offset;
-        LLineStateRect.Right := FLeftMargin.LineState.Width + FLeftMargin.LineState.Offset;
+        LLineStateRect.Left := FLeftMargin.LineState.ScaledOffset;
+        LLineStateRect.Right := FLeftMargin.LineState.ScaledWidth + FLeftMargin.LineState.ScaledOffset;
       end
       else
       begin
         LRightOffset := if IsCodeFoldingVisible then 1 else 3;
 
-        LLineStateRect.Left := AClipRect.Right - FLeftMargin.LineState.Width - LRightOffset;
+        LLineStateRect.Left := AClipRect.Right - FLeftMargin.LineState.ScaledWidth - LRightOffset;
         LLineStateRect.Right := AClipRect.Right - LRightOffset;
       end;
 

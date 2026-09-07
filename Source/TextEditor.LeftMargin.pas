@@ -150,7 +150,7 @@ begin
     Result := 0
   else
   if FLineNumbers.Visible then
-    Result := LPanelWidth + FLineState.Width + 2 + FLineNumbers.AutosizeDigitCount * ACharWidth + 5
+    Result := LPanelWidth + FLineState.ScaledWidth + 2 + FLineNumbers.AutosizeDigitCount * ACharWidth + 5
   else
     Result := FWidth;
 end;

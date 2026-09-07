@@ -1440,13 +1440,7 @@ begin
   FUnknownChars.OnChange := UnknownCharsChanged;
   { Fonts }
   FFonts := TTextEditorFonts.Create;
-
-  FFonts.CodeFoldingHint.OnChanged := FontChanged;
-  FFonts.CompletionProposal.OnChanged := FontChanged;
-  FFonts.LineNumbers.OnChanged := FontChanged;
-  FFonts.Minimap.OnChanged := FontChanged;
-  FFonts.Ruler.OnChanged := FontChanged;
-  FFonts.Text.OnChanged := FontChanged;
+  FFonts.OnChange := FontChanged;
 
   FFontStyles := TTextEditorFontStyles.Create;
   { Painting }
@@ -14535,14 +14529,14 @@ var
 
       if FLeftMargin.LineState.Align = lsLeft then
       begin
-        LLineStateRect.Left := FLeftMargin.LineState.Offset;
-        LLineStateRect.Right := FLeftMargin.LineState.Width + FLeftMargin.LineState.Offset;
+        LLineStateRect.Left := FLeftMargin.LineState.ScaledOffset;
+        LLineStateRect.Right := FLeftMargin.LineState.ScaledWidth + FLeftMargin.LineState.ScaledOffset;
       end
       else
       begin
         LRightOffset := if IsCodeFoldingVisible then 1 else 3;
 
-        LLineStateRect.Left := AClipRect.Right - FLeftMargin.LineState.Width - LRightOffset;
+        LLineStateRect.Left := AClipRect.Right - FLeftMargin.LineState.ScaledWidth - LRightOffset;
         LLineStateRect.Right := AClipRect.Right - LRightOffset;
       end;
 

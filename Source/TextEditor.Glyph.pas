@@ -8,16 +8,23 @@ uses
 type
   TTextEditorGlyph = class(TPersistent)
   strict private
+    FBaseBitmap: TBitmap;
     FBitmap: TBitmap;
+    FBitmapHeight: TTextEditorScaledInteger;
+    FBitmapWidth: TTextEditorScaledInteger;
     FColor: TColor;
     FInternalGlyph: TBitmap;
     FInternalGlyphKind: TTextEditorInternalGlyph;
+    FInternalGlyphSize: TTextEditorScaledInteger;
     FLeft: Integer;
     FMaskColor: TColor;
     FOnChange: TNotifyEvent;
+    FUpdating: Boolean;
     FVisible: Boolean;
     function GetHeight: Integer;
     function GetWidth: Integer;
+    procedure ApplyTransparency;
+    procedure BitmapChanged(ASender: TObject);
     procedure DrawInternalGlyph(const ACanvas: TCanvas; const X, Y, AWidth, AHeight: Integer);
     procedure SetBitmap(const AValue: TBitmap);
     procedure SetLeft(const AValue: Integer);
@@ -52,17 +59,17 @@ begin
   if AGlyph <> igNone then
   begin
     FInternalGlyph := Vcl.Graphics.TBitmap.Create;
-
-    if AGlyph = igMouseMoveScroll then
-      FInternalGlyph.SetSize(22, 22)
-    else
-      FInternalGlyph.SetSize(16, 16);
-
+    FInternalGlyphSize := TTextEditorScaledInteger.Create(if AGlyph = igMouseMoveScroll then 22 else 16);
+    FInternalGlyph.SetSize(FInternalGlyphSize.Value, FInternalGlyphSize.Value);
     FInternalGlyphKind := AGlyph;
   end;
 
   FVisible := True;
+  FBaseBitmap := Vcl.Graphics.TBitmap.Create;
   FBitmap := Vcl.Graphics.TBitmap.Create;
+  FBitmap.OnChange := BitmapChanged;
+  FBitmapHeight := TTextEditorScaledInteger.Create(0);
+  FBitmapWidth := TTextEditorScaledInteger.Create(0);
   FColor := TColors.SysNone;
   FMaskColor := TColors.SysNone;
   FLeft := 2;
@@ -73,20 +80,59 @@ begin
   if Assigned(FInternalGlyph) then
     FInternalGlyph.Free;
 
+  FBaseBitmap.Free;
   FBitmap.Free;
 
   inherited Destroy;
 end;
 
+procedure TTextEditorGlyph.ApplyTransparency;
+begin
+  FUpdating := True;
+  try
+    FBitmap.Transparent := True;
+    FBitmap.TransparentMode := tmFixed;
+    FBitmap.TransparentColor := FMaskColor;
+  finally
+    FUpdating := False;
+  end;
+end;
+
+procedure TTextEditorGlyph.BitmapChanged(ASender: TObject); //FI:O804 Method parameter is declared but never used
+begin
+  if FUpdating then
+    Exit;
+
+  FBaseBitmap.Assign(FBitmap);
+  FBitmapHeight.SetValue(FBitmap.Height);
+  FBitmapWidth.SetValue(FBitmap.Width);
+
+  ApplyTransparency;
+end;
+
 procedure TTextEditorGlyph.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
   if Assigned(FInternalGlyph) then
-    ResizeBitmap(FInternalGlyph, Max(1, MulDiv(FInternalGlyph.Width, AMultiplier, ADivider)),
-      Max(1, MulDiv(FInternalGlyph.Height, AMultiplier, ADivider)));
+  begin
+    FInternalGlyphSize.ChangeScale(AMultiplier, ADivider);
+    FInternalGlyph.SetSize(Max(1, FInternalGlyphSize.Value), Max(1, FInternalGlyphSize.Value));
+  end;
 
-  if (FBitmap.Height <> 0) and (FBitmap.Width <> 0) then
-    ResizeBitmap(FBitmap, Max(1, MulDiv(FBitmap.Width, AMultiplier, ADivider)),
-      Max(1, MulDiv(FBitmap.Height, AMultiplier, ADivider)));
+  if FBaseBitmap.Empty then
+    Exit;
+
+  FBitmapHeight.ChangeScale(AMultiplier, ADivider);
+  FBitmapWidth.ChangeScale(AMultiplier, ADivider);
+
+  FUpdating := True;
+  try
+    FBitmap.Assign(FBaseBitmap);
+    ResizeBitmap(FBitmap, Max(1, FBitmapWidth.Value), Max(1, FBitmapHeight.Value));
+  finally
+    FUpdating := False;
+  end;
+
+  ApplyTransparency;
 end;
 
 procedure TTextEditorGlyph.Assign(ASource: TPersistent);
@@ -99,6 +145,7 @@ begin
 
     Self.FColor := FColor;
     Self.FInternalGlyphKind := FInternalGlyphKind;
+    Self.FInternalGlyphSize := FInternalGlyphSize;
     Self.FVisible := FVisible;
     Self.FBitmap.Assign(FBitmap);
     Self.FMaskColor := FMaskColor;
@@ -310,10 +357,6 @@ begin
     if ALineHeight <> 0 then
       Inc(LY, (ALineHeight - FBitmap.Height) div 2);
 
-    FBitmap.Transparent := True;
-    FBitmap.TransparentMode := tmFixed;
-    FBitmap.TransparentColor := FMaskColor;
-
     ACanvas.Draw(X, LY, FBitmap);
   end
   else
@@ -347,6 +390,8 @@ begin
   if FMaskColor <> AValue then
   begin
     FMaskColor := AValue;
+
+    ApplyTransparency;
 
     if Assigned(FOnChange) then
       FOnChange(Self);

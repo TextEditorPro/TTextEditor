@@ -3,21 +3,25 @@
 interface
 
 uses
-  System.Classes, Vcl.ImgList;
+  System.Classes, Vcl.ImgList, TextEditor.Types;
 
 type
   TTextEditorLeftMarginMarks = class(TPersistent)
   strict private
     FDefaultImageIndex: Integer;
     FImages: TCustomImageList;
-    FLeftMargin: Integer;
+    FLeftMargin: TTextEditorScaledInteger;
     FOnChange: TNotifyEvent;
-    FOverlappingOffset: Integer;
+    FOverlappingOffset: TTextEditorScaledInteger;
     FOwner: TComponent;
     FShortCuts: Boolean;
     FVisible: Boolean;
+    function GetLeftMargin: Integer;
+    function GetOverlappingOffset: Integer;
     procedure DoChange;
     procedure SetImages(const AValue: TCustomImageList);
+    procedure SetLeftMargin(const AValue: Integer);
+    procedure SetOverlappingOffset(const AValue: Integer);
     procedure SetVisible(const AValue: Boolean);
   public
     constructor Create(AOwner: TComponent);
@@ -27,8 +31,8 @@ type
   published
     property DefaultImageIndex: Integer read FDefaultImageIndex write FDefaultImageIndex default -1;
     property Images: TCustomImageList read FImages write SetImages;
-    property LeftMargin: Integer read FLeftMargin write FLeftMargin default 2;
-    property OverlappingOffset: Integer read FOverlappingOffset write FOverlappingOffset default 4;
+    property LeftMargin: Integer read GetLeftMargin write SetLeftMargin default 2;
+    property OverlappingOffset: Integer read GetOverlappingOffset write SetOverlappingOffset default 4;
     property Visible: Boolean read FVisible write SetVisible default True;
   end;
 
@@ -43,8 +47,8 @@ begin
 
   FOwner := AOwner;
   FDefaultImageIndex := -1;
-  FLeftMargin := 2;
-  FOverlappingOffset := 4;
+  FLeftMargin := TTextEditorScaledInteger.Create(2);
+  FOverlappingOffset := TTextEditorScaledInteger.Create(4);
   FShortCuts := True;
   FVisible := True;
 end;
@@ -70,8 +74,38 @@ end;
 
 procedure TTextEditorLeftMarginMarks.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
-  FLeftMargin := MulDiv(FLeftMargin, AMultiplier, ADivider);
-  FOverlappingOffset := MulDiv(FOverlappingOffset, AMultiplier, ADivider);
+  FLeftMargin.ChangeScale(AMultiplier, ADivider);
+  FOverlappingOffset.ChangeScale(AMultiplier, ADivider);
+end;
+
+function TTextEditorLeftMarginMarks.GetLeftMargin: Integer;
+begin
+  Result := FLeftMargin.Value;
+end;
+
+function TTextEditorLeftMarginMarks.GetOverlappingOffset: Integer;
+begin
+  Result := FOverlappingOffset.Value;
+end;
+
+procedure TTextEditorLeftMarginMarks.SetLeftMargin(const AValue: Integer);
+begin
+  if FLeftMargin.Value <> AValue then
+  begin
+    FLeftMargin.SetValue(AValue);
+
+    DoChange;
+  end;
+end;
+
+procedure TTextEditorLeftMarginMarks.SetOverlappingOffset(const AValue: Integer);
+begin
+  if FOverlappingOffset.Value <> AValue then
+  begin
+    FOverlappingOffset.SetValue(AValue);
+
+    DoChange;
+  end;
 end;
 
 procedure TTextEditorLeftMarginMarks.DoChange;

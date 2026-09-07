@@ -20,7 +20,8 @@ type
     FTopLine: Integer;
     FVisible: Boolean;
     FVisibleLineCount: Integer;
-    FWidth: Integer;
+    FWidth: TTextEditorScaledInteger;
+    function GetWidthValue: Integer;
     procedure DoChange;
     procedure SetAlign(const AValue: TTextEditorMinimapAlign);
     procedure SetOnChange(const AValue: TNotifyEvent);
@@ -47,7 +48,7 @@ type
     property Shadow: TTextEditorMinimapShadow read FShadow write FShadow;
     property Style: TTextEditorMinimapStyle read FStyle write SetStyle default msText;
     property Visible: Boolean read FVisible write SetVisible default False;
-    property Width: Integer read FWidth write SetWidth default 140;
+    property Width: Integer read GetWidthValue write SetWidth default 140;
   end;
 
 implementation
@@ -66,7 +67,7 @@ begin
   FStyle := msText;
   FTopLine := 1;
   FVisible := False;
-  FWidth := 140;
+  FWidth := TTextEditorScaledInteger.Create(140);
 
   FIndicator := TTextEditorMinimapIndicator.Create;
   FShadow := TTextEditorMinimapShadow.Create;
@@ -101,7 +102,7 @@ end;
 
 procedure TTextEditorMinimap.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
-  FWidth := MulDiv(FWidth, AMultiplier, ADivider);
+  FWidth.ChangeScale(AMultiplier, ADivider);
   DoChange;
 end;
 
@@ -152,9 +153,9 @@ var
 begin
   LValue := Max(0, AValue);
 
-  if FWidth <> LValue then
+  if FWidth.Value <> LValue then
   begin
-    FWidth := LValue;
+    FWidth.SetValue(LValue);
 
     DoChange;
   end;
@@ -162,7 +163,12 @@ end;
 
 function TTextEditorMinimap.GetWidth: Integer;
 begin
-  Result := if FVisible then FWidth else 0;
+  Result := if FVisible then FWidth.Value else 0;
+end;
+
+function TTextEditorMinimap.GetWidthValue: Integer;
+begin
+  Result := FWidth.Value;
 end;
 
 procedure TTextEditorMinimap.SetVisible(const AValue: Boolean);

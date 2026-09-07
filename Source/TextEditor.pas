@@ -1556,12 +1556,7 @@ begin
   FUnknownChars.OnChange := UnknownCharsChanged;
   { Fonts }
   FFonts := TTextEditorFonts.Create;
-  FFonts.CodeFoldingHint.OnChange := FontChanged;
-  FFonts.CompletionProposal.OnChange := FontChanged;
-  FFonts.LineNumbers.OnChange := FontChanged;
-  FFonts.Minimap.OnChange := FontChanged;
-  FFonts.Ruler.OnChange := FontChanged;
-  FFonts.Text.OnChange := FontChanged;
+  FFonts.OnChange := FontChanged;
   FFontStyles := TTextEditorFontStyles.Create;
   { Painting }
   FPaintHelper := TTextEditorPaintHelper.Create([], FFonts.Text);

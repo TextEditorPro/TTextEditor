@@ -11,9 +11,10 @@ type
     FHighlightStyle: TTextEditorCodeFoldingGuideLineStyle;
     FOnChange: TNotifyEvent;
     FOptions: TTextEditorCodeFoldingGuideLineOptions;
-    FPadding: Integer;
+    FPadding: TTextEditorScaledInteger;
     FStyle: TTextEditorCodeFoldingGuideLineStyle;
     FVisible: Boolean;
+    function GetPadding: Integer;
     procedure DoChange;
     procedure SetHighlightStyle(const AValue: TTextEditorCodeFoldingGuideLineStyle);
     procedure SetOptions(const AValue: TTextEditorCodeFoldingGuideLineOptions);
@@ -23,12 +24,13 @@ type
   public
     constructor Create;
     procedure Assign(ASource: TPersistent); override;
+    procedure ChangeScale(const AMultiplier, ADivider: Integer);
     procedure SetOption(const AOption: TTextEditorCodeFoldingGuideLineOption; const AEnabled: Boolean);
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
     property HighlightStyle: TTextEditorCodeFoldingGuideLineStyle read FHighlightStyle write SetHighlightStyle default lsDash;
     property Options: TTextEditorCodeFoldingGuideLineOptions read FOptions write SetOptions default TTextEditorDefaultOptions.CodeFoldingGuideLines;
-    property Padding: Integer read FPadding write SetPadding default 3;
+    property Padding: Integer read GetPadding write SetPadding default 3;
     property Style: TTextEditorCodeFoldingGuideLineStyle read FStyle write SetStyle default lsDash;
     property Visible: Boolean read FVisible write SetVisible default True;
   end;
@@ -41,7 +43,7 @@ begin
 
   FHighlightStyle := lsDash;
   FOptions := TTextEditorDefaultOptions.CodeFoldingGuideLines;
-  FPadding := 3;
+  FPadding := TTextEditorScaledInteger.Create(3);
   FStyle := lsDash;
   FVisible := True;
 end;
@@ -104,11 +106,21 @@ begin
   end;
 end;
 
+procedure TTextEditorCodeFoldingGuideLines.ChangeScale(const AMultiplier, ADivider: Integer);
+begin
+  FPadding.ChangeScale(AMultiplier, ADivider);
+end;
+
+function TTextEditorCodeFoldingGuideLines.GetPadding: Integer;
+begin
+  Result := FPadding.Value;
+end;
+
 procedure TTextEditorCodeFoldingGuideLines.SetPadding(const AValue: Integer);
 begin
-  if FPadding <> AValue then
+  if FPadding.Value <> AValue then
   begin
-    FPadding := AValue;
+    FPadding.SetValue(AValue);
 
     DoChange;
   end;

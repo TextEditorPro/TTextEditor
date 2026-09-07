@@ -8,17 +8,23 @@ uses
 type
   TTextEditorGlyph = class(TPersistent)
   strict private
+    FBaseBitmap: TBitmap;
     FBitmap: TBitmap;
+    FBitmapHeight: TTextEditorScaledInteger;
+    FBitmapWidth: TTextEditorScaledInteger;
     FColor: TAlphaColor;
     FInternalGlyph: TBitmap;
     FInternalGlyphKind: TTextEditorInternalGlyph;
+    FInternalGlyphSize: TTextEditorScaledInteger;
     FLeft: Integer;
     FMaskColor: TAlphaColor;
     FOnChange: TNotifyEvent;
+    FUpdating: Boolean;
     FVisible: Boolean;
     function GetHeight: Integer;
     function GetWidth: Integer;
     procedure ApplyMaskColor;
+    procedure BitmapChanged(ASender: TObject);
     procedure SetBitmap(const AValue: TBitmap);
     procedure SetLeft(const AValue: Integer);
     procedure SetMaskColor(const AValue: TAlphaColor);
@@ -51,17 +57,43 @@ begin
   Result := ABitmap.IsEmpty;
 end;
 
+procedure TTextEditorGlyph.BitmapChanged(ASender: TObject); //FI:O804 Method parameter is declared but never used
+begin
+  if FUpdating then
+    Exit;
+
+  FBaseBitmap.Assign(FBitmap);
+  FBitmapHeight.SetValue(FBitmap.Height);
+  FBitmapWidth.SetValue(FBitmap.Width);
+
+  ApplyMaskColor;
+end;
+
 procedure TTextEditorGlyph.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
   { The internal glyph is drawn as vector graphics, so it can scale by any ratio. Keep at least one pixel -
     a zero-sized bitmap could never scale back up. }
   if Assigned(FInternalGlyph) then
-    ResizeBitmap(FInternalGlyph, Max(1, MulDiv(FInternalGlyph.Width, AMultiplier, ADivider)),
-      Max(1, MulDiv(FInternalGlyph.Height, AMultiplier, ADivider)));
+  begin
+    FInternalGlyphSize.ChangeScale(AMultiplier, ADivider);
+    FInternalGlyph.SetSize(Max(1, FInternalGlyphSize.Value), Max(1, FInternalGlyphSize.Value));
+  end;
 
-  if (FBitmap.Height <> 0) and (FBitmap.Width <> 0) then
-    ResizeBitmap(FBitmap, Max(1, MulDiv(FBitmap.Width, AMultiplier, ADivider)),
-      Max(1, MulDiv(FBitmap.Height, AMultiplier, ADivider)));
+  if FBaseBitmap.IsEmpty then
+    Exit;
+
+  FBitmapHeight.ChangeScale(AMultiplier, ADivider);
+  FBitmapWidth.ChangeScale(AMultiplier, ADivider);
+
+  FUpdating := True;
+  try
+    FBitmap.Assign(FBaseBitmap);
+    ResizeBitmap(FBitmap, Max(1, FBitmapWidth.Value), Max(1, FBitmapHeight.Value));
+  finally
+    FUpdating := False;
+  end;
+
+  ApplyMaskColor;
 end;
 
 constructor TTextEditorGlyph.Create(const AGlyph: TTextEditorInternalGlyph = igNone);
@@ -73,16 +105,17 @@ begin
     FInternalGlyph := TBitmap.Create;
 
     { Sizes of the original TextEditor.res bitmaps }
-    if AGlyph = igMouseMoveScroll then
-      FInternalGlyph.SetSize(22, 22)
-    else
-      FInternalGlyph.SetSize(16, 16);
-
+    FInternalGlyphSize := TTextEditorScaledInteger.Create(if AGlyph = igMouseMoveScroll then 22 else 16);
+    FInternalGlyph.SetSize(FInternalGlyphSize.Value, FInternalGlyphSize.Value);
     FInternalGlyphKind := AGlyph;
   end;
 
   FVisible := True;
+  FBaseBitmap := TBitmap.Create;
   FBitmap := TBitmap.Create;
+  FBitmap.OnChange := BitmapChanged;
+  FBitmapHeight := TTextEditorScaledInteger.Create(0);
+  FBitmapWidth := TTextEditorScaledInteger.Create(0);
   FColor := TAlphaColors.Null;
   FMaskColor := TAlphaColors.Null;
   FLeft := 2;
@@ -93,6 +126,7 @@ begin
   if Assigned(FInternalGlyph) then
     FInternalGlyph.Free;
 
+  FBaseBitmap.Free;
   FBitmap.Free;
 
   inherited Destroy;
@@ -108,6 +142,7 @@ begin
 
     Self.FColor := FColor;
     Self.FInternalGlyphKind := FInternalGlyphKind;
+    Self.FInternalGlyphSize := FInternalGlyphSize;
     Self.FVisible := FVisible;
     Self.FBitmap.Assign(FBitmap);
     Self.FMaskColor := FMaskColor;
@@ -343,14 +378,19 @@ begin
   if (FMaskColor = TAlphaColors.Null) or FBitmap.IsEmpty then
     Exit;
 
-  if FBitmap.Map(TMapAccess.ReadWrite, LBitmapData) then
+  FUpdating := True;
   try
-    for var LY := 0 to FBitmap.Height - 1 do
-    for var LX := 0 to FBitmap.Width - 1 do
-    if LBitmapData.GetPixel(LX, LY) = FMaskColor then
-      LBitmapData.SetPixel(LX, LY, TAlphaColors.Null);
+    if FBitmap.Map(TMapAccess.ReadWrite, LBitmapData) then
+    try
+      for var LY := 0 to FBitmap.Height - 1 do
+      for var LX := 0 to FBitmap.Width - 1 do
+      if LBitmapData.GetPixel(LX, LY) = FMaskColor then
+        LBitmapData.SetPixel(LX, LY, TAlphaColors.Null);
+    finally
+      FBitmap.Unmap(LBitmapData);
+    end;
   finally
-    FBitmap.Unmap(LBitmapData);
+    FUpdating := False;
   end;
 end;
 

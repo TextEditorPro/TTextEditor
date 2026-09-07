@@ -10,13 +10,17 @@ uses
 type
   TTextEditorFonts = class(TPersistent)
   strict private
+    FBaseHeights: array of Integer;
+    FBasePixelsPerInch: array of Integer;
     FCodeFoldingHint: TFont;
     FCompletionProposal: TFont;
+    FFontList: array of TFont;
     FHint: TFont;
     FLineNumbers: TFont;
     FMinimap: TFont;
     FOnChange: TNotifyEvent;
     FRuler: TFont;
+    FScaling: Boolean;
     FText: TFont;
     function IsCodeFoldingHintFontStored: Boolean;
     function IsCompletionProposalFontStored: Boolean;
@@ -26,6 +30,7 @@ type
     function IsRulerFontStored: Boolean;
     function IsTextFontStored: Boolean;
     procedure DoChange;
+    procedure FontChanged(ASender: TObject);
     procedure SetCodeFoldingHint(const AValue: TFont);
     procedure SetCompletionProposal(const AValue: TFont);
     procedure SetHint(const AValue: TFont);
@@ -33,6 +38,7 @@ type
     procedure SetMinimap(const AValue: TFont);
     procedure SetRuler(const AValue: TFont);
     procedure SetText(const AValue: TFont);
+    procedure StoreBase(const AIndex: Integer);
   public
     constructor Create;
     destructor Destroy; override;
@@ -137,6 +143,16 @@ begin
   FRuler := TFont.Create;
   FText := TFont.Create;
 
+  FFontList := [FCodeFoldingHint, FCompletionProposal, FHint, FLineNumbers, FMinimap, FRuler, FText];
+  SetLength(FBaseHeights, Length(FFontList));
+  SetLength(FBasePixelsPerInch, Length(FFontList));
+
+  for var LIndex := Low(FFontList) to High(FFontList) do
+  begin
+    FFontList[LIndex].OnChange := FontChanged;
+    StoreBase(LIndex);
+  end;
+
   SetDefaults;
 end;
 
@@ -232,24 +248,36 @@ begin
 end;
 
 procedure TTextEditorFonts.ChangeScale(const AMultiplier: Integer; const ADivider: Integer; const AIsDpiChange: Boolean);
-
-  procedure ChangeScale(const AFont: TFont);
-  begin
-    if AFont.PixelsPerInch <> AMultiplier then
+begin
+  FScaling := True;
+  try
+    for var LIndex := Low(FFontList) to High(FFontList) do
+    if FFontList[LIndex].PixelsPerInch <> AMultiplier then
     begin
-      AFont.Height := MulDiv(AFont.Height, AMultiplier, ADivider);
-      AFont.PixelsPerInch := AMultiplier;
+      FFontList[LIndex].Height := MulDiv(FBaseHeights[LIndex], AMultiplier, FBasePixelsPerInch[LIndex]);
+      FFontList[LIndex].PixelsPerInch := AMultiplier;
     end;
+  finally
+    FScaling := False;
+  end;
+end;
+
+procedure TTextEditorFonts.FontChanged(ASender: TObject);
+begin
+  if not FScaling then
+  begin
+    for var LIndex := Low(FFontList) to High(FFontList) do
+    if FFontList[LIndex] = ASender then
+      StoreBase(LIndex);
   end;
 
+  DoChange;
+end;
+
+procedure TTextEditorFonts.StoreBase(const AIndex: Integer);
 begin
-  ChangeScale(FCodeFoldingHint);
-  ChangeScale(FCompletionProposal);
-  ChangeScale(FHint);
-  ChangeScale(FLineNumbers);
-  ChangeScale(FMinimap);
-  ChangeScale(FRuler);
-  ChangeScale(FText);
+  FBaseHeights[AIndex] := FFontList[AIndex].Height;
+  FBasePixelsPerInch[AIndex] := FFontList[AIndex].PixelsPerInch;
 end;
 
 procedure TTextEditorFonts.SetCodeFoldingHint(const AValue: TFont);

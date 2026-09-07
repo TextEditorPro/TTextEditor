@@ -13,7 +13,8 @@ type
     FOnChange: TTextEditorSearchChangeEvent;
     FOptions: TTextEditorSearchMapOptions;
     FVisible: Boolean;
-    FWidth: Integer;
+    FWidth: TTextEditorScaledInteger;
+    function GetWidthValue: Integer;
     procedure DoChange;
     procedure SetAlign(const AValue: TTextEditorSearchMapAlign);
     procedure SetOptions(const AValue: TTextEditorSearchMapOptions);
@@ -31,7 +32,7 @@ type
     property OnChange: TTextEditorSearchChangeEvent read FOnChange write FOnChange;
     property Options: TTextEditorSearchMapOptions read FOptions write SetOptions default [moShowActiveLine];
     property Visible: Boolean read FVisible write SetVisible default False;
-    property Width: Integer read FWidth write SetWidth default 5;
+    property Width: Integer read GetWidthValue write SetWidth default 5;
   end;
 
 implementation
@@ -46,7 +47,7 @@ begin
   FAlign := saRight;
   FOptions := [moShowActiveLine];
   FVisible := False;
-  FWidth := 5;
+  FWidth := TTextEditorScaledInteger.Create(5);
   FCursor := crArrow;
 end;
 
@@ -81,17 +82,22 @@ var
 begin
   LValue := Max(0, AValue);
 
-  if FWidth <> LValue then
-    FWidth := LValue;
+  if FWidth.Value <> LValue then
+    FWidth.SetValue(LValue);
 
   DoChange;
 end;
 
 procedure TTextEditorSearchMap.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
-  FWidth := MulDiv(FWidth, AMultiplier, ADivider);
+  FWidth.ChangeScale(AMultiplier, ADivider);
 
   DoChange;
+end;
+
+function TTextEditorSearchMap.GetWidthValue: Integer;
+begin
+  Result := FWidth.Value;
 end;
 
 procedure TTextEditorSearchMap.DoChange;
@@ -132,7 +138,7 @@ end;
 
 function TTextEditorSearchMap.GetWidth: Integer;
 begin
-  Result := if FVisible then FWidth else 0;
+  Result := if FVisible then FWidth.Value else 0;
 end;
 
 end.

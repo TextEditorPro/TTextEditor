@@ -11,9 +11,12 @@ type
     FAlign: TTextEditorLeftMarginLineStateAlign;
     FOffset: Integer;
     FOnChange: TNotifyEvent;
+    FPixelsPerInch: Integer;
     FShowOnlyModified: Boolean;
     FVisible: Boolean;
     FWidth: Integer;
+    function GetScaledOffset: Integer;
+    function GetScaledWidth: Integer;
     procedure DoChange;
     procedure SetOnChange(const AValue: TNotifyEvent);
     procedure SetVisible(const AValue: Boolean);
@@ -23,6 +26,8 @@ type
     procedure Assign(ASource: TPersistent); override;
     procedure ChangeScale(const AMultiplier, ADivider: Integer);
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
+    property ScaledOffset: Integer read GetScaledOffset;
+    property ScaledWidth: Integer read GetScaledWidth;
   published
     property Align: TTextEditorLeftMarginLineStateAlign read FAlign write FAlign default lsRight;
     property Offset: Integer read FOffset write FOffset default 0;
@@ -42,6 +47,7 @@ begin
 
   FAlign := lsRight;
   FOffset := 0;
+  FPixelsPerInch := 96;
   FShowOnlyModified := True;
   FVisible := True;
   FWidth := 2;
@@ -62,6 +68,24 @@ begin
   end
   else
     inherited Assign(ASource);
+end;
+
+procedure TTextEditorLeftMarginLineState.ChangeScale(const AMultiplier, ADivider: Integer); //FI:O804 Method parameter is declared but never used
+begin
+  FPixelsPerInch := AMultiplier;
+end;
+
+function TTextEditorLeftMarginLineState.GetScaledOffset: Integer;
+begin
+  Result := FOffset * FPixelsPerInch div 96;
+end;
+
+function TTextEditorLeftMarginLineState.GetScaledWidth: Integer;
+begin
+  Result := FWidth * FPixelsPerInch div 96;
+
+  if (Result = 0) and (FWidth > 0) then
+    Result := 1;
 end;
 
 procedure TTextEditorLeftMarginLineState.SetOnChange(const AValue: TNotifyEvent);
@@ -85,17 +109,15 @@ begin
   end;
 end;
 
-procedure TTextEditorLeftMarginLineState.ChangeScale(const AMultiplier, ADivider: Integer);
-begin
-  FOffset := MulDiv(FOffset, AMultiplier, ADivider);
-  FWidth := MulDiv(FWidth, AMultiplier, ADivider);
-end;
-
 procedure TTextEditorLeftMarginLineState.SetWidth(const AValue: Integer);
+var
+  LValue: Integer;
 begin
-  if FWidth <> AValue then
+  LValue := Max(0, AValue);
+
+  if FWidth <> LValue then
   begin
-    FWidth := AValue;
+    FWidth := LValue;
 
     DoChange;
   end;

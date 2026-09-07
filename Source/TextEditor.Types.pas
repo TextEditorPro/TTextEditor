@@ -407,6 +407,19 @@ type
     MultiEdit = [meoShowActiveLine, meoShowGhost];
   end;
 
+  TTextEditorScaledInteger = record
+  strict private
+    FBase: Integer;
+    FBasePixelsPerInch: Integer;
+    FPixelsPerInch: Integer;
+    FValue: Integer;
+  public
+    class function Create(const AValue: Integer): TTextEditorScaledInteger; static;
+    procedure ChangeScale(const AMultiplier, ADivider: Integer);
+    procedure SetValue(const AValue: Integer);
+    property Value: Integer read FValue;
+  end;
+
   TTextEditorTimer = class(TTimer)
   public
     procedure Restart;
@@ -442,6 +455,32 @@ type
   function CompletionProposalItemFound(const AItems: TTextEditorCompletionProposalItems; const AItem: TTextEditorCompletionProposalItem): Boolean;
 
 implementation
+
+{ TTextEditorScaledInteger }
+
+class function TTextEditorScaledInteger.Create(const AValue: Integer): TTextEditorScaledInteger;
+begin
+  Result.FBase := AValue;
+  Result.FBasePixelsPerInch := 96;
+  Result.FPixelsPerInch := 96;
+  Result.FValue := AValue;
+end;
+
+procedure TTextEditorScaledInteger.ChangeScale(const AMultiplier, ADivider: Integer);
+begin
+  if (FPixelsPerInch = FBasePixelsPerInch) and (ADivider <> FPixelsPerInch) then
+    FBasePixelsPerInch := ADivider;
+
+  FPixelsPerInch := AMultiplier;
+  FValue := MulDiv(FBase, AMultiplier, FBasePixelsPerInch);
+end;
+
+procedure TTextEditorScaledInteger.SetValue(const AValue: Integer);
+begin
+  FBase := AValue;
+  FBasePixelsPerInch := FPixelsPerInch;
+  FValue := AValue;
+end;
 
 function SearchEngineAsText(const ASearchEngine: TTextEditorSearchEngine): string;
 begin

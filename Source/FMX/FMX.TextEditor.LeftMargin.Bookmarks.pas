@@ -9,13 +9,15 @@ type
   TTextEditorLeftMarginBookmarks = class(TPersistent)
   strict private
     FImages: TCustomImageList;
-    FLeftMargin: Integer;
+    FLeftMargin: TTextEditorScaledInteger;
     FOnChange: TNotifyEvent;
     FOptions: TTextEditorLeftMarginBookmarkOptions;
     FOwner: TComponent;
     FVisible: Boolean;
+    function GetLeftMargin: Integer;
     procedure DoChange;
     procedure SetImages(const AValue: TCustomImageList);
+    procedure SetLeftMargin(const AValue: Integer);
     procedure SetOptions(const AValue: TTextEditorLeftMarginBookmarkOptions);
     procedure SetVisible(const AValue: Boolean);
   public
@@ -26,7 +28,7 @@ type
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
     property Images: TCustomImageList read FImages write SetImages;
-    property LeftMargin: Integer read FLeftMargin write FLeftMargin default 2;
+    property LeftMargin: Integer read GetLeftMargin write SetLeftMargin default 2;
     property Options: TTextEditorLeftMarginBookmarkOptions read FOptions write SetOptions default TTextEditorDefaultOptions.Bookmarks;
     property Visible: Boolean read FVisible write SetVisible default True;
   end;
@@ -38,7 +40,7 @@ begin
   inherited Create;
 
   FOwner := AOwner;
-  FLeftMargin := 2;
+  FLeftMargin := TTextEditorScaledInteger.Create(2);
   FOptions := TTextEditorDefaultOptions.Bookmarks;
   FVisible := True;
 end;
@@ -69,7 +71,22 @@ end;
 
 procedure TTextEditorLeftMarginBookmarks.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
-  FLeftMargin := MulDiv(FLeftMargin, AMultiplier, ADivider);
+  FLeftMargin.ChangeScale(AMultiplier, ADivider);
+end;
+
+function TTextEditorLeftMarginBookmarks.GetLeftMargin: Integer;
+begin
+  Result := FLeftMargin.Value;
+end;
+
+procedure TTextEditorLeftMarginBookmarks.SetLeftMargin(const AValue: Integer);
+begin
+  if FLeftMargin.Value <> AValue then
+  begin
+    FLeftMargin.SetValue(AValue);
+
+    DoChange;
+  end;
 end;
 
 procedure TTextEditorLeftMarginBookmarks.DoChange;

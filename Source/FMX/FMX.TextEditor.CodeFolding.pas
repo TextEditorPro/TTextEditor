@@ -20,7 +20,8 @@ type
     FOutlining: Boolean;
     FTextFolding: TTextEditorTextFolding;
     FVisible: Boolean;
-    FWidth: Integer;
+    FWidth: TTextEditorScaledInteger;
+    function GetWidthValue: Integer;
     procedure DoChange;
     procedure GuideLinesChanged(ASender: TObject);
     procedure SetAutoHide(const AValue: Boolean);
@@ -52,7 +53,7 @@ type
     property Outlining: Boolean read FOutlining write FOutlining default False;
     property TextFolding: TTextEditorTextFolding read FTextFolding write SetTextFolding;
     property Visible: Boolean read FVisible write SetVisible default False;
-    property Width: Integer read FWidth write SetWidth default 14;
+    property Width: Integer read GetWidthValue write SetWidth default 14;
   end;
 
 implementation
@@ -77,7 +78,7 @@ begin
   FTextFolding := TTextEditorTextFolding.Create;
   FTextFolding.OnChange := TextFoldingChanged;
   FVisible := False;
-  FWidth := 14;
+  FWidth := TTextEditorScaledInteger.Create(14);
 end;
 
 destructor TTextEditorCodeFolding.Destroy;
@@ -129,9 +130,9 @@ end;
 
 procedure TTextEditorCodeFolding.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
-  FGuideLines.Padding := MulDiv(FGuideLines.Padding, AMultiplier, ADivider);
+  FGuideLines.ChangeScale(AMultiplier, ADivider);
   FHint.Indicator.Glyph.ChangeScale(AMultiplier, ADivider);
-  FWidth := MulDiv(FWidth, AMultiplier, ADivider);
+  FWidth.ChangeScale(AMultiplier, ADivider);
 
   DoChange;
 end;
@@ -199,7 +200,12 @@ end;
 
 function TTextEditorCodeFolding.GetWidth: Integer;
 begin
-  Result := if FVisible then FWidth else 0;
+  Result := if FVisible then FWidth.Value else 0;
+end;
+
+function TTextEditorCodeFolding.GetWidthValue: Integer;
+begin
+  Result := FWidth.Value;
 end;
 
 procedure TTextEditorCodeFolding.SetWidth(const AValue: Integer);
@@ -208,9 +214,9 @@ var
 begin
   LValue := Max(0, AValue);
 
-  if FWidth <> LValue then
+  if FWidth.Value <> LValue then
   begin
-    FWidth := LValue;
+    FWidth.SetValue(LValue);
 
     DoChange;
   end;

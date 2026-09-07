@@ -11,7 +11,8 @@ type
     FOnChange: TNotifyEvent;
     FOptions: TTextEditorLeftMarginBookmarkPanelOptions;
     FVisible: Boolean;
-    FWidth: Integer;
+    FWidth: TTextEditorScaledInteger;
+    function GetWidth: Integer;
     procedure DoChange;
     procedure SetWidth(const AValue: Integer);
     procedure SetVisible(const AValue: Boolean);
@@ -24,7 +25,7 @@ type
   published
     property Options: TTextEditorLeftMarginBookmarkPanelOptions read FOptions write FOptions default [bpoToggleBookmarkByClick];
     property Visible: Boolean read FVisible write SetVisible default True;
-    property Width: Integer read FWidth write SetWidth default 20;
+    property Width: Integer read GetWidth write SetWidth default 20;
   end;
 
 implementation
@@ -36,7 +37,7 @@ constructor TTextEditorLeftMarginMarksPanel.Create;
 begin
   inherited;
 
-  FWidth := 20;
+  FWidth := TTextEditorScaledInteger.Create(20);
   FOptions := [bpoToggleBookmarkByClick];
   FVisible := True;
 end;
@@ -58,7 +59,12 @@ end;
 
 procedure TTextEditorLeftMarginMarksPanel.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
-  FWidth := MulDiv(FWidth, AMultiplier, ADivider);
+  FWidth.ChangeScale(AMultiplier, ADivider);
+end;
+
+function TTextEditorLeftMarginMarksPanel.GetWidth: Integer;
+begin
+  Result := FWidth.Value;
 end;
 
 procedure TTextEditorLeftMarginMarksPanel.DoChange;
@@ -73,9 +79,9 @@ var
 begin
   LValue := Max(0, AValue);
 
-  if FWidth <> LValue then
+  if FWidth.Value <> LValue then
   begin
-    FWidth := LValue;
+    FWidth.SetValue(LValue);
 
     DoChange;
   end;

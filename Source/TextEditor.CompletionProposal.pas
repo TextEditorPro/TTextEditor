@@ -20,9 +20,11 @@ type
     FTrigger: TTextEditorCompletionProposalTrigger;
     FVisible: Boolean;
     FVisibleLines: Integer;
-    FWidth: Integer;
+    FWidth: TTextEditorScaledInteger;
+    function GetWidth: Integer;
     function IsCloseCharsStored: Boolean;
     procedure SetSnippets(const AValue: TTextEditorCompletionProposalSnippets);
+    procedure SetWidth(const AValue: Integer);
   protected
     function GetOwner: TPersistent; override;
   public
@@ -43,7 +45,7 @@ type
     property Snippets: TTextEditorCompletionProposalSnippets read FSnippets write SetSnippets;
     property Trigger: TTextEditorCompletionProposalTrigger read FTrigger write FTrigger;
     property VisibleLines: Integer read FVisibleLines write FVisibleLines default 8;
-    property Width: Integer read FWidth write FWidth default 0; 
+    property Width: Integer read GetWidth write SetWidth default 0;
   end;
 
 implementation
@@ -65,7 +67,7 @@ begin
   FVisibleLines := 8;
   FMinHeight := 0;
   FMinWidth := 0;
-  FWidth := 0;
+  FWidth := TTextEditorScaledInteger.Create(0);
   FKeywordCase := kcLowerCase;
 end;
 
@@ -102,7 +104,17 @@ end;
 
 procedure TTextEditorCompletionProposal.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
-  FWidth := MulDiv(FWidth, AMultiplier, ADivider);
+  FWidth.ChangeScale(AMultiplier, ADivider);
+end;
+
+function TTextEditorCompletionProposal.GetWidth: Integer;
+begin
+  Result := FWidth.Value;
+end;
+
+procedure TTextEditorCompletionProposal.SetWidth(const AValue: Integer);
+begin
+  FWidth.SetValue(AValue);
 end;
 
 procedure TTextEditorCompletionProposal.SetOption(const AOption: TTextEditorCompletionProposalOption; const AEnabled: Boolean);

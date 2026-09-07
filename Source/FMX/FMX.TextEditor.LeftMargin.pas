@@ -4,7 +4,8 @@ interface
 
 uses
   System.Classes, System.UITypes, FMX.TextEditor.LeftMargin.Bookmarks, FMX.TextEditor.LeftMargin.Border, FMX.TextEditor.LeftMargin.LineNumbers,
-  FMX.TextEditor.LeftMargin.LineState, FMX.TextEditor.LeftMargin.Marks, FMX.TextEditor.LeftMargin.MarksPanel, FMX.TextEditor.Marks;
+  FMX.TextEditor.LeftMargin.LineState, FMX.TextEditor.LeftMargin.Marks, FMX.TextEditor.LeftMargin.MarksPanel, FMX.TextEditor.Marks,
+  FMX.TextEditor.Types;
 
 type
   TLeftMarginGetTextEvent = procedure(ASender: TObject; ALine: Integer; var AText: string) of object;
@@ -23,7 +24,8 @@ type
     FMarksPanel: TTextEditorLeftMarginMarksPanel;
     FOnChange: TNotifyEvent;
     FVisible: Boolean;
-    FWidth: Integer;
+    FWidth: TTextEditorScaledInteger;
+    function GetWidthValue: Integer;
     procedure DoChange;
     procedure SetAutosize(const AValue: Boolean);
     procedure SetBookmarks(const AValue: TTextEditorLeftMarginBookmarks);
@@ -51,13 +53,13 @@ type
     property Marks: TTextEditorLeftMarginMarks read FMarks write SetMarks;
     property MarksPanel: TTextEditorLeftMarginMarksPanel read FMarksPanel write FMarksPanel;
     property Visible: Boolean read FVisible write SetVisible default True;
-    property Width: Integer read FWidth write SetWidth default 50;
+    property Width: Integer read GetWidthValue write SetWidth default 50;
   end;
 
 implementation
 
 uses
-  System.Math, System.SysUtils, FMX.TextEditor.Types;
+  System.Math, System.SysUtils;
 
 constructor TTextEditorLeftMargin.Create(AOwner: TComponent);
 begin
@@ -66,7 +68,7 @@ begin
   FAutosize := True;
   FCursor := crDefault;
   FBorder := TTextEditorLeftMarginBorder.Create;
-  FWidth := 50;
+  FWidth := TTextEditorScaledInteger.Create(50);
   FVisible := True;
 
   FBookmarks := TTextEditorLeftMarginBookmarks.Create(AOwner);
@@ -139,19 +141,24 @@ begin
     Result := 0
   else
   if FLineNumbers.Visible then
-    Result := LPanelWidth + FLineState.Width + 2 + FLineNumbers.AutosizeDigitCount * ACharWidth + 5
+    Result := LPanelWidth + FLineState.ScaledWidth + 2 + FLineNumbers.AutosizeDigitCount * ACharWidth + 5
   else
-    Result := FWidth;
+    Result := FWidth.Value;
 end;
 
 function TTextEditorLeftMargin.GetWidth: Integer;
 begin
-  Result := if FVisible then FWidth else 0;
+  Result := if FVisible then FWidth.Value else 0;
+end;
+
+function TTextEditorLeftMargin.GetWidthValue: Integer;
+begin
+  Result := FWidth.Value;
 end;
 
 procedure TTextEditorLeftMargin.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
-  FWidth := MulDiv(FWidth, AMultiplier, ADivider);
+  FWidth.ChangeScale(AMultiplier, ADivider);
   FBookmarks.ChangeScale(AMultiplier, ADivider);
   FMarks.ChangeScale(AMultiplier, ADivider);
   FLineState.ChangeScale(AMultiplier, ADivider);
@@ -176,9 +183,9 @@ var
 begin
   LValue := Max(0, AValue);
 
-  if FWidth <> LValue then
+  if FWidth.Value <> LValue then
   begin
-    FWidth := LValue;
+    FWidth.SetValue(LValue);
 
     DoChange;
   end;

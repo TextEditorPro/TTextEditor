@@ -12,13 +12,14 @@ type
   TTextEditorRuler = class(TPersistent)
   strict private
     FCursor: TCursor;
-    FHeight: Integer;
+    FHeight: TTextEditorScaledInteger;
     FMoving: Boolean;
     FOnChange: TNotifyEvent;
     FOptions: TTextEditorRulerOptions;
     FVisible: Boolean;
+    function GetHeight: Integer;
     procedure DoChange;
-    procedure SetHeight(AValue: Integer);
+    procedure SetHeight(const AValue: Integer);
     procedure SetOnChange(const AValue: TNotifyEvent);
     procedure SetVisible(const AValue: Boolean);
   public
@@ -30,7 +31,7 @@ type
     property OnChange: TNotifyEvent read FOnChange write SetOnChange;
   published
     property Cursor: TCursor read FCursor write FCursor default crDefault;
-    property Height: Integer read FHeight write SetHeight default 18;
+    property Height: Integer read GetHeight write SetHeight default 18;
     property Options: TTextEditorRulerOptions read FOptions write FOptions default TEXTEDITOR_DEFAULT_RULER_OPTIONS;
     property Visible: Boolean read FVisible write SetVisible default False;
   end;
@@ -45,7 +46,7 @@ begin
   inherited Create;
 
   FCursor := crDefault;
-  FHeight := 18;
+  FHeight := TTextEditorScaledInteger.Create(18);
   FMoving := False;
   FVisible := False;
   FOptions := TEXTEDITOR_DEFAULT_RULER_OPTIONS;
@@ -69,8 +70,13 @@ end;
 
 procedure TTextEditorRuler.ChangeScale(const AMultiplier, ADivider: Integer);
 begin
-  FHeight := MulDiv(FHeight, AMultiplier, ADivider);
+  FHeight.ChangeScale(AMultiplier, ADivider);
   DoChange;
+end;
+
+function TTextEditorRuler.GetHeight: Integer;
+begin
+  Result := FHeight.Value;
 end;
 
 procedure TTextEditorRuler.SetOnChange(const AValue: TNotifyEvent);
@@ -84,11 +90,11 @@ begin
     FOnChange(Self);
 end;
 
-procedure TTextEditorRuler.SetHeight(AValue: Integer);
+procedure TTextEditorRuler.SetHeight(const AValue: Integer);
 begin
-  if FHeight <> AValue then
+  if FHeight.Value <> AValue then
   begin
-    FHeight := AValue;
+    FHeight.SetValue(AValue);
 
     DoChange;
   end;

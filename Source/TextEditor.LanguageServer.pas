@@ -19,10 +19,12 @@ type
 
   TTextEditorLanguageServerDiagnostic = record
     BeginPosition: TTextEditorTextPosition;
+    Deprecated: Boolean;
     EndPosition: TTextEditorTextPosition;
     &Message: string;
     Severity: Integer;
     Source: string;
+    Unnecessary: Boolean;
   end;
 
   TTextEditorLanguageServerHoverPart = record
@@ -144,6 +146,7 @@ type
     class function ConvertSignatureHelp(const AResult: TLSPSignatureHelpResult; out AHelp: TTextEditorLanguageServerSignatureHelp): Boolean;
     class function DecodeRawJsonString(const AText: string): string;
     class function ExtractGotoLocation(const AGotoResult: TLSPGotoResult; out ALocation: TTextEditorLanguageServerLocation): Boolean;
+    class function FadeColor(const AColor: TColor; const ABackground: TColor): TColor;
     class function ParseHoverParts(const AText: string; const ACode: Boolean): TArray<TTextEditorLanguageServerHoverPart>;
     class function PositionToEditor(const APosition: TLSPPosition): TTextEditorTextPosition;
     class function PositionToLSP(const ATextPosition: TTextEditorTextPosition): TLSPPosition;
@@ -235,6 +238,7 @@ type
       const ATextPosition: TTextEditorTextPosition): TArray<TTextEditorLanguageServerHoverPart>;
     function SignatureHelp(const AEditor: TCustomTextEditor; const ATextPosition: TTextEditorTextPosition;
       out AHelp: TTextEditorLanguageServerSignatureHelp): Boolean;
+    procedure BeforeDestruction; override;
     procedure CloseDocument(const AEditor: TCustomTextEditor);
     procedure DocumentSaved(const AEditor: TCustomTextEditor);
     procedure GotoDefinition(const AEditor: TCustomTextEditor);
@@ -277,12 +281,14 @@ const
   LANGUAGE_SERVER_SEVERITY_WARNING = 2;
   LANGUAGE_SERVER_SEVERITY_INFORMATION = 3;
   LANGUAGE_SERVER_SEVERITY_HINT = 4;
+  LANGUAGE_SERVER_TAG_UNNECESSARY = 1;
+  LANGUAGE_SERVER_TAG_DEPRECATED = 2;
 
 implementation
 
 uses
-  System.Diagnostics, System.Generics.Defaults, System.Math, TextEditor.Consts, TextEditor.Highlighter, TextEditor.PaintHelper,
-  XLSPFunctions;
+  System.Diagnostics, System.Generics.Defaults, System.Math, Vcl.Graphics, TextEditor.Consts, TextEditor.Highlighter,
+  TextEditor.PaintHelper, XLSPFunctions;
 
 type
   ITextEditorLanguageServerResultHolder = interface
@@ -427,6 +433,18 @@ begin
   FSignatureHelpTimer := NewTimer(SIGNATURE_HELP_DELAY_MS, SignatureHelpTimerTimer);
 end;
 
+procedure TTextEditorLanguageServer.BeforeDestruction;
+begin
+  { Shut the server down before the inherited call flags the owned client as destroying: from then on the library drops its
+    exit event, the state would never reach stopped, and the client would have to kill the server thread, which then frees
+    itself after the application has already finalized (a leak or an access violation at exit). }
+  FAutoRestart := False;
+  Stop;
+  WaitForExit(EXIT_WAIT_MS);
+
+  inherited BeforeDestruction;
+end;
+
 destructor TTextEditorLanguageServer.Destroy;
 begin
   FLifetime.Expire;
@@ -436,10 +454,6 @@ begin
   FOnGotoLocation := nil;
   FOnLog := nil;
   FOnStateChange := nil;
-
-  { Stop asks the server to shut down; give it a moment to exit before the owned client kills the process }
-  Stop;
-  WaitForExit(EXIT_WAIT_MS);
 
   while FDocuments.Count > 0 do
     RemoveDocument(FDocuments.Last);
@@ -479,6 +493,17 @@ class function TTextEditorLanguageServer.PositionToLSP(const ATextPosition: TTex
 begin
   Result.line := Max(0, ATextPosition.Line);
   Result.character := Max(0, ATextPosition.Char - 1);
+end;
+
+class function TTextEditorLanguageServer.FadeColor(const AColor: TColor; const ABackground: TColor): TColor;
+var
+  LColor, LBackground: Longint;
+begin
+  LColor := ColorToRGB(AColor);
+  LBackground := ColorToRGB(ABackground);
+
+  Result := RGB((GetRValue(LColor) + GetRValue(LBackground)) div 2, (GetGValue(LColor) + GetGValue(LBackground)) div 2,
+    (GetBValue(LColor) + GetBValue(LBackground)) div 2);
 end;
 
 class function TTextEditorLanguageServer.PositionToEditor(const APosition: TLSPPosition): TTextEditorTextPosition;
@@ -919,8 +944,7 @@ var
 begin
   LStopwatch := TStopwatch.StartNew;
 
-  { The shutdown response and the exit notification arrive through the main thread queue, so pump that without a message loop }
-  while (FState = lssStopping) and (LStopwatch.ElapsedMilliseconds < ATimeout) do
+  while ((FState = lssStopping) or FClient.Initialized) and (LStopwatch.ElapsedMilliseconds < ATimeout) do
     CheckSynchronize(10);
 end;
 
@@ -1119,7 +1143,7 @@ procedure TTextEditorLanguageServer.ClientPublishDiagnostics(ASender: TObject; c
 var
   LDocument: TTextEditorLanguageServerDocument;
   LDiagnostics: TArray<TTextEditorLanguageServerDiagnostic>;
-  LIndex: Integer;
+  LIndex, LTag: Integer;
 begin
   LDocument := DocumentForUri(AUri);
 
@@ -1138,6 +1162,14 @@ begin
     LDiagnostics[LIndex].Message := DecodeRawJsonString(ADiagnostics[LIndex].&message);
     LDiagnostics[LIndex].Severity := ADiagnostics[LIndex].severity;
     LDiagnostics[LIndex].Source := ADiagnostics[LIndex].source;
+
+    for LTag in ADiagnostics[LIndex].tags do
+    case LTag of
+      LANGUAGE_SERVER_TAG_UNNECESSARY:
+        LDiagnostics[LIndex].Unnecessary := True;
+      LANGUAGE_SERVER_TAG_DEPRECATED:
+        LDiagnostics[LIndex].Deprecated := True;
+    end;
   end;
 
   LDocument.Diagnostics := LDiagnostics;
@@ -1177,7 +1209,7 @@ begin
     LLinesMarked := TDictionary<Integer, Boolean>.Create;
     try
       for LIndex := 0 to High(LDiagnostics) do
-      if not LLinesMarked.ContainsKey(LDiagnostics[LIndex].BeginPosition.Line) then
+      if not LDiagnostics[LIndex].Unnecessary and not LLinesMarked.ContainsKey(LDiagnostics[LIndex].BeginPosition.Line) then
       begin
         LLinesMarked.Add(LDiagnostics[LIndex].BeginPosition.Line, True);
         LEditor.SetMark(FDiagnosticMarkIndex + LMarkCount, LDiagnostics[LIndex].BeginPosition, FDiagnosticMarkImageIndex);
@@ -1232,6 +1264,10 @@ var
   LDocument: TTextEditorLanguageServerDocument;
   LDiagnostic: TTextEditorLanguageServerDiagnostic;
   LTokenBeginChar, LTokenEndChar: Integer;
+  LSeverity, LDiagnosticSeverity: Integer;
+  LDeprecated, LUnnecessary: Boolean;
+  LEditor: TCustomTextEditor;
+  LForegroundColor: TColor;
 begin
   LDocument := DocumentForEditor(TCustomTextEditor(ASender));
 
@@ -1240,6 +1276,9 @@ begin
 
   LTokenBeginChar := AChar + 1;
   LTokenEndChar := LTokenBeginChar + Max(0, Length(AText) - 1);
+  LSeverity := 0;
+  LDeprecated := False;
+  LUnnecessary := False;
 
   for LDiagnostic in LDocument.Diagnostics do
   begin
@@ -1252,18 +1291,43 @@ begin
     if (LDiagnostic.EndPosition.Line = ALine) and (LDiagnostic.EndPosition.Char <= LTokenBeginChar) then
       Continue;
 
-    AUnderline := ulWaveLine;
-
-    case LDiagnostic.Severity of
-      LANGUAGE_SERVER_SEVERITY_ERROR:
-        AUnderlineColor := FDiagnosticErrorColor;
-      LANGUAGE_SERVER_SEVERITY_WARNING:
-        AUnderlineColor := FDiagnosticWarningColor;
-    else
-      AUnderlineColor := FDiagnosticInformationColor;
+    if LDiagnostic.Unnecessary then
+    begin
+      LUnnecessary := True;
+      Continue;
     end;
 
+    if LDiagnostic.Deprecated then
+      LDeprecated := True;
+
+    LDiagnosticSeverity := if LDiagnostic.Severity = 0 then LANGUAGE_SERVER_SEVERITY_INFORMATION else LDiagnostic.Severity;
+
+    if (LSeverity = 0) or (LDiagnosticSeverity < LSeverity) then
+      LSeverity := LDiagnosticSeverity;
+  end;
+
+  if LUnnecessary then
+  begin
+    LEditor := TCustomTextEditor(ASender);
+    LForegroundColor := if AForegroundColor = TColors.SysNone then LEditor.Colors.EditorForeground else AForegroundColor;
+    AForegroundColor := FadeColor(LForegroundColor, LEditor.Colors.EditorBackground);
+  end;
+
+  if LDeprecated then
+    AStyles := AStyles + [fsStrikeOut];
+
+  if LSeverity = 0 then
     Exit;
+
+  AUnderline := ulWaveLine;
+
+  case LSeverity of
+    LANGUAGE_SERVER_SEVERITY_ERROR:
+      AUnderlineColor := FDiagnosticErrorColor;
+    LANGUAGE_SERVER_SEVERITY_WARNING:
+      AUnderlineColor := FDiagnosticWarningColor;
+  else
+    AUnderlineColor := FDiagnosticInformationColor;
   end;
 end;
 

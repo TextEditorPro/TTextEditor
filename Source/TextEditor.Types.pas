@@ -222,6 +222,9 @@ type
   TTextEditorSearchMapOptions = set of TTextEditorSearchMapOption;
 
   { Left margin }
+  TTextEditorLeftMarginBookmarkOption = (boAutoNumber, boNumbersInBold, boScaled, boShortCuts);
+  TTextEditorLeftMarginBookmarkOptions = set of TTextEditorLeftMarginBookmarkOption;
+
   TTextEditorLeftMarginBookmarkPanelOption = (bpoToggleBookmarkByClick, bpoToggleMarkByClick, bpoShowBookmarkColorsPopup);
   TTextEditorLeftMarginBookmarkPanelOptions = set of TTextEditorLeftMarginBookmarkPanelOption;
 
@@ -395,6 +398,7 @@ type
   { Defaults options }
   TTextEditorDefaultOptions = record
   const
+    Bookmarks = [boNumbersInBold, boScaled, boShortCuts];
     CodeFolding = [cfoAutoWidth, cfoHighlightMatchingPair, cfoShowTreeLine, cfoExpandByHintClick];
     CodeFoldingGuideLines = [cfgHideOverText];
     CodeFoldingHint = [hioShowBorder, hioShowMark];

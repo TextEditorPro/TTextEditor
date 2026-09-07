@@ -3,36 +3,31 @@
 interface
 
 uses
-  System.Classes, Vcl.ImgList;
+  System.Classes, Vcl.ImgList, TextEditor.Types;
 
 type
   TTextEditorLeftMarginBookmarks = class(TPersistent)
   strict private
-    FAutoNumber: Boolean;
-    FBold: Boolean;
     FImages: TCustomImageList;
     FLeftMargin: Integer;
     FOnChange: TNotifyEvent;
+    FOptions: TTextEditorLeftMarginBookmarkOptions;
     FOwner: TComponent;
-    FScaled: Boolean;
-    FShortCuts: Boolean;
     FVisible: Boolean;
     procedure DoChange;
-    procedure SetBold(const AValue: Boolean);
     procedure SetImages(const AValue: TCustomImageList);
+    procedure SetOptions(const AValue: TTextEditorLeftMarginBookmarkOptions);
     procedure SetVisible(const AValue: Boolean);
   public
     constructor Create(AOwner: TComponent);
     procedure Assign(ASource: TPersistent); override;
     procedure ChangeScale(const AMultiplier, ADivider: Integer);
+    procedure SetOption(const AOption: TTextEditorLeftMarginBookmarkOption; const AEnabled: Boolean);
     property OnChange: TNotifyEvent read FOnChange write FOnChange;
   published
-    property AutoNumber: Boolean read FAutoNumber write FAutoNumber default False;
-    property Bold: Boolean read FBold write SetBold default False;
     property Images: TCustomImageList read FImages write SetImages;
     property LeftMargin: Integer read FLeftMargin write FLeftMargin default 2;
-    property Scaled: Boolean read FScaled write FScaled default True;
-    property ShortCuts: Boolean read FShortCuts write FShortCuts default True;
+    property Options: TTextEditorLeftMarginBookmarkOptions read FOptions write SetOptions default TTextEditorDefaultOptions.Bookmarks;
     property Visible: Boolean read FVisible write SetVisible default True;
   end;
 
@@ -46,11 +41,8 @@ begin
   inherited Create;
 
   FOwner := AOwner;
-  FAutoNumber := False;
-  FBold := False;
   FLeftMargin := 2;
-  FScaled := True;
-  FShortCuts := True;
+  FOptions := TTextEditorDefaultOptions.Bookmarks;
   FVisible := True;
 end;
 
@@ -59,15 +51,12 @@ begin
   if Assigned(ASource) and (ASource is TTextEditorLeftMarginBookmarks) then
   with ASource as TTextEditorLeftMarginBookmarks do
   begin
-    Self.FAutoNumber := FAutoNumber;
-    Self.FBold := FBold;
     Self.FImages := FImages;
     Self.FLeftMargin := FLeftMargin;
-    Self.FShortCuts := FShortCuts;
+    Self.FOptions := FOptions;
     Self.FVisible := FVisible;
 
-    if Assigned(Self.FOnChange) then
-      Self.FOnChange(Self);
+    Self.DoChange;
   end
   else
     inherited Assign(ASource);
@@ -84,14 +73,12 @@ begin
     FOnChange(Self);
 end;
 
-procedure TTextEditorLeftMarginBookmarks.SetBold(const AValue: Boolean);
+procedure TTextEditorLeftMarginBookmarks.SetOption(const AOption: TTextEditorLeftMarginBookmarkOption; const AEnabled: Boolean);
 begin
-  if FBold <> AValue then
-  begin
-    FBold := AValue;
-
-    DoChange;
-  end;
+  if AEnabled then
+    Include(FOptions, AOption)
+  else
+    Exclude(FOptions, AOption);
 end;
 
 procedure TTextEditorLeftMarginBookmarks.SetImages(const AValue: TCustomImageList);
@@ -102,6 +89,16 @@ begin
 
     if Assigned(FImages) then
       FImages.FreeNotification(FOwner);
+
+    DoChange;
+  end;
+end;
+
+procedure TTextEditorLeftMarginBookmarks.SetOptions(const AValue: TTextEditorLeftMarginBookmarkOptions);
+begin
+  if FOptions <> AValue then
+  begin
+    FOptions := AValue;
 
     DoChange;
   end;

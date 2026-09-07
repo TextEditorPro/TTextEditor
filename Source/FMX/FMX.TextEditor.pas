@@ -7254,7 +7254,7 @@ begin
       LMarkIndex := LMark.Index;
   end;
 
-  if (AImageIndex = -1) and (AAutoNumber or FLeftMargin.Bookmarks.AutoNumber) then
+  if (AImageIndex = -1) and (AAutoNumber or (boAutoNumber in FLeftMargin.Bookmarks.Options)) then
   for var LIndex := 0 to 8 do
   if not Assigned(FBookmarkList.Find(LIndex)) then
   begin
@@ -14047,7 +14047,7 @@ var
 begin
   if not Assigned(FImagesBookmark) then
   begin
-    LPixelsPerInch := if FLeftMargin.Bookmarks.Scaled then FPixelsPerInch else 96;
+    LPixelsPerInch := if boScaled in FLeftMargin.Bookmarks.Options then FPixelsPerInch else 96;
 
     FImagesBookmark :=
       if Assigned(FLeftMargin.Bookmarks.Images) then
@@ -14062,7 +14062,7 @@ begin
   LBookmarkColors.Blue := FColors.BookmarkBlue;
   LBookmarkColors.Purple := FColors.BookmarkPurple;
   FImagesBookmark.SetColors(LBookmarkColors);
-  FImagesBookmark.SetBold(FLeftMargin.Bookmarks.Bold);
+  FImagesBookmark.SetBold(boNumbersInBold in FLeftMargin.Bookmarks.Options);
 end;
 
 procedure TCustomTextEditor.CreateCollapsedBackup;
@@ -21774,10 +21774,10 @@ begin
     TKeyCommands.ZoomReset:
       ZoomReset;
     TKeyCommands.GoToBookmark1 .. TKeyCommands.GoToBookmark9:
-      if FLeftMargin.Bookmarks.ShortCuts then
+      if boShortCuts in FLeftMargin.Bookmarks.Options then
         GoToBookmark(ACommand - TKeyCommands.GoToBookmark1);
     TKeyCommands.SetBookmark1 .. TKeyCommands.SetBookmark9:
-      if FLeftMargin.Bookmarks.ShortCuts then
+      if boShortCuts in FLeftMargin.Bookmarks.Options then
         DoSetBookmark(ACommand, AData);
     TKeyCommands.WordLeft, TKeyCommands.SelectionWordLeft:
       DoWordLeft(ACommand);

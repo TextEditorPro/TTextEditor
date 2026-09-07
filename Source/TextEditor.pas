@@ -14357,14 +14357,16 @@ var
   procedure PaintMark(const AEndMark: Boolean = False);
   var
     LPoints: array [0..2] of TPoint;
-    LHeight, LTempX, LTempY: Integer;
+    LHeight, LWidth, LTempX, LTempY: Integer;
     LTempRect: TRect;
   begin
-    LHeight := LRect.Right - LRect.Left;
+    LWidth := LRect.Right - LRect.Left;
+    LHeight := Min(LWidth, GetLineHeight - 2);
 
+    Inc(LRect.Left, (LWidth - LHeight) shr 1);
     LRect.Top := LRect.Top + (GetLineHeight - LHeight) shr 1 + 1;
     LRect.Bottom := LRect.Top + LHeight - 1;
-    LRect.Right := LRect.Right - 1;
+    LRect.Right := LRect.Left + LHeight - 1;
 
     { Match the box parity to the stroke thickness, otherwise the - and + cannot center exactly }
     if Odd(LRect.Right - LRect.Left) <> Odd(LThickness) then
@@ -24434,6 +24436,8 @@ begin
 
     FZoom.Percentage := APercentage;
     FZoom.Divider := LMultiplier;
+
+    SizeOrFontChanged;
   finally
     if FWordWrap.Active then
       CreateLineNumbersCache(True);

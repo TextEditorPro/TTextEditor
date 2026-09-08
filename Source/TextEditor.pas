@@ -486,6 +486,7 @@ type
     function GetSelectionLineCount: Integer;
     function GetSelectionStart: Integer;
     function GetSelectionStartPosition: TTextEditorTextPosition;
+    function GetStrokeWidth: Integer; inline;
     function GetTabText(var ATextPosition: TTextEditorTextPosition): string;
     function GetText: string;
     function GetTextBetween(const ATextBeginPosition: TTextEditorTextPosition; const ATextEndPosition: TTextEditorTextPosition): string;
@@ -787,6 +788,7 @@ type
     procedure PaintCodeFoldingCollapsedLine(const AFoldRange: TTextEditorCodeFoldingRange; const ALineRect: TRect);
     procedure PaintCodeFoldingGuides(const AFirstRow, ALastRow: Integer);
     procedure PaintCodeFoldingLine(const AClipRect: TRect; const ALine: Integer);
+    procedure PaintDottedVerticalLine(const AX, ATop, ABottom: Integer; const AColor: TColor);
     procedure PaintKeywordImageArrow(const AKind: TTextEditorKeywordImageKind; const ARect: TRect);
     procedure PaintKeywordImages(const ALeft: Integer; const ALine: Integer; const ALineRect: TRect; const ADraws: array of TTextEditorKeywordImageDraw; const ACount: Integer);
     procedure PaintLeftMargin(const AClipRect: TRect; const AFirstLine, ALastTextLine, ALastLine: Integer);
@@ -1363,7 +1365,7 @@ begin
 
   if GHintWindow is TTextEditorHintWindow then
   begin
-    GHintWindow.Font.Assign(AEditor.Fonts.Hint);
+    AssignFont(GHintWindow.Font, AEditor.Fonts.Hint);
     TTextEditorHintWindow(GHintWindow).SetColors(AEditor.Colors.HintBackground, AEditor.Colors.HintBorder, AEditor.Colors.HintText);
   end;
 
@@ -2171,7 +2173,7 @@ begin
 
   Canvas.Brush.Color := LColor;
 
-  LThickness := Max(1, FPixelsPerInch div 96);
+  LThickness := GetStrokeWidth;
 
   for LIndex := 1 to LThickness do
   begin
@@ -12508,7 +12510,7 @@ procedure TCustomTextEditor.DoOnPaint;
 begin
   if Assigned(FEvents.OnPaint) then
   begin
-    Canvas.Font.Assign(FFonts.Text);
+    AssignFont(Canvas.Font, FFonts.Text);
     Canvas.Brush.Color := FColors.EditorBackground;
 
     FEvents.OnPaint(Self, Canvas);
@@ -14472,8 +14474,7 @@ begin
     not (Assigned(LFoldRange) and LFoldRange.Collapsable and LFoldRange.Collapsed) then
     Exit;
 
-  { The marks scale with zoom - so must the stroke thickness. Truncate - rounding 150% up to 2 px looks bold }
-  LThickness := Max(1, FPixelsPerInch div 96);
+  LThickness := GetStrokeWidth;
   LOldPenWidth := Canvas.Pen.Width;
   Canvas.Pen.Width := LThickness;
 
@@ -14853,7 +14854,7 @@ var
 
   function CreateBitmap(const AHighlightGuide: Boolean): Vcl.Graphics.TBitmap;
   var
-    LY, LN: Integer;
+    LY, LN, LThickness: Integer;
     LStyle: TTextEditorCodeFoldingGuideLineStyle;
   begin
     Result := nil;
@@ -14861,24 +14862,24 @@ var
     if not AHighlightGuide and (FCodeFolding.GuideLines.Style = lsSolid) or AHighlightGuide and (FCodeFolding.GuideLines.HighlightStyle = lsSolid) then
       Exit;
 
+    LThickness := GetStrokeWidth;
     Result := Vcl.Graphics.TBitmap.Create;
 
-    Result.Canvas.Pen.Color := if AHighlightGuide then FColors.CodeFoldingIndentHighlight else FColors.CodeFoldingIndent;
     Result.Canvas.Brush.Color := TColors.Fuchsia;
-    Result.Width := 1;
+    Result.Width := LThickness;
     Result.Height := 0; { background color }
     Result.Height := Height;
 
+    Result.Canvas.Brush.Color := if AHighlightGuide then FColors.CodeFoldingIndentHighlight else FColors.CodeFoldingIndent;
+
     LY := 1;
     LStyle := if AHighlightGuide then FCodeFolding.GuideLines.HighlightStyle else FCodeFolding.GuideLines.Style;
-    LN := if LStyle = lsDash then 3 else 1;
+    LN := (if LStyle = lsDash then 3 else 1) * LThickness;
 
     while LY < Result.Height do
     begin
-      Result.Canvas.MoveTo(0, LY);
-      Inc(LY, LN);
-      Result.Canvas.LineTo(0, LY);
-      Inc(LY, LN);
+      Result.Canvas.FillRect(Rect(0, LY, LThickness, LY + LN));
+      Inc(LY, 2 * LN);
     end;
   end;
 
@@ -14889,10 +14890,11 @@ var
   LBitmap, LBitmapGuide, LBitmapHighlightGuide: Vcl.Graphics.TBitmap;
   LX, LX1, LZ: Integer;
   LColor, LPixelColor: TColor;
-  LHeight, LBltLineHeight: Integer;
+  LHeight, LBltLineHeight, LThickness: Integer;
   LStyle: TTextEditorCodeFoldingGuideLineStyle;
 begin
-  LOldColor := Canvas.Pen.Color;
+  LOldColor := Canvas.Brush.Color;
+  LThickness := GetStrokeWidth;
   LLineHeight := GetLineHeight;
   LY := 0;
 
@@ -14945,13 +14947,21 @@ begin
           if LHideOverText then
           begin
             LX1 := LX;
-            LColor := Canvas.Pixels[LX1 + 1, LY];
+            LColor := Canvas.Pixels[LX1 + LThickness, LY];
             LZ := LY + 2;
             LSkip := False;
 
             while LZ < LHeight do
             begin
-              LPixelColor := Canvas.Pixels[LX1, LZ];
+              LPixelColor := LColor;
+
+              for var LColumn := LX1 to LX1 + LThickness - 1 do
+              begin
+                LPixelColor := Canvas.Pixels[LColumn, LZ];
+
+                if LPixelColor <> LColor then
+                  Break;
+              end;
 
               if LPixelColor = -1 then
                 Break;
@@ -14981,21 +14991,18 @@ begin
               (LCurrentLine >= LCodeFoldingRange.FromLine) and (LCurrentLine <= LCodeFoldingRange.ToLine) then
             begin
               LBitmap := LBitmapHighlightGuide;
-              Canvas.Pen.Color := FColors.CodeFoldingIndentHighlight;
+              Canvas.Brush.Color := FColors.CodeFoldingIndentHighlight;
               LStyle := FCodeFolding.GuideLines.HighlightStyle;
             end
             else
             begin
               LBitmap := LBitmapGuide;
-              Canvas.Pen.Color := FColors.CodeFoldingIndent;
+              Canvas.Brush.Color := FColors.CodeFoldingIndent;
               LStyle := FCodeFolding.GuideLines.Style;
             end;
 
             if LStyle = lsSolid then
-            begin
-              Canvas.MoveTo(LX, LY + 1);
-              Canvas.LineTo(LX, LHeight + 1);
-            end
+              Canvas.FillRect(Rect(LX, LY + 1, LX + LThickness, LHeight + 1))
             else
             if Assigned(LBitmap) then
             begin
@@ -15004,8 +15011,8 @@ begin
               if LCodeFoldingRange.GuideLineOffset + LBltLineHeight > Height then
                 LBltLineHeight := Height - LCodeFoldingRange.GuideLineOffset;
 
-              TransparentBlt(Canvas.Handle, LX, LY, 1, LBltLineHeight, LBitmap.Canvas.Handle, 0,
-                LCodeFoldingRange.GuideLineOffset, 1, LBltLineHeight, TColors.Fuchsia);
+              TransparentBlt(Canvas.Handle, LX, LY, LThickness, LBltLineHeight, LBitmap.Canvas.Handle, 0,
+                LCodeFoldingRange.GuideLineOffset, LThickness, LBltLineHeight, TColors.Fuchsia);
 
               LCodeFoldingRange.GuideLineOffset := LCodeFoldingRange.GuideLineOffset + LLineHeight;
             end;
@@ -15024,7 +15031,7 @@ begin
     if Assigned(LBitmapHighlightGuide) then
       LBitmapHighlightGuide.Free;
 
-    Canvas.Pen.Color := LOldColor;
+    Canvas.Brush.Color := LOldColor;
   end;
 end;
 
@@ -15409,25 +15416,27 @@ var
 
   procedure PaintBorder;
   var
-    LRightPosition: Integer;
+    LRightPosition, LThickness: Integer;
+    LOldBrushColor: TColor;
   begin
     LRightPosition := AClipRect.Left + FLeftMargin.GetWidth - 2;
 
     if (FLeftMargin.Border.Style <> mbsNone) and (AClipRect.Right >= LRightPosition) then
-    with Canvas do
     begin
-      Pen.Color := FColors.LeftMarginBorder;
-      Pen.Width := 1;
+      LThickness := GetStrokeWidth;
+      LOldBrushColor := Canvas.Brush.Color;
+      Canvas.Brush.Color := FColors.LeftMarginBorder;
 
       if FLeftMargin.Border.Style = mbsMiddle then
       begin
-        MoveTo(LRightPosition, AClipRect.Top);
-        LineTo(LRightPosition, AClipRect.Bottom);
-        Pen.Color := FColors.LeftMarginBackground;
-      end;
+        Canvas.FillRect(Rect(LRightPosition - LThickness + 1, AClipRect.Top, LRightPosition + 1, AClipRect.Bottom));
+        Canvas.Brush.Color := FColors.LeftMarginBackground;
+        Canvas.FillRect(Rect(LRightPosition + 1, AClipRect.Top, LRightPosition + 2, AClipRect.Bottom));
+      end
+      else
+        Canvas.FillRect(Rect(LRightPosition + 2 - LThickness, AClipRect.Top, LRightPosition + 2, AClipRect.Bottom));
 
-      MoveTo(LRightPosition + 1, AClipRect.Top);
-      LineTo(LRightPosition + 1, AClipRect.Bottom);
+      Canvas.Brush.Color := LOldBrushColor;
     end;
   end;
 
@@ -15929,12 +15938,44 @@ procedure TCustomTextEditor.PaintRuler;
 var
   LClipRect, LRect: TRect;
   LCharWidth: Integer;
-  LOldColor, LOldPenColor: TColor;
+  LOldColor: TColor;
   LRulerCaretPosition: Integer;
   LLeft, LLongLineY, LShortLineY, LCharsBeforeView: Integer;
   LNumbers: string;
   LLineY: Integer;
   LWidth: Integer;
+  LThickness, LTick, LBorderTop: Integer;
+
+  procedure FillVerticalLine(const AX, ATop, ABottom: Integer);
+  begin
+    Canvas.FillRect(Rect(AX - LThickness div 2, ATop, AX - LThickness div 2 + LThickness, ABottom));
+  end;
+
+  function GetNumberTop: Integer;
+  const
+    IDENTITY: TMat2 = (eM11: (fract: 0; value: 1); eM12: (fract: 0; value: 0); eM21: (fract: 0; value: 0);
+      eM22: (fract: 0; value: 1));
+  var
+    LTextMetric: TTextMetric;
+    LGlyphMetrics: TGlyphMetrics;
+    LDigitTop, LDigitHeight: Integer;
+  begin
+    GetTextMetrics(Canvas.Handle, LTextMetric);
+
+    if GetGlyphOutline(Canvas.Handle, Ord('0'), GGO_METRICS, LGlyphMetrics, 0, nil, IDENTITY) <> GDI_ERROR then
+    begin
+      LDigitTop := LTextMetric.tmAscent - LGlyphMetrics.gmptGlyphOrigin.Y;
+      LDigitHeight := LGlyphMetrics.gmBlackBoxY;
+    end
+    else
+    begin
+      LDigitTop := LTextMetric.tmInternalLeading;
+      LDigitHeight := LTextMetric.tmAscent - LTextMetric.tmInternalLeading;
+    end;
+
+    Result := (LLongLineY - LDigitHeight) div 2 - LDigitTop;
+  end;
+
 begin
   LClipRect := ClientRect;
 
@@ -15942,7 +15983,9 @@ begin
 
   LCharWidth := FPaintHelper.CharWidth;
   LOldColor := Canvas.Brush.Color;
-  LOldPenColor := Canvas.Pen.Color;
+  LThickness := GetStrokeWidth;
+  LTick := MulDiv(2, FPixelsPerInch, 96);
+  LBorderTop := LClipRect.Bottom - LThickness + 1;
 
   Canvas.Brush.Color := FColors.RulerBackground;
 
@@ -15954,80 +15997,72 @@ begin
   try
     FillRect(LClipRect);
 
-    with Canvas do
+    Canvas.Brush.Color := FColors.RulerBorder;
+    Canvas.FillRect(Rect(0, LBorderTop, LClipRect.Right, LClipRect.Bottom + 1));
+
+    if (roShowSelection in FRuler.Options) and SelectionAvailable then
     begin
-      Pen.Color := FColors.RulerBorder;
-      Pen.Width := 1;
-      MoveTo(0, LClipRect.Bottom);
-      LineTo(LClipRect.Right, LClipRect.Bottom);
-
-      if (roShowSelection in FRuler.Options) and SelectionAvailable then
-      begin
-        LRect := LClipRect;
-
-        LRect.Left := FLeftMarginWidth + (FPosition.SelectionStart.Char - 1) * LCharWidth - FScrollHelper.HorizontalPosition;
-        LRect.Right := LRulerCaretPosition;
-        Canvas.Brush.Color := FColors.RulerSelection;
-        FPaintHelper.SetBackgroundColor(Canvas.Brush.Color);
-        FillRect(LRect);
-        Canvas.Brush.Color := FColors.RulerBackground;
-        FPaintHelper.SetBackgroundColor(Canvas.Brush.Color);
-        MoveTo(LRect.Left, 0);
-        LineTo(LRect.Left, LClipRect.Bottom);
-      end;
-
-      LLeft := FLeftMarginWidth - FScrollHelper.HorizontalPosition mod LCharWidth;
-      LLongLineY := LClipRect.Bottom - 4;
-      LShortLineY := LClipRect.Bottom - 2;
       LRect := LClipRect;
 
-      Dec(LRect.Bottom, 4);
-
-      SetBkMode(Canvas.Handle, TRANSPARENT);
-
-      Pen.Color := FColors.RulerLines;
-
-      LCharsBeforeView := FScrollHelper.HorizontalPosition div LCharWidth;
-
-      for var LIndex := LCharsBeforeView to FScrollHelper.PageWidth div LCharWidth + LCharsBeforeView + 10 do
-      begin
-        if LIndex mod 10 = 0 then
-        begin
-          LLineY := LLongLineY;
-
-          LNumbers := LIndex.ToString;
-          LRect.Left := LLeft;
-          LRect.Right := LLeft + LNumbers.Length * FPaintHelper.CharWidth;
-          LWidth := LRect.Width shr 1;
-
-          Dec(LRect.Left, LWidth);
-          Dec(LRect.Right, LWidth);
-
-          Winapi.Windows.ExtTextOut(Handle, LLeft - LWidth, LRect.Top, 0, @LRect, PChar(LNumbers),
-            LNumbers.Length, nil);
-        end
-        else
-          LLineY := LShortLineY;
-
-        MoveTo(LLeft, LLineY);
-        LineTo(LLeft, LClipRect.Bottom);
-
-        Inc(LLeft, LCharWidth);
-      end;
-
-      MoveTo(LRulerCaretPosition, 0);
-      LineTo(LRulerCaretPosition, LClipRect.Bottom);
+      LRect.Left := FLeftMarginWidth + (FPosition.SelectionStart.Char - 1) * LCharWidth - FScrollHelper.HorizontalPosition;
+      LRect.Right := LRulerCaretPosition;
+      Canvas.Brush.Color := FColors.RulerSelection;
+      FPaintHelper.SetBackgroundColor(Canvas.Brush.Color);
+      FillRect(LRect);
+      FPaintHelper.SetBackgroundColor(FColors.RulerBackground);
+      Canvas.Brush.Color := FColors.RulerBorder;
+      FillVerticalLine(LRect.Left, 0, LBorderTop);
     end;
+
+    LLeft := FLeftMarginWidth - FScrollHelper.HorizontalPosition mod LCharWidth;
+    LLongLineY := LBorderTop - 2 * LTick;
+    LShortLineY := LBorderTop - LTick;
+    LRect := LClipRect;
+    LRect.Bottom := LLongLineY;
+    LRect.Top := GetNumberTop;
+
+    SetBkMode(Canvas.Handle, TRANSPARENT);
+
+    Canvas.Brush.Color := FColors.RulerLines;
+
+    LCharsBeforeView := FScrollHelper.HorizontalPosition div LCharWidth;
+
+    for var LIndex := LCharsBeforeView to FScrollHelper.PageWidth div LCharWidth + LCharsBeforeView + 10 do
+    begin
+      if LIndex mod 10 = 0 then
+      begin
+        LLineY := LLongLineY;
+
+        LNumbers := LIndex.ToString;
+        LRect.Left := LLeft;
+        LRect.Right := LLeft + LNumbers.Length * FPaintHelper.CharWidth;
+        LWidth := LRect.Width shr 1;
+
+        Dec(LRect.Left, LWidth);
+        Dec(LRect.Right, LWidth);
+
+        Winapi.Windows.ExtTextOut(Canvas.Handle, LLeft - LWidth, LRect.Top, 0, @LRect, PChar(LNumbers),
+          LNumbers.Length, nil);
+      end
+      else
+        LLineY := LShortLineY;
+
+      FillVerticalLine(LLeft, LLineY, LBorderTop);
+
+      Inc(LLeft, LCharWidth);
+    end;
+
+    FillVerticalLine(LRulerCaretPosition, 0, LBorderTop);
   finally
     Canvas.Brush.Color := LOldColor;
-    Canvas.Pen.Color := LOldPenColor;
     FPaintHelper.SetBaseFont(FFonts.Text);
   end;
 end;
 
 procedure TCustomTextEditor.PaintRightMargin(const AClipRect: TRect);
 var
-  LRightMarginPosition, LY: Integer;
+  LRightMarginPosition, LY, LThickness: Integer;
+  LOldBrushColor: TColor;
 begin
   if FRightMargin.Visible then
   begin
@@ -16035,75 +16070,63 @@ begin
 
     if (LRightMarginPosition >= AClipRect.Left) and (LRightMarginPosition <= AClipRect.Right) then
     begin
-      Canvas.Pen.Color := FColors.RightMargin;
+      LThickness := GetStrokeWidth;
+      LOldBrushColor := Canvas.Brush.Color;
+      Canvas.Brush.Color := FColors.RightMargin;
 
       LY := 0;
 
       if IsRulerVisible then
         Inc(LY, FRuler.Height);
 
-      Canvas.MoveTo(LRightMarginPosition, LY);
-      Canvas.LineTo(LRightMarginPosition, ClientHeight);
+      Canvas.FillRect(Rect(LRightMarginPosition - LThickness div 2, LY, LRightMarginPosition - LThickness div 2 + LThickness, ClientHeight));
+      Canvas.Brush.Color := LOldBrushColor;
     end;
   end;
 end;
 
+procedure TCustomTextEditor.PaintDottedVerticalLine(const AX, ATop, ABottom: Integer; const AColor: TColor);
+var
+  LThickness, LLeft, LY: Integer;
+  LOldBrushColor: TColor;
+begin
+  LThickness := GetStrokeWidth;
+  LLeft := AX - LThickness div 2;
+  LOldBrushColor := Canvas.Brush.Color;
+  Canvas.Brush.Color := AColor;
+  LY := ATop;
+
+  while LY < ABottom do
+  begin
+    Canvas.FillRect(Rect(LLeft, LY, LLeft + LThickness, Min(LY + LThickness, ABottom)));
+    Inc(LY, 2 * LThickness);
+  end;
+
+  Canvas.Brush.Color := LOldBrushColor;
+end;
+
 procedure TCustomTextEditor.PaintRightMarginMove;
 var
-  LOldPenStyle: TPenStyle;
-  LOldStyle: TBrushStyle;
   LY: Integer;
 begin
-  with Canvas do
-  begin
-    LOldPenStyle := Pen.Style;
-    LOldStyle := Brush.Style;
+  LY := 0;
 
-    Pen.Width := 1;
-    Pen.Style := psDot;
-    Pen.Color := FColors.RightMovingEdge;
-    Brush.Style := bsClear;
+  if IsRulerVisible then
+    Inc(LY, FRuler.Height);
 
-    LY := 0;
-
-    if IsRulerVisible then
-      Inc(LY, FRuler.Height);
-
-    MoveTo(FRightMarginMovePosition, LY);
-    LineTo(FRightMarginMovePosition, ClientHeight);
-
-    Brush.Style := LOldStyle;
-    Pen.Style := LOldPenStyle;
-  end;
+  PaintDottedVerticalLine(FRightMarginMovePosition, LY, ClientHeight, FColors.RightMovingEdge);
 end;
 
 procedure TCustomTextEditor.PaintRulerMove;
 var
-  LOldPenStyle: TPenStyle;
-  LOldStyle: TBrushStyle;
   LY: Integer;
 begin
-  with Canvas do
-  begin
-    LOldPenStyle := Pen.Style;
-    LOldStyle := Brush.Style;
+  LY := 0;
 
-    Pen.Width := 1;
-    Pen.Style := psDot;
-    Pen.Color := FColors.RulerMovingEdge;
-    Brush.Style := bsClear;
+  if IsRulerVisible then
+    Inc(LY, FRuler.Height);
 
-    LY := 0;
-
-    if IsRulerVisible then
-      Inc(LY, FRuler.Height);
-
-    MoveTo(FRulerMovePosition, LY);
-    LineTo(FRulerMovePosition, ClientHeight);
-
-    Brush.Style := LOldStyle;
-    Pen.Style := LOldPenStyle;
-  end;
+  PaintDottedVerticalLine(FRulerMovePosition, LY, ClientHeight, FColors.RulerMovingEdge);
 end;
 
 procedure TCustomTextEditor.PaintScrollShadow(const ACanvas: TCanvas; const AClipRect: TRect);
@@ -16121,6 +16144,7 @@ var
   LRect: TRect;
   LHeight: Integer;
   LLine: Integer;
+  LThickness: Integer;
 begin
   if not Assigned(FSearch.Items) or not Assigned(FSearchEngine) or (FSearchEngine.ResultCount = 0) and not (soHighlightSimilarTerms in FSelection.Options) then
     Exit;
@@ -16143,31 +16167,24 @@ begin
   FillRect(LRect);
 
   { Draw lines }
-  Canvas.Pen.Color := if FColors.SearchMapForeground <> TColors.SysNone then FColors.SearchMapForeground else TColors.SysHighlight;
-  Canvas.Pen.Width := 1;
-  Canvas.Pen.Style := psSolid;
+  LThickness := 2 * GetStrokeWidth;
+  Canvas.Brush.Color := if FColors.SearchMapForeground <> TColors.SysNone then FColors.SearchMapForeground else TColors.SysHighlight;
 
   for var LIndex := 0 to FSearch.Items.Count - 1 do
   begin
     LLine := Round(PTextEditorSearchItem(FSearch.Items.Items[LIndex])^.BeginTextPosition.Line * LHeight);
 
-    Canvas.MoveTo(LRect.Left, LLine);
-    Canvas.LineTo(LRect.Right, LLine);
-    Canvas.MoveTo(LRect.Left, LLine + 1);
-    Canvas.LineTo(LRect.Right, LLine + 1);
+    Canvas.FillRect(Rect(LRect.Left, LLine, LRect.Right, LLine + LThickness));
   end;
 
   { Draw active line }
   if moShowActiveLine in FSearch.Map.Options then
   begin
-    Canvas.Pen.Color := if FColors.SearchMapActiveLine <> TColors.SysNone then FColors.SearchMapActiveLine else FColors.ActiveLineBackground;
+    Canvas.Brush.Color := if FColors.SearchMapActiveLine <> TColors.SysNone then FColors.SearchMapActiveLine else FColors.ActiveLineBackground;
 
     LLine := Round((FViewPosition.Row - 1) * LHeight);
 
-    Canvas.MoveTo(LRect.Left, LLine);
-    Canvas.LineTo(LRect.Right, LLine);
-    Canvas.MoveTo(LRect.Left, LLine + 1);
-    Canvas.LineTo(LRect.Right, LLine + 1);
+    Canvas.FillRect(Rect(LRect.Left, LLine, LRect.Right, LLine + LThickness));
   end;
 end;
 
@@ -16181,6 +16198,11 @@ end;
 function TCustomTextEditor.ZoomScaled(const AValue: Integer): Integer;
 begin
   Result := MulDiv(AValue, FZoom.Percentage, 100);
+end;
+
+function TCustomTextEditor.GetStrokeWidth: Integer;
+begin
+  Result := Max(1, FPixelsPerInch div 96);
 end;
 
 procedure TCustomTextEditor.PaintLineBreakArrow(const ARect: TRect; const AColor: TColor);
@@ -17009,7 +17031,7 @@ var
             LTempBitmap.Height := 0; // To avoid FillRect
             LTempBitmap.Height := LTextRect.Height;
             { Character }
-            LTempBitmap.Canvas.Font.Assign(FFonts.Text);
+            AssignFont(LTempBitmap.Canvas.Font, FFonts.Text);
 
             LTempRect := LTextRect;
 

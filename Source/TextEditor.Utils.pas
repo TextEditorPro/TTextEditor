@@ -36,6 +36,7 @@ function ToggleCase(const AValue: string): string;
 function Trim(const AText: string): string;
 function TrimLeft(const AText: string): string;
 function TrimRight(const AText: string): string;
+procedure AssignFont(const ATarget, ASource: TFont);
 procedure ClearList(var AList: TList);
 procedure FreeList(var AList: TList);
 procedure ResizeBitmap(const ABitmap: TBitmap; const ANewWidth, ANewHeight: Integer);
@@ -578,6 +579,12 @@ begin
     Format('%s%.8d', [StartFragment, LStartFragment]) + sLineBreak +
     Format('%s%.8d', [EndFragment, LEndFragment]) + sLineBreak +
     DocType + HTMLBegin + Result + HTMLEnd;
+end;
+
+procedure AssignFont(const ATarget, ASource: TFont);
+begin
+  ATarget.Assign(ASource);
+  ATarget.Height := ASource.Height;
 end;
 
 procedure ResizeBitmap(const ABitmap: TBitmap; const ANewWidth, ANewHeight: Integer);

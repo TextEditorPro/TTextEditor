@@ -230,7 +230,7 @@ begin
 
   if Assigned(LTextEditor) then
   begin
-    FBitmapBuffer.Canvas.Font.Assign(LTextEditor.Fonts.CompletionProposal);
+    AssignFont(FBitmapBuffer.Canvas.Font, LTextEditor.Fonts.CompletionProposal);
 
     Result := TextHeight(FBitmapBuffer.Canvas, 'X');
   end

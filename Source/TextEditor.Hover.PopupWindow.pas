@@ -5,7 +5,8 @@ unit TextEditor.Hover.PopupWindow;
 interface
 
 uses
-  System.Classes, System.Generics.Collections, System.Types, System.UITypes, Vcl.Controls, Vcl.Graphics, TextEditor.PopupWindow;
+  System.Classes, System.Generics.Collections, System.Types, System.UITypes, Vcl.Controls, Vcl.Graphics, TextEditor.PopupWindow,
+  TextEditor.Utils;
 
 type
   TTextEditorHoverPopupLineKind = (hlCode, hlText);
@@ -152,10 +153,8 @@ begin
   FTextColor := LEditor.Colors.HintText;
   FLinkColor := TColors.SysHotLight;
 
-  FCodeFont.Assign(LEditor.Fonts.Text);
-  FCodeFont.Height := LEditor.Fonts.Text.Height;
-  FTextFont.Assign(LEditor.Fonts.Hint);
-  FTextFont.Height := LEditor.Fonts.Hint.Height;
+  AssignFont(FCodeFont, LEditor.Fonts.Text);
+  AssignFont(FTextFont, LEditor.Fonts.Hint);
 
   Color := FBackgroundColor;
 end;

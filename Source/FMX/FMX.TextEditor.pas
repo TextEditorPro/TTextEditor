@@ -470,6 +470,7 @@ type
     function GetSelectionLineCount: Integer;
     function GetSelectionStart: Integer;
     function GetSelectionStartPosition: TTextEditorTextPosition;
+    function GetStrokeWidth: Integer;
     function GetTabText(var ATextPosition: TTextEditorTextPosition): string;
     function GetText: string;
     function GetTextBetween(const ATextBeginPosition: TTextEditorTextPosition; const ATextEndPosition: TTextEditorTextPosition): string;
@@ -13529,7 +13530,7 @@ begin
   if LSceneScale <= 0 then
     LSceneScale := 1;
 
-  LThickness := Max(1, Trunc(FPixelsPerInch / 96 * LSceneScale));
+  LThickness := GetStrokeWidth;
 
   LRect := AClipRect;
   LRect.Inflate(Trunc(FPixelsPerInch / 96 * -2), 0);
@@ -13843,6 +13844,8 @@ var
   LDeepestLevel: Integer;
   LX, LY, LHeight: Single;
   LGuideLineColumn: Integer;
+  LThickness: Integer;
+  LSceneScale: Single;
   LLineText: string;
   LHideAtFirstColumn, LHideInActiveRow, LHideOverText, LHighlightIndentGuides: Boolean;
   LOldStrokeColor: TAlphaColor;
@@ -13919,15 +13922,15 @@ var
 
   procedure DrawGuideLine(const AX: Single; const AY1, AY2: Single; const AStyle: TTextEditorCodeFoldingGuideLineStyle);
   var
-    LDashLength, LPeriod: Integer;
+    LDashLength, LPeriod: Single;
     LSegmentStart, LSegmentEnd: Single;
   begin
     if AStyle = lsSolid then
-      DrawPixelLine(AX, AY1, AX, AY2)
+      DrawPixelLine(AX, AY1, AX, AY2, 1, LThickness)
     else
     begin
-      LDashLength := if AStyle = lsDash then 3 else 1;
-      LPeriod := LDashLength shl 1;
+      LDashLength := (if AStyle = lsDash then 3 else 1) * LThickness / LSceneScale;
+      LPeriod := 2 * LDashLength;
       LSegmentStart := 1 + Floor((AY1 - 1) / LPeriod) * LPeriod;
 
       while LSegmentStart < AY2 do
@@ -13935,7 +13938,7 @@ var
         LSegmentEnd := LSegmentStart + LDashLength;
 
         if LSegmentEnd > AY1 then
-          DrawPixelLine(AX, Max(LSegmentStart, AY1), AX, Min(LSegmentEnd, AY2));
+          DrawPixelLine(AX, Max(LSegmentStart, AY1), AX, Min(LSegmentEnd, AY2), 1, LThickness);
 
         LSegmentStart := LSegmentStart + LPeriod;
       end;
@@ -13949,6 +13952,15 @@ begin
   LOldStrokeColor := Canvas.Stroke.Color;
   LOldStrokeThickness := Canvas.Stroke.Thickness;
   try
+    LThickness := GetStrokeWidth;
+    LSceneScale := 1;
+
+    if Assigned(Scene) then
+      LSceneScale := Scene.GetSceneScale;
+
+    if LSceneScale <= 0 then
+      LSceneScale := 1;
+
     LLineHeight := GetLineHeight;
     LY := 0;
 
@@ -14419,16 +14431,16 @@ var
     begin
       Canvas.Stroke.Kind := TBrushKind.Solid;
       Canvas.Stroke.Color := FColors.LeftMarginBorder;
-      Canvas.Stroke.Thickness := 1;
 
       if FLeftMargin.Border.Style = mbsMiddle then
       begin
-        DrawPixelLine(LRightPosition, AClipRect.Top, LRightPosition, AClipRect.Bottom);
+        DrawPixelLine(LRightPosition, AClipRect.Top, LRightPosition, AClipRect.Bottom, 1, GetStrokeWidth);
 
         Canvas.Stroke.Color := FColors.LeftMarginBackground;
-      end;
-
-      DrawPixelLine(LRightPosition + 1, AClipRect.Top, LRightPosition + 1, AClipRect.Bottom);
+        DrawPixelLine(LRightPosition + 1, AClipRect.Top, LRightPosition + 1, AClipRect.Bottom);
+      end
+      else
+        DrawPixelLine(LRightPosition + 1, AClipRect.Top, LRightPosition + 1, AClipRect.Bottom, 1, GetStrokeWidth);
     end;
   end;
 
@@ -14968,17 +14980,32 @@ var
   LRulerCaretPosition: Single;
   LShortLineY: Single;
   LTextWidth: Single;
+  LThickness: Integer;
+  LTick: Single;
+  LSceneScale: Single;
+  LBorderY, LBorderTop: Single;
 begin
   LCharWidth := Max(FPaintHelper.CharWidth, 1);
   LRulerCaretPosition := FLeftMarginWidth + (FViewPosition.Column - 1) * LCharWidth - FScrollHelper.HorizontalPosition;
+  LThickness := GetStrokeWidth;
+  LTick := 2 * FPixelsPerInch / 96;
+  LSceneScale := 1;
+
+  if Assigned(Scene) then
+    LSceneScale := Scene.GetSceneScale;
+
+  if LSceneScale <= 0 then
+    LSceneScale := 1;
 
   Canvas.Fill.Kind := TBrushKind.Solid;
   Canvas.Fill.Color := FColors.RulerBackground;
   Canvas.FillRect(RectF(0, 0, Width, FRuler.Height), 0, 0, [], 1);
 
+  LBorderY := FRuler.Height - 1 - ((LThickness - 1) div 2) / LSceneScale;
+  LBorderTop := FRuler.Height - LThickness / LSceneScale;
   Canvas.Stroke.Kind := TBrushKind.Solid;
   Canvas.Stroke.Color := FColors.RulerBorder;
-  DrawPixelLine(0, FRuler.Height - 1, Width, FRuler.Height - 1);
+  DrawPixelLine(0, LBorderY, Width, LBorderY, 1, LThickness);
 
   Canvas.Font.Assign(FFonts.Ruler);
 
@@ -14987,13 +15014,13 @@ begin
     LLeft := FLeftMarginWidth + (FPosition.SelectionStart.Char - 1) * LCharWidth - FScrollHelper.HorizontalPosition;
     Canvas.Fill.Color := FColors.RulerSelection;
     Canvas.FillRect(RectF(LLeft, 0, LRulerCaretPosition, FRuler.Height - 1), 0, 0, [], 1);
-    DrawPixelLine(LLeft, 0, LLeft, FRuler.Height - 1);
+    DrawPixelLine(LLeft, 0, LLeft, LBorderTop, 1, LThickness);
   end;
 
   LCharsBeforeView := Trunc(FScrollHelper.HorizontalPosition / LCharWidth);
   LLeft := FLeftMarginWidth - (FScrollHelper.HorizontalPosition - LCharsBeforeView * LCharWidth);
-  LLongLineY := FRuler.Height - 5;
-  LShortLineY := FRuler.Height - 3;
+  LLongLineY := LBorderTop - 2 * LTick;
+  LShortLineY := LBorderTop - LTick;
   Canvas.Stroke.Color := FColors.RulerLines;
 
   for var LIndex := LCharsBeforeView to FScrollHelper.PageWidth div Round(LCharWidth) + LCharsBeforeView + 10 do
@@ -15004,17 +15031,17 @@ begin
       LNumbers := LIndex.ToString;
       Canvas.Fill.Color := FColors.RulerNumbers;
       LTextWidth := FMX.TextEditor.Utils.TextWidth(Canvas, LNumbers);
-      Canvas.FillText(RectF(LLeft - LTextWidth / 2, 0, LLeft + LTextWidth / 2, FRuler.Height - 5), LNumbers,
-        False, 1, [], TTextAlign.Center, TTextAlign.Leading);
+
+      Canvas.FillText(RectF(LLeft - LTextWidth / 2, 0, LLeft + LTextWidth / 2, LLongLineY), LNumbers, False, 1, [], TTextAlign.Center, TTextAlign.Center);
     end
     else
       LLineY := LShortLineY;
 
-    DrawPixelLine(LLeft, LLineY, LLeft, FRuler.Height - 1);
+    DrawPixelLine(LLeft, LLineY, LLeft, LBorderTop, 1, LThickness);
     LLeft := LLeft + LCharWidth;
   end;
 
-  DrawPixelLine(LRulerCaretPosition, 0, LRulerCaretPosition, FRuler.Height - 1);
+  DrawPixelLine(LRulerCaretPosition, 0, LRulerCaretPosition, LBorderTop, 1, LThickness);
   Canvas.Font.Assign(FFonts.Text);
 end;
 
@@ -15030,7 +15057,7 @@ begin
     begin
       Canvas.Stroke.Kind := TBrushKind.Solid;
       Canvas.Stroke.Color := FColors.RightMargin;
-      DrawPixelLine(LRightMarginPosition, AClipRect.Top, LRightMarginPosition, AClipRect.Bottom);
+      DrawPixelLine(LRightMarginPosition, AClipRect.Top, LRightMarginPosition, AClipRect.Bottom, 1, GetStrokeWidth);
     end;
   end;
 end;
@@ -15047,7 +15074,7 @@ begin
   Canvas.Stroke.Kind := TBrushKind.Solid;
   Canvas.Stroke.Dash := TStrokeDash.Dot;
   Canvas.Stroke.Color := FColors.RightMovingEdge;
-  DrawPixelLine(FRightMarginMovePosition, LY, FRightMarginMovePosition, ClientHeight);
+  DrawPixelLine(FRightMarginMovePosition, LY, FRightMarginMovePosition, ClientHeight, 1, GetStrokeWidth);
   Canvas.Stroke.Dash := TStrokeDash.Solid;
 end;
 
@@ -15063,7 +15090,7 @@ begin
   Canvas.Stroke.Kind := TBrushKind.Solid;
   Canvas.Stroke.Dash := TStrokeDash.Dot;
   Canvas.Stroke.Color := FColors.RulerMovingEdge;
-  DrawPixelLine(FRulerMovePosition, LY, FRulerMovePosition, ClientHeight);
+  DrawPixelLine(FRulerMovePosition, LY, FRulerMovePosition, ClientHeight, 1, GetStrokeWidth);
   Canvas.Stroke.Dash := TStrokeDash.Solid;
 end;
 
@@ -15180,6 +15207,8 @@ var
   LHeight: Single;
   LLine: Single;
   LRect: TRectF;
+  LThickness: Integer;
+  LSceneScale: Single;
 begin
   if not Assigned(FSearch.Items) or not Assigned(FSearchEngine) or (FSearchEngine.ResultCount = 0) and not (soHighlightSimilarTerms in FSelection.Options) then
     Exit;
@@ -15196,22 +15225,29 @@ begin
   Canvas.Fill.Color := FColors.EditorBackground;
   Canvas.FillRect(LRect, 0, 0, [], 1);
 
+  LThickness := 2 * GetStrokeWidth;
+  LSceneScale := 1;
+
+  if Assigned(Scene) then
+    LSceneScale := Scene.GetSceneScale;
+
+  if LSceneScale <= 0 then
+    LSceneScale := 1;
+
   Canvas.Stroke.Kind := TBrushKind.Solid;
   Canvas.Stroke.Color := if FColors.SearchMapForeground <> TAlphaColors.Null then FColors.SearchMapForeground else TDefaultColors.SysHighlight;
 
   for var LIndex := 0 to FSearch.Items.Count - 1 do
   begin
-    LLine := AClipRect.Top + PTextEditorSearchItem(FSearch.Items.Items[LIndex])^.BeginTextPosition.Line * LHeight;
-    DrawPixelLine(AClipRect.Left, LLine, AClipRect.Right, LLine);
-    DrawPixelLine(AClipRect.Left, LLine + 1, AClipRect.Right, LLine + 1);
+    LLine := AClipRect.Top + PTextEditorSearchItem(FSearch.Items.Items[LIndex])^.BeginTextPosition.Line * LHeight + LThickness / (2 * LSceneScale);
+    DrawPixelLine(AClipRect.Left, LLine, AClipRect.Right, LLine, 1, LThickness);
   end;
 
   if moShowActiveLine in FSearch.Map.Options then
   begin
     Canvas.Stroke.Color := if FColors.SearchMapActiveLine <> TAlphaColors.Null then FColors.SearchMapActiveLine else FColors.ActiveLineBackground;
-    LLine := AClipRect.Top + (FViewPosition.Row - 1) * LHeight;
-    DrawPixelLine(AClipRect.Left, LLine, AClipRect.Right, LLine);
-    DrawPixelLine(AClipRect.Left, LLine + 1, AClipRect.Right, LLine + 1);
+    LLine := AClipRect.Top + (FViewPosition.Row - 1) * LHeight + LThickness / (2 * LSceneScale);
+    DrawPixelLine(AClipRect.Left, LLine, AClipRect.Right, LLine, 1, LThickness);
   end;
 end;
 
@@ -15225,6 +15261,21 @@ end;
 function TCustomTextEditor.ZoomScaled(const AValue: Single): Single;
 begin
   Result := AValue * FZoom.Percentage / 100;
+end;
+
+function TCustomTextEditor.GetStrokeWidth: Integer;
+var
+  LSceneScale: Single;
+begin
+  LSceneScale := 1;
+
+  if Assigned(Scene) then
+    LSceneScale := Scene.GetSceneScale;
+
+  if LSceneScale <= 0 then
+    LSceneScale := 1;
+
+  Result := Max(1, Trunc(FPixelsPerInch / 96 * LSceneScale));
 end;
 
 procedure TCustomTextEditor.PaintLineBreakArrow(const ARect: TRectF; const AColor: TAlphaColor);

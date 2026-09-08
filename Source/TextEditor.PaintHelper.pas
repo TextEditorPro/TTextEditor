@@ -128,7 +128,7 @@ type
 implementation
 
 uses
-  TextEditor.Language;
+  TextEditor.Language, TextEditor.Utils;
 
 var
   GFontsInfoManager: TTextEditorFontsInfoManager;
@@ -568,7 +568,7 @@ procedure TTextEditorPaintHelper.SetBaseFont(const AValue: TFont);
 begin
   if Assigned(AValue) then
   begin
-    FStockBitmap.Canvas.Font.Assign(AValue);
+    AssignFont(FStockBitmap.Canvas.Font, AValue);
     FStockBitmap.Canvas.Font.Style := [];
 
     with FFontStock do

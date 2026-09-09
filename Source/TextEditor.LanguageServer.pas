@@ -77,10 +77,8 @@ type
     property Version: Integer read FVersion write FVersion;
   end;
 
-  TTextEditorLanguageServerDiagnosticsEvent = procedure(const ASender: TObject; const AEditor: TCustomTextEditor;
-    const ADiagnostics: TArray<TTextEditorLanguageServerDiagnostic>) of object;
-  TTextEditorLanguageServerLocationEvent = procedure(const ASender: TObject; const AEditor: TCustomTextEditor;
-    const ALocation: TTextEditorLanguageServerLocation) of object;
+  TTextEditorLanguageServerDiagnosticsEvent = procedure(const ASender: TObject; const AEditor: TCustomTextEditor; const ADiagnostics: TArray<TTextEditorLanguageServerDiagnostic>) of object;
+  TTextEditorLanguageServerLocationEvent = procedure(const ASender: TObject; const AEditor: TCustomTextEditor; const ALocation: TTextEditorLanguageServerLocation) of object;
   TTextEditorLanguageServerLogEvent = procedure(const ASender: TObject; const AMessage: string) of object;
   TTextEditorLanguageServerStateEvent = procedure(const ASender: TObject; const AState: TTextEditorLanguageServerState) of object;
 
@@ -141,7 +139,7 @@ type
     FSignatureHelpSerial: Integer;
     FSignatureHelpTimer: TTimer;
     FState: TTextEditorLanguageServerState;
-    FSyncTimeout: Integer;
+    FSyncRequestTimeout: Integer;
     class function ConvertHover(const AHover: TLSPHoverResult): TArray<TTextEditorLanguageServerHoverPart>;
     class function ConvertSignatureHelp(const AResult: TLSPSignatureHelpResult; out AHelp: TTextEditorLanguageServerSignatureHelp): Boolean;
     class function DecodeRawJsonString(const AText: string): string;
@@ -168,16 +166,14 @@ type
     function QuotedCommandLine(const ACommandLine: string): string;
     function SyncRequest(const AKind: TLSPKind; const AParams: TLSPBaseParams; const AConvert: TFunc<TJSONValue, TObject>): TObject;
     procedure ApplyDiagnostics(const ADocument: TTextEditorLanguageServerDocument);
-    procedure ApplyResolvedDescription(const AEditor: TCustomTextEditor; const AGeneration: Integer; const AItemsIndex: Integer;
-      const ADescription: string);
+    procedure ApplyResolvedDescription(const AEditor: TCustomTextEditor; const AGeneration: Integer; const AItemsIndex: Integer; const ADescription: string);
     procedure ChangeTimerTimer(ASender: TObject);
     procedure ClientError(ASender: TObject; const AId, AErrorCode: Integer; const AErrorMessage: string; ARetriggerRequest: Boolean);
     procedure ClientExit(ASender: TObject; AExitCode: Integer; const ARestartServer: Boolean);
     procedure ClientInitialize(ASender: TObject; var AValue: TLSPInitializeParams);
     procedure ClientInitialized(ASender: TObject; var AValue: TLSPInitializeResult);
     procedure ClientLogMessage(ASender: TObject; const AType: TLSPMessageType; const AMessage: string);
-    procedure ClientPublishDiagnostics(ASender: TObject; const AUri: string; const AVersion: Cardinal;
-      const ADiagnostics: TArray<TLSPDiagnostic>);
+    procedure ClientPublishDiagnostics(ASender: TObject; const AUri: string; const AVersion: Cardinal; const ADiagnostics: TArray<TLSPDiagnostic>);
     procedure CompletionSelectedItemChange(ASender: TObject);
     procedure CompletionTriggerTimerTimer(ASender: TObject);
     procedure EditorCompletionProposalExecute(const ASender: TObject; var AParams: TCompletionProposalParams);
@@ -227,17 +223,13 @@ type
     destructor Destroy; override;
     class function FileNameToUri(const AFileName: string): string;
     function Completion(const AEditor: TCustomTextEditor; const AItems: TTextEditorCompletionProposalItems): Boolean;
-    function DiagnosticAt(const AEditor: TCustomTextEditor; const ATextPosition: TTextEditorTextPosition;
-      out ADiagnostic: TTextEditorLanguageServerDiagnostic): Boolean;
+    function DiagnosticAt(const AEditor: TCustomTextEditor; const ATextPosition: TTextEditorTextPosition; out ADiagnostic: TTextEditorLanguageServerDiagnostic): Boolean;
     function DiagnosticsFor(const AEditor: TCustomTextEditor): TArray<TTextEditorLanguageServerDiagnostic>;
-    function FindDefinition(const AEditor: TCustomTextEditor; const ATextPosition: TTextEditorTextPosition;
-      out ALocation: TTextEditorLanguageServerLocation): Boolean;
+    function FindDefinition(const AEditor: TCustomTextEditor; const ATextPosition: TTextEditorTextPosition; out ALocation: TTextEditorLanguageServerLocation): Boolean;
     function HasDocument(const AEditor: TCustomTextEditor): Boolean;
     function Hover(const AEditor: TCustomTextEditor; const ATextPosition: TTextEditorTextPosition): string;
-    function HoverParts(const AEditor: TCustomTextEditor;
-      const ATextPosition: TTextEditorTextPosition): TArray<TTextEditorLanguageServerHoverPart>;
-    function SignatureHelp(const AEditor: TCustomTextEditor; const ATextPosition: TTextEditorTextPosition;
-      out AHelp: TTextEditorLanguageServerSignatureHelp): Boolean;
+    function HoverParts(const AEditor: TCustomTextEditor; const ATextPosition: TTextEditorTextPosition): TArray<TTextEditorLanguageServerHoverPart>;
+    function SignatureHelp(const AEditor: TCustomTextEditor; const ATextPosition: TTextEditorTextPosition; out AHelp: TTextEditorLanguageServerSignatureHelp): Boolean;
     procedure BeforeDestruction; override;
     procedure CloseDocument(const AEditor: TCustomTextEditor);
     procedure DocumentSaved(const AEditor: TCustomTextEditor);
@@ -256,8 +248,7 @@ type
     property CompletionTriggerEnabled: Boolean read FCompletionTriggerEnabled write FCompletionTriggerEnabled default True;
     property Configuration: string read FConfiguration write FConfiguration;
     property DiagnosticErrorColor: TColor read FDiagnosticErrorColor write FDiagnosticErrorColor default TColors.Red;
-    property DiagnosticInformationColor: TColor read FDiagnosticInformationColor write FDiagnosticInformationColor
-      default TColors.Dodgerblue;
+    property DiagnosticInformationColor: TColor read FDiagnosticInformationColor write FDiagnosticInformationColor default TColors.Dodgerblue;
     property DiagnosticMarkImageIndex: Integer read FDiagnosticMarkImageIndex write FDiagnosticMarkImageIndex default -1;
     property DiagnosticMarkIndex: Integer read FDiagnosticMarkIndex write FDiagnosticMarkIndex default 1000;
     property DiagnosticWarningColor: TColor read FDiagnosticWarningColor write FDiagnosticWarningColor default TColors.Orange;
@@ -273,7 +264,7 @@ type
     property ServerCommandLine: string read FServerCommandLine write FServerCommandLine;
     property ServerDirectory: string read FServerDirectory write FServerDirectory;
     property SignatureHelpEnabled: Boolean read FSignatureHelpEnabled write FSignatureHelpEnabled default True;
-    property SyncTimeout: Integer read FSyncTimeout write FSyncTimeout default 1000;
+    property SyncRequestTimeout: Integer read FSyncRequestTimeout write FSyncRequestTimeout default 1000;
   end;
 
 const
@@ -413,7 +404,7 @@ begin
   FHoverDelay := 600;
   FHoverEnabled := True;
   FSignatureHelpEnabled := True;
-  FSyncTimeout := 1000;
+  FSyncRequestTimeout := 1000;
 
   FClient := TLSPClient.Create(Self);
   FClient.OnError := ClientError;
@@ -1132,7 +1123,7 @@ begin
 
       if Assigned(LValue) and not LValue.Null then
         LHolder.SetValue(AConvert(LValue));
-    end, FSyncTimeout) then
+    end, FSyncRequestTimeout) then
     Result := LHolder.Extract;
 end;
 
@@ -1962,8 +1953,7 @@ end;
 
 { Hover }
 
-class function TTextEditorLanguageServer.ParseHoverParts(const AText: string;
-  const ACode: Boolean): TArray<TTextEditorLanguageServerHoverPart>;
+class function TTextEditorLanguageServer.ParseHoverParts(const AText: string; const ACode: Boolean): TArray<TTextEditorLanguageServerHoverPart>;
 var
   LParts: TList<TTextEditorLanguageServerHoverPart>;
   LLines: TArray<string>;
@@ -2410,8 +2400,7 @@ end;
 
 { Definition }
 
-class function TTextEditorLanguageServer.ExtractGotoLocation(const AGotoResult: TLSPGotoResult;
-  out ALocation: TTextEditorLanguageServerLocation): Boolean;
+class function TTextEditorLanguageServer.ExtractGotoLocation(const AGotoResult: TLSPGotoResult; out ALocation: TTextEditorLanguageServerLocation): Boolean;
 var
   LUri: string;
   LRange: TLSPRange;
@@ -2547,8 +2536,7 @@ end;
 
 { Signature help }
 
-class function TTextEditorLanguageServer.ConvertSignatureHelp(const AResult: TLSPSignatureHelpResult;
-  out AHelp: TTextEditorLanguageServerSignatureHelp): Boolean;
+class function TTextEditorLanguageServer.ConvertSignatureHelp(const AResult: TLSPSignatureHelpResult; out AHelp: TTextEditorLanguageServerSignatureHelp): Boolean;
 var
   LIndex, LParameterIndex: Integer;
 begin
@@ -2722,8 +2710,7 @@ begin
   end;
 end;
 
-procedure TTextEditorLanguageServer.ShowSignatureHelpPopup(const AEditor: TCustomTextEditor;
-  const AHelp: TTextEditorLanguageServerSignatureHelp);
+procedure TTextEditorLanguageServer.ShowSignatureHelpPopup(const AEditor: TCustomTextEditor; const AHelp: TTextEditorLanguageServerSignatureHelp);
 var
   LSignature: TTextEditorLanguageServerSignature;
   LIndex, LSearchIndex, LFoundIndex: Integer;

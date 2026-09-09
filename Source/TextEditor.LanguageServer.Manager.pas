@@ -38,7 +38,6 @@ type
     property InitializationOptions: string read FInitializationOptions write FInitializationOptions;
     property LanguageId: string read FLanguageId write FLanguageId;
     property Name: string read FName write FName;
-    { For rpMarkerFile a semicolon separated list of file patterns searched upwards from the document folder }
     property RootPath: string read FRootPath write FRootPath;
     property RootPathKind: TTextEditorLanguageServerRootPathKind read FRootPathKind write FRootPathKind default rpDocumentFolder;
     property SettingsFallback: TTextEditorLanguageServerSettingsFallback read FSettingsFallback write FSettingsFallback default sfNone;
@@ -93,22 +92,17 @@ type
     FOnStateChange: TTextEditorLanguageServerStateEvent;
     FServers: TTextEditorLanguageServerDefinitions;
     FSignatureHelpEnabled: Boolean;
-    FSyncTimeout: Integer;
+    FSyncRequestTimeout: Integer;
     function BuildConfiguration(const ADefinition: TTextEditorLanguageServerDefinition; const AMarkerFileName: string): string;
     function CreateDelphiLspFallbackSettings(const ADefinition: TTextEditorLanguageServerDefinition; const AFileName: string): string;
-    function CreateInstance(const ADefinition: TTextEditorLanguageServerDefinition; const ARootPath: string;
-      const AConfiguration: string): TServerInstance;
+    function CreateInstance(const ADefinition: TTextEditorLanguageServerDefinition; const ARootPath: string; const AConfiguration: string): TServerInstance;
     function FindInstance(const ADefinitionId: Integer; const ARootPath: string): TServerInstance;
     function InstanceForServer(const AServer: TObject): TServerInstance;
-    function ResolveConfiguration(const ADefinition: TTextEditorLanguageServerDefinition; const AFileName: string;
-      out ARootPath: string): string;
-    function ResolveRootPath(const ADefinition: TTextEditorLanguageServerDefinition; const AFileName: string;
-      out AMarkerFileName: string): string;
+    function ResolveConfiguration(const ADefinition: TTextEditorLanguageServerDefinition; const AFileName: string; out ARootPath: string): string;
+    function ResolveRootPath(const ADefinition: TTextEditorLanguageServerDefinition; const AFileName: string; out AMarkerFileName: string): string;
     procedure CleanupTimerTimer(ASender: TObject);
-    procedure InstanceDiagnostics(const ASender: TObject; const AEditor: TCustomTextEditor;
-      const ADiagnostics: TArray<TTextEditorLanguageServerDiagnostic>);
-    procedure InstanceGotoLocation(const ASender: TObject; const AEditor: TCustomTextEditor;
-      const ALocation: TTextEditorLanguageServerLocation);
+    procedure InstanceDiagnostics(const ASender: TObject; const AEditor: TCustomTextEditor; const ADiagnostics: TArray<TTextEditorLanguageServerDiagnostic>);
+    procedure InstanceGotoLocation(const ASender: TObject; const AEditor: TCustomTextEditor; const ALocation: TTextEditorLanguageServerLocation);
     procedure InstanceLog(const ASender: TObject; const AMessage: string);
     procedure InstanceStateChange(const ASender: TObject; const AState: TTextEditorLanguageServerState);
     procedure Retire(const AInstance: TServerInstance);
@@ -139,7 +133,7 @@ type
     property OnStateChange: TTextEditorLanguageServerStateEvent read FOnStateChange write FOnStateChange;
     property Servers: TTextEditorLanguageServerDefinitions read FServers write SetServers;
     property SignatureHelpEnabled: Boolean read FSignatureHelpEnabled write FSignatureHelpEnabled default True;
-    property SyncTimeout: Integer read FSyncTimeout write FSyncTimeout default 1000;
+    property SyncRequestTimeout: Integer read FSyncRequestTimeout write FSyncRequestTimeout default 1000;
   end;
 
 implementation
@@ -271,7 +265,7 @@ begin
   FHoverEnabled := True;
   FIdleTimeout := 60000;
   FSignatureHelpEnabled := True;
-  FSyncTimeout := 1000;
+  FSyncRequestTimeout := 1000;
 end;
 
 destructor TTextEditorLanguageServers.Destroy;
@@ -501,7 +495,7 @@ begin
   LServer.HoverEnabled := FHoverEnabled;
   LServer.LogTraffic := FLogTraffic;
   LServer.SignatureHelpEnabled := FSignatureHelpEnabled;
-  LServer.SyncTimeout := FSyncTimeout;
+  LServer.SyncRequestTimeout := FSyncRequestTimeout;
   LServer.OnDiagnostics := InstanceDiagnostics;
   LServer.OnGotoLocation := InstanceGotoLocation;
   LServer.OnLog := InstanceLog;

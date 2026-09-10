@@ -20424,6 +20424,43 @@ begin
 end;
 
 function TCustomTextEditor.ReplaceSelectedText(const AReplaceText: string; const ASearchText: string; const AAction: TTextEditorReplaceTextAction = rtaReplace): Boolean;
+
+  procedure InsertTextWithLineBreaks(const AText: string);
+  var
+    LPStart, LPText: PChar;
+    LSegment: string;
+  begin
+    SelectedText := '';
+
+    LPText := PChar(AText);
+
+    while True do
+    begin
+      LPStart := LPText;
+
+      while (LPText^ <> TControlCharacters.Null) and (LPText^ <> TControlCharacters.CarriageReturn) and
+        (LPText^ <> TControlCharacters.Linefeed) do
+        Inc(LPText);
+
+      if LPText > LPStart then
+      begin
+        SetString(LSegment, LPStart, LPText - LPStart);
+        InsertText(LSegment);
+      end;
+
+      if LPText^ = TControlCharacters.Null then
+        Break;
+
+      if LPText^ = TControlCharacters.CarriageReturn then
+        Inc(LPText);
+
+      if LPText^ = TControlCharacters.Linefeed then
+        Inc(LPText);
+
+      ExecuteCommand(TKeyCommands.LineBreak, TControlCharacters.Null, nil);
+    end;
+  end;
+
 var
   LReplaceText: string;
   LOptions: TRegExOptions;
@@ -20449,29 +20486,34 @@ begin
         ExecuteCommand(TKeyCommands.DeleteLine, 'Y', nil);
       end;
     rtaReplace:
-      case FReplace.Engine of
-        seNormal, seWildcard:
+      begin
+        case FReplace.Engine of
+          seExtended:
+            begin
+              LReplaceText := StringReplace(LReplaceText, '\r', TControlCharacters.CarriageReturn, [rfReplaceAll]);
+              LReplaceText := StringReplace(LReplaceText, '\' + TControlCharacters.CarriageReturn, '\r', [rfReplaceAll]);
+              LReplaceText := StringReplace(LReplaceText, '\n', TControlCharacters.LineFeed, [rfReplaceAll]);
+              LReplaceText := StringReplace(LReplaceText, '\' + TControlCharacters.LineFeed, '\n', [rfReplaceAll]);
+              LReplaceText := StringReplace(LReplaceText, '\t', TControlCharacters.Tab, [rfReplaceAll]);
+              LReplaceText := StringReplace(LReplaceText, '\' + TControlCharacters.Tab, '\t', [rfReplaceAll]);
+              LReplaceText := StringReplace(LReplaceText, '\0', TControlCharacters.Null, [rfReplaceAll]);
+              LReplaceText := StringReplace(LReplaceText, '\' + TControlCharacters.Null, '\0', [rfReplaceAll]);
+            end;
+          seRegularExpression:
+            begin
+              LOptions := [roMultiLine, roNotEmpty];
+
+              if not (roCaseSensitive in FReplace.Options) then
+                Include(LOptions, roIgnoreCase);
+
+              LReplaceText := TRegEx.Replace(SelectedText, ASearchText, LReplaceText, LOptions);
+            end;
+        end;
+
+        if roAutoIndent in FReplace.Options then
+          InsertTextWithLineBreaks(LReplaceText)
+        else
           SelectedText := LReplaceText;
-        seExtended:
-          begin
-            LReplaceText := StringReplace(LReplaceText, '\r', TControlCharacters.CarriageReturn, [rfReplaceAll]);
-            LReplaceText := StringReplace(LReplaceText, '\' + TControlCharacters.CarriageReturn, '\r', [rfReplaceAll]);
-            LReplaceText := StringReplace(LReplaceText, '\n', TControlCharacters.LineFeed, [rfReplaceAll]);
-            LReplaceText := StringReplace(LReplaceText, '\' + TControlCharacters.LineFeed, '\n', [rfReplaceAll]);
-            LReplaceText := StringReplace(LReplaceText, '\t', TControlCharacters.Tab, [rfReplaceAll]);
-            LReplaceText := StringReplace(LReplaceText, '\' + TControlCharacters.Tab, '\t', [rfReplaceAll]);
-            LReplaceText := StringReplace(LReplaceText, '\0', TControlCharacters.Null, [rfReplaceAll]);
-            LReplaceText := StringReplace(LReplaceText, '\' + TControlCharacters.Null, '\0', [rfReplaceAll]);
-
-            SelectedText := LReplaceText;
-          end
-      else
-        LOptions := [roMultiLine, roNotEmpty];
-
-        if not (roCaseSensitive in FReplace.Options) then
-          Include(LOptions, roIgnoreCase);
-
-        SelectedText := TRegEx.Replace(SelectedText, ASearchText, LReplaceText, LOptions);
       end;
   end;
 

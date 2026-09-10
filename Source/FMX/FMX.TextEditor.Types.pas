@@ -101,7 +101,7 @@ type
   { Replace }
   TTextEditorReplaceAction = (raCancel, raSkip, raReplace, raReplaceAll);
   TTextEditorReplaceChanges = (rcEngineUpdate);
-  TTextEditorReplaceOption = (roBackwards, roCaseSensitive, roEntireScope, roPrompt, roReplaceAll, roSelectedOnly,
+  TTextEditorReplaceOption = (roAutoIndent, roBackwards, roCaseSensitive, roEntireScope, roPrompt, roReplaceAll, roSelectedOnly, 
     roWholeWordsOnly);
   TTextEditorReplaceOptions = set of TTextEditorReplaceOption;
   TTextEditorReplaceTextAction = (rtaAddLineBreak, rtaDeleteLine, rtaReplace);

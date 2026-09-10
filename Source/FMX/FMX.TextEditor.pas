@@ -19591,7 +19591,7 @@ begin
             end;
         end;
 
-        if roAutoIndent in FReplace.Options then
+        if roIndentLineBreaks in FReplace.Options then
           InsertTextWithLineBreaks(LReplaceText)
         else
           SelectedText := LReplaceText;

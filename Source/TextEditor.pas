@@ -4009,8 +4009,13 @@ begin
       Dec(LTextPosition.Char);
 
     if (soExpandRealNumbers in FSelection.Options) and (LTextLine[LTextPosition.Char] in TCharacterSets.Numbers) then
-    while (LTextPosition.Char > 1) and (LTextLine[LTextPosition.Char - 1] in TCharacterSets.RealNumbers) do
-      Dec(LTextPosition.Char);
+    begin
+      while (LTextPosition.Char > 1) and (LTextLine[LTextPosition.Char - 1] in TCharacterSets.RealNumbers) do
+        Dec(LTextPosition.Char);
+
+      while (LChar <= LLength) and (LTextLine[LChar] in TCharacterSets.RealNumbers) do
+        Inc(LChar);
+    end;
 
     if soExpandPrefix in FSelection.Options then
     begin
@@ -10453,22 +10458,14 @@ var
       Break;
     end;
 
-    if soExpandRealNumbers in FSelection.Options then
-      if LTempString[LBlockBeginPosition.Char] in TCharacterSets.Numbers then
-      begin
-        LIndex := LTextPosition.Char;
+    if (soExpandRealNumbers in FSelection.Options) and (LTempString[LBlockBeginPosition.Char] in TCharacterSets.Numbers) then
+    begin
+      while (LBlockBeginPosition.Char > 1) and (LTempString[LBlockBeginPosition.Char - 1] in TCharacterSets.RealNumbers) do
+        Dec(LBlockBeginPosition.Char);
 
-        while (LIndex > 0) and (LTempString[LIndex] in TCharacterSets.RealNumbers) do
-          Dec(LIndex);
-
-        LBlockBeginPosition.Char := LIndex + 1;
-        LIndex := LTextPosition.Char;
-
-        while (LIndex < LLength) and (LTempString[LIndex] in TCharacterSets.RealNumbers) do
-          Inc(LIndex);
-
-        LBlockEndPosition.Char := LIndex;
-      end;
+      while (LBlockEndPosition.Char < LLength) and (LTempString[LBlockEndPosition.Char] in TCharacterSets.RealNumbers) do
+        Inc(LBlockEndPosition.Char);
+    end;
 
     if soExpandPrefix in FSelection.Options then
     begin

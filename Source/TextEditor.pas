@@ -4017,11 +4017,11 @@ begin
         Inc(LChar);
     end;
 
-    if soExpandPrefix in FSelection.Options then
+    if soUseExpandCharacters in FSelection.Options then
     begin
       LPrefixIndex := LTextPosition.Char - 1;
 
-      while (LTextPosition.Char > 1) and CharInString(LTextLine[LTextPosition.Char - 1], FSelection.PrefixCharacters) do
+      while (LTextPosition.Char > 1) and CharInString(LTextLine[LTextPosition.Char - 1], FSelection.ExpandCharacters) do
         Dec(LTextPosition.Char);
 
       while (LPrefixIndex >= LTextPosition.Char) and (LChar <= LLength) and (LTextLine[LChar] = LTextLine[LPrefixIndex]) do
@@ -10467,12 +10467,12 @@ var
         Inc(LBlockEndPosition.Char);
     end;
 
-    if soExpandPrefix in FSelection.Options then
+    if soUseExpandCharacters in FSelection.Options then
     begin
       LPrefixIndex := LBlockBeginPosition.Char - 1;
       LIndex := LPrefixIndex;
 
-      while (LIndex > 0) and CharInString(LTempString[LIndex], FSelection.PrefixCharacters) do
+      while (LIndex > 0) and CharInString(LTempString[LIndex], FSelection.ExpandCharacters) do
         Dec(LIndex);
 
       LBlockBeginPosition.Char := LIndex + 1;
@@ -17684,21 +17684,21 @@ var
 
       LTempTextPosition.Char := LSelectionEndChar - 1;
 
-      if soExpandPrefix in FSelection.Options then
+      if soUseExpandCharacters in FSelection.Options then
       begin
         LLineText := FLines[LTempTextPosition.Line];
 
         while (LTempTextPosition.Char > 1) and (LTempTextPosition.Char <= LLineText.Length) and
-          CharInString(LLineText[LTempTextPosition.Char], FSelection.PrefixCharacters) do
+          CharInString(LLineText[LTempTextPosition.Char], FSelection.ExpandCharacters) do
           Dec(LTempTextPosition.Char);
       end;
 
       LSelectedText := Copy(FLines[FPosition.SelectionStart.Line], LSelectionStartChar, LSelectionEndChar - LSelectionStartChar);
       LWordAtSelection := if FPosition.SelectionStart.Line = FPosition.SelectionEnd.Line then WordAtTextPosition(LTempTextPosition) else '';
 
-      LSelectedTextWithPrefix := (soExpandPrefix in FSelection.Options) and not LWordAtSelection.IsEmpty and
-        (LSelectedText = LWordAtSelection) and (CharInString(LSelectedText[1], FSelection.PrefixCharacters) or
-        CharInString(LSelectedText[LSelectedText.Length], FSelection.PrefixCharacters));
+      LSelectedTextWithPrefix := (soUseExpandCharacters in FSelection.Options) and not LWordAtSelection.IsEmpty and
+        (LSelectedText = LWordAtSelection) and (CharInString(LSelectedText[1], FSelection.ExpandCharacters) or
+        CharInString(LSelectedText[LSelectedText.Length], FSelection.ExpandCharacters));
     end;
 
 var

@@ -175,8 +175,8 @@ type
   TTextEditorTabOptions = set of TTextEditorTabOption;
 
   { Selection }
-  TTextEditorSelectionOption = (soALTSetsColumnMode, soAutoCopyToClipboard, soExpandPrefix, soExpandRealNumbers, soHighlightSimilarTerms,
-    soTermsCaseSensitive, soToEndOfLine, soTripleClickRowSelect);
+  TTextEditorSelectionOption = (soALTSetsColumnMode, soAutoCopyToClipboard, soExpandRealNumbers, soHighlightSimilarTerms, soTermsCaseSensitive,
+    soToEndOfLine, soTripleClickRowSelect, soUseExpandCharacters);
   TTextEditorSelectionOptions = set of TTextEditorSelectionOption;
 
   { Search }

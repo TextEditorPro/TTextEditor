@@ -881,7 +881,7 @@ function TFrameTextEditor.RunWordSelectionSeed(ASeed: Integer): string;
 const
   cWordCount = 6;
   cCores: array [0 .. 3] of string = ('test', 'name', 'value', 'x1');
-  cPrefixCharacters = '$%:@';
+  cExpandCharacters = '$%:@';
 type
   TTestWord = record
     Core: string;
@@ -892,7 +892,7 @@ type
 var
   LWords: array [0 .. cWordCount - 1] of TTestWord;
   LLine: string;
-  LExpandPrefix: Boolean;
+  LUseExpandCharacters: Boolean;
   LPosition: TTextEditorTextPosition;
   LBitmap: TBitmap;
 
@@ -917,12 +917,12 @@ begin
 
   RandSeed := ASeed;
 
-  LExpandPrefix := not Odd(ASeed);
+  LUseExpandCharacters := not Odd(ASeed);
 
-  if LExpandPrefix then
-    TextEditor.Selection.Options := TextEditor.Selection.Options + [soExpandPrefix]
+  if LUseExpandCharacters then
+    TextEditor.Selection.Options := TextEditor.Selection.Options + [soUseExpandCharacters]
   else
-    TextEditor.Selection.Options := TextEditor.Selection.Options - [soExpandPrefix];
+    TextEditor.Selection.Options := TextEditor.Selection.Options - [soUseExpandCharacters];
 
   LLine := '';
 
@@ -934,7 +934,7 @@ begin
     var LPrefix := '';
 
     for var LPrefixIndex := 1 to Random(3) do
-      LPrefix := LPrefix + cPrefixCharacters[Random(cPrefixCharacters.Length) + 1];
+      LPrefix := LPrefix + cExpandCharacters[Random(cExpandCharacters.Length) + 1];
 
     LWord.CoreBegin := LLine.Length + 1;
     LWord.Decorated := LWord.Core;
@@ -947,7 +947,7 @@ begin
           LWord.Decorated := LPrefix + LWord.Core;
           LWord.CoreBegin := LWord.CoreBegin + LPrefix.Length;
 
-          if LExpandPrefix then
+          if LUseExpandCharacters then
             LWord.ExpectedSelection := LWord.Decorated;
         end;
       1: { Wrapping prefix - %test% - the mirrored trailing characters belong to the selection }
@@ -955,7 +955,7 @@ begin
           LWord.Decorated := LPrefix + LWord.Core + ReverseString(LPrefix);
           LWord.CoreBegin := LWord.CoreBegin + LPrefix.Length;
 
-          if LExpandPrefix then
+          if LUseExpandCharacters then
             LWord.ExpectedSelection := LWord.Decorated;
         end;
       2: { Suffix only - never part of the selection }
@@ -983,8 +983,8 @@ begin
     Exit('Word at text position [' + TextEditor.WordAtTextPosition(LPosition) + '] differs from the selection [' +
       LWords[LTarget].ExpectedSelection + '] for RandSeed = ' + ASeed.ToString);
 
-  { Every 100th seed: the term must highlight as one similar term on another line, prefix characters included }
-  if LExpandPrefix and (ASeed mod 100 = 0) and (LWords[LTarget].ExpectedSelection <> LWords[LTarget].Core) then
+  { Every 100th seed: the term must highlight as one similar term on another line, expand characters included }
+  if LUseExpandCharacters and (ASeed mod 100 = 0) and (LWords[LTarget].ExpectedSelection <> LWords[LTarget].Core) then
   begin
     TextEditor.Text := LLine + sLineBreak + 'zz ' + LWords[LTarget].Decorated + ' qq';
     TextEditor.TextPosition := LPosition;

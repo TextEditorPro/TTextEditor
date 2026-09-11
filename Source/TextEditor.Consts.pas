@@ -17,7 +17,7 @@ type
     Characters = LowerCharacters + UpperCharacters;
     DefaultDelimiters = ['''', '-', '!', '"', '#', '$', '%', '&', '(', ')', '*', ',', '.', '/', ':', ';', '?', '@', '[',
       '\', ']', '^', '`', '{', '|', '}', '~', '+', '<', '=', '>'];
-    DefaultSelectionPrefix = '$%:@';
+    DefaultSelectionExpandCharacters = '$%:@';
     DefaultCompletionProposalCloseChars = '()[]. ';
     Numbers = ['0'..'9'];
     RealNumbers = Numbers + ['.', 'e', 'E'];

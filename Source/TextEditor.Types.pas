@@ -314,7 +314,7 @@ type
 
   { Code folding }
   TTextEditorCodeFoldingGuideLineStyle = (lsDash, lsDot, lsSolid);
-  TTextEditorCodeFoldingMarkStyle = (msCircle, msSquare, msTriangle);
+  TTextEditorCodeFoldingMarkStyle = (msArrow, msCircle, msSquare, msTriangle);
   TTextEditorCodeFoldingHintIndicatorMarkStyle = (imsThreeDots, imsTriangle);
   TTextEditorCodeFoldingChanges = (fcRefresh, fcRescan, fcVisible);
   TTextEditorCodeFoldingHintIndicatorOption = (hioShowBorder, hioShowMark);

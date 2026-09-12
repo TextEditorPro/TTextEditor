@@ -13414,7 +13414,7 @@ var
   procedure PaintMark(const AEndMark: Boolean = False);
   var
     LPoints: TPolygon;
-    LHeight, LTempX, LTempY: Single;
+    LHeight, LInset, LTempX, LTempY: Single;
   begin
     LRect.Left :=  LRect.Left + 1;
     LRect.Right := LRect.Right - 1;
@@ -13460,6 +13460,30 @@ var
       Canvas.FillPolygon(LPoints, 1);
     end
     else
+    if CodeFolding.MarkStyle = msArrow then
+    begin
+      LInset := Round(LRect.Width / 4);
+      LTempX := LRect.Left + LRect.Width / 2;
+      LTempY := LRect.Top + LRect.Height / 2;
+
+      if LFoldRange.Collapsed then
+      begin
+        DrawPixelLine(LRect.Left + LInset, LRect.Top, LRect.Right - LInset, LTempY, 1, LThickness);
+        DrawPixelLine(LRect.Right - LInset, LTempY, LRect.Left + LInset, LRect.Bottom, 1, LThickness);
+      end
+      else
+      if AEndMark then
+      begin
+        DrawPixelLine(LRect.Left, LRect.Bottom - LInset, LTempX, LRect.Top + LInset, 1, LThickness);
+        DrawPixelLine(LTempX, LRect.Top + LInset, LRect.Right, LRect.Bottom - LInset, 1, LThickness);
+      end
+      else
+      begin
+        DrawPixelLine(LRect.Left, LRect.Top + LInset, LTempX, LRect.Bottom - LInset, 1, LThickness);
+        DrawPixelLine(LTempX, LRect.Bottom - LInset, LRect.Right, LRect.Top + LInset, 1, LThickness);
+      end;
+    end
+    else
     begin
       case CodeFolding.MarkStyle of
         msSquare:
@@ -13495,7 +13519,7 @@ var
       end;
     end;
 
-    if LShowCollapseMarkAtTheEnd and (CodeFolding.MarkStyle <> msTriangle) then
+    if LShowCollapseMarkAtTheEnd and not (CodeFolding.MarkStyle in [msArrow, msTriangle]) then
     begin
       LTempX := LRect.Left + (LRect.Right - LRect.Left) / 2;
 

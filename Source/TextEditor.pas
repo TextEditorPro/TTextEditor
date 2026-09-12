@@ -14353,7 +14353,7 @@ var
   procedure PaintMark(const AEndMark: Boolean = False);
   var
     LPoints: array [0..2] of TPoint;
-    LHeight, LWidth, LTempX, LTempY: Integer;
+    LHeight, LWidth, LInset, LTempX, LTempY: Integer;
     LTempRect: TRect;
   begin
     LWidth := LRect.Right - LRect.Left;
@@ -14400,6 +14400,35 @@ var
       end;
     end
     else
+    if CodeFolding.MarkStyle = msArrow then
+    begin
+      LInset := LRect.Width div 4;
+
+      if LFoldRange.Collapsed then
+      begin
+        LPoints[0] := Point(LRect.Left + LInset, LRect.Top);
+        LPoints[1] := Point(LRect.Right - 1 - LInset, LRect.Top + LRect.Height shr 1);
+        LPoints[2] := Point(LRect.Left + LInset, LRect.Bottom - 1);
+      end
+      else
+      if AEndMark then
+      begin
+        LPoints[0] := Point(LRect.Left, LRect.Bottom - 1 - LInset);
+        LPoints[1] := Point(LRect.Left + LRect.Width shr 1, LRect.Top + LInset);
+        LPoints[2] := Point(LRect.Right - 1, LRect.Bottom - 1 - LInset);
+      end
+      else
+      begin
+        LPoints[0] := Point(LRect.Left, LRect.Top + LInset);
+        LPoints[1] := Point(LRect.Left + LRect.Width shr 1, LRect.Bottom - 1 - LInset);
+        LPoints[2] := Point(LRect.Right - 1, LRect.Top + LInset);
+      end;
+
+      Canvas.Polyline(LPoints);
+      { Polyline leaves the final point unpainted }
+      Canvas.Pixels[LPoints[2].X, LPoints[2].Y] := Canvas.Pen.Color;
+    end
+    else
     begin
       case CodeFolding.MarkStyle of
         msSquare:
@@ -14441,7 +14470,7 @@ var
       end;
     end;
 
-    if LShowCollapseMarkAtTheEnd and (CodeFolding.MarkStyle <> msTriangle) then
+    if LShowCollapseMarkAtTheEnd and not (CodeFolding.MarkStyle in [msArrow, msTriangle]) then
     begin
       if AEndMark then
       begin

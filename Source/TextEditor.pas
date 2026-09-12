@@ -1357,7 +1357,9 @@ begin
   begin
     GHintWindow := LHintWindowClass.Create(Application);
 
-    if GHintWindow is TTextEditorHintWindow then
+{$IFDEF ALPHASKINS}
+    if not (GHintWindow is TacCustomHintWindow) then
+{$ENDIF}
       GHintWindow.DoubleBuffered := True;
   end;
 

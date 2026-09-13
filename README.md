@@ -26,11 +26,13 @@ The old version can be found at https://github.com/TextEditorPro/TTextEditor-Leg
 - Drag and drop text editing
 - Highlight line
 - Highlighters 
+  - Encoded property
   - Highlighter Load property
   - JSON file/stream import
 - HTML export (clipboard support)
 - IME support
 - Keyword images
+- Language Server Protocol (LSP) support
 - Large file support
 - Left margin
   - Bookmarks
@@ -70,6 +72,7 @@ The old version can be found at https://github.com/TextEditorPro/TTextEditor-Leg
 - AlphaSkins (native) - https://www.alphaskins.com/
 - BaseNcoding - https://github.com/Xor-el/BaseNcodingPascal
 - Hunspell - http://hunspell.github.io/
+- Language Server Protocol (LSP) - https://github.com/rickard67/LSP-Pascal-Library
 
 ## Defines
 

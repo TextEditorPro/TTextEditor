@@ -1167,6 +1167,11 @@ type
 
   [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
   TTextEditor = class(TCustomTextEditor)
+{$IFDEF TEXT_EDITOR_STYLE_HOOKS}
+  public
+    class constructor Create;
+    class destructor Destroy;
+{$ENDIF}
   published
     property ActiveLine;
     property Align;
@@ -24672,13 +24677,15 @@ end;
 
 {$IFDEF TEXT_EDITOR_STYLE_HOOKS}
 
-initialization
-
+class constructor TTextEditor.Create;
+begin
   TCustomStyleEngine.RegisterStyleHook(TTextEditor, TVclStyleScrollBarsHook);
+end;
 
-finalization
-
+class destructor TTextEditor.Destroy;
+begin
   TCustomStyleEngine.UnRegisterStyleHook(TTextEditor, TVclStyleScrollBarsHook);
+end;
 
 {$ENDIF}
 

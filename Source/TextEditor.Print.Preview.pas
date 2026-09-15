@@ -73,6 +73,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+{$IFDEF TEXT_EDITOR_STYLE_HOOKS}
+    class constructor Create;
+    class destructor Destroy;
+{$ENDIF}
     function CanFocus: Boolean; override;
     procedure AfterConstruction; override;
     procedure FirstPage;
@@ -128,6 +132,18 @@ const
   MARGIN_HEIGHT_TOP_AND_BOTTOM = 12;
 
 { TTextEditorPrintPreview }
+
+{$IFDEF TEXT_EDITOR_STYLE_HOOKS}
+class constructor TTextEditorPrintPreview.Create;
+begin
+  TCustomStyleEngine.RegisterStyleHook(TTextEditorPrintPreview, TVclStyleScrollBarsHook);
+end;
+
+class destructor TTextEditorPrintPreview.Destroy;
+begin
+  TCustomStyleEngine.UnRegisterStyleHook(TTextEditorPrintPreview, TVclStyleScrollBarsHook);
+end;
+{$ENDIF}
 
 constructor TTextEditorPrintPreview.Create(AOwner: TComponent);
 begin
@@ -1002,17 +1018,5 @@ begin
     end;
   end;
 end;
-
-{$IFDEF TEXT_EDITOR_STYLE_HOOKS}
-
-initialization
-
-  TCustomStyleEngine.RegisterStyleHook(TTextEditorPrintPreview, TVclStyleScrollBarsHook);
-
-finalization
-
-  TCustomStyleEngine.UnRegisterStyleHook(TTextEditorPrintPreview, TVclStyleScrollBarsHook);
-
-{$ENDIF}
 
 end.

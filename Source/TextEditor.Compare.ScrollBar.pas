@@ -53,6 +53,10 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+{$IFDEF TEXT_EDITOR_STYLE_HOOKS}
+    class constructor Create;
+    class destructor Destroy;
+{$ENDIF}
     function CanFocus: Boolean; override;
     procedure AfterConstruction; override;
     procedure Invalidate; override;
@@ -81,6 +85,18 @@ uses
 {$IFDEF TEXT_EDITOR_STYLE_HOOKS}
   , TextEditor.StyleHooks
 {$ENDIF};
+
+{$IFDEF TEXT_EDITOR_STYLE_HOOKS}
+class constructor TTextEditorCompareScrollBar.Create;
+begin
+  TCustomStyleEngine.RegisterStyleHook(TTextEditorCompareScrollBar, TVclStyleScrollBarsHook);
+end;
+
+class destructor TTextEditorCompareScrollBar.Destroy;
+begin
+  TCustomStyleEngine.UnRegisterStyleHook(TTextEditorCompareScrollBar, TVclStyleScrollBarsHook);
+end;
+{$ENDIF}
 
 constructor TTextEditorCompareScrollBar.Create(AOwner: TComponent);
 begin
@@ -646,17 +662,5 @@ function TTextEditorCompareScrollBar.CanFocus: Boolean;
 begin
   Result := if csDesigning in ComponentState then False else inherited CanFocus;
 end;
-
-{$IFDEF TEXT_EDITOR_STYLE_HOOKS}
-
-initialization
-
-  TCustomStyleEngine.RegisterStyleHook(TTextEditorCompareScrollBar, TVclStyleScrollBarsHook);
-
-finalization
-
-  TCustomStyleEngine.UnRegisterStyleHook(TTextEditorCompareScrollBar, TVclStyleScrollBarsHook);
-
-{$ENDIF}
 
 end.

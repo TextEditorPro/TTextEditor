@@ -46,7 +46,7 @@ type
     ZoomMaximum = 400;
     ZoomMinimum = 25;
     ZoomPercentage = 100;
-    ZoomStep = 10;
+    ZoomStep = 5;
   end;
 
   TCustomTextEditor = class abstract(TCustomControl)

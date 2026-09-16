@@ -46,11 +46,6 @@ type
 
   [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
   TDBTextEditor = class(TCustomDBTextEditor)
-{$IFDEF TEXT_EDITOR_STYLE_HOOKS}
-  public
-    class constructor Create;
-    class destructor Destroy;
-{$ENDIF}
   published
     property ActiveLine;
     property Align;
@@ -188,10 +183,7 @@ type
 implementation
 
 uses
-  Winapi.Windows, System.SysUtils, TextEditor.Consts, TextEditor.Encoding
-{$IFDEF TEXT_EDITOR_STYLE_HOOKS}
-  , Vcl.Themes, TextEditor.StyleHooks
-{$ENDIF};
+  Winapi.Windows, System.SysUtils, TextEditor.Consts, TextEditor.Encoding;
 
 constructor TCustomDBTextEditor.Create(AOwner: TComponent);
 begin
@@ -409,19 +401,5 @@ begin
   else
     FDataLink.Field.AsString := Text;
 end;
-
-{$IFDEF TEXT_EDITOR_STYLE_HOOKS}
-
-class constructor TDBTextEditor.Create;
-begin
-  TCustomStyleEngine.RegisterStyleHook(TDBTextEditor, TVclStyleScrollBarsHook);
-end;
-
-class destructor TDBTextEditor.Destroy;
-begin
-  TCustomStyleEngine.UnRegisterStyleHook(TDBTextEditor, TVclStyleScrollBarsHook);
-end;
-
-{$ENDIF}
 
 end.

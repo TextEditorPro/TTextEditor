@@ -102,6 +102,7 @@ type
     FHandle: HDC;
     FSaveHandle: Integer;
     FStockBitmap: Vcl.Graphics.TBitmap;
+    procedure UpdateFontMetrics;
   protected
     property DrawingCount: Integer read FDrawingCount;
   public
@@ -128,7 +129,10 @@ type
 implementation
 
 uses
-  TextEditor.Language, TextEditor.Utils;
+  System.Math, TextEditor.Language, TextEditor.Utils;
+
+const
+  CHAR_HEIGHT_FONT_STYLES: array [0 .. 3] of TFontStyles = ([], [fsBold], [fsItalic], [fsBold, fsItalic]);
 
 var
   GFontsInfoManager: TTextEditorFontsInfoManager;
@@ -571,14 +575,8 @@ begin
     AssignFont(FStockBitmap.Canvas.Font, AValue);
     FStockBitmap.Canvas.Font.Style := [];
 
-    with FFontStock do
-    begin
-      SetBaseFont(AValue);
-      SetStyle(FCalcExtentBaseStyle);
-      FCharWidth := GetCharWidth;
-      FCharHeight := GetCharHeight;
-      FFixedSizeFont := GetFixedSizeFont;
-    end;
+    FFontStock.SetBaseFont(AValue);
+    UpdateFontMetrics;
 
     SetStyle(AValue.Style);
   end
@@ -591,14 +589,7 @@ begin
   if FCalcExtentBaseStyle <> AValue then
   begin
     FCalcExtentBaseStyle := AValue;
-
-    with FFontStock do
-    begin
-      SetStyle(AValue);
-      FCharWidth := GetCharWidth;
-      FCharHeight := GetCharHeight;
-      FFixedSizeFont := GetFixedSizeFont;
-    end;
+    UpdateFontMetrics;
   end;
 end;
 
@@ -614,6 +605,22 @@ begin
 
   if FHandle <> 0 then
     SelectObject(FHandle, FCurrentFont);
+end;
+
+procedure TTextEditorPaintHelper.UpdateFontMetrics;
+begin
+  FCharHeight := 0;
+
+  for var LStyle in CHAR_HEIGHT_FONT_STYLES do
+  begin
+    FFontStock.SetStyle(LStyle);
+    FCharHeight := Max(FCharHeight, FFontStock.GetCharHeight);
+  end;
+
+  FFontStock.SetStyle(FCalcExtentBaseStyle);
+
+  FCharWidth := FFontStock.GetCharWidth;
+  FFixedSizeFont := FFontStock.GetFixedSizeFont;
 end;
 
 procedure TTextEditorPaintHelper.SetForegroundColor(const AValue: TColor);

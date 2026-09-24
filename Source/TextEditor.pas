@@ -394,6 +394,7 @@ type
     FPaintHelper: TTextEditorPaintHelper;
     FPaintLock: Integer;
     FPartialLoad: TTextEditorPartialLoad;
+    FPixelsPerInch: Integer;
     FPosition: TTextEditorPosition;
     FRedoList: TTextEditorUndoList;
     FReplace: TTextEditorReplace;

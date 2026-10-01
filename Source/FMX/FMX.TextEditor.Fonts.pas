@@ -25,6 +25,7 @@ type
     FText: TFont;
     function IsCodeFoldingHintFontStored: Boolean;
     function IsCompletionProposalFontStored: Boolean;
+    function IsFontStored(const AFont: TFont; const ADefaultSize: Single): Boolean;
     function IsHintFontStored: Boolean;
     function IsLineNumbersFontStored: Boolean;
     function IsMinimapFontStored: Boolean;
@@ -188,39 +189,44 @@ begin
   AFont.Family := AFamily;
 end;
 
+function TTextEditorFonts.IsFontStored(const AFont: TFont; const ADefaultSize: Single): Boolean;
+begin
+  Result := (TextEditorFontFamily(AFont) <> DEFAULT_FONT) or (AFont.Size <> ADefaultSize);
+end;
+
 function TTextEditorFonts.IsCodeFoldingHintFontStored: Boolean;
 begin
-  Result := (TextEditorFontFamily(FCodeFoldingHint) <> DEFAULT_FONT) or (FCodeFoldingHint.Size <> TDefaultFontSize.CodeFoldingHint);
+  Result := IsFontStored(FCodeFoldingHint, TDefaultFontSize.CodeFoldingHint);
 end;
 
 function TTextEditorFonts.IsCompletionProposalFontStored: Boolean;
 begin
-  Result := (TextEditorFontFamily(FCompletionProposal) <> DEFAULT_FONT) or (FCompletionProposal.Size <> TDefaultFontSize.CompletionProposal);
+  Result := IsFontStored(FCompletionProposal, TDefaultFontSize.CompletionProposal);
 end;
 
 function TTextEditorFonts.IsHintFontStored: Boolean;
 begin
-  Result := (TextEditorFontFamily(FHint) <> DEFAULT_FONT) or (FHint.Size <> TDefaultFontSize.Hint);
+  Result := IsFontStored(FHint, TDefaultFontSize.Hint);
 end;
 
 function TTextEditorFonts.IsLineNumbersFontStored: Boolean;
 begin
-  Result := (TextEditorFontFamily(FLineNumbers) <> DEFAULT_FONT) or (FLineNumbers.Size <> TDefaultFontSize.LineNumbers);
+  Result := IsFontStored(FLineNumbers, TDefaultFontSize.LineNumbers);
 end;
 
 function TTextEditorFonts.IsMinimapFontStored: Boolean;
 begin
-  Result := (TextEditorFontFamily(FMinimap) <> DEFAULT_FONT) or (FMinimap.Size <> TDefaultFontSize.Minimap);
+  Result := IsFontStored(FMinimap, TDefaultFontSize.Minimap);
 end;
 
 function TTextEditorFonts.IsRulerFontStored: Boolean;
 begin
-  Result := (TextEditorFontFamily(FRuler) <> DEFAULT_FONT) or (FRuler.Size <> TDefaultFontSize.Ruler);
+  Result := IsFontStored(FRuler, TDefaultFontSize.Ruler);
 end;
 
 function TTextEditorFonts.IsTextFontStored: Boolean;
 begin
-  Result := (TextEditorFontFamily(FText) <> DEFAULT_FONT) or (FText.Size <> TDefaultFontSize.Text);
+  Result := IsFontStored(FText, TDefaultFontSize.Text);
 end;
 
 procedure TTextEditorFonts.SetDefaults;

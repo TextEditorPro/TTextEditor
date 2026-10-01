@@ -22,6 +22,7 @@ type
     FVisible: Boolean;
     FWidth: TTextEditorScaledInteger;
     function GetWidthValue: Integer;
+    function IsWidthStored: Boolean;
     procedure DoChange;
     procedure GuideLinesChanged(ASender: TObject);
     procedure SetAutoHide(const AValue: Boolean);
@@ -53,7 +54,7 @@ type
     property Outlining: Boolean read FOutlining write FOutlining default False;
     property TextFolding: TTextEditorTextFolding read FTextFolding write SetTextFolding;
     property Visible: Boolean read FVisible write SetVisible default False;
-    property Width: Integer read GetWidthValue write SetWidth default 14;
+    property Width: Integer read GetWidthValue write SetWidth stored IsWidthStored default 14;
   end;
 
 implementation
@@ -206,6 +207,11 @@ end;
 function TTextEditorCodeFolding.GetWidthValue: Integer;
 begin
   Result := FWidth.Value;
+end;
+
+function TTextEditorCodeFolding.IsWidthStored: Boolean;
+begin
+  Result := not (cfoAutoWidth in FOptions);
 end;
 
 procedure TTextEditorCodeFolding.SetWidth(const AValue: Integer);

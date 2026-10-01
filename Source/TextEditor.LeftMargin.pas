@@ -25,6 +25,7 @@ type
     FVisible: Boolean;
     FWidth: TTextEditorScaledInteger;
     function GetWidthValue: Integer;
+    function IsWidthStored: Boolean;
     procedure DoChange;
     procedure SetAutosize(const AValue: Boolean);
     procedure SetBookmarks(const AValue: TTextEditorLeftMarginBookmarks);
@@ -52,7 +53,7 @@ type
     property Marks: TTextEditorLeftMarginMarks read FMarks write SetMarks;
     property MarksPanel: TTextEditorLeftMarginMarksPanel read FMarksPanel write FMarksPanel;
     property Visible: Boolean read FVisible write SetVisible default True;
-    property Width: Integer read GetWidthValue write SetWidth default 50;
+    property Width: Integer read GetWidthValue write SetWidth stored IsWidthStored default 50;
   end;
 
 implementation
@@ -164,6 +165,11 @@ end;
 function TTextEditorLeftMargin.GetWidthValue: Integer;
 begin
   Result := FWidth.Value;
+end;
+
+function TTextEditorLeftMargin.IsWidthStored: Boolean;
+begin
+  Result := not (FAutosize and FLineNumbers.Visible);
 end;
 
 procedure TTextEditorLeftMargin.SetAutosize(const AValue: Boolean);

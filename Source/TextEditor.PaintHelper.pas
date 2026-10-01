@@ -609,6 +609,8 @@ end;
 
 procedure TTextEditorPaintHelper.UpdateFontMetrics;
 begin
+  { Hinted GDI faces of one font differ in height: Courier New 9 pt is 15 px regular but 16 px italic with the underscore on the
+    last row. The line height must fit the tallest face or the bottom row is clipped. }
   FCharHeight := 0;
 
   for var LStyle in CHAR_HEIGHT_FONT_STYLES do

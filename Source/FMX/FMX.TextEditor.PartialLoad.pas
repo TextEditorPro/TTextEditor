@@ -28,7 +28,7 @@ begin
 
   FEnabled := False;
   FFrom := plfTail;
-  FRows := 100;
+  FRows := 200;
 end;
 
 procedure TTextEditorPartialLoad.Assign(ASource: TPersistent);

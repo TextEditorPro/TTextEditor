@@ -85,10 +85,8 @@ object MainForm: TMainForm
     Border.ColoredEdges = [ebLeft, ebTop, ebRight, ebBottom]
     CodeFolding.Visible = True
     HighlightLine.Active = True
-    LeftMargin.Width = 57
     OnCompletionProposalExecute = TextEditorCompletionProposalExecute
     OnCreateHighlighterStream = TextEditorCreateHighlighterStream
-    PartialLoad.Rows = 100
     Selection.Options = [soALTSetsColumnMode, soHighlightSimilarTerms, soTermsCaseSensitive]
     TabOrder = 1
   end

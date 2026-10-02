@@ -85,26 +85,16 @@ object MainForm: TMainForm
     Border.Color = xFF808690
     Border.ColoredEdges = [ebLeft, ebTop, ebRight, ebBottom]
     CodeFolding.Visible = True
-    Fonts.CodeFoldingHint.Family = 'Courier New'
-    Fonts.CodeFoldingHint.Size = 10.666666984558110000
-    Fonts.LineNumbers.Family = 'Courier New'
-    Fonts.LineNumbers.Size = 10.666666984558110000
-    Fonts.Minimap.Family = 'Courier New'
-    Fonts.Minimap.Size = 1.333333373069763000
-    Fonts.Ruler.Family = 'Courier New'
-    Fonts.Ruler.Size = 10.666666984558110000
     HighlightLine.Active = True
-    LeftMargin.Width = 55
-    OnCompletionProposalExecute = TextEditorCompletionProposalExecute
-    OnCreateHighlighterStream = TextEditorCreateHighlighterStream
-    PartialLoad.Rows = 100
     Margins.Top = 3.000000000000000000
     Margins.Right = 3.000000000000000000
     Margins.Bottom = 3.000000000000000000
+    OnCompletionProposalExecute = TextEditorCompletionProposalExecute
+    OnCreateHighlighterStream = TextEditorCreateHighlighterStream
+    Selection.Options = [soALTSetsColumnMode, soHighlightSimilarTerms, soTermsCaseSensitive]
     Size.Width = 703.000000000000000000
     Size.Height = 738.000000000000000000
     Size.PlatformDefault = False
-    Selection.Options = [soALTSetsColumnMode, soHighlightSimilarTerms, soTermsCaseSensitive]
     TabOrder = 1
   end
   object StatusBar: TStatusBar

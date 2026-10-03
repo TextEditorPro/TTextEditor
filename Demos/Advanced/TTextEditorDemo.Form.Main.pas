@@ -168,7 +168,7 @@ type
   end;
 
 const
-  cFileTypeHighlighters: array [0 .. 108] of TFileTypeHighlighter = (
+  cFileTypeHighlighters: array [0 .. 109] of TFileTypeHighlighter = (
     (Extensions: '.abap'; Highlighter: 'ABAP'),
     (Extensions: '.as'; Highlighter: 'ActionScript'),
     (Extensions: '.ads;.adb'; Highlighter: 'Ada'),
@@ -248,6 +248,7 @@ const
     (Extensions: '.odin'; Highlighter: 'Odin'),
     (Extensions: '.pl;.pm;.cgi'; Highlighter: 'Perl'),
     (Extensions: '.php;.class;.inc'; Highlighter: 'PHP'),
+    (Extensions: '.pine'; Highlighter: 'Pine Script'),
     (Extensions: '.ps1'; Highlighter: 'PowerShell'),
     (Extensions: '.pb;.pbp'; Highlighter: 'PureBasic'),
     (Extensions: '.py;.pyi'; Highlighter: 'Python'),

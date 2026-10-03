@@ -97,6 +97,13 @@ type
     FCompletionTriggerEnabled: Boolean;
     FCompletionTriggerTimer: TTimer;
     FConfiguration: string;
+    FDefinitionLinkEditor: TCustomTextEditor;
+    FDefinitionLinkEnabled: Boolean;
+    FDefinitionLinkLocation: TTextEditorLanguageServerLocation;
+    FDefinitionLinkLocationValid: Boolean;
+    FDefinitionLinkPosition: TTextEditorTextPosition;
+    FDefinitionLinkSerial: Integer;
+    FDefinitionLinkWord: string;
     FDiagnosticErrorColor: TColor;
     FDiagnosticInformationColor: TColor;
     FDiagnosticMarkImageIndex: Integer;
@@ -145,6 +152,7 @@ type
     class function DecodeRawJsonString(const AText: string): string;
     class function ExtractGotoLocation(const AGotoResult: TLSPGotoResult; out ALocation: TTextEditorLanguageServerLocation): Boolean;
     class function FadeColor(const AColor: TColor; const ABackground: TColor): TColor;
+    class function GotoResultFromJson(const AValue: TJSONValue): TLSPGotoResult;
     class function ParseHoverParts(const AText: string; const ACode: Boolean): TArray<TTextEditorLanguageServerHoverPart>;
     class function PositionToEditor(const APosition: TLSPPosition): TTextEditorTextPosition;
     class function PositionToLSP(const ATextPosition: TTextEditorTextPosition): TLSPPosition;
@@ -165,9 +173,11 @@ type
     function OpenDocumentFor(const AEditor: TCustomTextEditor): TTextEditorLanguageServerDocument;
     function QuotedCommandLine(const ACommandLine: string): string;
     function SyncRequest(const AKind: TLSPKind; const AParams: TLSPBaseParams; const AConvert: TFunc<TJSONValue, TObject>): TObject;
+    function UpdateDefinitionLink(const AEditor: TCustomTextEditor): Boolean;
     procedure ApplyDiagnostics(const ADocument: TTextEditorLanguageServerDocument);
     procedure ApplyResolvedDescription(const AEditor: TCustomTextEditor; const AGeneration: Integer; const AItemsIndex: Integer; const ADescription: string);
     procedure ChangeTimerTimer(ASender: TObject);
+    procedure ClearDefinitionLink;
     procedure ClientError(ASender: TObject; const AId, AErrorCode: Integer; const AErrorMessage: string; ARetriggerRequest: Boolean);
     procedure ClientExit(ASender: TObject; AExitCode: Integer; const ARestartServer: Boolean);
     procedure ClientInitialize(ASender: TObject; var AValue: TLSPInitializeParams);
@@ -176,6 +186,7 @@ type
     procedure ClientPublishDiagnostics(ASender: TObject; const AUri: string; const AVersion: Cardinal; const ADiagnostics: TArray<TLSPDiagnostic>);
     procedure CompletionSelectedItemChange(ASender: TObject);
     procedure CompletionTriggerTimerTimer(ASender: TObject);
+    procedure DefinitionLinkClick(ASender: TObject);
     procedure EditorCompletionProposalExecute(const ASender: TObject; var AParams: TCompletionProposalParams);
     procedure EditorCustomTokenAttribute(const ASender: TObject; const AText: string; const ALine: Integer; const AChar: Integer;
       var AForegroundColor: TColor; var ABackgroundColor: TColor; var AStyles: TFontStyles; var AUnderline: TTextEditorUnderline;
@@ -190,6 +201,7 @@ type
     procedure FreeCompletionItems;
     procedure FreeHoverPopup;
     procedure FreeSignatureHelpPopup;
+    procedure GotoLocation(const AEditor: TCustomTextEditor; const ALocation: TTextEditorLanguageServerLocation);
     procedure HideHover;
     procedure HideSignatureHelp;
     procedure HookEditor(const AEditor: TCustomTextEditor);
@@ -247,6 +259,7 @@ type
     property AutoRestart: Boolean read FAutoRestart write FAutoRestart default False;
     property CompletionTriggerEnabled: Boolean read FCompletionTriggerEnabled write FCompletionTriggerEnabled default True;
     property Configuration: string read FConfiguration write FConfiguration;
+    property DefinitionLinkEnabled: Boolean read FDefinitionLinkEnabled write FDefinitionLinkEnabled default True;
     property DiagnosticErrorColor: TColor read FDiagnosticErrorColor write FDiagnosticErrorColor default TColors.Red;
     property DiagnosticInformationColor: TColor read FDiagnosticInformationColor write FDiagnosticInformationColor default TColors.Dodgerblue;
     property DiagnosticMarkImageIndex: Integer read FDiagnosticMarkImageIndex write FDiagnosticMarkImageIndex default -1;
@@ -278,7 +291,7 @@ const
 implementation
 
 uses
-  System.Diagnostics, System.Generics.Defaults, System.Math, Vcl.Graphics, TextEditor.Consts, TextEditor.Highlighter,
+  System.Character, System.Diagnostics, System.Generics.Defaults, System.Math, Vcl.Graphics, TextEditor.Consts, TextEditor.Highlighter,
   TextEditor.PaintHelper, XLSPFunctions;
 
 type
@@ -396,6 +409,7 @@ begin
   FDocuments := TObjectList<TTextEditorLanguageServerDocument>.Create(True);
 
   FCompletionTriggerEnabled := True;
+  FDefinitionLinkEnabled := True;
   FDiagnosticErrorColor := TColors.Red;
   FDiagnosticInformationColor := TColors.Dodgerblue;
   FDiagnosticMarkImageIndex := -1;
@@ -641,6 +655,9 @@ begin
   if FHoverEditor = AEditor then
     HideHover;
 
+  if FDefinitionLinkEditor = AEditor then
+    ClearDefinitionLink;
+
   if FSignatureHelpEditor = AEditor then
     HideSignatureHelp;
 
@@ -846,6 +863,7 @@ var
   LDocument: TTextEditorLanguageServerDocument;
 begin
   HideHover;
+  ClearDefinitionLink;
 
   LDocument := DocumentForEditor(TCustomTextEditor(ASender));
 
@@ -913,6 +931,7 @@ begin
 
   HideHover;
   HideSignatureHelp;
+  ClearDefinitionLink;
 
   FChangeTimer.Enabled := False;
   FCompletionTriggerTimer.Enabled := False;
@@ -1064,6 +1083,7 @@ begin
 
   HideHover;
   HideSignatureHelp;
+  ClearDefinitionLink;
 
   FChangeTimer.Enabled := False;
   FCompletionTriggerTimer.Enabled := False;
@@ -1847,6 +1867,9 @@ procedure TTextEditorLanguageServer.EditorKeyDown(ASender: TObject; var AKey: Wo
 begin
   HideHover;
 
+  if AKey = VK_CONTROL then
+    UpdateDefinitionLink(TCustomTextEditor(ASender));
+
   if FSignatureHelpActive and (FSignatureHelpEditor = ASender) then
   case AKey of
     VK_ESCAPE:
@@ -1919,7 +1942,13 @@ var
 begin
   LEditor := TCustomTextEditor(ASender);
 
-  if not FHoverEnabled or not Assigned(OpenDocumentFor(LEditor)) then
+  if not Assigned(OpenDocumentFor(LEditor)) then
+    Exit;
+
+  if UpdateDefinitionLink(LEditor) then
+    ACursor := crHandPoint;
+
+  if not FHoverEnabled then
     Exit;
 
   LCursorPoint := Mouse.CursorPos;
@@ -2195,24 +2224,13 @@ end;
 procedure TTextEditorLanguageServer.HoverLinkClick(ASender: TObject);
 var
   LEditor: TCustomTextEditor;
-  LDocument: TTextEditorLanguageServerDocument;
-  LLocation: TTextEditorLanguageServerLocation;
 begin
   LEditor := FHoverEditor;
 
   HideHover;
 
-  if not FHoverLocationValid or not Assigned(LEditor) then
-    Exit;
-
-  LLocation := FHoverLocation;
-  LDocument := DocumentForEditor(LEditor);
-
-  if Assigned(LDocument) and SameText(LLocation.FileName, LDocument.FileName) then
-    LEditor.GoToLineAndSetPosition(LLocation.TextPosition.Line, LLocation.TextPosition.Char);
-
-  if Assigned(FOnGotoLocation) then
-    FOnGotoLocation(Self, LEditor, LLocation);
+  if FHoverLocationValid and Assigned(LEditor) then
+    GotoLocation(LEditor, FHoverLocation);
 end;
 
 procedure TTextEditorLanguageServer.RequestHover;
@@ -2320,7 +2338,7 @@ begin
 
           if Assigned(AJson.Values['result']) and not AJson.Values['result'].Null then
           begin
-            LResult := JsonGotoResultToObject(AJson.Values['result']);
+            LResult := GotoResultFromJson(AJson.Values['result']);
             try
               LFound := ExtractGotoLocation(LResult, LLocation);
             finally
@@ -2400,6 +2418,20 @@ end;
 
 { Definition }
 
+class function TTextEditorLanguageServer.GotoResultFromJson(const AValue: TJSONValue): TLSPGotoResult;
+begin
+  Result := JsonGotoResultToObject(AValue);
+
+  if (AValue is TJSONObject) and Result.location.uri.IsEmpty then
+  begin
+    Result.location.uri := AValue.GetValue<string>('uri', '');
+    Result.location.range.start.line := AValue.GetValue<Cardinal>('range.start.line', 0);
+    Result.location.range.start.character := AValue.GetValue<Cardinal>('range.start.character', 0);
+    Result.location.range.&end.line := AValue.GetValue<Cardinal>('range.end.line', 0);
+    Result.location.range.&end.character := AValue.GetValue<Cardinal>('range.end.character', 0);
+  end;
+end;
+
 class function TTextEditorLanguageServer.ExtractGotoLocation(const AGotoResult: TLSPGotoResult; out ALocation: TTextEditorLanguageServerLocation): Boolean;
 var
   LUri: string;
@@ -2456,7 +2488,7 @@ begin
     LGotoResult := TLSPGotoResult(SyncRequest(lspGotoDefinition, LParams,
       function(AValue: TJSONValue): TObject
       begin
-        Result := JsonGotoResultToObject(AValue);
+        Result := GotoResultFromJson(AValue);
       end));
   finally
     LParams.Free;
@@ -2502,7 +2534,7 @@ begin
         if not Assigned(AJson.Values['result']) or AJson.Values['result'].Null then
           Exit;
 
-        LResult := JsonGotoResultToObject(AJson.Values['result']);
+        LResult := GotoResultFromJson(AJson.Values['result']);
         try
           LFound := ExtractGotoLocation(LResult, LLocation);
         finally
@@ -2514,19 +2546,160 @@ begin
 
         QueueToMainThread(LLifetime,
           procedure
-          var
-            LTargetDocument: TTextEditorLanguageServerDocument;
           begin
-            LTargetDocument := DocumentForEditor(AEditor);
+            if Assigned(DocumentForEditor(AEditor)) then
+              GotoLocation(AEditor, LLocation);
+          end);
+      end);
+  finally
+    LParams.Free;
+  end;
+end;
 
-            if not Assigned(LTargetDocument) then
+procedure TTextEditorLanguageServer.GotoLocation(const AEditor: TCustomTextEditor; const ALocation: TTextEditorLanguageServerLocation);
+var
+  LDocument: TTextEditorLanguageServerDocument;
+begin
+  LDocument := DocumentForEditor(AEditor);
+
+  if Assigned(LDocument) and SameText(ALocation.FileName, LDocument.FileName) then
+    AEditor.GoToLineAndSetPosition(ALocation.TextPosition.Line, ALocation.TextPosition.Char);
+
+  if Assigned(FOnGotoLocation) then
+    FOnGotoLocation(Self, AEditor, ALocation);
+end;
+
+{ Definition link }
+
+procedure TTextEditorLanguageServer.ClearDefinitionLink;
+begin
+  if FDefinitionLinkWord.IsEmpty then
+    Exit;
+
+  Inc(FDefinitionLinkSerial);
+
+  if Assigned(FDefinitionLinkEditor) and not (csDestroying in FDefinitionLinkEditor.ComponentState) then
+    FDefinitionLinkEditor.ClearMouseOverLink;
+
+  FDefinitionLinkEditor := nil;
+  FDefinitionLinkLocationValid := False;
+  FDefinitionLinkWord := '';
+end;
+
+procedure TTextEditorLanguageServer.DefinitionLinkClick(ASender: TObject);
+var
+  LEditor: TCustomTextEditor;
+  LLocation: TTextEditorLanguageServerLocation;
+begin
+  LEditor := FDefinitionLinkEditor;
+
+  if not FDefinitionLinkLocationValid or (ASender <> LEditor) then
+    Exit;
+
+  LLocation := FDefinitionLinkLocation;
+
+  HideHover;
+  ClearDefinitionLink;
+  GotoLocation(LEditor, LLocation);
+end;
+
+{ The definition is asked once per word while Ctrl is held over it. The word becomes a link only after the server has answered
+  with a target elsewhere, so Ctrl+Click keeps adding carets wherever there is nothing to jump to. }
+function TTextEditorLanguageServer.UpdateDefinitionLink(const AEditor: TCustomTextEditor): Boolean;
+var
+  LDocument: TTextEditorLanguageServerDocument;
+  LTextPosition, LWordStart: TTextEditorTextPosition;
+  LWord: string;
+  LFileName: string;
+  LParams: TLSPTextDocumentPositionParams;
+  LSerial: Integer;
+  LLifetime: ITextEditorLanguageServerLifetime;
+begin
+  Result := False;
+
+  if not FDefinitionLinkEnabled then
+    Exit;
+
+  LWord := '';
+
+  if (GetKeyState(VK_CONTROL) < 0) and (GetKeyState(VK_SHIFT) >= 0) and (GetKeyState(VK_MENU) >= 0) and
+    AEditor.GetTextPositionOfMouse(LTextPosition) then
+    LWord := AEditor.WordAtTextPosition(LTextPosition);
+
+  if LWord.IsEmpty or not (LWord[1].IsLetter or (LWord[1] = '_')) then
+  begin
+    ClearDefinitionLink;
+    Exit;
+  end;
+
+  LWordStart := AEditor.WordStart(LTextPosition);
+
+  if (AEditor = FDefinitionLinkEditor) and (LWord = FDefinitionLinkWord) and (LWordStart.Line = FDefinitionLinkPosition.Line) and
+    (LWordStart.Char = FDefinitionLinkPosition.Char) then
+  begin
+    Result := FDefinitionLinkLocationValid;
+
+    if Result then
+      AEditor.SetMouseOverLink(FDefinitionLinkPosition, FDefinitionLinkWord.Length, DefinitionLinkClick);
+
+    Exit;
+  end;
+
+  ClearDefinitionLink;
+
+  LDocument := OpenDocumentFor(AEditor);
+
+  if not Assigned(LDocument) or not FClient.IsRequestSupported(lspGotoDefinition) then
+    Exit;
+
+  SyncDocument(LDocument);
+
+  FDefinitionLinkEditor := AEditor;
+  FDefinitionLinkPosition := LWordStart;
+  FDefinitionLinkWord := LWord;
+
+  LFileName := LDocument.FileName;
+  LSerial := FDefinitionLinkSerial;
+  LLifetime := FLifetime;
+
+  LParams := TLSPTextDocumentPositionParams.Create;
+  try
+    LParams.textDocument.uri := LDocument.Uri;
+    LParams.position := PositionToLSP(LTextPosition);
+
+    FClient.SendRequest(lspGotoDefinition, LParams,
+      procedure(AJson: TJSONObject)
+      var
+        LResult: TLSPGotoResult;
+        LLocation: TTextEditorLanguageServerLocation;
+        LFound: Boolean;
+      begin
+        if not Assigned(AJson.Values['result']) or AJson.Values['result'].Null then
+          Exit;
+
+        LResult := GotoResultFromJson(AJson.Values['result']);
+        try
+          LFound := ExtractGotoLocation(LResult, LLocation);
+        finally
+          LResult.Free;
+        end;
+
+        if not LFound then
+          Exit;
+
+        QueueToMainThread(LLifetime,
+          procedure
+          begin
+            if LSerial <> FDefinitionLinkSerial then
               Exit;
 
-            if SameText(LLocation.FileName, LTargetDocument.FileName) then
-              AEditor.GoToLineAndSetPosition(LLocation.TextPosition.Line, LLocation.TextPosition.Char);
+            if SameText(LLocation.FileName, LFileName) and (LLocation.TextPosition.Line = FDefinitionLinkPosition.Line) then
+              Exit;
 
-            if Assigned(FOnGotoLocation) then
-              FOnGotoLocation(Self, AEditor, LLocation);
+            FDefinitionLinkLocation := LLocation;
+            FDefinitionLinkLocationValid := True;
+
+            UpdateDefinitionLink(FDefinitionLinkEditor);
           end);
       end);
   finally

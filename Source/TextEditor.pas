@@ -216,6 +216,7 @@ type
       Down: TPoint;
       DownInText: Boolean;
       IsScrolling: Boolean;
+      LinkClick: TNotifyEvent;
       OverURI: Boolean;
       ScrollCursors: array [0 .. 7] of HCursor;
       ScrollingPoint: TPoint;
@@ -901,6 +902,7 @@ type
     procedure ClearMarks;
     procedure ClearMatchingPair;
     procedure ClearMinimapBuffer;
+    procedure ClearMouseOverLink;
     procedure ClearSelection;
     procedure ClearUndo;
     procedure CollapseAll(const AFromLineNumber: Integer = -1; const AToLineNumber: Integer = -1);
@@ -990,6 +992,7 @@ type
     procedure SetClipboardText(const AText: string; const AHTML: string = '');
     procedure SetFocus; override;
     procedure SetMark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition; const AImageIndex: Integer; const AColor: TColor = TColors.SysNone);
+    procedure SetMouseOverLink(const ATextPosition: TTextEditorTextPosition; const ALength: Integer; const AOnClick: TNotifyEvent);
     procedure SetOption(const AOption: TTextEditorOption; const AEnabled: Boolean);
     procedure SetSelectedTextEmpty(const AChangeString: string = '');
     procedure SetTextPositionAndSelection(const ATextPosition, ABlockBeginPosition, ABlockEndPosition: TTextEditorTextPosition);
@@ -11157,7 +11160,8 @@ procedure TCustomTextEditor.WMKillFocus(var AMessage: TWMKillFocus);
 begin
   inherited;
 
-  ClearMouseOverURI;
+  if not (csLButtonDown in ControlState) then
+    ClearMouseOverURI;
 
   if FMultiEdit.Position.Row <> -1 then
   begin
@@ -12633,6 +12637,7 @@ procedure TCustomTextEditor.ClearMouseOverURI;
 begin
   if FMouse.OverURI then
   begin
+    FMouse.LinkClick := nil;
     FMouse.OverURI := False;
     FMouse.URILine := -1;
     FMouse.URIStart := 0;
@@ -12652,12 +12657,16 @@ var
 begin
   LTextPosition := PixelsToTextPosition(X, Y);
 
-  if (X > FLeftMarginWidth) and
+  if Assigned(FMouse.LinkClick) and (LTextPosition.Line = FMouse.URILine) and (LTextPosition.Char >= FMouse.URIStart) and (LTextPosition.Char <= FMouse.URIEnd) then
+    Exit;
+
+  if URIOpener and (X > FLeftMarginWidth) and
     GetHighlighterAttributeAtRowColumn(LTextPosition, LToken, LRangeType, LStart, LHighlighterAttribute) and
     (LRangeType in [ttWebLink, ttMailtoLink]) then
   begin
-    if not FMouse.OverURI or (FMouse.URILine <> LTextPosition.Line) or (FMouse.URIStart <> LStart) then
+    if not FMouse.OverURI or Assigned(FMouse.LinkClick) or (FMouse.URILine <> LTextPosition.Line) or (FMouse.URIStart <> LStart) then
     begin
+      FMouse.LinkClick := nil;
       FMouse.OverURI := True;
       FMouse.URILine := LTextPosition.Line;
       FMouse.URIStart := LStart;
@@ -13796,7 +13805,7 @@ begin
 
   inherited MouseMove(AShift, X, Y);
 
-  if (ssCtrl in AShift) and not (ssAlt in AShift) and URIOpener then
+  if (ssCtrl in AShift) and not (ssAlt in AShift) and (URIOpener or Assigned(FMouse.LinkClick)) then
     UpdateMouseOverURI(X, Y)
   else
     ClearMouseOverURI;
@@ -13914,6 +13923,7 @@ var
   LRangeType: TTextEditorRangeType;
   LStart: Integer;
   LHighlighterAttribute: TTextEditorHighlighterAttribute;
+  LLinkClick: TNotifyEvent;
 begin
   FMinimap.Clicked := False;
   FScroll.Dragging := False;
@@ -13929,6 +13939,17 @@ begin
 
   if FMouse.OverURI and (AButton = mbLeft) and (X > FLeftMarginWidth) then
   begin
+    if Assigned(FMouse.LinkClick) then
+    begin
+      LLinkClick := FMouse.LinkClick;
+
+      MouseCapture := False;
+      ClearMouseOverURI;
+      LLinkClick(Self);
+
+      Exit;
+    end;
+
     Winapi.Windows.GetCursorPos(LCursorPoint);
     LCursorPoint := ScreenToClient(LCursorPoint);
 
@@ -21669,6 +21690,12 @@ begin
   FMatchingPair.Current := trNotFound;
 end;
 
+procedure TCustomTextEditor.ClearMouseOverLink;
+begin
+  if Assigned(FMouse.LinkClick) then
+    ClearMouseOverURI;
+end;
+
 procedure TCustomTextEditor.ClearSelection;
 begin
   if GetSelectionAvailable then
@@ -23964,6 +23991,25 @@ begin
     if Assigned(FEvents.OnAfterMarkPlaced) then
       FEvents.OnAfterMarkPlaced(Self);
   end;
+end;
+
+procedure TCustomTextEditor.SetMouseOverLink(const ATextPosition: TTextEditorTextPosition; const ALength: Integer;
+  const AOnClick: TNotifyEvent);
+begin
+  if Assigned(FMouse.LinkClick) and (FMouse.URILine = ATextPosition.Line) and (FMouse.URIStart = ATextPosition.Char) and
+    (FMouse.URIEnd = ATextPosition.Char + ALength) then
+    Exit;
+
+  FMouse.LinkClick := AOnClick;
+  FMouse.OverURI := True;
+  FMouse.URILine := ATextPosition.Line;
+  FMouse.URIStart := ATextPosition.Char;
+  FMouse.URIEnd := ATextPosition.Char + ALength;
+
+  FMultiEdit.Position.Row := -1;
+
+  Invalidate;
+  UpdateMouseCursor;
 end;
 
 procedure TCustomTextEditor.SetOption(const AOption: TTextEditorOption; const AEnabled: Boolean);

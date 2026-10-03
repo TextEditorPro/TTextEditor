@@ -80,6 +80,7 @@ type
     FAutoRestart: Boolean;
     FCleanupTimer: TTimer;
     FCompletionTriggerEnabled: Boolean;
+    FDefinitionLinkEnabled: Boolean;
     FEditors: TDictionary<TCustomTextEditor, TServerInstance>;
     FHoverDelay: Integer;
     FHoverEnabled: Boolean;
@@ -122,6 +123,7 @@ type
   published
     property AutoRestart: Boolean read FAutoRestart write FAutoRestart default False;
     property CompletionTriggerEnabled: Boolean read FCompletionTriggerEnabled write FCompletionTriggerEnabled default True;
+    property DefinitionLinkEnabled: Boolean read FDefinitionLinkEnabled write FDefinitionLinkEnabled default True;
     property HoverDelay: Integer read FHoverDelay write FHoverDelay default 600;
     property HoverEnabled: Boolean read FHoverEnabled write FHoverEnabled default True;
     { Milliseconds a server is kept alive without documents; 0 stops it at once, a negative value keeps it running }
@@ -261,6 +263,7 @@ begin
   FCleanupTimer.OnTimer := CleanupTimerTimer;
 
   FCompletionTriggerEnabled := True;
+  FDefinitionLinkEnabled := True;
   FHoverDelay := 600;
   FHoverEnabled := True;
   FIdleTimeout := 60000;
@@ -491,6 +494,7 @@ begin
   LServer.Configuration := AConfiguration;
   LServer.AutoRestart := FAutoRestart;
   LServer.CompletionTriggerEnabled := FCompletionTriggerEnabled;
+  LServer.DefinitionLinkEnabled := FDefinitionLinkEnabled;
   LServer.HoverDelay := FHoverDelay;
   LServer.HoverEnabled := FHoverEnabled;
   LServer.LogTraffic := FLogTraffic;

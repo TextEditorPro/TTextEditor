@@ -1,7 +1,7 @@
 ﻿unit TextEditor.LanguageServer.Manager;
 
-{ Maps editors to language servers. One server process is shared by every attached editor whose file matches the same
-  definition and resolves to the same root folder; it is stopped once it has had no documents for IdleTimeout milliseconds. }
+{ Maps editors to language servers. One server process is shared by every attached editor whose file matches the same definition and
+  resolves to the same root folder; it is stopped once it has had no documents for IdleTimeout milliseconds. }
 
 interface
 
@@ -14,6 +14,7 @@ type
 
   TTextEditorLanguageServerDefinition = class(TCollectionItem)
   strict private
+    FBrowsingPath: string;
     FCommandLine: string;
     FConfiguration: string;
     FEnabled: Boolean;
@@ -31,6 +32,7 @@ type
     function MatchesFileName(const AFileName: string): Boolean;
     procedure Assign(ASource: TPersistent); override;
   published
+    property BrowsingPath: string read FBrowsingPath write FBrowsingPath;
     property CommandLine: string read FCommandLine write FCommandLine;
     property Configuration: string read FConfiguration write FConfiguration;
     property Enabled: Boolean read FEnabled write FEnabled default True;
@@ -94,6 +96,8 @@ type
     FServers: TTextEditorLanguageServerDefinitions;
     FSignatureHelpEnabled: Boolean;
     FSyncRequestTimeout: Integer;
+    function BrowsingFileName(const AServer: TObject; const AFileName: string): string;
+    function BrowsingFolders(const ADefinition: TTextEditorLanguageServerDefinition): TArray<string>;
     function BuildConfiguration(const ADefinition: TTextEditorLanguageServerDefinition; const AMarkerFileName: string): string;
     function CreateDelphiLspFallbackSettings(const ADefinition: TTextEditorLanguageServerDefinition; const AFileName: string): string;
     function CreateInstance(const ADefinition: TTextEditorLanguageServerDefinition; const ARootPath: string; const AConfiguration: string): TServerInstance;
@@ -126,7 +130,6 @@ type
     property DefinitionLinkEnabled: Boolean read FDefinitionLinkEnabled write FDefinitionLinkEnabled default True;
     property HoverDelay: Integer read FHoverDelay write FHoverDelay default 600;
     property HoverEnabled: Boolean read FHoverEnabled write FHoverEnabled default True;
-    { Milliseconds a server is kept alive without documents; 0 stops it at once, a negative value keeps it running }
     property IdleTimeout: Integer read FIdleTimeout write FIdleTimeout default 60000;
     property LogTraffic: Boolean read FLogTraffic write FLogTraffic default False;
     property OnDiagnostics: TTextEditorLanguageServerDiagnosticsEvent read FOnDiagnostics write FOnDiagnostics;
@@ -182,6 +185,7 @@ begin
   if ASource is TTextEditorLanguageServerDefinition then
   with ASource as TTextEditorLanguageServerDefinition do
   begin
+    Self.FBrowsingPath := BrowsingPath;
     Self.FCommandLine := CommandLine;
     Self.FConfiguration := Configuration;
     Self.FEnabled := Enabled;
@@ -378,6 +382,50 @@ begin
   end;
 end;
 
+function TTextEditorLanguageServers.BrowsingFolders(const ADefinition: TTextEditorLanguageServerDefinition): TArray<string>;
+var
+  LFolder: string;
+begin
+  Result := nil;
+
+  for var LItem in ADefinition.BrowsingPath.Split([';']) do
+  begin
+    LFolder := ExcludeTrailingPathDelimiter(LItem.Trim);
+
+    if LFolder.IsEmpty or not TDirectory.Exists(LFolder) then
+      Continue;
+
+    Result := Result + [LFolder] + TDirectory.GetDirectories(LFolder, '*', TSearchOption.soAllDirectories);
+  end;
+end;
+
+function TTextEditorLanguageServers.BrowsingFileName(const AServer: TObject; const AFileName: string): string;
+var
+  LInstance: TServerInstance;
+  LDefinition: TCollectionItem;
+  LFileName: string;
+begin
+  Result := AFileName;
+
+  LInstance := InstanceForServer(AServer);
+
+  if not Assigned(LInstance) then
+    Exit;
+
+  LDefinition := FServers.FindItemID(LInstance.DefinitionId);
+
+  if not Assigned(LDefinition) then
+    Exit;
+
+  for var LFolder in BrowsingFolders(LDefinition as TTextEditorLanguageServerDefinition) do
+  begin
+    LFileName := TPath.Combine(LFolder, ExtractFileName(AFileName));
+
+    if FileExists(LFileName) then
+      Exit(LFileName);
+  end;
+end;
+
 function TTextEditorLanguageServers.BuildConfiguration(const ADefinition: TTextEditorLanguageServerDefinition;
   const AMarkerFileName: string): string;
 begin
@@ -420,6 +468,7 @@ var
   LBinDirectory, LLibDirectory, LDirectory, LDocumentDirectory: string;
   LCompilerFileNames: TArray<string>;
   LProjectFileName, LSettingsFileName: string;
+  LBrowsingPaths: string;
 begin
   Result := '';
 
@@ -440,6 +489,20 @@ begin
   LSettingsFileName := TPath.Combine(LDirectory, 'Fallback.' +
     IntToHex(THashFNV1a32.GetHashValue(LDocumentDirectory.ToLower), 8) + '.delphilsp.json');
 
+  { Without browsing paths the server names the source of a compiled unit without its folder. It does not search subfolders. }
+  LBrowsingPaths := '';
+
+  for var LFolder in BrowsingFolders(ADefinition) do
+  begin
+    if not LBrowsingPaths.IsEmpty then
+      LBrowsingPaths := LBrowsingPaths + ',';
+
+    LBrowsingPaths := LBrowsingPaths + '"' + TTextEditorLanguageServer.FileNameToUri(LFolder) + '"';
+  end;
+
+  if not LBrowsingPaths.IsEmpty then
+    LBrowsingPaths := ',"browsingPaths":[' + LBrowsingPaths + ']';
+
   try
     TDirectory.CreateDirectory(LDirectory);
     TFile.WriteAllText(LProjectFileName, '<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003"/>',
@@ -448,8 +511,8 @@ begin
       '{"settings":{"project":"' + TTextEditorLanguageServer.FileNameToUri(LProjectFileName) +
       '","dllname":"' + ExtractFileName(LCompilerFileNames[High(LCompilerFileNames)]) +
       '","dccOptions":"-U\"' + EscapedPath(LDocumentDirectory) + '\";\"' + EscapedPath(LLibDirectory) + '\" ' +
-      '-NSSystem;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;Winapi;System.Win"}}',
-      TEncoding.UTF8);
+      '-NSSystem;Xml;Data;Datasnap;Web;Soap;Vcl;Vcl.Imaging;Vcl.Touch;Vcl.Samples;Vcl.Shell;Winapi;System.Win"' +
+      LBrowsingPaths + '}}', TEncoding.UTF8);
   except
     Exit('');
   end;
@@ -635,9 +698,18 @@ end;
 
 procedure TTextEditorLanguageServers.InstanceGotoLocation(const ASender: TObject; const AEditor: TCustomTextEditor;
   const ALocation: TTextEditorLanguageServerLocation);
+var
+  LLocation: TTextEditorLanguageServerLocation;
 begin
-  if Assigned(FOnGotoLocation) then
-    FOnGotoLocation(ASender, AEditor, ALocation);
+  if not Assigned(FOnGotoLocation) then
+    Exit;
+
+  LLocation := ALocation;
+
+  if not FileExists(LLocation.FileName) then
+    LLocation.FileName := BrowsingFileName(ASender, LLocation.FileName);
+
+  FOnGotoLocation(ASender, AEditor, LLocation);
 end;
 
 procedure TTextEditorLanguageServers.InstanceLog(const ASender: TObject; const AMessage: string);
@@ -702,11 +774,12 @@ procedure TTextEditorLanguageServers.DetectInstalledServers;
   end;
 
 var
-  LDirectory, LFileName, LCommandLine: string;
+  LDirectory, LFileName, LCommandLine, LSourceDirectory: string;
   LDefinition: TTextEditorLanguageServerDefinition;
 begin
   LDirectory := GetEnvironmentVariable('ProgramFiles(x86)') + '\Embarcadero\Studio';
   LCommandLine := '';
+  LSourceDirectory := '';
 
   if TDirectory.Exists(LDirectory) then
   for var LStudioDirectory in TDirectory.GetDirectories(LDirectory) do
@@ -714,7 +787,10 @@ begin
     LFileName := LStudioDirectory + '\bin\DelphiLSP.exe';
 
     if FileExists(LFileName) then
+    begin
       LCommandLine := '"' + LFileName + '"';
+      LSourceDirectory := LStudioDirectory + '\source';
+    end;
   end;
 
   if not LCommandLine.IsEmpty then
@@ -722,6 +798,9 @@ begin
     LDefinition := AddDefinition('DelphiLSP', LCommandLine, '.pas;.dpr;.dpk;.inc', 'pascal', '*.delphilsp.json');
     LDefinition.Configuration := '{"settings":{"settingsFile":"%MARKERFILEURI%"}}';
     LDefinition.SettingsFallback := sfDelphiLsp;
+
+    if LDefinition.BrowsingPath.IsEmpty and TDirectory.Exists(LSourceDirectory) then
+      LDefinition.BrowsingPath := LSourceDirectory;
   end;
 
   LFileName := ProgramFilesDirectory + '\LLVM\bin\clangd.exe';

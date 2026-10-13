@@ -40,7 +40,7 @@ type
     function PropertyValueAsString(AObject: TObject; APropertyInfo: PPropInfo): string;
     function UnlistedProperty(const APropertyName: string): Boolean;
     function ValueDisplayText(const ANode: TMyInspectorNode): string;
-    procedure ColorBoxSelect(Sender: TObject);
+    procedure ColorComboSelect(Sender: TObject);
     procedure ComboChange(Sender: TObject);
     procedure ComboCycleValue(Sender: TObject);
     procedure DoAdvancedDrawItem(Sender: TCustomTreeView; Node: TTreeNode; State: TCustomDrawState; Stage: TCustomDrawStage; var PaintImages, DefaultDraw: Boolean);
@@ -62,6 +62,7 @@ type
     function CanExpand(Node: TTreeNode): Boolean; override;
     function CreateNode: TTreeNode; override;
     procedure Collapse(Node: TTreeNode); override;
+    procedure ChangeScale(AMultiplier, ADivider: Integer; AIsDpiChange: Boolean); override;
     procedure CreateWnd; override;
     procedure MouseDown(Button: TMouseButton; Shift: TShiftState; X, Y: Integer); override;
     procedure MouseMove(Shift: TShiftState; X, Y: Integer); override;
@@ -87,6 +88,7 @@ const
   TYPE_BITMAP = 'TBitmap';
   TYPE_FILENAME = 'TFileName';
   ITEM_HEIGHT = 22;
+  CUSTOM_COLOR_CAPTION = 'Custom...';
 
   ShortCuts: array [0 .. 110] of TShortCut = (
     scNone,
@@ -132,6 +134,25 @@ type
   public
     constructor Create(AOwner: TComponent); override;
     property OnCycle: TNotifyEvent read FOnCycle write FOnCycle;
+  end;
+
+  TMyInspectorColorComboBox = class(TMyInspectorComboBox)
+  strict private
+    FListSelected: Boolean;
+    function IsCustomItem(const AIndex: Integer): Boolean;
+    procedure AddColorName(const AName: string);
+    procedure PopulateList;
+  protected
+    procedure CloseUp; override;
+    procedure CreateParams(var Params: TCreateParams); override;
+    procedure CreateWnd; override;
+    procedure DrawItem(Index: Integer; Rect: TRect; State: TOwnerDrawState); override;
+    procedure DropDown; override;
+    procedure KeyDown(var Key: Word; Shift: TShiftState); override;
+    procedure KeyPress(var Key: Char); override;
+    procedure Select; override;
+  public
+    function PickCustomColor: Boolean;
   end;
 
 constructor TMyInspectorComboBox.Create(AOwner: TComponent);
@@ -204,7 +225,7 @@ end;
 
 procedure TMyInspectorComboBox.WndProc(var Message: TMessage);
 begin
-  if (Message.Msg = WM_LBUTTONDOWN) or (Message.Msg = WM_LBUTTONDBLCLK) then
+  if (Style = csDropDownList) and ((Message.Msg = WM_LBUTTONDOWN) or (Message.Msg = WM_LBUTTONDBLCLK)) then
     if HandleAllocated and not InArrowButton(TWMMouse(Message).XPos) then
     begin
       if (Message.Msg = WM_LBUTTONDBLCLK) or (GetTickCount - FCreatedTick <= GetDoubleClickTime) then
@@ -216,6 +237,151 @@ begin
     end;
 
   inherited WndProc(Message);
+end;
+
+{ TMyInspectorColorComboBox }
+
+function TextToColor(const AText: string; const ADefault: TColor): TColor;
+begin
+  try
+    Result := StringToColor(Trim(AText));
+  except
+    Result := ADefault;
+  end;
+end;
+
+function TMyInspectorColorComboBox.IsCustomItem(const AIndex: Integer): Boolean;
+begin
+  Result := (AIndex >= 0) and (AIndex = Items.Count - 1);
+end;
+
+procedure TMyInspectorColorComboBox.AddColorName(const AName: string);
+var
+  LValue: Integer;
+begin
+  if IdentToColor(AName, LValue) then
+    Items.AddObject(AName, TObject(LValue));
+end;
+
+procedure TMyInspectorColorComboBox.PopulateList;
+begin
+  Items.BeginUpdate;
+  try
+    GetColorValues(AddColorName);
+    Items.AddObject(CUSTOM_COLOR_CAPTION, TObject(clBlack));
+  finally
+    Items.EndUpdate;
+  end;
+end;
+
+procedure TMyInspectorColorComboBox.CloseUp;
+begin
+  inherited CloseUp;
+
+  FListSelected := True;
+end;
+
+{ The edit control of a CBS_DROPDOWN combo box keeps typing, copy and paste, the owner-draw style gives the list the colour
+  swatches }
+procedure TMyInspectorColorComboBox.CreateParams(var Params: TCreateParams);
+begin
+  inherited CreateParams(Params);
+
+  Params.Style := Params.Style or CBS_OWNERDRAWFIXED;
+end;
+
+procedure TMyInspectorColorComboBox.CreateWnd;
+begin
+  inherited CreateWnd;
+
+  if Items.Count = 0 then
+    PopulateList;
+end;
+
+procedure TMyInspectorColorComboBox.DrawItem(Index: Integer; Rect: TRect; State: TOwnerDrawState);
+var
+  LBoxRect: TRect;
+  LBrushColor: TColor;
+  LText: string;
+begin
+  Canvas.FillRect(Rect);
+
+  LBoxRect := Rect;
+  Inc(LBoxRect.Top, 2);
+  Dec(LBoxRect.Bottom, 2);
+  LBoxRect.Left := Rect.Left + 2;
+  LBoxRect.Right := LBoxRect.Left + LBoxRect.Height;
+
+  if not IsCustomItem(Index) then
+  begin
+    LBrushColor := Canvas.Brush.Color;
+    Canvas.Brush.Color := TColor(Items.Objects[Index]);
+    Canvas.FillRect(LBoxRect);
+    Canvas.Brush.Color := Canvas.Font.Color;
+    Canvas.FrameRect(LBoxRect);
+    Canvas.Brush.Color := LBrushColor;
+  end;
+
+  Rect.Left := LBoxRect.Right + 4;
+  LText := Items[Index];
+
+  SetBkMode(Canvas.Handle, TRANSPARENT);
+  DrawTextW(Canvas.Handle, PWideChar(LText), Length(LText), Rect, DT_LEFT or DT_VCENTER or DT_SINGLELINE or DT_NOPREFIX);
+end;
+
+procedure TMyInspectorColorComboBox.DropDown;
+begin
+  FListSelected := False;
+
+  inherited DropDown;
+end;
+
+procedure TMyInspectorColorComboBox.KeyDown(var Key: Word; Shift: TShiftState);
+begin
+  FListSelected := False;
+
+  inherited KeyDown(Key, Shift);
+end;
+
+procedure TMyInspectorColorComboBox.KeyPress(var Key: Char);
+begin
+  if (Key = #13) and (Items.Count > 0) and SameText(Text, CUSTOM_COLOR_CAPTION) and not PickCustomColor then
+    Key := #0;
+
+  inherited KeyPress(Key);
+end;
+
+function TMyInspectorColorComboBox.PickCustomColor: Boolean;
+var
+  LDialog: TColorDialog;
+begin
+  LDialog := TColorDialog.Create(Self);
+  try
+    LDialog.Options := [cdFullOpen];
+    LDialog.Color := TextToColor(Text, clBlack);
+    Result := LDialog.Execute;
+
+    if Result then
+      Text := ColorToString(LDialog.Color);
+  finally
+    LDialog.Free;
+  end;
+end;
+
+{ OnSelect is raised only for a colour picked from the dropped list. Selection changes made by the arrow keys or by the
+  auto completion only update the text, the edit goes on and Enter applies it; ending the edit inside the combo box's own
+  key handling would destroy its window under the running message }
+procedure TMyInspectorColorComboBox.Select;
+begin
+  if not FListSelected then
+    Exit;
+
+  FListSelected := False;
+
+  if IsCustomItem(ItemIndex) and not PickCustomColor then
+    Exit;
+
+  inherited Select;
 end;
 
 function IsBooleanIdent(const AValue: string): Boolean;
@@ -253,8 +419,18 @@ procedure TMyObjectInspector.CreateWnd;
 begin
   inherited;
 
-  SendMessage(Handle, TVM_SETITEMHEIGHT, ITEM_HEIGHT, 0);
+  SendMessage(Handle, TVM_SETITEMHEIGHT, MulDiv(ITEM_HEIGHT, CurrentPPI, USER_DEFAULT_SCREEN_DPI), 0);
   SendMessage(Handle, TVM_SETEXTENDEDSTYLE, TVS_EX_DOUBLEBUFFER, TVS_EX_DOUBLEBUFFER);
+end;
+
+procedure TMyObjectInspector.ChangeScale(AMultiplier, ADivider: Integer; AIsDpiChange: Boolean);
+begin
+  inherited ChangeScale(AMultiplier, ADivider, AIsDpiChange);
+
+  FNameColumnWidth := MulDiv(FNameColumnWidth, AMultiplier, ADivider);
+
+  if HandleAllocated then
+    SendMessage(Handle, TVM_SETITEMHEIGHT, MulDiv(ITEM_HEIGHT, CurrentPPI, USER_DEFAULT_SCREEN_DPI), 0);
 end;
 
 function TMyObjectInspector.CreateNode: TTreeNode;
@@ -296,7 +472,7 @@ begin
 
   Canvas.Font := Font;
 
-  LAvailable := FNameColumnWidth - 10 - (ALevel + 1) * Indent;
+  LAvailable := FNameColumnWidth - MulDiv(10, CurrentPPI, USER_DEFAULT_SCREEN_DPI) - (ALevel + 1) * Indent;
 
   if Canvas.TextWidth(Result) <= LAvailable then
     Exit;
@@ -698,8 +874,8 @@ begin
   InflateRect(LRect, -2, 0);
 
   Canvas.Pen.Color := if TStyleManager.IsCustomStyleActive then StyleServices.GetStyleColor(scBorder) else clBtnFace;
-  Canvas.MoveTo(FNameColumnWidth - 4, LRect.Top);
-  Canvas.LineTo(FNameColumnWidth - 4, LRect.Bottom);
+  Canvas.MoveTo(FNameColumnWidth - MulDiv(4, CurrentPPI, USER_DEFAULT_SCREEN_DPI), LRect.Top);
+  Canvas.LineTo(FNameColumnWidth - MulDiv(4, CurrentPPI, USER_DEFAULT_SCREEN_DPI), LRect.Bottom);
 
   if LNode.IsBooleanValue or LNode.IsSetValue then
   begin
@@ -781,7 +957,7 @@ end;
 
 function TMyObjectInspector.OnColumnSeparator(const X: Integer): Boolean;
 begin
-  Result := Abs(X - (FNameColumnWidth - 4)) <= 3;
+  Result := Abs(X - (FNameColumnWidth - MulDiv(4, CurrentPPI, USER_DEFAULT_SCREEN_DPI))) <= 3;
 end;
 
 procedure TMyObjectInspector.MouseMove(Shift: TShiftState; X, Y: Integer);
@@ -866,8 +1042,9 @@ var
   LRect: TRect;
   LEdit: TEdit;
   LComboBox: TMyInspectorComboBox;
-  LColorBox: TColorBox;
+  LColorComboBox: TMyInspectorColorComboBox;
   LTypeData: PTypeData;
+  LText: string;
 begin
   EndEdit(True);
 
@@ -897,16 +1074,20 @@ begin
 
   if ANode.PropTypeInfo = System.TypeInfo(TColor) then
   begin
-    LColorBox := TColorBox.Create(nil);
-    FEditor := LColorBox;
-    LColorBox.Parent := Self;
-    LColorBox.Style := LColorBox.Style + [cbCustomColor];
-    LColorBox.BoundsRect := LRect;
-    LColorBox.Selected := StringToColor(ANode.PropertyValue);
-    LColorBox.OnSelect := ColorBoxSelect;
-    LColorBox.OnExit := EditorExit;
-    LColorBox.Show;
-    LColorBox.SetFocus;
+    LText := ValueDisplayText(ANode);
+    LColorComboBox := TMyInspectorColorComboBox.Create(nil);
+    FEditor := LColorComboBox;
+    LColorComboBox.Parent := Self;
+    LColorComboBox.ItemHeight := Max(LRect.Height - 8, LColorComboBox.Canvas.TextHeight('Wg'));
+    LColorComboBox.BoundsRect := LRect;
+    LColorComboBox.ItemIndex := LColorComboBox.Items.IndexOf(LText);
+    LColorComboBox.Text := LText;
+    LColorComboBox.OnKeyPress := EditorKeyPress;
+    LColorComboBox.OnSelect := ColorComboSelect;
+    LColorComboBox.OnExit := EditorExit;
+    LColorComboBox.Show;
+    LColorComboBox.SetFocus;
+    LColorComboBox.SelectAll;
   end
   else
   if (ANode.PropTypeInfo.Kind = tkEnumeration) or (ANode.PropTypeInfo = System.TypeInfo(TShortCut)) then
@@ -972,8 +1153,8 @@ begin
   begin
     LValue := '';
 
-    if FEditor is TColorBox then
-      LValue := ColorToString(TColorBox(FEditor).Selected)
+    if FEditor is TMyInspectorColorComboBox then
+      LValue := Trim(TMyInspectorColorComboBox(FEditor).Text)
     else
     if FEditor is TComboBox then
     begin
@@ -1008,7 +1189,6 @@ begin
   if Assigned(LEditor) then
   begin
     LEditor.Hide;
-    LEditor.Parent := nil;
 
     TThread.ForceQueue(nil,
       procedure
@@ -1063,9 +1243,10 @@ begin
   end;
 end;
 
-procedure TMyObjectInspector.ColorBoxSelect(Sender: TObject);
+procedure TMyObjectInspector.ColorComboSelect(Sender: TObject);
 begin
-  EndEdit(True);
+  if Sender = FEditor then
+    EndEdit(True);
 end;
 
 procedure TMyObjectInspector.EditFileNameProperty(const ANode: TMyInspectorNode);

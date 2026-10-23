@@ -7,7 +7,7 @@
         <TargetedPlatforms>1</TargetedPlatforms>
         <AppType>Package</AppType>
         <FrameworkType>None</FrameworkType>
-        <ProjectVersion>20.4</ProjectVersion>
+        <ProjectVersion>20.5</ProjectVersion>
         <Platform Condition="'$(Platform)'==''">Win32</Platform>
         <ProjectName Condition="'$(ProjectName)'==''">TextEditor.Delphi.Designtime</ProjectName>
     </PropertyGroup>
@@ -115,6 +115,7 @@
         <DCCReference Include="dbrtl.dcp"/>
         <DCCReference Include="vcldb.dcp"/>
         <DCCReference Include="TextEditor.Delphi.Runtime.dcp"/>
+        <DCCReference Include="..\Source\TextEditor.DB.Design.pas"/>
         <DCCReference Include="..\Source\TextEditor.Register.pas"/>
         <DCCReference Include="..\Source\TextEditor.RegisterProperty.pas"/>
         <DCCReference Include="..\Source\TextEditor.Splash.pas"/>

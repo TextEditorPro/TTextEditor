@@ -5,9 +5,22 @@
 interface
 
 uses
-  Winapi.Messages, System.Classes, Vcl.Controls, Vcl.DBCtrls, Data.DB, TextEditor, TextEditor.KeyCommands;
+  Winapi.Messages, System.Classes, System.Types, Vcl.Controls, Vcl.DBCtrls, Vcl.Graphics, Data.DB, TextEditor,
+  TextEditor.KeyCommands;
 
 type
+  TCustomDBTextEditor = class;
+
+  TTextEditorDBDesignHook = class abstract(TObject)
+  public
+    function GetComponentImage(const AComponent: TComponent; const ASize: Integer): TGraphic; virtual; abstract;
+    function IsComponentSelected(const AInstance: TPersistent): Boolean; virtual; abstract;
+    procedure RegisterEditor(const AEditor: TCustomDBTextEditor); virtual; abstract;
+    procedure SelectComponent(const AInstance: TPersistent); virtual; abstract;
+    procedure ShowComponentMenu(const AComponent: TComponent; const AScreenPoint: TPoint); virtual; abstract;
+    procedure UnregisterEditor(const AEditor: TCustomDBTextEditor); virtual; abstract;
+  end;
+
   TCustomDBTextEditor = class abstract(TCustomTextEditor)
   strict private
     FBeginEdit: Boolean;
@@ -16,12 +29,20 @@ type
     FLoadData: TNotifyEvent;
     function GetDataField: string;
     function GetDataSource: TDataSource;
+    function GetDesignLinkAt(const AX, AY: Integer): TComponent;
+    function GetDesignLinkRect(const AIndex, ACount: Integer): TRect;
+    function GetDesignLinks: TArray<TComponent>;
     function GetField: TField;
+    function HandleDesignMouseMessage(var AMessage: TMessage): Boolean;
+    function ScaleMetric(const AValue: Integer): Integer;
+    procedure CMDesignHitTest(var AMessage: TCMDesignHitTest); message CM_DESIGNHITTEST;
     procedure CMEnter(var AMessage: TCMEnter); message CM_ENTER;
     procedure CMExit(var AMessage: TCMExit); message CM_EXIT;
     procedure CMGetDataLink(var AMessage: TMessage); message CM_GETDATALINK;
     procedure DataChange(Sender: TObject);
     procedure EditingChange(Sender: TObject);
+    procedure PaintDesignHandles(const ARect: TRect);
+    procedure PaintDesignLinks;
     procedure SetDataField(const AValue: string);
     procedure SetDataSource(const AValue: TDataSource);
     procedure SetEditing(const AValue: Boolean);
@@ -30,6 +51,7 @@ type
     function GetReadOnly: Boolean; override;
     procedure DoChange; override;
     procedure Loaded; override;
+    procedure Paint; override;
     procedure SetReadOnly(const AValue: Boolean); override;
     property DataField: string read GetDataField write SetDataField;
     property DataSource: TDataSource read GetDataSource write SetDataSource;
@@ -40,8 +62,10 @@ type
     destructor Destroy; override;
     procedure DragDrop(ASource: TObject; X, Y: Integer); override;
     procedure ExecuteCommand(const ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer); override;
+    procedure InvalidateDesignLinks;
     procedure LoadBlob;
     procedure Notification(AComponent: TComponent; AOperation: TOperation); override;
+    procedure WndProc(var AMessage: TMessage); override;
   end;
 
   [ComponentPlatformsAttribute(pidWin32 or pidWin64)]
@@ -180,10 +204,22 @@ type
     property ZoomPercentage;
   end;
 
+var
+  GTextEditorDBDesignHook: TTextEditorDBDesignHook;
+
 implementation
 
 uses
-  Winapi.Windows, System.SysUtils, TextEditor.Consts, TextEditor.Encoding;
+  Winapi.Windows, System.SysUtils, System.UITypes, TextEditor.Consts, TextEditor.Encoding;
+
+const
+  DESIGN_HANDLE_BORDER_COLOR = TColor($00B56B2D);
+  DESIGN_HANDLE_COLOR = TColor($00E8AE78);
+  DESIGN_HANDLE_SIZE = 7;
+  DESIGN_LINK_IMAGE_SIZE = 24;
+  DESIGN_LINK_MARGIN = 4;
+  DESIGN_LINK_MAX_COUNT = 2;
+  DESIGN_LINK_SIZE = 28;
 
 constructor TCustomDBTextEditor.Create(AOwner: TComponent);
 begin
@@ -198,10 +234,21 @@ end;
 
 destructor TCustomDBTextEditor.Destroy;
 begin
+  if Assigned(GTextEditorDBDesignHook) then
+    GTextEditorDBDesignHook.UnregisterEditor(Self);
+
   FDataLink.Free;
   FDataLink := nil;
 
   inherited Destroy;
+end;
+
+procedure TCustomDBTextEditor.CMDesignHitTest(var AMessage: TCMDesignHitTest);
+begin
+  if Assigned(GetDesignLinkAt(AMessage.XPos, AMessage.YPos)) then
+    AMessage.Result := 1
+  else
+    inherited;
 end;
 
 procedure TCustomDBTextEditor.CMEnter(var AMessage: TCMEnter);
@@ -291,14 +338,98 @@ begin
   Result := FDataLink.DataSource;
 end;
 
+function TCustomDBTextEditor.GetDesignLinkAt(const AX, AY: Integer): TComponent;
+var
+  LComponents: TArray<TComponent>;
+begin
+  LComponents := GetDesignLinks;
+
+  for var LIndex := 0 to High(LComponents) do
+  if GetDesignLinkRect(LIndex, Length(LComponents)).Contains(Point(AX, AY)) then
+    Exit(LComponents[LIndex]);
+
+  Result := nil;
+end;
+
+function TCustomDBTextEditor.GetDesignLinkRect(const AIndex, ACount: Integer): TRect;
+var
+  LMargin, LSize: Integer;
+begin
+  LMargin := ScaleMetric(DESIGN_LINK_MARGIN);
+  LSize := ScaleMetric(DESIGN_LINK_SIZE);
+
+  Result.Right := ClientWidth - LMargin - (ACount - 1 - AIndex) * (LSize + LMargin);
+  Result.Left := Result.Right - LSize;
+  Result.Bottom := ClientHeight - LMargin;
+  Result.Top := Result.Bottom - LSize;
+end;
+
+function TCustomDBTextEditor.GetDesignLinks: TArray<TComponent>;
+begin
+  Result := nil;
+
+  if not (csDesigning in ComponentState) or not Assigned(FDataLink) or not Assigned(FDataLink.DataSource) then
+    Exit;
+
+  Result := [FDataLink.DataSource];
+
+  if Assigned(FDataLink.DataSource.DataSet) then
+    Result := Result + [FDataLink.DataSource.DataSet];
+end;
+
 function TCustomDBTextEditor.GetField: TField;
 begin
   Result := FDataLink.Field;
 end;
 
+function TCustomDBTextEditor.HandleDesignMouseMessage(var AMessage: TMessage): Boolean;
+var
+  LComponent: TComponent;
+  LPoint: TPoint;
+begin
+  case AMessage.Msg of
+    WM_LBUTTONDOWN, WM_LBUTTONDBLCLK, WM_LBUTTONUP, WM_RBUTTONDOWN, WM_RBUTTONUP:
+      LPoint := Point(TWMMouse(AMessage).XPos, TWMMouse(AMessage).YPos);
+    WM_CONTEXTMENU:
+      LPoint := ScreenToClient(Point(TWMContextMenu(AMessage).XPos, TWMContextMenu(AMessage).YPos));
+  else
+    Exit(False);
+  end;
+
+  LComponent := GetDesignLinkAt(LPoint.X, LPoint.Y);
+
+  if not Assigned(LComponent) then
+    Exit(False);
+
+  if Assigned(GTextEditorDBDesignHook) then
+  case AMessage.Msg of
+    WM_LBUTTONDOWN:
+      GTextEditorDBDesignHook.SelectComponent(LComponent);
+    WM_RBUTTONDOWN:
+      GTextEditorDBDesignHook.ShowComponentMenu(LComponent, ClientToScreen(LPoint));
+  end;
+
+  AMessage.Result := 0;
+
+  Result := True;
+end;
+
 function TCustomDBTextEditor.GetReadOnly: Boolean;
 begin
   Result := FDataLink.ReadOnly;
+end;
+
+procedure TCustomDBTextEditor.InvalidateDesignLinks;
+var
+  LRect: TRect;
+begin
+  if not HandleAllocated then
+    Exit;
+
+  { Covers the largest link count, so a link removed since the last paint is erased too }
+  LRect := TRect.Union(GetDesignLinkRect(0, DESIGN_LINK_MAX_COUNT), GetDesignLinkRect(DESIGN_LINK_MAX_COUNT - 1, DESIGN_LINK_MAX_COUNT));
+
+  InvalidateRect(Handle, LRect, False);
 end;
 
 procedure TCustomDBTextEditor.Loaded;
@@ -344,6 +475,103 @@ begin
     DataSource := nil;
 end;
 
+procedure TCustomDBTextEditor.Paint;
+begin
+  inherited Paint;
+
+  if not (csDesigning in ComponentState) then
+    Exit;
+
+  if Assigned(GTextEditorDBDesignHook) then
+    GTextEditorDBDesignHook.RegisterEditor(Self);
+
+  PaintDesignLinks;
+end;
+
+procedure TCustomDBTextEditor.PaintDesignHandles(const ARect: TRect);
+var
+  LHandleSize: Integer;
+
+  procedure PaintHandle(const ACenterX, ACenterY: Integer);
+  var
+    LHandleRect: TRect;
+  begin
+    LHandleRect := Bounds(ACenterX - LHandleSize div 2, ACenterY - LHandleSize div 2, LHandleSize, LHandleSize);
+
+    Canvas.Brush.Color := DESIGN_HANDLE_BORDER_COLOR;
+    Canvas.FrameRect(LHandleRect);
+
+    LHandleRect.Inflate(-1, -1);
+
+    Canvas.Brush.Color := DESIGN_HANDLE_COLOR;
+    Canvas.FillRect(LHandleRect);
+  end;
+
+begin
+  LHandleSize := ScaleMetric(DESIGN_HANDLE_SIZE);
+
+  PaintHandle(ARect.Left, ARect.Top);
+  PaintHandle(ARect.Right - 1, ARect.Top);
+  PaintHandle(ARect.Left, ARect.Bottom - 1);
+  PaintHandle(ARect.Right - 1, ARect.Bottom - 1);
+end;
+
+procedure TCustomDBTextEditor.PaintDesignLinks;
+var
+  LComponents: TArray<TComponent>;
+  LImage: TGraphic;
+  LImageSize: Integer;
+  LLinkRect, LRect: TRect;
+  LText: string;
+begin
+  LComponents := GetDesignLinks;
+
+  if Length(LComponents) = 0 then
+    Exit;
+
+  LImageSize := ScaleMetric(DESIGN_LINK_IMAGE_SIZE);
+
+  for var LIndex := 0 to High(LComponents) do
+  begin
+    LLinkRect := GetDesignLinkRect(LIndex, Length(LComponents));
+    LRect := LLinkRect;
+
+    Canvas.Brush.Style := bsSolid;
+    Canvas.Brush.Color := TColors.SysBtnShadow;
+    Canvas.FrameRect(LRect);
+
+    LRect.Inflate(-1, -1);
+
+    Canvas.Brush.Color := TColors.SysBtnFace;
+    Canvas.FillRect(LRect);
+
+    LImage := nil;
+
+    if Assigned(GTextEditorDBDesignHook) then
+      LImage := GTextEditorDBDesignHook.GetComponentImage(LComponents[LIndex], LImageSize);
+
+    if Assigned(LImage) then
+      Canvas.StretchDraw(Bounds(LRect.Left + (LRect.Width - LImageSize) div 2, LRect.Top + (LRect.Height - LImageSize) div 2,
+        LImageSize, LImageSize), LImage)
+    else
+    begin
+      LText := Copy(LComponents[LIndex].ClassName, 2, 1);
+
+      Canvas.Font.Color := TColors.SysBtnText;
+      Canvas.TextRect(LRect, LRect.Left + (LRect.Width - Canvas.TextWidth(LText)) div 2,
+        LRect.Top + (LRect.Height - Canvas.TextHeight(LText)) div 2, LText);
+    end;
+
+    if Assigned(GTextEditorDBDesignHook) and GTextEditorDBDesignHook.IsComponentSelected(LComponents[LIndex]) then
+      PaintDesignHandles(LLinkRect);
+  end;
+end;
+
+function TCustomDBTextEditor.ScaleMetric(const AValue: Integer): Integer;
+begin
+  Result := MulDiv(AValue, CurrentPPI, USER_DEFAULT_SCREEN_DPI);
+end;
+
 procedure TCustomDBTextEditor.SetDataField(const AValue: string);
 begin
   FDataLink.FieldName := AValue;
@@ -356,6 +584,9 @@ begin
 
   if Assigned(AValue) then
     AValue.FreeNotification(Self);
+
+  if csDesigning in ComponentState then
+    Invalidate;
 end;
 
 procedure TCustomDBTextEditor.SetEditing(const AValue: Boolean);
@@ -400,6 +631,14 @@ begin
   end
   else
     FDataLink.Field.AsString := Text;
+end;
+
+procedure TCustomDBTextEditor.WndProc(var AMessage: TMessage);
+begin
+  if (csDesigning in ComponentState) and HandleDesignMouseMessage(AMessage) then
+    Exit;
+
+  inherited WndProc(AMessage);
 end;
 
 end.

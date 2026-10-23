@@ -6628,8 +6628,6 @@ begin
 
       if LIndentOnly then
       begin
-        { A line break at the indent-only line. Trimming the line first would lose the indent, so the indent moves to the
-          new line as an undoable delete and insert. Redo replays those records and calls this with AAddSpaceBuffer False. }
         LLineBreakPosition := GetPosition(1, LTextPosition.Line);
 
         AddUndoDelete(LLineBreakPosition, LLineBreakPosition, GetPosition(LLength + 1, LTextPosition.Line), LLineText, smNormal);

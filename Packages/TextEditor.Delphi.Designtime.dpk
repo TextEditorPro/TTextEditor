@@ -39,6 +39,7 @@ requires
   TextEditor.Delphi.Runtime;
 
 contains
+  TextEditor.DB.Design in '..\Source\TextEditor.DB.Design.pas',
   TextEditor.Register in '..\Source\TextEditor.Register.pas',
   TextEditor.RegisterProperty in '..\Source\TextEditor.RegisterProperty.pas',
   TextEditor.Splash in '..\Source\TextEditor.Splash.pas';

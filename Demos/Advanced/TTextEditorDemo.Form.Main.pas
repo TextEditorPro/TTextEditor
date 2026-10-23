@@ -462,7 +462,7 @@ begin
   FObjectInspector := TMyObjectInspector.Create(Self);
   FObjectInspector.Parent := PanelMain;
   FObjectInspector.Align := alRight;
-  FObjectInspector.Width := 350;
+  FObjectInspector.Width := ScaleValue(350);
   FObjectInspector.AddUnlistedProperties(['JSON']);
 end;
 

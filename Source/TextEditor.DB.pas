@@ -118,6 +118,7 @@ type
     property OnBeforeDeleteMark;
     property OnBeforeMarkPanelPaint;
     property OnBeforeMarkPlaced;
+    property OnBeforePaste;
     property OnBeforeSaveToFile;
     property OnCaretChanged;
     property OnChange;

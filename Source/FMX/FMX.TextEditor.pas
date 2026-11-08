@@ -107,6 +107,7 @@ type
       OnBeforeDeleteMark: TTextEditorMarkEvent;
       OnBeforeMarkPanelPaint: TTextEditorMarkPanelPaintEvent;
       OnBeforeMarkPlaced: TTextEditorMarkEvent;
+      OnBeforePaste: TTextEditorBeforePasteEvent;
       OnBeforeSaveToFile: TTextEditorSaveToFileEvent;
       OnCaretChanged: TTextEditorCaretChangedEvent;
       OnChainLinesChanged: TNotifyEvent;
@@ -459,6 +460,7 @@ type
     function GetMouseScrollCursorIndex: Integer;
     function GetMouseScrollCursors(const AIndex: Integer): TCursor;
     function GetMultiCaretSelectedText: string;
+    function GetPasteText: string;
     function GetPreviousCharAtCursor: Char;
     function GetRowCountFromPixel(const AY: Single): Integer;
     function GetScrollPageWidth: Integer;
@@ -1028,6 +1030,7 @@ type
     property OnBeforeDeleteMark: TTextEditorMarkEvent read FEvents.OnBeforeDeleteMark write FEvents.OnBeforeDeleteMark;
     property OnBeforeMarkPanelPaint: TTextEditorMarkPanelPaintEvent read FEvents.OnBeforeMarkPanelPaint write FEvents.OnBeforeMarkPanelPaint;
     property OnBeforeMarkPlaced: TTextEditorMarkEvent read FEvents.OnBeforeMarkPlaced write FEvents.OnBeforeMarkPlaced;
+    property OnBeforePaste: TTextEditorBeforePasteEvent read FEvents.OnBeforePaste write FEvents.OnBeforePaste;
     property OnBeforeSaveToFile: TTextEditorSaveToFileEvent read FEvents.OnBeforeSaveToFile write FEvents.OnBeforeSaveToFile;
     property OnCaretChanged: TTextEditorCaretChangedEvent read FEvents.OnCaretChanged write FEvents.OnCaretChanged;
     property OnChange: TNotifyEvent read FEvents.OnChange write FEvents.OnChange;
@@ -1145,6 +1148,7 @@ type
     property OnBeforeDeleteMark;
     property OnBeforeMarkPanelPaint;
     property OnBeforeMarkPlaced;
+    property OnBeforePaste;
     property OnBeforeSaveToFile;
     property OnCaretChanged;
     property OnChange;
@@ -6906,7 +6910,7 @@ begin
   if not ReadOnly then
   begin
     AutoCursor;
-    DoInsertText(GetClipboardText);
+    DoInsertText(GetPasteText);
   end;
 end;
 
@@ -21270,7 +21274,7 @@ begin
               begin
                 LStringList := TStringList.Create;
                 try
-                  LStringList.Text := GetClipboardText;
+                  LStringList.Text := GetPasteText;
 
                   if not Trim(LStringList.Text).IsEmpty then
                   begin
@@ -21482,6 +21486,14 @@ begin
       Inc(LIndex);
     end;
   end;
+end;
+
+function TCustomTextEditor.GetPasteText: string;
+begin
+  Result := GetClipboardText;
+
+  if Assigned(FEvents.OnBeforePaste) then
+    FEvents.OnBeforePaste(Self, Result);
 end;
 
 procedure TCustomTextEditor.CopyToClipboard(const AWithLineNumbers: Boolean = False);

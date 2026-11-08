@@ -11294,7 +11294,8 @@ end;
 
 procedure TCustomTextEditor.WMSetCursor(var AMessage: TWMSetCursor);
 begin
-  if (AMessage.HitTest = HTCLIENT) and (AMessage.CursorWnd = Handle) and not (csDesigning in ComponentState) then
+  if (Screen.Cursor = crDefault) and (AMessage.HitTest = HTCLIENT) and (AMessage.CursorWnd = Handle) and
+    not (csDesigning in ComponentState) then
     UpdateMouseCursor
   else
     inherited;

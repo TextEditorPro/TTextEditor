@@ -679,6 +679,7 @@ type
     procedure UpdateFoldingRanges(const ACurrentLine: Integer; const ALineCount: Integer); overload;
     procedure UpdateFoldingRanges(const AFoldRanges: TTextEditorCodeFoldingRanges; const ALineCount: Integer); overload;
     procedure UpdateMouseOverURI(const X, Y: Single);
+    procedure UpdateMultiCaretViewPositions(const ATextPositions: TArray<TTextEditorTextPosition>);
     procedure UpdateScrollBars;
     procedure UpdateWordWrap(const AValue: Boolean);
     procedure ValidateMultiCarets;
@@ -813,6 +814,7 @@ type
     function GetCanFocus: Boolean; override;
     function GetClipboardText: string;
     function GetCompareLineNumberOffsetCache(const ALine: Integer): Integer;
+    function GetMultiCaretTextPositions: TArray<TTextEditorTextPosition>;
     function GetNextBreakPosition(const ATextPosition: TTextEditorTextPosition): TTextEditorTextPosition;
     function GetPreviousBreakPosition(const ATextPosition: TTextEditorTextPosition): TTextEditorTextPosition;
     function GetTextPosition: TTextEditorTextPosition;
@@ -946,6 +948,7 @@ type
     procedure SetClipboardText(const AText: string; const AHTML: string = '');
     procedure SetFocus;
     procedure SetMark(const AIndex: Integer; const ATextPosition: TTextEditorTextPosition; const AImageIndex: Integer; const AColor: TAlphaColor = TAlphaColors.Null);
+    procedure SetMultiCaretTextPositions(const ATextPositions: TArray<TTextEditorTextPosition>);
     procedure SetOption(const AOption: TTextEditorOption; const AEnabled: Boolean);
     procedure SetSelectedTextEmpty(const AChangeString: string = '');
     procedure SetTextPositionAndSelection(const ATextPosition, ABlockBeginPosition, ABlockEndPosition: TTextEditorTextPosition);
@@ -9495,6 +9498,19 @@ begin
   end;
 end;
 
+function TCustomTextEditor.GetMultiCaretTextPositions: TArray<TTextEditorTextPosition>;
+begin
+  Result := nil;
+
+  if not Assigned(FMultiEdit.Carets) then
+    Exit;
+
+  SetLength(Result, FMultiEdit.Carets.Count);
+
+  for var LIndex := 0 to FMultiEdit.Carets.Count - 1 do
+    Result[LIndex] := ViewToTextPosition(FMultiEdit.Carets[LIndex]^.ViewPosition);
+end;
+
 function TCustomTextEditor.GetNextBreakPosition(const ATextPosition: TTextEditorTextPosition): TTextEditorTextPosition;
 var
   LTextLine: string;
@@ -10148,6 +10164,7 @@ var
   LScrollPageWidth, LVisibleLineCount: Integer;
   LWidthChanged: Boolean;
   LOldTextPosition: TTextEditorTextPosition;
+  LMultiCaretTextPositions: TArray<TTextEditorTextPosition>;
 begin
   if FHighlighter.Loading then
     Exit;
@@ -10183,8 +10200,10 @@ begin
     if FWordWrap.Active and LWidthChanged then
     begin
       LOldTextPosition := TextPosition;
+      LMultiCaretTextPositions := GetMultiCaretTextPositions;
       CreateLineNumbersCache(True);
       TextPosition := LOldTextPosition;
+      UpdateMultiCaretViewPositions(LMultiCaretTextPositions);
     end;
 
     if AFontChanged then
@@ -10575,6 +10594,15 @@ begin
   ScrollBarMouseMove(ASender, AShift, X, Y);
 end;
 
+procedure TCustomTextEditor.UpdateMultiCaretViewPositions(const ATextPositions: TArray<TTextEditorTextPosition>);
+begin
+  if not Assigned(FMultiEdit.Carets) or (FMultiEdit.Carets.Count <> Length(ATextPositions)) then
+    Exit;
+
+  for var LIndex := 0 to FMultiEdit.Carets.Count - 1 do
+    FMultiEdit.Carets[LIndex]^.ViewPosition := TextToViewPosition(ATextPositions[LIndex]);
+end;
+
 procedure TCustomTextEditor.UpdateScrollBars;
 const
   LScrollBarSize = 16;
@@ -10751,6 +10779,7 @@ end;
 procedure TCustomTextEditor.WordWrapChanged(ASender: TObject);
 var
   LOldTextPosition: TTextEditorTextPosition;
+  LMultiCaretTextPositions: TArray<TTextEditorTextPosition>;
 begin
   if not Visible or not Assigned(Parent) then
     Exit;
@@ -10758,9 +10787,11 @@ begin
   FScrollHelper.PageWidth := GetScrollPageWidth;
 
   LOldTextPosition := TextPosition;
+  LMultiCaretTextPositions := GetMultiCaretTextPositions;
 
   CreateLineNumbersCache(True);
   TextPosition := LOldTextPosition;
+  UpdateMultiCaretViewPositions(LMultiCaretTextPositions);
 
   if not (csLoading in ComponentState) then
     Repaint;
@@ -23126,6 +23157,22 @@ begin
     if Assigned(FEvents.OnAfterMarkPlaced) then
       FEvents.OnAfterMarkPlaced(Self);
   end;
+end;
+
+procedure TCustomTextEditor.SetMultiCaretTextPositions(const ATextPositions: TArray<TTextEditorTextPosition>);
+begin
+  FreeMultiCarets;
+
+  if ReadOnly or not FCaret.MultiEdit.Active then
+    Exit;
+
+  for var LTextPosition in ATextPositions do
+  if (LTextPosition.Line >= 0) and (LTextPosition.Line < FLines.Count) and (LTextPosition.Char >= 1) then
+    AddCaret(TextToViewPosition(LTextPosition));
+
+  ValidateMultiCarets;
+
+  Repaint;
 end;
 
 procedure TCustomTextEditor.SetOption(const AOption: TTextEditorOption; const AEnabled: Boolean);

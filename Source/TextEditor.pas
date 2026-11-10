@@ -17233,7 +17233,7 @@ var
             begin
               LStep := 0;
 
-              while LStep < LTokenRect.Right - 4 do
+              while LTextRect.Left + LStep <= LTokenRect.Right - 4 do
               begin
                 LLeft := LTextRect.Left + LStep;
 

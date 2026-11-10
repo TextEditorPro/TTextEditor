@@ -482,6 +482,7 @@ type
     function GetViewLineNumber(const AViewLineNumber: Integer): Integer;
     function GetViewTextLineNumber(const AViewLineNumber: Integer): Integer;
     function GetVisibleChars(const ARow: Integer; const ALineText: string = ''): Integer;
+    function GetVisibleLineCount: Integer;
     function IsAnyFoldingCollapsed: Boolean;
     function IsCodeFoldingRangesNeeded: Boolean; inline;
     function IsCodeFoldingVisible: Boolean; inline;
@@ -1234,6 +1235,9 @@ uses
 
 type
   TTextEditorScrollBarAccess = class(TScrollBar);
+
+const
+  LINE_COUNT_ROUNDING_TOLERANCE = 0.001;
 
 { TTextEditorCaretDisplay }
 
@@ -4067,6 +4071,23 @@ end;
 function TCustomTextEditor.IsCodeFoldingRangesNeeded: Boolean;
 begin
   Result := IsCodeFoldingVisible or (FEditorMode = emNormal) and FMatchingPairs.Active and (cfoHighlightMatchingPair in FCodeFolding.Options) and not FCodeFolding.TextFolding.Active;
+end;
+
+function TCustomTextEditor.GetVisibleLineCount: Integer;
+var
+  LHeight, LLineHeight: Single;
+begin
+  LLineHeight := GetLineHeight;
+
+  if LLineHeight <= 0 then
+    Exit(1);
+
+  LHeight := ClientHeight;
+
+  if IsRulerVisible then
+    LHeight := LHeight - FRuler.Height;
+
+  Result := Max(1, Trunc(LHeight / LLineHeight + LINE_COUNT_ROUNDING_TOLERANCE));
 end;
 
 function TCustomTextEditor.GetVisibleChars(const ARow: Integer; const ALineText: string = ''): Integer;
@@ -10136,11 +10157,7 @@ begin
     FPaintHelper.SetBaseFont(FFonts.Text);
 
     LScrollPageWidth := GetScrollPageWidth;
-    LVisibleLineCount := Round(ClientHeight / GetLineHeight);
-
-    if IsRulerVisible then
-      Dec(LVisibleLineCount);
-
+    LVisibleLineCount := GetVisibleLineCount;
     LWidthChanged := LScrollPageWidth <> FScrollHelper.PageWidth;
 
     if not FHighlighter.Changed and not LWidthChanged and (LVisibleLineCount = FLineNumbers.VisibleCount) then
@@ -10156,7 +10173,7 @@ begin
       FPaintHelper.SetBaseFont(FFonts.Minimap);
 
       FMinimap.CharHeight := Max(FPaintHelper.CharHeight - 1, 2);
-      FMinimap.VisibleLineCount := Round(ClientHeight / FMinimap.CharHeight);
+      FMinimap.VisibleLineCount := Trunc(ClientHeight / FMinimap.CharHeight + LINE_COUNT_ROUNDING_TOLERANCE);
       FMinimap.TopLine := Max(FLineNumbers.TopLine - Abs(Trunc((FMinimap.VisibleLineCount - FLineNumbers.VisibleCount) *
         (FLineNumbers.TopLine / Max(FLineNumbers.Count - FLineNumbers.VisibleCount, 1)))), 1);
 
@@ -10381,7 +10398,7 @@ begin
   if LLineHeight > 0 then
   begin
     FScrollHelper.PageWidth := GetScrollPageWidth;
-    FLineNumbers.VisibleCount := Max(1, Round(Height / LLineHeight));
+    FLineNumbers.VisibleCount := GetVisibleLineCount;
 
     if FWordWrap.Active then
       CreateLineNumbersCache(True);
@@ -10592,7 +10609,7 @@ begin
       for LPass := 1 to 2 do
       begin
         if LLineHeight > 0 then
-          FLineNumbers.VisibleCount := Max(1, Round(ClientHeight / LLineHeight));
+          FLineNumbers.VisibleCount := GetVisibleLineCount;
 
         if FWordWrap.Active then
         begin
@@ -13221,20 +13238,20 @@ begin
 
       if FLeftMargin.Visible then
         PaintLeftMargin(RectF(LLeftOffset, LTextTopOffset, LLeftOffset + FLeftMargin.GetWidth, Height), FLineNumbers.TopLine,
-          Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1),
-          Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1));
+          Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount),
+          Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount));
 
       if IsCodeFoldingVisible then
         PaintCodeFolding(RectF(LLeftOffset + FLeftMargin.GetWidth, LTextTopOffset,
           LLeftOffset + FLeftMargin.GetWidth + FCodeFolding.GetWidth, Height),
-          FLineNumbers.TopLine, Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1));
+          FLineNumbers.TopLine, Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount));
 
       LTextCanvasState := Canvas.SaveState;
       try
         Canvas.IntersectClipRect(RectF(FLeftMarginWidth, LTextTopOffset, ClientWidth, ClientHeight));
 
         PaintTextLines(RectF(FLeftMarginWidth - FScrollHelper.HorizontalPosition, LTextTopOffset, Width, Height), FLineNumbers.TopLine,
-          Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount - 1), False);
+          Min(FLineNumbers.Count, FLineNumbers.TopLine + FLineNumbers.VisibleCount), False);
       finally
         Canvas.RestoreState(LTextCanvasState);
       end;
@@ -16064,12 +16081,18 @@ var
       end;
     end;
 
+    procedure DrawUnderlineSegment(const ALeft, ARight, AY: Single);
+    begin
+      if ALeft < LTokenRect.Right then
+        DrawPixelLine(ALeft, AY, Min(ARight, LTokenRect.Right), AY);
+    end;
+
   var
     LText: string;
     LPChar: PChar;
     LCanvasState: TCanvasSaveState;
     LOldPenColor: TAlphaColor;
-    LStep, LLeft: Single;
+    LLeft: Single;
     LLastChar: Char;
     LAnsiChar: AnsiChar;
     LLastColumn: Integer;
@@ -16211,48 +16234,45 @@ var
             end;
           ulWavyZigzag:
             begin
-              LStep := 0;
+              LLeft := LTextRect.Left;
 
-              while LStep < LTokenRect.Right - 4 do
+              while LLeft + 4 <= LTokenRect.Right do
               begin
-                LLeft := LTextRect.Left + LStep;
-
                 DrawPixelLine(LLeft, LTextRect.Bottom - 3, LLeft + 2, LTextRect.Bottom - 1);
                 DrawPixelLine(LLeft + 2, LTextRect.Bottom - 1, LLeft + 4, LTextRect.Bottom - 3);
 
-                LStep := LStep + 4;
+                LLeft := LLeft + 4;
               end;
             end;
           ulWaveLine:
             begin
               LLeft := LTextRect.Left;
-              LStep := 0;
 
               while LLeft < LTokenRect.Right do
               begin
-                DrawPixelLine(LLeft, LTextRect.Bottom - 3, LLeft + 3, LTextRect.Bottom - 3);
+                DrawUnderlineSegment(LLeft, LLeft + 3, LTextRect.Bottom - 3);
 
-                LStep := LStep + 6;
+                LLeft := LLeft + 6;
               end;
 
               LLeft := LTextRect.Left;
-              DrawPixelLine(LLeft, LTextRect.Bottom - 2, LLeft + 1, LTextRect.Bottom - 2);
+              DrawUnderlineSegment(LLeft, LLeft + 1, LTextRect.Bottom - 2);
               LLeft := LLeft + 1;
 
               while LLeft < LTokenRect.Right do
               begin
-                DrawPixelLine(LLeft + 1, LTextRect.Bottom - 2, LLeft + 3, LTextRect.Bottom - 2);
+                DrawUnderlineSegment(LLeft + 1, LLeft + 3, LTextRect.Bottom - 2);
 
-                LStep := LStep + 3;
+                LLeft := LLeft + 3;
               end;
 
               LLeft := LTextRect.Left;
 
               while LLeft < LTokenRect.Right do
               begin
-                DrawPixelLine(LLeft + 3, LTextRect.Bottom - 1, LLeft + 6, LTextRect.Bottom - 1);
+                DrawUnderlineSegment(LLeft + 3, LLeft + 6, LTextRect.Bottom - 1);
 
-                LStep := LStep + 6;
+                LLeft := LLeft + 6;
               end;
             end;
         end;
@@ -22343,12 +22363,7 @@ begin
   LViewPosition := TextToViewPosition(LTextPosition);
 
   if FLineNumbers.VisibleCount = 0 then
-  begin
-    FLineNumbers.VisibleCount := Round(ClientHeight / GetLineHeight);
-
-    if IsRulerVisible then
-      Dec(FLineNumbers.VisibleCount);
-  end;
+    FLineNumbers.VisibleCount := GetVisibleLineCount;
 
   case AResultPosition of
     rpTop:
@@ -23533,6 +23548,9 @@ begin
   if (AMultiplier = ADivider) and not AIsDpiChange then
     Exit;
 
+  if AMultiplier <= 0 then
+    Exit;
+
   FPixelsPerInch := AMultiplier;
 
   if Assigned(FEvents.OnChangeScale) and not FZoom.Return then
@@ -23576,11 +23594,13 @@ end;
 
 procedure TCustomTextEditor.SetZoomPercentage(const AValue: Integer);
 var
-  LPixelsPerInch, LMultiplier: Integer;
+  LPixelsPerInch, LMultiplier, LValue: Integer;
 begin
-  if FZoom.Percentage <> AValue then
+  LValue := EnsureRange(AValue, TTextEditorDefaults.ZoomMinimum, TTextEditorDefaults.ZoomMaximum);
+
+  if FZoom.Percentage <> LValue then
   begin
-    FZoom.Percentage := AValue;
+    FZoom.Percentage := LValue;
 
     HideCaret;
     IncPaintLock;

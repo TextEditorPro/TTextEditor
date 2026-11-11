@@ -4489,7 +4489,7 @@ end;
 
 function TCustomTextEditor.MatchingPairFound: Boolean;
 begin
-  Result := FMatchingPairs.Active and not FSyncEdit.Visible and (FMatchingPair.Current <> trNotFound);
+  Result := FMatchingPairs.Active and not FSyncEdit.Visible and (FMatchingPair.Current in [trCloseAndOpenTokenFound, trOpenAndCloseTokenFound]);
 end;
 
 function TCustomTextEditor.NextWordPosition: TTextEditorTextPosition;
@@ -6584,12 +6584,21 @@ end;
 {$ENDIF}
 
 procedure TCustomTextEditor.GoToMatchingPair;
+var
+  LCloseTokenPosition, LTextPosition: TTextEditorTextPosition;
 begin
   if not MatchingPairFound then
     Exit;
 
+  LTextPosition := TextPosition;
+  LCloseTokenPosition := FMatchingPair.CurrentMatch.CloseTokenPos;
+
+  if FHighlighter.FoldTags and FMatchingPair.CurrentMatch.CloseToken.StartsWith(TCharacters.CloseTagOpen) then
+    Dec(LCloseTokenPosition.Char);
+
   TextPosition :=
-    if IsSamePosition(FMatchingPair.CurrentMatch.OpenTokenPos, TextPosition) then
+    if (LTextPosition.Line < LCloseTokenPosition.Line) or
+      (LTextPosition.Line = LCloseTokenPosition.Line) and (LTextPosition.Char < LCloseTokenPosition.Char) then
       FMatchingPair.CurrentMatch.CloseTokenPos
     else
       FMatchingPair.CurrentMatch.OpenTokenPos;

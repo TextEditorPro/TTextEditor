@@ -12832,6 +12832,7 @@ var
   LData: Pointer;
   LChar: Char;
   LEditorCommand: TTextEditorCommand;
+  LActiveSelectionMode: TTextEditorSelectionMode;
 begin
   inherited;
 
@@ -12948,7 +12949,12 @@ begin
   if soALTSetsColumnMode in FSelection.Options then
     if not (ssAlt in AShift) and not (ssCtrl in AShift) and FState.AltDown then
     begin
+      LActiveSelectionMode := FSelection.ActiveMode;
       FSelection.Mode := FSaveSelectionMode;
+
+      if GetSelectionAvailable then
+        FSelection.ActiveMode := LActiveSelectionMode;
+
       FScroll.SetOption(soPastEndOfLine, FSaveScrollOption);
       FState.AltDown := False;
     end;

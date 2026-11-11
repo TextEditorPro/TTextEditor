@@ -868,6 +868,7 @@ type
     function IsTextPositionInSelection(const ATextPosition: TTextEditorTextPosition): Boolean;
     function IsWordBreakChar(const AChar: Char): Boolean; inline;
     function IsWordSelected: Boolean;
+    function MatchingPairFound: Boolean;
     function PixelsToTextPosition(const X, Y: Integer): TTextEditorTextPosition;
     function ReplaceSelectedText(const AReplaceText: string; const ASearchText: string; const AAction: TTextEditorReplaceTextAction = rtaReplace): Boolean;
     function ReplaceText(const ASearchText: string; const AReplaceText: string; const AReplaceAll: Boolean = True; const APageIndex: Integer = -1): Integer;
@@ -4486,6 +4487,11 @@ begin
   end;
 end;
 
+function TCustomTextEditor.MatchingPairFound: Boolean;
+begin
+  Result := FMatchingPairs.Active and not FSyncEdit.Visible and (FMatchingPair.Current <> trNotFound);
+end;
+
 function TCustomTextEditor.NextWordPosition: TTextEditorTextPosition;
 begin
   Result := NextWordPosition(TextPosition);
@@ -6579,7 +6585,7 @@ end;
 
 procedure TCustomTextEditor.GoToMatchingPair;
 begin
-  if not FMatchingPairs.Active or FSyncEdit.Visible or FMatchingPairs.Active and (FMatchingPair.Current = trNotFound) then
+  if not MatchingPairFound then
     Exit;
 
   TextPosition :=
@@ -12378,14 +12384,12 @@ begin
 
   if FMatchingPairs.Active and not FSyncEdit.Visible then
   case ACommand of
-    TKeyCommands.Paste, TKeyCommands.Undo, TKeyCommands.Redo, TKeyCommands.Backspace, TKeyCommands.Tab,
-      TKeyCommands.Left, TKeyCommands.Right, TKeyCommands.Up, TKeyCommands.Down, TKeyCommands.PageUp,
-      TKeyCommands.PageDown, TKeyCommands.PageTop, TKeyCommands.PageBottom, TKeyCommands.EditorTop,
-      TKeyCommands.EditorBottom, TKeyCommands.GoToXY, TKeyCommands.BlockIndent, TKeyCommands.BlockUnindent,
-      TKeyCommands.ShiftTab, TKeyCommands.InsertLine, TKeyCommands.Char, TKeyCommands.Text, TKeyCommands.LineBreak,
-      TKeyCommands.DeleteChar, TKeyCommands.DeleteWord, TKeyCommands.DeleteWordForward, TKeyCommands.DeleteWordBackward,
-      TKeyCommands.DeleteBeginningOfLine, TKeyCommands.DeleteEndOfLine, TKeyCommands.DeleteLine, TKeyCommands.Clear,
-      TKeyCommands.WordLeft, TKeyCommands.WordRight:
+    TKeyCommands.Left..TKeyCommands.GoToXY, TKeyCommands.SelectionLeft..TKeyCommands.SelectAll,
+      TKeyCommands.Paste, TKeyCommands.Undo, TKeyCommands.Redo, TKeyCommands.Backspace, TKeyCommands.Tab,
+      TKeyCommands.BlockIndent, TKeyCommands.BlockUnindent, TKeyCommands.ShiftTab, TKeyCommands.InsertLine, TKeyCommands.Char,
+      TKeyCommands.Text, TKeyCommands.LineBreak, TKeyCommands.DeleteChar, TKeyCommands.DeleteWord, TKeyCommands.DeleteWordForward,
+      TKeyCommands.DeleteWordBackward, TKeyCommands.DeleteBeginningOfLine, TKeyCommands.DeleteEndOfLine, TKeyCommands.DeleteLine,
+      TKeyCommands.Clear:
       ScanMatchingPair;
   end;
 

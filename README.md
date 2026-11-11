@@ -1,4 +1,4 @@
-# TTextEditor [![License](https://img.shields.io/badge/License-MIT-yellowgreen.svg)](https://opensource.org/licenses/MIT) 
+# TTextEditor 
 
 The latest release of TTextEditor control for Delphi VCL/FMX. 
 

@@ -132,7 +132,12 @@ begin
 
   if not (Assigned(FProcs.Initialize) and Assigned(FProcs.Uninitialize) and Assigned(FProcs.Spell) and
     Assigned(FProcs.GetDICEncoding) and Assigned(FProcs.Suggest) and Assigned(FProcs.FreeList)) then
+  begin
+    FreeLibrary(FLibModule);
+    FLibModule := 0;
+
     raise ETextEditorSpellCheckException.CreateRes(@STextEditorSpellCheckEngineCantInitialize);
+  end;
 end;
 
 procedure TTextEditorSpellCheck.Close;
@@ -179,7 +184,7 @@ end;
 
 function TTextEditorSpellCheck.IsCorrectlyWritten(const AWord: string): Boolean;
 begin
-  Result := FProcs.Spell(FHandle, PAnsiChar(UnicodeToDLLString(AWord, icUseDefault))) <> 0;
+  Result := not Assigned(FHandle) or (FProcs.Spell(FHandle, PAnsiChar(UnicodeToDLLString(AWord, icUseDefault))) <> 0);
 end;
 
 function ASCIILowerCase(const S: AnsiString): AnsiString;
@@ -198,6 +203,14 @@ begin
   Result := Copy(AText, Length(AText) + 1 - AByteCount, AByteCount);
 end;
 
+function DictionaryFilename(const AFilename: string): RawByteString;
+begin
+  Result := AnsiString(AFilename);
+
+  if string(AnsiString(AFilename)) <> AFilename then
+    Result := UTF8Encode('\\?\' + ExpandFileName(AFilename));
+end;
+
 procedure TTextEditorSpellCheck.Open;
 const
   ISO_LATIN1 = 28591;
@@ -209,7 +222,7 @@ begin
   if FLibModule = 0 then
     LoadSpellCheckLibrary;
 
-  FHandle := FProcs.Initialize(PAnsiChar(AnsiString(FFilename + '.aff')), PAnsiChar(AnsiString(FFilename + '.dic')));
+  FHandle := FProcs.Initialize(PAnsiChar(DictionaryFilename(FFilename + '.aff')), PAnsiChar(DictionaryFilename(FFilename + '.dic')));
 
   if not Assigned(FHandle) then
     raise ETextEditorSpellCheckException.CreateRes(@STextEditorSpellCheckEngineCantInitialize);
@@ -259,8 +272,11 @@ begin
         FCodePage := 28605;
     end
     else
-    if (LCodePage = 'koi8r') or (LCodePage = 'koi8u') then
+    if LCodePage = 'koi8r' then
       FCodePage := 20866
+    else
+    if LCodePage = 'koi8u' then
+      FCodePage := 21866
     else
     if (ASCIIStartsStr('windows', LCodePage) or ASCIIStartsStr('microsoft', LCodePage)) and
       TryStrToInt(string(RightBStr(LCodePage, 4)), LValue) then
@@ -350,8 +366,8 @@ var
   LList: PPAnsiCharArray;
   LListCount: Integer;
 begin
-  if FLibModule = 0 then
-    ETextEditorSpellCheckException.CreateRes(@STextEditorHunspellHandleNeeded);
+  if not Assigned(FHandle) then
+    raise ETextEditorSpellCheckException.CreateRes(@STextEditorHunspellHandleNeeded);
 
   LListCount := FProcs.Suggest(FHandle, LList, PAnsiChar(UnicodeToDLLString(AWord, icBestFit)));
 

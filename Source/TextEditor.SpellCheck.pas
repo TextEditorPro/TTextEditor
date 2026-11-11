@@ -11,6 +11,7 @@ type
   TPAnsiCharArray = packed array[0..MaxLongint div SizeOf(PAnsiChar) -1] of PAnsiChar;
   PPAnsiCharArray = ^TPAnsiCharArray;
 
+  TSpellCheckAdd = function(const AHandle: Pointer; const AWord: PAnsiChar): Integer; cdecl;
   TSpellCheckFreeList = procedure (AHandle: Pointer; var AList: PPAnsiCharArray; ACount: Integer); cdecl;
   TSpellCheckGetDICEncoding = function(const AHandle: Pointer): PAnsiChar; cdecl;
   TSpellCheckInitialize = function(const AAFFFilename: PAnsiChar; const ADicFilename: PAnsiChar): Pointer; cdecl;
@@ -19,6 +20,7 @@ type
   TSpellCheckUninitialize = procedure(const AHandle: Pointer); cdecl;
 
   TSpellCheckProcs = record
+    Add: TSpellCheckAdd;
     FreeList: TSpellCheckFreeList;
     GetDICEncoding: TSpellCheckGetDICEncoding;
     Initialize: TSpellCheckInitialize;
@@ -40,13 +42,18 @@ type
     FProcs: TSpellCheckProcs;
     FUnderLine: TTextEditorUnderline;
     FUnderlineColor: TColor;
+    FUserDictionaryFilename: string;
+    FUserWords: TStringList;
     function DLLToUnicodeString(const AValue: PAnsiChar): UnicodeString;
     function UnicodeToDLLString(const AValue: string; const AIncompatCharBehaviour: TIncompatCharBehaviour): AnsiString;
+    procedure AddWordToDictionary(const AWord: string);
     procedure LoadSpellCheckLibrary;
     procedure SetFilename(const AValue: string);
+    procedure SetUserDictionaryFilename(const AValue: string);
   public
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
+    function AddUserWord(const AWord: string): Boolean;
     function GetNextErrorItemIndex(const ATextPosition: TTextEditorTextPosition): Integer;
     function GetPreviousErrorItemIndex(const ATextPosition: TTextEditorTextPosition): Integer;
     function GetSuggestions(const AWord: string): TStringDynArray;
@@ -55,6 +62,8 @@ type
     procedure Close; dynamic;
     procedure Open; dynamic;
     property Items: TList read FItems write FItems;
+    property UserDictionaryFilename: string read FUserDictionaryFilename write SetUserDictionaryFilename;
+    property UserWords: TStringList read FUserWords;
   published
     property Filename: string read FFilename write SetFilename;
     property Underline: TTextEditorUnderline read FUnderLine write FUnderLine default ulWaveLine;
@@ -74,6 +83,7 @@ const
 type
   TSpellCheckProcName = record
   const
+    Add = 'Hunspell_add';
     Create = 'Hunspell_create';
     Destroy = 'Hunspell_destroy';
     Spell = 'Hunspell_spell';
@@ -91,6 +101,8 @@ begin
   FUnderLine := ulWaveLine;
   FUnderlineColor := TColors.Red;
   FItems := TList.Create;
+  FUserWords := TStringList.Create;
+  FUserWords.CaseSensitive := True;
 end;
 
 destructor TTextEditorSpellCheck.Destroy;
@@ -98,6 +110,7 @@ begin
   Close;
   ClearItems;
   FItems.Free;
+  FUserWords.Free;
 
   if FLibModule <> 0 then
   begin
@@ -116,6 +129,34 @@ begin
   FItems.Clear;
 end;
 
+function TTextEditorSpellCheck.AddUserWord(const AWord: string): Boolean;
+begin
+  var LWord := AWord.Trim;
+
+  if LWord.IsEmpty or (FUserWords.IndexOf(LWord) <> -1) then
+    Exit(False);
+
+  FUserWords.Add(LWord);
+  AddWordToDictionary(LWord);
+
+  if not FUserDictionaryFilename.IsEmpty then
+    FUserWords.SaveToFile(FUserDictionaryFilename, TEncoding.UTF8);
+
+  Result := True;
+end;
+
+procedure TTextEditorSpellCheck.AddWordToDictionary(const AWord: string);
+begin
+  if not Assigned(FHandle) or not Assigned(FProcs.Add) then
+    Exit;
+
+  try
+    FProcs.Add(FHandle, PAnsiChar(UnicodeToDLLString(AWord, icError)));
+  except
+    on ETextEditorSpellCheckException do
+  end;
+end;
+
 procedure TTextEditorSpellCheck.LoadSpellCheckLibrary;
 begin
   FLibModule := LoadLibrary(PChar(LIBRARY_DLL));
@@ -123,6 +164,7 @@ begin
   if FLibModule = 0 then
     raise ETextEditorSpellCheckException.CreateRes(@STextEditorSpellCheckEngineCantLoadLibrary);
 
+  @FProcs.Add := GetProcAddress(FLibModule, TSpellCheckProcName.Add);
   @FProcs.FreeList := GetProcAddress(FLibModule, TSpellCheckProcName.FreeList);
   @FProcs.GetDICEncoding := GetProcAddress(FLibModule, TSpellCheckProcName.GetDicEncoding);
   @FProcs.Initialize := GetProcAddress(FLibModule, TSpellCheckProcName.Create);
@@ -282,6 +324,9 @@ begin
       TryStrToInt(string(RightBStr(LCodePage, 4)), LValue) then
         FCodePage := Word(LValue);
   end;
+
+  for var LIndex := 0 to FUserWords.Count - 1 do
+    AddWordToDictionary(FUserWords[LIndex]);
 end;
 
 procedure TTextEditorSpellCheck.SetFilename(const AValue: string);
@@ -289,6 +334,36 @@ begin
   Close;
   FFilename := AValue;
   Open;
+end;
+
+procedure TTextEditorSpellCheck.SetUserDictionaryFilename(const AValue: string);
+begin
+  FUserDictionaryFilename := AValue;
+  FUserWords.Clear;
+
+  if not AValue.IsEmpty and FileExists(AValue) then
+  begin
+    var LLines := TStringList.Create;
+    try
+      LLines.LoadFromFile(AValue, TEncoding.UTF8);
+
+      for var LIndex := 0 to LLines.Count - 1 do
+      begin
+        var LWord := LLines[LIndex].Trim;
+
+        if not LWord.IsEmpty and (FUserWords.IndexOf(LWord) = -1) then
+          FUserWords.Add(LWord);
+      end;
+    finally
+      LLines.Free;
+    end;
+  end;
+
+  if Assigned(FHandle) then
+  begin
+    Close;
+    Open;
+  end;
 end;
 
 function TTextEditorSpellCheck.GetPreviousErrorItemIndex(const ATextPosition: TTextEditorTextPosition): Integer;

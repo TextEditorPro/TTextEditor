@@ -418,6 +418,9 @@ type
     FSpecialChars: TTextEditorSpecialChars;
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
     FSpellCheck: TTextEditorSpellCheck;
+    FSpellCheckRescanFirstLine: Integer;
+    FSpellCheckRescanLastLine: Integer;
+    FSpellCheckRescanNeeded: Boolean;
 {$ENDIF}
     FState: TTextEditorState;
     FSyncEdit: TTextEditorSyncEdit;
@@ -638,6 +641,8 @@ type
     procedure RulerChanged(ASender: TObject);
     procedure ScanCodeFoldingMatchingPair;
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
+    procedure MarkSpellCheckRescan(const AFirstLine: Integer; const ALastLine: Integer);
+    procedure RescanSpellCheckAfterUpdate;
     procedure ScanSpellCheck(const AFromLine: Integer; const AToLine: Integer);
 {$ENDIF}
     procedure ScanMatchingPair;
@@ -988,6 +993,9 @@ type
     procedure ReplaceLine(const ALineNumber: Integer; const AValue: string; const AFlags: TTextEditorStringFlags);
     procedure RescanCodeFoldingRanges;
     procedure RescanHighlighterRanges;
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+    procedure RescanSpellCheck;
+{$ENDIF}
     procedure ResetCharacterCount;
     procedure ReturnToCaretBookmark;
     procedure SaveToStream(const AStream: TStream; const AEncoding: System.SysUtils.TEncoding = nil; const AChangeModified: Boolean = True);
@@ -13024,7 +13032,7 @@ var
 begin
   LIndex := FSpellCheck.Items.Count - 1;
 
-  while (LIndex >= 0) and (PTextEditorTextPosition(FSpellCheck.Items[LIndex]).Line <> AToLine) do
+  while (LIndex >= 0) and (PTextEditorTextPosition(FSpellCheck.Items[LIndex]).Line > AToLine) do
     Dec(LIndex);
 
   while (LIndex >= 0) and (PTextEditorTextPosition(FSpellCheck.Items[LIndex]).Line >= AFromLine) do
@@ -13127,6 +13135,57 @@ begin
   end;
 end;
 
+procedure TCustomTextEditor.MarkSpellCheckRescan(const AFirstLine: Integer; const ALastLine: Integer);
+begin
+  if FSpellCheckRescanNeeded then
+  begin
+    FSpellCheckRescanFirstLine := Min(FSpellCheckRescanFirstLine, AFirstLine);
+    FSpellCheckRescanLastLine := Max(FSpellCheckRescanLastLine, ALastLine);
+  end
+  else
+  begin
+    FSpellCheckRescanFirstLine := AFirstLine;
+    FSpellCheckRescanLastLine := ALastLine;
+    FSpellCheckRescanNeeded := True;
+  end;
+end;
+
+procedure TCustomTextEditor.RescanSpellCheckAfterUpdate;
+var
+  LFirstLine, LLastLine: Integer;
+begin
+  if not FSpellCheckRescanNeeded then
+    Exit;
+
+  FSpellCheckRescanNeeded := False;
+
+  if not Assigned(FSpellCheck) or not (eoSpellCheck in FOptions) or (FLines.Count = 0) then
+    Exit;
+
+  LFirstLine := EnsureRange(FSpellCheckRescanFirstLine, 0, FLines.Count - 1);
+  LLastLine := EnsureRange(FSpellCheckRescanLastLine, LFirstLine, FLines.Count - 1);
+
+  DeleteSpellCheckItems(LFirstLine, LLastLine);
+  ScanSpellCheck(LFirstLine, LLastLine);
+  FSpellCheck.Items.Sort(CompareLines);
+  ClearMinimapBuffer;
+end;
+
+{ DoSpellCheck moves the caret to the first error; this only brings the marks up to date, for example after the dictionary changed. }
+procedure TCustomTextEditor.RescanSpellCheck;
+begin
+  if not Assigned(FSpellCheck) then
+    Exit;
+
+  FSpellCheck.ClearItems;
+
+  if eoSpellCheck in FOptions then
+    ScanSpellCheck(0, FLines.Count - 1);
+
+  ClearMinimapBuffer;
+  Invalidate;
+end;
+
 procedure TCustomTextEditor.DoSpellCheck;
 var
   LTextPosition: TTextEditorTextPosition;
@@ -13202,6 +13261,28 @@ begin
 
   if FLines.Updating then
   begin
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+    if Assigned(FSpellCheck) and (eoSpellCheck in FOptions) then
+    begin
+      DeleteSpellCheckItems(AIndex, AIndex + ACount - 1);
+      MoveSpellCheckItems(AIndex + ACount, -ACount);
+
+      if FSpellCheckRescanNeeded then
+      begin
+        if FSpellCheckRescanFirstLine >= AIndex + ACount then
+          Dec(FSpellCheckRescanFirstLine, ACount)
+        else
+          FSpellCheckRescanFirstLine := Min(FSpellCheckRescanFirstLine, AIndex);
+
+        if FSpellCheckRescanLastLine >= AIndex + ACount then
+          Dec(FSpellCheckRescanLastLine, ACount)
+        else
+          FSpellCheckRescanLastLine := Min(FSpellCheckRescanLastLine, AIndex);
+      end;
+
+      MarkSpellCheckRescan(Max(AIndex - 1, 0), AIndex);
+    end;
+{$ENDIF}
     UpdateCollapsedBackup(AIndex, -ACount);
     Exit;
   end;
@@ -13260,6 +13341,23 @@ begin
 
   if FLines.Updating then
   begin
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+    if Assigned(FSpellCheck) and (eoSpellCheck in FOptions) and not FLines.Streaming then
+    begin
+      MoveSpellCheckItems(AIndex, ACount);
+
+      if FSpellCheckRescanNeeded then
+      begin
+        if FSpellCheckRescanFirstLine >= AIndex then
+          Inc(FSpellCheckRescanFirstLine, ACount);
+
+        if FSpellCheckRescanLastLine >= AIndex then
+          Inc(FSpellCheckRescanLastLine, ACount);
+      end;
+
+      MarkSpellCheckRescan(AIndex, AIndex + ACount - 1);
+    end;
+{$ENDIF}
     UpdateCollapsedBackup(AIndex, ACount);
     Exit;
   end;
@@ -13305,7 +13403,13 @@ begin
   FUndoRedoLastLine := Max(FUndoRedoLastLine, AIndex + ACount - 1);
 
   if FLines.Updating then
+  begin
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+    if Assigned(FSpellCheck) and (eoSpellCheck in FOptions) then
+      MarkSpellCheckRescan(AIndex, AIndex + Max(ACount, 1) - 1);
+{$ENDIF}
     Exit;
+  end;
 
   if (FEditorMode <> emSimple) and FHighlighter.Loaded and (FLines.Count > 0) then
   begin
@@ -13325,7 +13429,8 @@ begin
 
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
   if eoSpellCheck in FOptions then
-    UpdateSpellCheckItems(AIndex, 0);
+  for var LLine := AIndex to AIndex + Max(ACount, 1) - 1 do
+    UpdateSpellCheckItems(LLine, 0);
 {$ENDIF}
 
   UpdateScrollBars;
@@ -21464,6 +21569,9 @@ begin
   EnsureCursorPositionVisible;
   ScanMatchingPair;
   SearchAll;
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+  RescanSpellCheckAfterUpdate;
+{$ENDIF}
 
   DoChange;
 
@@ -22692,6 +22800,9 @@ begin
     EnsureCursorPositionVisible;
     ScanMatchingPair;
     SearchAll;
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+    RescanSpellCheckAfterUpdate;
+{$ENDIF}
 
     DoChange;
 

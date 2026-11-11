@@ -418,6 +418,7 @@ type
     FSpecialChars: TTextEditorSpecialChars;
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
     FSpellCheck: TTextEditorSpellCheck;
+    FSpellCheckItems: TList;
     FSpellCheckRescanFirstLine: Integer;
     FSpellCheckRescanLastLine: Integer;
     FSpellCheckRescanNeeded: Boolean;
@@ -912,6 +913,9 @@ type
     procedure ClearMatchingPair;
     procedure ClearMinimapBuffer;
     procedure ClearMouseOverLink;
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+    procedure ClearSpellCheckItems;
+{$ENDIF}
     procedure ClearSelection;
     procedure ClearUndo;
     procedure CollapseAll(const AFromLineNumber: Integer = -1; const AToLineNumber: Integer = -1);
@@ -1165,6 +1169,7 @@ type
     property SpecialChars: TTextEditorSpecialChars read FSpecialChars write SetSpecialChars;
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
     property SpellCheck: TTextEditorSpellCheck read FSpellCheck write FSpellCheck;
+    property SpellCheckItems: TList read FSpellCheckItems;
 {$ENDIF}
     property SyncEdit: TTextEditorSyncEdit read FSyncEdit write SetSyncEdit;
     property OvertypeMode: TTextEditorOvertypeMode read FOvertypeMode write SetOvertypeMode default TTextEditorDefaults.OvertypeMode;
@@ -1556,6 +1561,10 @@ begin
   { Special chars }
   FSpecialChars := TTextEditorSpecialChars.Create;
   FSpecialChars.OnChange := SpecialCharsChanged;
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+  { Spell check }
+  FSpellCheckItems := TList.Create;
+{$ENDIF}
   { Caret }
   FCaret := TTextEditorCaret.Create;
   FCaret.OnChange := CaretChanged;
@@ -1742,6 +1751,11 @@ begin
 
   if Assigned(FChainedEditor) then
     RemoveChainedEditor;
+
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+  ClearSpellCheckItems;
+  FSpellCheckItems.Free;
+{$ENDIF}
 
   FBorder.Free;
   FChangeNotifications.Free;
@@ -10232,13 +10246,25 @@ begin
 end;
 
 procedure TCustomTextEditor.SetOptions(const AValue: TTextEditorOptions);
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+var
+  LSpellCheckChanged: Boolean;
+{$ENDIF}
 begin
   if FOptions <> AValue then
   begin
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+    LSpellCheckChanged := (eoSpellCheck in FOptions) <> (eoSpellCheck in AValue);
+{$ENDIF}
     FOptions := AValue;
 
     if (eoDropFiles in FOptions) <> (eoDropFiles in AValue) and not (csDesigning in ComponentState) and HandleAllocated then
       DragAcceptFiles(Handle, eoDropFiles in FOptions);
+
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+    if LSpellCheckChanged then
+      RescanSpellCheck;
+{$ENDIF}
 
     Invalidate;
   end;
@@ -13008,6 +13034,10 @@ begin
   FMarkList.Clear;
   FUndoList.Clear;
   FRedoList.Clear;
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+  ClearSpellCheckItems;
+  FSpellCheckRescanNeeded := False;
+{$ENDIF}
   FLineNumbers.ResetCache := True;
   SetModified(False);
 end;
@@ -13026,19 +13056,27 @@ begin
 end;
 
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
+procedure TCustomTextEditor.ClearSpellCheckItems;
+begin
+  for var LIndex := FSpellCheckItems.Count - 1 downto 0 do
+    Dispose(PTextEditorTextPosition(FSpellCheckItems[LIndex]));
+
+  FSpellCheckItems.Clear;
+end;
+
 procedure TCustomTextEditor.DeleteSpellCheckItems(const AFromLine: Integer; const AToLine: Integer);
 var
   LIndex: Integer;
 begin
-  LIndex := FSpellCheck.Items.Count - 1;
+  LIndex := FSpellCheckItems.Count - 1;
 
-  while (LIndex >= 0) and (PTextEditorTextPosition(FSpellCheck.Items[LIndex]).Line > AToLine) do
+  while (LIndex >= 0) and (PTextEditorTextPosition(FSpellCheckItems[LIndex]).Line > AToLine) do
     Dec(LIndex);
 
-  while (LIndex >= 0) and (PTextEditorTextPosition(FSpellCheck.Items[LIndex]).Line >= AFromLine) do
+  while (LIndex >= 0) and (PTextEditorTextPosition(FSpellCheckItems[LIndex]).Line >= AFromLine) do
   begin
-    Dispose(PTextEditorTextPosition(FSpellCheck.Items[LIndex]));
-    FSpellCheck.Items.Delete(LIndex);
+    Dispose(PTextEditorTextPosition(FSpellCheckItems[LIndex]));
+    FSpellCheckItems.Delete(LIndex);
     Dec(LIndex);
   end;
 end;
@@ -13048,11 +13086,11 @@ var
   LIndex: Integer;
   LPTextPosition: PTextEditorTextPosition;
 begin
-  LIndex := FSpellCheck.Items.Count - 1;
+  LIndex := FSpellCheckItems.Count - 1;
 
-  while (LIndex >= 0) and (PTextEditorTextPosition(FSpellCheck.Items[LIndex]).Line >= ALine) do
+  while (LIndex >= 0) and (PTextEditorTextPosition(FSpellCheckItems[LIndex]).Line >= ALine) do
   begin
-    LPTextPosition := PTextEditorTextPosition(FSpellCheck.Items[LIndex]);
+    LPTextPosition := PTextEditorTextPosition(FSpellCheckItems[LIndex]);
     LPTextPosition^.Line := LPTextPosition^.Line + ACount;
     Dec(LIndex);
   end;
@@ -13078,7 +13116,7 @@ begin
   end;
 
   if ACount >= 0 then
-    FSpellCheck.Items.Sort(CompareLines);
+    FSpellCheckItems.Sort(CompareLines);
 end;
 
 procedure TCustomTextEditor.ScanSpellCheck(const AFromLine: Integer; const AToLine: Integer);
@@ -13126,7 +13164,7 @@ begin
             New(LPTextPosition);
             LPTextPosition^.Line := LLine;
             LPTextPosition^.Char := FHighlighter.TokenPosition + 1;
-            FSpellCheck.Items.Add(LPTextPosition);
+            FSpellCheckItems.Add(LPTextPosition);
           end;
         end;
 
@@ -13167,7 +13205,7 @@ begin
 
   DeleteSpellCheckItems(LFirstLine, LLastLine);
   ScanSpellCheck(LFirstLine, LLastLine);
-  FSpellCheck.Items.Sort(CompareLines);
+  FSpellCheckItems.Sort(CompareLines);
   ClearMinimapBuffer;
 end;
 
@@ -13177,7 +13215,7 @@ begin
   if not Assigned(FSpellCheck) then
     Exit;
 
-  FSpellCheck.ClearItems;
+  ClearSpellCheckItems;
 
   if eoSpellCheck in FOptions then
     ScanSpellCheck(0, FLines.Count - 1);
@@ -13194,16 +13232,16 @@ begin
   if not Assigned(FSpellCheck) then
     Exit;
 
-  FSpellCheck.ClearItems;
+  ClearSpellCheckItems;
   try
     if not (eoSpellCheck in FOptions) then
       Exit;
 
     ScanSpellCheck(0, FLines.Count - 1);
 
-    if FSpellCheck.Items.Count > 0 then
+    if FSpellCheckItems.Count > 0 then
     begin
-      LTextPosition := PTextEditorTextPosition(FSpellCheck.Items[0])^;
+      LTextPosition := PTextEditorTextPosition(FSpellCheckItems[0])^;
       LWord := WordAtTextPosition(LTextPosition);
 
       TextPosition := GetPosition(LTextPosition.Char + LWord.Length, LTextPosition.Line);
@@ -16746,13 +16784,13 @@ var
 begin
   Result := -1;
 
-  if not AMinimap and Assigned(FSpellCheck) and Assigned(FSpellCheck.Items) and (FSpellCheck.Items.Count > 0) then
+  if not AMinimap and Assigned(FSpellCheck) and Assigned(FSpellCheckItems) and (FSpellCheckItems.Count > 0) then
   begin
     Result := 0;
 
-    while Result < FSpellCheck.Items.Count do
+    while Result < FSpellCheckItems.Count do
     begin
-      LTextPosition := PTextEditorTextPosition(FSpellCheck.Items.Items[Result])^;
+      LTextPosition := PTextEditorTextPosition(FSpellCheckItems.Items[Result])^;
 
       if LTextPosition.Line + 1 >= FLineNumbers.TopLine then
         Break
@@ -16760,7 +16798,7 @@ begin
         Inc(Result);
     end;
 
-    if Result = FSpellCheck.Items.Count then
+    if Result = FSpellCheckItems.Count then
       Result := -1;
   end;
 end;
@@ -18132,7 +18170,7 @@ var
         end;
 
 {$IFDEF TEXT_EDITOR_SPELL_CHECK}
-        if (eoSpellCheck in FOptions) and Assigned(FSpellCheck) and (FSpellCheck.Items.Count > 0) and
+        if (eoSpellCheck in FOptions) and Assigned(FSpellCheck) and (FSpellCheckItems.Count > 0) and
           (LCurrentLine = LSpellCheckTextPosition.Line) and (LTokenPosition = LSpellCheckTextPosition.Char - 1) then
         begin
           if AMinimap then
@@ -18148,8 +18186,8 @@ var
 
           Inc(LCurrentSpellCheckIndex);
 
-          if LCurrentSpellCheckIndex < FSpellCheck.Items.Count then
-            LSpellCheckTextPosition := PTextEditorTextPosition(FSpellCheck.Items.Items[LCurrentSpellCheckIndex])^;
+          if LCurrentSpellCheckIndex < FSpellCheckItems.Count then
+            LSpellCheckTextPosition := PTextEditorTextPosition(FSpellCheckItems.Items[LCurrentSpellCheckIndex])^;
         end;
 {$ENDIF}
 
@@ -18634,7 +18672,7 @@ begin
   LCurrentSpellCheckIndex := GetFirstSpellCheckIndex(AMinimap);
 
   if LCurrentSpellCheckIndex <> -1 then
-    LSpellCheckTextPosition := PTextEditorTextPosition(FSpellCheck.Items.Items[LCurrentSpellCheckIndex])^;
+    LSpellCheckTextPosition := PTextEditorTextPosition(FSpellCheckItems.Items[LCurrentSpellCheckIndex])^;
 {$ENDIF}
 
   if ALastLine >= AFirstLine then
@@ -20447,11 +20485,11 @@ var
   LTextPosition: TTextEditorTextPosition;
   LWord: string;
 begin
-  LItemIndex := FSpellCheck.GetNextErrorItemIndex(TextPosition);
+  LItemIndex := FSpellCheck.GetNextErrorItemIndex(FSpellCheckItems, TextPosition);
 
   if LItemIndex <> -1 then
   begin
-    LTextPosition := PTextEditorTextPosition(FSpellCheck.Items[LItemIndex])^;
+    LTextPosition := PTextEditorTextPosition(FSpellCheckItems[LItemIndex])^;
     LWord := WordAtTextPosition(LTextPosition);
 
     TextPosition := GetPosition(LTextPosition.Char + LWord.Length, LTextPosition.Line);
@@ -20475,11 +20513,11 @@ begin
 
   Dec(LTextPosition.Char, LWord.Length);
 
-  LItemIndex := FSpellCheck.GetPreviousErrorItemIndex(LTextPosition);
+  LItemIndex := FSpellCheck.GetPreviousErrorItemIndex(FSpellCheckItems, LTextPosition);
 
   if LItemIndex <> -1 then
   begin
-    LTextPosition := PTextEditorTextPosition(FSpellCheck.Items[LItemIndex])^;
+    LTextPosition := PTextEditorTextPosition(FSpellCheckItems[LItemIndex])^;
     LWord := WordAtTextPosition(LTextPosition);
     TextPosition := GetPosition(LTextPosition.Char + LWord.Length, LTextPosition.Line);
 
@@ -24219,10 +24257,19 @@ end;
 
 procedure TCustomTextEditor.SetOption(const AOption: TTextEditorOption; const AEnabled: Boolean);
 begin
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+  var LSpellCheckChanged := (AOption = eoSpellCheck) and ((eoSpellCheck in FOptions) <> AEnabled);
+{$ENDIF}
+
   if AEnabled then
     Include(FOptions, AOption)
   else
     Exclude(FOptions, AOption);
+
+{$IFDEF TEXT_EDITOR_SPELL_CHECK}
+  if LSpellCheckChanged then
+    RescanSpellCheck;
+{$ENDIF}
 end;
 
 procedure TCustomTextEditor.Sort(const AOptions: TTextEditorSortOptions);

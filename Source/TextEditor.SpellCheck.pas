@@ -37,7 +37,6 @@ type
     FCodePage: Word;
     FFilename: string;
     FHandle: Pointer;
-    FItems: TList;
     FLibModule: THandle;
     FProcs: TSpellCheckProcs;
     FUnderLine: TTextEditorUnderline;
@@ -54,14 +53,12 @@ type
     constructor Create(AOwner: TComponent); override;
     destructor Destroy; override;
     function AddUserWord(const AWord: string): Boolean;
-    function GetNextErrorItemIndex(const ATextPosition: TTextEditorTextPosition): Integer;
-    function GetPreviousErrorItemIndex(const ATextPosition: TTextEditorTextPosition): Integer;
+    function GetNextErrorItemIndex(const AItems: TList; const ATextPosition: TTextEditorTextPosition): Integer;
+    function GetPreviousErrorItemIndex(const AItems: TList; const ATextPosition: TTextEditorTextPosition): Integer;
     function GetSuggestions(const AWord: string): TStringDynArray;
     function IsCorrectlyWritten(const AWord: string): Boolean; dynamic;
-    procedure ClearItems;
     procedure Close; dynamic;
     procedure Open; dynamic;
-    property Items: TList read FItems write FItems;
     property UserDictionaryFilename: string read FUserDictionaryFilename write SetUserDictionaryFilename;
     property UserWords: TStringList read FUserWords;
   published
@@ -100,7 +97,6 @@ begin
 
   FUnderLine := ulWaveLine;
   FUnderlineColor := TColors.Red;
-  FItems := TList.Create;
   FUserWords := TStringList.Create;
   FUserWords.CaseSensitive := True;
 end;
@@ -108,8 +104,6 @@ end;
 destructor TTextEditorSpellCheck.Destroy;
 begin
   Close;
-  ClearItems;
-  FItems.Free;
   FUserWords.Free;
 
   if FLibModule <> 0 then
@@ -119,14 +113,6 @@ begin
   end;
 
   inherited Destroy;
-end;
-
-procedure TTextEditorSpellCheck.ClearItems;
-begin
-  for var LIndex := FItems.Count - 1 downto 0 do
-    Dispose(PTextEditorTextPosition(FItems[LIndex]));
-
-  FItems.Clear;
 end;
 
 function TTextEditorSpellCheck.AddUserWord(const AWord: string): Boolean;
@@ -366,7 +352,7 @@ begin
   end;
 end;
 
-function TTextEditorSpellCheck.GetPreviousErrorItemIndex(const ATextPosition: TTextEditorTextPosition): Integer;
+function TTextEditorSpellCheck.GetPreviousErrorItemIndex(const AItems: TList; const ATextPosition: TTextEditorTextPosition): Integer;
 var
   LMiddle: Integer;
   LErrorItem: PTextEditorTextPosition;
@@ -375,7 +361,7 @@ var
   var
     LNextErrorItem: PTextEditorTextPosition;
   begin
-    LNextErrorItem := PTextEditorTextPosition(FItems[LMiddle + 1]);
+    LNextErrorItem := PTextEditorTextPosition(AItems[LMiddle + 1]);
 
     Result :=
       ((LErrorItem^.Line < ATextPosition.Line) or
@@ -400,17 +386,17 @@ var
 begin
   Result := -1;
 
-  if FItems.Count = 0 then
+  if AItems.Count = 0 then
     Exit;
 
-  LHigh := FItems.Count - 1;
+  LHigh := AItems.Count - 1;
 
-  LErrorItem := PTextEditorTextPosition(FItems[0]);
+  LErrorItem := PTextEditorTextPosition(AItems[0]);
 
   if IsErrorItemGreaterThanTextPosition then
     Exit(LHigh);
 
-  LErrorItem := PTextEditorTextPosition(FItems[LHigh]);
+  LErrorItem := PTextEditorTextPosition(AItems[LHigh]);
 
   if IsErrorItemLowerThanTextPosition then
     Exit(LHigh);
@@ -423,7 +409,7 @@ begin
   begin
     LMiddle := (LLow + LHigh) shr 1;
 
-    LErrorItem := PTextEditorTextPosition(FItems[LMiddle]);
+    LErrorItem := PTextEditorTextPosition(AItems[LMiddle]);
 
     if IsTextPositionBetweenErrorItems then
       Exit(LMiddle)
@@ -454,7 +440,7 @@ begin
   FProcs.FreeList(FHandle, LList, LListCount);
 end;
 
-function TTextEditorSpellCheck.GetNextErrorItemIndex(const ATextPosition: TTextEditorTextPosition): Integer;
+function TTextEditorSpellCheck.GetNextErrorItemIndex(const AItems: TList; const ATextPosition: TTextEditorTextPosition): Integer;
 var
   LMiddle: Integer;
   LErrorItem: PTextEditorTextPosition;
@@ -463,7 +449,7 @@ var
   var
     LPreviousErrorItem: PTextEditorTextPosition;
   begin
-    LPreviousErrorItem := PTextEditorTextPosition(FItems[LMiddle - 1]);
+    LPreviousErrorItem := PTextEditorTextPosition(AItems[LMiddle - 1]);
 
     Result :=
       ((LPreviousErrorItem^.Line < ATextPosition.Line) or
@@ -488,17 +474,17 @@ var
 begin
   Result := -1;
 
-  if FItems.Count = 0 then
+  if AItems.Count = 0 then
     Exit;
 
-  LErrorItem := PTextEditorTextPosition(FItems[0]);
+  LErrorItem := PTextEditorTextPosition(AItems[0]);
 
   if IsErrorItemGreaterThanTextPosition then
     Exit(0);
 
-  LHigh := FItems.Count - 1;
+  LHigh := AItems.Count - 1;
 
-  LErrorItem := PTextEditorTextPosition(FItems[LHigh]);
+  LErrorItem := PTextEditorTextPosition(AItems[LHigh]);
 
   if IsErrorItemLowerThanTextPosition then
     Exit(0);
@@ -509,7 +495,7 @@ begin
   begin
     LMiddle := (LLow + LHigh) shr 1;
 
-    LErrorItem := PTextEditorTextPosition(FItems[LMiddle]);
+    LErrorItem := PTextEditorTextPosition(AItems[LMiddle]);
 
     if IsTextPositionBetweenErrorItems then
       Exit(LMiddle)

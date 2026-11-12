@@ -284,6 +284,7 @@ type
       CanChangeSize: Boolean;
       ExecutingSelectionCommand: Boolean;
       Flags: TTextEditorStateFlags;
+      KeyRepeatCount: Integer;
       KeyRepeating: Boolean;
       Modified: Boolean;
       PaceNextPaint: Boolean;
@@ -13018,7 +13019,9 @@ begin
       begin
         FState.PaceNextPaint := not PeekMessage(LMessage, Handle, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE);
 
-        CommandProcessor(LEditorCommand, LChar, LData);
+        for var LIndex := 1 to FState.KeyRepeatCount do
+          CommandProcessor(LEditorCommand, LChar, LData);
+
         Update;
 
         FState.PaceNextPaint := False;
@@ -24849,7 +24852,10 @@ var
 {$ENDIF}
 begin
   if AMessage.Msg = WM_KEYDOWN then
+  begin
+    FState.KeyRepeatCount := Max(AMessage.LParamLo, 1);
     FState.KeyRepeating := AMessage.LParam and KEY_REPEAT_FLAG <> 0;
+  end;
 
   { Prevent Alt-Backspace from beeping }
   if (AMessage.Msg = WM_SYSCHAR) and (AMessage.wParam = vkBack) and (AMessage.LParam and ALT_KEY_DOWN <> 0) then

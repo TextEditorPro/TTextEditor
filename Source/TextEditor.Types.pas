@@ -164,8 +164,8 @@ type
   TTextEditorSelectionMode = (smColumn, smNormal);
 
   { Scroll }
-  TTextEditorScrollOption = (soAutoDisableScrollButtons, soHalfPage, soHintFollows, soMiddleClickAutoscroll, soPastEndOfFileMarker,
-    soPastEndOfLine, soShowVerticalScrollHint);
+  TTextEditorScrollOption = (soAutoDisableScrollButtons, soHalfPage, soHintFollows, soMiddleClickAutoscroll, soPaceKeyRepeat,
+    soPastEndOfFileMarker, soPastEndOfLine, soShowVerticalScrollHint);
   TTextEditorScrollOptions = set of TTextEditorScrollOption;
 
   TTextEditorScrollHintFormat = (shfTopLineOnly, shfTopToBottom);

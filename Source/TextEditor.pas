@@ -155,6 +155,7 @@ type
       DblClick: Cardinal;
       DeletedLine: Integer;
       Key: Word;
+      KeyRepeatFrame: Int64;
       LineNumberCount: Integer;
       MouseMovePoint: TPoint;
       Row: Integer;
@@ -283,7 +284,9 @@ type
       CanChangeSize: Boolean;
       ExecutingSelectionCommand: Boolean;
       Flags: TTextEditorStateFlags;
+      KeyRepeating: Boolean;
       Modified: Boolean;
+      PaceNextPaint: Boolean;
       ReadOnly: Boolean;
       ReplaceCanceled: Boolean;
       UnknownChars: TTextEditorUnknownChars;
@@ -720,6 +723,7 @@ type
 {$ENDIF}
     procedure UpdateWordWrap(const AValue: Boolean);
     procedure ValidateMultiCarets;
+    procedure WaitForKeyRepeatFrame;
     procedure WMCaptureChanged(var AMessage: TMessage); message WM_CAPTURECHANGED;
     procedure WMChar(var AMessage: TWMChar); message WM_CHAR;
     procedure WMClear(var AMessage: TMessage); message WM_CLEAR;
@@ -1332,7 +1336,7 @@ type
 implementation
 
 uses
-  Winapi.GDIPAPI, Winapi.GDIPOBJ, Winapi.Imm, Winapi.ShellAPI, System.Character, System.Generics.Defaults, System.RegularExpressions,
+  Winapi.DwmApi, Winapi.GDIPAPI, Winapi.GDIPOBJ, Winapi.Imm, Winapi.ShellAPI, System.Character, System.Generics.Defaults, System.RegularExpressions,
   System.Types, Vcl.Clipbrd, Vcl.ImgList, Vcl.Menus, Vcl.ToolWin, TextEditor.Export.HTML, TextEditor.Highlighter.Rules,
   TextEditor.Language, TextEditor.LeftMargin.Border, TextEditor.LeftMargin.LineNumbers, TextEditor.Search.Map, TextEditor.Search.Normal,
   TextEditor.Search.RegularExpressions, TextEditor.Search.WildCard, TextEditor.Undo.Item
@@ -11074,6 +11078,65 @@ begin
   end;
 end;
 
+procedure TCustomTextEditor.WaitForKeyRepeatFrame;
+const
+  FIRST_REPEAT_RATE = 2.5;
+  LAST_KEYBOARD_SPEED = 31;
+  LAST_REPEAT_RATE = 30;
+var
+  LFlushCount, LFrames: Integer;
+  LFrequency, LNow, LOffset, LPeriod, LFrameStart: Int64;
+  LKeyboardSpeed: DWORD;
+  LKeyInterval: Double;
+  LNearRefresh: Boolean;
+  LTimingInfo: DWM_TIMING_INFO;
+begin
+  LKeyboardSpeed := LAST_KEYBOARD_SPEED;
+
+  SystemParametersInfo(SPI_GETKEYBOARDSPEED, 0, @LKeyboardSpeed, 0);
+  QueryPerformanceFrequency(LFrequency);
+
+  LKeyInterval := LFrequency / (FIRST_REPEAT_RATE + LKeyboardSpeed * (LAST_REPEAT_RATE - FIRST_REPEAT_RATE) / LAST_KEYBOARD_SPEED);
+  LFlushCount := 0;
+
+  repeat
+    FillChar(LTimingInfo, SizeOf(LTimingInfo), 0);
+
+    LTimingInfo.cbSize := SizeOf(LTimingInfo);
+
+    if Failed(DwmGetCompositionTimingInfo(0, LTimingInfo)) or (LTimingInfo.qpcRefreshPeriod = 0) then
+      Exit;
+
+    LPeriod := LTimingInfo.qpcRefreshPeriod;
+
+    QueryPerformanceCounter(LNow);
+
+    LOffset := (LNow - Int64(LTimingInfo.qpcVBlank)) mod LPeriod;
+
+    if LOffset < 0 then
+      Inc(LOffset, LPeriod);
+
+    LFrameStart := LNow - LOffset;
+
+    if (LFlushCount > 0) and (LOffset > LPeriod div 2) then
+      Inc(LFrameStart, LPeriod);
+
+    LFrames := Max(1, Trunc((LKeyInterval + LPeriod / 8) / LPeriod));
+    LNearRefresh := (LFlushCount = 0) and (LOffset > LPeriod - LPeriod div 8);
+
+    if not LNearRefresh and ((LNow - FLast.KeyRepeatFrame > LFrequency div 4) or
+      (LFrameStart - FLast.KeyRepeatFrame >= LFrames * LPeriod - LPeriod div 4)) then
+      Break;
+
+    if (LFlushCount > LFrames) or Failed(DwmFlush) then
+      Break;
+
+    Inc(LFlushCount);
+  until False;
+
+  FLast.KeyRepeatFrame := LFrameStart;
+end;
+
 procedure TCustomTextEditor.WMCaptureChanged(var AMessage: TMessage);
 begin
   FScrollHelper.Timer.Enabled := False;
@@ -11353,6 +11416,13 @@ begin
     AMessage.DC := LCompatibleDC;
 
     inherited;
+
+    if FState.PaceNextPaint then
+    begin
+      FState.PaceNextPaint := False;
+
+      WaitForKeyRepeatFrame;
+    end;
 
     BitBlt(LDC, 0, 0, ClientWidth, ClientHeight, LCompatibleDC, 0, 0, SRCCOPY);
   finally
@@ -12846,6 +12916,7 @@ var
   LChar: Char;
   LEditorCommand: TTextEditorCommand;
   LActiveSelectionMode: TTextEditorSelectionMode;
+  LMessage: TMsg;
 begin
   inherited;
 
@@ -12940,10 +13011,25 @@ begin
     begin
       AKey := 0;
       Include(FState.Flags, sfIgnoreNextChar);
-      CommandProcessor(LEditorCommand, LChar, LData);
+
+      if FState.KeyRepeating and (soPaceKeyRepeat in FScroll.Options) and ((LEditorCommand = TKeyCommands.Up) or
+        (LEditorCommand = TKeyCommands.Down) or (LEditorCommand = TKeyCommands.SelectionUp) or
+        (LEditorCommand = TKeyCommands.SelectionDown)) then
+      begin
+        FState.PaceNextPaint := not PeekMessage(LMessage, Handle, WM_KEYDOWN, WM_KEYDOWN, PM_NOREMOVE);
+
+        CommandProcessor(LEditorCommand, LChar, LData);
+        Update;
+
+        FState.PaceNextPaint := False;
+      end
+      else
+        CommandProcessor(LEditorCommand, LChar, LData);
     end
     else
       Exclude(FState.Flags, sfIgnoreNextChar);
+
+    FState.KeyRepeating := False;
   finally
     if Assigned(LData) then
       FreeMem(LData);
@@ -15056,6 +15142,13 @@ begin
 end;
 
 procedure TCustomTextEditor.PaintCodeFoldingGuides(const AFirstRow, ALastRow: Integer);
+type
+  TGuideStrip = record
+    Bitmap: Vcl.Graphics.TBitmap;
+    FirstRow: PByte;
+    RowDelta: NativeInt;
+    X: Integer;
+  end;
 var
   LCurrentLine: Integer;
   LCodeFoldingRange, LCodeFoldingRangeTo: TTextEditorCodeFoldingRange;
@@ -15126,7 +15219,6 @@ var
             (LCodeFoldingRange.FromLine < LLine) and (LCodeFoldingRange.ToLine > LLine) then
           begin
             LCodeFoldingRanges[LRangeIndex] := LCodeFoldingRange;
-            LCodeFoldingRange.GuideLineOffset := 0;
             Inc(LRangeIndex);
 
             Break;
@@ -15170,22 +15262,100 @@ var
   end;
 
 var
+  LGuideStrips: array of TGuideStrip;
+  LThickness: Integer;
+
+  function GetGuideStripIndex(const AX: Integer): Integer;
+  var
+    LBitmap: Vcl.Graphics.TBitmap;
+  begin
+    for var LIndex := 0 to High(LGuideStrips) do
+    if LGuideStrips[LIndex].X = AX then
+      Exit(LIndex);
+
+    Result := Length(LGuideStrips);
+
+    SetLength(LGuideStrips, Result + 1);
+
+    LBitmap := Vcl.Graphics.TBitmap.Create;
+
+    LGuideStrips[Result].Bitmap := LBitmap;
+    LGuideStrips[Result].X := AX;
+
+    LBitmap.PixelFormat := pf32bit;
+    LBitmap.SetSize(LThickness + 1, Height);
+
+    BitBlt(LBitmap.Canvas.Handle, 0, 0, LBitmap.Width, LBitmap.Height, Canvas.Handle, AX, 0, SRCCOPY);
+
+    LGuideStrips[Result].FirstRow := LBitmap.ScanLine[0];
+    LGuideStrips[Result].RowDelta :=
+      if LBitmap.Height > 1 then NativeInt(LBitmap.ScanLine[1]) - NativeInt(LBitmap.ScanLine[0]) else 0;
+  end;
+
+  function IsTextAtGuide(const AX, ATop, ABottom: Integer): Boolean;
+  const
+    COLOR_MASK = $00FFFFFF;
+  var
+    LStripIndex: Integer;
+    LBackground: Cardinal;
+    LPFirstRow, LPRow: PByte;
+    LRowDelta: NativeInt;
+  begin
+    Result := False;
+
+    if (AX < 0) or (AX + LThickness >= Width) or (ATop >= Height) then
+      Exit;
+
+    LStripIndex := GetGuideStripIndex(AX);
+    LPFirstRow := LGuideStrips[LStripIndex].FirstRow;
+    LRowDelta := LGuideStrips[LStripIndex].RowDelta;
+
+    LBackground := PCardinal(LPFirstRow + ATop * LRowDelta + LThickness * SizeOf(Cardinal))^ and COLOR_MASK;
+
+    for var LRow := ATop + 2 to Min(ABottom, Height) - 1 do
+    begin
+      LPRow := LPFirstRow + LRow * LRowDelta;
+
+      for var LColumn := 0 to LThickness - 1 do
+      if (PCardinal(LPRow + LColumn * SizeOf(Cardinal))^ and COLOR_MASK) <> LBackground then
+        Exit(True);
+    end;
+  end;
+
+  procedure PaintGuideRun(const ABitmap: Vcl.Graphics.TBitmap; const AStyle: TTextEditorCodeFoldingGuideLineStyle;
+    const AX, ATop, AHeight, ASourceOffset: Integer);
+  var
+    LBltHeight: Integer;
+  begin
+    if AHeight <= 0 then
+      Exit;
+
+    if AStyle = lsSolid then
+      Canvas.FillRect(Rect(AX, ATop + 1, AX + LThickness, ATop + AHeight + 1))
+    else
+    if Assigned(ABitmap) then
+    begin
+      LBltHeight := Min(AHeight + 1, ABitmap.Height - ASourceOffset);
+
+      if LBltHeight > 0 then
+        TransparentBlt(Canvas.Handle, AX, ATop, LThickness, LBltHeight, ABitmap.Canvas.Handle, 0, ASourceOffset, LThickness,
+          LBltHeight, TColors.Fuchsia);
+    end;
+  end;
+
+var
   LOldColor: TColor;
-  LLineHeight, LDeepestLevel, LY: Integer;
-  LHideAtFirstColumn, LHideOverText, LHideInActiveRow, LHighlightIndentGuides, LSkip: Boolean;
+  LLineHeight, LDeepestLevel, LTop, LY, LX: Integer;
+  LHideAtFirstColumn, LHideOverText, LHideInActiveRow, LHighlightIndentGuides, LPaintRow, LTextAtGuide: Boolean;
   LBitmap, LBitmapGuide, LBitmapHighlightGuide: Vcl.Graphics.TBitmap;
-  LX, LX1, LZ: Integer;
-  LColor, LPixelColor: TColor;
-  LHeight, LBltLineHeight, LThickness: Integer;
+  LRowCount, LRunTop, LRunHeight, LSourceOffset: Integer;
+  LRowLines: array of Integer;
   LStyle: TTextEditorCodeFoldingGuideLineStyle;
 begin
   LOldColor := Canvas.Brush.Color;
   LThickness := GetStrokeWidth;
   LLineHeight := GetLineHeight;
-  LY := 0;
-
-  if IsRulerVisible then
-    Inc(LY, FRuler.Height);
+  LTop := if IsRulerVisible then FRuler.Height else 0;
 
   LCurrentLine := GetViewTextLineNumber(FViewPosition.Row);
   LCodeFoldingRange := nil;
@@ -15205,112 +15375,84 @@ begin
 
   GetCodeFoldingRanges;
 
+  LRowCount := Max(ALastRow - AFirstRow + 1, 0);
+
+  SetLength(LRowLines, LRowCount);
+
+  for var LRow := 0 to LRowCount - 1 do
+    LRowLines[LRow] := GetViewTextLineNumber(AFirstRow + LRow);
+
   LBitmapGuide := CreateBitmap(False);
   LBitmapHighlightGuide := CreateBitmap(True);
   try
-    for var LRow := AFirstRow to ALastRow do
+    for var LIndex := 0 to LRangeIndex - 1 do
     begin
-      LLine := GetViewTextLineNumber(LRow);
+      LCodeFoldingRange := LCodeFoldingRanges[LIndex];
 
-      for var LIndex := 0 to LRangeIndex - 1 do
+      if Assigned(LCodeFoldingRange.RegionItem) and not LCodeFoldingRange.RegionItem.ShowGuideLine then
+        Continue;
+
+      LX := FLeftMarginWidth + GetLineIndentLevel(LCodeFoldingRange.ToLine - 1) * FPaintHelper.CharWidth + FCodeFolding.GuideLines.Padding;
+
+      if LHideAtFirstColumn and (LX < FLeftMarginWidth + FPaintHelper.CharWidth) then
+        Continue;
+
+      Dec(LX, FScrollHelper.HorizontalPosition);
+
+      if LX <= FLeftMarginWidth then
+        Continue;
+
+      if LHighlightIndentGuides and FCodeFolding.GuideLines.Visible and (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
+        (LCurrentLine >= LCodeFoldingRange.FromLine) and (LCurrentLine <= LCodeFoldingRange.ToLine) then
       begin
-        LCodeFoldingRange := LCodeFoldingRanges[LIndex];
+        LBitmap := LBitmapHighlightGuide;
+        Canvas.Brush.Color := FColors.CodeFoldingIndentHighlight;
+        LStyle := FCodeFolding.GuideLines.HighlightStyle;
+      end
+      else
+      begin
+        LBitmap := LBitmapGuide;
+        Canvas.Brush.Color := FColors.CodeFoldingIndent;
+        LStyle := FCodeFolding.GuideLines.Style;
+      end;
 
-        LHeight := LY + LLineHeight;
+      LRunTop := 0;
+      LRunHeight := 0;
+      LSourceOffset := 0;
 
-        if Assigned(LCodeFoldingRange) and not LCodeFoldingRange.Collapsed and not LCodeFoldingRange.ParentCollapsed and
-          (LCodeFoldingRange.FromLine < LLine) and (LCodeFoldingRange.ToLine > LLine) then
+      for var LRow := 0 to LRowCount - 1 do
+      begin
+        LLine := LRowLines[LRow];
+        LY := LTop + LRow * LLineHeight;
+
+        LPaintRow := (LCodeFoldingRange.FromLine < LLine) and (LCodeFoldingRange.ToLine > LLine) and
+          not (LHideInActiveRow and (AFirstRow + LRow = FViewPosition.Row));
+        LTextAtGuide := LPaintRow and LHideOverText and IsTextAtGuide(LX, LY, LY + LLineHeight);
+
+        if LPaintRow and not LTextAtGuide then
         begin
-          if Assigned(LCodeFoldingRange.RegionItem) and not LCodeFoldingRange.RegionItem.ShowGuideLine then
-            Continue;
+          if LRunHeight = 0 then
+            LRunTop := LY;
 
-          LX := FLeftMarginWidth + GetLineIndentLevel(LCodeFoldingRange.ToLine - 1) * FPaintHelper.CharWidth + FCodeFolding.GuideLines.Padding;
+          Inc(LRunHeight, LLineHeight);
+        end
+        else
+        begin
+          PaintGuideRun(LBitmap, LStyle, LX, LRunTop, LRunHeight, LSourceOffset);
 
-          if LHideAtFirstColumn and (LX < FLeftMarginWidth + FPaintHelper.CharWidth) or
-            LHideInActiveRow and (LRow = FViewPosition.Row) then
-            Continue;
-
-          if LHideOverText then
-          begin
-            LX1 := LX;
-            LColor := Canvas.Pixels[LX1 + LThickness, LY];
-            LZ := LY + 2;
-            LSkip := False;
-
-            while LZ < LHeight do
-            begin
-              LPixelColor := LColor;
-
-              for var LColumn := LX1 to LX1 + LThickness - 1 do
-              begin
-                LPixelColor := Canvas.Pixels[LColumn, LZ];
-
-                if LPixelColor <> LColor then
-                  Break;
-              end;
-
-              if LPixelColor = -1 then
-                Break;
-
-              if LPixelColor <> LColor then
-              begin
-                LSkip := True;
-                Break;
-              end;
-
-              Inc(LZ);
-            end;
-
-            if LSkip then
-            begin
-              LCodeFoldingRange.GuideLineOffset := 0;
-              Continue;
-            end;
-          end;
-
-          Dec(LX, FScrollHelper.HorizontalPosition);
-
-          if LX - FLeftMarginWidth > 0 then
-          begin
-            if LHighlightIndentGuides and FCodeFolding.GuideLines.Visible and
-              (LDeepestLevel = LCodeFoldingRange.IndentLevel) and
-              (LCurrentLine >= LCodeFoldingRange.FromLine) and (LCurrentLine <= LCodeFoldingRange.ToLine) then
-            begin
-              LBitmap := LBitmapHighlightGuide;
-              Canvas.Brush.Color := FColors.CodeFoldingIndentHighlight;
-              LStyle := FCodeFolding.GuideLines.HighlightStyle;
-            end
-            else
-            begin
-              LBitmap := LBitmapGuide;
-              Canvas.Brush.Color := FColors.CodeFoldingIndent;
-              LStyle := FCodeFolding.GuideLines.Style;
-            end;
-
-            if LStyle = lsSolid then
-              Canvas.FillRect(Rect(LX, LY + 1, LX + LThickness, LHeight + 1))
-            else
-            if Assigned(LBitmap) then
-            begin
-              LBltLineHeight := LLineHeight + 1;
-
-              if LCodeFoldingRange.GuideLineOffset + LBltLineHeight > Height then
-                LBltLineHeight := Height - LCodeFoldingRange.GuideLineOffset;
-
-              TransparentBlt(Canvas.Handle, LX, LY, LThickness, LBltLineHeight, LBitmap.Canvas.Handle, 0,
-                LCodeFoldingRange.GuideLineOffset, LThickness, LBltLineHeight, TColors.Fuchsia);
-
-              LCodeFoldingRange.GuideLineOffset := LCodeFoldingRange.GuideLineOffset + LLineHeight;
-            end;
-          end;
+          LSourceOffset := if LTextAtGuide then 0 else LSourceOffset + LRunHeight;
+          LRunHeight := 0;
         end;
       end;
 
-      Inc(LY, LLineHeight);
+      PaintGuideRun(LBitmap, LStyle, LX, LRunTop, LRunHeight, LSourceOffset);
     end;
 
     SetLength(LCodeFoldingRanges, 0);
   finally
+    for var LIndex := 0 to High(LGuideStrips) do
+      LGuideStrips[LIndex].Bitmap.Free;
+
     if Assigned(LBitmapGuide) then
       LBitmapGuide.Free;
 
@@ -24700,11 +24842,15 @@ end;
 procedure TCustomTextEditor.WndProc(var AMessage: TMessage);
 const
   ALT_KEY_DOWN = $20000000;
+  KEY_REPEAT_FLAG = $40000000;
 {$IFDEF ALPHASKINS}
 var
   LPaintStruct: TPaintStruct;
 {$ENDIF}
 begin
+  if AMessage.Msg = WM_KEYDOWN then
+    FState.KeyRepeating := AMessage.LParam and KEY_REPEAT_FLAG <> 0;
+
   { Prevent Alt-Backspace from beeping }
   if (AMessage.Msg = WM_SYSCHAR) and (AMessage.wParam = vkBack) and (AMessage.LParam and ALT_KEY_DOWN <> 0) then
     AMessage.Msg := 0;

@@ -6,7 +6,7 @@ uses
   System.Classes, System.UITypes, TextEditor.Glyph, TextEditor.Scroll.Hint, TextEditor.Scroll.Shadow, TextEditor.Types;
 
 const
-  TEXTEDITOR_DEFAULT_SCROLL_OPTIONS = [soAutoDisableScrollButtons, soMiddleClickAutoscroll, soShowVerticalScrollHint];
+  TEXTEDITOR_DEFAULT_SCROLL_OPTIONS = [soAutoDisableScrollButtons, soMiddleClickAutoscroll, soShowVerticalScrollHint, soPaceKeyRepeat];
 
 type
   TTextEditorScroll = class(TPersistent)

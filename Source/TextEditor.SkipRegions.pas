@@ -11,6 +11,7 @@ type
   TTextEditorSkipRegionItem = class(TCollectionItem)
   strict private
     FCloseToken: string;
+    FIgnoreStringEscapeChar: Boolean;
     FNested: Boolean;
     FOpenToken: string;
     FRegionType: TTextEditorSkipRegionItemType;
@@ -19,6 +20,7 @@ type
   public
     property OpenToken: string read FOpenToken write FOpenToken;
     property CloseToken: string read FCloseToken write FCloseToken;
+    property IgnoreStringEscapeChar: Boolean read FIgnoreStringEscapeChar write FIgnoreStringEscapeChar;
     property Nested: Boolean read FNested write FNested;
     property RegionType: TTextEditorSkipRegionItemType read FRegionType write FRegionType;
     property SkipEmptyChars: Boolean read FSkipEmptyChars write FSkipEmptyChars;

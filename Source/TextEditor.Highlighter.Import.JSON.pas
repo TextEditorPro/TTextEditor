@@ -778,6 +778,7 @@ begin
         with LSkipRegionItem do
         begin
           RegionType := LSkipRegionType;
+          IgnoreStringEscapeChar := LItemObject.ValueBoolean['IgnoreStringEscapeChar'];
           SkipEmptyChars := LItemObject.ValueBoolean['SkipEmptyChars'];
           SkipIfNextCharIsNot := TControlCharacters.Null;
 

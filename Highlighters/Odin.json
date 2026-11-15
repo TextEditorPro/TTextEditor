@@ -8,8 +8,7 @@
       "import \"core:fmt\"\r\n",
       "\r\n",
       "main :: proc() {\r\n",
-      "{\r\n",
-      "    fmt.println(\"Hello, World!\\n\");\r\n",
+      "    fmt.println(\"Hello, World!\")\r\n",
       "}"
     ],
     "MainRules": {
@@ -20,6 +19,7 @@
         "HighlightMethodCalls": true,
         "NestedComments": true
       },
+      "CaseSensitive": true,
       "SubRules": {
         "Range": [
           {
@@ -94,44 +94,9 @@
             "Attributes": {
               "Element": "String"
             },
-            "Properties": {
-              "CloseOnEndOfLine": true
-            },
             "TokenRange": {
               "Open": "`",
               "Close": "`"
-            },
-            "SubRules": {
-              "Range": [
-                {
-                  "Type": "String",
-                  "Attributes": {
-                    "Element": "String"
-                  },
-                  "Properties": {
-                    "CloseOnEndOfLine": true,
-                    "CloseOnTerm": true
-                  },
-                  "TokenRange": {
-                    "Open": "\\`",
-                    "Close": ""
-                  }
-                },
-                {
-                  "Type": "String",
-                  "Attributes": {
-                    "Element": "String"
-                  },
-                  "Properties": {
-                    "CloseOnEndOfLine": true,
-                    "CloseOnTerm": true
-                  },
-                  "TokenRange": {
-                    "Open": "\\\\",
-                    "Close": ""
-                  }
-                }
-              ]
             }
           },
           {
@@ -198,7 +163,7 @@
             "Attributes": {
               "Element": "HexNumber"
             },
-            "AllowedCharacters": "0123456789abcdefABCDEF",
+            "AllowedCharacters": "0123456789abcdefABCDEF_",
             "Properties": {
               "CloseOnTerm": true,
               "CloseOnEndOfLine": true
@@ -206,6 +171,146 @@
             "TokenRange": {
               "Open": "0x",
               "OpenBreakType": "Any"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abcdefABCDEF_",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0h",
+              "OpenBreakType": "Any"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "01_",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0b",
+              "OpenBreakType": "Any"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "01234567_",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0o",
+              "OpenBreakType": "Any"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789_",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0d",
+              "OpenBreakType": "Any"
+            }
+          },
+          {
+            "Type": "HexNumber",
+            "Attributes": {
+              "Element": "HexNumber"
+            },
+            "AllowedCharacters": "0123456789abAB_",
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "0z",
+              "OpenBreakType": "Any"
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#"
+            }
+          },
+          {
+            "Type": "Directive",
+            "Attributes": {
+              "Element": "Directive"
+            },
+            "Properties": {
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "#+"
+            }
+          },
+          {
+            "Type": "Attribute",
+            "Attributes": {
+              "Element": "Attribute"
+            },
+            "Properties": {
+              "CloseOnTerm": true,
+              "CloseOnEndOfLine": true
+            },
+            "TokenRange": {
+              "Open": "@"
+            }
+          },
+          {
+            "Type": "Attribute",
+            "Attributes": {
+              "Element": "Attribute"
+            },
+            "TokenRange": {
+              "Open": "@(",
+              "Close": ")"
+            },
+            "SubRules": {
+              "Range": [
+                {
+                  "Type": "String",
+                  "Attributes": {
+                    "Element": "String"
+                  },
+                  "Properties": {
+                    "CloseOnEndOfLine": true
+                  },
+                  "TokenRange": {
+                    "Open": "\"",
+                    "Close": "\""
+                  }
+                }
+              ]
             }
           }
         ],
@@ -215,6 +320,7 @@
             "Words": [
               "asm",
               "auto_cast",
+              "bit_field",
               "bit_set",
               "break",
               "case",
@@ -234,7 +340,10 @@
               "import",
               "in",
               "map",
+              "matrix",
               "not_in",
+              "or_break",
+              "or_continue",
               "or_else",
               "or_return",
               "package",
@@ -243,7 +352,6 @@
               "struct",
               "switch",
               "transmute",
-              "typeid",
               "union",
               "using",
               "when",
@@ -267,6 +375,7 @@
               "complex64",
               "complex128",
               "cstring",
+              "cstring16",
               "f16",
               "f16be",
               "f16le",
@@ -297,6 +406,7 @@
               "rune",
               "runtime.Maybe",
               "string",
+              "string16",
               "typeid",
               "u8",
               "u16",
@@ -323,24 +433,41 @@
             "Words": [
               "false",
               "nil",
-              "odin_arch",
-              "odin_build_mode",
-              "odin_compile_timestamp",
-              "odin_debug",
-              "odin_default_to_nil_allocator",
-              "odin_default_to_panic_allocator",
-              "odin_disable_assert",
-              "odin_endian",
-              "odin_error_pos_style",
-              "odin_no_crt",
-              "odin_no_entry_point",
-              "odin_no_rtti",
-              "odin_os",
-              "odin_platform_subtarget",
-              "odin_root",
-              "odin_vendor",
-              "odin_version",
-              "odin_windows_subsystem",
+              "ODIN_ARCH",
+              "ODIN_ARCH_STRING",
+              "ODIN_BUILD_MODE",
+              "ODIN_BUILD_PROJECT_NAME",
+              "ODIN_COMPILE_TIMESTAMP",
+              "ODIN_DEBUG",
+              "ODIN_DEFAULT_TO_NIL_ALLOCATOR",
+              "ODIN_DEFAULT_TO_PANIC_ALLOCATOR",
+              "ODIN_DISABLE_ASSERT",
+              "ODIN_ENDIAN",
+              "ODIN_ENDIAN_STRING",
+              "ODIN_ERROR_POS_STYLE",
+              "ODIN_FOREIGN_ERROR_PROCEDURES",
+              "ODIN_MICROARCH_STRING",
+              "ODIN_MINIMUM_OS_VERSION",
+              "ODIN_NO_BOUNDS_CHECK",
+              "ODIN_NO_CRT",
+              "ODIN_NO_ENTRY_POINT",
+              "ODIN_NO_RTTI",
+              "ODIN_NO_TYPE_ASSERT",
+              "ODIN_OPTIMIZATION_MODE",
+              "ODIN_OS",
+              "ODIN_OS_STRING",
+              "ODIN_PLATFORM_SUBTARGET",
+              "ODIN_ROOT",
+              "ODIN_SANITIZER_FLAGS",
+              "ODIN_TEST",
+              "ODIN_TILDE",
+              "ODIN_USE_SEPARATE_MODULES",
+              "ODIN_VALGRIND_SUPPORT",
+              "ODIN_VENDOR",
+              "ODIN_VERSION",
+              "ODIN_VERSION_HASH",
+              "ODIN_WINDOWS_SUBSYSTEM",
+              "ODIN_WINDOWS_SUBSYSTEM_STRING",
               "true"
             ],
             "Attributes": {
@@ -352,7 +479,6 @@
             "Words": [
               "!",
               "-",
-              "#",
               "$",
               "%",
               "&",
@@ -365,11 +491,9 @@
               ":",
               ";",
               "?",
-              "@",
               "[",
               "]",
               "^",
-              "`",
               "{",
               "|",
               "}",
@@ -413,6 +537,12 @@
             "OpenToken": "\"",
             "CloseToken": "\"",
             "RegionType": "SingleLineString"
+          },
+          {
+            "OpenToken": "`",
+            "CloseToken": "`",
+            "RegionType": "MultiLineString",
+            "IgnoreStringEscapeChar": true
           },
           {
             "OpenToken": "//",

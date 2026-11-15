@@ -8345,11 +8345,11 @@ const
   var
     LCurrentCodeFoldingRegion: TTextEditorCodeFoldingRegion;
 
-  function OddCountOfStringEscapeChars(const APText: PChar): Boolean;
+  function OddCountOfStringEscapeChars(const APText: PChar; const ASkipRegionItem: TTextEditorSkipRegionItem): Boolean;
   begin
     Result := False;
 
-    if LCurrentCodeFoldingRegion.StringEscapeChar <> TControlCharacters.Null then
+    if (LCurrentCodeFoldingRegion.StringEscapeChar <> TControlCharacters.Null) and not ASkipRegionItem.IgnoreStringEscapeChar then
       Result := Odd(CountCharsBefore(APText, LCurrentCodeFoldingRegion.StringEscapeChar));
   end;
 
@@ -8380,9 +8380,12 @@ const
     Result := False;
 
     { Note! Check Close before Open because close and open keys might be same. }
-    if (LOpenTokenSkipFoldRangeList.Count > 0) and (LPText^ in FHighlighter.SkipCloseKeyChars) and not OddCountOfStringEscapeChars(LPText) then
+    if (LOpenTokenSkipFoldRangeList.Count > 0) and (LPText^ in FHighlighter.SkipCloseKeyChars) then
     begin
       LSkipRegionItem := LOpenTokenSkipFoldRangeList.Last;
+
+      if OddCountOfStringEscapeChars(LPText, LSkipRegionItem) then
+        Exit;
 
       LPKeyWord := PChar(LSkipRegionItem.CloseToken);
       LPBookmarkText := LPText;
@@ -8440,7 +8443,7 @@ const
           Continue;
         end;
 
-        if (LPText^ = PChar(LSkipRegionItem.OpenToken)^) and not OddCountOfStringEscapeChars(LPText) and
+        if (LPText^ = PChar(LSkipRegionItem.OpenToken)^) and not OddCountOfStringEscapeChars(LPText, LSkipRegionItem) and
           not IsNextSkipChar(LPText + LSkipRegionItem.OpenToken.Length, LSkipRegionItem) then
         begin
           LPKeyWord := PChar(LSkipRegionItem.OpenToken);
@@ -8464,7 +8467,7 @@ const
               LPKeyWord := PChar(LSkipRegionItem.CloseToken);
 
               while (LPText^ <> TControlCharacters.Null) and
-                ((LPText^ <> LPKeyWord^) or (LPText^ = LPKeyWord^) and OddCountOfStringEscapeChars(LPText)) do
+                ((LPText^ <> LPKeyWord^) or (LPText^ = LPKeyWord^) and OddCountOfStringEscapeChars(LPText, LSkipRegionItem)) do
                 Inc(LPText);
 
               Inc(LPText);

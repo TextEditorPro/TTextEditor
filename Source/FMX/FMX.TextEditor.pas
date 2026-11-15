@@ -391,6 +391,7 @@ type
     FRulerMovePosition: Single;
     FSaveScrollOption: Boolean;
     FSaveSelectionMode: TTextEditorSelectionMode;
+    FSaveWordWrapActive: Boolean;
     FScroll: TTextEditorScroll;
     FScrollHelper: TTextEditorScrollHelper;
     FSearch: TTextEditorSearch;
@@ -10274,13 +10275,17 @@ begin
 
   if FSyncEdit.Visible then
   begin
-    FWordWrap.Active := False;
-
     LSelectionAvailable := GetSelectionAvailable;
     LIsWordSelected := IsWordSelected;
 
     if LSelectionAvailable and LIsWordSelected then
     begin
+      if FWordWrap.Active then
+      begin
+        FSaveWordWrapActive := True;
+        FWordWrap.Active := False;
+      end;
+
       FUndoList.BeginBlock;
 
       FSyncEdit.InEditor := True;
@@ -10329,6 +10334,12 @@ begin
       FSyncEdit.InEditor := False;
 
       FUndoList.EndBlock;
+
+      if FSaveWordWrapActive then
+      begin
+        FSaveWordWrapActive := False;
+        FWordWrap.Active := True;
+      end;
     end;
   end;
 
@@ -12150,6 +12161,10 @@ end;
 procedure TCustomTextEditor.LinesCleared(ASender: TObject);
 begin
   MoveCaretToBeginning;
+
+  if FSyncEdit.Visible then
+    FSyncEdit.Visible := False;
+
   ClearCodeFolding;
   ClearMatchingPair;
   FBookmarkList.Clear;
@@ -12471,7 +12486,8 @@ begin
       Exit;
     end;
 
-  if not ReadOnly and FSyncEdit.Active and FSyncEdit.Activator.Visible and not FSyncEdit.Visible and LSelectionAvailable then
+  if not ReadOnly and FLeftMargin.Visible and FSyncEdit.Active and FSyncEdit.Activator.Visible and not FSyncEdit.Visible and
+    LSelectionAvailable then
   begin
     LViewPosition := TextToViewPosition(SelectionEndPosition);
 

@@ -164,8 +164,6 @@ end;
 
 procedure TTextEditorUndoList.Clear;
 begin
-  FBlockCount := 0;
-
   for var LIndex := 0 to FItems.Count - 1 do
     TTextEditorUndoItem(FItems[LIndex]).Free;
 

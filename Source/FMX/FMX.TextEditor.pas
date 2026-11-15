@@ -9565,22 +9565,27 @@ begin
           FEvents.OnSearchEngineChanged(Self);
       end;
     scSearch:
-      if FSearch.Enabled and SearchAll then
+      if FSearch.Enabled then
       begin
-        if not Assigned(Parent) then
-          Exit;
+        var LTextPosition := if SelectionAvailable then SelectionStartPosition else TextPosition;
 
-        TextPosition :=
+        if SearchAll then
+        begin
+          if not Assigned(Parent) then
+            Exit;
+
           if FSearch.InSelection.Active and
             not IsSamePosition(FSearch.InSelection.SelectionStartPosition, FSearch.InSelection.SelectionEndPosition) then
-            FSearch.InSelection.SelectionStartPosition
+            LTextPosition := FSearch.InSelection.SelectionStartPosition
           else
-            GetBOFPosition;
+          if (soEntireScope in FSearch.Options) or
+            (FSearch.Items.Count > 0) and (FSearch.GetNextSearchItemIndex(LTextPosition) = -1) then
+            LTextPosition := GetBOFPosition;
 
-        if SelectionAvailable then
-          TextPosition := SelectionStartPosition;
+          TextPosition := LTextPosition;
 
-        FindNext;
+          FindNext;
+        end;
       end;
     scInSelectionActive:
       begin

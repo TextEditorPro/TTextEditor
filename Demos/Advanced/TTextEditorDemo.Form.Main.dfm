@@ -653,6 +653,10 @@ object MainForm: TMainForm
               item
                 Action = ActionTestWordSelection
                 Caption = 'Test &word selection'
+              end
+              item
+                Action = ActionTestMultiCaretEditing
+                Caption = 'Test m&ulti-caret editing'
               end>
             Caption = '&Test'
           end>
@@ -791,6 +795,11 @@ object MainForm: TMainForm
       Category = 'Test'
       Caption = 'Test word selection'
       OnExecute = ActionTestWordSelectionExecute
+    end
+    object ActionTestMultiCaretEditing: TAction
+      Category = 'Test'
+      Caption = 'Test multi-caret editing'
+      OnExecute = ActionTestMultiCaretEditingExecute
     end
   end
   object PrintDialog: TPrintDialog

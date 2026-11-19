@@ -4,6 +4,12 @@ object FrameTextEditor: TFrameTextEditor
   Width = 640
   Height = 480
   Align = alClient
+  Font.Charset = DEFAULT_CHARSET
+  Font.Color = clWindowText
+  Font.Height = -12
+  Font.Name = 'Segoe UI'
+  Font.Style = []
+  ParentFont = False
   TabOrder = 0
   object TextEditor: TTextEditor
     Left = 0
@@ -16,7 +22,6 @@ object FrameTextEditor: TFrameTextEditor
     CodeFolding.Visible = True
     HighlightLine.Active = True
     LeftMargin.MarksPanel.Options = [bpoToggleBookmarkByClick, bpoShowBookmarkColorsPopup]
-    LeftMargin.Width = 57
     OnCreateHighlighterStream = TextEditorCreateHighlighterStream
     PartialLoad.Rows = 100
     Selection.Options = [soALTSetsColumnMode, soHighlightSimilarTerms, soTermsCaseSensitive]

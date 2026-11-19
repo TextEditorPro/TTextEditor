@@ -48,6 +48,7 @@ type
     function RunClipboardRoundTripSeed(ASeed: Integer): string;
     function RunLineBreakIndentSeed(ASeed: Integer): string;
     function RunMacroSeed(ASeed: Integer): string;
+    function RunMultiCaretEditingSeed(ASeed: Integer): string;
     function RunPastEndOfFileSeed(ASeed: Integer): string;
     function RunSaveLoadSeed(ASeed: Integer): string;
     function RunSelectionInvariantsSeed(ASeed: Integer): string;
@@ -68,6 +69,7 @@ type
     procedure RunHighlighterSweepTest;
     procedure RunLineBreakIndentTest;
     procedure RunMacroTest(const ARecorder: TCustomEditorMacroRecorder);
+    procedure RunMultiCaretEditingTest;
     procedure RunPastEndOfFileTest;
     procedure RunSaveLoadTest;
     procedure RunSelectionInvariantsTest;
@@ -85,7 +87,7 @@ implementation
 {$R *.dfm}
 
 uses
-  System.IOUtils, System.Math, System.StrUtils, Vcl.Clipbrd, Vcl.Dialogs, Vcl.Graphics, TextEditor.KeyCommands, TextEditor.PaintHelper;
+  System.Generics.Collections, System.IOUtils, System.Math, System.StrUtils, Vcl.Clipbrd, Vcl.Dialogs, Vcl.Graphics, TextEditor.KeyCommands, TextEditor.PaintHelper;
 
 
 procedure TFrameTextEditor.ButtonServerStartClick(Sender: TObject);
@@ -1147,6 +1149,251 @@ begin
   finally
     TextEditor.Selection.Options := LOptions;
     TextEditor.Colors.SearchHighlighterBackground := LColor;
+  end;
+end;
+
+function TFrameTextEditor.RunMultiCaretEditingSeed(ASeed: Integer): string;
+const
+  cMaxLineCount = 5;
+  cMaxLineLength = 6;
+  cMaxCaretCount = 5;
+  cMaxCommandCount = 8;
+  cBackspace = 'B';
+  cDelete = 'D';
+var
+  LInitialText, LText, LInitialCarets, LCommands: string;
+  LOffsets: TList<Integer>;
+  LCommand: Char;
+  LCaretsActive: Boolean;
+
+  function Failure(const AMessage: string): string;
+  begin
+    Result := AMessage + ' for RandSeed = ' + ASeed.ToString + ', text [' + LInitialText.Replace(#10, '|') + '], carets ' +
+      LInitialCarets + ', commands ' + LCommands;
+  end;
+
+  function CaretsToString(const ATextPositions: TArray<TTextEditorTextPosition>): string;
+  begin
+    Result := '';
+
+    for var LTextPosition in ATextPositions do
+      Result := Result + Format('(%d,%d)', [LTextPosition.Line, LTextPosition.Char]);
+  end;
+
+  function EditorCarets: string;
+  begin
+    Result := CaretsToString(TextEditor.GetMultiCaretTextPositions);
+  end;
+
+  function EditorText: string;
+  begin
+    Result := '';
+
+    for var LLine := 0 to TextEditor.Lines.Count - 1 do
+    begin
+      if LLine > 0 then
+        Result := Result + #10;
+
+      Result := Result + TextEditor.Lines[LLine];
+    end;
+  end;
+
+  function ModelCarets: TArray<TTextEditorTextPosition>;
+  begin
+    SetLength(Result, LOffsets.Count);
+
+    for var LIndex := 0 to LOffsets.Count - 1 do
+    begin
+      Result[LIndex].Line := 0;
+      Result[LIndex].Char := 1;
+
+      for var LPosition := 1 to LOffsets[LIndex] do
+      if LText[LPosition] = #10 then
+      begin
+        Inc(Result[LIndex].Line);
+        Result[LIndex].Char := 1;
+      end
+      else
+        Inc(Result[LIndex].Char);
+    end;
+  end;
+
+  procedure ApplyToModel(const ACommand: Char);
+  var
+    LOffset, LChange: Integer;
+  begin
+    for var LIndex1 := LOffsets.Count - 1 downto 0 do
+    begin
+      LOffset := LOffsets[LIndex1];
+      LChange := 0;
+
+      case ACommand of
+        cBackspace:
+          if LOffset > 0 then
+          begin
+            Delete(LText, LOffset, 1);
+            LOffsets[LIndex1] := LOffset - 1;
+            LChange := -1;
+          end;
+        cDelete:
+          if LOffset < LText.Length then
+          begin
+            Delete(LText, LOffset + 1, 1);
+            LChange := -1;
+          end;
+      else
+        Insert(ACommand, LText, LOffset + 1);
+        LOffsets[LIndex1] := LOffset + 1;
+        LChange := 1;
+      end;
+
+      for var LIndex2 := LIndex1 + 1 to LOffsets.Count - 1 do
+        LOffsets[LIndex2] := LOffsets[LIndex2] + LChange;
+    end;
+
+    for var LIndex := LOffsets.Count - 1 downto 1 do
+    if LOffsets[LIndex] = LOffsets[LIndex - 1] then
+      LOffsets.Delete(LIndex);
+  end;
+
+begin
+  Result := '';
+
+  RandSeed := ASeed;
+
+  TextEditor.WordWrap.Active := Odd(ASeed);
+
+  { The model keeps the document as one string with single line feeds and the carets as offsets into it }
+  LInitialText := '';
+
+  for var LLine := 1 to Random(cMaxLineCount) + 1 do
+  begin
+    if LLine > 1 then
+      LInitialText := LInitialText + #10;
+
+    for var LIndex := 1 to Random(cMaxLineLength + 1) do
+      LInitialText := LInitialText + Chr(Ord('a') + Random(26));
+  end;
+
+  { A trailing empty line would be dropped when the text is assigned to the editor }
+  LInitialText := LInitialText + 'z';
+
+  LText := LInitialText;
+  LCommands := '';
+
+  LOffsets := TList<Integer>.Create;
+  try
+    try
+      for var LIndex := 1 to Random(cMaxCaretCount - 1) + 2 do
+      begin
+        var LOffset := Random(LText.Length + 1);
+
+        if not LOffsets.Contains(LOffset) then
+          LOffsets.Add(LOffset);
+      end;
+
+      if LOffsets.Count < 2 then
+        Exit;
+
+      LOffsets.Sort;
+      LInitialCarets := CaretsToString(ModelCarets);
+
+      TextEditor.FreeMultiCarets;
+      TextEditor.Text := LInitialText.Replace(#10, sLineBreak);
+      TextEditor.ClearUndo;
+      TextEditor.SetMultiCaretTextPositions(ModelCarets);
+
+      if EditorCarets <> LInitialCarets then
+        Exit(Failure('Carets were set to ' + EditorCarets));
+
+      LCaretsActive := True;
+
+      for var LIndex := 1 to Random(cMaxCommandCount) + 1 do
+      begin
+        case Random(3) of
+          0:
+            LCommand := cBackspace;
+          1:
+            LCommand := cDelete;
+        else
+          LCommand := Chr(Ord('0') + Random(10));
+        end;
+
+        LCommands := LCommands + LCommand;
+
+        ApplyToModel(LCommand);
+
+        case LCommand of
+          cBackspace:
+            TextEditor.CommandProcessor(TKeyCommands.Backspace, #0, nil);
+          cDelete:
+            TextEditor.CommandProcessor(TKeyCommands.DeleteChar, #0, nil);
+        else
+          TextEditor.CommandProcessor(TKeyCommands.Char, LCommand, nil);
+        end;
+
+        if EditorText <> LText then
+          Exit(Failure('Text is [' + EditorText.Replace(#10, '|') + '] instead of [' + LText.Replace(#10, '|') + ']'));
+
+        { Multi-caret editing ends when the carets merge into one }
+        if LOffsets.Count < 2 then
+        begin
+          LCaretsActive := False;
+
+          if not EditorCarets.IsEmpty then
+            Exit(Failure('Merged carets left ' + EditorCarets));
+
+          Break;
+        end;
+
+        if EditorCarets <> CaretsToString(ModelCarets) then
+          Exit(Failure('Carets are ' + EditorCarets + ' instead of ' + CaretsToString(ModelCarets)));
+      end;
+
+      TextEditor.CommandProcessor(TKeyCommands.Undo, #0, nil);
+
+      if EditorText <> LInitialText then
+        Exit(Failure('Undo left the text as [' + EditorText.Replace(#10, '|') + ']'));
+
+      if LCaretsActive and (EditorCarets <> LInitialCarets) then
+        Exit(Failure('Undo left the carets at ' + EditorCarets));
+
+      TextEditor.CommandProcessor(TKeyCommands.Redo, #0, nil);
+
+      if EditorText <> LText then
+        Exit(Failure('Redo left the text as [' + EditorText.Replace(#10, '|') + '] instead of [' + LText.Replace(#10, '|') + ']'));
+
+      if LCaretsActive and (EditorCarets <> CaretsToString(ModelCarets)) then
+        Exit(Failure('Redo left the carets at ' + EditorCarets + ' instead of ' + CaretsToString(ModelCarets)));
+    except
+      on E: Exception do
+        Exit(Failure(E.ClassName + ': ' + E.Message));
+    end;
+  finally
+    LOffsets.Free;
+  end;
+end;
+
+procedure TFrameTextEditor.RunMultiCaretEditingTest;
+var
+  LMultiEditActive, LWordWrapActive: Boolean;
+  LUndoOptions: TTextEditorUndoOptions;
+begin
+  LMultiEditActive := TextEditor.Caret.MultiEdit.Active;
+  LUndoOptions := TextEditor.Undo.Options;
+  LWordWrapActive := TextEditor.WordWrap.Active;
+
+  { One undo has to take back the whole command sequence }
+  TextEditor.Caret.MultiEdit.Active := True;
+  TextEditor.Undo.Options := TextEditor.Undo.Options + [uoGroupUndo];
+  try
+    RunTestLoop(10000, RunMultiCaretEditingSeed);
+  finally
+    TextEditor.FreeMultiCarets;
+
+    TextEditor.Caret.MultiEdit.Active := LMultiEditActive;
+    TextEditor.Undo.Options := LUndoOptions;
+    TextEditor.WordWrap.Active := LWordWrapActive;
   end;
 end;
 

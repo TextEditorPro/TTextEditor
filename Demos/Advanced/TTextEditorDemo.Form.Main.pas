@@ -35,6 +35,7 @@ type
     ActionTestHighlighterSweep: TAction;
     ActionTestLineBreakIndent: TAction;
     ActionTestMacro: TAction;
+    ActionTestMultiCaretEditing: TAction;
     ActionTestPastEndOfFile: TAction;
     ActionTestSaveLoad: TAction;
     ActionTestSelectionInvariants: TAction;
@@ -88,6 +89,7 @@ type
     procedure ActionTestHighlighterSweepExecute(Sender: TObject);
     procedure ActionTestLineBreakIndentExecute(Sender: TObject);
     procedure ActionTestMacroExecute(Sender: TObject);
+    procedure ActionTestMultiCaretEditingExecute(Sender: TObject);
     procedure ActionTestPastEndOfFileExecute(Sender: TObject);
     procedure ActionTestSaveLoadExecute(Sender: TObject);
     procedure ActionTestSelectionInvariantsExecute(Sender: TObject);
@@ -764,6 +766,14 @@ begin
     ActionViewTextEditor.Execute;
 
   FFrameTextEditor.RunWordSelectionTest;
+end;
+
+procedure TMainForm.ActionTestMultiCaretEditingExecute(Sender: TObject);
+begin
+  if not FFrameTextEditor.Visible then
+    ActionViewTextEditor.Execute;
+
+  FFrameTextEditor.RunMultiCaretEditingTest;
 end;
 
 procedure TMainForm.ActionViewDarkThemeExecute(Sender: TObject);

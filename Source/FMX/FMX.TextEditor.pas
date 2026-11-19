@@ -234,6 +234,8 @@ type
       Position: TTextEditorViewPosition;
       SelectionAvailable: Boolean;
       Timer: TTextEditorTimer;
+      UndoTextPositions: TArray<TTextEditorTextPosition>;
+      UndoTextPositionsChanged: Boolean;
     end;
 
     TTextEditorOriginal = record
@@ -576,6 +578,7 @@ type
     procedure DoWordLeft(const ACommand: TTextEditorCommand);
     procedure DoWordRight(const ACommand: TTextEditorCommand);
     procedure DragMinimap(const AY: Single);
+    procedure ExecuteCommandAtMultiCarets(const ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer);
     procedure EndUndoUpdate;
     procedure EnsureCaretPositionInsideLines(const ATextPosition: TTextEditorTextPosition);
     procedure FindWords(const AWord: string; const AList: TList; const ACaseSensitive: Boolean; const AWholeWordsOnly: Boolean);
@@ -607,6 +610,7 @@ type
     procedure OnCodeFoldingDelayTimer(ASender: TObject);
     procedure ReplaceChanged(const AEvent: TTextEditorReplaceChanges);
     procedure RestoreCollapsedBackup;
+    procedure RestoreMultiCaretsAfterUndo;
     procedure RightMarginChanged(ASender: TObject);
     procedure RulerChanged(ASender: TObject);
     procedure ScanCodeFoldingMatchingPair;
@@ -5345,7 +5349,7 @@ begin
   LTextPosition := TextPosition;
   LCharAtCursor := GetCharAtTextPosition(GetPosition(LTextPosition.Char + 1, LTextPosition.Line));
 
-  if GetSelectionAvailable then
+  if GetSelectionAvailable or FMultiEdit.SelectionAvailable then
   begin
     SetSelectedTextEmpty;
     FLineNumbers.ResetCache := True;
@@ -8262,6 +8266,85 @@ begin
     if FMultiEdit.Carets.Count <= 1 then
       FreeMultiCarets;
   end;
+end;
+
+procedure TCustomTextEditor.ExecuteCommandAtMultiCarets(const ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer);
+var
+  LTextPositions: TArray<TTextEditorTextPosition>;
+  LMoved: TArray<Boolean>;
+  LOldTextPosition, LNewTextPosition: TTextEditorTextPosition;
+  LLineCount, LLineLength, LLengthChange: Integer;
+begin
+  LTextPositions := GetMultiCaretTextPositions;
+
+  SetLength(LMoved, Length(LTextPositions));
+
+  for var LIndex1 := High(LTextPositions) downto 0 do
+  begin
+    ViewPosition := FMultiEdit.Carets[LIndex1]^.ViewPosition;
+
+    LOldTextPosition := TextPosition;
+    LLineCount := FLines.Count;
+    LLineLength := FLines[LOldTextPosition.Line].Length;
+
+    ExecuteCommand(ACommand, AChar, AData);
+
+    LNewTextPosition := TextPosition;
+
+    FMultiEdit.Carets[LIndex1]^.ViewPosition := ViewPosition;
+    LTextPositions[LIndex1] := LNewTextPosition;
+
+    if FLines.Count < LLineCount then
+    begin
+      for var LIndex2 := LIndex1 + 1 to High(LTextPositions) do
+      if LTextPositions[LIndex2].Line > LNewTextPosition.Line then
+      begin
+        if LTextPositions[LIndex2].Line = LNewTextPosition.Line + 1 then
+          Inc(LTextPositions[LIndex2].Char, LNewTextPosition.Char - 1);
+
+        Dec(LTextPositions[LIndex2].Line);
+        LMoved[LIndex2] := True;
+      end;
+    end
+    else
+    begin
+      LLengthChange := FLines[LOldTextPosition.Line].Length - LLineLength;
+
+      if LLengthChange <> 0 then
+      for var LIndex2 := LIndex1 + 1 to High(LTextPositions) do
+      if (LTextPositions[LIndex2].Line = LOldTextPosition.Line) and (LTextPositions[LIndex2].Char >= LOldTextPosition.Char) then
+      begin
+        LTextPositions[LIndex2].Char := Max(LTextPositions[LIndex2].Char + LLengthChange, LNewTextPosition.Char);
+        LMoved[LIndex2] := True;
+      end;
+    end;
+  end;
+
+  CreateLineNumbersCache;
+
+  for var LIndex := 0 to High(LTextPositions) do
+  if LMoved[LIndex] then
+    FMultiEdit.Carets[LIndex]^.ViewPosition := TextToViewPosition(LTextPositions[LIndex]);
+
+  if Assigned(FEvents.OnMultiCaretChanged) then
+    FEvents.OnMultiCaretChanged(Self);
+end;
+
+procedure TCustomTextEditor.RestoreMultiCaretsAfterUndo;
+begin
+  if FMultiEdit.UndoTextPositionsChanged then
+  begin
+    if Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count = Length(FMultiEdit.UndoTextPositions)) then
+    begin
+      UpdateMultiCaretViewPositions(FMultiEdit.UndoTextPositions);
+      UpdateMultiCaretDisplays;
+    end
+    else
+      SetMultiCaretTextPositions(FMultiEdit.UndoTextPositions);
+  end;
+
+  FMultiEdit.UndoTextPositions := nil;
+  FMultiEdit.UndoTextPositionsChanged := False;
 end;
 
 procedure TCustomTextEditor.ReplaceChanged(const AEvent: TTextEditorReplaceChanges);
@@ -11401,6 +11484,8 @@ begin
   if LChangeTrim then
     Exclude(FOptions, eoTrimTrailingSpaces);
 
+  FMultiEdit.UndoTextPositions := GetMultiCaretTextPositions;
+
   BeginUndoUpdate;
   try
     RemoveGroupBreak;
@@ -11437,6 +11522,8 @@ begin
 
     EndUndoUpdate;
   end;
+
+  RestoreMultiCaretsAfterUndo;
 end;
 
 procedure TCustomTextEditor.DoOnCommandProcessed(ACommand: TTextEditorCommand; const AChar: Char; const AData: Pointer);
@@ -17807,9 +17894,7 @@ procedure TCustomTextEditor.RedoItem;
 var
   LChangeScrollPastEndOfLine: Boolean;
   LUndoItem: TTextEditorUndoItem;
-  LMultiCaretRecord: TTextEditorMultiCaretRecord;
   LTextPosition: TTextEditorTextPosition;
-  LCharChange, LLineChange: Integer;
   LSelectionStartPosition, LSelectionEndPosition: TTextEditorTextPosition;
   LTempText: string;
   LStrToDelete: PChar;
@@ -17846,27 +17931,12 @@ begin
           SelectionEndPosition := LUndoItem.ChangeEndPosition;
         end;
       crMultiCaret:
-        if Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) then
+        if Assigned(FMultiEdit.UndoTextPositions) and Assigned(LUndoItem.ChangeMultiCaretPositions) then
         begin
-          LMultiCaretRecord := FMultiEdit.Carets[0]^;
-          LTextPosition := ViewToTextPosition(LMultiCaretRecord.ViewPosition);
+          FUndoList.AddMultiCaretChange(FMultiEdit.UndoTextPositions, LUndoItem.ChangeBlockNumber);
 
-          FUndoList.AddChange(LUndoItem.ChangeReason, LTextPosition, LUndoItem.ChangeBeginPosition,
-            LUndoItem.ChangeEndPosition, '', FSelection.ActiveMode, LUndoItem.ChangeBlockNumber);
-
-          LCharChange := LUndoItem.ChangeCaretPosition.Char - LTextPosition.Char;
-          LLineChange := LUndoItem.ChangeCaretPosition.Line - LTextPosition.Line;
-
-          { Through the pointer - a dereferenced copy would lose the write-back }
-          for var LIndex := 0 to FMultiEdit.Carets.Count - 1 do
-          begin
-            LTextPosition := ViewToTextPosition(FMultiEdit.Carets[LIndex]^.ViewPosition);
-            Inc(LTextPosition.Char, LCharChange);
-            Inc(LTextPosition.Line, LLineChange);
-            FMultiEdit.Carets[LIndex]^.ViewPosition := TextToViewPosition(LTextPosition);
-          end;
-
-          UpdateMultiCaretDisplays;
+          FMultiEdit.UndoTextPositions := LUndoItem.ChangeMultiCaretPositions;
+          FMultiEdit.UndoTextPositionsChanged := True;
         end;
       crSelection:
         begin
@@ -18646,7 +18716,8 @@ var
         FLines[LTextPosition.Line] := LLine;
       end;
 
-      if FWordWrap.Active then
+      { Lines restored earlier in the same undo group are not in the cache until it is rebuilt }
+      if FWordWrap.Active and (LTextPosition.Line + 1 < Length(FWordWrapLine.ViewLength)) then
         FWordWrapLine.ViewLength[LTextPosition.Line + 1] := LLine.Length;
 
       { Insert left lines of Value }
@@ -18760,7 +18831,7 @@ var
 
           FLines[LCurrentLine] := LTempString;
 
-          if FWordWrap.Active then
+          if FWordWrap.Active and (LCurrentLine + 1 < Length(FWordWrapLine.ViewLength)) then
             FWordWrapLine.ViewLength[LCurrentLine + 1] := LTempString.Length;
 
           if AAddToUndoList then
@@ -19031,11 +19102,10 @@ end;
 
 procedure TCustomTextEditor.UndoItem;
 var
-  LTextPosition, LTempPosition: TTextEditorTextPosition;
+  LTempPosition: TTextEditorTextPosition;
   LChangeScrollPastEndOfLine: Boolean;
   LUndoItem: TTextEditorUndoItem;
-  LMultiCaretRecord: TTextEditorMultiCaretRecord;
-  LCharChange, LLineChange, LBeginX: Integer;
+  LBeginX: Integer;
   LTempText: string;
 begin
   LChangeScrollPastEndOfLine := not (soPastEndOfLine in FScroll.Options);
@@ -19065,26 +19135,12 @@ begin
           SelectionEndPosition := LUndoItem.ChangeEndPosition;
         end;
       crMultiCaret:
-        if Assigned(FMultiEdit.Carets) and (FMultiEdit.Carets.Count > 0) then
+        if Assigned(FMultiEdit.UndoTextPositions) and Assigned(LUndoItem.ChangeMultiCaretPositions) then
         begin
-          LMultiCaretRecord := FMultiEdit.Carets[0]^;
-          LTextPosition := ViewToTextPosition(LMultiCaretRecord.ViewPosition);
+          FRedoList.AddMultiCaretChange(FMultiEdit.UndoTextPositions, LUndoItem.ChangeBlockNumber);
 
-          FRedoList.AddChange(LUndoItem.ChangeReason, LTextPosition, LUndoItem.ChangeBeginPosition,
-            LUndoItem.ChangeEndPosition, '', FSelection.ActiveMode, LUndoItem.ChangeBlockNumber);
-
-          LCharChange := LUndoItem.ChangeCaretPosition.Char - LTextPosition.Char;
-          LLineChange := LUndoItem.ChangeCaretPosition.Line - LTextPosition.Line;
-
-          for var LIndex := 0 to FMultiEdit.Carets.Count - 1 do
-          begin
-            LTextPosition := ViewToTextPosition(FMultiEdit.Carets[LIndex]^.ViewPosition);
-            Inc(LTextPosition.Char, LCharChange);
-            Inc(LTextPosition.Line, LLineChange);
-            FMultiEdit.Carets[LIndex]^.ViewPosition := TextToViewPosition(LTextPosition);
-          end;
-
-          UpdateMultiCaretDisplays;
+          FMultiEdit.UndoTextPositions := LUndoItem.ChangeMultiCaretPositions;
+          FMultiEdit.UndoTextPositionsChanged := True;
         end;
       crSelection:
         begin
@@ -21255,10 +21311,8 @@ procedure TCustomTextEditor.CommandProcessor(const ACommand: TTextEditorCommand;
 var
   LCommand: TTextEditorCommand;
   LChar: Char;
-  LSelectionAvailable: Boolean;
-  LBackspaceCount, LCollapsedCount: Integer;
+  LCollapsedCount: Integer;
   LTextPosition: TTextEditorTextPosition;
-  LViewPosition: TTextEditorViewPosition;
   LOldSelectionStartPosition, LOldSelectionEndPosition: TTextEditorTextPosition;
   LMultiCaretRecord: PTextEditorMultiCaretRecord;
   LLength, LRows, LPasteRows, LSpaceCount: Integer;
@@ -21268,8 +21322,6 @@ var
 begin
   LCommand := ACommand;
   LChar := AChar;
-  LSelectionAvailable := False;
-  LBackspaceCount := 1;
 
   { First the program event handler gets a chance to process the command }
   DoOnProcessCommand(LCommand, LChar, AData);
@@ -21334,10 +21386,7 @@ begin
 
       FUndoList.BeginBlock(8);
       try
-        LMultiCaretRecord := FMultiEdit.Carets[0];
-        LTextPosition := ViewToTextPosition(LMultiCaretRecord^.ViewPosition);
-
-        FUndoList.AddChange(crMultiCaret, LTextPosition, LTextPosition, LTextPosition, '', smNormal);
+        FUndoList.AddMultiCaretChange(GetMultiCaretTextPositions);
 
         if FMultiEdit.SelectionAvailable then
         case LCommand of
@@ -21350,8 +21399,12 @@ begin
             end;
         end;
 
+        if not FMultiEdit.SelectionAvailable and ((LCommand = TKeyCommands.Char) or (LCommand = TKeyCommands.Tab) or
+          (LCommand = TKeyCommands.Backspace) or (LCommand = TKeyCommands.DeleteChar)) then
+          ExecuteCommandAtMultiCarets(LCommand, LChar, AData)
+        else
         case LCommand of
-          TKeyCommands.Char, TKeyCommands.Backspace, TKeyCommands.Tab, TKeyCommands.LineBegin, TKeyCommands.LineEnd,
+          TKeyCommands.Char, TKeyCommands.Backspace, TKeyCommands.DeleteChar, TKeyCommands.LineBegin, TKeyCommands.LineEnd,
           TKeyCommands.Cut, TKeyCommands.Paste, TKeyCommands.Left, TKeyCommands.SelectionLeft, TKeyCommands.Right,
           TKeyCommands.SelectionRight, TKeyCommands.SelectionLineBegin, TKeyCommands.SelectionLineEnd:
             begin
@@ -21397,27 +21450,15 @@ begin
 
               for var LIndex1 := FMultiEdit.Carets.Count - 1 downto 0 do
               case LCommand of
-                TKeyCommands.Char, TKeyCommands.Cut, TKeyCommands.Tab, TKeyCommands.Backspace, TKeyCommands.Paste:
+                TKeyCommands.Char, TKeyCommands.Cut, TKeyCommands.Backspace, TKeyCommands.DeleteChar, TKeyCommands.Paste:
                   begin
                     LMultiCaretRecord := FMultiEdit.Carets[LIndex1];
 
-                    LViewPosition := LMultiCaretRecord^.ViewPosition;
-
-                    ViewPosition := LViewPosition;
-                    LBackspaceCount := LViewPosition.Column;
-
-                    if LCommand = TKeyCommands.Tab then
-                    begin
-                      LTextPosition := ViewToTextPosition(LMultiCaretRecord^.ViewPosition);
-                      LLength := GetTabText(LTextPosition).Length;
-                    end;
+                    ViewPosition := LMultiCaretRecord^.ViewPosition;
 
                     ExecuteCommand(LCommand, LChar, AData);
 
-                    Dec(LBackspaceCount, ViewPosition.Column);
-                    LSelectionAvailable := FMultiEdit.SelectionAvailable;
-
-                    if LSelectionAvailable then
+                    if FMultiEdit.SelectionAvailable then
                     begin
                       for var LIndex2 := FMultiEdit.Carets.Count - 1 downto 0 do
                       begin
@@ -21434,7 +21475,7 @@ begin
                         case LCommand of
                           TKeyCommands.Paste:
                             Inc(LMultiCaretRecord^.ViewPosition.Column, LLength);
-                          TKeyCommands.Char, TKeyCommands.Tab:
+                          TKeyCommands.Char:
                             Inc(LMultiCaretRecord^.ViewPosition.Column);
                         end;
                       end;
@@ -21459,7 +21500,7 @@ begin
 
               if FMultiEdit.Carets.Count > 0 then
               case LCommand of
-                TKeyCommands.Char, TKeyCommands.Paste, TKeyCommands.Backspace, TKeyCommands.Tab, TKeyCommands.LineBegin,
+                TKeyCommands.Char, TKeyCommands.Paste, TKeyCommands.Backspace, TKeyCommands.DeleteChar, TKeyCommands.LineBegin,
                 TKeyCommands.LineEnd, TKeyCommands.SelectionLineBegin, TKeyCommands.SelectionLineEnd:
                   begin
                     for var LIndex2 := 0 to FMultiEdit.Carets.Count - 1 do
@@ -21467,19 +21508,11 @@ begin
                       LMultiCaretRecord := FMultiEdit.Carets[LIndex2];
 
                       case LCommand of
-                        TKeyCommands.Char, TKeyCommands.Tab, TKeyCommands.Paste, TKeyCommands.Backspace:
-                          case LCommand of
-                            TKeyCommands.Char, TKeyCommands.Tab:
-                              Inc(LMultiCaretRecord^.ViewPosition.Column, LLength);
-                            TKeyCommands.Backspace:
-                              if not LSelectionAvailable and (LMultiCaretRecord^.ViewPosition.Column > 1) then
-                                Dec(LMultiCaretRecord^.ViewPosition.Column, LBackspaceCount);
-                            TKeyCommands.Paste:
-                              begin
-                                LMultiCaretRecord^.ViewPosition.Column := LLength + 1;
-                                Inc(LMultiCaretRecord^.ViewPosition.Row, LRows);
-                                Inc(LRows, LPasteRows);
-                              end;
+                        TKeyCommands.Paste:
+                          begin
+                            LMultiCaretRecord^.ViewPosition.Column := LLength + 1;
+                            Inc(LMultiCaretRecord^.ViewPosition.Row, LRows);
+                            Inc(LRows, LPasteRows);
                           end;
                         TKeyCommands.LineBegin:
                           begin
@@ -22846,6 +22879,8 @@ begin
   if ReadOnly then
     Exit;
 
+  FMultiEdit.UndoTextPositions := GetMultiCaretTextPositions;
+
   BeginUndoUpdate;
 
   LChangeTrim := eoTrimTrailingSpaces in Options;
@@ -22887,6 +22922,8 @@ begin
 
     EndUndoUpdate;
   end;
+
+  RestoreMultiCaretsAfterUndo;
 end;
 
 procedure TCustomTextEditor.RegisterCommandHandler(const AHookedCommandEvent: TTextEditorHookedCommandEvent;

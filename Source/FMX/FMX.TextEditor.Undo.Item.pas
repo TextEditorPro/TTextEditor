@@ -13,6 +13,7 @@ type
     FChangeCaretPosition: TTextEditorTextPosition;
     FChangeData: Pointer;
     FChangeEndPosition: TTextEditorTextPosition;
+    FChangeMultiCaretPositions: TArray<TTextEditorTextPosition>;
     FChangeReason: TTextEditorChangeReason;
     FChangeSelectionMode: TTextEditorSelectionMode;
     FChangeString: string;
@@ -23,6 +24,7 @@ type
     property ChangeCaretPosition: TTextEditorTextPosition read FChangeCaretPosition write FChangeCaretPosition;
     property ChangeData: Pointer read FChangeData write FChangeData;
     property ChangeEndPosition: TTextEditorTextPosition read FChangeEndPosition write FChangeEndPosition;
+    property ChangeMultiCaretPositions: TArray<TTextEditorTextPosition> read FChangeMultiCaretPositions write FChangeMultiCaretPositions;
     property ChangeReason: TTextEditorChangeReason read FChangeReason write FChangeReason;
     property ChangeSelectionMode: TTextEditorSelectionMode read FChangeSelectionMode write FChangeSelectionMode;
     property ChangeString: string read FChangeString write FChangeString;
@@ -40,6 +42,7 @@ begin
     Self.FChangeCaretPosition := FChangeCaretPosition;
     Self.FChangeData := FChangeData;
     Self.FChangeEndPosition := FChangeEndPosition;
+    Self.FChangeMultiCaretPositions := FChangeMultiCaretPositions;
     Self.FChangeReason := FChangeReason;
     Self.FChangeSelectionMode := FChangeSelectionMode;
     Self.FChangeString := FChangeString;

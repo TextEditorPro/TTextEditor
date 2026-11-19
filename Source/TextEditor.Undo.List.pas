@@ -37,6 +37,7 @@ type
     procedure AddChange(AReason: TTextEditorChangeReason;
       const ACaretPosition, ASelectionStartPosition, ASelectionEndPosition: TTextEditorTextPosition;
       const AChangeText: string; SelectionMode: TTextEditorSelectionMode; AChangeBlockNumber: Integer = 0);
+    procedure AddMultiCaretChange(const ACaretPositions: TArray<TTextEditorTextPosition>; const AChangeBlockNumber: Integer = 0);
     procedure BeginBlock(AChangeBlockNumber: Integer = 0);
     procedure Clear;
     procedure EndBlock;
@@ -140,6 +141,17 @@ begin
     end;
 
     PushItem(LNewItem);
+  end;
+end;
+
+procedure TTextEditorUndoList.AddMultiCaretChange(const ACaretPositions: TArray<TTextEditorTextPosition>;
+  const AChangeBlockNumber: Integer = 0);
+begin
+  if (FLockCount = 0) and (Length(ACaretPositions) > 0) then
+  begin
+    AddChange(crMultiCaret, ACaretPositions[0], ACaretPositions[0], ACaretPositions[0], '', smNormal, AChangeBlockNumber);
+
+    PeekItem.ChangeMultiCaretPositions := ACaretPositions;
   end;
 end;
 

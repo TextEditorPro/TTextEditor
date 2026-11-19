@@ -435,12 +435,14 @@ begin
     FEditorLeft.Scroll.Dragging := True;
     FEditorLeft.TopLine := FTopLine;
     FEditorLeft.Scroll.Dragging := False;
+    FEditorLeft.Invalidate;
 
     if Assigned(FEditorRight) then
     begin
       FEditorRight.Scroll.Dragging := True;
       FEditorRight.TopLine := FTopLine;
       FEditorRight.Scroll.Dragging := False;
+      FEditorRight.Invalidate;
     end;
 
     UpdateScrollBars;
@@ -453,15 +455,7 @@ begin
   if FScrollBarClicked then
   begin
     if FScrollBarDragging then
-    begin
       DragMinimap(Y);
-
-      if Assigned(FEditorLeft) then
-        FEditorLeft.Invalidate;
-
-      if Assigned(FEditorRight) then
-        FEditorRight.Invalidate;
-    end;
 
     if not FScrollBarDragging and (ssLeft in AShift) and MouseCapture and (Abs(FMouseDownY - Y) >= FSystemMetricsCYDRAG) then
       FScrollBarDragging := True;

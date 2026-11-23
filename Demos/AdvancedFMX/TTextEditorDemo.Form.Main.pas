@@ -60,12 +60,17 @@ type
     MenuItemSaveAs: TMenuItem;
     MenuItemSearch: TMenuItem;
     MenuItemTest: TMenuItem;
+    MenuItemTestCaretNavigation: TMenuItem;
     MenuItemTestClipboardRoundTrip: TMenuItem;
     MenuItemTestHighlighterSweep: TMenuItem;
+    MenuItemTestLineBreakIndent: TMenuItem;
     MenuItemTestMacro: TMenuItem;
+    MenuItemTestMultiCaretEditing: TMenuItem;
+    MenuItemTestPastEndOfFile: TMenuItem;
     MenuItemTestSaveLoad: TMenuItem;
     MenuItemTestSelectionInvariants: TMenuItem;
     MenuItemTestUndoRedo: TMenuItem;
+    MenuItemTestWordSelection: TMenuItem;
     MenuItemZoom100: TMenuItem;
     MenuItemZoom125: TMenuItem;
     MenuItemZoom150: TMenuItem;
@@ -116,12 +121,17 @@ type
     procedure MenuItemSampleClick(Sender: TObject);
     procedure MenuItemSaveAsClick(Sender: TObject);
     procedure MenuItemSaveClick(Sender: TObject);
+    procedure MenuItemTestCaretNavigationClick(Sender: TObject);
     procedure MenuItemTestClipboardRoundTripClick(Sender: TObject);
     procedure MenuItemTestHighlighterSweepClick(Sender: TObject);
+    procedure MenuItemTestLineBreakIndentClick(Sender: TObject);
     procedure MenuItemTestMacroClick(Sender: TObject);
+    procedure MenuItemTestMultiCaretEditingClick(Sender: TObject);
+    procedure MenuItemTestPastEndOfFileClick(Sender: TObject);
     procedure MenuItemTestSaveLoadClick(Sender: TObject);
     procedure MenuItemTestSelectionInvariantsClick(Sender: TObject);
     procedure MenuItemTestUndoRedoClick(Sender: TObject);
+    procedure MenuItemTestWordSelectionClick(Sender: TObject);
     procedure MenuItemZoomClick(Sender: TObject);
     procedure PrintPreviewPreviewPage(ASender: TObject; APageNumber: Integer);
     procedure StatusBarClick(Sender: TObject);
@@ -139,12 +149,17 @@ type
     FSplitterRight: TSplitter;
     FUpdating: Boolean;
     FCompareTimer: TTimer;
+    function RunCaretNavigationSeed(ASeed: Integer): string;
     function RunClipboardRoundTripSeed(ASeed: Integer): string;
+    function RunLineBreakIndentSeed(ASeed: Integer): string;
     function RunMacroSeed(ASeed: Integer): string;
+    function RunMultiCaretEditingSeed(ASeed: Integer): string;
+    function RunPastEndOfFileSeed(ASeed: Integer): string;
     function RunSaveLoadSeed(ASeed: Integer): string;
     function RunSelectionInvariantsSeed(ASeed: Integer): string;
     function RunUndoRedoSeed(ASeed: Integer): string;
-    function TestCommandNames(const ASeed, ACount: Integer): string;
+    function RunWordSelectionSeed(ASeed: Integer): string;
+    function TestCommandNames(const ASeed, ASkip, ACount: Integer): string;
     procedure ExecuteTestCommand(const ACommand: Integer; const AViaCommandProcessor: Boolean = False);
     procedure LoadTestDocument;
     procedure RunTestLoop(const ASeeds: Integer; const ARun: TFunc<Integer, string>);
@@ -171,8 +186,8 @@ implementation
 {$R *.fmx}
 
 uses
-  System.Generics.Collections, System.Hash, System.IOUtils, System.Math, FMX.DialogService.Sync, FMX.Platform, FMX.TextEditor.Consts,
-  FMX.TextEditor.KeyCommands, FMX.TextEditor.Lines;
+  System.Generics.Collections, System.Hash, System.IOUtils, System.Math, System.StrUtils, FMX.DialogService.Sync, FMX.Platform,
+  FMX.TextEditor.Consts, FMX.TextEditor.KeyCommands, FMX.TextEditor.Lines, FMX.TextEditor.PaintHelper;
 
 type
   TDemoPaths = record
@@ -953,6 +968,7 @@ const
 
   cTestDocumentText = 'a1'#13#10'b2'#13#10'c3'#13#10'd4'#13#10'e5'#13#10;
   cTestDocumentState = 'a1,b2,c3,d4,e5,';
+  cSimilarTermColor = TAlphaColor($FFFF00FF);
 
 procedure SetTestClipboardText(const AText: string);
 var
@@ -1004,7 +1020,7 @@ begin
   end;
 end;
 
-function TMainForm.TestCommandNames(const ASeed, ACount: Integer): string;
+function TMainForm.TestCommandNames(const ASeed, ASkip, ACount: Integer): string;
 var
   LIdent: string;
 begin
@@ -1012,9 +1028,12 @@ begin
 
   RandSeed := ASeed;
 
-  for var LIndex := 1 to ACount do
+  for var LIndex := 1 to ASkip + ACount do
   begin
     EditorCommandToIdent(cTestCommands[Random(Length(cTestCommands))], LIdent);
+
+    if LIndex <= ASkip then
+      Continue;
 
     Result := Result + ', ' + LIdent;
   end;
@@ -1051,14 +1070,24 @@ end;
 function TMainForm.RunUndoRedoSeed(ASeed: Integer): string;
 const
   cActionsCount = 10;
+  cSkipCount = 0;
+var
+  LCommand: TTextEditorCommand;
 begin
   LoadTestDocument;
   SetTestClipboardText('b');
 
   RandSeed := ASeed;
 
-  for var LIndex := 1 to cActionsCount do
-    ExecuteTestCommand(cTestCommands[Random(Length(cTestCommands))]);
+  for var LIndexAction := 1 to cSkipCount + cActionsCount do
+  begin
+    LCommand := cTestCommands[Random(Length(cTestCommands))];
+
+    if LIndexAction <= cSkipCount then
+      Continue;
+
+    ExecuteTestCommand(LCommand);
+  end;
 
   var LFinalState := TextEditor.Lines.CommaText;
 
@@ -1066,13 +1095,13 @@ begin
     TextEditor.ExecuteCommand(TKeyCommands.Undo, #0, nil);
 
   if TextEditor.Lines.CommaText <> cTestDocumentState then
-    Exit('Failed for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount));
+    Exit('Failed for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cSkipCount, cActionsCount));
 
   for var LIndex := 1 to cActionsCount do
     TextEditor.ExecuteCommand(TKeyCommands.Redo, #0, nil);
 
   if (TextEditor.Lines.CommaText <> LFinalState) and (TextEditor.Lines.CommaText <> '""') then
-    Exit('Failed Redo for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount));
+    Exit('Failed Redo for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cSkipCount, cActionsCount));
 
   Result := '';
 
@@ -1128,7 +1157,7 @@ begin
 
     if not LError.IsEmpty then
       Exit('Failed for RandSeed = ' + ASeed.ToString + ' after command ' + LIndex.ToString + ' (' + LError + ')' +
-        TestCommandNames(ASeed, cActionsCount));
+        TestCommandNames(ASeed, 0, cActionsCount));
   end;
 end;
 
@@ -1166,7 +1195,7 @@ begin
   end;
 
   if TextEditor.Text <> LText then
-    Result := 'Failed for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount);
+    Result := 'Failed for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, 0, cActionsCount);
 end;
 
 procedure TMainForm.MenuItemTestSaveLoadClick(Sender: TObject);
@@ -1278,10 +1307,10 @@ var
     Playback;
 
     if TextEditor.Text <> LFinalText then
-      Exit('Failed playback for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount));
+      Exit('Failed playback for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, 0, cActionsCount));
 
     if (TextEditor.TextPosition.Line <> LFinalPosition.Line) or (TextEditor.TextPosition.Char <> LFinalPosition.Char) then
-      Exit('Failed playback caret for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount));
+      Exit('Failed playback caret for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, 0, cActionsCount));
 
     var LStream := TMemoryStream.Create;
     try
@@ -1295,7 +1324,7 @@ var
     Playback;
 
     if TextEditor.Text <> LFinalText then
-      Exit('Failed playback after macro save/load for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, cActionsCount));
+      Exit('Failed playback after macro save/load for RandSeed = ' + ASeed.ToString + TestCommandNames(ASeed, 0, cActionsCount));
   end;
 
 begin
@@ -1345,7 +1374,9 @@ begin
       begin
         LCurrentFile := LTheme;
         TextEditor.Highlighter.Colors.LoadFromFile(LTheme);
-        TextEditor.Repaint;
+
+        { Loading the colors only invalidates the editor - the paint runs when the messages are processed }
+        Application.ProcessMessages;
       end;
     end;
   except
@@ -1363,6 +1394,678 @@ begin
   ShowMessage('Done.');
 
   LabelTestRun.Visible := False;
+end;
+
+function TMainForm.RunCaretNavigationSeed(ASeed: Integer): string;
+const
+  cBookmarkCount = 4;
+var
+  LPositions: array [0 .. cBookmarkCount - 1] of TTextEditorTextPosition;
+  LPosition, LEditPosition: TTextEditorTextPosition;
+begin
+  Result := '';
+
+  LoadTestDocument;
+
+  RandSeed := ASeed;
+
+  { Caret bookmarks return in last-in-first-out order }
+  for var LIndex := 0 to cBookmarkCount - 1 do
+  begin
+    LPosition.Char := Random(3) + 1;
+    LPosition.Line := Random(TextEditor.Lines.Count);
+    TextEditor.TextPosition := LPosition;
+    LPositions[LIndex] := TextEditor.TextPosition;
+
+    TextEditor.AddCaretBookmark;
+  end;
+
+  for var LIndex := cBookmarkCount - 1 downto 0 do
+  begin
+    TextEditor.ExecuteCommand(TKeyCommands.ReturnToCaretBookmark, #0, nil);
+
+    LPosition := TextEditor.TextPosition;
+
+    if (LPosition.Line <> LPositions[LIndex].Line) or (LPosition.Char <> LPositions[LIndex].Char) then
+      Exit('Caret bookmark ' + LIndex.ToString + ' returned to a wrong position for RandSeed = ' + ASeed.ToString);
+  end;
+
+  if TextEditor.CaretBookmarks.Count <> 0 then
+    Exit('Caret bookmark list is not empty for RandSeed = ' + ASeed.ToString);
+
+  { Swap toggles between the caret and the topmost caret bookmark }
+  TextEditor.TextPosition := LPositions[0];
+  TextEditor.AddCaretBookmark;
+  TextEditor.TextPosition := LPositions[1];
+  TextEditor.ExecuteCommand(TKeyCommands.SwapCaretBookmark, #0, nil);
+
+  LPosition := TextEditor.TextPosition;
+
+  if (LPosition.Line <> LPositions[0].Line) or (LPosition.Char <> LPositions[0].Char) then
+    Exit('Swap did not move the caret to the bookmark for RandSeed = ' + ASeed.ToString);
+
+  TextEditor.ExecuteCommand(TKeyCommands.SwapCaretBookmark, #0, nil);
+
+  LPosition := TextEditor.TextPosition;
+
+  if (LPosition.Line <> LPositions[1].Line) or (LPosition.Char <> LPositions[1].Char) then
+    Exit('Swap did not move the caret back for RandSeed = ' + ASeed.ToString);
+
+  TextEditor.ExecuteCommand(TKeyCommands.ReturnToCaretBookmark, #0, nil);
+
+  { Go to last edit position finds the edit after the caret moved away }
+  LPosition.Char := Random(3) + 1;
+  LPosition.Line := Random(TextEditor.Lines.Count);
+  TextEditor.TextPosition := LPosition;
+  TextEditor.ExecuteCommand(TKeyCommands.Char, 'x', nil);
+  LEditPosition := TextEditor.TextPosition;
+
+  LPosition.Char := 1;
+  LPosition.Line := (LEditPosition.Line + 1) mod TextEditor.Lines.Count;
+  TextEditor.TextPosition := LPosition;
+
+  TextEditor.ExecuteCommand(TKeyCommands.GoToLastEditPosition, #0, nil);
+
+  if TextEditor.TextPosition.Line <> LEditPosition.Line then
+    Exit('Go to last edit position landed on line ' + TextEditor.TextPosition.Line.ToString + ' instead of ' +
+      LEditPosition.Line.ToString + ' for RandSeed = ' + ASeed.ToString);
+end;
+
+procedure TMainForm.MenuItemTestCaretNavigationClick(Sender: TObject);
+begin
+  RunTestLoop(10000, RunCaretNavigationSeed);
+end;
+
+function TMainForm.RunPastEndOfFileSeed(ASeed: Integer): string;
+const
+  cActionsCount = 6;
+var
+  LPosition: TTextEditorTextPosition;
+  LTargetLine: Integer;
+begin
+  Result := '';
+
+  LoadTestDocument;
+  SetTestClipboardText('b');
+
+  RandSeed := ASeed;
+
+  TextEditor.Scroll.Options := TextEditor.Scroll.Options + [soPastEndOfFileMarker];
+
+  if Odd(ASeed) then
+    TextEditor.Scroll.Options := TextEditor.Scroll.Options + [soPastEndOfLine]
+  else
+    TextEditor.Scroll.Options := TextEditor.Scroll.Options - [soPastEndOfLine];
+
+  try
+    { Typing on a virtual line past the end of file materializes the missing lines }
+    LTargetLine := TextEditor.Lines.Count + Random(5);
+    LPosition.Char := Random(6) + 1;
+    LPosition.Line := LTargetLine;
+    TextEditor.TextPosition := LPosition;
+
+    TextEditor.ExecuteCommand(TKeyCommands.Char, 'w', nil);
+
+    if TextEditor.Lines.Count <= LTargetLine then
+      Exit('Typing on a virtual line did not materialize the lines for RandSeed = ' + ASeed.ToString);
+
+    if not TextEditor.Lines[LTargetLine].Contains('w') then
+      Exit('Typed character not found on the target line for RandSeed = ' + ASeed.ToString);
+
+    { Random commands with the caret dropped on virtual positions must keep the position valid }
+    for var LIndex := 1 to cActionsCount do
+    begin
+      LPosition.Char := Random(6) + 1;
+      LPosition.Line := TextEditor.Lines.Count + Random(3);
+      TextEditor.TextPosition := LPosition;
+
+      ExecuteTestCommand(cTestCommands[Random(Length(cTestCommands))]);
+
+      LPosition := TextEditor.TextPosition;
+
+      if (LPosition.Line < 0) or (LPosition.Char < 1) then
+        Exit('Invalid caret position after command ' + LIndex.ToString + ' for RandSeed = ' + ASeed.ToString);
+    end;
+  except
+    on E: Exception do
+      Exit(E.ClassName + ': ' + E.Message + ' for RandSeed = ' + ASeed.ToString);
+  end;
+end;
+
+procedure TMainForm.MenuItemTestPastEndOfFileClick(Sender: TObject);
+var
+  LOptions: TTextEditorScrollOptions;
+begin
+  LOptions := TextEditor.Scroll.Options;
+  try
+    RunTestLoop(10000, RunPastEndOfFileSeed);
+  finally
+    TextEditor.Scroll.Options := LOptions;
+  end;
+end;
+
+function TMainForm.RunLineBreakIndentSeed(ASeed: Integer): string;
+var
+  LPosition: TTextEditorTextPosition;
+begin
+  Result := '';
+
+  RandSeed := ASeed;
+
+  { Repeated line breaks keep the auto indent with and without trimming - only the abandoned lines differ }
+  var LTrimTrailingSpaces := Odd(ASeed);
+
+  if LTrimTrailingSpaces then
+    TextEditor.Options := TextEditor.Options + [eoTrimTrailingSpaces]
+  else
+    TextEditor.Options := TextEditor.Options - [eoTrimTrailingSpaces];
+
+  if Random(2) = 0 then
+    TextEditor.Scroll.Options := TextEditor.Scroll.Options + [soPastEndOfLine]
+  else
+    TextEditor.Scroll.Options := TextEditor.Scroll.Options - [soPastEndOfLine];
+
+  var LIndent := StringOfChar(' ', Random(8) + 1);
+  var LLineBreakCount := Random(4) + 2;
+  var LDocument := LIndent + 'a1';
+
+  if Random(2) = 0 then
+    LDocument := LDocument + #13#10'b2'#13#10;
+
+  TextEditor.Clear;
+
+  var LStringStream := TStringStream.Create(LDocument);
+  try
+    TextEditor.LoadFromStream(LStringStream);
+  finally
+    LStringStream.Free;
+  end;
+
+  var LOriginalText := TextEditor.Text;
+
+  try
+    LPosition.Char := LIndent.Length + 3;
+    LPosition.Line := 0;
+    TextEditor.TextPosition := LPosition;
+
+    for var LIndex := 1 to LLineBreakCount do
+      TextEditor.ExecuteCommand(TKeyCommands.LineBreak, #0, nil);
+
+    LPosition := TextEditor.TextPosition;
+
+    if (LPosition.Line <> LLineBreakCount) or (LPosition.Char <> LIndent.Length + 1) then
+      Exit('Caret at ' + LPosition.Char.ToString + ', ' + LPosition.Line.ToString + ' lost the indent for RandSeed = ' +
+        ASeed.ToString);
+
+    var LAbandonedLine := '';
+
+    if not LTrimTrailingSpaces then
+      LAbandonedLine := LIndent;
+
+    for var LLine := 1 to LLineBreakCount - 1 do
+    if TextEditor.Lines[LLine] <> LAbandonedLine then
+      Exit('Abandoned line ' + LLine.ToString + ' is [' + TextEditor.Lines[LLine] + '] for RandSeed = ' + ASeed.ToString);
+
+    TextEditor.ExecuteCommand(TKeyCommands.Char, 'w', nil);
+
+    if TextEditor.Lines[LLineBreakCount] <> LIndent + 'w' then
+      Exit('Typed line is [' + TextEditor.Lines[LLineBreakCount] + '] for RandSeed = ' + ASeed.ToString);
+
+    var LFinalText := TextEditor.Text;
+
+    while TextEditor.CanUndo do
+      TextEditor.ExecuteCommand(TKeyCommands.Undo, #0, nil);
+
+    if TextEditor.Text <> LOriginalText then
+      Exit('Failed Undo for RandSeed = ' + ASeed.ToString);
+
+    while TextEditor.CanRedo do
+      TextEditor.ExecuteCommand(TKeyCommands.Redo, #0, nil);
+
+    if TextEditor.Text <> LFinalText then
+      Exit('Failed Redo for RandSeed = ' + ASeed.ToString);
+  except
+    on E: Exception do
+      Exit(E.ClassName + ': ' + E.Message + ' for RandSeed = ' + ASeed.ToString);
+  end;
+end;
+
+procedure TMainForm.MenuItemTestLineBreakIndentClick(Sender: TObject);
+var
+  LOptions: TTextEditorOptions;
+  LScrollOptions: TTextEditorScrollOptions;
+  LTabOptions: TTextEditorTabOptions;
+begin
+  LOptions := TextEditor.Options;
+  LScrollOptions := TextEditor.Scroll.Options;
+  LTabOptions := TextEditor.Tabs.Options;
+
+  TextEditor.Options := TextEditor.Options + [eoAutoIndent];
+  TextEditor.Tabs.Options := TextEditor.Tabs.Options + [toTabsToSpaces];
+  try
+    RunTestLoop(10000, RunLineBreakIndentSeed);
+  finally
+    TextEditor.Options := LOptions;
+    TextEditor.Scroll.Options := LScrollOptions;
+    TextEditor.Tabs.Options := LTabOptions;
+  end;
+end;
+
+function TMainForm.RunWordSelectionSeed(ASeed: Integer): string;
+const
+  cWordCount = 6;
+  cCores: array [0 .. 3] of string = ('test', 'name', 'value', 'x1');
+  cExpandCharacters = '$%:@';
+type
+  TTestWord = record
+    Core: string;
+    CoreBegin: Integer;
+    Decorated: string;
+    ExpectedSelection: string;
+  end;
+var
+  LWords: array [0 .. cWordCount - 1] of TTestWord;
+  LLine: string;
+  LUseExpandCharacters: Boolean;
+  LPosition: TTextEditorTextPosition;
+  LBitmap: TBitmap;
+  LBitmapData: TBitmapData;
+
+  function IsHighlighted(const AChar, ALine: Integer): Boolean;
+  var
+    LCheckPosition: TTextEditorTextPosition;
+  begin
+    Result := False;
+
+    LCheckPosition.Char := AChar;
+    LCheckPosition.Line := ALine;
+
+    var LPoint := TextEditor.ViewPositionToPixels(TextEditor.TextToViewPosition(LCheckPosition));
+    var LPixelX := Round((LPoint.X + 2) * LBitmap.BitmapScale);
+
+    if (LPixelX < 0) or (LPixelX >= LBitmapData.Width) then
+      Exit;
+
+    for var LOffsetY := 1 to Trunc(TextEditor.LineHeight) - 2 do
+    begin
+      var LPixelY := Round((LPoint.Y + LOffsetY) * LBitmap.BitmapScale);
+
+      if (LPixelY >= 0) and (LPixelY < LBitmapData.Height) and (LBitmapData.GetPixel(LPixelX, LPixelY) = cSimilarTermColor) then
+        Exit(True);
+    end;
+  end;
+
+begin
+  Result := '';
+
+  RandSeed := ASeed;
+
+  LUseExpandCharacters := not Odd(ASeed);
+
+  if LUseExpandCharacters then
+    TextEditor.Selection.Options := TextEditor.Selection.Options + [soUseExpandCharacters]
+  else
+    TextEditor.Selection.Options := TextEditor.Selection.Options - [soUseExpandCharacters];
+
+  LLine := '';
+
+  for var LIndex := 0 to cWordCount - 1 do
+  begin
+    var LWord: TTestWord;
+    LWord.Core := cCores[Random(Length(cCores))];
+
+    var LPrefix := '';
+
+    for var LPrefixIndex := 1 to Random(3) do
+      LPrefix := LPrefix + cExpandCharacters[Random(cExpandCharacters.Length) + 1];
+
+    LWord.CoreBegin := LLine.Length + 1;
+    LWord.Decorated := LWord.Core;
+    LWord.ExpectedSelection := LWord.Core;
+
+    if not LPrefix.IsEmpty then
+    case Random(3) of
+      0: { Prefix only - $name }
+        begin
+          LWord.Decorated := LPrefix + LWord.Core;
+          LWord.CoreBegin := LWord.CoreBegin + LPrefix.Length;
+
+          if LUseExpandCharacters then
+            LWord.ExpectedSelection := LWord.Decorated;
+        end;
+      1: { Wrapping prefix - %test% - the mirrored trailing characters belong to the selection }
+        begin
+          LWord.Decorated := LPrefix + LWord.Core + ReverseString(LPrefix);
+          LWord.CoreBegin := LWord.CoreBegin + LPrefix.Length;
+
+          if LUseExpandCharacters then
+            LWord.ExpectedSelection := LWord.Decorated;
+        end;
+      2: { Suffix only - never part of the selection }
+        LWord.Decorated := LWord.Core + LPrefix;
+    end;
+
+    LWords[LIndex] := LWord;
+    LLine := LLine + LWord.Decorated + ' ';
+  end;
+
+  TextEditor.Text := LLine;
+
+  var LTarget := Random(cWordCount);
+
+  LPosition.Char := LWords[LTarget].CoreBegin + Random(LWords[LTarget].Core.Length);
+  LPosition.Line := 0;
+  TextEditor.TextPosition := LPosition;
+  TextEditor.ExecuteCommand(TKeyCommands.SelectionWord, #0, nil);
+
+  if TextEditor.SelectedText <> LWords[LTarget].ExpectedSelection then
+    Exit('Selected [' + TextEditor.SelectedText + '] instead of [' + LWords[LTarget].ExpectedSelection +
+      '] for RandSeed = ' + ASeed.ToString);
+
+  if TextEditor.WordAtTextPosition(LPosition) <> LWords[LTarget].ExpectedSelection then
+    Exit('Word at text position [' + TextEditor.WordAtTextPosition(LPosition) + '] differs from the selection [' +
+      LWords[LTarget].ExpectedSelection + '] for RandSeed = ' + ASeed.ToString);
+
+  { Every 100th seed: the term must highlight as one similar term on another line, expand characters included }
+  if LUseExpandCharacters and (ASeed mod 100 = 0) and (LWords[LTarget].ExpectedSelection <> LWords[LTarget].Core) then
+  begin
+    TextEditor.Text := LLine + sLineBreak + 'zz ' + LWords[LTarget].Decorated + ' qq';
+    TextEditor.TextPosition := LPosition;
+    TextEditor.ExecuteCommand(TKeyCommands.SelectionWord, #0, nil);
+
+    LBitmap := TextEditor.MakeScreenshot;
+    try
+      if not LBitmap.Map(TMapAccess.Read, LBitmapData) then
+        Exit('Editor screenshot is not readable for RandSeed = ' + ASeed.ToString);
+
+      try
+        var LOccurrenceBegin := 4;
+        var LOccurrenceEnd := LOccurrenceBegin + LWords[LTarget].Decorated.Length - 1;
+
+        if not IsHighlighted(LOccurrenceBegin, 1) or not IsHighlighted(LOccurrenceEnd, 1) then
+          Exit('Similar term [' + LWords[LTarget].Decorated + '] is not highlighted for RandSeed = ' + ASeed.ToString);
+
+        if IsHighlighted(1, 1) then
+          Exit('Text outside the similar term [' + LWords[LTarget].Decorated + '] is highlighted for RandSeed = ' +
+            ASeed.ToString);
+      finally
+        LBitmap.Unmap(LBitmapData);
+      end;
+    finally
+      LBitmap.Free;
+    end;
+  end;
+end;
+
+procedure TMainForm.MenuItemTestWordSelectionClick(Sender: TObject);
+var
+  LOptions: TTextEditorSelectionOptions;
+  LColor: TAlphaColor;
+begin
+  TabControl.ActiveTab := TabItemEditor;
+
+  LOptions := TextEditor.Selection.Options;
+  LColor := TextEditor.Colors.SearchHighlighterBackground;
+
+  { Similar term highlighting compares highlighter tokens - the default empty highlighter has no usable tokens }
+  TextEditor.Highlighter.LoadFromFile(TDemoPaths.Highlighters + 'Object Pascal.json');
+
+  TextEditor.Selection.Options := TextEditor.Selection.Options + [soHighlightSimilarTerms] -
+    [soExpandRealNumbers, soTermsCaseSensitive];
+  TextEditor.Colors.SearchHighlighterBackground := cSimilarTermColor;
+  try
+    RunTestLoop(10000, RunWordSelectionSeed);
+  finally
+    TextEditor.Selection.Options := LOptions;
+    TextEditor.Colors.SearchHighlighterBackground := LColor;
+  end;
+end;
+
+function TMainForm.RunMultiCaretEditingSeed(ASeed: Integer): string;
+const
+  cMaxLineCount = 5;
+  cMaxLineLength = 6;
+  cMaxCaretCount = 5;
+  cMaxCommandCount = 8;
+  cBackspace = 'B';
+  cDelete = 'D';
+var
+  LInitialText, LText, LInitialCarets, LCommands: string;
+  LOffsets: TList<Integer>;
+  LCommand: Char;
+  LCaretsActive: Boolean;
+
+  function Failure(const AMessage: string): string;
+  begin
+    Result := AMessage + ' for RandSeed = ' + ASeed.ToString + ', text [' + LInitialText.Replace(#10, '|') + '], carets ' +
+      LInitialCarets + ', commands ' + LCommands;
+  end;
+
+  function CaretsToString(const ATextPositions: TArray<TTextEditorTextPosition>): string;
+  begin
+    Result := '';
+
+    for var LTextPosition in ATextPositions do
+      Result := Result + Format('(%d,%d)', [LTextPosition.Line, LTextPosition.Char]);
+  end;
+
+  function EditorCarets: string;
+  begin
+    Result := CaretsToString(TextEditor.GetMultiCaretTextPositions);
+  end;
+
+  function EditorText: string;
+  begin
+    Result := '';
+
+    for var LLine := 0 to TextEditor.Lines.Count - 1 do
+    begin
+      if LLine > 0 then
+        Result := Result + #10;
+
+      Result := Result + TextEditor.Lines[LLine];
+    end;
+  end;
+
+  function ModelCarets: TArray<TTextEditorTextPosition>;
+  begin
+    SetLength(Result, LOffsets.Count);
+
+    for var LIndex := 0 to LOffsets.Count - 1 do
+    begin
+      Result[LIndex].Line := 0;
+      Result[LIndex].Char := 1;
+
+      for var LPosition := 1 to LOffsets[LIndex] do
+      if LText[LPosition] = #10 then
+      begin
+        Inc(Result[LIndex].Line);
+        Result[LIndex].Char := 1;
+      end
+      else
+        Inc(Result[LIndex].Char);
+    end;
+  end;
+
+  procedure ApplyToModel(const ACommand: Char);
+  var
+    LOffset, LChange: Integer;
+  begin
+    for var LIndex1 := LOffsets.Count - 1 downto 0 do
+    begin
+      LOffset := LOffsets[LIndex1];
+      LChange := 0;
+
+      case ACommand of
+        cBackspace:
+          if LOffset > 0 then
+          begin
+            Delete(LText, LOffset, 1);
+            LOffsets[LIndex1] := LOffset - 1;
+            LChange := -1;
+          end;
+        cDelete:
+          if LOffset < LText.Length then
+          begin
+            Delete(LText, LOffset + 1, 1);
+            LChange := -1;
+          end;
+      else
+        Insert(ACommand, LText, LOffset + 1);
+        LOffsets[LIndex1] := LOffset + 1;
+        LChange := 1;
+      end;
+
+      for var LIndex2 := LIndex1 + 1 to LOffsets.Count - 1 do
+        LOffsets[LIndex2] := LOffsets[LIndex2] + LChange;
+    end;
+
+    for var LIndex := LOffsets.Count - 1 downto 1 do
+    if LOffsets[LIndex] = LOffsets[LIndex - 1] then
+      LOffsets.Delete(LIndex);
+  end;
+
+begin
+  Result := '';
+
+  RandSeed := ASeed;
+
+  TextEditor.WordWrap.Active := Odd(ASeed);
+
+  { The model keeps the document as one string with single line feeds and the carets as offsets into it }
+  LInitialText := '';
+
+  for var LLine := 1 to Random(cMaxLineCount) + 1 do
+  begin
+    if LLine > 1 then
+      LInitialText := LInitialText + #10;
+
+    for var LIndex := 1 to Random(cMaxLineLength + 1) do
+      LInitialText := LInitialText + Chr(Ord('a') + Random(26));
+  end;
+
+  { A trailing empty line would be dropped when the text is assigned to the editor }
+  LInitialText := LInitialText + 'z';
+
+  LText := LInitialText;
+  LCommands := '';
+
+  LOffsets := TList<Integer>.Create;
+  try
+    try
+      for var LIndex := 1 to Random(cMaxCaretCount - 1) + 2 do
+      begin
+        var LOffset := Random(LText.Length + 1);
+
+        if not LOffsets.Contains(LOffset) then
+          LOffsets.Add(LOffset);
+      end;
+
+      if LOffsets.Count < 2 then
+        Exit;
+
+      LOffsets.Sort;
+      LInitialCarets := CaretsToString(ModelCarets);
+
+      TextEditor.FreeMultiCarets;
+      TextEditor.Text := LInitialText.Replace(#10, sLineBreak);
+      TextEditor.ClearUndo;
+      TextEditor.SetMultiCaretTextPositions(ModelCarets);
+
+      if EditorCarets <> LInitialCarets then
+        Exit(Failure('Carets were set to ' + EditorCarets));
+
+      LCaretsActive := True;
+
+      for var LIndex := 1 to Random(cMaxCommandCount) + 1 do
+      begin
+        case Random(3) of
+          0:
+            LCommand := cBackspace;
+          1:
+            LCommand := cDelete;
+        else
+          LCommand := Chr(Ord('0') + Random(10));
+        end;
+
+        LCommands := LCommands + LCommand;
+
+        ApplyToModel(LCommand);
+
+        case LCommand of
+          cBackspace:
+            TextEditor.CommandProcessor(TKeyCommands.Backspace, #0, nil);
+          cDelete:
+            TextEditor.CommandProcessor(TKeyCommands.DeleteChar, #0, nil);
+        else
+          TextEditor.CommandProcessor(TKeyCommands.Char, LCommand, nil);
+        end;
+
+        if EditorText <> LText then
+          Exit(Failure('Text is [' + EditorText.Replace(#10, '|') + '] instead of [' + LText.Replace(#10, '|') + ']'));
+
+        { Multi-caret editing ends when the carets merge into one }
+        if LOffsets.Count < 2 then
+        begin
+          LCaretsActive := False;
+
+          if not EditorCarets.IsEmpty then
+            Exit(Failure('Merged carets left ' + EditorCarets));
+
+          Break;
+        end;
+
+        if EditorCarets <> CaretsToString(ModelCarets) then
+          Exit(Failure('Carets are ' + EditorCarets + ' instead of ' + CaretsToString(ModelCarets)));
+      end;
+
+      TextEditor.CommandProcessor(TKeyCommands.Undo, #0, nil);
+
+      if EditorText <> LInitialText then
+        Exit(Failure('Undo left the text as [' + EditorText.Replace(#10, '|') + ']'));
+
+      if LCaretsActive and (EditorCarets <> LInitialCarets) then
+        Exit(Failure('Undo left the carets at ' + EditorCarets));
+
+      TextEditor.CommandProcessor(TKeyCommands.Redo, #0, nil);
+
+      if EditorText <> LText then
+        Exit(Failure('Redo left the text as [' + EditorText.Replace(#10, '|') + '] instead of [' + LText.Replace(#10, '|') + ']'));
+
+      if LCaretsActive and (EditorCarets <> CaretsToString(ModelCarets)) then
+        Exit(Failure('Redo left the carets at ' + EditorCarets + ' instead of ' + CaretsToString(ModelCarets)));
+    except
+      on E: Exception do
+        Exit(Failure(E.ClassName + ': ' + E.Message));
+    end;
+  finally
+    LOffsets.Free;
+  end;
+end;
+
+procedure TMainForm.MenuItemTestMultiCaretEditingClick(Sender: TObject);
+var
+  LMultiEditActive, LWordWrapActive: Boolean;
+  LUndoOptions: TTextEditorUndoOptions;
+begin
+  TabControl.ActiveTab := TabItemEditor;
+
+  LMultiEditActive := TextEditor.Caret.MultiEdit.Active;
+  LUndoOptions := TextEditor.Undo.Options;
+  LWordWrapActive := TextEditor.WordWrap.Active;
+
+  { One undo has to take back the whole command sequence }
+  TextEditor.Caret.MultiEdit.Active := True;
+  TextEditor.Undo.Options := TextEditor.Undo.Options + [uoGroupUndo];
+  try
+    RunTestLoop(10000, RunMultiCaretEditingSeed);
+  finally
+    TextEditor.FreeMultiCarets;
+
+    TextEditor.Caret.MultiEdit.Active := LMultiEditActive;
+    TextEditor.Undo.Options := LUndoOptions;
+    TextEditor.WordWrap.Active := LWordWrapActive;
+  end;
 end;
 
 end.

@@ -152,6 +152,31 @@ object MainForm: TMainForm
         Text = 'Test highlighters and themes'
         OnClick = MenuItemTestHighlighterSweepClick
       end
+      object MenuItemTestCaretNavigation: TMenuItem
+        Locked = True
+        Text = 'Test caret navigation'
+        OnClick = MenuItemTestCaretNavigationClick
+      end
+      object MenuItemTestPastEndOfFile: TMenuItem
+        Locked = True
+        Text = 'Test past end of file/line'
+        OnClick = MenuItemTestPastEndOfFileClick
+      end
+      object MenuItemTestLineBreakIndent: TMenuItem
+        Locked = True
+        Text = 'Test line break indent'
+        OnClick = MenuItemTestLineBreakIndentClick
+      end
+      object MenuItemTestWordSelection: TMenuItem
+        Locked = True
+        Text = 'Test word selection'
+        OnClick = MenuItemTestWordSelectionClick
+      end
+      object MenuItemTestMultiCaretEditing: TMenuItem
+        Locked = True
+        Text = 'Test multi-caret editing'
+        OnClick = MenuItemTestMultiCaretEditingClick
+      end
     end
   end
   object RectangleSearch: TRectangle

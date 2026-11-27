@@ -4237,7 +4237,7 @@ begin
     LCaretPosition := FPosition.Text;
     LLineText := FLines[LCaretPosition.Line];
 
-    if FMX.TextEditor.Utils.Trim(LLineText).IsEmpty then
+    if FMX.TextEditor.Utils.Trim(LLineText).IsEmpty or (LCaretPosition.Char > LLineText.Length + 1) then
       Exit;
 
     LPLine := PChar(LLineText);
@@ -4319,7 +4319,7 @@ begin
   LCaretPosition := ATextPosition;
   LLineText := FLines[LCaretPosition.Line];
 
-  if FMX.TextEditor.Utils.Trim(LLineText).IsEmpty then
+  if FMX.TextEditor.Utils.Trim(LLineText).IsEmpty or (LCaretPosition.Char > LLineText.Length + 1) then
     Exit;
 
   LPLine := PChar(LLineText);
